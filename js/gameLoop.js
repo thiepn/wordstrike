@@ -182,14 +182,12 @@ export function updateWordSeparation(game, dimensions, deltaMs = 16) {
     let nextX = (word.separationX || 0) + (target.x - (word.separationX || 0)) * smoothing;
     let nextY = (word.separationY || 0) + (target.y - (word.separationY || 0)) * smoothing;
     if (dimensions) {
-      nextX = Math.max(size.width / 2 - word.x, Math.min(
-        dimensions.width - size.width / 2 - word.x,
-        nextX,
-      ));
-      nextY = Math.max(size.height / 2 - word.y, Math.min(
-        dimensions.height - size.height / 2 - word.y,
-        nextY,
-      ));
+      const minimumOffsetX = Math.min(0, size.width / 2 - word.x);
+      const maximumOffsetX = Math.max(0, dimensions.width - size.width / 2 - word.x);
+      const minimumOffsetY = Math.min(0, size.height / 2 - word.y);
+      const maximumOffsetY = Math.max(0, dimensions.height - size.height / 2 - word.y);
+      nextX = Math.max(minimumOffsetX, Math.min(maximumOffsetX, nextX));
+      nextY = Math.max(minimumOffsetY, Math.min(maximumOffsetY, nextY));
     }
     nextX = Math.max(-cap, Math.min(cap, nextX));
     nextY = Math.max(-cap, Math.min(cap, nextY));

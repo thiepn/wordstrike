@@ -17,6 +17,8 @@ globalThis.localStorage = {
   removeItem: (key) => values.delete(key),
 };
 
+values.set("wordstrike.onboarding.general.v2", "seen");
+assert.equal(isTutorialSeen("general"), false, "general v2 completion must not suppress general v3");
 for (const id of Object.keys(ONBOARDING_VERSIONS)) {
   assert.equal(isTutorialSeen(id), false);
   assert.equal(markTutorialSeen(id), true);

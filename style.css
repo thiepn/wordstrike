@@ -2509,6 +2509,7 @@ button {
   position: absolute;
   z-index: 5;
   will-change: transform;
+  transition: none;
 }
 
 .word-separation {

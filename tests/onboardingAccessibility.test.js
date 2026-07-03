@@ -4,7 +4,7 @@ import { onboardingMarkup } from "../js/onboardingView.js";
 import { ONBOARDING_TUTORIALS } from "../js/onboardingContent.js";
 
 const state = {
-  tutorialId: "general", version: 2, title: ONBOARDING_TUTORIALS.general.title,
+  tutorialId: "general", version: 3, title: ONBOARDING_TUTORIALS.general.title,
   steps: ONBOARDING_TUTORIALS.general.steps, currentStep: 0, source: "automatic",
 };
 const markup = onboardingMarkup(state);

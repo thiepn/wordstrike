@@ -1,5 +1,5 @@
 export const ONBOARDING_VERSIONS = Object.freeze({
-  general: 2,
+  general: 3,
   campaign: 1,
   typing: 1,
   endless: 1,
@@ -14,10 +14,10 @@ const step = (title, body, visualType, primaryLabel = "NEXT", extra = {}) => Obj
 
 export const ONBOARDING_TUTORIALS = Object.freeze({
   general: Object.freeze({
-    id: "general", version: 2, title: "WORDSTRIKE INTRODUCTION",
+    id: "general", version: 3, title: "WORDSTRIKE INTRODUCTION",
     steps: Object.freeze([
       step("TYPE BEFORE THEY STRIKE", "Words move toward the center.\n\nType them correctly before they reach it.", "approaching-word"),
-      step("JUST START TYPING", "Use Backspace to correct mistakes.\n\nOn phones and tablets, tap the game area to open the keyboard.", "typing-highlight"),
+      step("JUST START TYPING", "Typing the first valid letter narrows or selects a target. Once one word is highlighted, finish it before targeting another.\n\nOn phones and tablets, tap the game area to open the keyboard.", "typing-highlight"),
       step("NAVIGATE YOUR WAY", "Use mouse, touch, or keyboard.", "navigation-controls", "NEXT", {
         controls: Object.freeze([
           Object.freeze({ key: "ARROW KEYS", label: "Move between menus and options" }),

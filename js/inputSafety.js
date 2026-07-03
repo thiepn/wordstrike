@@ -4,3 +4,21 @@ export function isTextEntryTarget(target) {
     || target?.isContentEditable === true
     || Boolean(target?.closest?.('[contenteditable="true"]'));
 }
+
+const GAMEPLAY_BACKSPACE_MODES = new Set([
+  "campaign", "normal", "endless", "daily", "boss", "typing",
+]);
+
+export function captureGameplayBackspace(event, {
+  mode,
+  onTypingBackspace,
+} = {}) {
+  if (
+    event?.key !== "Backspace" ||
+    !GAMEPLAY_BACKSPACE_MODES.has(mode) ||
+    isTextEntryTarget(event.target)
+  ) return false;
+  event.preventDefault?.();
+  if (mode === "typing") onTypingBackspace?.(event);
+  return true;
+}

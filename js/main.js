@@ -164,7 +164,7 @@ import {
   startUsernameChange,
   subscribeToLeaderboardProfile,
 } from "./leaderboardProfileService.js";
-import { isTextEntryTarget } from "./inputSafety.js";
+import { captureGameplayBackspace, isTextEntryTarget } from "./inputSafety.js";
 import {
   createMobileInputAdapter,
   keyboardEventFromNormalized,
@@ -1348,6 +1348,15 @@ function inspectDevLevel(levelNumber) {
 }
 
 function handleGlobalKeydown(event) {
+  const gameplayInputMode = appState.screen === Screens.SPEED_TEST_RUN
+    ? "typing"
+    : appState.screen === Screens.PLAYING
+      ? appState.game?.mode || "campaign"
+      : null;
+  if (captureGameplayBackspace(event, {
+    mode: gameplayInputMode,
+    onTypingBackspace: (backspaceEvent) => routeActiveGameplayKey(backspaceEvent),
+  })) return;
   if (isTextEntryTarget(event.target)) return;
   if (["Enter", " "].includes(event.key) && event.target?.matches?.("button, a, [role=tab]")) return;
   if (routeActiveGameplayKey(event)) return;

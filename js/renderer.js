@@ -24,41 +24,60 @@ export function createWordElement(word) {
   const position = document.createElement("div");
   const separation = document.createElement("div");
   const visual = document.createElement("div");
+  const text = document.createElement("span");
+  const typed = document.createElement("span");
+  const remaining = document.createElement("span");
   position.className = "word-position";
   separation.className = "word-separation";
   visual.className = "word-visual";
+  text.className = "word-text";
+  typed.className = "typed-letter";
+  remaining.className = "remaining-letter";
   position.dataset.wordId = word.id;
   position.setAttribute("aria-label", word.text);
   visual.addEventListener("animationend", (event) => {
     if (event.animationName === "wrong") visual.classList.remove("wrong");
   });
+  text.append(typed, remaining);
+  visual.append(text);
   separation.append(visual);
   position.append(separation);
   area.append(position);
-  wordElements.set(word.id, { position, separation, visual });
+  wordElements.set(word.id, {
+    position,
+    separation,
+    visual,
+    typed,
+    remaining,
+    renderedText: null,
+    renderedTypedIndex: null,
+  });
   updateWordElement(word, false);
 }
 
 export function updateWordElement(word, isActive, candidateState = null) {
   const elements = wordElements.get(word.id);
   if (!elements) return;
-  const { position, separation, visual } = elements;
+  const { position, separation, visual, typed, remaining } = elements;
   const isCandidate = candidateState?.candidate === true;
   const candidatePrefixLength = isCandidate
     ? Math.max(0, candidateState.prefixLength || 0)
     : 0;
-  position.style.transform = `translate(${word.x}px, ${word.y}px) translate(-50%, -50%)`;
-  separation.style.transform = `translate(${word.separationX || 0}px, ${word.separationY || 0}px)`;
+  position.style.transform = `translate3d(${word.x}px, ${word.y}px, 0) translate(-50%, -50%)`;
+  separation.style.transform = `translate3d(${word.separationX || 0}px, ${word.separationY || 0}px, 0)`;
   visual.classList.toggle("active", isActive);
   visual.classList.toggle("candidate", isCandidate);
-  position.setAttribute("aria-label", word.text);
   const displayTypedIndex = isCandidate ? candidatePrefixLength : word.typedIndex;
-  const typed = word.text.slice(0, displayTypedIndex);
-  const remaining = word.text.slice(displayTypedIndex);
-  visual.innerHTML = `
-    <span class="word-text">
-      <span class="typed-letter">${typed}</span><span class="remaining-letter">${remaining}</span>
-    </span>`;
+  if (
+    elements.renderedText !== word.text ||
+    elements.renderedTypedIndex !== displayTypedIndex
+  ) {
+    typed.textContent = word.text.slice(0, displayTypedIndex);
+    remaining.textContent = word.text.slice(displayTypedIndex);
+    position.setAttribute("aria-label", word.text);
+    elements.renderedText = word.text;
+    elements.renderedTypedIndex = displayTypedIndex;
+  }
 }
 
 export function removeWordElement(word, completed = false, particlesEnabled = true) {
