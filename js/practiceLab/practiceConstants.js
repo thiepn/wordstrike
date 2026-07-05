@@ -6,7 +6,7 @@ export const PRACTICE_DATABASE_VERSION = 1;
 export const PRACTICE_MANIFEST_VERSION = 1;
 
 export const PRACTICE_RECORD_VERSIONS = Object.freeze({
-  profile: 1,
+  profile: 2,
   skillStat: 1,
   sessionSummary: 1,
   reviewItem: 1,
@@ -168,4 +168,3 @@ export const QUOTA_RECOVERY_STEPS = Object.freeze([
   "low-confidence-skill-stats",
   "old-quarantine",
 ]);
-

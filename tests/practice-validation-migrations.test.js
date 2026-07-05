@@ -72,7 +72,7 @@ const v0 = { ...profile };
 delete v0.recordVersion;
 const migratedV0 = migratePracticeRecord("profile", v0);
 assert.equal(migratedV0.ok, true);
-assert.equal(migratedV0.value.recordVersion, 1);
+assert.equal(migratedV0.value.recordVersion, 2);
 assert.equal(migratedV0.migrated, true);
 assert.deepEqual(migratePracticeRecord("profile", migratedV0.value).value, migratedV0.value);
 

@@ -110,6 +110,7 @@ export function createDefaultPracticeProfile({
     firstAssessmentCompletedAt: null,
     lastAssessmentAt: null,
     lastPracticeAt: null,
+    lastTrainingDayKey: null,
     totalCompletedSessions: 0,
     totalPracticeDurationMs: 0,
     activeTrainingDays: 0,
@@ -342,4 +343,3 @@ export function createDefaultCheckpoint({
     ...freshObject(overrides),
   };
 }
-

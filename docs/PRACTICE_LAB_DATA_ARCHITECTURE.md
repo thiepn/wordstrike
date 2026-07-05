@@ -81,7 +81,8 @@ The implementation keeps independent integers:
 
 - manifest schema version: 1;
 - IndexedDB structural version: 1;
-- profile, skill stat, session summary, review item, custom text, preset, checkpoint, and quarantine record versions: each 1;
+- profile record version: 2;
+- skill stat, session summary, review item, custom text, preset, checkpoint, and quarantine record versions: each 1;
 - session schema version: 1;
 - experiment version: experiment-owned integer;
 - experiment configuration version: 1 foundation contract;
@@ -113,11 +114,14 @@ Historical local day keys remain unchanged after timezone changes. UTC due times
 - identity/version/created/updated fields;
 - data locale and keyboard layout;
 - first/last assessment and practice state;
+- last local training-day key for idempotent active-day totals;
 - total completed sessions, duration, and active days;
 - settings and dashboard summary versions;
 - bounded dashboard summary.
 
 The dashboard carries nullable sustainable/burst/controlled WPM, accuracy, consistency, up to eight primary limiter IDs, due count, and a small trend label. It embeds neither full skills nor history and has no auth relationship.
+
+Profiles also preserve nullable **lastTrainingDayKey** as a canonical local **YYYY-MM-DD** key. It is separate from UTC timestamps and lets completion count a local training day once without re-deriving historical locality after timezone changes. Profile v1 records migrate deterministically to v2 by adding **lastTrainingDayKey: null** when absent. IndexedDB remains structural version 1 because no store, key, or index changed.
 
 ## 11. Settings schema
 
@@ -190,6 +194,8 @@ Normalizers exist for settings, manifest, skill stats, summaries, and custom-tex
 **migratePracticeManifest()** and **migratePracticeRecord()** clone inputs, inspect the appropriate version field, reject unsupported future versions, perform sequential steps, normalize, validate, and report from/to versions and steps.
 
 Version 1 uses identity migration. A missing version is treated as synthetic v0 solely to establish the v0-to-v1 framework; the resulting record must still pass current validation. Migration never mutates input and repeated migration is idempotent. Invalid outcomes return a structured migration failure and may be quarantined when discovered through repository reads.
+
+The first concrete record migration is profile v1 to v2. It preserves every valid profile field, retains an existing valid local day key, and adds null only when the field is absent. Repository reads run record migration and write the canonical v2 record back to the Practice store. Manifest and IndexedDB structural versions remain 1.
 
 ## 20. Repository contract
 
@@ -319,7 +325,7 @@ Prompt 3 prerequisites now supplied: stable IDs, UTC/local time helpers, setting
 | Record | Store | Key | Version | Size/count limit | Retention | Privacy |
 | --- | --- | --- | ---: | --- | --- | --- |
 | Manifest | localStorage | wordstrike.practice.manifest.v1 | 1 | 64 KiB | Current + backup | Local |
-| Profile | profiles | profileId | 1 | Small aggregate | One/profile | Local |
+| Profile | profiles | profileId | 2 | Small aggregate | One/profile | Local |
 | Skill stat | skillStats | statId | 1 | Type caps; 64 recent timings | Confidence/staleness pruning | Local aggregate |
 | Session summary | sessionSummaries | sessionId | 1 | 128 KiB; 1,000/2,000 | 730 days with preservation | Local, unranked |
 | Review item | reviewItems | reviewItemId | 1 | 5,000 | Duplicate/stale mastered pruning | Local |

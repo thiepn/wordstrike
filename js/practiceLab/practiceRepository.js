@@ -6,6 +6,7 @@ import {
 import {
   createDefaultPracticeProfile,
 } from "./practiceDefaults.js";
+import { migratePracticeRecord } from "./practiceMigrations.js";
 import {
   createPracticeQuarantineId,
   createSkillStatId,
@@ -37,6 +38,16 @@ const validators = Object.freeze({
   customTexts: validateCustomText,
   presets: validatePreset,
   activeSessionCheckpoints: validateCheckpoint,
+});
+
+const recordTypesByStore = Object.freeze({
+  profiles: "profile",
+  skillStats: "skillStat",
+  sessionSummaries: "sessionSummary",
+  reviewItems: "reviewItem",
+  customTexts: "customText",
+  presets: "preset",
+  activeSessionCheckpoints: "checkpoint",
 });
 
 const activeReviewStates = new Set(["new", "due", "learning", "improving", "stable"]);
@@ -108,10 +119,17 @@ export function createPracticeRepository({
   const readValidated = async (storeName, key) => {
     const record = await dataStore.get(storeName, key);
     if (!record) return null;
+    const recordType = recordTypesByStore[storeName];
+    const migration = recordType ? migratePracticeRecord(recordType, record) : null;
+    if (migration?.ok) {
+      if (migration.migrated) await dataStore.put(storeName, migration.value);
+      return migration.value;
+    }
     const outcome = validators[storeName]?.(record);
-    if (!outcome || outcome.valid) return record;
+    if (!migration && (!outcome || outcome.valid)) return record;
     await quarantine(storeName, record, "record-validation-failed");
     await dataStore.delete(storeName, key);
+    if (migration?.error) throw migration.error;
     throw validationError(storeName, record, outcome, "read");
   };
 

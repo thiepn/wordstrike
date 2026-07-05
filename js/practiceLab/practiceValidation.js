@@ -186,6 +186,7 @@ export function validatePracticeProfile(profile) {
   requiredString(errors, profile.keyboardLayout, "keyboardLayout", 40);
   if (typeof profile.firstAssessmentCompleted !== "boolean") error(errors, "firstAssessmentCompleted", "INVALID_TYPE", "firstAssessmentCompleted must be boolean");
   for (const key of ["firstAssessmentCompletedAt", "lastAssessmentAt", "lastPracticeAt"]) nullableTimestamp(errors, profile[key], key);
+  if (profile.lastTrainingDayKey != null && !isValidPracticeDayKey(profile.lastTrainingDayKey)) error(errors, "lastTrainingDayKey", "INVALID_DAY_KEY", "lastTrainingDayKey must be YYYY-MM-DD or null");
   for (const key of ["totalCompletedSessions", "totalPracticeDurationMs", "activeTrainingDays", "settingsVersion", "summaryVersion"]) finite(errors, profile[key], key, { min: 0, integer: true });
   validateDashboard(errors, profile.dashboardSummary);
   return result(errors);

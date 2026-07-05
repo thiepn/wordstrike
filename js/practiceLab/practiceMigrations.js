@@ -43,6 +43,28 @@ const normalizers = Object.freeze({
   checkpoint: (value) => value,
 });
 
+const migrations = Object.freeze({
+  profile: Object.freeze({
+    0: (value) => ({ ...value, recordVersion: 1 }),
+    1: (value) => ({
+      ...value,
+      recordVersion: 2,
+      lastTrainingDayKey: value.lastTrainingDayKey ?? null,
+    }),
+  }),
+});
+
+function validateIntermediate(type, value, version, validate) {
+  if (type === "profile" && version === 1) {
+    return validatePracticeProfile({
+      ...value,
+      recordVersion: PRACTICE_RECORD_VERSIONS.profile,
+      lastTrainingDayKey: value.lastTrainingDayKey ?? null,
+    });
+  }
+  return validate(value);
+}
+
 function failure(code, message, details = {}) {
   return {
     ok: false,
@@ -80,9 +102,30 @@ function migrate({
     return failure(PRACTICE_STORAGE_ERROR_CODES.UNSUPPORTED_VERSION, `${type} version ${fromVersion} is newer than supported version ${targetVersion}`);
   }
   const steps = [];
-  if (fromVersion === 0) {
-    value[versionField] = 1;
-    steps.push(`${type}:0->1`);
+  let currentVersion = fromVersion;
+  while (currentVersion < targetVersion) {
+    const migrateStep = migrations[type]?.[currentVersion]
+      ?? (
+        currentVersion === 0
+          ? (current) => ({ ...current, [versionField]: 1 })
+          : null
+      );
+    if (!migrateStep) {
+      return failure(PRACTICE_STORAGE_ERROR_CODES.MIGRATION_FAILED, `${type} has no migration from version ${currentVersion}`);
+    }
+    const previousVersion = currentVersion;
+    value = migrateStep(value);
+    currentVersion = Number(value[versionField]);
+    if (!Number.isInteger(currentVersion) || currentVersion !== previousVersion + 1) {
+      return failure(PRACTICE_STORAGE_ERROR_CODES.MIGRATION_FAILED, `${type} migration did not advance sequentially`);
+    }
+    const intermediate = validateIntermediate(type, value, currentVersion, validate);
+    if (!intermediate.valid) {
+      return failure(PRACTICE_STORAGE_ERROR_CODES.MIGRATION_FAILED, `${type} failed validation after version ${currentVersion}`, {
+        cause: intermediate.errors,
+      });
+    }
+    steps.push(`${type}:${previousVersion}->${currentVersion}`);
   }
   value = normalize(value);
   const validation = validate(value);
@@ -125,4 +168,3 @@ export function migratePracticeRecord(recordType, record) {
     validate: validators[recordType],
   });
 }
-
