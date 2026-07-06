@@ -1,8 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createPracticeExperimentRegistry } from "../js/practiceLab/practiceExperimentRegistry.js";
+import { PRACTICE_REGISTRY_ERROR_CODES } from "../js/practiceLab/practiceExperimentRegistry.js";
 
-const catalog = Object.freeze([Object.freeze({ id: "fixture", status: "available" })]);
+const catalog = Object.freeze([Object.freeze({ id: "fixture", category: "precision", status: "available" })]);
 const descriptor = (overrides = {}) => ({ id: "fixture", version: 1, title: "Fixture", category: "precision", sessionSchemaVersion: 1, defaultCorrectionBehavior: "allow", supportedCompletionModes: ["content"], resumable: true, ...overrides });
 
 test("registry validates a future session-engine-compatible descriptor and resolves availability", () => {
@@ -20,16 +21,21 @@ test("registry validates a future session-engine-compatible descriptor and resol
 
 test("registry rejects unknown, duplicate, mismatched, and invalid descriptors", () => {
   const registry = createPracticeExperimentRegistry({ catalog });
-  assert.throws(() => registry.register({ experimentId: "unknown", implementationVersion: 1, descriptorFactory: descriptor }), /Unknown/);
+  assert.throws(
+    () => registry.register({ experimentId: "unknown", implementationVersion: 1, descriptorFactory: descriptor }),
+    (error) => error.code === PRACTICE_REGISTRY_ERROR_CODES.UNKNOWN_EXPERIMENT,
+  );
   assert.throws(() => registry.register({ experimentId: "fixture", implementationVersion: 0, descriptorFactory: descriptor }), /positive integer/);
   assert.throws(() => registry.register({ experimentId: "fixture", implementationVersion: 1, descriptorFactory: () => descriptor({ id: "other" }) }), /match/);
+  assert.throws(() => registry.register({ experimentId: "fixture", implementationVersion: 1, descriptorFactory: () => descriptor({ category: "speed" }) }), /category/);
   assert.throws(() => registry.register({ experimentId: "fixture", implementationVersion: 1, descriptorFactory: () => descriptor({ defaultCorrectionBehavior: "bad" }) }), /Invalid/);
   registry.register({ experimentId: "fixture", implementationVersion: 1, descriptorFactory: descriptor });
+  assert.equal(registry.getRegistration("fixture").descriptor.id, "fixture");
   assert.throws(() => registry.register({ experimentId: "fixture", implementationVersion: 1, descriptorFactory: descriptor }), /already registered/);
 });
 
 test("registry does not make planned catalog entries runnable and destroy clears lifecycle state", () => {
-  const planned = [{ id: "fixture", status: "planned" }];
+  const planned = [{ id: "fixture", category: "precision", status: "planned" }];
   const registry = createPracticeExperimentRegistry({ catalog: planned });
   registry.register({ experimentId: "fixture", implementationVersion: 1, descriptorFactory: descriptor });
   assert.equal(registry.getResolvedExperiment("fixture").runnable, false);

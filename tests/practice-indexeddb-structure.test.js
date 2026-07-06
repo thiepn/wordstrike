@@ -38,6 +38,17 @@ for (const [name, definition] of Object.entries(PRACTICE_STORE_DEFINITIONS)) {
   })));
 }
 
+const addedExistingIndexes = [];
+const existingProfiles = {
+  indexNames: { contains: () => false },
+  createIndex(name, keyPath, options) { addedExistingIndexes.push({ name, keyPath, options }); },
+};
+applyPracticeDatabaseUpgrade({
+  objectStoreNames: { contains: (name) => name === "profiles" },
+  createObjectStore() { return { indexNames: { contains: () => true }, createIndex() {} }; },
+}, { objectStore: () => existingProfiles });
+assert.deepEqual(addedExistingIndexes.map(({ name }) => name), ["updatedAt"]);
+
 const unavailable = createPracticeIndexedDbStore({ indexedDB: null });
 await assert.rejects(
   unavailable.open(),

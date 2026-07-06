@@ -3772,6 +3772,11 @@ body.gameplay-viewport-short .boss-phrase-size-extreme { font-size: clamp(16px, 
   text-transform: uppercase;
 }
 
+.practice-lab-screen [data-practice-heading]:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 5px;
+}
+
 .practice-lab-header p,
 .practice-lab-section-heading p {
   max-width: 700px;

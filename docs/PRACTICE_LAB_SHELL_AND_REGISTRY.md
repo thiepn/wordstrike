@@ -44,11 +44,11 @@ Entries include stable ID/version, bounded titles/descriptions, category/status,
 
 ## 9. Registry contract
 
-`createPracticeExperimentRegistry()` exposes `register`, `unregister`, `hasImplementation`, `getCatalogEntry`, `getRegistration`, `getResolvedExperiment`, `listResolvedExperiments`, `subscribe`, `getDiagnostics`, and `destroy`. Registration requires a positive implementation version and Prompt 3-compatible descriptor factory. Duplicate, unknown, mismatched, and invalid registrations fail.
+`createPracticeExperimentRegistry()` exposes `register`, `unregister`, `hasImplementation`, `getCatalogEntry`, `getRegistration`, `getResolvedExperiment`, `listResolvedExperiments`, `subscribe`, `getDiagnostics`, and `destroy`. Registration requires a positive implementation version and Prompt 3-compatible descriptor factory. The descriptor is validated once, stored as an immutable runtime value, and must match both catalog ID and category. Duplicate, unknown, mismatched, and invalid registrations fail with `PracticeRegistryError` and stable `PRACTICE_REGISTRY_ERROR_CODES`.
 
 ## 10. Availability resolution
 
-Resolved state combines feature access, catalog status, and implementation registration. A runnable experiment requires an open gate, catalog status `available`, and a valid registration. Assessment, data, device, and capability metadata are retained for later policy inputs; no profile state is fabricated now.
+Resolved state combines feature access, catalog status, and implementation registration. A runnable experiment requires an open gate, a valid registration, and catalog status `available` or `preview`; `planned`, `disabled`, and `hidden` entries remain non-runnable. This lets Prompt 6 activate the immutable Full Assessment preview entry without mutating catalog metadata. Assessment, data, device, and capability metadata are retained for later policy inputs; no profile state is fabricated now.
 
 ## 11. Guided Daily Training metadata
 
@@ -60,7 +60,7 @@ Accessible routes are home, experiment-detail, skill-map, review-queue, and prog
 
 ## 13. Controller lifecycle
 
-`mount()` validates its root, normalizes the initial route, installs one click listener, subscribes to registry changes, and renders once. `unmount()` removes the listener/subscription, clears history, prevents rendering, and is idempotent. Back pops internal history before calling the app exit callback.
+`mount()` validates its root, normalizes the initial route, installs one click listener, subscribes to registry changes, and renders once. `unmount()` removes the listener/subscription, clears history, prevents rendering, and is idempotent. Back pops bounded internal history before calling the app exit callback; history also retains a safe return-focus selector for the originating card.
 
 ## 14. DOM event strategy
 
@@ -136,7 +136,7 @@ Prompt 6 may register `full-assessment` only after supplying a valid descriptor 
 
 ## 32. Known limitations
 
-The Help action is a prepared no-op callback until Practice onboarding exists. URL history does not represent internal routes. No cross-route focus restoration beyond matching action type is promised. Device capability and prerequisite resolution remain metadata-only because no profile is loaded.
+The Help location is visibly disabled until Practice onboarding exists. URL history does not represent internal routes. Device capability and prerequisite resolution remain metadata-only because no profile is loaded. Interactive browser coverage remains environment-dependent.
 
 ## 33. Open questions
 

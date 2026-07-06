@@ -131,4 +131,24 @@ for (const [mode, value, suffix] of [
   assert.equal(completionEngine.getSnapshot().lifecycleState, "completed");
 }
 
+const dirtyHarness = await createPracticeSessionHarness({ suffix: "dirty-checkpoint", text: "abc" });
+let releaseCheckpoint;
+const dirtyRepository = {
+  ...dirtyHarness.repository,
+  saveActiveCheckpoint(record) {
+    return new Promise((resolve) => {
+      releaseCheckpoint = async () => resolve(await dirtyHarness.repository.saveActiveCheckpoint(record));
+    });
+  },
+};
+const dirtyEngine = await engineFor(dirtyHarness, { repository: dirtyRepository });
+dirtyEngine.handleInput(dirtyHarness.input("character", "a"));
+const pendingCheckpoint = dirtyEngine.flushCheckpoint("manual", { force: true });
+await Promise.resolve();
+dirtyEngine.handleInput(dirtyHarness.input("character", "b"));
+await releaseCheckpoint();
+await pendingCheckpoint;
+assert.equal(dirtyEngine.getSnapshot().checkpoint.dirty, true);
+assert.equal(dirtyHarness.time.timerCount, 1);
+
 console.log("Practice abandonment thresholds, interruption, forced-checkpoint coalescing, completion precedence, and destroy races passed.");

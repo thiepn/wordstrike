@@ -101,7 +101,7 @@ Pause freezes active time, starts paused accumulation, rejects input, preserves 
 
 ## 17. Checkpoint cadence
 
-Defaults are 15 seconds minimum, 50 accepted insertions threshold, one timer, and no setInterval. Meaningful changes mark state dirty. Scheduled writes coalesce. Pause, hidden, interruption, and manual flush force a write. Non-resumable, empty, created, completed, abandoned, and destroyed sessions do not checkpoint.
+Defaults are 15 seconds minimum, 50 accepted insertions threshold, one timer, and no setInterval. Meaningful changes mark state dirty. Scheduled writes coalesce. Pause, hidden, interruption, and manual flush force a write. A write never clears dirty state when a newer snapshot was produced while that write was pending. Non-resumable, empty, created, completed, abandoned, and destroyed sessions do not checkpoint.
 
 ## 18. Checkpoint payload
 

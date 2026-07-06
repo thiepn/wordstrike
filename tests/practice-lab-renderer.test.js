@@ -44,3 +44,15 @@ test("renderer escapes dynamic catalog text", () => {
   assert.match(target.innerHTML, /&lt;img src=x&gt;/);
   assert.match(target.innerHTML, /&amp; unsafe/);
 });
+
+test("renderer deliberately focuses the route heading when prior focus cannot be restored", () => {
+  let focused = 0;
+  const heading = { focus: () => { focused += 1; } };
+  const target = {
+    innerHTML: "",
+    querySelector: (selector) => selector === "[data-practice-heading]" ? heading : null,
+  };
+  renderPracticeLab(target, { kind: "not-found", title: "Missing", description: "Missing", backLabel: "Back" });
+  assert.equal(focused, 1);
+  assert.match(target.innerHTML, /tabindex="-1" data-practice-heading/);
+});

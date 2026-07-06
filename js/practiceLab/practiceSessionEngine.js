@@ -286,7 +286,7 @@ export function createPracticeSessionEngine({
     checkpointWrite = (async () => {
       try {
         await repository.saveActiveCheckpoint(checkpoint);
-        if (snapshotVersion === writeVersion || force) {
+        if (snapshotVersion === writeVersion) {
           dirtyCheckpoint = false;
           acceptedSinceCheckpoint = 0;
         }
@@ -370,16 +370,16 @@ export function createPracticeSessionEngine({
     const validation = validatePracticeNormalizedInput(input, { segmenter });
     if (!validation.valid) return { accepted: false, stateChanged: false, reason: "invalid-input", errors: validation.errors, sessionCompleted: false, snapshotVersion };
     const isInsertion = input.type === "character" || input.type === "space";
-    if (isInsertion && !performanceTimingStarted) {
-      performanceTimingStarted = true;
-      activeIntervalStart = input.monotonicTimestampMs;
-    }
     let outcome;
     const activeMs = activeAt(input.monotonicTimestampMs);
     if (isInsertion) {
       const value = input.type === "space" ? " " : input.value;
       outcome = applyPracticeInsertion(typingState, contentPlan, value, activeMs);
       if (outcome.accepted) {
+        if (!performanceTimingStarted) {
+          performanceTimingStarted = true;
+          activeIntervalStart = input.monotonicTimestampMs;
+        }
         const unit = contentPlan.units.find((candidate) => candidate.unitId === outcome.unitId) || null;
         const latency = metrics.recordInsertion({
           ...outcome,

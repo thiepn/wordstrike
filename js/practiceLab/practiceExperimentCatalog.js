@@ -7,6 +7,8 @@ export const PRACTICE_CATEGORY_LABELS = Object.freeze({
   assessment: "Assess", precision: "Precision", speed: "Speed", fluency: "Fluency",
   "real-world": "Real-world", advanced: "Advanced", custom: "Custom",
 });
+export const PRACTICE_ICON_KEYS = Object.freeze(["assessment", "key", "combination", "word", "target", "bolt", "words", "text", "wave", "metronome", "eye", "endurance", "punctuation", "numbers", "custom"]);
+export const PRACTICE_ACCENT_KEYS = Object.freeze(["assessment", "precision", "speed", "fluency", "real-world", "custom"]);
 
 const IDS = [
   "full-assessment", "weak-keys", "combination-repair", "problem-words", "accuracy-control",
@@ -67,9 +69,12 @@ export function validatePracticeExperimentCatalog(catalog) {
     if (!PRACTICE_EXPERIMENT_STATUSES.includes(entry.status)) errors.push({ path: `${path}.status`, code: "INVALID_STATUS" });
     if (!PRACTICE_EXPERIMENT_DIFFICULTIES.includes(entry.difficulty)) errors.push({ path: `${path}.difficulty`, code: "INVALID_DIFFICULTY" });
     if (!Number.isInteger(entry.displayOrder)) errors.push({ path: `${path}.displayOrder`, code: "INVALID_ORDER" });
+    if (!Number.isInteger(entry.implementationPrompt) || entry.implementationPrompt < 1) errors.push({ path: `${path}.implementationPrompt`, code: "INVALID_PROMPT" });
     const duration = entry.estimatedDurationMinutes || {};
     if (![duration.minimum, duration.recommended, duration.maximum].every((n) => Number.isFinite(n) && n >= 0) || duration.minimum > duration.recommended || duration.recommended > duration.maximum) errors.push({ path: `${path}.estimatedDurationMinutes`, code: "INVALID_DURATION" });
-    if (!/^[a-z0-9-]+$/.test(entry.iconKey || "") || !/^[a-z0-9-]+$/.test(entry.accentKey || "")) errors.push({ path, code: "INVALID_VISUAL_KEY" });
+    if (!PRACTICE_ICON_KEYS.includes(entry.iconKey) || !PRACTICE_ACCENT_KEYS.includes(entry.accentKey)) errors.push({ path, code: "INVALID_VISUAL_KEY" });
+    for (const key of ["requiresAssessment", "requiresPracticeData", "supportsMobile", "supportsPhysicalKeyboard", "supportsSoftwareKeyboard"]) if (typeof entry[key] !== "boolean") errors.push({ path: `${path}.${key}`, code: "INVALID_BOOLEAN" });
+    for (const key of ["capabilities", "tags"]) if (!Array.isArray(entry[key]) || entry[key].length > 32 || entry[key].some((value) => typeof value !== "string" || value.length > 100)) errors.push({ path: `${path}.${key}`, code: "INVALID_ARRAY" });
     if (!validatePracticeSerializable(entry).valid) errors.push({ path, code: "NOT_SERIALIZABLE" });
   });
   return { valid: errors.length === 0, errors };

@@ -25,6 +25,11 @@ const SETTINGS_ENUMS = Object.freeze({
   difficultyPreference: ["gentle", "adaptive", "challenging"],
   reducedMotion: ["system", "reduce", "full"],
 });
+const UNSAFE_OBJECT_KEYS = new Set(["__proto__", "constructor", "prototype"]);
+const FORBIDDEN_SESSION_FIELDS = Object.freeze([
+  "rawEvents", "eventTrace", "rawEventTrace", "leaderboardEligible",
+  "submissionPayload", "accessToken", "boardKey", "rulesVersion",
+]);
 
 function result(errors) {
   return { valid: errors.length === 0, errors };
@@ -112,7 +117,10 @@ export function validatePracticeSerializable(value, {
       return;
     }
     seen.add(entry);
-    Object.entries(entry).forEach(([key, child]) => visit(child, `${currentPath}.${key}`, depth + 1));
+    Object.entries(entry).forEach(([key, child]) => {
+      if (UNSAFE_OBJECT_KEYS.has(key)) error(errors, `${currentPath}.${key}`, "UNSAFE_KEY", `${currentPath} contains an unsafe object key`);
+      else visit(child, `${currentPath}.${key}`, depth + 1);
+    });
     seen.delete(entry);
   };
   visit(value, path, 0);
@@ -266,7 +274,7 @@ export function validateSessionSummary(summary) {
   for (const key of ["beforeMetrics", "afterMetrics", "transferMetrics", "fatigueSummary", "trainingQuality"]) if (summary[key] != null) appendSerializable(errors, summary[key], key);
   if (!Array.isArray(summary.targetEntities) || summary.targetEntities.length > PRACTICE_LIMITS.targetEntities) error(errors, "targetEntities", "ARRAY_LIMIT", "targetEntities exceeds its limit");
   if (!Array.isArray(summary.recommendationIds) || summary.recommendationIds.length > PRACTICE_LIMITS.recommendationIds) error(errors, "recommendationIds", "ARRAY_LIMIT", "recommendationIds exceeds its limit");
-  for (const forbidden of ["rawEvents", "eventTrace", "leaderboardEligible", "submissionPayload", "accessToken"]) if (Object.hasOwn(summary, forbidden)) error(errors, forbidden, "FORBIDDEN_FIELD", `${forbidden} is forbidden in Practice summaries`);
+  for (const forbidden of FORBIDDEN_SESSION_FIELDS) if (Object.hasOwn(summary, forbidden)) error(errors, forbidden, "FORBIDDEN_FIELD", `${forbidden} is forbidden in Practice summaries`);
   if (byteSize(summary) > PRACTICE_LIMITS.sessionObjectBytes) error(errors, "sessionSummary", "SERIALIZED_SIZE", "sessionSummary exceeds its size limit");
   return result(errors);
 }
@@ -401,7 +409,7 @@ export function normalizeSkillStat(value) {
 export function normalizeSessionSummary(value) {
   if (!isPlainObject(value)) return null;
   const copy = { ...value };
-  for (const key of ["rawEvents", "eventTrace", "leaderboardEligible", "submissionPayload", "accessToken"]) delete copy[key];
+  for (const key of FORBIDDEN_SESSION_FIELDS) delete copy[key];
   return copy;
 }
 

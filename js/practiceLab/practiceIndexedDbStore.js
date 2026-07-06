@@ -24,14 +24,20 @@ function transactionPromise(transaction) {
   });
 }
 
-export function applyPracticeDatabaseUpgrade(database) {
+function containsName(collection, name) {
+  if (typeof collection?.contains === "function") return collection.contains(name);
+  return Array.from(collection || []).includes(name);
+}
+
+export function applyPracticeDatabaseUpgrade(database, transaction = null) {
   for (const [storeName, definition] of Object.entries(PRACTICE_STORE_DEFINITIONS)) {
-    const store = database.objectStoreNames.contains(storeName)
-      ? null
+    const exists = database.objectStoreNames.contains(storeName);
+    const store = exists
+      ? transaction?.objectStore?.(storeName) ?? null
       : database.createObjectStore(storeName, { keyPath: definition.keyPath });
     if (!store) continue;
     for (const index of definition.indexes) {
-      store.createIndex(index.name, index.keyPath, index.options || {});
+      if (!containsName(store.indexNames, index.name)) store.createIndex(index.name, index.keyPath, index.options || {});
     }
   }
 }
@@ -93,7 +99,7 @@ export function createPracticeIndexedDbStore({
       );
       try {
         const request = indexedDB.open(databaseName, databaseVersion);
-        request.onupgradeneeded = () => applyPracticeDatabaseUpgrade(request.result);
+        request.onupgradeneeded = () => applyPracticeDatabaseUpgrade(request.result, request.transaction);
         database = await requestPromise(request);
         database.onversionchange = () => {
           database?.close();
@@ -165,4 +171,3 @@ export function createPracticeIndexedDbStore({
     },
   });
 }
-

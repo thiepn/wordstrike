@@ -92,4 +92,22 @@ disabled.handleInput(disabledHarness.input("character", "é"));
 assert.equal(disabled.handleInput(disabledHarness.input("backspace")).reason, "correction-disabled");
 assert.equal(disabled.getMetricsSnapshot().correctionInputs, 0);
 
+const exhaustedHarness = await createPracticeSessionHarness({ suffix: "exhausted", text: "" });
+const exhausted = createPracticeSessionEngine({
+  repository: exhaustedHarness.repository,
+  sessionId: exhaustedHarness.sessionId,
+  profileId: exhaustedHarness.profileId,
+  clock: exhaustedHarness.time.clock,
+  wallClock: exhaustedHarness.time.wallClock,
+  scheduler: exhaustedHarness.time.scheduler,
+});
+await exhausted.prepare({ experiment: exhaustedHarness.experiment, configuration: { timingMode: "on-first-input" }, contentPlan: exhaustedHarness.contentPlan });
+await exhausted.start();
+await exhaustedHarness.time.advance(1000, { runTimers: false });
+assert.equal(exhausted.handleInput(exhaustedHarness.input("character", "a")).reason, "content-exhausted");
+assert.equal(exhausted.getSnapshot().timing.performanceTimingStarted, false);
+exhausted.appendContent({ text: "a" });
+assert.equal(exhausted.handleInput(exhaustedHarness.input("character", "a")).accepted, true);
+assert.equal(exhausted.getSnapshot().timing.performanceTimingStarted, true);
+
 console.log("Practice lifecycle, first-input timing, input comparison, Unicode, correction policies, pause/resume, words, and visibility passed.");

@@ -393,6 +393,16 @@ export function createPracticeRepository({
       reviewItemChanges.filter((change) => change?.action !== "delete")
         .forEach((record) => validate("reviewItems", record));
       if (updatedProfileSummary) validate("profiles", updatedProfileSummary);
+      const activeProfileId = ensureManifest().profileId;
+      const mismatchedProfile = sessionSummary.profileId !== activeProfileId
+        || updatedSkillStats.some((record) => record.profileId !== sessionSummary.profileId)
+        || reviewItemChanges.some((change) => change?.action !== "delete" && change.profileId !== sessionSummary.profileId)
+        || (updatedProfileSummary && updatedProfileSummary.profileId !== sessionSummary.profileId);
+      if (mismatchedProfile) throw practiceStorageError(
+        PRACTICE_STORAGE_ERROR_CODES.VALIDATION_FAILED,
+        "Practice completion records must belong to the active session profile",
+        { operation: "commit-session", storeName: "profiles", recordId: sessionSummary.profileId },
+      );
 
       const stores = ["sessionSummaries", "skillStats", "reviewItems", "profiles", "activeSessionCheckpoints", "meta"];
       const transactionResult = await writeWithQuotaRecovery("commit-session", () => (
@@ -400,7 +410,11 @@ export function createPracticeRepository({
           const existing = await transaction.get("sessionSummaries", sessionSummary.sessionId);
           if (existing) {
             if (JSON.stringify(existing) === JSON.stringify(sessionSummary)) {
-              return { committed: false, idempotent: true };
+              return {
+                committed: false,
+                idempotent: true,
+                profileSummary: await transaction.get("profiles", sessionSummary.profileId),
+              };
             }
             throw practiceStorageError(
               PRACTICE_STORAGE_ERROR_CODES.DUPLICATE,
@@ -426,12 +440,13 @@ export function createPracticeRepository({
           return { committed: true, idempotent: false };
         })
       ));
-      if (transactionResult.idempotent) return { ...transactionResult, manifestUpdated: true };
-
       try {
+        const reconciliationProfile = transactionResult.profileSummary ?? updatedProfileSummary;
         saveManifestPatch({
-          lastCompletedSessionAt: sessionSummary.completedAtUtc,
-          dashboardSummary: updatedProfileSummary?.dashboardSummary
+          lastCompletedSessionAt: sessionSummary.status === "completed"
+            ? sessionSummary.completedAtUtc
+            : ensureManifest().lastCompletedSessionAt,
+          dashboardSummary: reconciliationProfile?.dashboardSummary
             ?? ensureManifest().dashboardSummary,
           storageHealth: "healthy",
         });
@@ -442,10 +457,12 @@ export function createPracticeRepository({
           createdAt: sessionSummary.completedAtUtc,
           updatedAt: toPracticeUtcIso(now),
         });
-        return { ...transactionResult, manifestUpdated: true };
+        const { profileSummary: _profileSummary, ...publicResult } = transactionResult;
+        return { ...publicResult, manifestUpdated: true };
       } catch (cause) {
+        const { profileSummary: _profileSummary, ...publicResult } = transactionResult;
         return {
-          ...transactionResult,
+          ...publicResult,
           manifestUpdated: false,
           recoveryRequired: true,
           error: practiceStorageError(

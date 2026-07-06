@@ -12,7 +12,7 @@ const cardFromResolved = ({ catalogEntry: entry, availability, runnable }) => Ob
   status: runnable ? "available" : availability === "preview" ? "preview" : "planned", runnable,
 });
 
-export function buildPracticeHomeViewModel({ registry, featureGate }) {
+export function buildPracticeHomeViewModel({ registry, featureGate, helpAvailable = false }) {
   const visible = registry.listResolvedExperiments().filter(({ catalogEntry }) => catalogEntry.status !== "hidden");
   const categories = PRACTICE_EXPERIMENT_CATEGORIES
     .map((id) => ({ id, title: PRACTICE_CATEGORY_LABELS[id], experiments: visible.filter(({ catalogEntry }) => catalogEntry.category === id).sort((a, b) => a.catalogEntry.displayOrder - b.catalogEntry.displayOrder).map(cardFromResolved) }))
@@ -21,6 +21,7 @@ export function buildPracticeHomeViewModel({ registry, featureGate }) {
   return Object.freeze({
     kind: "home", title: "Practice Lab", subtitle: "Diagnose weaknesses, train specific skills, and measure improvement.",
     preview: featureGate.getSnapshot().reason === "developer-preview",
+    helpAvailable: helpAvailable === true,
     dailyTraining: Object.freeze({ title: PRACTICE_DAILY_TRAINING.title, description: PRACTICE_DAILY_TRAINING.description, state: "assessment-required", stateLabel: "Assessment required", duration: "12-minute recommended session" }),
     assessment: cardFromResolved(registry.getResolvedExperiment("full-assessment")),
     profile: Object.freeze({ state: "not-loaded", title: "No skill profile yet", description: "Complete the Full Assessment once it becomes available. Practice Lab will then identify the keys, combinations, words, and pacing patterns that most limit your typing." }),
@@ -57,11 +58,11 @@ export const buildReviewQueueEmptyViewModel = () => emptyView("review-queue", "R
 export const buildProgressEmptyViewModel = () => emptyView("progress", "Progress", "A future home for training time, sustainable and burst speed, accuracy, consistency, mastered weaknesses, and experiment history.", "No training history", "Complete future Practice sessions to begin a local training history.", ["Training activity", "Speed and accuracy", "Consistency", "Mastered weaknesses"]);
 export const buildPracticeUnavailableViewModel = () => Object.freeze({ kind: "unavailable", title: "Practice Lab", description: "Practice Lab is coming soon.", backLabel: "Back" });
 
-export function buildPracticeLabViewModel({ route, registry, featureGate }) {
+export function buildPracticeLabViewModel({ route, registry, featureGate, helpAvailable = false }) {
   if (!featureGate.canAccess() || route.name === "unavailable") return buildPracticeUnavailableViewModel();
   if (route.name === PRACTICE_LAB_ROUTES.EXPERIMENT_DETAIL) return buildExperimentDetailViewModel({ route, registry });
   if (route.name === PRACTICE_LAB_ROUTES.SKILL_MAP) return buildSkillMapEmptyViewModel();
   if (route.name === PRACTICE_LAB_ROUTES.REVIEW_QUEUE) return buildReviewQueueEmptyViewModel();
   if (route.name === PRACTICE_LAB_ROUTES.PROGRESS) return buildProgressEmptyViewModel();
-  return buildPracticeHomeViewModel({ registry, featureGate });
+  return buildPracticeHomeViewModel({ registry, featureGate, helpAvailable });
 }

@@ -2,11 +2,11 @@
 
 Status: Prompt 2 foundation
 Database generation: 1
-Runtime integration: none
+Runtime integration: explicit future-feature use only; no shell initialization
 
 ## 1. Scope and goals
 
-This document defines the durable local data boundary used by future Practice Lab prompts. The implementation lives under **js/practiceLab/** and is not imported by **js/main.js** or any existing screen. It provides schemas, defaults, structured validation, migration, retention, manifest recovery, native IndexedDB and memory stores, and a high-level repository.
+This document defines the durable local data boundary used by future Practice Lab prompts. The implementation lives under **js/practiceLab/**. The production entry imports only the separate Prompt 4 shell/catalog/controller path; it does not import the repository, manifest store, IndexedDB backend, memory backend, or session engine. The data foundation provides schemas, defaults, structured validation, migration, retention, manifest recovery, native IndexedDB and memory stores, and a high-level repository.
 
 It deliberately does not implement UI, assessment, experiment execution, input processing, analysis formulas, mastery decisions, review scheduling, recommendations, account sync, or Supabase behavior.
 
@@ -14,7 +14,7 @@ It deliberately does not implement UI, assessment, experiment execution, input p
 
 Practice records are separate from **wordstrike_save**, **wordstrike_mode_data_v1**, Typing Test records, English 200, pending result recovery, leaderboard boards, and Campaign/Daily/Endless results. Practice modules import none of the existing storage, scoring, leaderboard, auth, or Supabase modules. Practice summaries have no board key, submission payload, eligibility field, access token, or raw event trace.
 
-No existing route imports this module tree. Practice remains COMING SOON.
+The developer-only Practice route imports shell modules but does not initialize this persistence layer. Public Practice remains COMING SOON.
 
 ## 3. Storage ownership
 
@@ -150,7 +150,7 @@ Validation enforces entity-specific key shape, counter relationships, bounded sa
 
 Statuses are completed, abandoned, interrupted, or invalid. Reasons are time-complete, content-complete, word-target-complete, manual-stop, navigation-away, refresh-interruption, or error.
 
-Objects are bounded to 128 KiB with configuration fields bounded separately. Raw events, event traces, leaderboard eligibility, submission payloads, and access tokens are explicitly rejected. Isolation is guaranteed by the Practice record type rather than a mutable ranked flag.
+Objects are bounded to 128 KiB with configuration fields bounded separately. Raw events/traces, leaderboard eligibility, submission payloads, access tokens, board keys, and rules versions are explicitly rejected. Isolation is guaranteed by the Practice record type rather than a mutable ranked flag.
 
 ## 14. Checkpoint schema
 
@@ -187,7 +187,7 @@ Experiment-specific configuration validation is deferred to the owning experimen
 
 **practiceValidation.js** returns **{ valid, errors[] }**, where each error has path, code, and message. It validates required types, IDs, versions, enums, finite/ranged numbers, UTC/day values, array/string/serialized limits, plain JSON-safe structure, depth, cycles, and cross-field relationships.
 
-Normalizers exist for settings, manifest, skill stats, summaries, and custom-text metadata. They fill safe optional defaults, normalize casing/whitespace, cap bounded recent samples, and remove forbidden transient/ranked summary fields. They do not rescue fundamentally malformed identity or metric data.
+Normalizers exist for settings, manifest, skill stats, summaries, and custom-text metadata. They fill safe optional defaults, normalize casing/whitespace, cap bounded recent samples, and remove forbidden transient/ranked summary fields. JSON-safe validation rejects prototype-sensitive keys (`__proto__`, `constructor`, and `prototype`). Normalizers do not rescue fundamentally malformed identity or metric data.
 
 ## 19. Migration strategy
 
@@ -222,7 +222,7 @@ Initialization explicitly opens the selected backend, creates the canonical prof
 
 **commitCompletedPracticeSession()** validates the summary, skill updates, review changes, and optional profile before one read/write transaction across summaries, stats, reviews, profiles, checkpoints, and meta.
 
-The transaction rejects a conflicting session ID and returns idempotent success for the same persisted summary. It may clear the checkpoint and writes a pending manifest-reconciliation marker. After commit, the lightweight manifest dashboard/timestamp is updated and the marker is resolved.
+The transaction rejects a conflicting session ID and returns idempotent success for the same persisted summary. All completion records must belong to the active profile. It may clear the checkpoint and writes a pending manifest-reconciliation marker. After commit, the lightweight manifest dashboard/timestamp is updated and the marker is resolved. An idempotent retry also performs pending manifest reconciliation rather than claiming success against a stale manifest.
 
 If the IndexedDB transaction fails, no transaction changes are reported as committed. If only the later manifest write fails, IndexedDB remains authoritative and the method returns **recoveryRequired** with the pending reconciliation marker; a later initialization prompt can reconcile the cache.
 

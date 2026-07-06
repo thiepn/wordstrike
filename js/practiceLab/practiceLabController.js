@@ -29,18 +29,23 @@ export function createPracticeLabController({
     const value = Object.freeze({ type, ...snapshot() });
     [...subscribers].forEach((listener) => { try { listener(value); } catch (error) { logger?.warn?.("Practice controller subscriber failed", error); } });
   };
-  const render = (reason) => {
+  const render = (reason, focusSelector = null) => {
     if (!mounted) return false;
-    renderer(root, buildPracticeLabViewModel({ route, registry: experimentRegistry, featureGate }));
+    renderer(root, buildPracticeLabViewModel({
+      route,
+      registry: experimentRegistry,
+      featureGate,
+      helpAvailable: typeof appNavigation.help === "function",
+    }), { focusSelector });
     lastRenderReason = reason;
     renderCount += 1;
     emit("rendered");
     return true;
   };
-  const navigate = (nextRoute, { replace = false } = {}) => {
+  const navigate = (nextRoute, { replace = false, returnFocusSelector = null } = {}) => {
     if (!mounted || !featureGate.canAccess()) return false;
     const normalized = normalizePracticeLabRoute(nextRoute, { featureGate });
-    if (!replace) history = [...history.slice(-(HISTORY_LIMIT - 1)), route];
+    if (!replace) history = [...history.slice(-(HISTORY_LIMIT - 1)), { route, focusSelector: returnFocusSelector }];
     route = normalized;
     render("navigation");
     return true;
@@ -48,9 +53,10 @@ export function createPracticeLabController({
   const back = () => {
     if (!mounted) return false;
     if (history.length) {
-      route = history[history.length - 1];
+      const previous = history[history.length - 1];
+      route = previous.route;
       history = history.slice(0, -1);
-      render("back");
+      render("back", previous.focusSelector);
       return true;
     }
     appNavigation.exit?.();
@@ -64,8 +70,14 @@ export function createPracticeLabController({
     if (action === "exit") appNavigation.exit?.();
     else if (action === "back") back();
     else if (action === "help") appNavigation.help?.({ onboardingVersion: PRACTICE_LAB_ONBOARDING_VERSION });
-    else if (action === "open-experiment") navigate(createPracticeLabRoute(PRACTICE_LAB_ROUTES.EXPERIMENT_DETAIL, { experimentId: target.dataset.experimentId }));
-    else if (action === "navigate") navigate(createPracticeLabRoute(target.dataset.route));
+    else if (action === "open-experiment") navigate(
+      createPracticeLabRoute(PRACTICE_LAB_ROUTES.EXPERIMENT_DETAIL, { experimentId: target.dataset.experimentId }),
+      { returnFocusSelector: `[data-experiment-id="${String(target.dataset.experimentId || "").replace(/[^a-z0-9-]/gi, "")}"]` },
+    );
+    else if (action === "navigate") navigate(
+      createPracticeLabRoute(target.dataset.route),
+      { returnFocusSelector: `[data-route="${String(target.dataset.route || "").replace(/[^a-z0-9-]/gi, "")}"]` },
+    );
   };
 
   return Object.freeze({
