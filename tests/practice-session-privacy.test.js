@@ -10,6 +10,6 @@ assert.doesNotMatch(source, /addEventListener|document\.|window\.|indexedDB|loca
 assert.doesNotMatch(source, /setInterval\s*\(/);
 
 const main = readFileSync(new URL("../js/main.js", import.meta.url), "utf8");
-assert.doesNotMatch(main, /practiceSessionEngine|practiceLab\//);
+assert.doesNotMatch(main, /practiceSessionEngine/);
 
-console.log("Practice Session Engine has no DOM, global listener, browser storage, ranked, auth, Supabase, or production-entry dependency.");
+console.log("Practice Session Engine has no DOM, global listener, browser storage, ranked, auth, Supabase, or production-entry dependency; only the headless shell is integrated.");

@@ -27,6 +27,6 @@ for (const field of ["rawEvents", "eventTrace", "latencySamples"]) {
 }
 
 const main = readFileSync(new URL("../js/main.js", import.meta.url), "utf8");
-assert.doesNotMatch(main, /practiceLab\//);
+assert.doesNotMatch(main, /practice(?:IndexedDbStore|Repository|ManifestStore|MemoryStore|SessionEngine)\.js/);
 
-console.log("Practice modules remain local-only, unranked, raw-trace-free, Supabase-free, and absent from the production entry graph.");
+console.log("Practice modules remain local-only, unranked, raw-trace-free, Supabase-free, and shell imports do not initialize storage.");

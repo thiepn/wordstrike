@@ -209,6 +209,9 @@ import {
   savePendingResultSubmission,
 } from "./pendingResultSubmission.js";
 import { createPendingResultCoordinator } from "./pendingResultCoordinator.js";
+import { createPracticeFeatureGate } from "./practiceLab/practiceFeatureGate.js";
+import { createPracticeExperimentRegistry } from "./practiceLab/practiceExperimentRegistry.js";
+import { createPracticeLabController } from "./practiceLab/practiceLabController.js";
 import {
   armPreparedResult,
   clearAutomaticSubmission,
@@ -230,6 +233,35 @@ let deactivateGameplayInput = () => {};
 const onboardingController = createOnboardingController();
 let onboardingView = null;
 let tutorialHintMode = null;
+let practiceLabFeatureGate = null;
+let practiceLabRegistry = null;
+let practiceLabController = null;
+
+function getPracticeLabFeatureGate() {
+  if (!practiceLabFeatureGate) practiceLabFeatureGate = createPracticeFeatureGate({ developerMode: appState.devMode });
+  return practiceLabFeatureGate;
+}
+
+function ensurePracticeLabController() {
+  if (practiceLabController) return practiceLabController;
+  const featureGate = getPracticeLabFeatureGate();
+  practiceLabRegistry = createPracticeExperimentRegistry({ featureGate });
+  practiceLabController = createPracticeLabController({
+    root: document.querySelector("#app"), featureGate, experimentRegistry: practiceLabRegistry,
+    appNavigation: {
+      exit: openModeSelect,
+      help: () => {},
+    },
+  });
+  return practiceLabController;
+}
+
+function unmountPracticeLab() {
+  practiceLabController?.unmount();
+  practiceLabRegistry?.destroy();
+  practiceLabController = null;
+  practiceLabRegistry = null;
+}
 const pendingResultCoordinator = createPendingResultCoordinator({
   onUsernameRequired: () => {
     if (bootstrapReady && appState.screen !== Screens.SETTINGS) openAccountSettings();
@@ -401,6 +433,7 @@ function getAttemptSeed() {
 }
 
 function openTitle() {
+  unmountPracticeLab();
   cleanupCampaignAttempt("main-menu");
   changeScreen(Screens.TITLE);
   appState.menuIndex = 0;
@@ -455,10 +488,19 @@ function openLeaderboardReturn(returnState) {
 }
 
 function openModeSelect() {
+  unmountPracticeLab();
   cleanupCampaignAttempt("mode-select");
   changeScreen(Screens.MODE_SELECT);
   appState.modeSelection = 0;
   renderCurrentScreen();
+}
+
+function openPracticeLab() {
+  if (!getPracticeLabFeatureGate().canAccess()) return false;
+  cleanupCampaignAttempt("practice-lab");
+  changeScreen(Screens.PRACTICE_LAB);
+  renderCurrentScreen();
+  return true;
 }
 
 function openEndlessReady(reason = "endless-ready") {
@@ -974,6 +1016,7 @@ async function copyPlayerId() {
 }
 
 function activateSelectedMode(modeId = getAllModes()[appState.modeSelection]?.id) {
+  if (modeId === MODE_IDS.PRACTICE) return openPracticeLab();
   if (!isModeEnabled(modeId)) return false;
   const route = getAllModes().find((mode) => mode.id === modeId)?.route;
   if (route === "level-select") {
@@ -1022,7 +1065,7 @@ function renderCurrentScreen() {
       leaderboardNotice,
     );
   } else if (appState.screen === Screens.MODE_SELECT) {
-    renderModeSelect(getAllModes(), appState.modeSelection, {
+    renderModeSelect(getPracticeLabFeatureGate().resolveModeDefinitions(getAllModes()), appState.modeSelection, {
       select: (index) => {
         if (appState.modeSelection === index) return;
         appState.modeSelection = index;
@@ -1031,6 +1074,8 @@ function renderCurrentScreen() {
       activate: activateSelectedMode,
       back: openTitle,
     });
+  } else if (appState.screen === Screens.PRACTICE_LAB) {
+    ensurePracticeLabController().mount();
   } else if (appState.screen === Screens.ENDLESS_READY) {
     renderEndlessReady({
       start: () => startEndless("mode-select"),
@@ -1416,6 +1461,11 @@ function handleGlobalKeydown(event) {
     return;
   }
 
+  if (appState.screen === Screens.PRACTICE_LAB) {
+    if (event.key === "Escape") practiceLabController?.back();
+    return;
+  }
+
   if (appState.screen === Screens.TITLE) {
     if (event.key === "ArrowUp" || event.key === "ArrowDown") {
       const direction = event.key === "ArrowUp" ? -1 : 1;
@@ -1651,6 +1701,7 @@ async function bootstrap() {
   void initializeAuth();
   const search = new URLSearchParams(window.location.search);
   appState.devMode = isDevelopmentMode(window.location.search);
+  practiceLabFeatureGate = createPracticeFeatureGate({ developerMode: appState.devMode });
   if (appState.devMode) {
     window.wordstrikeOnboarding = Object.freeze({
       inspect: getOnboardingStorageDiagnostic,

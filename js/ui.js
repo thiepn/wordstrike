@@ -151,7 +151,7 @@ export function renderModeSelect(modes, selectedIndex, handlers) {
                 data-mode-id="${mode.id}" data-mode-index="${index}">
               <strong>${mode.name}</strong>
               <span>${mode.shortLabel}</span>
-              <small>AVAILABLE</small>
+              <small>${mode.status === "preview" ? "DEVELOPER PREVIEW" : "AVAILABLE"}</small>
             </button>`
     : `<article class="mode-card coming-soon ${index === selectedIndex ? "selected" : ""}"
                 data-mode-id="${mode.id}" data-mode-index="${index}" aria-disabled="true">
