@@ -2,7 +2,7 @@ export const USERNAME_PATTERN = /^[A-Za-z0-9_]{3,20}$/;
 export const USERNAME_CHANGE_DAYS = 30;
 
 export const ALLOWED_ORIGINS = Object.freeze([
-  "https://thiepn.github.io",
+  "https://thiepn.dev",
   "http://localhost:8000",
   "http://127.0.0.1:8000",
 ]);
