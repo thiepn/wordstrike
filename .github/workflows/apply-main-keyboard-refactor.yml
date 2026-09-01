@@ -1,0 +1,42 @@
+name: Apply Main Keyboard Refactor
+
+on:
+  push:
+    branches: [refactor/main-keyboard-controller]
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          ref: refactor/main-keyboard-controller
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Extract keyboard routing from main
+        run: node scripts/applyMainKeyboardRefactor.mjs
+
+      - name: Run full test suite
+        run: npm test
+
+      - name: Check patch quality
+        run: git diff --check
+
+      - name: Commit transformed main
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add js/main.js
+          git diff --cached --quiet && exit 0
+          git commit -m "Extract global keyboard controller from main"
+          git push origin HEAD:refactor/main-keyboard-controller
