@@ -115,9 +115,13 @@ clickAudit(["retry", "change", "modes", "title"], (handlers) => renderSpeedTestR
 }, {}, 1, handlers));
 assert.match(app.html, /arcade-button selected[^>]*data-action="change"/);
 
-const main = await readFile(new URL("../js/main.js", import.meta.url), "utf8");
-assert.match(main, /const actions = \["retry", "modes", "title"\]/);
-assert.match(main, /startDaily\("retry", appState\.dailyResult\.modeData\.dateKey\)/);
+const [main, keyboard] = await Promise.all([
+  readFile(new URL("../js/main.js", import.meta.url), "utf8"),
+  readFile(new URL("../js/appKeyboardController.js", import.meta.url), "utf8"),
+]);
+assert.match(keyboard, /const actions = \["retry", "modes", "title"\]/);
+assert.match(keyboard, /startDaily\("retry", state\.dailyResult\.modeData\.dateKey\)/);
+assert.match(main, /createGlobalKeyboardController\(\{/);
 assert.equal(main.split('addEventListener("keydown"').length - 1, 1);
 
-console.log("Campaign, Typing Test, Endless, and Daily result buttons support direct one-click routing.");
+console.log("Campaign, Typing Test, Endless, and Daily result buttons support direct one-click routing through the extracted keyboard controller.");
