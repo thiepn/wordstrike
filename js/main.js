@@ -5,8 +5,6 @@ import {
   clearAttemptRuntime,
   isDevelopmentMode,
   getDefaultResultsIndex,
-  getResultsActions,
-  isResultsInputBlocked,
   moveLevelGridSelection,
   returnFromSettings,
   Screens,
@@ -145,6 +143,7 @@ import {
   attachAppClickListener,
   resolveAppClickAction,
 } from "./appClickRouting.js";
+import { createGlobalKeyboardController } from "./appKeyboardController.js";
 import {
   getAuthState,
   initializeAuth,
@@ -164,7 +163,6 @@ import {
   startUsernameChange,
   subscribeToLeaderboardProfile,
 } from "./leaderboardProfileService.js";
-import { captureGameplayBackspace, isTextEntryTarget } from "./inputSafety.js";
 import {
   createMobileInputAdapter,
   keyboardEventFromNormalized,
@@ -185,7 +183,6 @@ import {
 } from "./contextualHints.js";
 import {
   getLeaderboardState,
-  getLeaderboardKeyboardTarget,
   initializeLeaderboards,
   LEADERBOARD_CATEGORIES,
   LEADERBOARD_BOARDS,
@@ -1391,250 +1388,33 @@ function inspectDevLevel(levelNumber) {
   input?.focus();
 }
 
-function handleGlobalKeydown(event) {
-  const gameplayInputMode = appState.screen === Screens.SPEED_TEST_RUN
-    ? "typing"
-    : appState.screen === Screens.PLAYING
-      ? appState.game?.mode || "campaign"
-      : null;
-  if (captureGameplayBackspace(event, {
-    mode: gameplayInputMode,
-    onTypingBackspace: (backspaceEvent) => routeActiveGameplayKey(backspaceEvent),
-  })) return;
-  if (isTextEntryTarget(event.target)) return;
-  if (["Enter", " "].includes(event.key) && event.target?.matches?.("button, a, [role=tab]")) return;
-  if (routeActiveGameplayKey(event)) return;
-
-  if (appState.screen === Screens.PROFILE_STATS) {
-    if (appState.profileEditing) {
-      if (event.key === "Escape") {
-        event.preventDefault();
-        cancelProfileNameEdit();
-      } else if (event.key === "Enter") {
-        event.preventDefault();
-        saveProfileName(event.target?.value);
-      }
-      return;
-    }
-    if (event.key === "Escape") {
-      event.preventDefault();
-      openTitle();
-    } else if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
-      event.preventDefault();
-      const direction = event.key === "ArrowLeft" ? -1 : 1;
-      selectStatisticsTab(
-        (appState.statisticsTabIndex + direction + STATISTICS_TABS.length)
-          % STATISTICS_TABS.length,
-      );
-    }
-    return;
-  }
-
-  if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Home", "End", "Enter", "Escape"].includes(event.key)) {
-    event.preventDefault();
-  }
-
-  if (appState.screen === Screens.PAUSED) {
-    if (event.key === "Escape") {
-      resumeGame();
-    } else if (event.key === "ArrowUp" || event.key === "ArrowDown") {
-      const direction = event.key === "ArrowUp" ? -1 : 1;
-      appState.pauseIndex = (appState.pauseIndex + direction + 4) % 4;
-      renderPauseOverlay();
-    } else if (event.key === "Enter") {
-      if (getCurrentSpeedTest()?.phase === "PAUSED") {
-        [
-          resumeGame,
-          () => resetSpeedTestAttempt("pause-restart"),
-          openModeSelect,
-          openTitle,
-        ][appState.pauseIndex]();
-      } else if (appState.game?.mode === "endless") {
-        [resumeGame, () => startEndless("restart"), openModeSelect, openTitle][appState.pauseIndex]();
-      } else if (appState.game?.mode === "daily") {
-        [resumeGame, () => startDaily("retry", appState.game.config.dateKey), openModeSelect, openTitle][appState.pauseIndex]();
-      } else {
-        [resumeGame, retryCurrentLevel, openModeSelect, openTitle][appState.pauseIndex]();
-      }
-    }
-    return;
-  }
-
-  if (appState.screen === Screens.PRACTICE_LAB) {
-    if (event.key === "Escape") practiceLabController?.back();
-    return;
-  }
-
-  if (appState.screen === Screens.TITLE) {
-    if (event.key === "ArrowUp" || event.key === "ArrowDown") {
-      const direction = event.key === "ArrowUp" ? -1 : 1;
-      appState.menuIndex = (appState.menuIndex + direction + titleActions.length) % titleActions.length;
-      renderCurrentScreen();
-    } else if (event.key === "Enter") {
-      activateTitleAction();
-    }
-    return;
-  }
-
-  if (appState.screen === Screens.LEADERBOARDS) {
-    if (event.key === "Escape") openTitle();
-    else if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End"].includes(event.key)) {
-      const boardKey = getLeaderboardKeyboardTarget(getLeaderboardState(), event.key);
-      if (boardKey) void selectLeaderboardBoard(boardKey);
-    }
-    else if (event.key.toLowerCase() === "r") void refreshLeaderboard();
-    return;
-  }
-
-  if (appState.screen === Screens.MODE_SELECT) {
-    const itemCount = getAllModes().length + 1;
-    if (event.key === "ArrowUp" || event.key === "ArrowLeft") {
-      appState.modeSelection = (
-        appState.modeSelection - 1 + itemCount
-      ) % itemCount;
-      renderCurrentScreen();
-    } else if (event.key === "ArrowDown" || event.key === "ArrowRight") {
-      appState.modeSelection = (appState.modeSelection + 1) % itemCount;
-      renderCurrentScreen();
-    } else if (event.key === "Enter") {
-      if (appState.modeSelection === getAllModes().length) openTitle();
-      else activateSelectedMode();
-    } else if (event.key === "Escape") {
-      openTitle();
-    }
-    return;
-  }
-
-  if (appState.screen === Screens.ENDLESS_READY) {
-    if (event.key === "Escape") openModeSelect();
-    else if (event.key === "Enter") startEndless("mode-select");
-    return;
-  }
-
-  if (appState.screen === Screens.ENDLESS_RESULTS) {
-    const actions = ["retry", "modes", "title"];
-    if (isResultsInputBlocked(
-      event,
-      currentTimeMs(),
-      appState.endlessResultsReadyAt,
-    )) return;
-    if (event.key === "Escape") {
-      openModeSelect();
-    } else if (event.key === "ArrowUp" || event.key === "ArrowDown") {
-      const direction = event.key === "ArrowUp" ? -1 : 1;
-      appState.endlessResultsIndex = (
-        appState.endlessResultsIndex + direction + actions.length
-      ) % actions.length;
-      renderCurrentScreen();
-    } else if (event.key === "Enter") {
-      const action = actions[appState.endlessResultsIndex];
-      if (action === "retry") startEndless("retry");
-      else if (action === "modes") openModeSelect();
-      else openTitle();
-    }
-    return;
-  }
-
-  if (appState.screen === Screens.DAILY_READY) {
-    if (event.key === "Escape") openModeSelect();
-    else if (event.key === "Enter") startDaily("daily-ready", appState.dailyDateKey);
-    return;
-  }
-
-  if (appState.screen === Screens.DAILY_RESULTS) {
-    const actions = ["retry", "modes", "title"];
-    if (isResultsInputBlocked(event, currentTimeMs(), appState.dailyResultsReadyAt)) return;
-    if (event.key === "Escape") {
-      openModeSelect();
-    } else if (event.key === "ArrowUp" || event.key === "ArrowDown") {
-      const direction = event.key === "ArrowUp" ? -1 : 1;
-      appState.dailyResultsIndex = (
-        appState.dailyResultsIndex + direction + actions.length
-      ) % actions.length;
-      renderCurrentScreen();
-    } else if (event.key === "Enter") {
-      const action = actions[appState.dailyResultsIndex];
-      if (action === "retry") startDaily("retry", appState.dailyResult.modeData.dateKey);
-      else if (action === "modes") openModeSelect();
-      else openTitle();
-    }
-    return;
-  }
-
-  if (appState.screen === Screens.SPEED_TEST_RESULTS) {
-    const actions = ["retry", "change", "modes", "title"];
-    if (isResultsInputBlocked(
-      event,
-      currentTimeMs(),
-      appState.speedTestResultsReadyAt,
-    )) return;
-    if (event.key === "Tab") {
-      event.preventDefault();
-      resetSpeedTestAttempt("retry");
-    } else if (event.key === "Escape") {
-      event.preventDefault();
-      resetSpeedTestAttempt("change-test");
-    } else if (event.key === "ArrowUp" || event.key === "ArrowDown") {
-      event.preventDefault();
-      const direction = event.key === "ArrowUp" ? -1 : 1;
-      appState.speedTestResultsIndex = (
-        appState.speedTestResultsIndex + direction + actions.length
-      ) % actions.length;
-      renderCurrentScreen();
-    } else if (event.key === "Enter") {
-      event.preventDefault();
-      const action = actions[appState.speedTestResultsIndex];
-      if (action === "retry") resetSpeedTestAttempt("retry");
-      else if (action === "change") resetSpeedTestAttempt("change-test");
-      else if (action === "modes") openModeSelect();
-      else openTitle();
-    }
-    return;
-  }
-
-  if (appState.screen === Screens.LEVEL_SELECT) {
-    if (event.key.startsWith("Arrow")) moveLevelSelection(event.key);
-    if (event.key === "Enter") startLevel(appState.levelSelection);
-    if (event.key === "Escape") openModeSelect();
-    return;
-  }
-
-  if (appState.screen === Screens.RESULTS) {
-    const actions = getResultsActions(appState.results);
-    if (isResultsInputBlocked(event, currentTimeMs(), appState.resultsReadyAt)) return;
-    if (event.key === "Escape") {
-      openLevelSelect();
-    } else if (event.key === "ArrowUp" || event.key === "ArrowDown") {
-      const direction = event.key === "ArrowUp" ? -1 : 1;
-      appState.resultsIndex = (
-        appState.resultsIndex + direction + actions.length
-      ) % actions.length;
-      renderCurrentScreen();
-    } else if (event.key === "Enter") {
-      const action = actions[appState.resultsIndex];
-      if (action === "retry") startLevel(appState.results.levelNumber, "retry");
-      else if (action === "next") startLevel(appState.results.levelNumber + 1, "next-level");
-      else if (action === "levels") openLevelSelect();
-      else openTitle();
-    }
-    return;
-  }
-
-  if (appState.screen === Screens.SETTINGS) {
-    if (event.key === "Escape") {
-      backFromSettings();
-    } else if (event.key === "ArrowUp" || event.key === "ArrowDown") {
-      const direction = event.key === "ArrowUp" ? -1 : 1;
-      appState.settingsIndex = (appState.settingsIndex + direction + 5) % 5;
-      renderCurrentScreen();
-    } else if (event.key === "Enter") {
-      const keys = ["strictMode", "particles", "screenShake"];
-      if (appState.settingsIndex < 3) toggleSetting(keys[appState.settingsIndex]);
-      if (appState.settingsIndex === 3) confirmReset();
-      if (appState.settingsIndex === 4) backFromSettings();
-    }
-  }
-}
+const handleGlobalKeydown = createGlobalKeyboardController({
+  state: appState,
+  currentTimeMs,
+  routeActiveGameplayKey,
+  cancelProfileNameEdit,
+  saveProfileName,
+  openTitle,
+  selectStatisticsTab,
+  resumeGame,
+  renderPauseOverlay,
+  resetSpeedTestAttempt,
+  openModeSelect,
+  startEndless,
+  startDaily,
+  retryCurrentLevel,
+  backPracticeLab: () => practiceLabController?.back(),
+  activateTitleAction,
+  renderCurrentScreen,
+  activateSelectedMode,
+  moveLevelSelection,
+  startLevel,
+  openLevelSelect,
+  backFromSettings,
+  toggleSetting,
+  confirmReset,
+  titleActionCount: titleActions.length,
+});
 
 async function bootstrap() {
   clearSession();

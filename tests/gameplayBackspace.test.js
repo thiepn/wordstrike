@@ -67,8 +67,12 @@ const editableEvent = backspaceEvent({ tagName: "DIV", isContentEditable: true }
 assert.equal(captureGameplayBackspace(editableEvent, { mode: "typing" }), false);
 assert.equal(editableEvent.defaultPrevented, false);
 
-const main = await readFile(new URL("../js/main.js", import.meta.url), "utf8");
+const [main, keyboard] = await Promise.all([
+  readFile(new URL("../js/main.js", import.meta.url), "utf8"),
+  readFile(new URL("../js/appKeyboardController.js", import.meta.url), "utf8"),
+]);
 assert.equal(main.split('addEventListener("keydown"').length - 1, 1);
-assert.match(main, /captureGameplayBackspace\(event,[\s\S]*onTypingBackspace:[\s\S]*routeActiveGameplayKey/);
+assert.match(main, /createGlobalKeyboardController\(\{/);
+assert.match(keyboard, /captureGameplayBackspace\(event,[\s\S]*onTypingBackspace:[\s\S]*routeActiveGameplayKey/);
 
-console.log("Gameplay Backspace is captured once, defense-safe, Typing-aware, and editable-input-safe.");
+console.log("Gameplay Backspace is captured once, defense-safe, Typing-aware, editable-input-safe, and routed through the extracted keyboard controller.");

@@ -16,11 +16,15 @@ const editableBackspace = {
 assert.equal(captureGameplayBackspace(editableBackspace, { mode: "typing" }), false);
 assert.equal(editableBackspace.prevented, undefined);
 
-const main = await readFile(new URL("../js/main.js", import.meta.url), "utf8");
-assert.match(main, /function handleGlobalKeydown\(event\)[\s\S]*captureGameplayBackspace\(event,[\s\S]*if \(isTextEntryTarget\(event\.target\)\) return;/s);
+const [main, keyboard] = await Promise.all([
+  readFile(new URL("../js/main.js", import.meta.url), "utf8"),
+  readFile(new URL("../js/appKeyboardController.js", import.meta.url), "utf8"),
+]);
+assert.match(keyboard, /captureGameplayBackspace\(event,[\s\S]*if \(isTextEntryTarget\(event\.target\)\) return;/s);
+assert.match(main, /createGlobalKeyboardController\(\{/);
 assert.match(main, /const authUiChanged = authUiKey !== lastAuthUiKey/);
 assert.match(main, /authUiChanged &&[\s\S]*updateProfileAuthSection/);
 assert.equal(main.split('addEventListener("keydown"').length - 1, 1);
 assert.equal(main.split('addEventListener("input"').length - 1, 1);
 
-console.log("Profile username inputs are ignored by the global keyboard router.");
+console.log("Profile username inputs are ignored by the extracted global keyboard router.");

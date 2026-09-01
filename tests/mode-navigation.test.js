@@ -69,12 +69,16 @@ assert.equal(activated.at(-1), "daily");
 app.titleButton.onclick();
 assert.equal(backed, 1);
 
-const mainSource = await readFile(new URL("../js/main.js", import.meta.url), "utf8");
-assert.match(mainSource, /Screens\.MODE_SELECT/);
-assert.match(mainSource, /if \(event\.key === "Escape"\) \{\s*openTitle\(\)/s);
-assert.match(mainSource, /modeSelection === getAllModes\(\)\.length\) openTitle\(\)/);
+const [mainSource, keyboardSource] = await Promise.all([
+  readFile(new URL("../js/main.js", import.meta.url), "utf8"),
+  readFile(new URL("../js/appKeyboardController.js", import.meta.url), "utf8"),
+]);
+assert.match(keyboardSource, /state\.screen === Screens\.MODE_SELECT/);
+assert.match(keyboardSource, /if \(event\.key === "Escape"\) \{\s*openTitle\(\)/s);
+assert.match(keyboardSource, /state\.modeSelection === getAllModes\(\)\.length\) openTitle\(\)/);
+assert.match(mainSource, /createGlobalKeyboardController\(\{/);
 assert.match(mainSource, /back: openModeSelect/);
 assert.match(mainSource, /renderDevSessionDiagnostics/);
 assert.equal(mainSource.split('addEventListener("keydown"').length - 1, 1);
 
-console.log("Mode Select cards, disabled behavior, mouse synchronization, and navigation wiring tests passed.");
+console.log("Mode Select cards, disabled behavior, mouse synchronization, and extracted keyboard navigation wiring tests passed.");

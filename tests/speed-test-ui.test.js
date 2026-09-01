@@ -216,10 +216,13 @@ assert.doesNotMatch(css, /\.speed-test-word-current::before/);
 assert.doesNotMatch(css, /\.speed-setup-/);
 assert.match(css, /\.speed-test-config,\s*\.speed-test-controls-wrap,\s*\.speed-test-hud\s*\{[^}]*flex-wrap:\s*wrap/s);
 
-const mainSource = await readFile(new URL("../js/main.js", import.meta.url), "utf8");
-const uiSource = await readFile(new URL("../js/ui.js", import.meta.url), "utf8");
+const [mainSource, keyboardSource, uiSource] = await Promise.all([
+  readFile(new URL("../js/main.js", import.meta.url), "utf8"),
+  readFile(new URL("../js/appKeyboardController.js", import.meta.url), "utf8"),
+  readFile(new URL("../js/ui.js", import.meta.url), "utf8"),
+]);
 assert.match(mainSource, /speedTestResultsReadyAt/);
-assert.match(mainSource, /isResultsInputBlocked\(/);
+assert.match(keyboardSource, /isResultsInputBlocked\(/);
 assert.match(mainSource, /route === "speed-test"/);
 assert.match(mainSource, /appState\.speedTestConfigId = DEFAULT_SPEED_TEST_CONFIG_ID/);
 assert.match(mainSource, /change:\s*\(\) => resetSpeedTestAttempt\("change-test"\)/);
@@ -227,6 +230,7 @@ assert.match(mainSource, /const attemptSeed = getAttemptSeed\(\)/);
 assert.match(mainSource, /event\.key === "Tab"[\s\S]*resetSpeedTestAttempt\("tab-reset"\)/);
 assert.match(mainSource, /pauseTypingTest\(\)/);
 assert.match(mainSource, /modes:\s*openModeSelect/);
+assert.match(keyboardSource, /state\.screen === Screens\.SPEED_TEST_RESULTS/);
 assert.match(uiSource, /RESUME[\s\S]*RESTART TEST[\s\S]*MODE SELECT[\s\S]*MAIN MENU/);
 assert.doesNotMatch(uiSource, /QUIT TEST/);
 assert.doesNotMatch(mainSource, /moveSpeedTestConfigSelection/);
