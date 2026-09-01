@@ -1,6 +1,8 @@
 {
+  "id": "./",
   "name": "WORDSTRIKE",
   "short_name": "WORDSTRIKE",
+  "description": "A local-first browser typing game with arcade pressure, speed tests, daily challenges, statistics, and optional global leaderboards.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
