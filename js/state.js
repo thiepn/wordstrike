@@ -1,64 +1,25 @@
-export const Screens = Object.freeze({
-  TITLE: "TITLE",
-  MODE_SELECT: "MODE_SELECT",
-  PRACTICE_LAB: "PRACTICE_LAB",
-  ENDLESS_READY: "ENDLESS_READY",
-  ENDLESS_RESULTS: "ENDLESS_RESULTS",
-  DAILY_READY: "DAILY_READY",
-  DAILY_RESULTS: "DAILY_RESULTS",
-  SPEED_TEST_RUN: "SPEED_TEST_RUN",
-  SPEED_TEST_RESULTS: "SPEED_TEST_RESULTS",
-  LEVEL_SELECT: "LEVEL_SELECT",
-  PLAYING: "PLAYING",
-  PAUSED: "PAUSED",
-  RESULTS: "RESULTS",
-  SETTINGS: "SETTINGS",
-  PROFILE_STATS: "PROFILE_STATS",
-  LEADERBOARDS: "LEADERBOARDS",
-});
+import { Screens, isKnownScreen } from "./appScreens.js";
+import {
+  appState,
+  getStateDomain,
+  getStateOwner,
+  patchStateDomain,
+  resetStateDomains,
+  snapshotStateDomains,
+  STATE_DOMAIN_NAMES,
+  stateDomains,
+} from "./appStateDomains.js";
 
-export const appState = {
-  screen: Screens.TITLE,
-  previousScreen: Screens.TITLE,
-  devMode: false,
-  developerSeed: null,
-  save: null,
-  wordBank: null,
-  bossWordBank: null,
-  speedTestWordBank: null,
-  commonWordBank: null,
-  currentLevel: 1,
-  game: null,
-  results: null,
-  campaignResult: null,
-  menuIndex: 0,
-  modeSelection: 0,
-  speedTestConfigId: "time-60",
-  speedTestResultsIndex: 0,
-  speedTestResultsReadyAt: 0,
-  speedTestResult: null,
-  speedTestRecordFlags: null,
-  endlessResult: null,
-  endlessResultsIndex: 0,
-  endlessResultsReadyAt: 0,
-  endlessStartStage: 1,
-  dailyDateKey: null,
-  dailyDateOverride: false,
-  dailyResult: null,
-  dailyRecordFlags: null,
-  dailyResultsIndex: 0,
-  dailyResultsReadyAt: 0,
-  levelSelection: 1,
-  pauseIndex: 0,
-  resultsIndex: 0,
-  resultsReadyAt: 0,
-  settingsIndex: 0,
-  statisticsTabIndex: 0,
-  statisticsRecentFilter: "all",
-  profileEditing: false,
-  profileDraft: "",
-  profileNameError: "",
-  profileCopyMessage: "",
+export {
+  appState,
+  getStateDomain,
+  getStateOwner,
+  patchStateDomain,
+  resetStateDomains,
+  snapshotStateDomains,
+  STATE_DOMAIN_NAMES,
+  stateDomains,
+  Screens,
 };
 
 export function getResultsActions(result) {
@@ -94,7 +55,6 @@ export function clearAttemptRuntime(game) {
     };
     if (Array.isArray(game.words)) game.words.length = 0;
     if (Array.isArray(game.wordQueue)) game.wordQueue.length = 0;
-    // Clear obsolete fields if an old in-memory snapshot is supplied.
     delete game.modifierRuntime;
     delete game.blackoutStats;
     delete game.chainRuntime;
@@ -161,12 +121,19 @@ export function moveLevelGridSelection(currentLevel, key, maximumLevel = 100) {
 }
 
 export function changeScreen(nextScreen, { remember = true } = {}) {
+  if (!isKnownScreen(nextScreen)) throw new TypeError(`Unknown app screen: ${nextScreen}`);
+  const navigation = stateDomains.navigation;
   if (remember && nextScreen === Screens.SETTINGS) {
-    appState.previousScreen = appState.screen;
+    navigation.previousScreen = navigation.screen;
   }
-  appState.screen = nextScreen;
+  navigation.screen = nextScreen;
+  return navigation.screen;
 }
 
 export function returnFromSettings() {
-  appState.screen = appState.previousScreen || Screens.TITLE;
+  const navigation = stateDomains.navigation;
+  navigation.screen = isKnownScreen(navigation.previousScreen)
+    ? navigation.previousScreen
+    : Screens.TITLE;
+  return navigation.screen;
 }
