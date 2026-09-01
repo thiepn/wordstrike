@@ -7,6 +7,8 @@ import {
 import { AUDITED_FALLBACK_WORDS } from "./auditedFallbackWords.js";
 import { createSeededRandom, mixSeed, shuffleSeeded } from "./random.js";
 
+let commonGameplaySourcePromise = null;
+
 function validateCommonGameplaySource(source) {
   const words = source?.words;
   const tiers = source?.tiers;
@@ -34,48 +36,79 @@ function validateCommonGameplaySource(source) {
   return source;
 }
 
+async function fetchCommonGameplaySource() {
+  const response = await fetch(new URL("../data/commonGameplayWords.json", import.meta.url));
+  if (!response.ok) throw new Error(`Common vocabulary request failed: ${response.status}`);
+  return validateCommonGameplaySource(await response.json());
+}
+
+function loadCommonGameplaySource() {
+  if (!commonGameplaySourcePromise) {
+    commonGameplaySourcePromise = fetchCommonGameplaySource().catch((error) => {
+      commonGameplaySourcePromise = null;
+      throw error;
+    });
+  }
+  return commonGameplaySourcePromise;
+}
+
+function fallbackCampaignBank() {
+  return {
+    schemaVersion: 0,
+    source: "audited-fallback",
+    theme: "fallback",
+    tiers: { 1: [...AUDITED_FALLBACK_WORDS] },
+  };
+}
+
+function fallbackCommonWordBank() {
+  return {
+    schemaVersion: 0,
+    source: "audited-fallback",
+    words: [...AUDITED_FALLBACK_WORDS],
+  };
+}
+
 export async function loadWordBank() {
   try {
-    const response = await fetch(new URL("../data/commonGameplayWords.json", import.meta.url));
-    if (!response.ok) throw new Error(`Word bank request failed: ${response.status}`);
-    return validateCommonGameplaySource(await response.json());
+    return await loadCommonGameplaySource();
   } catch (error) {
     console.warn("Using fallback word bank.", error);
-    return { theme: "fallback", tiers: { 1: AUDITED_FALLBACK_WORDS } };
+    return fallbackCampaignBank();
   }
 }
 
 export async function loadCommonWordBank() {
-  const response = await fetch(new URL("../data/commonGameplayWords.json", import.meta.url));
-  if (!response.ok) throw new Error(`Common vocabulary request failed: ${response.status}`);
-  const source = validateCommonGameplaySource(await response.json());
-  return {
-    schemaVersion: source.schemaVersion ?? 1,
-    source: source.source,
-    words: source.words.map((entry) => typeof entry === "string" ? entry : entry.word),
-  };
+  try {
+    const source = await loadCommonGameplaySource();
+    return {
+      schemaVersion: source.schemaVersion ?? 1,
+      source: source.source,
+      words: source.words.map((entry) => typeof entry === "string" ? entry : entry.word),
+    };
+  } catch (error) {
+    console.warn("Using fallback common vocabulary.", error);
+    return fallbackCommonWordBank();
+  }
 }
 
 export async function loadBossWordBank() {
   try {
-    const [typingResponse, longResponse] = await Promise.all([
-      fetch(new URL("../data/commonGameplayWords.json", import.meta.url)),
+    const [typingSource, longResponse] = await Promise.all([
+      loadCommonGameplaySource(),
       fetch(new URL("../data/bossCommonLongWords.json", import.meta.url)),
     ]);
-    if (!typingResponse.ok || !longResponse.ok) {
-      throw new Error("Boss vocabulary request failed");
-    }
-    const [rawTypingSource, longSource] = await Promise.all([
-      typingResponse.json(),
-      longResponse.json(),
-    ]);
-    const typingSource = validateCommonGameplaySource(rawTypingSource);
+    if (!longResponse.ok) throw new Error(`Boss vocabulary request failed: ${longResponse.status}`);
+    const longSource = await longResponse.json();
     const longValidation = validateBossLongVocabulary(longSource);
     if (!longValidation.valid) {
       throw new Error(`Invalid curated boss vocabulary: ${longValidation.errors.join("; ")}`);
     }
+    const typingWords = typingSource.words.map(
+      (entry) => typeof entry === "string" ? entry : entry.word,
+    );
     const pools = buildBossWordPools({
-      typingWords: typingSource.words.map((entry) => typeof entry === "string" ? entry : entry.word),
+      typingWords,
       longWords: longValidation.words,
     });
     const poolValidation = validateBossWordPools(pools);
@@ -85,7 +118,7 @@ export async function loadBossWordBank() {
     return {
       schemaVersion: 1,
       source: "common-gameplay-v2+curated-long",
-      typingWords: typingSource.words.map((entry) => typeof entry === "string" ? entry : entry.word),
+      typingWords,
       longWords: [...longValidation.words],
       pools,
       words: Object.values(pools).flat().map(({ word, source }) => ({ word, source })),
