@@ -11,12 +11,13 @@ assert.equal(validateUsername("  WordStriker27  ").username, "WordStriker27");
 assert.equal(validateUsername("WordStriker27").normalized, "wordstriker27");
 assert.equal(validateUsername("user-name").valid, false);
 assert.deepEqual(ALLOWED_ORIGINS, [
-  "https://thiepn.github.io",
+  "https://thiepn.dev",
   "http://localhost:8000",
   "http://127.0.0.1:8000",
 ]);
 assert.equal(getCorsHeaders("https://evil.example"), null);
 assert.equal(getCorsHeaders(null)["Access-Control-Allow-Origin"], undefined);
+assert.equal(getCorsHeaders("https://thiepn.dev")["Access-Control-Allow-Origin"], "https://thiepn.dev");
 assert.equal(getCorsHeaders("http://localhost:8000")["Access-Control-Allow-Origin"], "http://localhost:8000");
 assert.match(getCorsHeaders(null)["Access-Control-Allow-Headers"], /authorization.*apikey.*content-type.*x-client-info/);
 
