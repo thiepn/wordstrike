@@ -1,117 +1,115 @@
-import { buildPracticeLabViewModel } from "./practiceLabViewModel.js";
-import { renderPracticeLab } from "./practiceLabRenderer.js";
-import { createPracticeLabRoute, normalizePracticeLabRoute, PRACTICE_LAB_ROUTES } from "./practiceLabRoutes.js";
+import {
+  attachPracticeRegistryRuntime,
+  getPracticeRegistryLazyState,
+} from "./practiceExperimentRegistry.js";
+
+const IS_NODE_RUNTIME = Boolean(globalThis.process?.versions?.node);
+const nodeRuntime = IS_NODE_RUNTIME
+  ? await import("./practiceLabControllerRuntime.js")
+  : null;
 
 export const PRACTICE_LAB_ONBOARDING_VERSION = 1;
-const HISTORY_LIMIT = 20;
 
-export function createPracticeLabController({
-  root,
-  appNavigation = {},
-  experimentRegistry,
-  featureGate,
-  renderer = renderPracticeLab,
-  logger = null,
-} = {}) {
-  let mounted = false;
-  let route = createPracticeLabRoute();
-  let history = [];
-  let unsubscribeRegistry = null;
-  let lastRenderReason = null;
-  let renderCount = 0;
-  const subscribers = new Set();
+export function createPracticeLabController(options = {}) {
+  if (nodeRuntime) return nodeRuntime.createPracticeLabController(options);
 
-  const snapshot = () => Object.freeze({
-    mounted, route, historyDepth: history.length, listenerCount: mounted ? 1 : 0,
-    renderCount, lastRenderReason, featureGate: featureGate.getSnapshot(), registry: experimentRegistry.getDiagnostics(),
+  const {
+    root,
+    appNavigation = {},
+    experimentRegistry,
+    logger = null,
+  } = options;
+  let runtimeController = null;
+  let runtimePromise = null;
+  let mountRequested = false;
+  let requestedRoute;
+  const pendingSubscribers = new Set();
+  const runtimeUnsubscribers = new Map();
+
+  const loadingSnapshot = () => Object.freeze({
+    mounted: false,
+    loading: runtimePromise !== null && runtimeController === null,
+    route: null,
+    historyDepth: 0,
+    listenerCount: 0,
+    renderCount: 0,
+    lastRenderReason: runtimePromise ? "lazy-load" : null,
+    featureGate: options.featureGate?.getSnapshot?.() ?? null,
+    registry: experimentRegistry?.getDiagnostics?.() ?? null,
   });
-  const emit = (type) => {
-    const value = Object.freeze({ type, ...snapshot() });
-    [...subscribers].forEach((listener) => { try { listener(value); } catch (error) { logger?.warn?.("Practice controller subscriber failed", error); } });
-  };
-  const render = (reason, focusSelector = null) => {
-    if (!mounted) return false;
-    renderer(root, buildPracticeLabViewModel({
-      route,
-      registry: experimentRegistry,
-      featureGate,
-      helpAvailable: typeof appNavigation.help === "function",
-    }), { focusSelector });
-    lastRenderReason = reason;
-    renderCount += 1;
-    emit("rendered");
-    return true;
-  };
-  const navigate = (nextRoute, { replace = false, returnFocusSelector = null } = {}) => {
-    if (!mounted || !featureGate.canAccess()) return false;
-    const normalized = normalizePracticeLabRoute(nextRoute, { featureGate });
-    if (!replace) history = [...history.slice(-(HISTORY_LIMIT - 1)), { route, focusSelector: returnFocusSelector }];
-    route = normalized;
-    render("navigation");
-    return true;
-  };
-  const back = () => {
-    if (!mounted) return false;
-    if (history.length) {
-      const previous = history[history.length - 1];
-      route = previous.route;
-      history = history.slice(0, -1);
-      render("back", previous.focusSelector);
-      return true;
-    }
-    appNavigation.exit?.();
-    return true;
-  };
-  const click = (event) => {
-    if (event.button != null && event.button !== 0) return;
-    const target = event.target?.closest?.("[data-practice-action]");
-    if (!target || !root.contains?.(target) || target.disabled || target.getAttribute?.("aria-disabled") === "true") return;
-    const action = target.dataset.practiceAction;
-    if (action === "exit") appNavigation.exit?.();
-    else if (action === "back") back();
-    else if (action === "help") appNavigation.help?.({ onboardingVersion: PRACTICE_LAB_ONBOARDING_VERSION });
-    else if (action === "open-experiment") navigate(
-      createPracticeLabRoute(PRACTICE_LAB_ROUTES.EXPERIMENT_DETAIL, { experimentId: target.dataset.experimentId }),
-      { returnFocusSelector: `[data-experiment-id="${String(target.dataset.experimentId || "").replace(/[^a-z0-9-]/gi, "")}"]` },
-    );
-    else if (action === "navigate") navigate(
-      createPracticeLabRoute(target.dataset.route),
-      { returnFocusSelector: `[data-route="${String(target.dataset.route || "").replace(/[^a-z0-9-]/gi, "")}"]` },
-    );
+
+  const loadRuntime = () => {
+    if (runtimePromise) return runtimePromise;
+    runtimePromise = Promise.all([
+      import("./practiceExperimentRegistryRuntime.js"),
+      import("./practiceLabControllerRuntime.js"),
+    ]).then(([registryModule, controllerModule]) => {
+      const lazyRegistry = getPracticeRegistryLazyState(experimentRegistry);
+      if (lazyRegistry?.destroyed) return null;
+
+      let resolvedRegistry = experimentRegistry;
+      if (lazyRegistry) {
+        resolvedRegistry = registryModule.createPracticeExperimentRegistry(lazyRegistry.options);
+        if (!attachPracticeRegistryRuntime(experimentRegistry, resolvedRegistry)) return null;
+      }
+
+      runtimeController = controllerModule.createPracticeLabController({
+        ...options,
+        experimentRegistry: resolvedRegistry,
+      });
+      for (const listener of pendingSubscribers) {
+        runtimeUnsubscribers.set(listener, runtimeController.subscribe(listener));
+      }
+      if (mountRequested) runtimeController.mount(requestedRoute);
+      return runtimeController;
+    }).catch((error) => {
+      logger?.warn?.("Practice Lab lazy load failed", error);
+      console.warn("Practice Lab could not be loaded.", error);
+      if (mountRequested) appNavigation.exit?.();
+      return null;
+    });
+    return runtimePromise;
   };
 
   return Object.freeze({
-    mount(initialRoute = createPracticeLabRoute()) {
-      if (mounted) return snapshot();
-      if (!root?.addEventListener || !root?.removeEventListener) throw new TypeError("Practice Lab controller requires a DOM root");
-      route = normalizePracticeLabRoute(initialRoute, { featureGate });
-      history = [];
-      mounted = true;
-      root.addEventListener("click", click);
-      unsubscribeRegistry = experimentRegistry.subscribe(() => render("registry-change"));
-      render("mount");
-      emit("mounted");
-      return snapshot();
+    mount(initialRoute) {
+      mountRequested = true;
+      requestedRoute = initialRoute;
+      if (runtimeController) return runtimeController.mount(initialRoute);
+      if (root && "innerHTML" in root) {
+        root.innerHTML = '<section class="practice-lab-shell" aria-busy="true"><p>LOADING PRACTICE LAB...</p></section>';
+      }
+      void loadRuntime();
+      return loadingSnapshot();
     },
-    navigate,
-    back,
-    getSnapshot: snapshot,
+    navigate(...args) {
+      return runtimeController?.navigate(...args) ?? false;
+    },
+    back() {
+      if (runtimeController) return runtimeController.back();
+      if (!mountRequested) return false;
+      mountRequested = false;
+      appNavigation.exit?.();
+      return true;
+    },
+    getSnapshot() {
+      return runtimeController?.getSnapshot() ?? loadingSnapshot();
+    },
     subscribe(listener) {
       if (typeof listener !== "function") throw new TypeError("Controller listener must be a function");
-      subscribers.add(listener);
-      return () => subscribers.delete(listener);
+      if (runtimeController) return runtimeController.subscribe(listener);
+      pendingSubscribers.add(listener);
+      return () => {
+        pendingSubscribers.delete(listener);
+        runtimeUnsubscribers.get(listener)?.();
+        runtimeUnsubscribers.delete(listener);
+      };
     },
     unmount() {
-      if (!mounted) return false;
-      root.removeEventListener("click", click);
-      unsubscribeRegistry?.();
-      unsubscribeRegistry = null;
-      history = [];
-      mounted = false;
-      lastRenderReason = "unmount";
-      emit("unmounted");
-      subscribers.clear();
-      return true;
+      const wasPending = mountRequested;
+      mountRequested = false;
+      if (runtimeController) return runtimeController.unmount();
+      return wasPending;
     },
   });
 }
