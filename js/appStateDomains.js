@@ -1,4 +1,4 @@
-import { Screens } from "./appScreens.js";
+import { Screens, isKnownScreen } from "./appScreens.js";
 
 const DOMAIN_DEFAULTS = Object.freeze({
   environment: Object.freeze({
@@ -131,6 +131,14 @@ for (const [domainName, domain] of Object.entries(stateDomains)) {
   }
 }
 
+function assignStateValue(domainName, property, value) {
+  const domain = stateDomains[domainName];
+  if (domainName === "navigation" && ["screen", "previousScreen"].includes(property) && !isKnownScreen(value)) {
+    throw new TypeError(`Unknown app screen: ${value}`);
+  }
+  domain[property] = value;
+}
+
 const facade = {};
 for (const [property, domainName] of LEGACY_PROPERTY_ORDER) {
   Object.defineProperty(facade, property, {
@@ -140,7 +148,7 @@ for (const [property, domainName] of LEGACY_PROPERTY_ORDER) {
       return stateDomains[domainName][property];
     },
     set(value) {
-      stateDomains[domainName][property] = value;
+      assignStateValue(domainName, property, value);
     },
   });
 }
@@ -166,7 +174,7 @@ export function patchStateDomain(domainName, patch) {
     if (!Object.hasOwn(domain, key)) {
       throw new TypeError(`Unknown ${domainName} state property: ${key}`);
     }
-    domain[key] = value;
+    assignStateValue(domainName, key, value);
   }
   return domain;
 }
