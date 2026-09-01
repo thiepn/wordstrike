@@ -44,10 +44,16 @@ async function fetchCommonGameplaySource() {
 
 function loadCommonGameplaySource() {
   if (!commonGameplaySourcePromise) {
-    commonGameplaySourcePromise = fetchCommonGameplaySource().catch((error) => {
-      commonGameplaySourcePromise = null;
-      throw error;
-    });
+    const request = fetchCommonGameplaySource();
+    commonGameplaySourcePromise = request;
+    request.then(
+      () => {
+        if (commonGameplaySourcePromise === request) commonGameplaySourcePromise = null;
+      },
+      () => {
+        if (commonGameplaySourcePromise === request) commonGameplaySourcePromise = null;
+      },
+    );
   }
   return commonGameplaySourcePromise;
 }
