@@ -40,21 +40,36 @@ function validateSave(value) {
   };
 }
 
-export function loadSave() {
+function getStorage() {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    return globalThis.localStorage ?? null;
+  } catch {
+    return null;
+  }
+}
+
+export function loadSave() {
+  const storage = getStorage();
+  if (!storage) return createDefaultSave();
+  try {
+    const raw = storage.getItem(STORAGE_KEY);
     const save = raw ? validateSave(JSON.parse(raw)) : createDefaultSave();
     saveGame(save);
     return save;
   } catch {
-    const save = createDefaultSave();
-    saveGame(save);
-    return save;
+    return createDefaultSave();
   }
 }
 
 export function saveGame(save) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(save));
+  const storage = getStorage();
+  if (!storage) return false;
+  try {
+    storage.setItem(STORAGE_KEY, JSON.stringify(save));
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 export function updateLevelResult(save, levelNumber, result) {

@@ -9,6 +9,29 @@ export const SPEED_TEST_WORD_SET = Object.freeze({
 export const LEGACY_SPEED_TEST_WORD_SET_ID = "legacy-common-740";
 export const SPEED_TEST_BATCH_SIZE = 200;
 
+const EMBEDDED_ENGLISH_200_WORDS = Object.freeze([
+  "the", "be", "of", "and", "a", "to", "in", "he", "have", "it",
+  "that", "for", "they", "with", "as", "not", "on", "she", "at", "by",
+  "this", "we", "you", "do", "but", "from", "or", "which", "one", "would",
+  "all", "will", "there", "say", "who", "make", "when", "can", "more", "if",
+  "no", "man", "out", "other", "so", "what", "time", "up", "go", "about",
+  "than", "into", "could", "state", "only", "new", "year", "some", "take", "come",
+  "these", "know", "see", "use", "get", "like", "then", "first", "any", "work",
+  "now", "may", "such", "give", "over", "think", "most", "even", "find", "day",
+  "also", "after", "way", "many", "must", "look", "before", "great", "back", "through",
+  "long", "where", "much", "should", "well", "people", "down", "own", "just", "because",
+  "good", "each", "those", "feel", "seem", "how", "high", "too", "place", "little",
+  "world", "very", "still", "nation", "hand", "old", "life", "tell", "write", "become",
+  "here", "show", "house", "both", "between", "need", "mean", "call", "develop", "under",
+  "last", "right", "move", "thing", "general", "school", "never", "same", "another", "begin",
+  "while", "number", "part", "turn", "real", "leave", "might", "want", "point", "form",
+  "off", "child", "few", "small", "since", "against", "ask", "late", "home", "interest",
+  "large", "person", "end", "open", "public", "follow", "during", "present", "without", "again",
+  "hold", "govern", "around", "possible", "head", "consider", "word", "program", "problem", "however",
+  "lead", "system", "set", "order", "eye", "plan", "run", "keep", "face", "fact",
+  "group", "play", "stand", "increase", "early", "course", "change", "help", "line",
+]);
+
 function hashLabel(label) {
   let hash = 0x811c9dc5;
   for (const character of label) {
@@ -43,10 +66,7 @@ export function validateSpeedTestVocabulary(source) {
   };
 }
 
-export async function loadSpeedTestWordBank() {
-  const response = await fetch(new URL("../data/english200.json", import.meta.url));
-  if (!response.ok) throw new Error(`Typing Test vocabulary request failed: ${response.status}`);
-  const source = await response.json();
+function buildSpeedTestWordBank(source, sourceLabel = "data-file") {
   if (
     source?.wordSetId !== SPEED_TEST_WORD_SET.id ||
     source?.wordSetName !== SPEED_TEST_WORD_SET.name ||
@@ -63,7 +83,30 @@ export async function loadSpeedTestWordBank() {
     schemaVersion: source.schemaVersion ?? 1,
     wordSet: SPEED_TEST_WORD_SET,
     words: validation.words,
+    source: sourceLabel,
   };
+}
+
+function embeddedEnglish200Source() {
+  return {
+    schemaVersion: 1,
+    wordSetId: SPEED_TEST_WORD_SET.id,
+    wordSetName: SPEED_TEST_WORD_SET.name,
+    wordSetVersion: SPEED_TEST_WORD_SET.version,
+    wordCount: SPEED_TEST_WORD_SET.wordCount,
+    words: [...EMBEDDED_ENGLISH_200_WORDS],
+  };
+}
+
+export async function loadSpeedTestWordBank() {
+  try {
+    const response = await fetch(new URL("../data/english200.json", import.meta.url));
+    if (!response.ok) throw new Error(`Typing Test vocabulary request failed: ${response.status}`);
+    return buildSpeedTestWordBank(await response.json());
+  } catch (error) {
+    console.warn("Using embedded English 200 vocabulary.", error);
+    return buildSpeedTestWordBank(embeddedEnglish200Source(), "embedded-fallback");
+  }
 }
 
 export function deriveSpeedTestWordSeed(attemptSeed, configId) {
