@@ -15,13 +15,15 @@ test("Practice shell owns no document/window keyboard listener, hidden input, st
   assert.doesNotMatch(source, /createPracticeSessionEngine\s*\(/);
 });
 
-test("app dispatcher recognizes Practice as a non-gameplay screen and production metadata stays unavailable", async () => {
-  const [main, modes] = await Promise.all([
+test("app keyboard controller recognizes Practice as a non-gameplay screen and production metadata stays unavailable", async () => {
+  const [main, keyboard, modes] = await Promise.all([
     readFile(new URL("../js/main.js", import.meta.url), "utf8"),
+    readFile(new URL("../js/appKeyboardController.js", import.meta.url), "utf8"),
     readFile(new URL("../js/modes.js", import.meta.url), "utf8"),
   ]);
-  assert.match(main, /appState\.screen === Screens\.PRACTICE_LAB/);
-  assert.match(main, /if \(event\.key === "Escape"\) practiceLabController\?\.back\(\);\s*return;/);
+  assert.match(keyboard, /state\.screen === Screens\.PRACTICE_LAB/);
+  assert.match(keyboard, /if \(event\.key === "Escape"\) backPracticeLab\?\.\(\)/);
+  assert.match(main, /backPracticeLab:\s*\(\) => practiceLabController\?\.back\(\)/);
   assert.match(modes, /id: MODE_IDS\.PRACTICE,[\s\S]*?enabled: false,[\s\S]*?status: "coming-soon"/);
 });
 
