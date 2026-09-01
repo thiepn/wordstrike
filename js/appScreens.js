@@ -1,0 +1,24 @@
+export const Screens = Object.freeze({
+  TITLE: "TITLE",
+  MODE_SELECT: "MODE_SELECT",
+  PRACTICE_LAB: "PRACTICE_LAB",
+  ENDLESS_READY: "ENDLESS_READY",
+  ENDLESS_RESULTS: "ENDLESS_RESULTS",
+  DAILY_READY: "DAILY_READY",
+  DAILY_RESULTS: "DAILY_RESULTS",
+  SPEED_TEST_RUN: "SPEED_TEST_RUN",
+  SPEED_TEST_RESULTS: "SPEED_TEST_RESULTS",
+  LEVEL_SELECT: "LEVEL_SELECT",
+  PLAYING: "PLAYING",
+  PAUSED: "PAUSED",
+  RESULTS: "RESULTS",
+  SETTINGS: "SETTINGS",
+  PROFILE_STATS: "PROFILE_STATS",
+  LEADERBOARDS: "LEADERBOARDS",
+});
+
+const knownScreens = new Set(Object.values(Screens));
+
+export function isKnownScreen(value) {
+  return knownScreens.has(value);
+}
