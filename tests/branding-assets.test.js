@@ -46,6 +46,10 @@ assert.match(css, /@media \(max-height:\s*760px\)[\s\S]*\.brand-logo/);
 assert.match(css, /@media \(max-width:\s*760px\)[\s\S]*\.brand-logo/);
 
 const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
+assert.match(html, /rel="canonical" href="https:\/\/thiepn\.dev\/wordstrike\/"/);
+assert.match(html, /property="og:url" content="https:\/\/thiepn\.dev\/wordstrike\/"/);
+assert.match(html, /property="og:image" content="https:\/\/thiepn\.dev\/wordstrike\/assets\/branding\/wordstrike-logo\.png"/);
+assert.match(html, /name="description" content="WORDSTRIKE/);
 assert.match(html, /rel="icon" href="\.\/assets\/icons\/favicon\.ico" sizes="any"/);
 assert.match(html, /rel="icon" type="image\/png" href="\.\/assets\/icons\/favicon-64\.png"/);
 assert.match(html, /rel="apple-touch-icon" href="\.\/assets\/icons\/apple-touch-icon\.png"/);
@@ -54,9 +58,11 @@ assert.match(html, /href="\.\/manifest\.webmanifest"/);
 assert.doesNotMatch(html, /href="\/assets\//);
 
 const manifest = JSON.parse(await readFile(new URL("../manifest.webmanifest", import.meta.url), "utf8"));
+assert.equal(manifest.id, "./");
 assert.equal(manifest.name, "WORDSTRIKE");
 assert.equal(manifest.start_url, "./");
 assert.equal(manifest.scope, "./");
+assert.match(manifest.description, /local-first browser typing game/i);
 assert.deepEqual(manifest.icons, [
   { src: "./assets/icons/icon-192.png", sizes: "192x192", type: "image/png" },
   { src: "./assets/icons/icon-512.png", sizes: "512x512", type: "image/png" },
@@ -72,4 +78,4 @@ for (const path of [
   await access(new URL(path, import.meta.url));
 }
 
-console.log("Main-menu branding, semantic fallback, favicons, manifest icons, responsive CSS, and relative assets passed.");
+console.log("Main-menu branding, canonical metadata, favicons, manifest identity, responsive CSS, and relative assets passed.");
