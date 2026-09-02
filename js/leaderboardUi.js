@@ -3,6 +3,7 @@ import {
   LEADERBOARD_BOARDS,
   LEADERBOARD_CATEGORIES,
 } from "./leaderboardService.js";
+import { isArcadeRushLeaderboardShadowEnabled } from "./arcadeRushLeaderboard.js";
 
 const app = () => document.querySelector("#app");
 const escapeHtml = (value) => String(value ?? "")
@@ -20,6 +21,7 @@ function boardKind(boardKey) {
   if (boardKey === LEADERBOARD_BOARDS.CAMPAIGN) return "campaign";
   if ([LEADERBOARD_BOARDS.TYPING_60, LEADERBOARD_BOARDS.TYPING_15].includes(boardKey)) return "typing";
   if (boardKey === LEADERBOARD_BOARDS.DAILY) return "daily";
+  if (boardKey === LEADERBOARD_BOARDS.ARCADE_RUSH) return "arcade-rush";
   return "endless";
 }
 
@@ -27,6 +29,7 @@ function metricText(entry, kind) {
   if (kind === "campaign") return `Level ${entry.level} · Grade ${entry.grade} · ${entry.accuracy.toFixed(1)}%`;
   if (kind === "typing") return `${entry.wpm.toFixed(1)} WPM · ${entry.accuracy.toFixed(1)}% · ${entry.rawWpm.toFixed(1)} raw`;
   if (kind === "daily") return `${entry.score.toLocaleString()} pts · ${duration(entry.durationMs)} · ${entry.accuracy.toFixed(1)}%`;
+  if (kind === "arcade-rush") return `${entry.score.toLocaleString()} pts · ${entry.accuracy.toFixed(1)}% · ${duration(entry.durationMs)}`;
   return `Stage ${entry.stage} · ${entry.score.toLocaleString()} pts · ${entry.accuracy.toFixed(1)}%`;
 }
 
@@ -34,6 +37,7 @@ function columns(kind) {
   if (kind === "campaign") return ["LEVEL", "GRADE", "ACCURACY"];
   if (kind === "typing") return ["WPM", "ACCURACY", "RAW WPM"];
   if (kind === "daily") return ["SCORE", "TIME", "ACCURACY"];
+  if (kind === "arcade-rush") return ["SCORE", "ACCURACY", "TIME"];
   return ["STAGE", "SCORE", "ACCURACY"];
 }
 
@@ -41,6 +45,7 @@ function values(entry, kind) {
   if (kind === "campaign") return [entry.level, entry.grade, `${entry.accuracy.toFixed(1)}%`];
   if (kind === "typing") return [entry.wpm.toFixed(1), `${entry.accuracy.toFixed(1)}%`, entry.rawWpm.toFixed(1)];
   if (kind === "daily") return [entry.score.toLocaleString(), duration(entry.durationMs), `${entry.accuracy.toFixed(1)}%`];
+  if (kind === "arcade-rush") return [entry.score.toLocaleString(), `${entry.accuracy.toFixed(1)}%`, duration(entry.durationMs)];
   return [entry.stage, entry.score.toLocaleString(), `${entry.accuracy.toFixed(1)}%`];
 }
 
@@ -84,38 +89,58 @@ function viewerPanel(authState, profileState, viewer, entries, kind) {
     <p>${metricText(viewer.entry, kind)}</p></section>`;
 }
 
+function emptyModeLabel(kind) {
+  if (kind === "typing") return "Typing Test";
+  if (kind === "campaign") return "Campaign";
+  if (kind === "daily") return "Daily Strike";
+  if (kind === "arcade-rush") return "Arcade Rush";
+  return "Endless";
+}
+
 function boardContent(state, authState, profileState) {
   const kind = boardKind(state.selectedBoardKey || state.selectedBoard);
   if (["idle", "loading"].includes(state.status)) return `<div class="leaderboard-status">Loading global rankings&hellip;</div>`;
   if (state.status === "offline") return `<div class="leaderboard-status"><strong>Global rankings are unavailable while offline.</strong><p>Local gameplay and records are unaffected.</p></div>`;
   if (state.status === "error") return `<div class="leaderboard-status"><strong>Unable to load global rankings.</strong><button class="arcade-button" data-action="leaderboard-refresh">RETRY</button></div>`;
   const empty = state.status === "empty"
-    ? `<div class="leaderboard-status"><strong>No ranked ${kind === "typing" ? "Typing Test" : kind === "campaign" ? "Campaign" : kind === "daily" ? "Daily Strike" : "Endless"} results yet.</strong></div>`
+    ? `<div class="leaderboard-status"><strong>No ranked ${emptyModeLabel(kind)} results yet.</strong></div>`
     : "";
   return `${state.status === "refreshing" ? '<div class="leaderboard-refreshing">Refreshing rankings&hellip;</div>' : ""}
     ${empty || rows(state.entries, state.viewer, kind)}
     ${viewerPanel(authState, profileState, state.viewer, state.entries, kind)}`;
 }
 
-export function renderLeaderboards(state, authState, profileState, notice = "") {
+export function renderLeaderboards(
+  state,
+  authState,
+  profileState,
+  notice = "",
+  { shadowArcadeRush = isArcadeRushLeaderboardShadowEnabled() } = {},
+) {
   const boardKey = state.selectedBoardKey || state.selectedBoard || LEADERBOARD_BOARDS.CAMPAIGN;
   const inferredSelection = getLeaderboardSelection(boardKey);
   const category = state.selectedCategory || inferredSelection.selectedCategory;
   const typingDuration = state.selectedTypingDuration || inferredSelection.selectedTypingDuration;
   const typing = category === LEADERBOARD_CATEGORIES.TYPING;
   const daily = boardKey === LEADERBOARD_BOARDS.DAILY;
+  const rush = boardKey === LEADERBOARD_BOARDS.ARCADE_RUSH;
+  const useShadowRushTab = shadowArcadeRush || rush;
   const meta = daily
     ? `CANONICAL UTC CHALLENGE ${escapeHtml(state.board?.challengeDate || "LOADING")}`
-    : boardKey === LEADERBOARD_BOARDS.CAMPAIGN
-      ? "HIGHEST SUCCESSFULLY COMPLETED LEVEL"
-      : typing
-        ? `ENGLISH 200 // ${typingDuration} SECONDS`
-        : "STANDARD ENDLESS";
+    : rush
+      ? "RULES V1 // COMPLETED RUNS ONLY // ALL-TIME"
+      : boardKey === LEADERBOARD_BOARDS.CAMPAIGN
+        ? "HIGHEST SUCCESSFULLY COMPLETED LEVEL"
+        : typing
+          ? `ENGLISH 200 // ${typingDuration} SECONDS`
+          : "STANDARD ENDLESS";
   const tabs = [
     [LEADERBOARD_CATEGORIES.CAMPAIGN, "CAMPAIGN", "leaderboard-select-campaign"],
     [LEADERBOARD_CATEGORIES.TYPING, "TYPING TEST", "leaderboard-select-typing"],
     [LEADERBOARD_CATEGORIES.ENDLESS, "ENDLESS", "leaderboard-select-endless"],
-    [LEADERBOARD_CATEGORIES.DAILY, "DAILY STRIKE", "leaderboard-select-daily"],
+    useShadowRushTab
+      ? [LEADERBOARD_CATEGORIES.ARCADE_RUSH, "ARCADE RUSH", "leaderboard-select-daily"]
+      : [LEADERBOARD_CATEGORIES.DAILY, "DAILY STRIKE", "leaderboard-select-daily"],
   ];
   app().innerHTML = `<section class="screen leaderboards-screen"><main class="leaderboards-panel">
     <button type="button" class="screen-back-button" data-action="leaderboard-main-menu" aria-label="Go back">BACK</button>
