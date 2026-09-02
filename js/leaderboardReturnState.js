@@ -13,11 +13,14 @@ export function validateLeaderboardReturnState(value) {
     return Object.freeze({ screen: "title" });
   }
   if (value.screen !== "leaderboards" || !CATEGORIES.has(value.selectedCategory)) return null;
-  const typingDuration = value.selectedCategory === LEADERBOARD_CATEGORIES.TYPING
+  const normalizedCategory = value.selectedCategory === LEADERBOARD_CATEGORIES.ARCADE_RUSH
+    ? LEADERBOARD_CATEGORIES.DAILY
+    : value.selectedCategory;
+  const typingDuration = normalizedCategory === LEADERBOARD_CATEGORIES.TYPING
     ? value.typingDuration === 15 ? 15 : value.typingDuration === 60 ? 60 : null
     : 60;
   if (typingDuration == null) return null;
-  return Object.freeze({ screen: "leaderboards", selectedCategory: value.selectedCategory, typingDuration });
+  return Object.freeze({ screen: "leaderboards", selectedCategory: normalizedCategory, typingDuration });
 }
 
 export function leaderboardReturnStateForBoard(boardKey) {
