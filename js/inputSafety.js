@@ -6,8 +6,10 @@ export function isTextEntryTarget(target) {
 }
 
 const GAMEPLAY_BACKSPACE_MODES = new Set([
-  "campaign", "normal", "endless", "daily", "boss", "typing",
+  "campaign", "normal", "endless", "daily", "boss", "typing", "arcade-rush",
 ]);
+
+const FORWARDED_BACKSPACE_MODES = new Set(["typing", "arcade-rush"]);
 
 export function captureGameplayBackspace(event, {
   mode,
@@ -19,6 +21,6 @@ export function captureGameplayBackspace(event, {
     isTextEntryTarget(event.target)
   ) return false;
   event.preventDefault?.();
-  if (mode === "typing") onTypingBackspace?.(event);
+  if (FORWARDED_BACKSPACE_MODES.has(mode)) onTypingBackspace?.(event);
   return true;
 }
