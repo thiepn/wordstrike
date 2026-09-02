@@ -1,11 +1,13 @@
 import { getSupabaseClient } from "./supabaseClient.js";
 import { CURRENT_GAME_VERSION } from "./gameVersion.js";
 import { invalidateLeaderboardBoard, LEADERBOARD_BOARDS } from "./leaderboardService.js";
+import { buildArcadeRushLeaderboardSubmissionResult } from "./arcadeRushLeaderboard.js";
 
 const MODE_BOARDS = Object.freeze({
   campaign: LEADERBOARD_BOARDS.CAMPAIGN,
   daily: LEADERBOARD_BOARDS.DAILY,
   endless: LEADERBOARD_BOARDS.ENDLESS,
+  "arcade-rush": LEADERBOARD_BOARDS.ARCADE_RUSH,
 });
 
 function boardForMode(mode, result) {
@@ -58,6 +60,17 @@ export function buildSubmissionPayload(mode, result) {
   if (!boardKey || !result || !data || !validSessionId(result.sessionId)) return null;
   if (mode === "daily") {
     const normalizedResult = buildDailySubmissionResult(result);
+    if (!normalizedResult) return null;
+    const payload = {
+      boardKey,
+      sessionId: result.sessionId,
+      clientVersion: CURRENT_GAME_VERSION,
+      result: normalizedResult,
+    };
+    return hasCompleteMetrics(payload) ? payload : null;
+  }
+  if (mode === "arcade-rush") {
+    const normalizedResult = buildArcadeRushLeaderboardSubmissionResult(result);
     if (!normalizedResult) return null;
     const payload = {
       boardKey,
@@ -254,6 +267,11 @@ export function createLeaderboardSubmissionService({
     if (activeMode === "daily" && payload.result.dateOverride !== false) {
       return { status: "ineligible", reason: "local-only" };
     }
+    if (activeMode === "arcade-rush" && (
+      payload.result.completed !== true ||
+      payload.result.bossDefeated !== true ||
+      payload.result.rulesVersion !== 1
+    )) return { status: "ineligible", reason: "invalid-result" };
     if (payload.result.developerMode || !payload.result.recordEligible) {
       return { status: "ineligible", reason: "local-only" };
     }
