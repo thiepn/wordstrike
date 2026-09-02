@@ -24,6 +24,16 @@ import {
   projectWordTrajectory,
 } from "./gameplayWorld.js";
 import { updateWordSeparation } from "./gameLoop.js";
+import { changeScreen, Screens } from "./state.js";
+import { getAuthState } from "./authService.js";
+import { getLeaderboardProfileState } from "./leaderboardProfileService.js";
+import {
+  getLeaderboardState,
+  initializeLeaderboards,
+  LEADERBOARD_BOARDS,
+} from "./leaderboardService.js";
+import { renderLeaderboards } from "./leaderboardUi.js";
+import { isArcadeRushLeaderboardShadowEnabled } from "./arcadeRushLeaderboard.js";
 
 export { ARCADE_RUSH_MODE_ID };
 
@@ -309,6 +319,20 @@ function sessionPort() {
   };
 }
 
+function openShadowArcadeRushLeaderboard() {
+  if (!isArcadeRushLeaderboardShadowEnabled()) return false;
+  changeScreen(Screens.LEADERBOARDS);
+  renderLeaderboards(
+    getLeaderboardState(),
+    getAuthState(),
+    getLeaderboardProfileState(),
+    "",
+    { shadowArcadeRush: true },
+  );
+  void initializeLeaderboards(LEADERBOARD_BOARDS.ARCADE_RUSH);
+  return true;
+}
+
 export function parseArcadeRushDeveloperSeed(searchOrValue = "") {
   const source = String(searchOrValue ?? "");
   const raw = source.includes("?") || source.includes("=")
@@ -332,10 +356,29 @@ export function createArcadeRushAppController({
   const renderer = createRenderer(root, getSettings);
   const input = createInput(renderer);
   const world = createWorld(root);
-  const uiController = createArcadeRushDomUiController({ root, actions });
+  const resolvedActions = {
+    ...actions,
+    [ARCADE_RUSH_UI_ACTIONS.LEADERBOARD]: (payload) => {
+      if (typeof actions[ARCADE_RUSH_UI_ACTIONS.LEADERBOARD] === "function") {
+        const handled = actions[ARCADE_RUSH_UI_ACTIONS.LEADERBOARD](payload);
+        if (handled !== false) return handled;
+      }
+      return openShadowArcadeRushLeaderboard();
+    },
+  };
+  const resolveResultOptions = (result, options = null) => {
+    const configured = options || resultOptions(result) || {};
+    return {
+      ...configured,
+      leaderboardAvailable: configured.leaderboardAvailable === true || isArcadeRushLeaderboardShadowEnabled(),
+    };
+  };
+  const uiController = createArcadeRushDomUiController({ root, actions: resolvedActions });
   if (!uiController) return null;
   const uiPort = createArcadeRushUiPort(uiController);
-  const uiBindings = createArcadeRushUiBindings(uiPort, { resultOptions });
+  const uiBindings = createArcadeRushUiBindings(uiPort, {
+    resultOptions: (result) => resolveResultOptions(result),
+  });
   if (!uiPort || !uiBindings) return null;
 
   let runtime = null;
@@ -400,7 +443,7 @@ export function createArcadeRushAppController({
   }
 
   function renderResults(result, options = {}) {
-    return uiController.renderResults(result, options);
+    return uiController.renderResults(result, resolveResultOptions(result, options));
   }
 
   function start({
