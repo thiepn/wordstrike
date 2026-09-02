@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import fs from "node:fs/promises";
 import {
   ARCADE_RUSH_LEADERBOARD_BOARD_KEY,
   ARCADE_RUSH_LEADERBOARD_CATEGORY,
@@ -11,6 +12,7 @@ import { buildArcadeRushSessionResult } from "../js/arcadeRush/arcadeRushResult.
 import { buildSubmissionPayload, createLeaderboardSubmissionService } from "../js/leaderboardSubmissionService.js";
 import { LEADERBOARD_BOARDS } from "../js/leaderboardService.js";
 import { validateLeaderboardReturnState } from "../js/leaderboardReturnState.js";
+import { savePendingResultSubmission } from "../js/pendingResultSubmission.js";
 
 assert.equal(ARCADE_RUSH_LEADERBOARD_BOARD_KEY, "arcade-rush-v1");
 assert.equal(ARCADE_RUSH_LEADERBOARD_CATEGORY, "arcade-rush");
@@ -84,6 +86,22 @@ assert.equal(payload.boardKey, "arcade-rush-v1");
 assert.equal(payload.sessionId, success.sessionId);
 assert.deepEqual(payload.result, normalized);
 
+const pendingValues = new Map();
+const pendingStorage = {
+  setItem(key, value) { pendingValues.set(key, value); },
+  getItem(key) { return pendingValues.get(key) ?? null; },
+  removeItem(key) { pendingValues.delete(key); },
+};
+const pendingIntent = savePendingResultSubmission("arcade-rush", success, {
+  storage: pendingStorage,
+  now: 10_000,
+});
+assert.ok(pendingIntent);
+assert.equal(pendingIntent.mode, "arcade-rush");
+assert.equal(pendingIntent.boardKey, LEADERBOARD_BOARDS.ARCADE_RUSH);
+assert.equal(pendingIntent.sessionId, success.sessionId);
+assert.deepEqual(pendingIntent.immutablePayload, payload);
+
 const localOnly = makeSuccess({ developerMode: true });
 assert.ok(localOnly);
 assert.equal(localOnly.modeData.recordEligible, false);
@@ -144,4 +162,11 @@ assert.deepEqual(validateLeaderboardReturnState({
   typingDuration: 60,
 });
 
-console.log("Arcade Rush AR11 frontend board, ranking contract, payload, shadow tab, and auth-return bridge passed.");
+const adapterSource = await fs.readFile(new URL("../js/arcadeRushAppController.js", import.meta.url), "utf8");
+const mainSource = await fs.readFile(new URL("../js/main.js", import.meta.url), "utf8");
+assert.match(adapterSource, /openShadowArcadeRushLeaderboard/);
+assert.match(adapterSource, /LEADERBOARD_BOARDS\.ARCADE_RUSH/);
+assert.match(adapterSource, /leaderboardAvailable/);
+assert.doesNotMatch(mainSource, /leaderboard-select-arcade-rush|view-arcade-rush-leaderboard/);
+
+console.log("Arcade Rush AR11 frontend board, ranking contract, payload, pending auth, shadow tab, and result bridge passed.");
