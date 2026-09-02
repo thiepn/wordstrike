@@ -30,6 +30,9 @@ function createHarness(overrides = {}) {
     dailyResult: { modeData: { dateKey: "2026-09-01" } },
     dailyResultsIndex: 0,
     dailyResultsReadyAt: 0,
+    arcadeRushResult: { score: 42 },
+    arcadeRushResultsIndex: 0,
+    arcadeRushResultsReadyAt: 0,
     speedTestResultsIndex: 0,
     speedTestResultsReadyAt: 0,
     levelSelection: 1,
@@ -54,6 +57,7 @@ function createHarness(overrides = {}) {
     openModeSelect: record("modes"),
     startEndless: record("endless"),
     startDaily: record("daily"),
+    startArcadeRush: record("rush"),
     retryCurrentLevel: record("campaign-retry"),
     backPracticeLab: record("practice-back"),
     activateTitleAction: record("title-action"),
@@ -109,4 +113,74 @@ test("result navigation preserves readiness gates and selected action routing", 
   const daily = createHarness({ screen: Screens.DAILY_RESULTS, dailyResultsReadyAt: 0, dailyResultsIndex: 0 });
   daily.handle(eventFor("Enter"));
   assert.deepEqual(daily.calls, [["daily", "retry", "2026-09-01"]]);
+});
+
+test("Arcade Rush ready and results routes use injected high-level actions only", () => {
+  const ready = createHarness({ screen: Screens.ARCADE_RUSH_READY });
+  ready.handle(eventFor("Enter"));
+  assert.deepEqual(ready.calls, [["rush", "arcade-rush-ready"]]);
+
+  const back = createHarness({ screen: Screens.ARCADE_RUSH_READY });
+  back.handle(eventFor("Escape"));
+  assert.deepEqual(back.calls, [["modes"]]);
+
+  const blocked = createHarness({
+    screen: Screens.ARCADE_RUSH_RESULTS,
+    arcadeRushResultsReadyAt: 1200,
+  });
+  blocked.handle(eventFor("Enter"));
+  assert.deepEqual(blocked.calls, []);
+
+  const retry = createHarness({
+    screen: Screens.ARCADE_RUSH_RESULTS,
+    arcadeRushResultsReadyAt: 0,
+    arcadeRushResultsIndex: 0,
+  });
+  retry.handle(eventFor("Enter"));
+  assert.deepEqual(retry.calls, [["rush", "retry"]]);
+
+  const modes = createHarness({
+    screen: Screens.ARCADE_RUSH_RESULTS,
+    arcadeRushResultsReadyAt: 0,
+    arcadeRushResultsIndex: 0,
+  });
+  modes.handle(eventFor("ArrowDown"));
+  modes.handle(eventFor("Enter"));
+  assert.deepEqual(modes.calls, [["render"], ["modes"]]);
+
+  const title = createHarness({
+    screen: Screens.ARCADE_RUSH_RESULTS,
+    arcadeRushResultsReadyAt: 0,
+    arcadeRushResultsIndex: 2,
+  });
+  title.handle(eventFor("Enter"));
+  assert.deepEqual(title.calls, [["title"]]);
+});
+
+test("Arcade Rush pause routing owns selection without owning runtime execution", () => {
+  const paused = createHarness({
+    screen: Screens.PAUSED,
+    game: { mode: "arcade-rush" },
+    pauseIndex: 0,
+  });
+  paused.handle(eventFor("ArrowDown"));
+  assert.equal(paused.state.pauseIndex, 1);
+  assert.deepEqual(paused.calls, [["pause-render"]]);
+  paused.handle(eventFor("Enter"));
+  assert.deepEqual(paused.calls, [["pause-render"], ["rush", "restart"]]);
+
+  const resume = createHarness({
+    screen: Screens.PAUSED,
+    game: { mode: "arcade-rush" },
+  });
+  resume.handle(eventFor("Escape"));
+  assert.deepEqual(resume.calls, [["resume"]]);
+
+  const modes = createHarness({
+    screen: Screens.PAUSED,
+    game: { mode: "arcade-rush" },
+    pauseIndex: 2,
+  });
+  modes.handle(eventFor("Enter"));
+  assert.deepEqual(modes.calls, [["modes"]]);
 });
