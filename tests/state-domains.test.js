@@ -23,9 +23,10 @@ const expectedLegacyKeys = [
   "speedTestRecordFlags", "endlessResult", "endlessResultsIndex",
   "endlessResultsReadyAt", "endlessStartStage", "dailyDateKey", "dailyDateOverride",
   "dailyResult", "dailyRecordFlags", "dailyResultsIndex", "dailyResultsReadyAt",
-  "levelSelection", "pauseIndex", "resultsIndex", "resultsReadyAt", "settingsIndex",
-  "statisticsTabIndex", "statisticsRecentFilter", "profileEditing", "profileDraft",
-  "profileNameError", "profileCopyMessage",
+  "arcadeRushResult", "arcadeRushRecordFlags", "arcadeRushResultsIndex",
+  "arcadeRushResultsReadyAt", "levelSelection", "pauseIndex", "resultsIndex",
+  "resultsReadyAt", "settingsIndex", "statisticsTabIndex", "statisticsRecentFilter",
+  "profileEditing", "profileDraft", "profileNameError", "profileCopyMessage",
 ];
 
 test("legacy appState facade preserves the established surface while domains own every key exactly once", () => {
@@ -34,7 +35,7 @@ test("legacy appState facade preserves the established surface while domains own
   assert.equal(Object.isExtensible(appState), false);
   assert.deepEqual(STATE_DOMAIN_NAMES, [
     "environment", "resources", "navigation", "session", "campaign",
-    "typing", "endless", "daily", "profile",
+    "typing", "endless", "daily", "arcadeRush", "profile",
   ]);
 
   const owned = new Set();
@@ -49,6 +50,14 @@ test("legacy appState facade preserves the established surface while domains own
     }
   }
   assert.deepEqual([...owned].sort(), [...expectedLegacyKeys].sort());
+  for (const property of [
+    "arcadeRushResult",
+    "arcadeRushRecordFlags",
+    "arcadeRushResultsIndex",
+    "arcadeRushResultsReadyAt",
+  ]) {
+    assert.equal(getStateOwner(property), "arcadeRush");
+  }
 });
 
 test("facade and domain writes stay synchronized without permitting cross-domain patches", () => {
@@ -60,18 +69,31 @@ test("facade and domain writes stay synchronized without permitting cross-domain
   stateDomains.daily.dailyResult = dailyResult;
   assert.equal(appState.dailyResult, dailyResult);
 
+  const rushResult = { score: 99 };
+  patchStateDomain("arcadeRush", {
+    arcadeRushResult: rushResult,
+    arcadeRushResultsIndex: 2,
+  });
+  assert.equal(appState.arcadeRushResult, rushResult);
+  assert.equal(appState.arcadeRushResultsIndex, 2);
+
   patchStateDomain("typing", { speedTestResultsIndex: 2, speedTestResult: { wpm: 91 } });
   assert.equal(appState.speedTestResultsIndex, 2);
   assert.equal(appState.speedTestResult.wpm, 91);
 
   assert.throws(() => patchStateDomain("typing", { dailyResult: null }), /Unknown typing state property/);
+  assert.throws(() => patchStateDomain("arcadeRush", { dailyResult: null }), /Unknown arcadeRush state property/);
   assert.throws(() => patchStateDomain("missing", {}), /Unknown state domain/);
   assert.throws(() => { appState.accidentalStateKey = true; }, TypeError);
 });
 
-test("screen transitions mutate only navigation state and reject unknown screens", () => {
+test("screen transitions mutate only navigation state and accept hidden Arcade Rush screens", () => {
   resetStateDomains();
   const before = snapshotStateDomains();
+  changeScreen(Screens.ARCADE_RUSH_READY);
+  assert.equal(appState.screen, Screens.ARCADE_RUSH_READY);
+  changeScreen(Screens.ARCADE_RUSH_RESULTS);
+  assert.equal(appState.screen, Screens.ARCADE_RUSH_RESULTS);
   changeScreen(Screens.MODE_SELECT);
   changeScreen(Screens.SETTINGS);
   assert.equal(appState.previousScreen, Screens.MODE_SELECT);
