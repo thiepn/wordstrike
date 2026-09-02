@@ -1,5 +1,11 @@
 import { getSupabaseClient } from "./supabaseClient.js";
 import { getUtcDateKey } from "./dailyDate.js";
+import {
+  ARCADE_RUSH_LEADERBOARD_BOARD_KEY,
+  ARCADE_RUSH_LEADERBOARD_CATEGORY,
+  ARCADE_RUSH_LEADERBOARD_RULES_VERSION,
+  isArcadeRushLeaderboardShadowEnabled,
+} from "./arcadeRushLeaderboard.js";
 
 export const LEADERBOARD_BOARDS = Object.freeze({
   CAMPAIGN: "campaign-highest-level-v1",
@@ -7,6 +13,7 @@ export const LEADERBOARD_BOARDS = Object.freeze({
   TYPING_15: "typing-15s-english200-v1",
   ENDLESS: "endless-v1",
   DAILY: "daily-strike-v1",
+  ARCADE_RUSH: ARCADE_RUSH_LEADERBOARD_BOARD_KEY,
 });
 
 export const LEADERBOARD_CATEGORIES = Object.freeze({
@@ -14,6 +21,7 @@ export const LEADERBOARD_CATEGORIES = Object.freeze({
   TYPING: "typing",
   ENDLESS: "endless",
   DAILY: "daily",
+  ARCADE_RUSH: ARCADE_RUSH_LEADERBOARD_CATEGORY,
 });
 
 const VALID_BOARDS = Object.freeze(Object.values(LEADERBOARD_BOARDS));
@@ -26,6 +34,7 @@ export const EXPECTED_LEADERBOARD_RULES_VERSIONS = Object.freeze({
   [LEADERBOARD_BOARDS.TYPING_15]: 1,
   [LEADERBOARD_BOARDS.ENDLESS]: 1,
   [LEADERBOARD_BOARDS.DAILY]: 1,
+  [LEADERBOARD_BOARDS.ARCADE_RUSH]: ARCADE_RUSH_LEADERBOARD_RULES_VERSION,
 });
 
 export function isLeaderboardCacheStateCurrent(boardKey, cachedState) {
@@ -48,6 +57,9 @@ export function getLeaderboardSelection(boardKey) {
   if (boardKey === LEADERBOARD_BOARDS.DAILY) {
     return { selectedCategory: LEADERBOARD_CATEGORIES.DAILY, selectedTypingDuration: 60 };
   }
+  if (boardKey === LEADERBOARD_BOARDS.ARCADE_RUSH) {
+    return { selectedCategory: LEADERBOARD_CATEGORIES.ARCADE_RUSH, selectedTypingDuration: 60 };
+  }
   return { selectedCategory: LEADERBOARD_CATEGORIES.CAMPAIGN, selectedTypingDuration: 60 };
 }
 
@@ -57,30 +69,42 @@ export function getBoardKeyForSelection(category, typingDuration = 60) {
   }
   if (category === LEADERBOARD_CATEGORIES.ENDLESS) return LEADERBOARD_BOARDS.ENDLESS;
   if (category === LEADERBOARD_CATEGORIES.DAILY) return LEADERBOARD_BOARDS.DAILY;
+  if (category === LEADERBOARD_CATEGORIES.ARCADE_RUSH) return LEADERBOARD_BOARDS.ARCADE_RUSH;
   return LEADERBOARD_BOARDS.CAMPAIGN;
 }
 
-const KEYBOARD_CATEGORY_ORDER = Object.freeze([
+const PUBLIC_KEYBOARD_CATEGORY_ORDER = Object.freeze([
   LEADERBOARD_CATEGORIES.CAMPAIGN,
   LEADERBOARD_CATEGORIES.TYPING,
   LEADERBOARD_CATEGORIES.ENDLESS,
   LEADERBOARD_CATEGORIES.DAILY,
 ]);
+const SHADOW_KEYBOARD_CATEGORY_ORDER = Object.freeze([
+  LEADERBOARD_CATEGORIES.CAMPAIGN,
+  LEADERBOARD_CATEGORIES.TYPING,
+  LEADERBOARD_CATEGORIES.ENDLESS,
+  LEADERBOARD_CATEGORIES.ARCADE_RUSH,
+]);
 
-export function getLeaderboardKeyboardTarget(state, key) {
+export function getLeaderboardKeyboardTarget(state, key, {
+  shadowArcadeRush = isArcadeRushLeaderboardShadowEnabled(),
+} = {}) {
   const selection = getLeaderboardSelection(state?.selectedBoardKey || state?.selectedBoard);
   const category = state?.selectedCategory || selection.selectedCategory;
   const typingDuration = state?.selectedTypingDuration || selection.selectedTypingDuration;
   if (category === LEADERBOARD_CATEGORIES.TYPING && ["ArrowUp", "ArrowDown"].includes(key)) {
     return getBoardKeyForSelection(category, typingDuration === 60 ? 15 : 60);
   }
-  let index = Math.max(0, KEYBOARD_CATEGORY_ORDER.indexOf(category));
-  if (key === "ArrowLeft") index = (index - 1 + KEYBOARD_CATEGORY_ORDER.length) % KEYBOARD_CATEGORY_ORDER.length;
-  else if (key === "ArrowRight") index = (index + 1) % KEYBOARD_CATEGORY_ORDER.length;
+  const order = shadowArcadeRush || category === LEADERBOARD_CATEGORIES.ARCADE_RUSH
+    ? SHADOW_KEYBOARD_CATEGORY_ORDER
+    : PUBLIC_KEYBOARD_CATEGORY_ORDER;
+  let index = Math.max(0, order.indexOf(category));
+  if (key === "ArrowLeft") index = (index - 1 + order.length) % order.length;
+  else if (key === "ArrowRight") index = (index + 1) % order.length;
   else if (key === "Home") index = 0;
-  else if (key === "End") index = KEYBOARD_CATEGORY_ORDER.length - 1;
+  else if (key === "End") index = order.length - 1;
   else return null;
-  return getBoardKeyForSelection(KEYBOARD_CATEGORY_ORDER[index], 60);
+  return getBoardKeyForSelection(order[index], 60);
 }
 
 const safeEntry = (entry) => Object.freeze({
@@ -93,7 +117,9 @@ const safeEntry = (entry) => Object.freeze({
   stage: entry?.stage == null ? null : Math.max(0, Number(entry.stage) || 0),
   score: entry?.score == null ? null : Math.max(0, Number(entry.score) || 0),
   accuracy: Math.max(0, Math.min(100, Number(entry?.accuracy) || 0)),
-  durationMs: entry?.durationMs == null ? null : Math.max(0, Number(entry.durationMs) || 0),
+  durationMs: entry?.durationMs == null && entry?.activeDurationMs == null
+    ? null
+    : Math.max(0, Number(entry.durationMs ?? entry.activeDurationMs) || 0),
   completed: entry?.completed === true,
   submittedAt: String(entry?.submittedAt || ""),
 });
@@ -129,7 +155,6 @@ const makeState = ({
     selectedCategory: selection.selectedCategory,
     selectedTypingDuration: selection.selectedTypingDuration,
     selectedBoardKey: boardKey,
-    // Retained as a read-only compatibility alias for existing integrations.
     selectedBoard: boardKey,
     board: board ? Object.freeze({
       boardKey: String(board.boardKey || boardKey),
@@ -158,6 +183,7 @@ export function createLeaderboardService({
   getDateKey = getUtcDateKey,
   now = () => Date.now(),
   isOnline = () => globalThis.navigator?.onLine !== false,
+  isShadowArcadeRushEnabled = isArcadeRushLeaderboardShadowEnabled,
 } = {}) {
   let state = makeState();
   let requestSequence = 0;
@@ -170,11 +196,17 @@ export function createLeaderboardService({
     for (const listener of listeners) listener(state);
     return state;
   };
+  const normalizeBoardKey = (boardKey) => (
+    boardKey === LEADERBOARD_BOARDS.DAILY && isShadowArcadeRushEnabled()
+      ? LEADERBOARD_BOARDS.ARCADE_RUSH
+      : boardKey
+  );
   const requestKey = (boardKey) => boardKey === LEADERBOARD_BOARDS.DAILY
     ? `${boardKey}:${getDateKey()}`
     : boardKey;
 
-  const load = (boardKey, { force = false } = {}) => {
+  const load = (requestedBoardKey, { force = false } = {}) => {
+    const boardKey = normalizeBoardKey(requestedBoardKey);
     if (!VALID_BOARDS.includes(boardKey)) return Promise.resolve(state);
     const key = requestKey(boardKey);
     if (inFlight.has(key)) return inFlight.get(key);
@@ -224,7 +256,8 @@ export function createLeaderboardService({
     return promise;
   };
 
-  const selectBoard = (boardKey) => {
+  const selectBoard = (requestedBoardKey) => {
+    const boardKey = normalizeBoardKey(requestedBoardKey);
     if (!VALID_BOARDS.includes(boardKey)) return Promise.resolve(state);
     if (state.selectedBoardKey === boardKey && ["loading", "refreshing", "ready", "empty"].includes(state.status)) {
       return inFlight.get(requestKey(boardKey)) || Promise.resolve(state);
@@ -253,8 +286,9 @@ export function createLeaderboardService({
     },
     refreshLeaderboard() { return load(state.selectedBoardKey, { force: true }); },
     invalidateLeaderboardBoard(boardKey) {
-      if (!VALID_BOARDS.includes(boardKey)) return false;
-      cache.delete(requestKey(boardKey));
+      const normalized = normalizeBoardKey(boardKey);
+      if (!VALID_BOARDS.includes(normalized)) return false;
+      cache.delete(requestKey(normalized));
       return true;
     },
     resetLeaderboardState() {
