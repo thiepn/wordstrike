@@ -20,7 +20,7 @@ assert.equal(formatArcadeRushAccuracy(97.84), "97.8%");
 assert.equal(formatArcadeRushDuration(287000), "4:47");
 
 const ready = buildArcadeRushReadyMarkup({ personalBest: 76972 });
-for (const expected of ["ARCADE RUSH", "Waves", "Final Boss", "Core Integrity", "~5 MIN", "76,972", "Start Rush"]) assert.ok(ready.includes(expected));
+for (const expected of ["Arcade Rush", "Waves", "Final Boss", "Core Integrity", "~5 MIN", "76,972", "Start Rush"]) assert.ok(ready.includes(expected));
 for (const forbidden of ["Daily Strike", "streak", "attempt limit", "UTC"]) assert.equal(ready.toLowerCase().includes(forbidden.toLowerCase()), false);
 assert.ok(ARCADE_RUSH_UI_CSS.includes("@media(max-width:520px)"));
 assert.ok(ARCADE_RUSH_UI_CSS.includes("@media(prefers-reduced-motion:reduce)"));
