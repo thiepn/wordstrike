@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import {
   createLeaderboardService,
   EXPECTED_LEADERBOARD_RULES_VERSIONS,
+  getLeaderboardKeyboardTarget,
   isLeaderboardCacheStateCurrent,
   LEADERBOARD_BOARDS,
 } from "../js/leaderboardService.js";
@@ -23,20 +24,21 @@ const service = createLeaderboardService({
   getClient: () => client,
   getDateKey: () => "2026-06-27",
   now: (() => { let value = 1000; return () => ++value; })(),
+  isShadowArcadeRushEnabled: () => false,
 });
 assert.equal(service.getLeaderboardState().status, "idle");
 assert.equal(calls.length, 0);
-const dailyRequest = service.initializeLeaderboards();
+const campaignRequest = service.initializeLeaderboards();
 assert.equal(service.getLeaderboardState().selectedBoard, LEADERBOARD_BOARDS.CAMPAIGN);
 assert.deepEqual(calls[0], {
   name: "get-leaderboard",
   options: { body: { boardKey: "campaign-highest-level-v1" } },
 });
-assert.equal(service.initializeLeaderboards(), dailyRequest);
+assert.equal(service.initializeLeaderboards(), campaignRequest);
 const endlessRequest = service.selectLeaderboardBoard(LEADERBOARD_BOARDS.ENDLESS);
 assert.deepEqual(calls[1].options.body, { boardKey: "endless-v1" });
 pending[0].resolve({ data: { ok: true, data: { board: {}, entries: [{ rank: 1, username: "Stale" }], viewer: null } } });
-await dailyRequest;
+await campaignRequest;
 assert.equal(service.getLeaderboardState().selectedBoard, LEADERBOARD_BOARDS.ENDLESS);
 assert.equal(service.getLeaderboardState().entries.some(({ username }) => username === "Stale"), false);
 pending[1].resolve({ data: { ok: true, data: {
@@ -55,7 +57,7 @@ pending[2].resolve({ data: { ok: true, data: { board: {}, entries: [], viewer: n
 await refresh;
 assert.equal(service.getLeaderboardState().status, "empty");
 
-const offline = createLeaderboardService({ getClient: () => null });
+const offline = createLeaderboardService({ getClient: () => null, isShadowArcadeRushEnabled: () => false });
 assert.equal((await offline.initializeLeaderboards()).status, "offline");
 const localData = { bestScore: 123 };
 offline.resetLeaderboardState();
@@ -67,12 +69,14 @@ assert.deepEqual(EXPECTED_LEADERBOARD_RULES_VERSIONS, {
   "typing-15s-english200-v1": 1,
   "endless-v1": 1,
   "daily-strike-v1": 1,
+  "arcade-rush-v1": 1,
 });
 
 for (const boardKey of [
   LEADERBOARD_BOARDS.CAMPAIGN,
   LEADERBOARD_BOARDS.ENDLESS,
   LEADERBOARD_BOARDS.DAILY,
+  LEADERBOARD_BOARDS.ARCADE_RUSH,
 ]) {
   assert.equal(isLeaderboardCacheStateCurrent(boardKey, {
     board: { boardKey, rulesVersion: 2 },
@@ -80,6 +84,7 @@ for (const boardKey of [
   let fetches = 0;
   const rollbackService = createLeaderboardService({
     getDateKey: () => "2026-06-27",
+    isShadowArcadeRushEnabled: () => false,
     getClient: () => ({ functions: { invoke: async () => {
       fetches += 1;
       return { data: { ok: true, data: {
@@ -96,6 +101,7 @@ for (const boardKey of [
 
 let typingFetches = 0;
 const typingCacheService = createLeaderboardService({
+  isShadowArcadeRushEnabled: () => false,
   getClient: () => ({ functions: { invoke: async () => {
     typingFetches += 1;
     return { data: { ok: true, data: {
@@ -108,4 +114,33 @@ await typingCacheService.initializeLeaderboards(LEADERBOARD_BOARDS.TYPING_60);
 await typingCacheService.initializeLeaderboards(LEADERBOARD_BOARDS.TYPING_60);
 assert.equal(typingFetches, 1, "valid Typing version-1 cache remains reusable");
 
-console.log("Leaderboard service is lazy, stale-safe, and invalidates only mismatched rules-version caches after rollback.");
+const shadowCalls = [];
+const shadowService = createLeaderboardService({
+  getDateKey: () => {
+    throw new Error("Arcade Rush must not request a Daily date");
+  },
+  isShadowArcadeRushEnabled: () => true,
+  getClient: () => ({ functions: { invoke: async (_name, { body }) => {
+    shadowCalls.push(body);
+    return { data: { ok: true, data: {
+      board: { boardKey: LEADERBOARD_BOARDS.ARCADE_RUSH, displayName: "Arcade Rush", rulesVersion: 1 },
+      entries: [{ rank: 1, username: "Rusher", score: 90000, accuracy: 99, durationMs: 250000, completed: true }],
+      viewer: null,
+    } } };
+  } } }),
+});
+await shadowService.selectLeaderboardBoard(LEADERBOARD_BOARDS.DAILY);
+assert.deepEqual(shadowCalls, [{ boardKey: LEADERBOARD_BOARDS.ARCADE_RUSH }]);
+assert.equal(shadowService.getLeaderboardState().selectedBoardKey, LEADERBOARD_BOARDS.ARCADE_RUSH);
+assert.equal(shadowService.getLeaderboardState().selectedCategory, "arcade-rush");
+assert.equal(shadowService.getLeaderboardState().entries[0].durationMs, 250000);
+assert.equal(
+  getLeaderboardKeyboardTarget({ selectedBoardKey: LEADERBOARD_BOARDS.ENDLESS }, "ArrowRight", { shadowArcadeRush: true }),
+  LEADERBOARD_BOARDS.ARCADE_RUSH,
+);
+assert.equal(
+  getLeaderboardKeyboardTarget({ selectedBoardKey: LEADERBOARD_BOARDS.ENDLESS }, "ArrowRight", { shadowArcadeRush: false }),
+  LEADERBOARD_BOARDS.DAILY,
+);
+
+console.log("Leaderboard service is lazy, stale-safe, rules-versioned, and supports a date-free Arcade Rush shadow board.");
