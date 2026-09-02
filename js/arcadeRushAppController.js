@@ -34,6 +34,7 @@ import {
 } from "./leaderboardService.js";
 import { renderLeaderboards } from "./leaderboardUi.js";
 import { isArcadeRushLeaderboardShadowEnabled } from "./arcadeRushLeaderboard.js";
+import { createArcadeRushShadowCoordinator } from "./arcadeRushShadowCoordinator.js";
 
 export { ARCADE_RUSH_MODE_ID };
 
@@ -356,6 +357,7 @@ export function createArcadeRushAppController({
   const renderer = createRenderer(root, getSettings);
   const input = createInput(renderer);
   const world = createWorld(root);
+  const shadowCoordinator = createArcadeRushShadowCoordinator();
   const resolvedActions = {
     ...actions,
     [ARCADE_RUSH_UI_ACTIONS.LEADERBOARD]: (payload) => {
@@ -368,18 +370,24 @@ export function createArcadeRushAppController({
   };
   const resolveResultOptions = (result, options = null) => {
     const configured = options || resultOptions(result) || {};
-    return {
+    return shadowCoordinator.enhanceResultOptions({
       ...configured,
       leaderboardAvailable: configured.leaderboardAvailable === true || isArcadeRushLeaderboardShadowEnabled(),
-    };
+    });
   };
   const uiController = createArcadeRushDomUiController({ root, actions: resolvedActions });
-  if (!uiController) return null;
+  if (!uiController) {
+    shadowCoordinator.destroy();
+    return null;
+  }
   const uiPort = createArcadeRushUiPort(uiController);
   const uiBindings = createArcadeRushUiBindings(uiPort, {
     resultOptions: (result) => resolveResultOptions(result),
   });
-  if (!uiPort || !uiBindings) return null;
+  if (!uiPort || !uiBindings) {
+    shadowCoordinator.destroy();
+    return null;
+  }
 
   let runtime = null;
   let latestSnapshot = null;
@@ -421,11 +429,13 @@ export function createArcadeRushAppController({
       },
       onComplete(snapshot, result) {
         publish(snapshot);
+        shadowCoordinator.onTerminal(result);
         callbacks.onComplete?.(snapshot, result);
         uiBindings.onComplete(snapshot, result);
       },
       onFailure(snapshot, result) {
         publish(snapshot);
+        shadowCoordinator.onTerminal(result);
         callbacks.onFailure?.(snapshot, result);
         uiBindings.onFailure(snapshot, result);
       },
@@ -439,7 +449,7 @@ export function createArcadeRushAppController({
 
   function renderReady(options = {}) {
     latestSnapshot = null;
-    return uiController.renderReady(options);
+    return uiController.renderReady(shadowCoordinator.enhanceReadyOptions(options));
   }
 
   function renderResults(result, options = {}) {
@@ -453,9 +463,10 @@ export function createArcadeRushAppController({
     developerMode = false,
     source = "arcade-rush-ready",
   } = {}) {
-    if (!isArcadeRushSeed(seed)) return null;
+    const shadowStart = shadowCoordinator.prepareStart({ seed, developerMode });
+    if (!isArcadeRushSeed(shadowStart.seed)) return null;
     const vocabulary = createArcadeRushVocabulary({ commonWords, campaignBank });
-    const plan = generateArcadeRushPlan({ seed, vocabulary });
+    const plan = generateArcadeRushPlan({ seed: shadowStart.seed, vocabulary });
     if (!plan) return null;
     runtime?.cleanup?.({ abortSession: false });
     renderer.clearWords();
@@ -471,11 +482,14 @@ export function createArcadeRushAppController({
       },
       bossPort: createCoreBreakerBossPort(),
       source,
-      developerMode,
+      developerMode: shadowStart.developerMode,
       callbacks: runtimeCallbacks(),
     });
     const started = runtime?.start?.() || null;
-    if (started) publish(started);
+    if (started) {
+      shadowCoordinator.onStarted({ developerMode: shadowStart.developerMode });
+      publish(started);
+    }
     return started;
   }
 
@@ -522,11 +536,14 @@ export function createArcadeRushAppController({
     focusPauseAction,
     getSnapshot: () => latestSnapshot || runtime?.getSnapshot?.() || null,
     getUiController: () => uiController,
+    getShadowCertification: shadowCoordinator.inspect,
+    verifyShadowLeaderboard: shadowCoordinator.verifyLeaderboard,
     destroy() {
       runtime?.dispose?.({ abortSession: false });
       runtime = null;
       latestSnapshot = null;
       renderer.clearWords();
+      shadowCoordinator.destroy();
       return uiController.destroy();
     },
   });
