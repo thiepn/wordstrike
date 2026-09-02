@@ -52,6 +52,8 @@ renderModeSelect(getAllModes(), 0, {
 });
 assert.match(app.html, /MODE SELECT/);
 assert.match(app.html, /CAMPAIGN/i);
+assert.match(app.html, /ARCADE RUSH/i);
+assert.doesNotMatch(app.html, /DAILY STRIKE/i);
 assert.equal((app.html.match(/COMING SOON/g) || []).length, 1);
 assert.match(app.html, /data-action="mode-title"[^>]*>MAIN MENU<\/button>/);
 assert.equal(app.cards.filter((card) => card.button).length, 4);
@@ -65,7 +67,7 @@ assert.equal(activated.at(-1), "speed-test");
 app.cards[2].onclick();
 assert.equal(activated.at(-1), "endless");
 app.cards[3].onclick();
-assert.equal(activated.at(-1), "daily");
+assert.equal(activated.at(-1), "arcade-rush");
 app.titleButton.onclick();
 assert.equal(backed, 1);
 
@@ -77,8 +79,9 @@ assert.match(keyboardSource, /state\.screen === Screens\.MODE_SELECT/);
 assert.match(keyboardSource, /if \(event\.key === "Escape"\) \{\s*openTitle\(\)/s);
 assert.match(keyboardSource, /state\.modeSelection === getAllModes\(\)\.length\) openTitle\(\)/);
 assert.match(mainSource, /createGlobalKeyboardController\(\{/);
+assert.match(mainSource, /route === "arcade-rush-ready"\) openArcadeRushReady\("mode-select"\)/);
 assert.match(mainSource, /back: openModeSelect/);
 assert.match(mainSource, /renderDevSessionDiagnostics/);
 assert.equal(mainSource.split('addEventListener("keydown"').length - 1, 1);
 
-console.log("Mode Select cards, disabled behavior, mouse synchronization, and extracted keyboard navigation wiring tests passed.");
+console.log("Mode Select renders Arcade Rush publicly with disabled Practice behavior and extracted keyboard navigation wiring.");
