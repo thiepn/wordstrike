@@ -115,6 +115,9 @@ assert.equal(createArcadeRushBossPort({}), null);
     boss: bossPlan(2003),
     integrityRemaining: 5,
   });
+  // Isolate the total-duration path by preventing ordinary 7.5s attacks
+  // from destroying Core before the 45s deadline.
+  encounter.attackRemainingMs = ARCADE_RUSH_BOSS_TARGET_DURATION_MS + 1;
   updateCoreBreakerEncounter(encounter, ARCADE_RUSH_BOSS_TARGET_DURATION_MS);
   const timedOut = getCoreBreakerSnapshot(encounter);
   assert.equal(timedOut.phase, "FAILED");
