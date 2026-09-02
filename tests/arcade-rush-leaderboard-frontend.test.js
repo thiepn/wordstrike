@@ -17,6 +17,7 @@ import { savePendingResultSubmission } from "../js/pendingResultSubmission.js";
 assert.equal(ARCADE_RUSH_LEADERBOARD_BOARD_KEY, "arcade-rush-v1");
 assert.equal(ARCADE_RUSH_LEADERBOARD_CATEGORY, "arcade-rush");
 assert.equal(ARCADE_RUSH_LEADERBOARD_RULES_VERSION, 1);
+// The AR13 query detector remains available for diagnostics after cutover.
 assert.equal(isArcadeRushLeaderboardShadowEnabled("?dev=1"), true);
 assert.equal(isArcadeRushLeaderboardShadowEnabled("?dev=true&mode=arcade-rush"), true);
 assert.equal(isArcadeRushLeaderboardShadowEnabled("?dev=0"), false);
@@ -122,15 +123,16 @@ const { renderLeaderboards } = await import("../js/leaderboardUi.js");
 const signedOut = { status: "signed-out" };
 const noProfile = { status: "idle", profile: null };
 
+// AR14: Arcade Rush is the normal fourth tab without any developer option.
 renderLeaderboards({
   status: "loading",
   selectedBoardKey: LEADERBOARD_BOARDS.CAMPAIGN,
   selectedCategory: "campaign",
   selectedTypingDuration: 60,
   entries: [],
-}, signedOut, noProfile, "", { shadowArcadeRush: false });
-assert.match(app.html, /DAILY STRIKE/);
-assert.doesNotMatch(app.html, /ARCADE RUSH/);
+}, signedOut, noProfile);
+assert.match(app.html, /ARCADE RUSH/);
+assert.doesNotMatch(app.html, /DAILY STRIKE/);
 
 renderLeaderboards({
   status: "ready",
@@ -143,7 +145,7 @@ renderLeaderboards({
     durationMs: 247000, completed: true, submittedAt: "2026-09-02T12:00:00.000Z",
   }],
   viewer: null,
-}, signedOut, noProfile, "", { shadowArcadeRush: true });
+}, signedOut, noProfile);
 assert.match(app.html, /ARCADE RUSH/);
 assert.doesNotMatch(app.html, /DAILY STRIKE/);
 assert.match(app.html, /RULES V1 \/\/ COMPLETED RUNS ONLY \/\/ ALL-TIME/);
@@ -158,15 +160,25 @@ assert.deepEqual(validateLeaderboardReturnState({
   typingDuration: 60,
 }), {
   screen: "leaderboards",
+  selectedCategory: "arcade-rush",
+  typingDuration: 60,
+});
+assert.deepEqual(validateLeaderboardReturnState({
+  screen: "leaderboards",
   selectedCategory: "daily",
+  typingDuration: 60,
+}), {
+  screen: "leaderboards",
+  selectedCategory: "arcade-rush",
   typingDuration: 60,
 });
 
 const adapterSource = await fs.readFile(new URL("../js/arcadeRushAppController.js", import.meta.url), "utf8");
 const mainSource = await fs.readFile(new URL("../js/main.js", import.meta.url), "utf8");
-assert.match(adapterSource, /openShadowArcadeRushLeaderboard/);
+assert.match(adapterSource, /openArcadeRushLeaderboard/);
 assert.match(adapterSource, /LEADERBOARD_BOARDS\.ARCADE_RUSH/);
-assert.match(adapterSource, /leaderboardAvailable/);
-assert.doesNotMatch(mainSource, /leaderboard-select-arcade-rush|view-arcade-rush-leaderboard/);
+assert.match(adapterSource, /leaderboardAvailable: true/);
+assert.match(mainSource, /leaderboard-select-arcade-rush/);
+assert.match(mainSource, /prepareAutomaticResultSubmission\("arcade-rush", result\)/);
 
-console.log("Arcade Rush AR11 frontend board, ranking contract, payload, pending auth, shadow tab, and result bridge passed.");
+console.log("Arcade Rush AR11 board/payload contracts remain valid after the AR14 public cutover.");
