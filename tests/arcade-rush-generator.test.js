@@ -7,6 +7,7 @@ import {
   ARCADE_RUSH_GENERATOR_CONFIG,
   ARCADE_RUSH_GENERATOR_VERSION,
   ARCADE_RUSH_PROFILE_STATUS,
+  ARCADE_RUSH_RULES_VERSION,
   ARCADE_RUSH_TARGET_DURATION_MS,
   ARCADE_RUSH_TARGET_RUN_DURATION_MS,
   ARCADE_RUSH_TOTAL_PLANNED_WORDS,
@@ -29,10 +30,14 @@ const source = JSON.parse(await fs.readFile(
 const commonWords = source.words.map((entry) => typeof entry === "string" ? entry : entry.word);
 const vocabulary = createArcadeRushVocabulary({ commonWords, campaignBank: source });
 
+assert.equal(ARCADE_RUSH_RULES_VERSION, 1);
 assert.equal(ARCADE_RUSH_GENERATOR_VERSION, 1);
-assert.equal(ARCADE_RUSH_PROFILE_STATUS, "DRAFT_UNTIL_AR10");
+assert.equal(ARCADE_RUSH_PROFILE_STATUS, "FROZEN_V1");
+assert.equal(ARCADE_RUSH_GENERATOR_CONFIG.rulesVersion, ARCADE_RUSH_RULES_VERSION);
 assert.equal(ARCADE_RUSH_WAVE_PROFILES.length, ARCADE_RUSH_WAVE_COUNT);
-assert.equal(ARCADE_RUSH_TOTAL_PLANNED_WORDS, 120);
+assert.equal(ARCADE_RUSH_TOTAL_PLANNED_WORDS, 168);
+assert.deepEqual(ARCADE_RUSH_WAVE_PROFILES.map(({ wordCount }) => wordCount), [23, 27, 29, 25, 31, 33]);
+assert.deepEqual(ARCADE_RUSH_WAVE_PROFILES.map(({ spawnIntervalMs }) => spawnIntervalMs), [1500, 1350, 1250, 1650, 1200, 1050]);
 assert.equal(ARCADE_RUSH_BOSS_TARGET_DURATION_MS, 45_000);
 assert.equal(ARCADE_RUSH_TARGET_RUN_DURATION_MS, 300_000);
 assert.ok(ARCADE_RUSH_TARGET_RUN_DURATION_MS >= ARCADE_RUSH_TARGET_DURATION_MS.minimum);
@@ -66,7 +71,7 @@ assert.deepEqual(repeated, first, "same seed and vocabulary must produce an iden
 assert.notDeepEqual(different, first, "different seeds must produce a different plan");
 assert.equal(first.generatorVersion, ARCADE_RUSH_GENERATOR_VERSION);
 assert.equal(first.waves.length, 6);
-assert.equal(first.waves.reduce((sum, wave) => sum + wave.entries.length, 0), 120);
+assert.equal(first.waves.reduce((sum, wave) => sum + wave.entries.length, 0), ARCADE_RUSH_TOTAL_PLANNED_WORDS);
 assert.equal(first.boss.id, "core-breaker");
 assert.equal(first.boss.bossVersion, ARCADE_RUSH_BOSS_VERSION);
 assert.equal(first.boss.status, ARCADE_RUSH_BOSS_PLAN_STATUS);
@@ -76,7 +81,10 @@ assert.equal(Object.isFrozen(first.waves), true);
 
 const allEntries = first.waves.flatMap((wave) => wave.entries);
 assert.equal(new Set(allEntries.map((entry) => entry.word)).size, allEntries.length, "AR2 plans must not repeat words");
-assert.deepEqual(allEntries.map((entry) => entry.globalIndex), Array.from({ length: 120 }, (_, index) => index));
+assert.deepEqual(
+  allEntries.map((entry) => entry.globalIndex),
+  Array.from({ length: ARCADE_RUSH_TOTAL_PLANNED_WORDS }, (_, index) => index),
+);
 for (const wave of first.waves) {
   const profile = getArcadeRushWaveProfile(wave.wave);
   const counts = Object.fromEntries(Object.keys(profile.sourceCounts).map((key) => [key, 0]));
@@ -94,10 +102,14 @@ for (const wave of first.waves) {
   }
 }
 
-const changedSlots = allEntries.filter((entry, index) => entry.word !== different.waves.flatMap((wave) => wave.entries)[index].word).length;
-assert.ok(changedSlots >= Math.floor(ARCADE_RUSH_TOTAL_PLANNED_WORDS * 0.75), "adjacent seeds should materially change the run");
+const differentEntries = different.waves.flatMap((wave) => wave.entries);
+const changedSlots = allEntries.filter((entry, index) => entry.word !== differentEntries[index].word).length;
+assert.ok(
+  changedSlots >= Math.floor(ARCADE_RUSH_TOTAL_PLANNED_WORDS * 0.75),
+  "adjacent seeds should materially change the run",
+);
 
 assert.equal(generateArcadeRushPlan({ seed: -1, vocabulary }), null);
 assert.equal(generateArcadeRushPlan({ seed: 1, vocabulary: {} }), null);
 
-console.log("Arcade Rush AR2 deterministic generator contracts passed.");
+console.log("Arcade Rush AR2 generator contracts and AR10 frozen v1 profile passed.");
