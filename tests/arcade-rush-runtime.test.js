@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import fs from "node:fs/promises";
 import {
+  ARCADE_RUSH_TOTAL_PLANNED_WORDS,
   ARCADE_RUSH_WAVE_COUNT,
   ARCADE_RUSH_WAVE_TRANSITION_MS,
   createArcadeRushRuntime,
@@ -167,10 +168,10 @@ function createPlan(seed) {
   assert.equal(final.integrity, 5);
   assert.equal(final.wavesCompleted, 6);
   assert.equal(final.perfectWaves, 6);
-  assert.equal(final.totalResolved, 120);
-  assert.equal(final.completedWordCount, 120);
+  assert.equal(final.totalResolved, ARCADE_RUSH_TOTAL_PLANNED_WORDS);
+  assert.equal(final.completedWordCount, ARCADE_RUSH_TOTAL_PLANNED_WORDS);
   assert.equal(final.missedWordCount, 0);
-  assert.equal(final.maxCombo, 120);
+  assert.equal(final.maxCombo, ARCADE_RUSH_TOTAL_PLANNED_WORDS);
   assert.equal(h.events.wavesComplete, 1);
   assert.equal(h.events.transitions, 5);
   assert.equal(h.events.completes, 0, "AR4 must not complete the overall run before AR5 boss logic");
