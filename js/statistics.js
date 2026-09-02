@@ -1,7 +1,7 @@
 import { getAllSpeedTestConfigs, SPEED_TEST_TYPES } from "./speedTestConfig.js";
 import { getWeightedLifetimeAccuracy, getWeightedLifetimeWpm } from "./lifetimeStatistics.js";
-import { getUtcDateKey } from "./dailyDate.js";
 import { SPEED_TEST_WORD_SET } from "./speedTestWords.js";
+import { MODE_IDS } from "./modes.js";
 
 function number(value, fallback = null) {
   if (value == null || value === "") return fallback;
@@ -50,8 +50,10 @@ export function getLifetimeStatistics(storage = {}) {
 }
 
 function bestTypingWpm(storage) {
-  const records = storage.modes?.["speed-test"]?.wordSetRecords?.[SPEED_TEST_WORD_SET.id] || {};
-  const values = Object.values(records).map((record) => number(record?.bestWpm)).filter((value) => value != null);
+  const records = storage.modes?.[MODE_IDS.SPEED_TEST]?.wordSetRecords?.[SPEED_TEST_WORD_SET.id] || {};
+  const values = Object.values(records)
+    .map((record) => number(record?.bestWpm))
+    .filter((value) => value != null);
   return values.length ? Math.max(...values) : null;
 }
 
@@ -68,7 +70,7 @@ export function getCampaignStatistics(storage = {}, save = {}) {
     grade,
     completed.filter(([, result]) => result.grade === grade).length,
   ]));
-  const mode = storage.modes?.campaign || {};
+  const mode = storage.modes?.[MODE_IDS.CAMPAIGN] || {};
   return {
     highestUnlockedLevel: Math.min(100, Math.max(1, number(save.currentFurthestLevel, 1))),
     highestCompletedLevel: completedLevels.length ? completedLevels.at(-1) : null,
@@ -87,7 +89,7 @@ export function getCampaignStatistics(storage = {}, save = {}) {
 }
 
 export function getTypingTestStatistics(storage = {}) {
-  const mode = storage.modes?.["speed-test"] || {};
+  const mode = storage.modes?.[MODE_IDS.SPEED_TEST] || {};
   const records = mode.wordSetRecords?.[SPEED_TEST_WORD_SET.id] || {};
   const mapRecord = (config) => {
     const record = records[config.configId] || {};
@@ -128,7 +130,7 @@ export function getTypingTestStatistics(storage = {}) {
 }
 
 export function getEndlessStatistics(storage = {}) {
-  const mode = storage.modes?.endless || {};
+  const mode = storage.modes?.[MODE_IDS.ENDLESS] || {};
   const records = mode.records || {};
   return {
     highestStage: number(records.bestStage?.stage ?? mode.highestStage),
@@ -146,43 +148,58 @@ export function getEndlessStatistics(storage = {}) {
   };
 }
 
-export function getDailyStatistics(storage = {}, utcDateKey = getUtcDateKey()) {
-  const mode = storage.modes?.daily || {};
+export function getArcadeRushStatistics(storage = {}) {
+  const mode = storage.modes?.[MODE_IDS.ARCADE_RUSH] || {};
   const records = mode.records || {};
-  const days = records.days || {};
-  const today = days[utcDateKey] || {};
-  const latestDates = Object.entries(days)
-    .sort(([a], [b]) => b.localeCompare(a))
-    .slice(0, 7)
-    .map(([dateKey, day]) => ({
-      dateKey,
-      attempts: number(day.attempts, 0),
-      completed: day.firstCompletedAt != null || day.best?.success === true,
-      score: number(day.best?.score),
-      bestTimeMs: day.best?.success ? number(day.best.activeDurationMs) : null,
-    }));
+  const runsStarted = number(records.runsStarted, 0);
+  const runsCompleted = number(records.runsCompleted, 0);
+  const finalizedRuns = number(mode.completedSessions, 0);
+  const completionDenominator = Math.max(runsStarted, finalizedRuns, runsCompleted);
   return {
-    utcDateKey,
-    currentStreak: number(records.currentStreak, 0),
-    bestStreak: number(records.bestStreak, 0),
-    todayAttempts: number(today.attempts, 0),
-    todayBestScore: number(today.best?.score),
-    todayBestTimeMs: today.best?.success ? number(today.best.activeDurationMs) : null,
-    todayCompleted: today.firstCompletedAt != null || today.best?.success === true,
-    totalAttempts: number(mode.completedSessions, 0),
-    successfulCompletions: Math.max(
-      0,
-      number(mode.completedSessions, 0) - number(mode.failedSessions, 0),
-    ),
-    distinctDaysCompleted: number(records.distinctCompletedDays, 0),
+    highestScore: number(records.highestScore ?? mode.highestScore),
+    bestCompletedScore: number(records.bestCompletedScore),
+    fastestCompletionMs: number(records.fastestCompletion),
+    highestCombo: number(records.highestCombo),
+    bestAccuracy: number(records.bestAccuracy ?? mode.bestAccuracy),
+    bestWpm: number(records.bestWpm ?? mode.bestWpm),
+    mostPerfectWaves: number(records.mostPerfectWaves),
+    runsStarted,
+    runsCompleted,
+    finalizedRuns,
+    failedRuns: Math.max(0, finalizedRuns - runsCompleted),
+    completionRate: completionDenominator > 0
+      ? Math.min(100, runsCompleted / completionDenominator * 100)
+      : null,
+    bossesDefeated: number(records.bossesDefeated, 0),
     activePlaytimeMs: number(mode.activePlaytimeMs, 0),
-    bestScore: number(mode.highestScore),
-    latestDates,
+    wordsCompleted: activityMetric(mode, "wordsCompleted"),
+    weightedAccuracy: activityAccuracy(mode),
+    weightedWpm: activityWpm(mode),
+  };
+}
+
+function arcadeRushRecentData(session) {
+  if (session.modeId !== MODE_IDS.ARCADE_RUSH) return null;
+  const wavesCompleted = Math.min(6, number(session.modeData?.wavesCompleted, 0));
+  const rulesVersion = number(session.modeData?.rulesVersion, 0);
+  return {
+    wavesCompleted,
+    bossDefeated: session.modeData?.bossDefeated === true,
+    integrityRemaining: Math.min(5, number(session.modeData?.integrityRemaining, 0)),
+    maxCombo: number(session.modeData?.maxCombo, 0),
+    rulesVersion,
+    rulesLabel: rulesVersion > 0 ? `V${rulesVersion}` : "DRAFT",
   };
 }
 
 export function getRecentSessionStatistics(storage = {}, modeFilter = "all") {
-  const allowed = new Set(["all", "campaign", "speed-test", "endless", "daily"]);
+  const allowed = new Set([
+    "all",
+    MODE_IDS.CAMPAIGN,
+    MODE_IDS.SPEED_TEST,
+    MODE_IDS.ENDLESS,
+    MODE_IDS.ARCADE_RUSH,
+  ]);
   const filter = allowed.has(modeFilter) ? modeFilter : "all";
   return [...(storage.recentSessions || [])]
     .filter((session) => filter === "all" || session.modeId === filter)
@@ -190,19 +207,22 @@ export function getRecentSessionStatistics(storage = {}, modeFilter = "all") {
     .slice(0, 30)
     .map((session) => {
       let primaryMetric = null;
-      if (session.modeId === "campaign") {
+      if (session.modeId === MODE_IDS.CAMPAIGN) {
         primaryMetric = session.modeData?.level == null
           ? null
           : `LEVEL ${session.modeData.level}${session.grade ? ` · ${session.grade}` : ""}`;
-      } else if (session.modeId === "speed-test") {
+      } else if (session.modeId === MODE_IDS.SPEED_TEST) {
         const wordSetName = session.modeData?.wordSetId === SPEED_TEST_WORD_SET.id
           ? SPEED_TEST_WORD_SET.name
           : session.modeData?.wordSetName || "LEGACY TEST";
         primaryMetric = `${wordSetName} · ${session.modeData?.configId || "TEST"} · ${Math.round(number(session.wpm, 0))} WPM`;
-      } else if (session.modeId === "endless") {
+      } else if (session.modeId === MODE_IDS.ENDLESS) {
         primaryMetric = `STAGE ${number(session.modeData?.highestStage, 0)} · ${number(session.score, 0).toLocaleString("en-US")}`;
-      } else if (session.modeId === "daily") {
-        primaryMetric = `${session.success ? "COMPLETE" : "FAILED"} · ${number(session.score, 0).toLocaleString("en-US")}`;
+      } else if (session.modeId === MODE_IDS.ARCADE_RUSH) {
+        const rush = arcadeRushRecentData(session);
+        primaryMetric = session.success
+          ? `COMPLETE · ${number(session.score, 0).toLocaleString("en-US")}`
+          : `WAVE ${Math.min(7, rush.wavesCompleted + 1)}/7 · ${number(session.score, 0).toLocaleString("en-US")}`;
       }
       return {
         sessionId: session.sessionId,
@@ -213,6 +233,7 @@ export function getRecentSessionStatistics(storage = {}, modeFilter = "all") {
         accuracy: number(session.accuracy),
         wpm: number(session.wpm),
         activeDurationMs: number(session.activeDurationMs),
+        arcadeRush: arcadeRushRecentData(session),
       };
     });
 }
@@ -221,19 +242,20 @@ export function getOverviewStatistics(storage = {}, save = {}) {
   const lifetime = getLifetimeStatistics(storage);
   const campaign = getCampaignStatistics(storage, save);
   const endless = getEndlessStatistics(storage);
-  const daily = getDailyStatistics(storage);
+  const arcadeRush = getArcadeRushStatistics(storage);
   return {
     profile: storage.profile || null,
     lifetime,
     campaignProgress: campaign.levelsCompleted,
     bestTypingWpm: bestTypingWpm(storage),
     highestEndlessStage: endless.highestStage,
-    dailyStreak: daily.currentStreak,
+    arcadeRushBestScore: arcadeRush.highestScore,
+    arcadeRushCompletionRate: arcadeRush.completionRate,
     recent: getRecentSessionStatistics(storage).slice(0, 5),
   };
 }
 
-export function getStatisticsSnapshot(storage = {}, save = {}, utcDateKey = getUtcDateKey()) {
+export function getStatisticsSnapshot(storage = {}, save = {}) {
   return {
     profile: storage.profile || null,
     lifetime: getLifetimeStatistics(storage),
@@ -241,7 +263,7 @@ export function getStatisticsSnapshot(storage = {}, save = {}, utcDateKey = getU
     campaign: getCampaignStatistics(storage, save),
     typingTest: getTypingTestStatistics(storage),
     endless: getEndlessStatistics(storage),
-    daily: getDailyStatistics(storage, utcDateKey),
+    arcadeRush: getArcadeRushStatistics(storage),
     recent: getRecentSessionStatistics(storage),
   };
 }
