@@ -1,4 +1,5 @@
 export const ARCADE_RUSH_CONTRACT_VERSION = 1;
+export const ARCADE_RUSH_RULES_VERSION = 1;
 export const ARCADE_RUSH_MODE_ID = "arcade-rush";
 export const ARCADE_RUSH_DISPLAY_NAME = "Arcade Rush";
 export const ARCADE_RUSH_READY_ROUTE = "arcade-rush-ready";
@@ -12,9 +13,10 @@ export const ARCADE_RUSH_WAVE_COUNT = 6;
 export const ARCADE_RUSH_FINALE_COUNT = 1;
 export const ARCADE_RUSH_STARTING_INTEGRITY = 5;
 
-// AR10 owns the numeric gameplay/leaderboard rules freeze. AR0 freezes the
-// product and data contract only so balancing can still change safely.
-export const ARCADE_RUSH_RULES_STATUS = "UNFROZEN_UNTIL_AR10";
+// AR10 freezes every leaderboard-affecting gameplay rule at version 1.
+// Any later change to wave pressure, vocabulary rules, boss rules, scoring,
+// or eligibility must ship behind a new ARCADE_RUSH_RULES_VERSION.
+export const ARCADE_RUSH_RULES_STATUS = "FROZEN_V1";
 
 export const ARCADE_RUSH_LIFECYCLE_SEQUENCE = Object.freeze([
   "READY",
