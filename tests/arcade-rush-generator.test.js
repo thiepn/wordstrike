@@ -1,7 +1,9 @@
 import assert from "node:assert/strict";
 import fs from "node:fs/promises";
 import {
+  ARCADE_RUSH_BOSS_PLAN_STATUS,
   ARCADE_RUSH_BOSS_TARGET_DURATION_MS,
+  ARCADE_RUSH_BOSS_VERSION,
   ARCADE_RUSH_GENERATOR_CONFIG,
   ARCADE_RUSH_GENERATOR_VERSION,
   ARCADE_RUSH_PROFILE_STATUS,
@@ -66,7 +68,8 @@ assert.equal(first.generatorVersion, ARCADE_RUSH_GENERATOR_VERSION);
 assert.equal(first.waves.length, 6);
 assert.equal(first.waves.reduce((sum, wave) => sum + wave.entries.length, 0), 120);
 assert.equal(first.boss.id, "core-breaker");
-assert.equal(first.boss.status, "DEFERRED_TO_AR5");
+assert.equal(first.boss.bossVersion, ARCADE_RUSH_BOSS_VERSION);
+assert.equal(first.boss.status, ARCADE_RUSH_BOSS_PLAN_STATUS);
 assert.equal(first.boss.targetDurationMs, 45_000);
 assert.equal(Object.isFrozen(first), true);
 assert.equal(Object.isFrozen(first.waves), true);
