@@ -4,10 +4,12 @@ export const PUBLIC_BOARD_KEYS = Object.freeze([
   "typing-15s-english200-v1",
   "endless-v1",
   "daily-strike-v1",
+  "arcade-rush-v1",
 ]);
 export const LEADERBOARD_LIMIT = 100;
 export const LEADERBOARD_RULES_VERSION = 1;
 export const DAILY_CHALLENGE_VERSION = 1;
+export const ARCADE_RUSH_BOARD_KEY = "arcade-rush-v1";
 
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -79,6 +81,15 @@ export function compareEndlessLeaderboardRows(a, b) {
   ].find(Boolean) || finalTie(a, b);
 }
 
+export function compareArcadeRushLeaderboardRows(a, b) {
+  if (Boolean(a.completed) !== Boolean(b.completed)) return a.completed ? -1 : 1;
+  return [
+    higher(a.score, b.score),
+    higher(a.accuracy, b.accuracy),
+    lower(a.durationMs ?? a.duration_ms, b.durationMs ?? b.duration_ms),
+  ].find(Boolean) || finalTie(a, b);
+}
+
 const GRADE_RANK = Object.freeze({ D: 1, C: 2, B: 3, A: 4, S: 5 });
 
 export function compareCampaignLeaderboardRows(a, b) {
@@ -132,11 +143,13 @@ export function rankLeaderboardRows(rows, {
 } = {}) {
   const comparator = boardKey === "daily-strike-v1"
     ? compareDailyLeaderboardRows
-    : boardKey === "endless-v1"
-      ? compareEndlessLeaderboardRows
-      : boardKey === "campaign-highest-level-v1"
-        ? compareCampaignLeaderboardRows
-        : compareTypingLeaderboardRows;
+    : boardKey === ARCADE_RUSH_BOARD_KEY
+      ? compareArcadeRushLeaderboardRows
+      : boardKey === "endless-v1"
+        ? compareEndlessLeaderboardRows
+        : boardKey === "campaign-highest-level-v1"
+          ? compareCampaignLeaderboardRows
+          : compareTypingLeaderboardRows;
   const eligible = (Array.isArray(rows) ? rows : []).filter((row) => (
     row.boardKey === boardKey &&
     number(row.rulesVersion) === LEADERBOARD_RULES_VERSION &&
@@ -144,6 +157,7 @@ export function rankLeaderboardRows(rows, {
     typeof row.username === "string" && row.username.length > 0 &&
     (boardKey !== "campaign-highest-level-v1" || row.completed === true) &&
     (!boardKey.startsWith("typing-") || row.completed === true) &&
+    (boardKey !== ARCADE_RUSH_BOARD_KEY || row.completed === true) &&
     (
       boardKey !== "daily-strike-v1" ||
       (
