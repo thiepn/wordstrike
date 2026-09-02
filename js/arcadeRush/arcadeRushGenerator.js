@@ -10,6 +10,11 @@ import {
   ARCADE_RUSH_WAVE_PROFILES,
   getArcadeRushWaveProfile,
 } from "./arcadeRushConfig.js";
+import {
+  ARCADE_RUSH_BOSS_ID,
+  ARCADE_RUSH_BOSS_PLAN_STATUS,
+  ARCADE_RUSH_BOSS_VERSION,
+} from "./arcadeRushBoss.js";
 
 const EDGES = Object.freeze(["top", "right", "bottom", "left"]);
 const SOURCE_NAMES = Object.freeze(["common", "low", "mid", "high", "difficult"]);
@@ -264,11 +269,12 @@ export function generateArcadeRushPlan({ seed, vocabulary } = {}) {
     globalIndex += wave.entries.length;
   }
   const boss = Object.freeze({
-    id: "core-breaker",
+    id: ARCADE_RUSH_BOSS_ID,
+    bossVersion: ARCADE_RUSH_BOSS_VERSION,
     generatorVersion: ARCADE_RUSH_GENERATOR_VERSION,
     seed: deriveArcadeRushDomainSeed(seed, "boss"),
     targetDurationMs: ARCADE_RUSH_BOSS_TARGET_DURATION_MS,
-    status: "DEFERRED_TO_AR5",
+    status: ARCADE_RUSH_BOSS_PLAN_STATUS,
   });
   return createArcadeRushPlanEnvelope({ seed, waves, boss });
 }
@@ -316,9 +322,10 @@ export function isGeneratedArcadeRushPlan(value) {
   }
   return Boolean(
     expectedGlobalIndex === ARCADE_RUSH_TOTAL_PLANNED_WORDS &&
-    value.boss?.id === "core-breaker" &&
+    value.boss?.id === ARCADE_RUSH_BOSS_ID &&
+    value.boss?.bossVersion === ARCADE_RUSH_BOSS_VERSION &&
     isArcadeRushSeed(value.boss?.seed) &&
     value.boss?.generatorVersion === ARCADE_RUSH_GENERATOR_VERSION &&
-    value.boss?.status === "DEFERRED_TO_AR5"
+    value.boss?.status === ARCADE_RUSH_BOSS_PLAN_STATUS
   );
 }
