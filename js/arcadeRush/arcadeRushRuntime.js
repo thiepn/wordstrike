@@ -7,6 +7,7 @@ import {
 } from "./arcadeRushContract.js";
 import { ARCADE_RUSH_GENERATOR_VERSION } from "./arcadeRushConfig.js";
 import { isGeneratedArcadeRushPlan } from "./arcadeRushGenerator.js";
+import { createArcadeRushBossPort } from "./arcadeRushBoss.js";
 import {
   ARCADE_RUSH_DRAFT_RULES_VERSION,
   ARCADE_RUSH_SCORING_VERSION,
@@ -16,8 +17,9 @@ import {
 } from "./arcadeRushScoring.js";
 import { buildArcadeRushSessionResult } from "./arcadeRushResult.js";
 
-export const ARCADE_RUSH_RUNTIME_VERSION = 1;
+export const ARCADE_RUSH_RUNTIME_VERSION = 2;
 export const ARCADE_RUSH_WAVE_TRANSITION_MS = 2_500;
+export const ARCADE_RUSH_BOSS_INTRO_MS = 2_500;
 export const ARCADE_RUSH_MAX_FRAME_DELTA_MS = 100;
 
 export const ARCADE_RUSH_RUNTIME_PORTS = Object.freeze({
@@ -56,7 +58,10 @@ const RUN_STATES = Object.freeze({
   ACTIVE: "active",
   TRANSITIONING: "transitioning",
   PAUSED: "paused",
+  BOSS_INTRO: "boss-intro",
+  BOSS_ACTIVE: "boss-active",
   AWAITING_BOSS: "awaiting-boss",
+  COMPLETE: "complete",
   FAILED: "failed",
   STOPPED: "stopped",
 });
@@ -96,6 +101,20 @@ function createWaveStats(plan) {
     breaches: 0,
     perfect: false,
   }));
+}
+
+function createBossMetricsBaseline(integrity = ARCADE_RUSH_STARTING_INTEGRITY) {
+  return {
+    correctKeystrokes: 0,
+    totalKeystrokes: 0,
+    correctCharacters: 0,
+    missedCharacters: 0,
+    completedWords: 0,
+    missedWords: 0,
+    successfulPhrases: 0,
+    failedPhrases: 0,
+    integrityRemaining: integrity,
+  };
 }
 
 function phaseForWave(wave) {
@@ -147,11 +166,17 @@ function createRuntimeState(plan, options = {}) {
     lastSpawnAtMs: -(firstWave?.profile?.spawnIntervalMs || 0),
     transitionRemainingMs: 0,
     transitionNextWave: null,
+    bossIntroRemainingMs: 0,
+    boss: null,
     sessionId: null,
     result: null,
     failureNotified: false,
+    completeNotified: false,
     terminalNotified: false,
     wavesCompleteNotified: false,
+    bossIntroNotified: false,
+    bossStartNotified: false,
+    bossCompleteNotified: false,
   };
 }
 
@@ -176,6 +201,7 @@ export function createArcadeRushRuntimePorts(value) {
 export function createArcadeRushRuntime({
   plan,
   ports,
+  bossPort,
   source = "arcade-rush-ready",
   developerMode = false,
   callbacks = {},
@@ -184,9 +210,17 @@ export function createArcadeRushRuntime({
   const runtimePorts = createArcadeRushRuntimePorts(ports);
   if (!runtimePorts) return null;
 
+  const requestedBossPort = bossPort === undefined ? null : bossPort;
+  const runtimeBossPort = requestedBossPort === null
+    ? null
+    : createArcadeRushBossPort(requestedBossPort);
+  if (requestedBossPort !== null && !runtimeBossPort) return null;
+
   let game = createRuntimeState(plan, { source, developerMode });
   let frameId = null;
   let disposed = false;
+  let bossEncounter = null;
+  let bossMetricsApplied = createBossMetricsBaseline(game.integrity);
 
   function currentWavePlan() {
     return game.plan.waves[game.currentWave - 1] || null;
@@ -206,7 +240,12 @@ export function createArcadeRushRuntime({
   }
 
   function shouldLoop() {
-    return !disposed && [RUN_STATES.ACTIVE, RUN_STATES.TRANSITIONING].includes(game.runState);
+    return !disposed && [
+      RUN_STATES.ACTIVE,
+      RUN_STATES.TRANSITIONING,
+      RUN_STATES.BOSS_INTRO,
+      RUN_STATES.BOSS_ACTIVE,
+    ].includes(game.runState);
   }
 
   function scheduleFrame() {
@@ -232,6 +271,30 @@ export function createArcadeRushRuntime({
     return game.words.find((word) => word.id === Number(wordId)) || null;
   }
 
+  function beginBossIntro() {
+    game.phase = "BOSS_INTRO";
+    game.transitionRemainingMs = 0;
+    game.transitionNextWave = null;
+    runtimePorts.session.setState("transitioning");
+
+    if (!runtimeBossPort) {
+      cancelFrame();
+      game.runState = RUN_STATES.AWAITING_BOSS;
+      return;
+    }
+
+    game.runState = RUN_STATES.BOSS_INTRO;
+    game.bossIntroRemainingMs = ARCADE_RUSH_BOSS_INTRO_MS;
+    if (!game.bossIntroNotified) {
+      game.bossIntroNotified = true;
+      callbacks.onBossIntro?.(getSnapshot(), snapshot({
+        bossId: game.plan.boss.id,
+        durationMs: ARCADE_RUSH_BOSS_INTRO_MS,
+      }));
+    }
+    scheduleFrame();
+  }
+
   function finishWaveIfResolved() {
     if (game.runState !== RUN_STATES.ACTIVE) return false;
     const wave = currentWavePlan();
@@ -245,16 +308,11 @@ export function createArcadeRushRuntime({
     runtimePorts.input.resetTargeting(game);
 
     if (game.currentWave >= ARCADE_RUSH_WAVE_COUNT) {
-      cancelFrame();
-      game.phase = "BOSS_INTRO";
-      game.runState = RUN_STATES.AWAITING_BOSS;
-      game.transitionRemainingMs = 0;
-      game.transitionNextWave = null;
-      runtimePorts.session.setState("transitioning");
       if (!game.wavesCompleteNotified) {
         game.wavesCompleteNotified = true;
         callbacks.onWavesComplete?.(getSnapshot());
       }
+      beginBossIntro();
       notifyUpdate();
       return true;
     }
@@ -348,7 +406,11 @@ export function createArcadeRushRuntime({
     return true;
   }
 
-  function buildFailureResult() {
+  function buildTerminalResult({
+    success,
+    bossDefeated = false,
+    bossTimeRemainingMs = 0,
+  }) {
     const session = runtimePorts.session.getCurrent?.() || {};
     const startedAt = Number.isFinite(session.startedAtEpochMs)
       ? session.startedAtEpochMs
@@ -372,7 +434,7 @@ export function createArcadeRushRuntime({
       activeDurationMs: Math.round(game.elapsedMs),
       seed: game.seed,
       developerMode: game.developerMode,
-      success: false,
+      success,
       accuracy,
       wpm,
       characters: {
@@ -388,38 +450,74 @@ export function createArcadeRushRuntime({
       },
       combo: { maximum: game.maxCombo, final: game.combo },
       wavesCompleted: game.wavesCompleted,
-      bossDefeated: false,
-      bossTimeRemainingMs: 0,
-      integrityRemaining: 0,
+      bossDefeated,
+      bossTimeRemainingMs,
+      integrityRemaining: success ? game.integrity : 0,
       perfectWaves: game.perfectWaves,
       wordPoints: game.wordPoints,
     });
   }
 
-  function failRun() {
-    if ([RUN_STATES.FAILED, RUN_STATES.STOPPED, RUN_STATES.AWAITING_BOSS].includes(game.runState)) {
+  function finalizeSessionResult(result) {
+    if (!result) return null;
+    game.result = result;
+    game.score = result.score;
+    runtimePorts.session.setState("results");
+    runtimePorts.session.complete(result);
+    return result;
+  }
+
+  function failRun({ bossTimeRemainingMs = 0 } = {}) {
+    if ([RUN_STATES.FAILED, RUN_STATES.COMPLETE, RUN_STATES.STOPPED].includes(game.runState)) {
       return game.result;
     }
     cancelFrame();
     game.integrity = 0;
     game.phase = "FAILED";
     game.runState = RUN_STATES.FAILED;
-    runtimePorts.session.setState("results");
-    game.result = buildFailureResult();
-    if (game.result) {
-      game.score = game.result.score;
-      runtimePorts.session.complete(game.result);
-    }
+    const result = finalizeSessionResult(buildTerminalResult({
+      success: false,
+      bossDefeated: false,
+      bossTimeRemainingMs,
+    }));
     if (!game.failureNotified) {
       game.failureNotified = true;
-      callbacks.onFailure?.(getSnapshot(), game.result);
+      callbacks.onFailure?.(getSnapshot(), result);
     }
     if (!game.terminalNotified) {
       game.terminalNotified = true;
-      callbacks.onTerminal?.(getSnapshot(), game.result);
+      callbacks.onTerminal?.(getSnapshot(), result);
     }
     notifyUpdate();
-    return game.result;
+    return result;
+  }
+
+  function completeRun() {
+    if ([RUN_STATES.COMPLETE, RUN_STATES.FAILED, RUN_STATES.STOPPED].includes(game.runState)) {
+      return game.result;
+    }
+    cancelFrame();
+    game.phase = "COMPLETE";
+    game.runState = RUN_STATES.COMPLETE;
+    const result = finalizeSessionResult(buildTerminalResult({
+      success: true,
+      bossDefeated: true,
+      bossTimeRemainingMs: game.boss?.durationRemainingMs ?? 0,
+    }));
+    if (!game.bossCompleteNotified) {
+      game.bossCompleteNotified = true;
+      callbacks.onBossComplete?.(getSnapshot(), result);
+    }
+    if (!game.completeNotified) {
+      game.completeNotified = true;
+      callbacks.onComplete?.(getSnapshot(), result);
+    }
+    if (!game.terminalNotified) {
+      game.terminalNotified = true;
+      callbacks.onTerminal?.(getSnapshot(), result);
+    }
+    notifyUpdate();
+    return result;
   }
 
   function processCoreBreach(wordId) {
@@ -463,7 +561,131 @@ export function createArcadeRushRuntime({
     });
   }
 
+  function syncBossSnapshot(explicitSnapshot = null) {
+    if (!runtimeBossPort || !bossEncounter) return null;
+    const next = explicitSnapshot || runtimeBossPort.getSnapshot(bossEncounter);
+    if (!next) return null;
+
+    const completedWords = Math.max(
+      0,
+      next.completedWords - bossMetricsApplied.completedWords,
+    );
+    const missedWords = Math.max(
+      0,
+      next.missedWords - bossMetricsApplied.missedWords,
+    );
+    const correctKeystrokes = Math.max(
+      0,
+      next.correctKeystrokes - bossMetricsApplied.correctKeystrokes,
+    );
+    const totalKeystrokes = Math.max(
+      0,
+      next.totalKeystrokes - bossMetricsApplied.totalKeystrokes,
+    );
+    const correctCharacters = Math.max(
+      0,
+      next.correctCharacters - bossMetricsApplied.correctCharacters,
+    );
+    const missedCharacters = Math.max(
+      0,
+      next.missedCharacters - bossMetricsApplied.missedCharacters,
+    );
+    const successfulPhrases = Math.max(
+      0,
+      next.successfulPhrases - bossMetricsApplied.successfulPhrases,
+    );
+    const failedPhrases = Math.max(
+      0,
+      next.failedPhrases - bossMetricsApplied.failedPhrases,
+    );
+    const damage = Math.max(
+      0,
+      bossMetricsApplied.integrityRemaining - next.integrityRemaining,
+    );
+
+    game.correctKeystrokes += correctKeystrokes;
+    game.totalKeystrokes += totalKeystrokes;
+    game.correctCharacters += correctCharacters;
+    game.missedCharacters += missedCharacters;
+    game.completedWordCount += completedWords;
+    game.missedWordCount += missedWords;
+    game.totalResolved += completedWords + missedWords;
+
+    if (missedWords > 0 || damage > 0) game.combo = 0;
+    if (completedWords > 0) {
+      game.combo += completedWords;
+      game.maxCombo = Math.max(game.maxCombo, game.combo);
+    }
+
+    if (damage > 0) {
+      game.coreBreaches += damage;
+      for (let hit = 0; hit < damage; hit += 1) {
+        runtimePorts.renderer.flashDamage();
+      }
+    }
+    game.integrity = next.integrityRemaining;
+    game.boss = next;
+
+    if (successfulPhrases > 0) {
+      callbacks.onBossPhraseComplete?.(getSnapshot(), snapshot({
+        count: successfulPhrases,
+        hp: next.hp,
+        completedWords,
+      }));
+    }
+    if (failedPhrases > 0) {
+      callbacks.onBossAttack?.(getSnapshot(), snapshot({
+        count: failedPhrases,
+        damage,
+        integrity: next.integrityRemaining,
+        missedWords,
+      }));
+    }
+
+    bossMetricsApplied = {
+      correctKeystrokes: next.correctKeystrokes,
+      totalKeystrokes: next.totalKeystrokes,
+      correctCharacters: next.correctCharacters,
+      missedCharacters: next.missedCharacters,
+      completedWords: next.completedWords,
+      missedWords: next.missedWords,
+      successfulPhrases: next.successfulPhrases,
+      failedPhrases: next.failedPhrases,
+      integrityRemaining: next.integrityRemaining,
+    };
+    return next;
+  }
+
+  function settleBossIfTerminal() {
+    if (!game.boss || !runtimeBossPort || !bossEncounter) return false;
+    if (!["DEFEATED", "FAILED"].includes(game.boss.phase)) return false;
+
+    const finalized = runtimeBossPort.finalize(bossEncounter);
+    if (finalized) syncBossSnapshot(finalized);
+
+    if (game.boss?.phase === "DEFEATED") {
+      completeRun();
+      return true;
+    }
+
+    failRun({
+      bossTimeRemainingMs: game.boss?.durationRemainingMs ?? 0,
+    });
+    return true;
+  }
+
   function handleKey(event) {
+    if (game.runState === RUN_STATES.BOSS_ACTIVE) {
+      const response = runtimeBossPort?.handleInput(bossEncounter, event);
+      const handled = typeof response === "object"
+        ? response?.handled === true
+        : Boolean(response);
+      syncBossSnapshot();
+      const terminal = settleBossIfTerminal();
+      if (!terminal) notifyUpdate();
+      return handled;
+    }
+
     if (game.runState !== RUN_STATES.ACTIVE) return false;
     const handled = runtimePorts.input.handleKey(event, game, interactionApi());
     runtimePorts.input.reconcileTargeting(game);
@@ -552,6 +774,48 @@ export function createArcadeRushRuntime({
     callbacks.onWaveStart?.(getSnapshot(), nextWave);
   }
 
+  function startBossEncounter() {
+    if (!runtimeBossPort || game.runState !== RUN_STATES.BOSS_INTRO) return false;
+    bossEncounter = runtimeBossPort.createEncounter({
+      boss: game.plan.boss,
+      seed: game.plan.boss.seed,
+      integrityRemaining: game.integrity,
+    });
+    if (!bossEncounter) {
+      cancelFrame();
+      game.runState = RUN_STATES.STOPPED;
+      runtimePorts.session.setState("aborted");
+      callbacks.onBossError?.(getSnapshot(), "boss-creation-failed");
+      notifyUpdate();
+      return false;
+    }
+    bossMetricsApplied = createBossMetricsBaseline(game.integrity);
+    syncBossSnapshot();
+    game.phase = "BOSS";
+    game.runState = RUN_STATES.BOSS_ACTIVE;
+    game.bossIntroRemainingMs = 0;
+    runtimePorts.session.setState("active");
+    if (!game.bossStartNotified) {
+      game.bossStartNotified = true;
+      callbacks.onBossStart?.(getSnapshot(), game.boss);
+    }
+    return true;
+  }
+
+  function tickBossIntro(deltaMs) {
+    game.bossIntroRemainingMs = Math.max(
+      0,
+      game.bossIntroRemainingMs - deltaMs,
+    );
+    if (game.bossIntroRemainingMs <= 0) startBossEncounter();
+  }
+
+  function tickBoss(deltaMs) {
+    runtimeBossPort?.update(bossEncounter, deltaMs);
+    syncBossSnapshot();
+    settleBossIfTerminal();
+  }
+
   function tick(timestamp) {
     frameId = null;
     if (!shouldLoop()) return;
@@ -568,6 +832,8 @@ export function createArcadeRushRuntime({
 
     if (game.runState === RUN_STATES.ACTIVE) tickWave(deltaMs);
     else if (game.runState === RUN_STATES.TRANSITIONING) tickTransition(deltaMs);
+    else if (game.runState === RUN_STATES.BOSS_INTRO) tickBossIntro(deltaMs);
+    else if (game.runState === RUN_STATES.BOSS_ACTIVE) tickBoss(deltaMs);
 
     notifyUpdate();
     scheduleFrame();
@@ -589,6 +855,8 @@ export function createArcadeRushRuntime({
         runtimeVersion: ARCADE_RUSH_RUNTIME_VERSION,
         waveCount: ARCADE_RUSH_WAVE_COUNT,
         startingIntegrity: ARCADE_RUSH_STARTING_INTEGRITY,
+        bossId: game.plan.boss.id,
+        bossVersion: game.plan.boss.bossVersion,
         recordEligible: false,
       },
     });
@@ -604,7 +872,12 @@ export function createArcadeRushRuntime({
   }
 
   function pause() {
-    if (![RUN_STATES.ACTIVE, RUN_STATES.TRANSITIONING].includes(game.runState)) return false;
+    if (![
+      RUN_STATES.ACTIVE,
+      RUN_STATES.TRANSITIONING,
+      RUN_STATES.BOSS_INTRO,
+      RUN_STATES.BOSS_ACTIVE,
+    ].includes(game.runState)) return false;
     game.resumeRunState = game.runState;
     game.runState = RUN_STATES.PAUSED;
     cancelFrame();
@@ -614,14 +887,18 @@ export function createArcadeRushRuntime({
     return true;
   }
 
+  function sessionStateForRunState(runState) {
+    return [RUN_STATES.TRANSITIONING, RUN_STATES.BOSS_INTRO].includes(runState)
+      ? "transitioning"
+      : "active";
+  }
+
   function resume() {
     if (game.runState !== RUN_STATES.PAUSED) return false;
     game.runState = game.resumeRunState || RUN_STATES.ACTIVE;
     game.resumeRunState = null;
     game.lastTimestamp = null;
-    runtimePorts.session.setState(
-      game.runState === RUN_STATES.TRANSITIONING ? "transitioning" : "active",
-    );
+    runtimePorts.session.setState(sessionStateForRunState(game.runState));
     callbacks.onResume?.(getSnapshot());
     notifyUpdate();
     scheduleFrame();
@@ -630,10 +907,15 @@ export function createArcadeRushRuntime({
 
   function stop({ abortSession = true } = {}) {
     cancelFrame();
-    if (abortSession && ![RUN_STATES.FAILED, RUN_STATES.STOPPED].includes(game.runState)) {
+    if (
+      abortSession
+      && ![RUN_STATES.FAILED, RUN_STATES.COMPLETE, RUN_STATES.STOPPED].includes(game.runState)
+    ) {
       runtimePorts.session.setState("aborted");
     }
-    if (game.runState !== RUN_STATES.FAILED) game.runState = RUN_STATES.STOPPED;
+    if (![RUN_STATES.FAILED, RUN_STATES.COMPLETE].includes(game.runState)) {
+      game.runState = RUN_STATES.STOPPED;
+    }
     game.lastTimestamp = null;
     return true;
   }
@@ -644,17 +926,25 @@ export function createArcadeRushRuntime({
     runtimePorts.input.resetTargeting(game);
     game.words.length = 0;
     game.activeTargetId = null;
+    bossEncounter = null;
+    game.boss = null;
     callbacks.onCleanup?.(getSnapshot());
     return true;
   }
 
-  function restart({ plan: nextPlan, source: nextSource = source, developerMode: nextDeveloperMode = developerMode } = {}) {
+  function restart({
+    plan: nextPlan,
+    source: nextSource = source,
+    developerMode: nextDeveloperMode = developerMode,
+  } = {}) {
     if (!isGeneratedArcadeRushPlan(nextPlan)) return null;
     cleanup({ abortSession: true });
     game = createRuntimeState(nextPlan, {
       source: nextSource,
       developerMode: nextDeveloperMode,
     });
+    bossEncounter = null;
+    bossMetricsApplied = createBossMetricsBaseline(game.integrity);
     disposed = false;
     return start();
   }
