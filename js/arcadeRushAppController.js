@@ -33,7 +33,6 @@ import {
   LEADERBOARD_BOARDS,
 } from "./leaderboardService.js";
 import { renderLeaderboards } from "./leaderboardUi.js";
-import { isArcadeRushLeaderboardShadowEnabled } from "./arcadeRushLeaderboard.js";
 import { createArcadeRushShadowCoordinator } from "./arcadeRushShadowCoordinator.js";
 
 export { ARCADE_RUSH_MODE_ID };
@@ -320,15 +319,13 @@ function sessionPort() {
   };
 }
 
-function openShadowArcadeRushLeaderboard() {
-  if (!isArcadeRushLeaderboardShadowEnabled()) return false;
+function openArcadeRushLeaderboard() {
   changeScreen(Screens.LEADERBOARDS);
   renderLeaderboards(
     getLeaderboardState(),
     getAuthState(),
     getLeaderboardProfileState(),
     "",
-    { shadowArcadeRush: true },
   );
   void initializeLeaderboards(LEADERBOARD_BOARDS.ARCADE_RUSH);
   return true;
@@ -365,14 +362,14 @@ export function createArcadeRushAppController({
         const handled = actions[ARCADE_RUSH_UI_ACTIONS.LEADERBOARD](payload);
         if (handled !== false) return handled;
       }
-      return openShadowArcadeRushLeaderboard();
+      return openArcadeRushLeaderboard();
     },
   };
   const resolveResultOptions = (result, options = null) => {
     const configured = options || resultOptions(result) || {};
     return shadowCoordinator.enhanceResultOptions({
       ...configured,
-      leaderboardAvailable: configured.leaderboardAvailable === true || isArcadeRushLeaderboardShadowEnabled(),
+      leaderboardAvailable: true,
     });
   };
   const uiController = createArcadeRushDomUiController({ root, actions: resolvedActions });
