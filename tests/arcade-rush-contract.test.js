@@ -11,6 +11,7 @@ import {
   ARCADE_RUSH_READY_ROUTE,
   ARCADE_RUSH_REQUIRED_RESULT_FIELDS,
   ARCADE_RUSH_RULES_STATUS,
+  ARCADE_RUSH_RULES_VERSION,
   ARCADE_RUSH_SCORE_COMPONENT_FIELDS,
   ARCADE_RUSH_STARTING_INTEGRITY,
   ARCADE_RUSH_TARGET_DURATION_MS,
@@ -22,6 +23,7 @@ import {
 } from "../js/arcadeRush/arcadeRushContract.js";
 
 assert.equal(ARCADE_RUSH_CONTRACT_VERSION, 1);
+assert.equal(ARCADE_RUSH_RULES_VERSION, 1);
 assert.equal(ARCADE_RUSH_MODE_ID, "arcade-rush");
 assert.equal(ARCADE_RUSH_DISPLAY_NAME, "Arcade Rush");
 assert.equal(ARCADE_RUSH_READY_ROUTE, "arcade-rush-ready");
@@ -32,7 +34,7 @@ assert.deepEqual(ARCADE_RUSH_TARGET_DURATION_MS, {
 assert.equal(ARCADE_RUSH_WAVE_COUNT, 6);
 assert.equal(ARCADE_RUSH_FINALE_COUNT, 1);
 assert.equal(ARCADE_RUSH_STARTING_INTEGRITY, 5);
-assert.equal(ARCADE_RUSH_RULES_STATUS, "UNFROZEN_UNTIL_AR10");
+assert.equal(ARCADE_RUSH_RULES_STATUS, "FROZEN_V1");
 
 assert.deepEqual(ARCADE_RUSH_LIFECYCLE_SEQUENCE, [
   "READY",
@@ -114,4 +116,4 @@ for (const value of [
   assert.equal(Object.isFrozen(value), true);
 }
 
-console.log("Arcade Rush AR0 contract freeze tests passed.");
+console.log("Arcade Rush AR0 contract and AR10 rules-v1 freeze tests passed.");
