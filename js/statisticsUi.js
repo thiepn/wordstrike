@@ -5,7 +5,6 @@ import {
   formatDuration,
   formatPercentage,
   formatRecordValue,
-  formatUtcDate,
 } from "./statisticsFormat.js";
 import { getRecentSessionStatistics } from "./statistics.js";
 import {
@@ -19,7 +18,7 @@ export const STATISTICS_TABS = Object.freeze([
   "CAMPAIGN",
   "TYPING TEST",
   "ENDLESS",
-  "DAILY",
+  "ARCADE RUSH",
   "RECENT",
   "PROFILE",
 ]);
@@ -49,8 +48,15 @@ function modeLabel(modeId) {
     campaign: "CAMPAIGN",
     "speed-test": "TYPING TEST",
     endless: "ENDLESS",
-    daily: "DAILY",
+    "arcade-rush": "ARCADE RUSH",
   }[modeId] || String(modeId || "UNKNOWN").toUpperCase();
+}
+
+function rushRecentDetails(row) {
+  const rush = row.arcadeRush;
+  if (!rush) return "";
+  const boss = rush.bossDefeated ? "BOSS DEFEATED" : "BOSS NOT DEFEATED";
+  return `<span class="recent-session-detail">${rush.wavesCompleted} WAVES · ${boss} · CORE ${rush.integrityRemaining}/5 · COMBO ${formatCompactNumber(rush.maxCombo)} · RULES ${rush.rulesLabel}</span>`;
 }
 
 function recentRows(rows) {
@@ -59,7 +65,8 @@ function recentRows(rows) {
     <article class="recent-session-row">
       <div><time>${formatDateTime(row.endedAt)}</time><strong>${modeLabel(row.modeId)}</strong></div>
       <div><b>${escapeHtml(row.primaryMetric || (row.success ? "COMPLETE" : "FAILED"))}</b>
-        <span>${formatPercentage(row.accuracy)} · ${formatRecordValue(row.wpm, (value) => `${Math.round(value)} WPM`)} · ${formatDuration(row.activeDurationMs)}</span></div>
+        <span>${formatPercentage(row.accuracy)} · ${formatRecordValue(row.wpm, (value) => `${Math.round(value)} WPM`)} · ${formatDuration(row.activeDurationMs)}</span>
+        ${rushRecentDetails(row)}</div>
     </article>`).join("")}</div>`;
 }
 
@@ -80,7 +87,8 @@ function renderOverview(snapshot) {
       ${metric("CAMPAIGN PROGRESS", `${data.campaignProgress} / 100`, true)}
       ${metric("BEST TYPING SPEED", formatRecordValue(data.bestTypingWpm, (value) => `${Math.round(value)} WPM`), true)}
       ${metric("HIGHEST ENDLESS STAGE", formatRecordValue(data.highestEndlessStage), true)}
-      ${metric("DAILY STREAK", `${data.dailyStreak} ${data.dailyStreak === 1 ? "day" : "days"}`, true)}
+      ${metric("ARCADE RUSH BEST", formatRecordValue(data.arcadeRushBestScore), true)}
+      ${metric("RUSH COMPLETION", formatPercentage(data.arcadeRushCompletionRate), true)}
       ${metric("WEIGHTED WPM", formatRecordValue(lifetime.weightedWpm, (value) => value.toFixed(1)), true)}
     </div>
     ${lifetime.finalizedSessions === 0 ? emptyState("PLAY A MODE TO BUILD YOUR STATISTICS") : ""}
@@ -171,34 +179,39 @@ function renderEndless(data) {
     </div>`;
 }
 
-function renderDaily(data) {
+function renderArcadeRush(data) {
+  const hasRuns = data.runsStarted > 0 || data.finalizedRuns > 0;
   return `
-    <h2>DAILY STRIKE</h2>
-    ${data.totalAttempts === 0 ? emptyState("NO DAILY STRIKE ATTEMPTS YET") : ""}
+    <h2>ARCADE RUSH</h2>
+    ${hasRuns ? "" : emptyState("NO ARCADE RUSH RUNS YET")}
+    <h3>PERSONAL BEST</h3>
     <div class="profile-metric-grid">
-      ${metric("CURRENT STREAK", `${data.currentStreak} days`)}
-      ${metric("BEST STREAK", `${data.bestStreak} days`)}
-      ${metric("TODAY'S ATTEMPTS", data.todayAttempts)}
-      ${metric("TODAY'S BEST SCORE", formatRecordValue(data.todayBestScore))}
-      ${metric("TODAY'S BEST TIME", formatDuration(data.todayBestTimeMs))}
-      ${metric("TODAY'S STATUS", data.todayCompleted ? "COMPLETE" : "NOT COMPLETE")}
-      ${metric("TOTAL ATTEMPTS", data.totalAttempts)}
-      ${metric("SUCCESSFUL COMPLETIONS", data.successfulCompletions)}
-      ${metric("DISTINCT DAYS COMPLETED", data.distinctDaysCompleted)}
-      ${metric("DAILY PLAYTIME", formatDuration(data.activePlaytimeMs))}
-      ${metric("BEST DAILY SCORE", formatRecordValue(data.bestScore))}
+      ${metric("HIGHEST SCORE", formatRecordValue(data.highestScore))}
+      ${metric("BEST COMPLETED SCORE", formatRecordValue(data.bestCompletedScore))}
+      ${metric("FASTEST COMPLETION", formatDuration(data.fastestCompletionMs))}
+      ${metric("BEST WPM", formatRecordValue(data.bestWpm, (value) => value.toFixed(1)))}
+      ${metric("BEST ACCURACY", formatPercentage(data.bestAccuracy))}
+      ${metric("MAXIMUM COMBO", formatRecordValue(data.highestCombo))}
+      ${metric("MOST PERFECT WAVES", formatRecordValue(data.mostPerfectWaves))}
     </div>
-    <h3>LATEST DAILY DATES</h3>
-    ${data.latestDates.length ? `<div class="daily-history-list">${data.latestDates.map((day) => `
-      <div><time>${formatUtcDate(day.dateKey)}</time><strong>${day.completed ? "COMPLETE" : "FAILED"}</strong>
-        <span>${formatRecordValue(day.score)}</span></div>`).join("")}</div>` : emptyState("NO DAILY STRIKE ATTEMPTS YET")}`;
+    <h3>RUN HISTORY</h3>
+    <div class="profile-metric-grid">
+      ${metric("RUNS STARTED", formatCompactNumber(data.runsStarted))}
+      ${metric("RUNS COMPLETED", formatCompactNumber(data.runsCompleted))}
+      ${metric("COMPLETION RATE", formatPercentage(data.completionRate))}
+      ${metric("BOSSES DEFEATED", formatCompactNumber(data.bossesDefeated))}
+      ${metric("FINALIZED RUNS", formatCompactNumber(data.finalizedRuns))}
+      ${metric("FAILED RUNS", formatCompactNumber(data.failedRuns))}
+      ${metric("PLAYTIME", formatDuration(data.activePlaytimeMs))}
+      ${metric("WORDS COMPLETED", formatRecordValue(data.wordsCompleted))}
+    </div>`;
 }
 
 function renderRecent(storage, filter) {
   const rows = getRecentSessionStatistics(storage, filter);
   const filters = [
     ["all", "ALL"], ["campaign", "CAMPAIGN"], ["speed-test", "TYPING TEST"],
-    ["endless", "ENDLESS"], ["daily", "DAILY"],
+    ["endless", "ENDLESS"], ["arcade-rush", "ARCADE RUSH"],
   ];
   return `<h2>RECENT SESSIONS</h2>
     <nav class="recent-filters">${filters.map(([id, label]) => `
@@ -449,8 +462,9 @@ function diagnostics(snapshot, storage) {
     `CAMPAIGN RECORD COUNT=${snapshot.campaign.levelsCompleted}`,
     `TYPING TEST RECORD COUNT=${Object.values(records).filter((record) => record.bestWpm != null).length}`,
     `ENDLESS RECORD PRESENT=${snapshot.endless.highestStage != null}`,
-    `DAILY DAY COUNT=${Object.keys(storage.modes?.daily?.records?.days || {}).length}`,
-    `CURRENT DAILY STREAK=${snapshot.daily.currentStreak}`,
+    `RUSH RUNS STARTED=${snapshot.arcadeRush.runsStarted}`,
+    `RUSH RUNS COMPLETED=${snapshot.arcadeRush.runsCompleted}`,
+    `RUSH BEST SCORE=${snapshot.arcadeRush.highestScore ?? "NONE"}`,
   ].join(" // ");
 }
 
@@ -472,7 +486,7 @@ export function renderProfileStatistics({
     : tab === "CAMPAIGN" ? renderCampaign(snapshot.campaign)
       : tab === "TYPING TEST" ? renderTypingTest(snapshot.typingTest)
         : tab === "ENDLESS" ? renderEndless(snapshot.endless)
-          : tab === "DAILY" ? renderDaily(snapshot.daily)
+          : tab === "ARCADE RUSH" ? renderArcadeRush(snapshot.arcadeRush)
             : tab === "RECENT" ? renderRecent(storage, recentFilter)
               : renderProfile(snapshot.profile, {
                 editing, draft, nameError, copyMessage, authState, leaderboardProfileState,
