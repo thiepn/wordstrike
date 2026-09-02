@@ -4,6 +4,7 @@ import {
   ARCADE_RUSH_BASE_POINTS_BY_TIER,
   ARCADE_RUSH_COMBO_MULTIPLIER_BPS,
   ARCADE_RUSH_DRAFT_RULES_VERSION,
+  ARCADE_RUSH_RULES_VERSION,
   ARCADE_RUSH_SCORING_STATUS,
   ARCADE_RUSH_SCORING_VERSION,
   calculateArcadeRushAccuracyBonus,
@@ -17,8 +18,9 @@ import {
 import { ARCADE_RUSH_SCORING_GOLDEN_FIXTURES } from "./fixtures/arcadeRushScoringFixtures.js";
 
 assert.equal(ARCADE_RUSH_SCORING_VERSION, 1);
-assert.equal(ARCADE_RUSH_DRAFT_RULES_VERSION, 0);
-assert.equal(ARCADE_RUSH_SCORING_STATUS, "DRAFT_UNTIL_AR10");
+assert.equal(ARCADE_RUSH_RULES_VERSION, 1);
+assert.equal(ARCADE_RUSH_DRAFT_RULES_VERSION, ARCADE_RUSH_RULES_VERSION, "legacy draft import must resolve to frozen v1");
+assert.equal(ARCADE_RUSH_SCORING_STATUS, "FROZEN_V1");
 assert.equal(Object.isFrozen(ARCADE_RUSH_BASE_POINTS_BY_TIER), true);
 assert.equal(Object.isFrozen(ARCADE_RUSH_COMBO_MULTIPLIER_BPS), true);
 assert.equal(Object.isFrozen(ARCADE_RUSH_ACCURACY_BONUS_BPS), true);
@@ -62,8 +64,9 @@ for (const fixture of ARCADE_RUSH_SCORING_GOLDEN_FIXTURES) {
   assert.deepEqual(score.breakdown, fixture.expected.breakdown, `${fixture.id} breakdown changed`);
   assert.equal(score.total, fixture.expected.total, `${fixture.id} total changed`);
   assert.equal(sumArcadeRushScoreComponents(score.breakdown), fixture.expected.total);
-  assert.equal(score.rulesVersion, ARCADE_RUSH_DRAFT_RULES_VERSION);
+  assert.equal(score.rulesVersion, ARCADE_RUSH_RULES_VERSION);
   assert.equal(score.scoringVersion, ARCADE_RUSH_SCORING_VERSION);
+  assert.equal(score.scoringStatus, "FROZEN_V1");
 }
 
 assert.equal(calculateArcadeRushFinalScore({
@@ -87,4 +90,4 @@ assert.equal(calculateArcadeRushFinalScore({
   bossTimeRemainingMs: 0,
 }), null);
 
-console.log("Arcade Rush AR3 canonical scoring and golden fixtures passed.");
+console.log("Arcade Rush AR3 canonical scoring and AR10 frozen-v1 golden fixtures passed.");
