@@ -4,7 +4,6 @@ import {
   ARCADE_RUSH_LEADERBOARD_BOARD_KEY,
   ARCADE_RUSH_LEADERBOARD_CATEGORY,
   ARCADE_RUSH_LEADERBOARD_RULES_VERSION,
-  isArcadeRushLeaderboardShadowEnabled,
 } from "./arcadeRushLeaderboard.js";
 
 export const LEADERBOARD_BOARDS = Object.freeze({
@@ -73,32 +72,27 @@ export function getBoardKeyForSelection(category, typingDuration = 60) {
   return LEADERBOARD_BOARDS.CAMPAIGN;
 }
 
+// AR14 public order. Daily remains addressable by exact legacy board key until
+// AR15 retires the backend, but it is no longer part of public keyboard tabs.
 const PUBLIC_KEYBOARD_CATEGORY_ORDER = Object.freeze([
-  LEADERBOARD_CATEGORIES.CAMPAIGN,
-  LEADERBOARD_CATEGORIES.TYPING,
-  LEADERBOARD_CATEGORIES.ENDLESS,
-  LEADERBOARD_CATEGORIES.DAILY,
-]);
-const SHADOW_KEYBOARD_CATEGORY_ORDER = Object.freeze([
   LEADERBOARD_CATEGORIES.CAMPAIGN,
   LEADERBOARD_CATEGORIES.TYPING,
   LEADERBOARD_CATEGORIES.ENDLESS,
   LEADERBOARD_CATEGORIES.ARCADE_RUSH,
 ]);
 
-export function getLeaderboardKeyboardTarget(state, key, {
-  shadowArcadeRush = isArcadeRushLeaderboardShadowEnabled(),
-} = {}) {
+export function getLeaderboardKeyboardTarget(state, key) {
   const selection = getLeaderboardSelection(state?.selectedBoardKey || state?.selectedBoard);
   const category = state?.selectedCategory || selection.selectedCategory;
   const typingDuration = state?.selectedTypingDuration || selection.selectedTypingDuration;
   if (category === LEADERBOARD_CATEGORIES.TYPING && ["ArrowUp", "ArrowDown"].includes(key)) {
     return getBoardKeyForSelection(category, typingDuration === 60 ? 15 : 60);
   }
-  const order = shadowArcadeRush || category === LEADERBOARD_CATEGORIES.ARCADE_RUSH
-    ? SHADOW_KEYBOARD_CATEGORY_ORDER
-    : PUBLIC_KEYBOARD_CATEGORY_ORDER;
-  let index = Math.max(0, order.indexOf(category));
+  const order = PUBLIC_KEYBOARD_CATEGORY_ORDER;
+  let index = order.indexOf(category);
+  // Legacy Daily selections normalize to the new public fourth slot.
+  if (index < 0 && category === LEADERBOARD_CATEGORIES.DAILY) index = order.length - 1;
+  index = Math.max(0, index);
   if (key === "ArrowLeft") index = (index - 1 + order.length) % order.length;
   else if (key === "ArrowRight") index = (index + 1) % order.length;
   else if (key === "Home") index = 0;
@@ -183,7 +177,6 @@ export function createLeaderboardService({
   getDateKey = getUtcDateKey,
   now = () => Date.now(),
   isOnline = () => globalThis.navigator?.onLine !== false,
-  isShadowArcadeRushEnabled = isArcadeRushLeaderboardShadowEnabled,
 } = {}) {
   let state = makeState();
   let requestSequence = 0;
@@ -197,7 +190,7 @@ export function createLeaderboardService({
     return state;
   };
   const normalizeBoardKey = (boardKey) => (
-    boardKey === LEADERBOARD_BOARDS.DAILY && isShadowArcadeRushEnabled()
+    boardKey === LEADERBOARD_BOARDS.DAILY
       ? LEADERBOARD_BOARDS.ARCADE_RUSH
       : boardKey
   );
@@ -278,7 +271,10 @@ export function createLeaderboardService({
     selectLeaderboardBoard: selectBoard,
     selectLeaderboardCategory(category) {
       if (!VALID_CATEGORIES.includes(category)) return Promise.resolve(state);
-      return selectBoard(getBoardKeyForSelection(category, 60));
+      const publicCategory = category === LEADERBOARD_CATEGORIES.DAILY
+        ? LEADERBOARD_CATEGORIES.ARCADE_RUSH
+        : category;
+      return selectBoard(getBoardKeyForSelection(publicCategory, 60));
     },
     selectTypingDuration(duration) {
       if (![15, 60].includes(duration)) return Promise.resolve(state);
