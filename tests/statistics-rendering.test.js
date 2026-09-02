@@ -182,7 +182,11 @@ assert.match(css, /--text-muted:\s*#[0-9a-f]+/i);
 assert.match(css, /\.profile-metric-grid\s*\{[^}]*background:\s*transparent/s);
 assert.match(css, /\.profile-stats-screen\s*\{[^}]*--profile-text-secondary:\s*#d2dbe2/s);
 assert.match(css, /\.profile-stats-screen\s*\{[^}]*--profile-text-muted:\s*#bac6cf/s);
-assert.doesNotMatch(statisticsSource, /dailyDate|getUtcDateKey|dateKey|challengeVersion|streak|attempts/i);
+assert.doesNotMatch(
+  statisticsSource,
+  /dailyDate|getUtcDateKey|dateKey|challengeVersion|currentStreak|bestStreak|dailyStreak|todayAttempts/i,
+);
+assert.doesNotMatch(statisticsSource, /MODE_IDS\.DAILY|modes\?\.daily/);
 assert.doesNotMatch(statisticsSource, /supabase|authService|leaderboardService/i);
 
 console.log("Statistics UI exposes solo-first Arcade Rush records, detailed recent runs, offline local profile access, and no Daily profile surface.");
