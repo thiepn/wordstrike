@@ -35,19 +35,24 @@ function backspaceEvent() {
   };
 }
 
-test("Arcade Rush is registered for infrastructure but excluded from the public mode list", () => {
+test("Arcade Rush is registered and public after the AR14 cutover", () => {
   const rush = getModeDefinition(MODE_IDS.ARCADE_RUSH);
+  const daily = getModeDefinition(MODE_IDS.DAILY);
   assert.equal(MODE_IDS.ARCADE_RUSH, "arcade-rush");
   assert.ok(rush);
   assert.equal(rush.enabled, true);
-  assert.equal(rush.visible, false);
+  assert.equal(rush.visible, true);
   assert.equal(rush.route, "arcade-rush-ready");
-  assert.equal(rush.storesProgress, false);
+  assert.equal(rush.storesProgress, true);
+  assert.equal(rush.status, "available");
   assert.equal(isValidModeId(MODE_IDS.ARCADE_RUSH), true);
   assert.equal(isModeEnabled(MODE_IDS.ARCADE_RUSH), true);
-  assert.equal(getAllModes().some(({ id }) => id === MODE_IDS.ARCADE_RUSH), false);
-  assert.equal(getAllModes().some(({ id }) => id === MODE_IDS.DAILY), true);
+  assert.equal(getAllModes().some(({ id }) => id === MODE_IDS.ARCADE_RUSH), true);
+  assert.equal(getAllModes().some(({ id }) => id === MODE_IDS.DAILY), false);
+  assert.equal(daily?.visible, false);
+  assert.equal(daily?.enabled, true);
   assert.equal(getRegisteredModes().some(({ id }) => id === MODE_IDS.ARCADE_RUSH), true);
+  assert.equal(getRegisteredModes().some(({ id }) => id === MODE_IDS.DAILY), true);
 });
 
 test("Arcade Rush owns one isolated state domain and two valid app screens", () => {
@@ -68,11 +73,11 @@ test("Arcade Rush owns one isolated state domain and two valid app screens", () 
   assert.equal(appState.screen, Screens.ARCADE_RUSH_RESULTS);
 });
 
-test("shared session manager accepts hidden Arcade Rush sessions without public exposure", () => {
+test("shared session manager accepts Arcade Rush sessions", () => {
   clearSession();
   const session = beginSession({
     modeId: MODE_IDS.ARCADE_RUSH,
-    variantId: "draft-r0-s1",
+    variantId: "draft-r1-s1",
     source: "arcade-rush-test",
     seed: 1234,
     developerMode: true,
@@ -105,14 +110,15 @@ test("Arcade Rush backspace is prevented from browser navigation and forwarded t
   assert.equal(forwarded, 1);
 });
 
-test("production mode selection remains Daily while developer routing can reach Arcade Rush", async () => {
+test("production mode selection reaches Arcade Rush while Daily remains developer-reachable for rollback", async () => {
   const [main, modes] = await Promise.all([
     readFile(new URL("../js/main.js", import.meta.url), "utf8"),
     readFile(new URL("../js/modes.js", import.meta.url), "utf8"),
   ]);
+  assert.match(main, /route === "arcade-rush-ready"\) openArcadeRushReady\("mode-select"\)/);
   assert.match(main, /appState\.devMode && search\.get\("mode"\) === MODE_IDS\.ARCADE_RUSH/);
-  assert.match(main, /openArcadeRushReady\("developer"\)/);
+  assert.match(main, /appState\.devMode && search\.get\("mode"\) === MODE_IDS\.DAILY/);
   assert.match(main, /renderModeSelect\(getPracticeLabFeatureGate\(\)\.resolveModeDefinitions\(getAllModes\(\)\)/);
-  assert.match(modes, /name: "Daily Strike"[\s\S]*visible: true/);
-  assert.match(modes, /name: "Arcade Rush"[\s\S]*visible: false/);
+  assert.match(modes, /name: "Daily Strike"[\s\S]*visible: false/);
+  assert.match(modes, /name: "Arcade Rush"[\s\S]*visible: true/);
 });
