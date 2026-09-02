@@ -140,6 +140,11 @@ import {
   stopDailyLoop,
 } from "./dailyMode.js";
 import {
+  ARCADE_RUSH_MODE_ID,
+  createArcadeRushAppController,
+  parseArcadeRushDeveloperSeed,
+} from "./arcadeRushAppController.js";
+import {
   attachAppClickListener,
   resolveAppClickAction,
 } from "./appClickRouting.js";
@@ -233,6 +238,8 @@ let tutorialHintMode = null;
 let practiceLabFeatureGate = null;
 let practiceLabRegistry = null;
 let practiceLabController = null;
+let arcadeRushAppController = null;
+let arcadeRushDeveloperSeed = null;
 
 function getPracticeLabFeatureGate() {
   if (!practiceLabFeatureGate) practiceLabFeatureGate = createPracticeFeatureGate({ developerMode: appState.devMode });
@@ -258,6 +265,45 @@ function unmountPracticeLab() {
   practiceLabController = null;
   practiceLabRegistry = null;
 }
+
+function syncArcadeRushSnapshot(snapshot) {
+  if (!snapshot) return null;
+  const bridged = { ...snapshot, mode: ARCADE_RUSH_MODE_ID };
+  appState.game = bridged;
+  return bridged;
+}
+
+function ensureArcadeRushAppController() {
+  if (arcadeRushAppController) return arcadeRushAppController;
+  const root = document.querySelector("#app");
+  if (!root) return null;
+  arcadeRushAppController = createArcadeRushAppController({
+    root,
+    getSettings: () => appState.save?.settings || {},
+    actions: {
+      start: () => startArcadeRush("arcade-rush-ready"),
+      back: openModeSelect,
+      pause: pauseGame,
+      resume: resumeGame,
+      restart: () => startArcadeRush("restart"),
+      "play-again": () => startArcadeRush("retry"),
+      "mode-select": openModeSelect,
+      "main-menu": openTitle,
+      leaderboard: () => false,
+    },
+    callbacks: {
+      onSnapshot: syncArcadeRushSnapshot,
+      onComplete: finishArcadeRush,
+      onFailure: finishArcadeRush,
+    },
+    resultOptions: () => ({
+      isPersonalBest: appState.arcadeRushRecordFlags?.newBest === true,
+      leaderboardAvailable: false,
+    }),
+  });
+  return arcadeRushAppController;
+}
+
 const pendingResultCoordinator = createPendingResultCoordinator({
   onUsernameRequired: () => {
     if (bootstrapReady && appState.screen !== Screens.SETTINGS) openAccountSettings();
@@ -305,6 +351,7 @@ function stopActiveLoops() {
   stopSpeedTestLoop();
   stopEndlessLoop();
   stopDailyLoop();
+  arcadeRushAppController?.stop({ abortSession: false });
 }
 
 function unmountGameplayInput() {
@@ -316,6 +363,7 @@ function discardActiveAttempt() {
   dismissContextualHint();
   tutorialHintMode = null;
   unmountGameplayInput();
+  arcadeRushAppController?.cleanup({ abortSession: false });
   clearAttemptRuntime(appState.game);
   clearSpeedTestLayout();
   clearSpeedTestRuntime();
@@ -365,7 +413,9 @@ function routeActiveGameplayKey(event) {
     pauseGame();
     return true;
   }
-  if (appState.game?.mode === "endless") {
+  if (appState.game?.mode === ARCADE_RUSH_MODE_ID) {
+    ensureArcadeRushAppController()?.handleKey(event);
+  } else if (appState.game?.mode === "endless") {
     handleEndlessKey(event, appState.game);
     updateEndlessHud(appState.game);
   } else if (appState.game?.mode === "daily") {
@@ -425,6 +475,12 @@ function startPreparedAutomaticSubmission() {
 function getAttemptSeed() {
   return appState.devMode && appState.developerSeed
     ? appState.developerSeed
+    : createAttemptSeed();
+}
+
+function getArcadeRushAttemptSeed() {
+  return appState.devMode && arcadeRushDeveloperSeed != null
+    ? arcadeRushDeveloperSeed
     : createAttemptSeed();
 }
 
@@ -524,6 +580,18 @@ function openDailyReady(reason = "daily-ready") {
       if (choice === "primary") startDaily("daily-ready", appState.dailyDateKey);
     });
   }
+}
+
+function openArcadeRushReady(reason = "developer") {
+  if (!appState.devMode) return false;
+  cleanupCampaignAttempt(reason);
+  appState.arcadeRushResult = null;
+  appState.arcadeRushRecordFlags = null;
+  appState.arcadeRushResultsIndex = 0;
+  appState.arcadeRushResultsReadyAt = 0;
+  changeScreen(Screens.ARCADE_RUSH_READY);
+  renderCurrentScreen();
+  return true;
 }
 
 function openLevelSelect(reason = "level-select") {
@@ -707,6 +775,43 @@ function finishDaily(game, result) {
   startPreparedAutomaticSubmission();
 }
 
+function finishArcadeRush(snapshot, result) {
+  if (!result || appState.screen === Screens.ARCADE_RUSH_RESULTS) return;
+  unmountGameplayInput();
+  syncArcadeRushSnapshot(snapshot);
+  appState.arcadeRushResult = result;
+  appState.arcadeRushRecordFlags = { newBest: false };
+  appState.arcadeRushResultsIndex = 0;
+  appState.arcadeRushResultsReadyAt = currentTimeMs() + 200;
+  changeScreen(Screens.ARCADE_RUSH_RESULTS);
+  renderCurrentScreen();
+}
+
+function startArcadeRush(source = "arcade-rush-ready") {
+  if (!appState.devMode) return false;
+  cleanupCampaignAttempt(["retry", "restart"].includes(source) ? source : "new-session");
+  appState.arcadeRushResult = null;
+  appState.arcadeRushRecordFlags = null;
+  appState.arcadeRushResultsIndex = 0;
+  appState.arcadeRushResultsReadyAt = 0;
+  const controller = ensureArcadeRushAppController();
+  const started = controller?.start({
+    seed: getArcadeRushAttemptSeed(),
+    commonWords: appState.commonWordBank?.words || [],
+    campaignBank: appState.wordBank,
+    developerMode: appState.devMode,
+    source,
+  });
+  if (!started) {
+    openArcadeRushReady("start-failed");
+    return false;
+  }
+  syncArcadeRushSnapshot(started);
+  changeScreen(Screens.PLAYING);
+  mountGameplayInput();
+  return true;
+}
+
 function startDaily(source = "daily-ready", dateKey = appState.dailyDateKey) {
   cleanupCampaignAttempt(source === "retry" ? "retry" : "new-session");
   const challengeDateKey = isValidDailyDateKey(dateKey) ? dateKey : getUtcDateKey();
@@ -877,6 +982,13 @@ function pauseGame() {
   deactivateGameplayInput.blur?.();
   dismissContextualHint();
   tutorialHintMode = null;
+  if (appState.game?.mode === ARCADE_RUSH_MODE_ID) {
+    if (!ensureArcadeRushAppController()?.pause()) return;
+    changeScreen(Screens.PAUSED);
+    appState.pauseIndex = 0;
+    renderPauseOverlay();
+    return;
+  }
   changeScreen(Screens.PAUSED);
   pauseSession();
   if (appState.game?.mode === "endless") stopEndlessLoop();
@@ -890,6 +1002,10 @@ function retryCurrentLevel() {
 }
 
 function renderPauseOverlay() {
+  if (appState.game?.mode === ARCADE_RUSH_MODE_ID) {
+    ensureArcadeRushAppController()?.focusPauseAction(appState.pauseIndex);
+    return;
+  }
   if (getCurrentSpeedTest()?.phase === "PAUSED") {
     showSpeedTestPauseOverlay(appState.pauseIndex, {
       resume: resumeGame,
@@ -931,6 +1047,11 @@ function renderPauseOverlay() {
 
 function resumeGame() {
   if (appState.screen !== Screens.PAUSED) return;
+  if (appState.game?.mode === ARCADE_RUSH_MODE_ID) {
+    changeScreen(Screens.PLAYING);
+    ensureArcadeRushAppController()?.resume();
+    return;
+  }
   hidePauseOverlay();
   if (getCurrentSpeedTest()?.phase === "PAUSED") {
     changeScreen(Screens.SPEED_TEST_RUN);
@@ -1121,6 +1242,19 @@ function renderCurrentScreen() {
       },
       getSubmissionState(),
     );
+  } else if (appState.screen === Screens.ARCADE_RUSH_READY) {
+    ensureArcadeRushAppController()?.renderReady({
+      personalBest: null,
+      developerMode: appState.devMode,
+    });
+  } else if (appState.screen === Screens.ARCADE_RUSH_RESULTS) {
+    ensureArcadeRushAppController()?.renderResults(
+      appState.arcadeRushResult,
+      {
+        isPersonalBest: appState.arcadeRushRecordFlags?.newBest === true,
+        leaderboardAvailable: false,
+      },
+    );
   } else if (appState.screen === Screens.SPEED_TEST_RUN) {
     const state = getCurrentSpeedTest();
     if (state) {
@@ -1246,9 +1380,11 @@ function handleAppClick(event) {
     ? appState.endlessResultsReadyAt
     : appState.screen === Screens.DAILY_RESULTS
       ? appState.dailyResultsReadyAt
-      : appState.screen === Screens.SPEED_TEST_RESULTS
-        ? appState.speedTestResultsReadyAt
-        : appState.resultsReadyAt;
+      : appState.screen === Screens.ARCADE_RUSH_RESULTS
+        ? appState.arcadeRushResultsReadyAt
+        : appState.screen === Screens.SPEED_TEST_RESULTS
+          ? appState.speedTestResultsReadyAt
+          : appState.resultsReadyAt;
   const action = resolveAppClickAction(event, {
     root,
     screen: appState.screen,
@@ -1402,6 +1538,7 @@ const handleGlobalKeydown = createGlobalKeyboardController({
   openModeSelect,
   startEndless,
   startDaily,
+  startArcadeRush,
   retryCurrentLevel,
   backPracticeLab: () => practiceLabController?.back(),
   activateTitleAction,
@@ -1491,6 +1628,9 @@ async function bootstrap() {
   appState.developerSeed = appState.devMode
     ? parseDeveloperSeed(window.location.search)
     : null;
+  arcadeRushDeveloperSeed = appState.devMode
+    ? parseArcadeRushDeveloperSeed(window.location.search)
+    : null;
   appState.endlessStartStage = appState.devMode
     ? Math.max(1, Number.parseInt(search.get("stage"), 10) || 1)
     : 1;
@@ -1527,6 +1667,8 @@ async function bootstrap() {
     openEndlessReady("developer");
   } else if (appState.devMode && search.get("mode") === MODE_IDS.DAILY) {
     openDailyReady("developer");
+  } else if (appState.devMode && search.get("mode") === MODE_IDS.ARCADE_RUSH) {
+    openArcadeRushReady("developer");
   } else if (pendingLeaderboardReturn) {
     const returnState = pendingLeaderboardReturn;
     pendingLeaderboardReturn = null;

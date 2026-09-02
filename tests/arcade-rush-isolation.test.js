@@ -75,7 +75,7 @@ globalThis.fetch = () => {
 
 try {
   for (const file of MODULE_FILES) {
-    await import(`../js/arcadeRush/${file}?ar1-isolation=${encodeURIComponent(file)}`);
+    await import(`../js/arcadeRush/${file}?ar7-isolation=${encodeURIComponent(file)}`);
   }
 } finally {
   for (const [key, descriptor] of previousDescriptors) {
@@ -87,8 +87,22 @@ try {
 
 const mainSource = await fs.readFile(new URL("../js/main.js", import.meta.url), "utf8");
 const modesSource = await fs.readFile(new URL("../js/modes.js", import.meta.url), "utf8");
-assert.equal(mainSource.includes("./arcadeRush/"), false, "AR1 must not wire Arcade Rush into main.js");
-assert.equal(modesSource.includes("ARCADE_RUSH"), false, "AR1 must not expose Arcade Rush in the production mode registry");
-assert.ok(modesSource.includes("Daily Strike"), "Daily Strike remains production-active during AR1");
+const adapterSource = await fs.readFile(new URL("../js/arcadeRushAppController.js", import.meta.url), "utf8");
+assert.equal(
+  mainSource.includes("./arcadeRush/"),
+  false,
+  "main.js must integrate Arcade Rush only through the app adapter boundary",
+);
+assert.ok(
+  mainSource.includes('./arcadeRushAppController.js'),
+  "AR7 must wire the dedicated Arcade Rush app adapter",
+);
+assert.ok(
+  adapterSource.includes('./arcadeRush/index.js'),
+  "the app adapter is the explicit browser integration boundary",
+);
+assert.ok(modesSource.includes("ARCADE_RUSH"), "AR7 registers Arcade Rush for the shared session lifecycle");
+assert.ok(modesSource.includes("visible: false"), "Arcade Rush must remain hidden before production cutover");
+assert.ok(modesSource.includes("Daily Strike"), "Daily Strike remains production-active during AR7");
 
-console.log("Arcade Rush AR1 import-side-effect and production-isolation tests passed.");
+console.log("Arcade Rush pure-subsystem isolation and AR7 hidden app-boundary tests passed.");

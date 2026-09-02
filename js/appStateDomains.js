@@ -52,6 +52,12 @@ const DOMAIN_DEFAULTS = Object.freeze({
     dailyResultsIndex: 0,
     dailyResultsReadyAt: 0,
   }),
+  arcadeRush: Object.freeze({
+    arcadeRushResult: null,
+    arcadeRushRecordFlags: null,
+    arcadeRushResultsIndex: 0,
+    arcadeRushResultsReadyAt: 0,
+  }),
   profile: Object.freeze({
     statisticsTabIndex: 0,
     statisticsRecentFilter: "all",
@@ -93,6 +99,10 @@ const LEGACY_PROPERTY_ORDER = Object.freeze([
   ["dailyRecordFlags", "daily"],
   ["dailyResultsIndex", "daily"],
   ["dailyResultsReadyAt", "daily"],
+  ["arcadeRushResult", "arcadeRush"],
+  ["arcadeRushRecordFlags", "arcadeRush"],
+  ["arcadeRushResultsIndex", "arcadeRush"],
+  ["arcadeRushResultsReadyAt", "arcadeRush"],
   ["levelSelection", "campaign"],
   ["pauseIndex", "navigation"],
   ["resultsIndex", "campaign"],

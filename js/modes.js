@@ -3,6 +3,7 @@ export const MODE_IDS = Object.freeze({
   SPEED_TEST: "speed-test",
   ENDLESS: "endless",
   DAILY: "daily",
+  ARCADE_RUSH: "arcade-rush",
   PRACTICE: "practice",
 });
 
@@ -13,6 +14,7 @@ const MODE_DEFINITIONS = Object.freeze([
     shortLabel: "100 Levels",
     description: "Defend the core through 100 levels.",
     enabled: true,
+    visible: true,
     status: "available",
     route: "level-select",
     supportsPause: true,
@@ -25,6 +27,7 @@ const MODE_DEFINITIONS = Object.freeze([
     shortLabel: "Speed + Accuracy",
     description: "Measure your typing speed and accuracy.",
     enabled: true,
+    visible: true,
     status: "available",
     route: "speed-test",
     supportsPause: true,
@@ -37,6 +40,7 @@ const MODE_DEFINITIONS = Object.freeze([
     shortLabel: "Survival",
     description: "Survive escalating stages for as long as possible.",
     enabled: true,
+    visible: true,
     status: "available",
     route: "endless-ready",
     supportsPause: true,
@@ -49,6 +53,7 @@ const MODE_DEFINITIONS = Object.freeze([
     shortLabel: "Daily Challenge",
     description: "Face one shared challenge each day.",
     enabled: true,
+    visible: true,
     status: "available",
     route: "daily-ready",
     supportsPause: true,
@@ -56,11 +61,25 @@ const MODE_DEFINITIONS = Object.freeze([
     storesProgress: true,
   }),
   Object.freeze({
+    id: MODE_IDS.ARCADE_RUSH,
+    name: "Arcade Rush",
+    shortLabel: "Score Attack",
+    description: "Race through escalating waves and defeat Core Breaker.",
+    enabled: true,
+    visible: false,
+    status: "developer-preview",
+    route: "arcade-rush-ready",
+    supportsPause: true,
+    supportsSeed: true,
+    storesProgress: false,
+  }),
+  Object.freeze({
     id: MODE_IDS.PRACTICE,
     name: "Practice Lab",
     shortLabel: "Training",
     description: "Train focused typing skills.",
     enabled: false,
+    visible: true,
     status: "coming-soon",
     route: null,
     supportsPause: true,
@@ -79,12 +98,18 @@ export function getModeDefinition(modeId) {
   return MODE_BY_ID.get(modeId) || null;
 }
 
-export function getAllModes() {
+export function getRegisteredModes() {
   return [...MODE_DEFINITIONS];
 }
 
-export function getEnabledModes() {
-  return MODE_DEFINITIONS.filter((mode) => mode.enabled);
+export function getAllModes({ includeHidden = false } = {}) {
+  return MODE_DEFINITIONS.filter((mode) => includeHidden || mode.visible !== false);
+}
+
+export function getEnabledModes({ includeHidden = false } = {}) {
+  return MODE_DEFINITIONS.filter((mode) => (
+    mode.enabled && (includeHidden || mode.visible !== false)
+  ));
 }
 
 export function isModeEnabled(modeId) {

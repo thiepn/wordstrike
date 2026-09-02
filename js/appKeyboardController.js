@@ -35,6 +35,7 @@ export function createGlobalKeyboardController({
   openModeSelect,
   startEndless,
   startDaily,
+  startArcadeRush,
   retryCurrentLevel,
   backPracticeLab,
   activateTitleAction,
@@ -91,6 +92,22 @@ export function createGlobalKeyboardController({
     if (PREVENTED_NAVIGATION_KEYS.has(event.key)) event.preventDefault();
 
     if (state.screen === Screens.PAUSED) {
+      if (state.game?.mode === "arcade-rush") {
+        const actions = ["resume", "restart", "modes"];
+        if (event.key === "Escape") {
+          resumeGame();
+        } else if (event.key === "ArrowUp" || event.key === "ArrowDown") {
+          const direction = event.key === "ArrowUp" ? -1 : 1;
+          state.pauseIndex = cycleIndex(state.pauseIndex, direction, actions.length);
+          renderPauseOverlay();
+        } else if (event.key === "Enter") {
+          const action = actions[state.pauseIndex] || actions[0];
+          if (action === "resume") resumeGame();
+          else if (action === "restart") startArcadeRush?.("restart");
+          else openModeSelect();
+        }
+        return;
+      }
       if (event.key === "Escape") {
         resumeGame();
       } else if (event.key === "ArrowUp" || event.key === "ArrowDown") {
@@ -202,6 +219,30 @@ export function createGlobalKeyboardController({
       } else if (event.key === "Enter") {
         const action = actions[state.dailyResultsIndex];
         if (action === "retry") startDaily("retry", state.dailyResult.modeData.dateKey);
+        else if (action === "modes") openModeSelect();
+        else openTitle();
+      }
+      return;
+    }
+
+    if (state.screen === Screens.ARCADE_RUSH_READY) {
+      if (event.key === "Escape") openModeSelect();
+      else if (event.key === "Enter") startArcadeRush?.("arcade-rush-ready");
+      return;
+    }
+
+    if (state.screen === Screens.ARCADE_RUSH_RESULTS) {
+      const actions = ["retry", "modes", "title"];
+      if (isResultsInputBlocked(event, currentTimeMs(), state.arcadeRushResultsReadyAt)) return;
+      if (event.key === "Escape") {
+        openModeSelect();
+      } else if (event.key === "ArrowUp" || event.key === "ArrowDown") {
+        const direction = event.key === "ArrowUp" ? -1 : 1;
+        state.arcadeRushResultsIndex = cycleIndex(state.arcadeRushResultsIndex, direction, actions.length);
+        renderCurrentScreen();
+      } else if (event.key === "Enter") {
+        const action = actions[state.arcadeRushResultsIndex];
+        if (action === "retry") startArcadeRush?.("retry");
         else if (action === "modes") openModeSelect();
         else openTitle();
       }
