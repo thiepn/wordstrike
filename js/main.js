@@ -298,7 +298,7 @@ function ensureArcadeRushAppController() {
     },
     resultOptions: () => ({
       isPersonalBest: appState.arcadeRushRecordFlags?.newBest === true,
-      leaderboardAvailable: false,
+      leaderboardAvailable: true,
     }),
   });
   return arcadeRushAppController;
@@ -533,9 +533,11 @@ function openLeaderboardReturn(returnState) {
     ? returnState.typingDuration === 15 ? LEADERBOARD_BOARDS.TYPING_15 : LEADERBOARD_BOARDS.TYPING_60
     : returnState?.selectedCategory === LEADERBOARD_CATEGORIES.ENDLESS
       ? LEADERBOARD_BOARDS.ENDLESS
-      : returnState?.selectedCategory === LEADERBOARD_CATEGORIES.DAILY
-        ? LEADERBOARD_BOARDS.DAILY
-        : LEADERBOARD_BOARDS.CAMPAIGN;
+      : returnState?.selectedCategory === LEADERBOARD_CATEGORIES.ARCADE_RUSH
+        ? LEADERBOARD_BOARDS.ARCADE_RUSH
+        : returnState?.selectedCategory === LEADERBOARD_CATEGORIES.DAILY
+          ? LEADERBOARD_BOARDS.ARCADE_RUSH
+          : LEADERBOARD_BOARDS.CAMPAIGN;
   openLeaderboardBoard(boardKey);
 }
 
@@ -582,8 +584,7 @@ function openDailyReady(reason = "daily-ready") {
   }
 }
 
-function openArcadeRushReady(reason = "developer") {
-  if (!appState.devMode) return false;
+function openArcadeRushReady(reason = "arcade-rush-ready") {
   cleanupCampaignAttempt(reason);
   appState.arcadeRushResult = null;
   appState.arcadeRushRecordFlags = null;
@@ -783,12 +784,13 @@ function finishArcadeRush(snapshot, result) {
   appState.arcadeRushRecordFlags = { newBest: false };
   appState.arcadeRushResultsIndex = 0;
   appState.arcadeRushResultsReadyAt = currentTimeMs() + 200;
+  if (!appState.devMode) prepareAutomaticResultSubmission("arcade-rush", result);
   changeScreen(Screens.ARCADE_RUSH_RESULTS);
   renderCurrentScreen();
+  if (!appState.devMode) startPreparedAutomaticSubmission();
 }
 
 function startArcadeRush(source = "arcade-rush-ready") {
-  if (!appState.devMode) return false;
   cleanupCampaignAttempt(["retry", "restart"].includes(source) ? source : "new-session");
   appState.arcadeRushResult = null;
   appState.arcadeRushRecordFlags = null;
@@ -1149,7 +1151,8 @@ function activateSelectedMode(modeId = getAllModes()[appState.modeSelection]?.id
     }
   }
   else if (route === "endless-ready") openEndlessReady("mode-select");
-  else if (route === "daily-ready") openDailyReady("mode-select");
+  else if (route === "arcade-rush-ready") openArcadeRushReady("mode-select");
+  else if (route === "daily-ready" && appState.devMode) openDailyReady("developer");
   else return false;
   return true;
 }
@@ -1252,7 +1255,7 @@ function renderCurrentScreen() {
       appState.arcadeRushResult,
       {
         isPersonalBest: appState.arcadeRushRecordFlags?.newBest === true,
-        leaderboardAvailable: false,
+        leaderboardAvailable: true,
       },
     );
   } else if (appState.screen === Screens.SPEED_TEST_RUN) {
@@ -1429,7 +1432,7 @@ function handleAppClick(event) {
   } else if (appState.screen === Screens.DAILY_RESULTS) {
     if (action === "submit-global-score") void submitCurrentResult();
     else if (action === "retry-global-score") void retryCurrentSubmission();
-    else if (action === "view-daily-leaderboard") openLeaderboardBoard(LEADERBOARD_BOARDS.DAILY);
+    else if (action === "view-daily-leaderboard") openLeaderboardBoard(LEADERBOARD_BOARDS.ARCADE_RUSH);
     else if (action === "open-account-settings") openAccountSettings();
     else if (action === "result-google-sign-in") startResultGoogleSignIn(LEADERBOARD_BOARDS.DAILY, "daily", appState.dailyResult);
     else if (action === "retry") startDaily("retry", appState.dailyResult.modeData.dateKey);
@@ -1472,8 +1475,10 @@ function handleAppClick(event) {
       void selectLeaderboardCategory(LEADERBOARD_CATEGORIES.CAMPAIGN);
     } else if (action === "leaderboard-select-typing") {
       void selectLeaderboardCategory(LEADERBOARD_CATEGORIES.TYPING);
+    } else if (action === "leaderboard-select-arcade-rush") {
+      void selectLeaderboardBoard(LEADERBOARD_BOARDS.ARCADE_RUSH);
     } else if (action === "leaderboard-select-daily") {
-      void selectLeaderboardBoard(LEADERBOARD_BOARDS.DAILY);
+      void selectLeaderboardBoard(LEADERBOARD_BOARDS.ARCADE_RUSH);
     } else if (action === "leaderboard-select-endless") {
       void selectLeaderboardBoard(LEADERBOARD_BOARDS.ENDLESS);
     } else if (action === "leaderboard-refresh") {
@@ -1578,7 +1583,7 @@ async function bootstrap() {
       }
     }
     else resetLeaderboardProfile();
-    if ([Screens.DAILY_RESULTS, Screens.ENDLESS_RESULTS, Screens.SPEED_TEST_RESULTS, Screens.RESULTS].includes(appState.screen)) {
+    if ([Screens.ARCADE_RUSH_RESULTS, Screens.DAILY_RESULTS, Screens.ENDLESS_RESULTS, Screens.SPEED_TEST_RESULTS, Screens.RESULTS].includes(appState.screen)) {
       void handleAutomaticSubmissionStateChange(authState, getLeaderboardProfileState());
     }
     if (bootstrapReady) void pendingResultCoordinator.evaluate(authState, getLeaderboardProfileState());
@@ -1598,13 +1603,13 @@ async function bootstrap() {
       else updateProfileAuthSection(getAuthState(), profileState);
     }
     if (appState.screen === Screens.LEADERBOARDS) renderCurrentScreen();
-    if ([Screens.DAILY_RESULTS, Screens.ENDLESS_RESULTS, Screens.SPEED_TEST_RESULTS, Screens.RESULTS].includes(appState.screen)) {
+    if ([Screens.ARCADE_RUSH_RESULTS, Screens.DAILY_RESULTS, Screens.ENDLESS_RESULTS, Screens.SPEED_TEST_RESULTS, Screens.RESULTS].includes(appState.screen)) {
       void handleAutomaticSubmissionStateChange(getAuthState(), profileState);
     }
     if (bootstrapReady) void pendingResultCoordinator.evaluate(getAuthState(), profileState);
   });
   subscribeToSubmissions((submissionState) => {
-    if ([Screens.DAILY_RESULTS, Screens.ENDLESS_RESULTS, Screens.SPEED_TEST_RESULTS, Screens.RESULTS].includes(appState.screen)) {
+    if ([Screens.ARCADE_RUSH_RESULTS, Screens.DAILY_RESULTS, Screens.ENDLESS_RESULTS, Screens.SPEED_TEST_RESULTS, Screens.RESULTS].includes(appState.screen)) {
       updateGlobalSubmissionRegion(submissionState);
     }
   });
