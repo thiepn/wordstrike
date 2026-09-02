@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import {
   ensureStoredPlayerProfile,
+  getLegacyDailyModeSummary,
   getPublicPlayerProfile,
+  LEGACY_DAILY_STORAGE_KEY,
+  LEGACY_MODE_DATA_STORAGE_KEY,
   loadModeData,
   MODE_DATA_STORAGE_KEY,
   recordCompletedSession,
@@ -14,7 +17,7 @@ globalThis.localStorage = {
   setItem(key, value) { values.set(key, value); },
 };
 
-values.set(MODE_DATA_STORAGE_KEY, JSON.stringify({
+values.set(LEGACY_MODE_DATA_STORAGE_KEY, JSON.stringify({
   schemaVersion: 1,
   totals: {
     completedSessions: 3,
@@ -31,6 +34,8 @@ values.set(MODE_DATA_STORAGE_KEY, JSON.stringify({
     "speed-test": { records: { "time-15": { bestWpm: 80 } } },
     endless: { highestStage: 7, records: { bestStage: { stage: 7 } } },
     daily: {
+      completedSessions: 2,
+      failedSessions: 1,
       records: {
         currentStreak: 2,
         bestStreak: 3,
@@ -49,6 +54,7 @@ values.set(MODE_DATA_STORAGE_KEY, JSON.stringify({
 }));
 
 let data = loadModeData();
+assert.equal(data.schemaVersion, 2);
 assert.equal(data.profile, null);
 assert.equal(data.lifetime.finalizedSessions, 3);
 assert.equal(data.lifetime.successfulSessions, 2);
@@ -58,7 +64,9 @@ assert.equal(data.lifetime.historicalBackfillApplied, true);
 assert.equal(data.modes.campaign.highestScore, 900);
 assert.equal(data.modes["speed-test"].records["time-15"].bestWpm, 80);
 assert.equal(data.modes.endless.records.bestStage.stage, 7);
-assert.equal(data.modes.daily.records.distinctCompletedDays, 1);
+assert.equal(Object.hasOwn(data.modes, "daily"), false);
+assert.equal(getLegacyDailyModeSummary().records.distinctCompletedDays, 1);
+assert.ok(data.modes["arcade-rush"]);
 
 const cryptoSource = { randomUUID: () => "storage-profile-id" };
 const profile = ensureStoredPlayerProfile({ cryptoSource, now: 1000 });
@@ -72,7 +80,10 @@ assert.deepEqual(getPublicPlayerProfile(), {
   displayName: "Nova Prime",
   profileVersion: 1,
 });
-assert.deepEqual([...values.keys()], [MODE_DATA_STORAGE_KEY]);
+assert.deepEqual(
+  [...values.keys()].sort(),
+  [LEGACY_DAILY_STORAGE_KEY, LEGACY_MODE_DATA_STORAGE_KEY, MODE_DATA_STORAGE_KEY].sort(),
+);
 
 const makeResult = (sessionId) => ({
   schemaVersion: 1,
@@ -119,4 +130,4 @@ assert.equal(data.lifetime.finalizedSessions, 0);
 assert.equal(data.lifetime.activePlaytimeMs, 0);
 assert.equal(data.modes.campaign.highestScore, 900);
 
-console.log("Profile/lifetime migration, stable identity, one-key storage, aggregate persistence, and duplicate guards passed.");
+console.log("Profile/lifetime v1→v2 migration, stable identity, Daily sidecar isolation, aggregates, and duplicate guards passed.");

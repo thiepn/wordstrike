@@ -30,10 +30,10 @@ globalThis.document = {
   createElement() { return new Element(); },
 };
 globalThis.window = { setTimeout() {} };
+const stored = new Map();
 globalThis.localStorage = {
-  value: null,
-  getItem() { return this.value; },
-  setItem(_key, value) { this.value = value; },
+  getItem(key) { return stored.get(key) ?? null; },
+  setItem(key, value) { stored.set(key, value); },
 };
 let frameId = 0;
 const frames = new Map();
@@ -53,7 +53,11 @@ const {
   startDailyRun,
 } = await import("../js/dailyMode.js");
 const { appState } = await import("../js/state.js");
-const { getDailyRecord, loadModeData } = await import("../js/modeStorage.js");
+const {
+  getDailyRecord,
+  getLegacyDailyModeSummary,
+  loadModeData,
+} = await import("../js/modeStorage.js");
 
 appState.save = { settings: { screenShake: false, particles: false, strictMode: false } };
 const dateKey = getUtcDateKey();
@@ -105,7 +109,6 @@ assert.equal(getCurrentSession().modeId, "daily");
 game.elapsedMs = 60000;
 game.spawnedWordCount = 60;
 game.resolvedWordCount = 59;
-// The shared target handler increments the completed counter before the Daily callback.
 game.completedWordCount = 60;
 game.score = 1000;
 game.accumulatedWordPoints = 1000;
@@ -115,7 +118,8 @@ assert.equal(game.result.success, true);
 assert.equal(game.result.modeData.completionBonus, 10000);
 assert.equal(getCurrentSession().state, "completed");
 assert.equal(getDailyRecord(dateKey).attempts, 1);
-assert.equal(loadModeData().modes.daily.records.days[dateKey].best.success, true);
+assert.equal(getLegacyDailyModeSummary().records.days[dateKey].best.success, true);
+assert.equal(Object.hasOwn(loadModeData().modes, "daily"), false, "active schema v2 must not persist Daily mode data");
 assert.equal(completeDailyRun(game, true), null);
 clearDailyRuntime();
 
@@ -127,4 +131,4 @@ const override = createDailyRuntime({
 });
 assert.equal(override.recordEligible, false);
 
-console.log("Daily wave transition, geometry speed retention, breach, lifecycle, and storage tests passed.");
+console.log("Daily lifecycle remains compatible through the AR8 legacy sidecar while active v2 excludes Daily.");
