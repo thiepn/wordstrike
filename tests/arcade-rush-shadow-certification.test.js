@@ -51,8 +51,13 @@ assert.equal(ordinaryDevPolicy.allowDeveloperSeedOverride, true);
 assert.equal(ordinaryDevPolicy.ignoredDeveloperSeedOverride, false);
 
 const publicModeIds = getAllModes().map(({ id }) => id);
-assert.equal(publicModeIds.includes(MODE_IDS.DAILY), true);
-assert.equal(publicModeIds.includes(MODE_IDS.ARCADE_RUSH), false);
+const dailyPublic = publicModeIds.includes(MODE_IDS.DAILY);
+const rushPublic = publicModeIds.includes(MODE_IDS.ARCADE_RUSH);
+// AR13's isolation invariant is intentionally valid on both sides of AR14:
+// exactly one replacement mode may be public at a time.
+assert.equal(dailyPublic !== rushPublic, true);
+assert.equal(rushPublic, true);
+assert.equal(dailyPublic, false);
 
 const durationMs = 250_000;
 const correctCharacters = 1_000;
@@ -228,7 +233,7 @@ assert.match(adapterSource, /shadowCoordinator\.onTerminal/);
 assert.match(adapterSource, /getShadowCertification/);
 assert.match(adapterSource, /verifyShadowLeaderboard/);
 assert.match(mainSource, /appState\.devMode\s*&&\s*search\.get\("mode"\)\s*===\s*MODE_IDS\.ARCADE_RUSH/);
-assert.match(modesSource, /id:\s*MODE_IDS\.ARCADE_RUSH[\s\S]*visible:\s*false/);
-assert.match(modesSource, /id:\s*MODE_IDS\.DAILY[\s\S]*visible:\s*true/);
+assert.match(modesSource, /id:\s*MODE_IDS\.ARCADE_RUSH[\s\S]*visible:\s*true/);
+assert.match(modesSource, /id:\s*MODE_IDS\.DAILY[\s\S]*visible:\s*false/);
 
-console.log("Arcade Rush AR13 ranked shadow route, production isolation, local persistence, server submission, and readback certification passed.");
+console.log("Arcade Rush AR13 ranked shadow route remains a valid production-isolation diagnostic across the AR14 cutover.");
