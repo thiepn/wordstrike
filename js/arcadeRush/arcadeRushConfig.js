@@ -5,6 +5,7 @@ import {
   ARCADE_RUSH_MODE_ID,
   ARCADE_RUSH_READY_ROUTE,
   ARCADE_RUSH_RULES_STATUS,
+  ARCADE_RUSH_RULES_VERSION,
   ARCADE_RUSH_STARTING_INTEGRITY,
   ARCADE_RUSH_TARGET_DURATION_MS,
   ARCADE_RUSH_WAVE_COUNT,
@@ -12,6 +13,7 @@ import {
 
 export const ARCADE_RUSH_FOUNDATION_CONFIG = Object.freeze({
   contractVersion: ARCADE_RUSH_CONTRACT_VERSION,
+  rulesVersion: ARCADE_RUSH_RULES_VERSION,
   modeId: ARCADE_RUSH_MODE_ID,
   displayName: ARCADE_RUSH_DISPLAY_NAME,
   readyRoute: ARCADE_RUSH_READY_ROUTE,
@@ -23,7 +25,7 @@ export const ARCADE_RUSH_FOUNDATION_CONFIG = Object.freeze({
 });
 
 export const ARCADE_RUSH_GENERATOR_VERSION = 1;
-export const ARCADE_RUSH_PROFILE_STATUS = "DRAFT_UNTIL_AR10";
+export const ARCADE_RUSH_PROFILE_STATUS = "FROZEN_V1";
 export const ARCADE_RUSH_BOSS_TARGET_DURATION_MS = 45_000;
 
 function freezeWaveProfile(profile) {
@@ -33,18 +35,22 @@ function freezeWaveProfile(profile) {
   });
 }
 
+// AR10-certified rules-v1 pressure curve. The higher target count is
+// intentional: AR4 resolves waves by targets resolved, not by authored target
+// duration. These counts/cadences make successful runs land inside the 4–6
+// minute product contract while preserving escalating density and difficulty.
 export const ARCADE_RUSH_WAVE_PROFILES = Object.freeze([
   freezeWaveProfile({
     wave: 1,
     id: "ignition",
     name: "Ignition",
-    wordCount: 18,
+    wordCount: 23,
     targetDurationMs: 35_000,
     minWordLength: 3,
     maxWordLength: 6,
     targetAverageWordLength: 4.5,
-    sourceCounts: { common: 12, low: 6 },
-    spawnIntervalMs: 1_450,
+    sourceCounts: { common: 15, low: 8 },
+    spawnIntervalMs: 1_500,
     wordSpeedPxPerSec: 60,
     maxSimultaneousWords: 3,
     targetWpm: 55,
@@ -53,13 +59,13 @@ export const ARCADE_RUSH_WAVE_PROFILES = Object.freeze([
     wave: 2,
     id: "acceleration",
     name: "Acceleration",
-    wordCount: 20,
+    wordCount: 27,
     targetDurationMs: 40_000,
     minWordLength: 3,
     maxWordLength: 7,
     targetAverageWordLength: 5,
-    sourceCounts: { common: 8, low: 8, mid: 4 },
-    spawnIntervalMs: 1_150,
+    sourceCounts: { common: 10, low: 11, mid: 6 },
+    spawnIntervalMs: 1_350,
     wordSpeedPxPerSec: 64,
     maxSimultaneousWords: 4,
     targetWpm: 65,
@@ -68,13 +74,13 @@ export const ARCADE_RUSH_WAVE_PROFILES = Object.freeze([
     wave: 3,
     id: "crossfire",
     name: "Crossfire",
-    wordCount: 20,
+    wordCount: 29,
     targetDurationMs: 40_000,
     minWordLength: 4,
     maxWordLength: 8,
     targetAverageWordLength: 5.5,
-    sourceCounts: { common: 4, low: 4, mid: 8, high: 4 },
-    spawnIntervalMs: 1_050,
+    sourceCounts: { common: 6, low: 5, mid: 12, high: 6 },
+    spawnIntervalMs: 1_250,
     wordSpeedPxPerSec: 70,
     maxSimultaneousWords: 5,
     targetWpm: 72,
@@ -83,13 +89,13 @@ export const ARCADE_RUSH_WAVE_PROFILES = Object.freeze([
     wave: 4,
     id: "heavy-words",
     name: "Heavy Words",
-    wordCount: 18,
+    wordCount: 25,
     targetDurationMs: 45_000,
     minWordLength: 7,
     maxWordLength: 12,
     targetAverageWordLength: 8.5,
-    sourceCounts: { mid: 6, high: 8, difficult: 4 },
-    spawnIntervalMs: 1_250,
+    sourceCounts: { mid: 8, high: 11, difficult: 6 },
+    spawnIntervalMs: 1_650,
     wordSpeedPxPerSec: 72,
     maxSimultaneousWords: 4,
     targetWpm: 68,
@@ -98,13 +104,13 @@ export const ARCADE_RUSH_WAVE_PROFILES = Object.freeze([
     wave: 5,
     id: "overdrive",
     name: "Overdrive",
-    wordCount: 22,
+    wordCount: 31,
     targetDurationMs: 45_000,
     minWordLength: 4,
     maxWordLength: 10,
     targetAverageWordLength: 6.5,
-    sourceCounts: { low: 2, mid: 6, high: 8, difficult: 6 },
-    spawnIntervalMs: 900,
+    sourceCounts: { low: 3, mid: 8, high: 11, difficult: 9 },
+    spawnIntervalMs: 1_200,
     wordSpeedPxPerSec: 80,
     maxSimultaneousWords: 6,
     targetWpm: 82,
@@ -113,13 +119,13 @@ export const ARCADE_RUSH_WAVE_PROFILES = Object.freeze([
     wave: 6,
     id: "critical",
     name: "Critical",
-    wordCount: 22,
+    wordCount: 33,
     targetDurationMs: 50_000,
     minWordLength: 5,
     maxWordLength: 12,
     targetAverageWordLength: 7.2,
-    sourceCounts: { mid: 4, high: 8, difficult: 10 },
-    spawnIntervalMs: 760,
+    sourceCounts: { mid: 6, high: 12, difficult: 15 },
+    spawnIntervalMs: 1_050,
     wordSpeedPxPerSec: 88,
     maxSimultaneousWords: 7,
     targetWpm: 92,
@@ -137,6 +143,7 @@ export const ARCADE_RUSH_TARGET_RUN_DURATION_MS = ARCADE_RUSH_WAVE_PROFILES.redu
 );
 
 export const ARCADE_RUSH_GENERATOR_CONFIG = Object.freeze({
+  rulesVersion: ARCADE_RUSH_RULES_VERSION,
   generatorVersion: ARCADE_RUSH_GENERATOR_VERSION,
   profileStatus: ARCADE_RUSH_PROFILE_STATUS,
   totalPlannedWords: ARCADE_RUSH_TOTAL_PLANNED_WORDS,
@@ -184,6 +191,7 @@ export function isArcadeRushWaveProfile(value) {
 export function isArcadeRushGeneratorConfig(value) {
   return Boolean(
     value &&
+    value.rulesVersion === ARCADE_RUSH_RULES_VERSION &&
     value.generatorVersion === ARCADE_RUSH_GENERATOR_VERSION &&
     value.profileStatus === ARCADE_RUSH_PROFILE_STATUS &&
     value.totalPlannedWords === ARCADE_RUSH_TOTAL_PLANNED_WORDS &&
@@ -199,6 +207,7 @@ export function isArcadeRushFoundationConfig(value) {
   return Boolean(
     value &&
     value.contractVersion === ARCADE_RUSH_CONTRACT_VERSION &&
+    value.rulesVersion === ARCADE_RUSH_RULES_VERSION &&
     value.modeId === ARCADE_RUSH_MODE_ID &&
     value.waveCount === ARCADE_RUSH_WAVE_COUNT &&
     value.finaleCount === ARCADE_RUSH_FINALE_COUNT &&

@@ -1,4 +1,5 @@
 import {
+  ARCADE_RUSH_RULES_VERSION,
   ARCADE_RUSH_SCORE_COMPONENT_FIELDS,
   ARCADE_RUSH_STARTING_INTEGRITY,
   ARCADE_RUSH_WAVE_COUNT,
@@ -6,8 +7,10 @@ import {
 import { ARCADE_RUSH_BOSS_TARGET_DURATION_MS } from "./arcadeRushConfig.js";
 
 export const ARCADE_RUSH_SCORING_VERSION = 1;
-export const ARCADE_RUSH_DRAFT_RULES_VERSION = 0;
-export const ARCADE_RUSH_SCORING_STATUS = "DRAFT_UNTIL_AR10";
+// Compatibility alias for AR3–AR5 imports. It intentionally resolves to the
+// frozen rules version after AR10; there is no active draft ruleset anymore.
+export const ARCADE_RUSH_DRAFT_RULES_VERSION = ARCADE_RUSH_RULES_VERSION;
+export const ARCADE_RUSH_SCORING_STATUS = "FROZEN_V1";
 
 export const ARCADE_RUSH_BASE_POINTS_BY_TIER = Object.freeze({
   1: 100,
@@ -225,7 +228,7 @@ export function calculateArcadeRushFinalScore({
 
   return Object.freeze({
     scoringVersion: ARCADE_RUSH_SCORING_VERSION,
-    rulesVersion: ARCADE_RUSH_DRAFT_RULES_VERSION,
+    rulesVersion: ARCADE_RUSH_RULES_VERSION,
     scoringStatus: ARCADE_RUSH_SCORING_STATUS,
     accuracyBonusBasisPoints: getArcadeRushAccuracyBonusBasisPoints(accuracy),
     breakdown,
