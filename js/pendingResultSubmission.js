@@ -2,7 +2,7 @@ import { buildSubmissionPayload } from "./leaderboardSubmissionService.js";
 
 export const PENDING_RESULT_STORAGE_KEY = "wordstrike.pending-result-submission.v1";
 export const PENDING_RESULT_MAX_AGE_MS = 30 * 60 * 1000;
-const MODES = new Set(["campaign", "typing", "endless", "daily"]);
+const MODES = new Set(["campaign", "typing", "endless", "daily", "arcade-rush"]);
 
 function invalidIntentReason(value, now) {
   if (!value || typeof value !== "object" || Array.isArray(value)) return "MALFORMED_INTENT";
