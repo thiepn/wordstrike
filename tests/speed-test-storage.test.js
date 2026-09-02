@@ -3,6 +3,7 @@ import {
   getSpeedTestRecord,
   getSpeedTestRecordFlags,
   loadModeData,
+  MODE_DATA_STORAGE_KEY,
   recordCompletedSession,
   resetModeData,
 } from "../js/modeStorage.js";
@@ -141,7 +142,7 @@ assert.equal(
 );
 
 const stored = loadModeData();
-values.set("wordstrike_mode_data_v1", JSON.stringify({
+values.set(MODE_DATA_STORAGE_KEY, JSON.stringify({
   ...stored,
   modes: {
     ...stored.modes,
