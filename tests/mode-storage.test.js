@@ -5,6 +5,7 @@ import {
   getRecentSessions,
   loadModeData,
   MAX_RECENT_SESSIONS,
+  MODE_DATA_SCHEMA_VERSION,
   MODE_DATA_STORAGE_KEY,
   recordCompletedSession,
   resetModeData,
@@ -16,6 +17,7 @@ globalThis.localStorage = {
   setItem(key, value) { values.set(key, value); },
 };
 
+assert.equal(MODE_DATA_SCHEMA_VERSION, 2);
 assert.deepEqual(loadModeData(), createDefaultModeData());
 values.set(MODE_DATA_STORAGE_KEY, "{broken");
 assert.deepEqual(loadModeData(), createDefaultModeData());
@@ -58,6 +60,7 @@ assert.equal(recordCompletedSession(makeResult("failed", {
 assert.equal(values.get("wordstrike_save"), '{"currentFurthestLevel":42}');
 
 let data = loadModeData();
+assert.equal(data.schemaVersion, 2);
 assert.equal(data.totals.completedSessions, 2);
 assert.equal(data.totals.failedSessions, 1);
 assert.equal(data.totals.activePlaytimeMs, 2000);
@@ -88,13 +91,16 @@ assert.equal(getRecentSessions()[0].sessionId, "session-39");
 assert.equal(data.modes.campaign.bestWpm, 89);
 assert.equal(data.modes.campaign.bestAccuracy, 100);
 assert.equal(data.modes.campaign.highestScore, 139);
+assert.equal(Object.hasOwn(data.modes, "daily"), false);
+assert.ok(data.modes["arcade-rush"]);
 
 values.set(MODE_DATA_STORAGE_KEY, JSON.stringify({
   ...data,
   futureField: { safe: true },
   modes: { ...data.modes, future: { anything: true } },
 }));
-assert.equal(loadModeData().schemaVersion, 1);
+assert.equal(loadModeData().schemaVersion, 2);
 assert.ok(loadModeData().modes.campaign);
+assert.equal(loadModeData().modes.future, undefined);
 
-console.log("Versioned mode storage, aggregates, duplicate guards, developer exclusion, and bounded history tests passed.");
+console.log("Mode storage v2, aggregates, duplicate guards, developer exclusion, Daily isolation, and bounded history tests passed.");
