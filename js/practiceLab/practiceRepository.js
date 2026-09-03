@@ -71,8 +71,19 @@ function validationError(storeName, record, validation, operation = "save") {
   });
 }
 
+function canonicalizePracticeValue(value) {
+  if (Array.isArray(value)) return value.map(canonicalizePracticeValue);
+  if (value && typeof value === "object") {
+    return Object.keys(value).sort().reduce((result, key) => {
+      result[key] = canonicalizePracticeValue(value[key]);
+      return result;
+    }, {});
+  }
+  return value;
+}
+
 function equivalent(left, right) {
-  return JSON.stringify(left) === JSON.stringify(right);
+  return JSON.stringify(canonicalizePracticeValue(left)) === JSON.stringify(canonicalizePracticeValue(right));
 }
 
 export function createPracticeRepository({ dataStore, manifestStore, now = Date.now } = {}) {
@@ -121,13 +132,17 @@ export function createPracticeRepository({ dataStore, manifestStore, now = Date.
       await dataStore.put(storeName, migrated);
       return migrated;
     }
+    let resolved = migrated;
     await dataStore.runTransaction([storeName, "quarantine"], "readwrite", async (transaction) => {
       const existing = await transaction.get(storeName, nextKey);
       if (!existing) await transaction.put(storeName, migrated);
-      else if (!equivalent(existing, migrated)) await transaction.put("quarantine", makeQuarantineEntry(storeName, migrated, "migration-primary-key-conflict"));
+      else {
+        resolved = existing;
+        if (!equivalent(existing, migrated)) await transaction.put("quarantine", makeQuarantineEntry(storeName, migrated, "migration-primary-key-conflict"));
+      }
       await transaction.delete(storeName, requestedKey);
     });
-    return migrated;
+    return resolved;
   };
 
   const readValidated = async (storeName, key) => {
@@ -180,6 +195,7 @@ export function createPracticeRepository({ dataStore, manifestStore, now = Date.
         if (!migration.ok) {
           await transaction.put("quarantine", makeQuarantineEntry("profiles", raw, "profile-migration-failed"));
           await transaction.delete("profiles", raw.profileId);
+          if (raw?.profileId === ensureManifest().profileId) return { reconciled: false, fatal: "active-profile-invalid", ids: [raw.profileId] };
           continue;
         }
         const profile = migration.value;
@@ -193,12 +209,14 @@ export function createPracticeRepository({ dataStore, manifestStore, now = Date.
         const migration = migratePracticeRecord("context", raw);
         if (!migration.ok) {
           await transaction.put("quarantine", makeQuarantineEntry("contexts", raw, "context-validation-failed"));
+          await transaction.delete("contexts", raw.contextId);
           if ([...profiles.values()].some((profile) => profile.activeContextId === raw.contextId)) invalidActiveContextIds.add(raw.contextId);
           continue;
         }
         const context = migration.value;
         if (!profiles.has(context.profileId)) {
           await transaction.put("quarantine", makeQuarantineEntry("contexts", raw, "context-owner-missing"));
+          await transaction.delete("contexts", raw.contextId);
           continue;
         }
         contexts.set(context.contextId, context);
@@ -335,10 +353,19 @@ export function createPracticeRepository({ dataStore, manifestStore, now = Date.
       validate("contexts", context);
       const profile = await readValidated("profiles", context.profileId);
       if (!profile) throw practiceStorageError(PRACTICE_STORAGE_ERROR_CODES.RECORD_NOT_FOUND, "Practice context owner does not exist", { operation: "save-context", storeName: "profiles", recordId: context.profileId, recoverable: true });
+      const existingById = await dataStore.get("contexts", context.contextId);
+      if (existingById && (existingById.profileId !== context.profileId || existingById.fingerprint !== context.fingerprint)) {
+        throw practiceStorageError(PRACTICE_STORAGE_ERROR_CODES.VALIDATION_FAILED, "Practice context identity is immutable", { operation: "save-context", storeName: "contexts", recordId: context.contextId, recoverable: true });
+      }
       const duplicates = await dataStore.query("contexts", "profileFingerprint", [context.profileId, context.fingerprint]);
       const conflict = duplicates.find((candidate) => candidate.contextId !== context.contextId);
       if (conflict) throw practiceStorageError(PRACTICE_STORAGE_ERROR_CODES.DUPLICATE, "Equivalent Practice context already exists for this profile", { operation: "save-context", storeName: "contexts", recordId: context.contextId, recoverable: true });
-      return putValidated("contexts", context);
+      try {
+        return await putValidated("contexts", context);
+      } catch (cause) {
+        if (cause?.name !== "ConstraintError") throw cause;
+        throw practiceStorageError(PRACTICE_STORAGE_ERROR_CODES.DUPLICATE, "Equivalent Practice context already exists for this profile", { operation: "save-context", storeName: "contexts", recordId: context.contextId, recoverable: true, cause });
+      }
     },
     async createPracticeContext({ profileId = ensureManifest().profileId, contextId = createPracticeContextId(), dataLocale, keyboardLayout, inputMethod = "unknown", hardwareProfileId = null } = {}) {
       const profile = await readValidated("profiles", profileId);
@@ -346,8 +373,15 @@ export function createPracticeRepository({ dataStore, manifestStore, now = Date.
       const context = createPracticeContextRecord({ contextId, profileId, dataLocale: dataLocale ?? profile.dataLocale, keyboardLayout: keyboardLayout ?? profile.keyboardLayout, inputMethod, hardwareProfileId, now });
       const existing = await dataStore.query("contexts", "profileFingerprint", [profileId, context.fingerprint]);
       if (existing.length) return { created: false, reused: true, context: existing[0] };
-      await putValidated("contexts", context);
-      return { created: true, reused: false, context };
+      try {
+        await putValidated("contexts", context);
+        return { created: true, reused: false, context };
+      } catch (cause) {
+        if (cause?.name !== "ConstraintError") throw cause;
+        const canonical = await dataStore.query("contexts", "profileFingerprint", [profileId, context.fingerprint]);
+        if (canonical.length) return { created: false, reused: true, context: canonical[0] };
+        throw practiceStorageError(PRACTICE_STORAGE_ERROR_CODES.DUPLICATE, "Equivalent Practice context already exists for this profile", { operation: "create-context", storeName: "contexts", recordId: context.contextId, recoverable: true, cause });
+      }
     },
     async getActivePracticeContext(profileId = ensureManifest().profileId) {
       const profile = await readValidated("profiles", profileId);
@@ -412,8 +446,8 @@ export function createPracticeRepository({ dataStore, manifestStore, now = Date.
       validate("reviewItems", item);
       await assertContextOwnership(item.profileId, item.contextId, { operation: "save-review-item" });
       const existing = await dataStore.query("reviewItems", "profileContextEntity", [item.profileId, item.contextId, item.entityType, item.entityKey]);
-      const conflict = existing.find((record) => record.reviewItemId !== item.reviewItemId && activeReviewStates.has(record.state) && activeReviewStates.has(item.state));
-      if (conflict) throw practiceStorageError(PRACTICE_STORAGE_ERROR_CODES.DUPLICATE, "An active Practice review item already exists for this context/entity", { operation: "save-review-item", storeName: "reviewItems", recordId: item.reviewItemId });
+      const conflict = existing.find((record) => record.reviewItemId !== item.reviewItemId);
+      if (conflict) throw practiceStorageError(PRACTICE_STORAGE_ERROR_CODES.DUPLICATE, "A canonical Practice review item already exists for this context/entity", { operation: "save-review-item", storeName: "reviewItems", recordId: item.reviewItemId });
       return putValidated("reviewItems", item);
     },
     getReviewItem(reviewItemId) { return readValidated("reviewItems", reviewItemId); },

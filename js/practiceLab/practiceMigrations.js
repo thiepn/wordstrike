@@ -94,6 +94,26 @@ const migrations = Object.freeze({
   }),
 });
 
+function createLegacySkillStatId(profileId, entityType, entityKey) {
+  return "practice-stat_" + encodeURIComponent(profileId) + "_" + encodeURIComponent(entityType) + "_" + encodeURIComponent(entityKey);
+}
+
+function validateHistoricalRecord(type, value, version) {
+  const errors = [];
+  if (type === "skillStat" && version === 1) {
+    const validIdentity = typeof value.profileId === "string"
+      && typeof value.entityType === "string"
+      && typeof value.entityKey === "string"
+      && value.statId === createLegacySkillStatId(value.profileId, value.entityType, value.entityKey);
+    if (!validIdentity) errors.push({
+      path: "statId",
+      code: "IDENTITY_MISMATCH",
+      message: "legacy statId does not match the historical profile/entity identity",
+    });
+  }
+  return errors;
+}
+
 function promoteForCurrentValidation(type, value, version) {
   if (type === "profile" && version <= 2) return {
     ...value,
@@ -119,6 +139,8 @@ function promoteForCurrentValidation(type, value, version) {
 }
 
 function validateIntermediate(type, value, version, validate) {
+  const historicalErrors = validateHistoricalRecord(type, value, version);
+  if (historicalErrors.length) return { valid: false, errors: historicalErrors };
   try {
     return validate(promoteForCurrentValidation(type, value, version));
   } catch (cause) {
@@ -153,6 +175,12 @@ function migrate({ input, type, versionField, targetVersion, normalize, validate
   const steps = [];
   let currentVersion = fromVersion;
   while (currentVersion < targetVersion) {
+    const historicalErrors = validateHistoricalRecord(type, value, currentVersion);
+    if (historicalErrors.length) return failure(
+      PRACTICE_STORAGE_ERROR_CODES.MIGRATION_FAILED,
+      type + " failed historical validation before version " + (currentVersion + 1),
+      { cause: historicalErrors },
+    );
     const migrateStep = migrations[type]?.[currentVersion]
       ?? (currentVersion === 0 ? (current) => ({ ...current, [versionField]: 1 }) : null);
     if (!migrateStep) return failure(PRACTICE_STORAGE_ERROR_CODES.MIGRATION_FAILED, `${type} has no migration from version ${currentVersion}`);

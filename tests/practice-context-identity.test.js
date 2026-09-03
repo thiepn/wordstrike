@@ -89,7 +89,7 @@ assert.equal(migratedProfile.ok, true);
 assert.deepEqual(migratedProfile.steps, ["profile:2->3"]);
 assert.equal(migratedProfile.value.activeContextId, defaultA);
 assert.equal(legacyProfile.activeContextId, undefined);
-const legacyStat = { ...stat, recordVersion: 1, statId: "legacy-" + stat.statId };
+const legacyStat = { ...stat, recordVersion: 1, statId: "practice-stat_" + encodeURIComponent(profileA) + "_" + encodeURIComponent(stat.entityType) + "_" + encodeURIComponent(stat.entityKey) };
 delete legacyStat.contextId;
 const migratedStat = migratePracticeRecord("skillStat", legacyStat);
 assert.equal(migratedStat.ok, true);

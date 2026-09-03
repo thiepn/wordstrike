@@ -1,6 +1,6 @@
 # Practice Lab Session Engine
 
-Status: Prompt 3 headless foundation
+Status: Prompt 3 headless foundation + PL5 context identity
 
 ## 1. Scope
 
@@ -11,6 +11,10 @@ No route, screen, browser listener, renderer, experiment content, recommendation
 ## 2. Protected boundaries
 
 The engine imports Prompt 2 Practice contracts and a repository interface. It never accesses IndexedDB, localStorage, DOM, Supabase, authentication, leaderboard services, ranked Typing records, or WORDSTRIKE saves. **js/main.js** does not import it.
+
+### PL5 immutable identity
+
+Before an engine is created, the caller must resolve one valid **profileId + contextId** pair. The engine receives both as constructor identity and never re-reads activeContextId while the session is running. The frozen context propagates through snapshots, checkpoints, analyzer output validation, summaries, and atomic completion. Locale/layout/input-method decisions remain above the generic engine.
 
 ## 3. Module map
 
@@ -43,7 +47,7 @@ terminal ----> destroyed
 
 ## 5. Public API
 
-**createPracticeSessionEngine()** exposes prepare, start, handleInput, pause, resume, handleVisibilityState, appendContent, tick, flushCheckpoint, complete, abandon, interrupt, destroy, snapshots, metrics, trace, observations, diagnostics, and subscribe.
+**createPracticeSessionEngine()** requires a resolved **profileId** and **contextId**, then exposes prepare, start, handleInput, pause, resume, handleVisibilityState, appendContent, tick, flushCheckpoint, complete, abandon, interrupt, destroy, snapshots, metrics, trace, observations, diagnostics, and subscribe. Session identity is immutable after construction.
 
 **restorePracticeSessionEngine()** validates and restores a checkpoint. All clocks, scheduling, repository, IDs, logging, checkpoint policy, and segmentation are injectable.
 
@@ -105,11 +109,11 @@ Defaults are 15 seconds minimum, 50 accepted insertions threshold, one timer, an
 
 ## 18. Checkpoint payload
 
-**buildPracticeCheckpoint()** uses the Prompt 2 schema: identity/versions, configuration, full bounded content snapshot and descriptor/hash, cursor/typed buffer, completed units, durations, aggregate metrics, original start/timezone context, and at most 32 recent input events. It contains no unbounded trace, callback, DOM, auth, or ranking data.
+**buildPracticeCheckpoint()** uses the current schema: immutable **profileId + contextId + sessionId**, versions, configuration, full bounded content snapshot and descriptor/hash, cursor/typed buffer, completed units, durations, aggregate metrics, original start/timezone context, and at most 32 recent input events. It contains no unbounded trace, callback, DOM, auth, or ranking data.
 
 ## 19. Restoration
 
-Restore validates schema/expiry/profile/experiment/session/content versions, resumability, content hash, cursor bounds, and reconstructed content. Already-committed session IDs return their existing summary without recommit. A valid restore begins paused and requires explicit resume.
+Restore validates schema/expiry/profile/**context**/experiment/session/content versions, context ownership, resumability, content hash, cursor bounds, and reconstructed content. A checkpoint whose context is missing or no longer belongs to its profile fails recoverably and is never restored under the currently active context. Already-committed session IDs return their existing summary without recommit. A valid restore begins paused and requires explicit resume.
 
 ## 20. Event-buffer limits
 
@@ -147,11 +151,11 @@ Evaluation occurs after accepted input, append, tick, and explicit completion.
 
 ## 24. Result construction
 
-**buildPracticeSessionResult()** maps identity/version, content descriptor, UTC/local time, durations, generic metrics, targets, and bounded optional analysis into a Prompt 2-valid Practice summary. It creates no recommendation, mastery, leaderboard, ranked, submission, or raw-event field.
+**buildPracticeSessionResult()** maps immutable **profileId + contextId + sessionId**, version, content descriptor, UTC/local time, durations, generic metrics, targets, and bounded optional analysis into a current Practice summary. The historical contextId is persisted permanently and is never derived later from activeContextId. It creates no recommendation, mastery, leaderboard, ranked, submission, or raw-event field.
 
 ## 25. Experiment analysis hook
 
-Optional **analyzeResult()** receives immutable snapshot, metrics, bounded in-memory trace, and observations. Output must be JSON-safe and at most 32 KiB. Analyzer failure blocks commit, pauses an active session, preserves/refreshes its checkpoint, and returns a recoverable **PRACTICE_SESSION_ANALYSIS_FAILED** error. Retry is explicit.
+Optional **analyzeResult()** receives an immutable snapshot containing the frozen profile/context identity, metrics, bounded in-memory trace, and observations. Any returned skill/review updates must match the completing summary's profileId and contextId; mixed-context output is rejected before commit. Output must be JSON-safe and at most 32 KiB. Analyzer failure blocks commit, pauses an active session, preserves/refreshes its checkpoint, and returns a recoverable **PRACTICE_SESSION_ANALYSIS_FAILED** error. Retry is explicit.
 
 ## 26. Atomic completion
 
@@ -162,7 +166,7 @@ lock finalization
  -> calculate metrics/observations
  -> optional analysis
  -> build + validate summary/profile update
- -> repository.commitCompletedPracticeSession()
+ -> repository.commitCompletedPracticeSession() [profile/context ownership enforced]
  -> transaction clears checkpoint
  -> enter completed
  -> emit completed once
