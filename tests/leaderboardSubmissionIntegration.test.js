@@ -13,13 +13,18 @@ assert.equal(result.sessionSource, "mode-select");
 clearSession();
 const second = beginSession({ modeId: MODE_IDS.ENDLESS, source: "retry" });
 assert.notEqual(second.id, first.id);
+clearSession();
+const rush = beginSession({ modeId: MODE_IDS.ARCADE_RUSH, source: "arcade-rush-ready", seed: 123 });
+assert.ok(rush.id);
+assert.equal(rush.modeId, MODE_IDS.ARCADE_RUSH);
+assert.notEqual(rush.id, second.id);
+clearSession();
 
-const dailyMode = await readFile(new URL("../js/dailyMode.js", import.meta.url), "utf8");
 const endlessMode = await readFile(new URL("../js/endlessMode.js", import.meta.url), "utf8");
 const main = await readFile(new URL("../js/main.js", import.meta.url), "utf8");
-assert.ok(dailyMode.indexOf("recordCompletedSession(result)") < dailyMode.indexOf("callbacks.onComplete?.(game, result)"));
 assert.ok(endlessMode.indexOf("recordCompletedSession(result)") < endlessMode.indexOf("callbacks.onComplete?.(game, result)"));
-assert.match(main, /function finishDaily[\s\S]*prepareAutomaticResultSubmission\("daily", result/);
 assert.match(main, /function finishEndless[\s\S]*prepareAutomaticResultSubmission\("endless", result/);
+assert.match(main, /function finishArcadeRush[\s\S]*recordCompletedSession\(result\)[\s\S]*prepareAutomaticResultSubmission\("arcade-rush", result/);
+assert.doesNotMatch(main, /function finishDaily|prepareAutomaticResultSubmission\("daily"/);
 
-console.log("Daily/Endless run IDs remain stable through finalization while separate runs receive separate IDs.");
+console.log("Endless and Arcade Rush session identities remain isolated, locally persisted before submission, and separate runs receive separate IDs.");
