@@ -49,7 +49,7 @@ root.render("menu-screen", ["open-leaderboards"]);
 root.buttons[0].dispatchEvent(new MouseEvent("click", { bubbles: true }));
 screen = Screens.LEADERBOARDS;
 const actions = [
-  "leaderboard-select-daily", "leaderboard-select-endless", "leaderboard-refresh", "leaderboard-main-menu",
+  "leaderboard-select-arcade-rush", "leaderboard-select-endless", "leaderboard-refresh", "leaderboard-main-menu",
 ];
 root.render("leaderboards-screen", actions);
 for (const button of root.buttons) button.dispatchEvent(new MouseEvent("click", { bubbles: true }));
@@ -63,10 +63,13 @@ assert.equal(calls.length, 5);
 
 const ui = await readFile(new URL("../js/ui.js", import.meta.url), "utf8");
 const main = await readFile(new URL("../js/main.js", import.meta.url), "utf8");
+const clickRouting = await readFile(new URL("../js/appClickRouting.js", import.meta.url), "utf8");
 assert.match(ui, /\["LEADERBOARDS", "open-leaderboards"\]/);
 assert.match(main, /function openLeaderboards\(\)/);
 assert.match(main, /Screens\.LEADERBOARDS/);
+assert.match(clickRouting, /"leaderboard-select-arcade-rush"/);
+assert.doesNotMatch(clickRouting, /"leaderboard-select-daily"/);
 assert.equal(main.split("attachAppClickListener(").length - 1, 1);
 assert.equal(main.split('addEventListener("keydown"').length - 1, 1);
 
-console.log("Main-menu and Leaderboards actions use one stable delegated click route.");
+console.log("Main-menu and active Leaderboards actions use one stable delegated click route after Daily retirement.");
