@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import {
-  compareDailyLeaderboardRows,
+  compareArcadeRushLeaderboardRows,
   compareEndlessLeaderboardRows,
   rankLeaderboardRows,
 } from "../supabase/functions/_shared/leaderboardRead.js";
@@ -32,19 +32,25 @@ assert.equal("userId" in endless.entries[0], false);
 assert.equal("userId" in endless.viewer.entry, false);
 assert.ok(compareEndlessLeaderboardRows(row("a", { stage: 11 }), row("b", { stage: 10 })) < 0);
 
-const dailyBase = row("daily", {
-  boardKey: "daily-strike-v1", challengeDate: "2026-06-27", challengeVersion: 1,
-  completed: true, score: 1000, durationMs: 5000, accuracy: 90, wordsCompleted: 60,
+const rushBase = row("rush", {
+  boardKey: "arcade-rush-v1", completed: true, score: 80_000,
+  accuracy: 98, durationMs: 260_000, stage: null,
 });
-assert.ok(compareDailyLeaderboardRows(dailyBase, { ...dailyBase, completed: false, score: 99999 }) < 0);
-assert.ok(compareDailyLeaderboardRows(dailyBase, { ...dailyBase, score: 999 }) < 0);
-assert.ok(compareDailyLeaderboardRows(dailyBase, { ...dailyBase, durationMs: 6000 }) < 0);
-const daily = rankLeaderboardRows([
-  dailyBase,
-  { ...dailyBase, id: "date-wrong", userId: "x", challengeDate: "2026-06-26", score: 99999 },
-  { ...dailyBase, id: "version-wrong", userId: "y", challengeVersion: 2, score: 99999 },
-], { boardKey: "daily-strike-v1", challengeDate: "2026-06-27" });
-assert.equal(daily.entries.length, 1);
+assert.ok(compareArcadeRushLeaderboardRows({ ...rushBase, score: 81_000 }, rushBase) < 0);
+assert.ok(compareArcadeRushLeaderboardRows({ ...rushBase, accuracy: 99 }, rushBase) < 0);
+assert.ok(compareArcadeRushLeaderboardRows({ ...rushBase, durationMs: 250_000 }, rushBase) < 0);
+assert.ok(compareArcadeRushLeaderboardRows(rushBase, { ...rushBase, completed: false, score: 999_999 }) < 0);
+const rush = rankLeaderboardRows([
+  rushBase,
+  { ...rushBase, id: "rush-better", userId: "rush", score: 90_000 },
+  { ...rushBase, id: "rush-failed", userId: "failed", completed: false, score: 999_999 },
+], { boardKey: "arcade-rush-v1", viewerUserId: "rush" });
+assert.equal(rush.entries.length, 1);
+assert.equal(rush.entries[0].score, 90_000);
+assert.equal(rush.viewer.rank, 1);
+assert.deepEqual(rankLeaderboardRows([rushBase], { boardKey: "daily-strike-v1" }), {
+  entries: [], viewer: null,
+});
 
 const tied = [
   row("late", { id: "z", submittedAt: "2026-06-28T00:00:00.000Z" }),
@@ -61,4 +67,4 @@ const limited = rankLeaderboardRows(many, { boardKey: "endless-v1", viewerUserId
 assert.equal(limited.entries.length, 100);
 assert.equal(limited.viewer.rank, 121);
 
-console.log("Leaderboard ranking mirrors Daily/Endless comparators, best-per-player, moderation, top-100, and viewer rank.");
+console.log("Active Endless/Arcade Rush ranking preserves best-per-player, moderation, completion, top-100, viewer rank, and stable ties; retired Daily has no rank surface.");
