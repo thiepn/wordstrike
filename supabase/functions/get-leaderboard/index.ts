@@ -5,7 +5,6 @@ import { validateLeaderboardRequest } from "../_shared/leaderboardRead.js";
 const MESSAGES: Record<string, string> = Object.freeze({
   INVALID_REQUEST: "The leaderboard request is invalid.",
   INVALID_BOARD: "Unsupported leaderboard.",
-  INVALID_CHALLENGE_DATE: "The Daily Strike challenge date is invalid.",
   BOARD_UNAVAILABLE: "This leaderboard is unavailable.",
   METHOD_NOT_ALLOWED: "This request method is not supported.",
   SERVER_ERROR: "Global rankings are temporarily unavailable.",
@@ -58,7 +57,7 @@ Deno.serve(async (request) => {
   try {
     const { data, error } = await client.rpc("get_public_leaderboard", {
       p_board_key: validation.boardKey,
-      p_challenge_date: validation.challengeDate,
+      p_challenge_date: null,
       p_viewer_user_id: viewerUserId,
     });
     if (error) {
