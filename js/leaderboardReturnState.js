@@ -13,8 +13,9 @@ export function validateLeaderboardReturnState(value) {
     return Object.freeze({ screen: "title" });
   }
   if (value.screen !== "leaderboards" || !CATEGORIES.has(value.selectedCategory)) return null;
-  const normalizedCategory = value.selectedCategory === LEADERBOARD_CATEGORIES.ARCADE_RUSH
-    ? LEADERBOARD_CATEGORIES.DAILY
+  // AR14 redirects any pre-cutover Daily OAuth return to the replacement board.
+  const normalizedCategory = value.selectedCategory === LEADERBOARD_CATEGORIES.DAILY
+    ? LEADERBOARD_CATEGORIES.ARCADE_RUSH
     : value.selectedCategory;
   const typingDuration = normalizedCategory === LEADERBOARD_CATEGORIES.TYPING
     ? value.typingDuration === 15 ? 15 : value.typingDuration === 60 ? 60 : null
@@ -25,9 +26,12 @@ export function validateLeaderboardReturnState(value) {
 
 export function leaderboardReturnStateForBoard(boardKey) {
   const selection = getLeaderboardSelection(boardKey);
+  const selectedCategory = selection.selectedCategory === LEADERBOARD_CATEGORIES.DAILY
+    ? LEADERBOARD_CATEGORIES.ARCADE_RUSH
+    : selection.selectedCategory;
   return Object.freeze({
     screen: "leaderboards",
-    selectedCategory: selection.selectedCategory,
+    selectedCategory,
     typingDuration: selection.selectedTypingDuration,
   });
 }

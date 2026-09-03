@@ -24,7 +24,6 @@ const service = createLeaderboardService({
   getClient: () => client,
   getDateKey: () => "2026-06-27",
   now: (() => { let value = 1000; return () => ++value; })(),
-  isShadowArcadeRushEnabled: () => false,
 });
 assert.equal(service.getLeaderboardState().status, "idle");
 assert.equal(calls.length, 0);
@@ -57,7 +56,7 @@ pending[2].resolve({ data: { ok: true, data: { board: {}, entries: [], viewer: n
 await refresh;
 assert.equal(service.getLeaderboardState().status, "empty");
 
-const offline = createLeaderboardService({ getClient: () => null, isShadowArcadeRushEnabled: () => false });
+const offline = createLeaderboardService({ getClient: () => null });
 assert.equal((await offline.initializeLeaderboards()).status, "offline");
 const localData = { bestScore: 123 };
 offline.resetLeaderboardState();
@@ -72,36 +71,37 @@ assert.deepEqual(EXPECTED_LEADERBOARD_RULES_VERSIONS, {
   "arcade-rush-v1": 1,
 });
 
-for (const boardKey of [
+for (const requestedBoardKey of [
   LEADERBOARD_BOARDS.CAMPAIGN,
   LEADERBOARD_BOARDS.ENDLESS,
   LEADERBOARD_BOARDS.DAILY,
   LEADERBOARD_BOARDS.ARCADE_RUSH,
 ]) {
-  assert.equal(isLeaderboardCacheStateCurrent(boardKey, {
-    board: { boardKey, rulesVersion: 2 },
+  const effectiveBoardKey = requestedBoardKey === LEADERBOARD_BOARDS.DAILY
+    ? LEADERBOARD_BOARDS.ARCADE_RUSH
+    : requestedBoardKey;
+  assert.equal(isLeaderboardCacheStateCurrent(effectiveBoardKey, {
+    board: { boardKey: effectiveBoardKey, rulesVersion: 2 },
   }), false);
   let fetches = 0;
   const rollbackService = createLeaderboardService({
     getDateKey: () => "2026-06-27",
-    isShadowArcadeRushEnabled: () => false,
     getClient: () => ({ functions: { invoke: async () => {
       fetches += 1;
       return { data: { ok: true, data: {
-        board: { boardKey, displayName: "Board", rulesVersion: fetches === 1 ? 2 : 1 },
+        board: { boardKey: effectiveBoardKey, displayName: "Board", rulesVersion: fetches === 1 ? 2 : 1 },
         entries: fetches === 1 ? [] : [{ rank: 1, username: "Restored", score: 1 }],
         viewer: null,
       } } };
     } } }),
   });
-  assert.equal((await rollbackService.initializeLeaderboards(boardKey)).status, "empty");
-  assert.equal((await rollbackService.initializeLeaderboards(boardKey)).status, "ready");
-  assert.equal(fetches, 2, `${boardKey} must refetch a cached version-2 response`);
+  assert.equal((await rollbackService.initializeLeaderboards(requestedBoardKey)).status, "empty");
+  assert.equal((await rollbackService.initializeLeaderboards(requestedBoardKey)).status, "ready");
+  assert.equal(fetches, 2, `${requestedBoardKey} must refetch a cached version-2 response`);
 }
 
 let typingFetches = 0;
 const typingCacheService = createLeaderboardService({
-  isShadowArcadeRushEnabled: () => false,
   getClient: () => ({ functions: { invoke: async () => {
     typingFetches += 1;
     return { data: { ok: true, data: {
@@ -114,14 +114,13 @@ await typingCacheService.initializeLeaderboards(LEADERBOARD_BOARDS.TYPING_60);
 await typingCacheService.initializeLeaderboards(LEADERBOARD_BOARDS.TYPING_60);
 assert.equal(typingFetches, 1, "valid Typing version-1 cache remains reusable");
 
-const shadowCalls = [];
-const shadowService = createLeaderboardService({
+const rushCalls = [];
+const rushService = createLeaderboardService({
   getDateKey: () => {
     throw new Error("Arcade Rush must not request a Daily date");
   },
-  isShadowArcadeRushEnabled: () => true,
   getClient: () => ({ functions: { invoke: async (_name, { body }) => {
-    shadowCalls.push(body);
+    rushCalls.push(body);
     return { data: { ok: true, data: {
       board: { boardKey: LEADERBOARD_BOARDS.ARCADE_RUSH, displayName: "Arcade Rush", rulesVersion: 1 },
       entries: [{ rank: 1, username: "Rusher", score: 90000, accuracy: 99, durationMs: 250000, completed: true }],
@@ -129,18 +128,19 @@ const shadowService = createLeaderboardService({
     } } };
   } } }),
 });
-await shadowService.selectLeaderboardBoard(LEADERBOARD_BOARDS.DAILY);
-assert.deepEqual(shadowCalls, [{ boardKey: LEADERBOARD_BOARDS.ARCADE_RUSH }]);
-assert.equal(shadowService.getLeaderboardState().selectedBoardKey, LEADERBOARD_BOARDS.ARCADE_RUSH);
-assert.equal(shadowService.getLeaderboardState().selectedCategory, "arcade-rush");
-assert.equal(shadowService.getLeaderboardState().entries[0].durationMs, 250000);
+// AR14 redirects the legacy frontend Daily selection to the public Rush board.
+await rushService.selectLeaderboardBoard(LEADERBOARD_BOARDS.DAILY);
+assert.deepEqual(rushCalls, [{ boardKey: LEADERBOARD_BOARDS.ARCADE_RUSH }]);
+assert.equal(rushService.getLeaderboardState().selectedBoardKey, LEADERBOARD_BOARDS.ARCADE_RUSH);
+assert.equal(rushService.getLeaderboardState().selectedCategory, "arcade-rush");
+assert.equal(rushService.getLeaderboardState().entries[0].durationMs, 250000);
 assert.equal(
-  getLeaderboardKeyboardTarget({ selectedBoardKey: LEADERBOARD_BOARDS.ENDLESS }, "ArrowRight", { shadowArcadeRush: true }),
+  getLeaderboardKeyboardTarget({ selectedBoardKey: LEADERBOARD_BOARDS.ENDLESS }, "ArrowRight"),
   LEADERBOARD_BOARDS.ARCADE_RUSH,
 );
 assert.equal(
-  getLeaderboardKeyboardTarget({ selectedBoardKey: LEADERBOARD_BOARDS.ENDLESS }, "ArrowRight", { shadowArcadeRush: false }),
-  LEADERBOARD_BOARDS.DAILY,
+  getLeaderboardKeyboardTarget({ selectedBoardKey: LEADERBOARD_BOARDS.CAMPAIGN }, "End"),
+  LEADERBOARD_BOARDS.ARCADE_RUSH,
 );
 
-console.log("Leaderboard service is lazy, stale-safe, rules-versioned, and supports a date-free Arcade Rush shadow board.");
+console.log("Leaderboard service is lazy, stale-safe, rules-versioned, and uses Arcade Rush as the public date-free fourth board after AR14.");

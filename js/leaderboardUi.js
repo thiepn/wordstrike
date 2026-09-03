@@ -3,7 +3,6 @@ import {
   LEADERBOARD_BOARDS,
   LEADERBOARD_CATEGORIES,
 } from "./leaderboardService.js";
-import { isArcadeRushLeaderboardShadowEnabled } from "./arcadeRushLeaderboard.js";
 
 const app = () => document.querySelector("#app");
 const escapeHtml = (value) => String(value ?? "")
@@ -115,7 +114,6 @@ export function renderLeaderboards(
   authState,
   profileState,
   notice = "",
-  { shadowArcadeRush = isArcadeRushLeaderboardShadowEnabled() } = {},
 ) {
   const boardKey = state.selectedBoardKey || state.selectedBoard || LEADERBOARD_BOARDS.CAMPAIGN;
   const inferredSelection = getLeaderboardSelection(boardKey);
@@ -124,9 +122,8 @@ export function renderLeaderboards(
   const typing = category === LEADERBOARD_CATEGORIES.TYPING;
   const daily = boardKey === LEADERBOARD_BOARDS.DAILY;
   const rush = boardKey === LEADERBOARD_BOARDS.ARCADE_RUSH;
-  const useShadowRushTab = shadowArcadeRush || rush;
   const meta = daily
-    ? `CANONICAL UTC CHALLENGE ${escapeHtml(state.board?.challengeDate || "LOADING")}`
+    ? `LEGACY UTC CHALLENGE ${escapeHtml(state.board?.challengeDate || "LOADING")}`
     : rush
       ? "RULES V1 // COMPLETED RUNS ONLY // ALL-TIME"
       : boardKey === LEADERBOARD_BOARDS.CAMPAIGN
@@ -138,9 +135,7 @@ export function renderLeaderboards(
     [LEADERBOARD_CATEGORIES.CAMPAIGN, "CAMPAIGN", "leaderboard-select-campaign"],
     [LEADERBOARD_CATEGORIES.TYPING, "TYPING TEST", "leaderboard-select-typing"],
     [LEADERBOARD_CATEGORIES.ENDLESS, "ENDLESS", "leaderboard-select-endless"],
-    useShadowRushTab
-      ? [LEADERBOARD_CATEGORIES.ARCADE_RUSH, "ARCADE RUSH", "leaderboard-select-daily"]
-      : [LEADERBOARD_CATEGORIES.DAILY, "DAILY STRIKE", "leaderboard-select-daily"],
+    [LEADERBOARD_CATEGORIES.ARCADE_RUSH, "ARCADE RUSH", "leaderboard-select-arcade-rush"],
   ];
   app().innerHTML = `<section class="screen leaderboards-screen"><main class="leaderboards-panel">
     <button type="button" class="screen-back-button" data-action="leaderboard-main-menu" aria-label="Go back">BACK</button>
