@@ -1,0 +1,28 @@
+name: AR16 Profile Statistics Cleanup
+
+on:
+  push:
+    branches:
+      - feature/arcade-rush-ar16-delete-daily-frontend
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/arcade-rush-ar16-delete-daily-frontend
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node scripts/ar16-fix-stats-date.mjs
+      - run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add js/main.js
+          git commit -m "AR16: remove stale Daily date dependency from profile statistics"
+          git push origin HEAD:feature/arcade-rush-ar16-delete-daily-frontend
