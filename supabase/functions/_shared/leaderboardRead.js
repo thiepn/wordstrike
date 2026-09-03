@@ -9,9 +9,14 @@ export const LEADERBOARD_LIMIT = 100;
 export const LEADERBOARD_RULES_VERSION = 1;
 export const ARCADE_RUSH_BOARD_KEY = "arcade-rush-v1";
 
+const RETIRED_DAILY_BOARD_KEY = "daily-strike-v1";
+
 export function validateLeaderboardRequest(body) {
   if (!body || typeof body !== "object" || Array.isArray(body)) {
     return { valid: false, code: "INVALID_REQUEST" };
+  }
+  if (body.boardKey === RETIRED_DAILY_BOARD_KEY) {
+    return { valid: false, code: "INVALID_BOARD" };
   }
   if (Object.keys(body).length !== 1 || !Object.hasOwn(body, "boardKey")) {
     return { valid: false, code: "INVALID_REQUEST" };
