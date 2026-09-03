@@ -31,7 +31,6 @@ globalThis.document = {
 };
 
 const {
-  renderDailyResults,
   renderEndlessResults,
   renderResults,
   renderSpeedTestResults,
@@ -65,7 +64,7 @@ const campaign = (grade, isBoss, levelNumber, handlers) => renderResults({
   timeRemaining: 4,
   phrasesCompleted: 1,
   phraseCount: 1,
-}, grade === "Fail" ? 0 : 0, handlers);
+}, 0, handlers);
 clickAudit(["next", "retry", "levels", "title"], (handlers) => campaign("A", false, 9, handlers));
 clickAudit(["retry", "levels", "title"], (handlers) => campaign("Fail", false, 9, handlers));
 clickAudit(["next", "retry", "levels", "title"], (handlers) => campaign("S", true, 10, handlers));
@@ -86,21 +85,6 @@ renderEndlessResults({
 assert.deepEqual(app.buttons.map(({ dataset }) => dataset.action), ["retry", "modes", "title"]);
 assert.doesNotMatch(app.html, /29993\s*\+\s*31668/);
 
-renderDailyResults({
-  success: true,
-  score: 25000,
-  activeDurationMs: 90000,
-  accuracy: 95,
-  wpm: 55,
-  combo: { maximum: 30 },
-  modeData: {
-    dateKey: "2026-06-26", wordsCompleted: 60, wordsResolved: 60,
-    integrityRemaining: 2, wordPoints: 6600, completionBonus: 10000,
-    integrityBonus: 4000, accuracyBonus: 1900, timeBonus: 2500,
-  },
-}, {}, 0, { select() {} });
-assert.deepEqual(app.buttons.map(({ dataset }) => dataset.action), ["retry", "modes", "title"]);
-
 clickAudit(["retry", "change", "modes", "title"], (handlers) => renderSpeedTestResults({
   variantId: "time",
   wpm: 60,
@@ -119,9 +103,10 @@ const [main, keyboard] = await Promise.all([
   readFile(new URL("../js/main.js", import.meta.url), "utf8"),
   readFile(new URL("../js/appKeyboardController.js", import.meta.url), "utf8"),
 ]);
-assert.match(keyboard, /const actions = \["retry", "modes", "title"\]/);
-assert.match(keyboard, /startDaily\("retry", state\.dailyResult\.modeData\.dateKey\)/);
+assert.match(keyboard, /Screens\.ARCADE_RUSH_RESULTS[\s\S]*const actions = \["retry", "modes", "title"\][\s\S]*startArcadeRush\?\.\("retry"\)/);
+assert.doesNotMatch(keyboard, /startDaily|DAILY_RESULTS/);
 assert.match(main, /createGlobalKeyboardController\(\{/);
+assert.doesNotMatch(main, /renderDailyResults|Screens\.DAILY_RESULTS/);
 assert.equal(main.split('addEventListener("keydown"').length - 1, 1);
 
-console.log("Campaign, Typing Test, Endless, and Daily result buttons support direct one-click routing through the extracted keyboard controller.");
+console.log("Campaign, Typing Test, Endless, and Arcade Rush result navigation remain wired without a Daily result surface.");
