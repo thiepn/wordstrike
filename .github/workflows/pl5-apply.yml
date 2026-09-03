@@ -24,6 +24,11 @@ jobs:
         with:
           node-version: 22
 
+      - name: Apply staging-script fix
+        run: |
+          node scripts/fixPL5Script.mjs
+          node --check scripts/applyPL5.mjs
+
       - name: Apply PL5 patch
         run: node scripts/applyPL5.mjs
 
@@ -37,7 +42,7 @@ jobs:
 
       - name: Commit implementation
         run: |
-          rm scripts/applyPL5.mjs .github/workflows/pl5-apply.yml
+          rm scripts/applyPL5.mjs scripts/fixPL5Script.mjs .github/workflows/pl5-apply.yml
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
