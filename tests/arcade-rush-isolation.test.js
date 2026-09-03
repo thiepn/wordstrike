@@ -101,8 +101,12 @@ assert.ok(
   adapterSource.includes('./arcadeRush/index.js'),
   "the app adapter is the explicit browser integration boundary",
 );
-assert.ok(modesSource.includes("ARCADE_RUSH"), "AR7 registers Arcade Rush for the shared session lifecycle");
-assert.ok(modesSource.includes("visible: false"), "Arcade Rush must remain hidden before production cutover");
-assert.ok(modesSource.includes("Daily Strike"), "Daily Strike remains production-active during AR7");
+assert.ok(modesSource.includes("ARCADE_RUSH"), "Arcade Rush stays registered for the shared session lifecycle");
+assert.match(
+  modesSource,
+  /id: MODE_IDS\.ARCADE_RUSH[\s\S]*?visible: true/,
+  "Arcade Rush must remain public after the production cutover",
+);
+assert.equal(modesSource.includes("Daily Strike"), false, "AR16 removes Daily Strike from the app registry");
 
-console.log("Arcade Rush pure-subsystem isolation and AR7 hidden app-boundary tests passed.");
+console.log("Arcade Rush pure-subsystem isolation and current app-boundary tests passed.");
