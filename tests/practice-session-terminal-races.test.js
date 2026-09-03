@@ -7,6 +7,7 @@ async function engineFor(harness, options = {}) {
     repository: options.repository || harness.repository,
     sessionId: harness.sessionId,
     profileId: harness.profileId,
+    contextId: harness.contextId,
     clock: harness.time.clock,
     wallClock: harness.time.wallClock,
     scheduler: harness.time.scheduler,

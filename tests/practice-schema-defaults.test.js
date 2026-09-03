@@ -87,10 +87,10 @@ assert.match(createPracticePresetId({ uuid: () => "preset-12345678" }), /^practi
 
 assert.equal(PRACTICE_MANIFEST_KEY, "wordstrike.practice.manifest.v1");
 assert.equal(PRACTICE_DATABASE_NAME, "wordstrike-practice-lab");
-assert.equal(PRACTICE_DATABASE_VERSION, 1);
+assert.equal(PRACTICE_DATABASE_VERSION, 2);
 assert.equal(PRACTICE_LIMITS.manifestBytes, 65536);
 assert.deepEqual(Object.keys(PRACTICE_STORE_DEFINITIONS), [
-  "meta", "profiles", "skillStats", "sessionSummaries", "reviewItems",
+  "meta", "profiles", "contexts", "skillStats", "sessionSummaries", "reviewItems",
   "customTexts", "presets", "activeSessionCheckpoints", "quarantine",
 ]);
 assert.equal(toPracticeUtcIso(now), "2026-07-05T18:42:13.000Z");

@@ -20,6 +20,14 @@ function indexValue(record, keyPath) {
     : record?.[keyPath];
 }
 
+function sameIndexValue(left, right) {
+  return JSON.stringify(left) === JSON.stringify(right);
+}
+
+function isIndexable(value) {
+  return Array.isArray(value) ? value.every((entry) => entry !== undefined) : value !== undefined;
+}
+
 function matchesQuery(value, query) {
   if (typeof query === "function") return query(value);
   if (query && typeof query === "object" && !Array.isArray(query)) {
@@ -63,7 +71,22 @@ export function createPracticeMemoryStore({ initialData = {} } = {}) {
       async put(storeName, record) {
         const key = getPracticeStoreKey(storeName, record);
         if (key == null || (Array.isArray(key) && key.some((entry) => entry == null))) throw new TypeError(`Missing key for ${storeName}`);
-        getStore(storeName).set(serializeKey(key), clonePracticeValue(record));
+        const serializedKey = serializeKey(key);
+        const definition = PRACTICE_STORE_DEFINITIONS[storeName];
+        for (const index of definition?.indexes || []) {
+          if (!index.options?.unique) continue;
+          const target = indexValue(record, index.keyPath);
+          if (!isIndexable(target)) continue;
+          for (const [candidateKey, candidate] of getStore(storeName)) {
+            if (candidateKey === serializedKey) continue;
+            if (sameIndexValue(indexValue(candidate, index.keyPath), target)) {
+              const constraint = new Error(`Unique index violation: ${storeName}.${index.name}`);
+              constraint.name = "ConstraintError";
+              throw constraint;
+            }
+          }
+        }
+        getStore(storeName).set(serializedKey, clonePracticeValue(record));
         return clonePracticeValue(record);
       },
       async delete(storeName, key) {

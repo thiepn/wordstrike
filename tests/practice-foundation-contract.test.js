@@ -22,9 +22,9 @@ const descriptor = Object.freeze({
 
 test("documented Phase 0 constants match canonical exports", async () => {
   assert.equal(PRACTICE_MANIFEST_VERSION, 1);
-  assert.equal(PRACTICE_DATABASE_VERSION, 1);
-  assert.equal(PRACTICE_RECORD_VERSIONS.profile, 2);
-  assert.equal(PRACTICE_STORE_NAMES.length, 9);
+  assert.equal(PRACTICE_DATABASE_VERSION, 2);
+  assert.equal(PRACTICE_RECORD_VERSIONS.profile, 3);
+  assert.equal(PRACTICE_STORE_NAMES.length, 10);
   assert.equal(PRACTICE_LIMITS.checkpointTtlMs, 86_400_000);
   assert.equal(PRACTICE_LIMITS.sessionSummarySoftCap, 1_000);
   const docs = await readFile(new URL("../docs/PRACTICE_LAB_DATA_ARCHITECTURE.md", import.meta.url), "utf8");

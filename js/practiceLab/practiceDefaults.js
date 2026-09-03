@@ -8,6 +8,7 @@ import {
   PRACTICE_RECORD_VERSIONS,
 } from "./practiceConstants.js";
 import {
+  createDefaultPracticeContextId,
   createPracticeCustomTextId,
   createPracticePresetId,
   createPracticeProfileId,
@@ -96,6 +97,7 @@ export function createDefaultPracticeProfile({
   now = Date.now,
   locale = "en",
   keyboardLayout = "qwerty",
+  activeContextId = createDefaultPracticeContextId(profileId),
   overrides = {},
 } = {}) {
   const timestamp = toPracticeUtcIso(now);
@@ -106,6 +108,7 @@ export function createDefaultPracticeProfile({
     updatedAt: timestamp,
     dataLocale: locale,
     keyboardLayout,
+    activeContextId,
     firstAssessmentCompleted: false,
     firstAssessmentCompletedAt: null,
     lastAssessmentAt: null,
@@ -123,9 +126,10 @@ export function createDefaultPracticeProfile({
 
 export function createDefaultSkillStat({
   profileId = createPracticeProfileId(),
+  contextId = createDefaultPracticeContextId(profileId),
   entityType = "key",
   entityKey = "a",
-  statId = createSkillStatId(profileId, entityType, entityKey),
+  statId = createSkillStatId(profileId, contextId, entityType, entityKey),
   now = Date.now,
   overrides = {},
 } = {}) {
@@ -133,6 +137,7 @@ export function createDefaultSkillStat({
   return {
     statId,
     profileId,
+    contextId,
     entityType,
     entityKey,
     recordVersion: PRACTICE_RECORD_VERSIONS.skillStat,
@@ -168,6 +173,7 @@ export function createDefaultSkillStat({
 export function createDefaultSessionSummary({
   sessionId = createPracticeSessionId(),
   profileId = createPracticeProfileId(),
+  contextId = createDefaultPracticeContextId(profileId),
   experimentId = "foundation-test",
   now = Date.now,
   overrides = {},
@@ -176,6 +182,7 @@ export function createDefaultSessionSummary({
   return {
     sessionId,
     profileId,
+    contextId,
     recordVersion: PRACTICE_RECORD_VERSIONS.sessionSummary,
     experimentId,
     experimentVersion: 1,
@@ -221,6 +228,7 @@ export function createDefaultSessionSummary({
 export function createDefaultReviewItem({
   reviewItemId = createPracticeReviewItemId(),
   profileId = createPracticeProfileId(),
+  contextId = createDefaultPracticeContextId(profileId),
   entityType = "key",
   entityKey = "a",
   now = Date.now,
@@ -231,6 +239,7 @@ export function createDefaultReviewItem({
   return {
     reviewItemId,
     profileId,
+    contextId,
     recordVersion: PRACTICE_RECORD_VERSIONS.reviewItem,
     entityType,
     entityKey,
@@ -310,6 +319,7 @@ export function createDefaultPreset({
 
 export function createDefaultCheckpoint({
   profileId = createPracticeProfileId(),
+  contextId = createDefaultPracticeContextId(profileId),
   sessionId = createPracticeSessionId(),
   experimentId = "foundation-test",
   now = Date.now,
@@ -318,6 +328,7 @@ export function createDefaultCheckpoint({
   const createdAt = toPracticeUtcIso(now);
   return {
     profileId,
+    contextId,
     sessionId,
     recordVersion: PRACTICE_RECORD_VERSIONS.checkpoint,
     experimentId,
@@ -343,3 +354,5 @@ export function createDefaultCheckpoint({
     ...freshObject(overrides),
   };
 }
+
+export { createDefaultPracticeContext } from "./practiceContext.js";

@@ -42,6 +42,7 @@ const addedExistingIndexes = [];
 const existingProfiles = {
   indexNames: { contains: () => false },
   createIndex(name, keyPath, options) { addedExistingIndexes.push({ name, keyPath, options }); },
+  deleteIndex() {},
 };
 applyPracticeDatabaseUpgrade({
   objectStoreNames: { contains: (name) => name === "profiles" },

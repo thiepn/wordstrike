@@ -44,7 +44,7 @@ assert.equal(repository.savePracticeSettings(settings).dailySessionLengthMinutes
 
 const stat = createDefaultSkillStat({ profileId, entityType: "bigram", entityKey: "ou", now });
 await repository.saveSkillStat(stat);
-assert.deepEqual(await repository.getSkillStat(profileId, "bigram", "ou"), stat);
+assert.deepEqual(await repository.getSkillStat(profileId, initialized.profile.activeContextId, "bigram", "ou"), stat);
 assert.equal((await repository.listSkillStats()).length, 1);
 
 const review = createDefaultReviewItem({ profileId, reviewItemId, now });

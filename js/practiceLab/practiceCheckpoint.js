@@ -16,6 +16,7 @@ import { validateCheckpoint } from "./practiceValidation.js";
 
 export function buildPracticeCheckpoint({
   profileId,
+  contextId,
   sessionId,
   experiment,
   configuration,
@@ -42,6 +43,7 @@ export function buildPracticeCheckpoint({
   };
   const checkpoint = createDefaultCheckpoint({
     profileId,
+    contextId,
     sessionId,
     experimentId: experiment.id,
     now: wallClock,
@@ -85,12 +87,14 @@ export function validatePracticeCheckpointRestore({
   checkpoint,
   experiment,
   profileId = checkpoint?.profileId,
+  contextId = checkpoint?.contextId,
   wallClock = Date.now,
   segmenter,
 }) {
   const validation = validateCheckpoint(checkpoint);
   const errors = [...validation.errors];
   if (checkpoint?.profileId !== profileId) errors.push({ path: "profileId", code: "PROFILE_MISMATCH", message: "checkpoint profile does not match" });
+  if (checkpoint?.contextId !== contextId) errors.push({ path: "contextId", code: "CONTEXT_MISMATCH", message: "checkpoint context does not match" });
   if (checkpoint?.experimentId !== experiment?.id) errors.push({ path: "experimentId", code: "EXPERIMENT_MISMATCH", message: "checkpoint experiment does not match" });
   if (checkpoint?.experimentVersion !== experiment?.version) errors.push({ path: "experimentVersion", code: "VERSION_MISMATCH", message: "checkpoint experiment version does not match" });
   if (checkpoint?.sessionSchemaVersion !== experiment?.sessionSchemaVersion) errors.push({ path: "sessionSchemaVersion", code: "VERSION_MISMATCH", message: "checkpoint session version does not match" });

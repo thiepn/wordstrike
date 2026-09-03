@@ -74,7 +74,8 @@ export async function createPracticeSessionHarness({
     manifestStore,
     now: time.wallClock,
   });
-  await repository.initializePracticeStorage();
+  const initialized = await repository.initializePracticeStorage();
+  const contextId = initialized.profile.activeContextId;
   const experiment = createGenericPracticeExperimentDescriptor(experimentOverrides);
   const contentPlan = createPracticeContentPlan({
     contentId: `practice-content_${suffix}`,
@@ -93,6 +94,7 @@ export async function createPracticeSessionHarness({
   return {
     time,
     profileId,
+    contextId,
     sessionId,
     repository,
     dataStore,

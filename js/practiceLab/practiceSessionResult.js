@@ -9,6 +9,7 @@ import { practiceSessionError } from "./practiceSessionContract.js";
 export function buildPracticeSessionResult({
   sessionId,
   profileId,
+  contextId,
   experiment,
   configuration,
   contentPlan,
@@ -25,6 +26,7 @@ export function buildPracticeSessionResult({
   const summary = createDefaultSessionSummary({
     sessionId,
     profileId,
+    contextId,
     experimentId: experiment.id,
     now: () => new Date(createdAt),
     overrides: {

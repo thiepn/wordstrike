@@ -1,6 +1,7 @@
 import {
   PRACTICE_DATABASE_NAME,
   PRACTICE_DATABASE_VERSION,
+  PRACTICE_OBSOLETE_INDEXES,
   PRACTICE_STORE_DEFINITIONS,
   PRACTICE_STORE_NAMES,
 } from "./practiceConstants.js";
@@ -36,6 +37,11 @@ export function applyPracticeDatabaseUpgrade(database, transaction = null) {
       ? transaction?.objectStore?.(storeName) ?? null
       : database.createObjectStore(storeName, { keyPath: definition.keyPath });
     if (!store) continue;
+    if (exists && transaction) {
+      for (const obsoleteIndex of PRACTICE_OBSOLETE_INDEXES[storeName] || []) {
+        if (containsName(store.indexNames, obsoleteIndex)) store.deleteIndex(obsoleteIndex);
+      }
+    }
     for (const index of definition.indexes) {
       if (!containsName(store.indexNames, index.name)) store.createIndex(index.name, index.keyPath, index.options || {});
     }
