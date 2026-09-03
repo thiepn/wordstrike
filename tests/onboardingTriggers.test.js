@@ -10,7 +10,7 @@ assert.match(main, /renderCurrentScreen\(\);\s*openAutomaticTutorial\("general"/
 assert.match(main, /openAutomaticTutorial\("campaign"/);
 assert.match(main, /openAutomaticTutorial\("typing"[\s\S]*resetSpeedTestAttempt\("mode-select"\)/);
 assert.match(main, /openAutomaticTutorial\("endless"/);
-assert.match(main, /openAutomaticTutorial\("daily"/);
+assert.doesNotMatch(main, /openAutomaticTutorial\("daily"/);
 assert.match(main, /openAutomaticTutorial\("boss"/);
 assert.match(main, /openAutomaticTutorial\("leaderboards"/);
 assert.match(main, /safeLevel % 10 === 0[\s\S]*openAutomaticTutorial\("boss"[\s\S]*return;/);
@@ -19,5 +19,6 @@ assert.match(main, /window\.wordstrikeOnboarding = Object\.freeze/);
 assert.match(main, /openAutomaticTutorial\("general", \(choice\) =>/);
 assert.doesNotMatch(main, /openAutomaticTutorial\("general"[\s\S]{0,300}openLevelSelect/);
 assert.doesNotMatch(onboardingModules.join("\n"), /beginSession|startSpeedTest|prepareResultSubmission|submitCurrentResult|recordCompletedSession/);
+assert.doesNotMatch(onboardingModules.join("\n"), /Daily Strike|\bdaily\b/i);
 
-console.log("First-title, mode, boss, and leaderboard triggers are one-shot and tutorial modules cannot start or submit gameplay.");
+console.log("Current first-title, mode, boss, and leaderboard tutorial triggers are one-shot and retired Daily has no onboarding trigger.");
