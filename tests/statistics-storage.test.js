@@ -1,9 +1,7 @@
 import assert from "node:assert/strict";
 import {
   ensureStoredPlayerProfile,
-  getLegacyDailyModeSummary,
   getPublicPlayerProfile,
-  LEGACY_DAILY_STORAGE_KEY,
   LEGACY_MODE_DATA_STORAGE_KEY,
   loadModeData,
   MODE_DATA_STORAGE_KEY,
@@ -11,12 +9,15 @@ import {
   updateStoredDisplayName,
 } from "../js/modeStorage.js";
 
+const RETIRED_DAILY_STORAGE_KEY = "wordstrike_daily_legacy_v1";
 const values = new Map();
 globalThis.localStorage = {
   getItem(key) { return values.get(key) ?? null; },
   setItem(key, value) { values.set(key, value); },
+  removeItem(key) { values.delete(key); },
 };
 
+values.set(RETIRED_DAILY_STORAGE_KEY, JSON.stringify({ obsolete: true }));
 values.set(LEGACY_MODE_DATA_STORAGE_KEY, JSON.stringify({
   schemaVersion: 1,
   totals: {
@@ -49,8 +50,10 @@ values.set(LEGACY_MODE_DATA_STORAGE_KEY, JSON.stringify({
       },
     },
   },
-  recentSessions: [],
-  recordedSessionIds: [],
+  recentSessions: [
+    { sessionId: "old-daily", modeId: "daily", endedAt: 1, success: true, score: 1000, modeData: { dateKey: "2026-06-20" } },
+  ],
+  recordedSessionIds: ["old-daily"],
 }));
 
 let data = loadModeData();
@@ -65,7 +68,9 @@ assert.equal(data.modes.campaign.highestScore, 900);
 assert.equal(data.modes["speed-test"].records["time-15"].bestWpm, 80);
 assert.equal(data.modes.endless.records.bestStage.stage, 7);
 assert.equal(Object.hasOwn(data.modes, "daily"), false);
-assert.equal(getLegacyDailyModeSummary().records.distinctCompletedDays, 1);
+assert.equal(data.recentSessions.some(({ modeId }) => modeId === "daily"), false);
+assert.equal(data.recordedSessionIds.includes("old-daily"), false);
+assert.equal(values.has(RETIRED_DAILY_STORAGE_KEY), false, "retired Daily sidecar must be removed during storage normalization");
 assert.ok(data.modes["arcade-rush"]);
 
 const cryptoSource = { randomUUID: () => "storage-profile-id" };
@@ -82,7 +87,7 @@ assert.deepEqual(getPublicPlayerProfile(), {
 });
 assert.deepEqual(
   [...values.keys()].sort(),
-  [LEGACY_DAILY_STORAGE_KEY, LEGACY_MODE_DATA_STORAGE_KEY, MODE_DATA_STORAGE_KEY].sort(),
+  [LEGACY_MODE_DATA_STORAGE_KEY, MODE_DATA_STORAGE_KEY].sort(),
 );
 
 const makeResult = (sessionId) => ({
@@ -130,4 +135,4 @@ assert.equal(data.lifetime.finalizedSessions, 0);
 assert.equal(data.lifetime.activePlaytimeMs, 0);
 assert.equal(data.modes.campaign.highestScore, 900);
 
-console.log("Profile/lifetime v1→v2 migration, stable identity, Daily sidecar isolation, aggregates, and duplicate guards passed.");
+console.log("Profile/lifetime v1→v2 migration, stable identity, retired Daily cleanup, aggregates, and duplicate guards passed.");
