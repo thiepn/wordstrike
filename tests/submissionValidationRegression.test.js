@@ -28,6 +28,8 @@ const dailyResult = {
   },
 };
 
+// AR15 deliberately leaves the hidden frontend Daily serializer in place until AR16,
+// but the current server contract rejects its board key.
 const beforeDaily = structuredClone(dailyResult);
 assert.equal(buildDailySubmissionResult({
   ...dailyResult,
@@ -44,19 +46,11 @@ const dailyRequest = {
   clientVersion: "1.0.0",
   result: normalizedDaily,
 };
-assert.equal(validateScoreSubmission(dailyRequest, { now: new Date("2026-06-28T12:00:00Z") }).valid, true);
+assert.equal(validateScoreSubmission(dailyRequest).code, "INVALID_BOARD");
 assert.equal(validateScoreSubmission({
   ...dailyRequest,
   result: { ...normalizedDaily, wordsCompleted: 120 },
-}, { now: new Date("2026-06-28T12:00:00Z") }).code, "INVALID_WORD_COUNTERS");
-assert.equal(validateScoreSubmission({
-  ...dailyRequest,
-  result: { ...normalizedDaily, completed: true, failureReason: "core-destroyed" },
-}, { now: new Date("2026-06-28T12:00:00Z") }).code, "INVALID_FAILURE_STATE");
-assert.equal(validateScoreSubmission({
-  ...dailyRequest,
-  result: { ...normalizedDaily, developerMode: true },
-}, { now: new Date("2026-06-28T12:00:00Z") }).code, "DEVELOPER_RESULT");
+}).code, "INVALID_BOARD");
 
 function typingResult(duration, sessionId, source = "tab-reset") {
   const correctTestCharacters = duration === 60 ? 400 : 100;
@@ -122,6 +116,7 @@ const service = createLeaderboardSubmissionService({
   } } }),
   invalidateBoard() {},
 });
+// Hidden Daily client preparation still cannot contaminate a later public result.
 service.prepareResultSubmission("daily", dailyResult, auth, profile);
 service.prepareResultSubmission("campaign", campaignResult, auth, profile);
 await service.submitCurrentResult();
@@ -137,4 +132,4 @@ assert.equal(sent.at(-1).boardKey, "typing-15s-english200-v1");
 assert.equal(sent.at(-1).sessionId, typing15.sessionId);
 assert.equal(sent.at(-2).sessionId, typing15.sessionId);
 
-console.log("Production Daily/Typing normalization, specific codes, and cross-mode payload replacement regressions passed.");
+console.log("Retired Daily client normalization remains isolated while active Typing/Campaign validation and cross-mode payload replacement stay correct.");
