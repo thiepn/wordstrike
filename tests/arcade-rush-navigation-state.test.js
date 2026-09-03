@@ -37,7 +37,6 @@ function backspaceEvent() {
 
 test("Arcade Rush is registered and public after the AR14 cutover", () => {
   const rush = getModeDefinition(MODE_IDS.ARCADE_RUSH);
-  const daily = getModeDefinition(MODE_IDS.DAILY);
   assert.equal(MODE_IDS.ARCADE_RUSH, "arcade-rush");
   assert.ok(rush);
   assert.equal(rush.enabled, true);
@@ -48,11 +47,11 @@ test("Arcade Rush is registered and public after the AR14 cutover", () => {
   assert.equal(isValidModeId(MODE_IDS.ARCADE_RUSH), true);
   assert.equal(isModeEnabled(MODE_IDS.ARCADE_RUSH), true);
   assert.equal(getAllModes().some(({ id }) => id === MODE_IDS.ARCADE_RUSH), true);
-  assert.equal(getAllModes().some(({ id }) => id === MODE_IDS.DAILY), false);
-  assert.equal(daily?.visible, false);
-  assert.equal(daily?.enabled, true);
   assert.equal(getRegisteredModes().some(({ id }) => id === MODE_IDS.ARCADE_RUSH), true);
-  assert.equal(getRegisteredModes().some(({ id }) => id === MODE_IDS.DAILY), true);
+  assert.equal(Object.hasOwn(MODE_IDS, "DAILY"), false);
+  assert.equal(getModeDefinition("daily"), null);
+  assert.equal(getAllModes().some(({ id }) => id === "daily"), false);
+  assert.equal(getRegisteredModes().some(({ id }) => id === "daily"), false);
 });
 
 test("Arcade Rush owns one isolated state domain and two valid app screens", () => {
@@ -110,15 +109,15 @@ test("Arcade Rush backspace is prevented from browser navigation and forwarded t
   assert.equal(forwarded, 1);
 });
 
-test("production mode selection reaches Arcade Rush while Daily remains developer-reachable for rollback", async () => {
+test("production mode selection reaches Arcade Rush and retired Daily routes are absent", async () => {
   const [main, modes] = await Promise.all([
     readFile(new URL("../js/main.js", import.meta.url), "utf8"),
     readFile(new URL("../js/modes.js", import.meta.url), "utf8"),
   ]);
   assert.match(main, /route === "arcade-rush-ready"\) openArcadeRushReady\("mode-select"\)/);
   assert.match(main, /appState\.devMode && search\.get\("mode"\) === MODE_IDS\.ARCADE_RUSH/);
-  assert.match(main, /appState\.devMode && search\.get\("mode"\) === MODE_IDS\.DAILY/);
+  assert.doesNotMatch(main, /MODE_IDS\.DAILY|openDailyReady|startDaily|daily-ready/);
   assert.match(main, /renderModeSelect\(getPracticeLabFeatureGate\(\)\.resolveModeDefinitions\(getAllModes\(\)\)/);
-  assert.match(modes, /name: "Daily Strike"[\s\S]*visible: false/);
+  assert.doesNotMatch(modes, /Daily Strike|MODE_IDS\.DAILY|daily-ready/);
   assert.match(modes, /name: "Arcade Rush"[\s\S]*visible: true/);
 });
