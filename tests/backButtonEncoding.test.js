@@ -26,8 +26,6 @@ globalThis.document = {
 
 const {
   renderBossShell,
-  renderDailyReady,
-  renderDailyShell,
   renderEndlessReady,
   renderEndlessShell,
   renderGameplayShell,
@@ -99,11 +97,6 @@ assertBackButtons("Endless ready", app.html, screenBack);
 renderEndlessShell({ stage: 1, stageWordsCompleted: 0, integrity: 3 }, false, {});
 assertBackButtons("Endless gameplay", app.html, gameplayBack);
 
-renderDailyReady({ dateKey: "2026-06-30", record: null }, {});
-assertBackButtons("Daily Strike ready", app.html, screenBack);
-renderDailyShell({ wave: 1, resolvedWordCount: 0, integrity: 3 }, false, {});
-assertBackButtons("Daily Strike gameplay", app.html, gameplayBack);
-
 renderLeaderboards({
   status: "empty",
   entries: [],
@@ -127,7 +120,7 @@ storage.profile = {
 const snapshot = getStatisticsSnapshot(storage, {
   currentFurthestLevel: 1,
   levels: {},
-}, "2026-06-30");
+});
 renderProfileStatistics({ snapshot, storage }, {});
 assertBackButtons("Profile & Stats", app.html, screenBack);
 
@@ -154,4 +147,4 @@ const onboarding = onboardingMarkup({
 });
 assertBackButtons("Onboarding/help overlay", onboarding, byAttribute(/data-onboarding-action="previous"/));
 
-console.log("All rendered Back-button variants use the exact ASCII label BACK.");
+console.log("All current rendered Back-button variants use the exact ASCII label BACK.");
