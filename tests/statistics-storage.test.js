@@ -69,7 +69,8 @@ assert.equal(data.modes["speed-test"].records["time-15"].bestWpm, 80);
 assert.equal(data.modes.endless.records.bestStage.stage, 7);
 assert.equal(Object.hasOwn(data.modes, "daily"), false);
 assert.equal(data.recentSessions.some(({ modeId }) => modeId === "daily"), false);
-assert.equal(data.recordedSessionIds.includes("old-daily"), false);
+// recordedSessionIds are opaque dedupe tokens with no recoverable mode tag; retaining them is safe.
+assert.equal(data.recordedSessionIds.includes("old-daily"), true);
 assert.equal(values.has(RETIRED_DAILY_STORAGE_KEY), false, "retired Daily sidecar must be removed during storage normalization");
 assert.ok(data.modes["arcade-rush"]);
 
