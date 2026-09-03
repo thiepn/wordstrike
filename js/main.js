@@ -1225,7 +1225,7 @@ function renderCurrentScreen() {
     const profile = storage.profile || ensureStoredPlayerProfile();
     if (!storage.profile) storage.profile = profile;
     renderProfileStatistics({
-      snapshot: getStatisticsSnapshot(storage, appState.save, getUtcDateKey()),
+      snapshot: getStatisticsSnapshot(storage, appState.save),
       storage,
       activeTab: appState.statisticsTabIndex,
       recentFilter: appState.statisticsRecentFilter,
