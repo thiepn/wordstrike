@@ -12,6 +12,7 @@ const RESULT_ACTIONS = Object.freeze({
       "leaderboard-select-campaign",
       "leaderboard-select-typing",
       "leaderboard-select-endless",
+      "leaderboard-select-arcade-rush",
       "leaderboard-typing-select-60",
       "leaderboard-typing-select-15",
       "leaderboard-google-sign-in",
