@@ -4,8 +4,6 @@ import {
   createDefaultModeData,
   getArcadeRushRecordFlags,
   getArcadeRushRecords,
-  getLegacyDailyModeSummary,
-  LEGACY_DAILY_STORAGE_KEY,
   LEGACY_MODE_DATA_STORAGE_KEY,
   loadModeData,
   migrateModeDataToV2,
@@ -16,10 +14,12 @@ import {
 } from "../js/modeStorage.js";
 import { MODE_IDS } from "../js/modes.js";
 
+const RETIRED_DAILY_STORAGE_KEY = "wordstrike_daily_legacy_v1";
 const values = new Map();
 globalThis.localStorage = {
   getItem(key) { return values.get(key) ?? null; },
   setItem(key, value) { values.set(key, value); },
+  removeItem(key) { values.delete(key); },
 };
 
 function resetValues() {
@@ -36,7 +36,7 @@ assert.ok(defaults.modes[MODE_IDS.CAMPAIGN]);
 assert.ok(defaults.modes[MODE_IDS.SPEED_TEST]);
 assert.ok(defaults.modes[MODE_IDS.ENDLESS]);
 assert.ok(defaults.modes[MODE_IDS.ARCADE_RUSH]);
-assert.equal(Object.hasOwn(defaults.modes, MODE_IDS.DAILY), false);
+assert.equal(Object.hasOwn(defaults.modes, "daily"), false);
 assert.deepEqual(defaults.modes[MODE_IDS.ARCADE_RUSH].records, createDefaultArcadeRushRecords());
 
 const dailyHeavyV1 = {
@@ -93,7 +93,7 @@ const dailyHeavyV1 = {
 
 const pureMigration = migrateModeDataToV2(dailyHeavyV1);
 assert.equal(pureMigration.schemaVersion, 2);
-assert.equal(Object.hasOwn(pureMigration.modes, MODE_IDS.DAILY), false);
+assert.equal(Object.hasOwn(pureMigration.modes, "daily"), false);
 assert.equal(pureMigration.modes.campaign.highestScore, 4444);
 assert.equal(pureMigration.modes.endless.highestStage, 11);
 assert.deepEqual(pureMigration.modes[MODE_IDS.ARCADE_RUSH].records, createDefaultArcadeRushRecords());
@@ -106,15 +106,12 @@ assert.deepEqual(migrateModeDataToV2(pureMigration), pureMigration, "v2 migratio
 
 resetValues();
 values.set(LEGACY_MODE_DATA_STORAGE_KEY, JSON.stringify(dailyHeavyV1));
+values.set(RETIRED_DAILY_STORAGE_KEY, JSON.stringify({ schemaVersion: 1, mode: dailyHeavyV1.modes.daily }));
 const loadedMigrated = loadModeData();
 assert.deepEqual(loadedMigrated, pureMigration);
 assert.equal(JSON.parse(values.get(MODE_DATA_STORAGE_KEY)).schemaVersion, 2);
-assert.ok(values.has(LEGACY_DAILY_STORAGE_KEY), "Daily compatibility must move outside active v2 storage");
-const legacyDaily = getLegacyDailyModeSummary();
-assert.equal(legacyDaily.records.currentStreak, 7);
-assert.equal(legacyDaily.records.bestStreak, 12);
-assert.equal(legacyDaily.records.days["2026-09-01"].attempts, 4);
-assert.equal(Object.hasOwn(loadModeData().modes, MODE_IDS.DAILY), false);
+assert.equal(values.has(RETIRED_DAILY_STORAGE_KEY), false, "AR16 removes the obsolete Daily compatibility sidecar");
+assert.equal(Object.hasOwn(loadModeData().modes, "daily"), false);
 
 // A corrupt v2 payload falls back to the still-readable v1 source and repairs v2.
 values.set(MODE_DATA_STORAGE_KEY, "{broken");
@@ -206,4 +203,4 @@ const beforeDev = JSON.stringify(loadModeData());
 assert.equal(recordCompletedSession(rushResult("rush-dev", { developerMode: true, score: 999999 })), false);
 assert.equal(JSON.stringify(loadModeData()), beforeDev);
 
-console.log("Arcade Rush AR8 schema v2 migration, Daily isolation, local records, corruption recovery, and idempotence passed.");
+console.log("Arcade Rush schema v2 migration, retired Daily cleanup, local records, corruption recovery, and idempotence passed.");
