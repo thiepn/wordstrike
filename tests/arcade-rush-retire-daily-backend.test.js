@@ -26,7 +26,7 @@ assert.equal(validateLeaderboardRequest({ boardKey: "daily-strike-v1" }).code, "
 assert.equal(validateLeaderboardRequest({
   boardKey: "daily-strike-v1",
   challengeDate: "2026-09-03",
-}).code, "INVALID_REQUEST");
+}).code, "INVALID_BOARD");
 assert.equal(validateScoreSubmission(dailySubmission()).code, "INVALID_BOARD");
 assert.deepEqual(rankLeaderboardRows([], { boardKey: "daily-strike-v1" }), {
   entries: [],
