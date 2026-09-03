@@ -9,24 +9,14 @@ import { dailySubmission, endlessSubmission } from "./leaderboardSubmissionFixtu
 
 const options = { now: new Date("2026-06-28T12:00:00Z") };
 assert.equal(CLIENT_GAME_VERSION, SERVER_GAME_VERSION);
-assert.equal(validateScoreSubmission(dailySubmission(), options).valid, true);
+assert.equal(validateScoreSubmission(dailySubmission(), options).code, "INVALID_BOARD");
 assert.equal(validateScoreSubmission(dailySubmission({
   completed: false, failureReason: "core-destroyed", score: 3000,
   wordsCompleted: 20, wordsResolved: 23, wordsSpawned: 24,
   integrityRemaining: 0, coreHits: 3, coreBreaches: 3,
   wordPoints: 3000, completionBonus: 0, integrityBonus: 0,
   accuracyBonus: 0, timeBonus: 0, finalWave: 2,
-}), options).valid, true);
-assert.equal(validateScoreSubmission(dailySubmission({ score: 24999 }), options).code, "SCORE_MISMATCH");
-assert.equal(validateScoreSubmission(dailySubmission({ challengeDate: "2026-06-27" }), options).code, "CHALLENGE_MISMATCH");
-assert.equal(validateScoreSubmission(dailySubmission({ challengeVersion: 2 }), options).code, "CHALLENGE_MISMATCH");
-assert.equal(validateScoreSubmission(dailySubmission({ accuracy: 101 }), options).code, "INVALID_RESULT");
-assert.equal(validateScoreSubmission(dailySubmission({ wordsResolved: 58 }), options).code, "INVALID_WORD_COUNTERS");
-assert.equal(validateScoreSubmission(dailySubmission({ developerMode: true }), options).code, "DEVELOPER_RESULT");
-assert.equal(validateScoreSubmission(dailySubmission({ sessionSource: "test" }), options).code, "INVALID_SESSION_SOURCE");
-const extraMetric = dailySubmission();
-extraMetric.result.email = "private@example.com";
-assert.equal(validateScoreSubmission(extraMetric, options).code, "INVALID_RESULT");
+}), options).code, "INVALID_BOARD");
 
 assert.equal(validateScoreSubmission(endlessSubmission(), options).valid, true);
 assert.deepEqual([1, 6, 11].map(getEndlessWordsBeforeStage), [0, 50, 125]);
@@ -39,4 +29,4 @@ assert.equal(validateScoreSubmission(endlessSubmission({ developerMode: true }),
 assert.equal(validateScoreSubmission({ ...endlessSubmission(), userId: "forged" }, options).code, "INVALID_REQUEST");
 assert.equal(validateScoreSubmission({ ...endlessSubmission(), boardKey: "campaign-v1" }, options).code, "INVALID_BOARD");
 
-console.log("Daily and Endless submission validators enforce canonical formulas, progression, eligibility, and strict schemas.");
+console.log("Retired Daily score submissions are rejected at the active board gate while Endless validation remains canonical and strict.");
