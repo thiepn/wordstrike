@@ -1,0 +1,34 @@
+name: AR16 Daily Frontend Deletion
+
+on:
+  push:
+    branches:
+      - feature/arcade-rush-ar16-delete-daily-frontend
+
+permissions:
+  contents: write
+
+jobs:
+  refactor:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/arcade-rush-ar16-delete-daily-frontend
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Apply AR16 refactor
+        run: node scripts/ar16-delete-daily-frontend.mjs
+      - name: Commit refactor
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git commit -m "AR16: delete Daily frontend implementation"
+          git push origin HEAD:feature/arcade-rush-ar16-delete-daily-frontend
