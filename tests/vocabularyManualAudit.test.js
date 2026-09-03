@@ -3,7 +3,7 @@ import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { AUDITED_FALLBACK_WORDS } from "../js/auditedFallbackWords.js";
 import { EMERGENCY_BOSS_WORDS } from "../js/bossGenerator.js";
-import { createDailyVocabulary, generateDailyPlan } from "../js/dailyGenerator.js";
+import { createArcadeRushVocabulary, generateArcadeRushPlan } from "../js/arcadeRush/index.js";
 import { createEndlessVocabulary, createEndlessWordGenerator } from "../js/endlessWords.js";
 import { generateLevel } from "../js/levelGenerator.js";
 import {
@@ -77,12 +77,14 @@ assert.deepEqual(new Set(commonBank.words), selected);
 assert.ok(bossBank.typingWords.every((word) => selected.has(word)));
 assert.ok(bossBank.longWords.every((word) => bossLong.words.includes(word)));
 
-const dailyVocabulary = createDailyVocabulary({
+const rushVocabulary = createArcadeRushVocabulary({
   commonWords: commonBank.words,
   campaignBank,
 });
-const dailyPlan = generateDailyPlan({ dateKey: "2026-07-01", vocabulary: dailyVocabulary });
-assert.ok(dailyPlan.entries.every(({ word }) => selected.has(word)));
+const rushPlan = generateArcadeRushPlan({ seed: 0x12345678, vocabulary: rushVocabulary });
+assert.ok(rushPlan);
+assert.equal(rushPlan.waves.length, 6);
+assert.ok(rushPlan.waves.flatMap((wave) => wave.entries).every(({ word }) => selected.has(word)));
 
 const endlessVocabulary = createEndlessVocabulary({
   commonWords: commonBank.words,
@@ -119,5 +121,6 @@ assert.match(mainSource, /commonWords:\s*appState\.commonWordBank\.words/g);
 assert.match(mainSource, /campaignBank:\s*appState\.wordBank/g);
 assert.match(mainSource, /bossBank:\s*appState\.bossWordBank/g);
 assert.doesNotMatch(mainSource, /commonWords:\s*appState\.speedTestWordBank\.words/);
+assert.doesNotMatch(mainSource, /dailyGenerator|createDailyVocabulary|generateDailyPlan/);
 
-console.log("Campaign, level 83, Boss, Endless, Daily, and offline fallbacks use audited vocabulary sources.");
+console.log("Campaign, level 83, Boss, Endless, Arcade Rush, and offline fallbacks use audited vocabulary sources.");
