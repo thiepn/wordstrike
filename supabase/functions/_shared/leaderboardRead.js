@@ -3,43 +3,26 @@ export const PUBLIC_BOARD_KEYS = Object.freeze([
   "typing-60s-english200-v1",
   "typing-15s-english200-v1",
   "endless-v1",
-  "daily-strike-v1",
   "arcade-rush-v1",
 ]);
 export const LEADERBOARD_LIMIT = 100;
 export const LEADERBOARD_RULES_VERSION = 1;
-export const DAILY_CHALLENGE_VERSION = 1;
 export const ARCADE_RUSH_BOARD_KEY = "arcade-rush-v1";
-
-const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
-
-export function isValidChallengeDate(value) {
-  if (typeof value !== "string" || !DATE_PATTERN.test(value)) return false;
-  const date = new Date(`${value}T00:00:00.000Z`);
-  return Number.isFinite(date.getTime()) && date.toISOString().slice(0, 10) === value;
-}
 
 export function validateLeaderboardRequest(body) {
   if (!body || typeof body !== "object" || Array.isArray(body)) {
     return { valid: false, code: "INVALID_REQUEST" };
   }
-  const allowedKeys = new Set(["boardKey", "challengeDate"]);
-  if (Object.keys(body).some((key) => !allowedKeys.has(key))) {
+  if (Object.keys(body).length !== 1 || !Object.hasOwn(body, "boardKey")) {
     return { valid: false, code: "INVALID_REQUEST" };
   }
   if (!PUBLIC_BOARD_KEYS.includes(body.boardKey)) {
     return { valid: false, code: "INVALID_BOARD" };
   }
-  if (body.boardKey === "daily-strike-v1" && !isValidChallengeDate(body.challengeDate)) {
-    return { valid: false, code: "INVALID_CHALLENGE_DATE" };
-  }
-  if (body.boardKey !== "daily-strike-v1" && body.challengeDate != null) {
-    return { valid: false, code: "INVALID_REQUEST" };
-  }
   return {
     valid: true,
     boardKey: body.boardKey,
-    challengeDate: body.boardKey === "daily-strike-v1" ? body.challengeDate : null,
+    challengeDate: null,
   };
 }
 
@@ -51,25 +34,6 @@ function finalTie(a, b) {
   const submitted = String(a.submittedAt || a.submitted_at || "")
     .localeCompare(String(b.submittedAt || b.submitted_at || ""));
   return submitted || String(a.id || "").localeCompare(String(b.id || ""));
-}
-
-export function compareDailyLeaderboardRows(a, b) {
-  if (Boolean(a.completed) !== Boolean(b.completed)) return a.completed ? -1 : 1;
-  const comparisons = a.completed
-    ? [
-      higher(a.score, b.score),
-      lower(a.durationMs ?? a.duration_ms, b.durationMs ?? b.duration_ms),
-      higher(a.accuracy, b.accuracy),
-      higher(a.wordsCompleted ?? a.words_completed, b.wordsCompleted ?? b.words_completed),
-    ]
-    : [
-      higher(a.wordsResolved ?? a.metrics?.wordsResolved, b.wordsResolved ?? b.metrics?.wordsResolved),
-      higher(a.wordsCompleted ?? a.words_completed, b.wordsCompleted ?? b.words_completed),
-      higher(a.score, b.score),
-      higher(a.accuracy, b.accuracy),
-      higher(a.durationMs ?? a.duration_ms, b.durationMs ?? b.duration_ms),
-    ];
-  return comparisons.find(Boolean) || finalTie(a, b);
 }
 
 export function compareEndlessLeaderboardRows(a, b) {
@@ -138,18 +102,18 @@ function publicEntry(row, rank, boardKey) {
 
 export function rankLeaderboardRows(rows, {
   boardKey,
-  challengeDate = null,
   viewerUserId = null,
 } = {}) {
-  const comparator = boardKey === "daily-strike-v1"
-    ? compareDailyLeaderboardRows
-    : boardKey === ARCADE_RUSH_BOARD_KEY
-      ? compareArcadeRushLeaderboardRows
-      : boardKey === "endless-v1"
-        ? compareEndlessLeaderboardRows
-        : boardKey === "campaign-highest-level-v1"
-          ? compareCampaignLeaderboardRows
-          : compareTypingLeaderboardRows;
+  if (!PUBLIC_BOARD_KEYS.includes(boardKey)) {
+    return Object.freeze({ entries: Object.freeze([]), viewer: null });
+  }
+  const comparator = boardKey === ARCADE_RUSH_BOARD_KEY
+    ? compareArcadeRushLeaderboardRows
+    : boardKey === "endless-v1"
+      ? compareEndlessLeaderboardRows
+      : boardKey === "campaign-highest-level-v1"
+        ? compareCampaignLeaderboardRows
+        : compareTypingLeaderboardRows;
   const eligible = (Array.isArray(rows) ? rows : []).filter((row) => (
     row.boardKey === boardKey &&
     number(row.rulesVersion) === LEADERBOARD_RULES_VERSION &&
@@ -157,14 +121,7 @@ export function rankLeaderboardRows(rows, {
     typeof row.username === "string" && row.username.length > 0 &&
     (boardKey !== "campaign-highest-level-v1" || row.completed === true) &&
     (!boardKey.startsWith("typing-") || row.completed === true) &&
-    (boardKey !== ARCADE_RUSH_BOARD_KEY || row.completed === true) &&
-    (
-      boardKey !== "daily-strike-v1" ||
-      (
-        row.challengeDate === challengeDate &&
-        number(row.challengeVersion) === DAILY_CHALLENGE_VERSION
-      )
-    )
+    (boardKey !== ARCADE_RUSH_BOARD_KEY || row.completed === true)
   ));
   const best = new Map();
   for (const row of eligible) {
@@ -172,19 +129,16 @@ export function rankLeaderboardRows(rows, {
     if (!previous || comparator(row, previous) < 0) best.set(row.userId, row);
   }
   const ranked = [...best.values()].sort(comparator).map((row, index) => ({ row, rank: index + 1 }));
+  const viewerRow = viewerUserId == null
+    ? null
+    : ranked.find(({ row }) => row.userId === viewerUserId) || null;
   return Object.freeze({
     entries: Object.freeze(ranked.slice(0, LEADERBOARD_LIMIT).map(({ row, rank }) => publicEntry(row, rank, boardKey))),
-    viewer: viewerUserId == null
-      ? null
-      : ranked.find(({ row }) => row.userId === viewerUserId)
-        ? Object.freeze({
-          rank: ranked.find(({ row }) => row.userId === viewerUserId).rank,
-          entry: publicEntry(
-            ranked.find(({ row }) => row.userId === viewerUserId).row,
-            ranked.find(({ row }) => row.userId === viewerUserId).rank,
-            boardKey,
-          ),
-        })
-        : null,
+    viewer: viewerRow
+      ? Object.freeze({
+        rank: viewerRow.rank,
+        entry: publicEntry(viewerRow.row, viewerRow.rank, boardKey),
+      })
+      : null,
   });
 }
