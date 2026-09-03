@@ -18,8 +18,8 @@ for (const renderer of ["renderGameplayShell", "renderBossShell", "renderEndless
 for (const screen of ["mode-screen", "endless-ready-screen", "speed-results-screen", "endless-results-screen", "results-screen", "settings-screen", "level-screen"]) {
   assert.match(ui, new RegExp(`${screen}[\\s\\S]{0,5000}(?:screenBackButton|data-action=\\"back\\")`), `${screen} needs a visible Back route`);
 }
-assert.match(rushUi, /data-rush-action="back"/, "Arcade Rush ready view needs a Back route");
-assert.match(rushUi, /data-rush-action="pause"/, "Arcade Rush gameplay needs a Pause route");
+assert.match(rushUi, /button\(ARCADE_RUSH_UI_ACTIONS\.BACK,"Back"/, "Arcade Rush ready view needs a Back route");
+assert.match(rushUi, /button\(ARCADE_RUSH_UI_ACTIONS\.PAUSE,"Pause"/, "Arcade Rush gameplay needs a Pause route");
 assert.match(leaderboard, /screen-back-button[\s\S]*leaderboard-main-menu/);
 assert.match(statistics, /screen-back-button[\s\S]*data-stats-action="back"/);
 assert.match(main, /renderEndlessShell\(game, appState\.devMode, \{ pause: pauseGame \}\)/);
