@@ -7,6 +7,7 @@ import {
   LEADERBOARD_BOARDS,
 } from "../js/leaderboardService.js";
 
+const LEGACY_DAILY_BOARD_KEY = "daily-strike-v1";
 const deferred = () => {
   let resolve;
   const promise = new Promise((done) => { resolve = done; });
@@ -67,17 +68,16 @@ assert.deepEqual(EXPECTED_LEADERBOARD_RULES_VERSIONS, {
   "typing-60s-english200-v1": 1,
   "typing-15s-english200-v1": 1,
   "endless-v1": 1,
-  "daily-strike-v1": 1,
   "arcade-rush-v1": 1,
 });
 
 for (const requestedBoardKey of [
   LEADERBOARD_BOARDS.CAMPAIGN,
   LEADERBOARD_BOARDS.ENDLESS,
-  LEADERBOARD_BOARDS.DAILY,
+  LEGACY_DAILY_BOARD_KEY,
   LEADERBOARD_BOARDS.ARCADE_RUSH,
 ]) {
-  const effectiveBoardKey = requestedBoardKey === LEADERBOARD_BOARDS.DAILY
+  const effectiveBoardKey = requestedBoardKey === LEGACY_DAILY_BOARD_KEY
     ? LEADERBOARD_BOARDS.ARCADE_RUSH
     : requestedBoardKey;
   assert.equal(isLeaderboardCacheStateCurrent(effectiveBoardKey, {
@@ -128,8 +128,8 @@ const rushService = createLeaderboardService({
     } } };
   } } }),
 });
-// AR14 redirects the legacy frontend Daily selection to the public Rush board.
-await rushService.selectLeaderboardBoard(LEADERBOARD_BOARDS.DAILY);
+// Legacy pre-cutover Daily selections still redirect safely to the public Rush board.
+await rushService.selectLeaderboardBoard(LEGACY_DAILY_BOARD_KEY);
 assert.deepEqual(rushCalls, [{ boardKey: LEADERBOARD_BOARDS.ARCADE_RUSH }]);
 assert.equal(rushService.getLeaderboardState().selectedBoardKey, LEADERBOARD_BOARDS.ARCADE_RUSH);
 assert.equal(rushService.getLeaderboardState().selectedCategory, "arcade-rush");
@@ -143,4 +143,4 @@ assert.equal(
   LEADERBOARD_BOARDS.ARCADE_RUSH,
 );
 
-console.log("Leaderboard service is lazy, stale-safe, rules-versioned, and uses Arcade Rush as the public date-free fourth board after AR14.");
+console.log("Leaderboard service is lazy, stale-safe, rules-versioned, and redirects legacy Daily selections to Arcade Rush without a current Daily board.");

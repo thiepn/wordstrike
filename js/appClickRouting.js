@@ -11,8 +11,8 @@ const RESULT_ACTIONS = Object.freeze({
     actions: Object.freeze([
       "leaderboard-select-campaign",
       "leaderboard-select-typing",
-      "leaderboard-select-daily",
       "leaderboard-select-endless",
+      "leaderboard-select-arcade-rush",
       "leaderboard-typing-select-60",
       "leaderboard-typing-select-15",
       "leaderboard-google-sign-in",
@@ -28,13 +28,6 @@ const RESULT_ACTIONS = Object.freeze({
     actions: Object.freeze([
       "retry", "modes", "title", "submit-global-score", "retry-global-score",
       "view-endless-leaderboard", "open-account-settings", "result-google-sign-in",
-    ]),
-  }),
-  [Screens.DAILY_RESULTS]: Object.freeze({
-    selector: ".daily-results-screen",
-    actions: Object.freeze([
-      "retry", "modes", "title", "submit-global-score", "retry-global-score",
-      "view-daily-leaderboard", "open-account-settings", "result-google-sign-in",
     ]),
   }),
   [Screens.SPEED_TEST_RESULTS]: Object.freeze({

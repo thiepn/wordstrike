@@ -34,7 +34,6 @@ export function createGlobalKeyboardController({
   resetSpeedTestAttempt,
   openModeSelect,
   startEndless,
-  startDaily,
   startArcadeRush,
   retryCurrentLevel,
   backPracticeLab,
@@ -124,8 +123,6 @@ export function createGlobalKeyboardController({
           ][state.pauseIndex]();
         } else if (state.game?.mode === "endless") {
           [resumeGame, () => startEndless("restart"), openModeSelect, openTitle][state.pauseIndex]();
-        } else if (state.game?.mode === "daily") {
-          [resumeGame, () => startDaily("retry", state.game.config.dateKey), openModeSelect, openTitle][state.pauseIndex]();
         } else {
           [resumeGame, retryCurrentLevel, openModeSelect, openTitle][state.pauseIndex]();
         }
@@ -195,30 +192,6 @@ export function createGlobalKeyboardController({
       } else if (event.key === "Enter") {
         const action = actions[state.endlessResultsIndex];
         if (action === "retry") startEndless("retry");
-        else if (action === "modes") openModeSelect();
-        else openTitle();
-      }
-      return;
-    }
-
-    if (state.screen === Screens.DAILY_READY) {
-      if (event.key === "Escape") openModeSelect();
-      else if (event.key === "Enter") startDaily("daily-ready", state.dailyDateKey);
-      return;
-    }
-
-    if (state.screen === Screens.DAILY_RESULTS) {
-      const actions = ["retry", "modes", "title"];
-      if (isResultsInputBlocked(event, currentTimeMs(), state.dailyResultsReadyAt)) return;
-      if (event.key === "Escape") {
-        openModeSelect();
-      } else if (event.key === "ArrowUp" || event.key === "ArrowDown") {
-        const direction = event.key === "ArrowUp" ? -1 : 1;
-        state.dailyResultsIndex = cycleIndex(state.dailyResultsIndex, direction, actions.length);
-        renderCurrentScreen();
-      } else if (event.key === "Enter") {
-        const action = actions[state.dailyResultsIndex];
-        if (action === "retry") startDaily("retry", state.dailyResult.modeData.dateKey);
         else if (action === "modes") openModeSelect();
         else openTitle();
       }

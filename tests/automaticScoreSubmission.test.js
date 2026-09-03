@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
+import { buildArcadeRushSessionResult } from "../js/arcadeRush/arcadeRushResult.js";
 import { createAutomaticSubmissionController } from "../js/automaticSubmissionController.js";
 import { createLeaderboardSubmissionService } from "../js/leaderboardSubmissionService.js";
 
@@ -65,20 +66,42 @@ function typingResult(durationSeconds, overrides = {}) {
   };
 }
 
-function dailyResult(overrides = {}) {
-  return {
-    sessionId: SESSION, sessionSource: "daily-ready", developerMode: false, success: true,
-    failureReason: null, score: 25000, accuracy: 95, activeDurationMs: 90000,
-    words: { completed: 59, missed: 1, total: 60 },
-    modeData: {
-      integrityRemaining: 2, dateKey: "2026-06-28", challengeVersion: 1,
-      wordsCompleted: 59, wordsResolved: 60, wordsSpawned: 60, totalWords: 60, dateOverride: false,
-      recordEligible: true, wordPoints: 6600, completionBonus: 10000,
-      integrityBonus: 4000, accuracyBonus: 1900, timeBonus: 2500,
-      coreHits: 1, coreBreaches: 1, finalWave: 3,
-      ...overrides,
+function arcadeRushResult(overrides = {}) {
+  const durationMs = 250_000;
+  const correctCharacters = 1_000;
+  const incorrectCharacters = 20;
+  const totalKeystrokes = correctCharacters + incorrectCharacters;
+  const missedCharacters = 0;
+  const accuracy = correctCharacters / (totalKeystrokes + missedCharacters) * 100;
+  const wpm = (correctCharacters / 5) / (durationMs / 60_000);
+  return buildArcadeRushSessionResult({
+    sessionId: SESSION,
+    sessionSource: "arcade-rush-ready",
+    startedAt: 1_000,
+    endedAt: 251_000,
+    durationMs,
+    activeDurationMs: durationMs,
+    seed: 123_456_789,
+    developerMode: false,
+    success: true,
+    accuracy,
+    wpm,
+    characters: {
+      correct: correctCharacters,
+      incorrect: incorrectCharacters,
+      missed: missedCharacters,
+      totalKeystrokes,
     },
-  };
+    words: { completed: 184, missed: 0, total: 184 },
+    combo: { maximum: 91, final: 24 },
+    wavesCompleted: 6,
+    bossDefeated: true,
+    bossTimeRemainingMs: 15_000,
+    integrityRemaining: 5,
+    perfectWaves: 2,
+    wordPoints: 50_000,
+    ...overrides,
+  });
 }
 
 function harness({ online = true, response = { ok: true, data: { rank: 7 } } } = {}) {
@@ -146,7 +169,7 @@ for (const [mode, result, boardKey] of [
   ["typing", typingResult(60), "typing-60s-english200-v1"],
   ["typing", typingResult(15), "typing-15s-english200-v1"],
   ["endless", endlessResult(), "endless-v1"],
-  ["daily", dailyResult(), "daily-strike-v1"],
+  ["arcade-rush", arcadeRushResult(), "arcade-rush-v1"],
 ]) {
   const h = harness();
   h.service.prepareResultSubmission(mode, result, AUTH, PROFILE);
@@ -160,7 +183,7 @@ for (const [mode, result] of [
   ["campaign", campaignResult(false)],
   ["typing", typingResult(30)],
   ["typing", typingResult(60, { wordSetId: "legacy-common-740" })],
-  ["daily", dailyResult({ dateOverride: true, recordEligible: false })],
+  ["arcade-rush", arcadeRushResult({ developerMode: true })],
 ]) {
   const h = harness();
   h.service.prepareResultSubmission(mode, result, AUTH, PROFILE);
@@ -271,24 +294,25 @@ const main = await readFile(new URL("../js/main.js", import.meta.url), "utf8");
 for (const [finishName, mode] of [
   ["finishSpeedTest", "typing"],
   ["finishEndless", "endless"],
-  ["finishDaily", "daily"],
+  ["finishArcadeRush", "arcade-rush"],
   ["finishLevel", "campaign"],
 ]) {
   const start = main.indexOf(`function ${finishName}`);
-  const body = main.slice(start, main.indexOf("\nfunction ", start + 1));
+  assert.ok(start >= 0, `${finishName} must remain wired`);
+  const nextFunction = main.indexOf("\nfunction ", start + 1);
+  const body = main.slice(start, nextFunction >= 0 ? nextFunction : undefined);
   assert.match(body, new RegExp(`prepareAutomaticResultSubmission\\(\"${mode}\"`));
   assert.ok(body.indexOf("renderCurrentScreen()") < body.indexOf("startPreparedAutomaticSubmission()"));
 }
 const speed = await readFile(new URL("../js/speedTest.js", import.meta.url), "utf8");
 const endless = await readFile(new URL("../js/endlessMode.js", import.meta.url), "utf8");
-const daily = await readFile(new URL("../js/dailyMode.js", import.meta.url), "utf8");
 assert.ok(speed.indexOf("recordCompletedSession(result)") < speed.indexOf("callbacks.onComplete?.(currentSpeedTest, result)"));
 assert.ok(endless.indexOf("recordCompletedSession(result)") < endless.indexOf("callbacks.onComplete?.(game, result)"));
-assert.ok(daily.indexOf("recordCompletedSession(result)") < daily.indexOf("callbacks.onComplete?.(game, result)"));
 const campaignFinish = main.slice(main.indexOf("function finishLevel"), main.indexOf("function pauseGame"));
 assert.ok(campaignFinish.indexOf("finalizeCampaignSession") < campaignFinish.indexOf("prepareAutomaticResultSubmission"));
 assert.ok(campaignFinish.indexOf("updateLevelResult") < campaignFinish.indexOf("prepareAutomaticResultSubmission"));
+assert.doesNotMatch(main, /finishDaily|dailyMode\.js|prepareAutomaticResultSubmission\(\"daily\"/);
 assert.match(main, /clearAutomaticSubmission\(\);\s*clearSubmissionState\(\);/);
 assert.doesNotMatch(main, /setInterval\s*\(/);
 
-console.log("Automatic score submission is completion-armed, account-gated, single-flight, retry-stable, local-first, and stale-safe.");
+console.log("Automatic score submission is completion-armed for active modes, account-gated, single-flight, retry-stable, local-first, and stale-safe.");

@@ -9,14 +9,6 @@ import {
   SPEED_TEST_WORD_SET,
 } from "./speedTestWords.js";
 import {
-  createDefaultDailyRecords,
-  MAX_DAILY_RECORD_DAYS,
-  updateDailyRecords,
-} from "./dailyRecords.js";
-import { getUtcDateKey, isValidDailyDateKey } from "./dailyDate.js";
-import { DAILY_CHALLENGE_VERSION, DAILY_TOTAL_WORDS } from "./dailyConfig.js";
-import { getDailyChallengeSeed } from "./dailyGenerator.js";
-import {
   createDefaultPlayerProfile,
   getPublicPlayerProfile as selectPublicPlayerProfile,
   sanitizePlayerProfile,
@@ -31,17 +23,12 @@ import {
 
 export const MODE_DATA_STORAGE_KEY = "wordstrike_mode_data_v2";
 export const LEGACY_MODE_DATA_STORAGE_KEY = "wordstrike_mode_data_v1";
-export const LEGACY_DAILY_STORAGE_KEY = "wordstrike_daily_legacy_v1";
+const RETIRED_DAILY_STORAGE_KEY = "wordstrike_daily_legacy_v1";
 export const MODE_DATA_SCHEMA_VERSION = 2;
 export const MAX_RECENT_SESSIONS = 30;
 const MAX_RECORDED_SESSION_IDS = 100;
-const LEGACY_DAILY_SCHEMA_VERSION = 1;
 
-const ACTIVE_MODE_IDS = Object.freeze(
-  getRegisteredModes()
-    .map(({ id }) => id)
-    .filter((id) => id !== MODE_IDS.DAILY),
-);
+const ACTIVE_MODE_IDS = Object.freeze(getRegisteredModes().map(({ id }) => id));
 const ACTIVE_MODE_ID_SET = new Set(ACTIVE_MODE_IDS);
 
 function finiteNonNegative(value, fallback = 0) {
@@ -184,9 +171,6 @@ function createModeSummary(modeId) {
   if (modeId === MODE_IDS.ARCADE_RUSH) {
     summary.records = createDefaultArcadeRushRecords();
   }
-  if (modeId === MODE_IDS.DAILY) {
-    summary.records = createDefaultDailyRecords();
-  }
   return summary;
 }
 
@@ -282,45 +266,6 @@ function sanitizeArcadeRushRecords(value) {
   };
 }
 
-function sanitizeDailyBest(value) {
-  if (!value || typeof value !== "object") return null;
-  return {
-    success: value.success === true,
-    score: finiteNonNegative(value.score),
-    activeDurationMs: finiteNonNegative(value.activeDurationMs),
-    accuracy: Math.max(0, Math.min(100, finiteNonNegative(value.accuracy))),
-    wordsCompleted: finiteNonNegative(value.wordsCompleted),
-    wordsResolved: finiteNonNegative(value.wordsResolved),
-    integrityRemaining: finiteNonNegative(value.integrityRemaining),
-    endedAt: finiteNonNegative(value.endedAt),
-    sessionId: typeof value.sessionId === "string" ? value.sessionId : null,
-  };
-}
-
-function sanitizeDailyRecords(value) {
-  const entries = Object.entries(value?.days || {})
-    .filter(([dateKey]) => isValidDailyDateKey(dateKey))
-    .sort(([a], [b]) => b.localeCompare(a))
-    .slice(0, MAX_DAILY_RECORD_DAYS)
-    .map(([dateKey, day]) => [dateKey, {
-      attempts: finiteNonNegative(day?.attempts),
-      best: sanitizeDailyBest(day?.best),
-      firstCompletedAt: nullableFinite(day?.firstCompletedAt),
-      lastAttemptAt: nullableFinite(day?.lastAttemptAt),
-    }]);
-  return {
-    currentStreak: finiteNonNegative(value?.currentStreak),
-    bestStreak: finiteNonNegative(value?.bestStreak),
-    distinctCompletedDays: value?.distinctCompletedDays == null
-      ? entries.filter(([, day]) => day.firstCompletedAt != null || day.best?.success).length
-      : finiteNonNegative(value.distinctCompletedDays),
-    lastSuccessfulDateKey: isValidDailyDateKey(value?.lastSuccessfulDateKey)
-      ? value.lastSuccessfulDateKey
-      : null,
-    days: Object.fromEntries(entries),
-  };
-}
-
 function sanitizeModeActivity(value) {
   const defaults = createModeActivity();
   if (!value || typeof value !== "object" || value.activityVersion !== 1) return defaults;
@@ -375,9 +320,6 @@ function sanitizeModeSummary(value, modeId) {
   }
   if (modeId === MODE_IDS.ARCADE_RUSH) {
     summary.records = sanitizeArcadeRushRecords(value?.records);
-  }
-  if (modeId === MODE_IDS.DAILY) {
-    summary.records = sanitizeDailyRecords(value?.records);
   }
   return summary;
 }
@@ -471,65 +413,16 @@ export function migrateModeDataToV2(value) {
   };
 }
 
-function createDefaultLegacyDailyData() {
-  return {
-    schemaVersion: LEGACY_DAILY_SCHEMA_VERSION,
-    mode: createModeSummary(MODE_IDS.DAILY),
-    recordedSessionIds: [],
-  };
-}
-
-function sanitizeLegacyDailyData(value) {
-  const sourceMode = value?.mode || value?.modes?.[MODE_IDS.DAILY] || null;
-  return {
-    schemaVersion: LEGACY_DAILY_SCHEMA_VERSION,
-    mode: sanitizeModeSummary(sourceMode, MODE_IDS.DAILY),
-    recordedSessionIds: [...new Set(
-      (Array.isArray(value?.recordedSessionIds) ? value.recordedSessionIds : [])
-        .filter((id) => typeof id === "string"),
-    )].slice(0, MAX_RECORDED_SESSION_IDS),
-  };
-}
-
-function saveLegacyDailyData(data) {
-  return writeJsonStorage(LEGACY_DAILY_STORAGE_KEY, sanitizeLegacyDailyData(data));
-}
-
-function seedLegacyDailyFromSource(source) {
-  if (!source?.modes?.[MODE_IDS.DAILY]) return false;
-  if (readJsonStorage(LEGACY_DAILY_STORAGE_KEY)) return false;
-  return saveLegacyDailyData({
-    schemaVersion: LEGACY_DAILY_SCHEMA_VERSION,
-    mode: source.modes[MODE_IDS.DAILY],
-    recordedSessionIds: [],
-  });
-}
-
-function loadLegacyDailyData() {
-  const direct = readJsonStorage(LEGACY_DAILY_STORAGE_KEY);
-  if (direct) return sanitizeLegacyDailyData(direct);
-  const legacy = readJsonStorage(LEGACY_MODE_DATA_STORAGE_KEY);
-  if (legacy?.modes?.[MODE_IDS.DAILY]) {
-    const migrated = sanitizeLegacyDailyData(legacy);
-    saveLegacyDailyData(migrated);
-    return migrated;
-  }
-  return createDefaultLegacyDailyData();
-}
-
-export function getLegacyDailyModeSummary() {
-  return clone(loadLegacyDailyData().mode);
+function clearRetiredDailyStorage() {
+  try { globalThis.localStorage?.removeItem(RETIRED_DAILY_STORAGE_KEY); } catch { /* Ignore cleanup failure. */ }
 }
 
 export function loadModeData() {
+  clearRetiredDailyStorage();
   const v2 = readJsonStorage(MODE_DATA_STORAGE_KEY);
-  if (v2) {
-    seedLegacyDailyFromSource(v2);
-    return migrateModeDataToV2(v2);
-  }
+  if (v2) return migrateModeDataToV2(v2);
   const legacy = readJsonStorage(LEGACY_MODE_DATA_STORAGE_KEY);
   if (legacy) {
-    seedLegacyDailyFromSource(legacy);
     const migrated = migrateModeDataToV2(legacy);
     writeJsonStorage(MODE_DATA_STORAGE_KEY, migrated);
     return migrated;
@@ -621,20 +514,6 @@ function updateIndependentRecord(records, key, next, valueField) {
   ) {
     records[key] = next;
   }
-}
-
-function isEligibleDailyResult(result) {
-  const dateKey = result?.modeData?.dateKey;
-  return (
-    result?.developerMode !== true &&
-    result?.variantId === `v${DAILY_CHALLENGE_VERSION}` &&
-    result?.modeData?.challengeVersion === DAILY_CHALLENGE_VERSION &&
-    result?.modeData?.dateOverride !== true &&
-    result?.modeData?.totalWords === DAILY_TOTAL_WORDS &&
-    result?.modeData?.recordEligible === true &&
-    dateKey === getUtcDateKey() &&
-    result?.seed === getDailyChallengeSeed(dateKey)
-  );
 }
 
 function isSupportedSpeedTestResult(result) {
@@ -797,33 +676,6 @@ function updateArcadeRushRecords(records, result) {
   if (result.modeData?.bossDefeated === true) records.bossesDefeated += 1;
 }
 
-function recordLegacyDailySession(result) {
-  if (!isEligibleDailyResult(result)) return false;
-  const legacy = loadLegacyDailyData();
-  const data = loadModeData();
-  if (
-    legacy.recordedSessionIds.includes(result.sessionId) ||
-    data.recordedSessionIds.includes(result.sessionId)
-  ) return false;
-
-  applyResultToCommonModeSummary(legacy.mode, result);
-  legacy.mode.records = updateDailyRecords(legacy.mode.records, result);
-  legacy.recordedSessionIds = [
-    result.sessionId,
-    ...legacy.recordedSessionIds,
-  ].slice(0, MAX_RECORDED_SESSION_IDS);
-
-  applyResultToTotals(data, result);
-  data.recordedSessionIds = [
-    result.sessionId,
-    ...data.recordedSessionIds,
-  ].slice(0, MAX_RECORDED_SESSION_IDS);
-
-  const dailySaved = saveLegacyDailyData(legacy);
-  const activeSaved = saveModeData(data);
-  return dailySaved && activeSaved;
-}
-
 export function recordCompletedSession(result) {
   if (
     !result ||
@@ -836,7 +688,6 @@ export function recordCompletedSession(result) {
   ) {
     return false;
   }
-  if (result.modeId === MODE_IDS.DAILY) return recordLegacyDailySession(result);
   if (!ACTIVE_MODE_ID_SET.has(result.modeId)) return false;
   if (result.modeId === MODE_IDS.SPEED_TEST && !isSupportedSpeedTestResult(result)) return false;
   if (result.modeId === MODE_IDS.ENDLESS && result.modeData?.recordEligible !== true) return false;
@@ -942,7 +793,6 @@ export function recordCompletedSession(result) {
 }
 
 export function getModeSummary(modeId) {
-  if (modeId === MODE_IDS.DAILY) return getLegacyDailyModeSummary();
   if (!ACTIVE_MODE_ID_SET.has(modeId)) return null;
   return clone(loadModeData().modes[modeId]);
 }
@@ -970,27 +820,6 @@ export function getPublicPlayerProfile() {
   return selectPublicPlayerProfile(ensureStoredPlayerProfile());
 }
 
-export function getDailyRecord(dateKey) {
-  if (!isValidDailyDateKey(dateKey)) return null;
-  const records = loadLegacyDailyData().mode.records;
-  const day = records.days[dateKey];
-  return day ? {
-    ...day,
-    best: day.best ? { ...day.best } : null,
-    currentStreak: records.currentStreak,
-    bestStreak: records.bestStreak,
-    lastSuccessfulDateKey: records.lastSuccessfulDateKey,
-  } : {
-    attempts: 0,
-    best: null,
-    firstCompletedAt: null,
-    lastAttemptAt: null,
-    currentStreak: records.currentStreak,
-    bestStreak: records.bestStreak,
-    lastSuccessfulDateKey: records.lastSuccessfulDateKey,
-  };
-}
-
 export function getRecentSessions() {
   return loadModeData().recentSessions.map((summary) => ({
     ...summary,
@@ -1001,6 +830,6 @@ export function getRecentSessions() {
 export function resetModeData() {
   const defaults = createDefaultModeData();
   saveModeData(defaults);
-  saveLegacyDailyData(createDefaultLegacyDailyData());
+  clearRetiredDailyStorage();
   return defaults;
 }

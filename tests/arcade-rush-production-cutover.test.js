@@ -24,10 +24,8 @@ assert.deepEqual(publicModes.map(({ id }) => id), [
   MODE_IDS.ARCADE_RUSH,
   MODE_IDS.PRACTICE,
 ]);
-assert.equal(publicModes.some(({ id }) => id === MODE_IDS.DAILY), false);
-assert.equal(getModeDefinition(MODE_IDS.DAILY)?.visible, false);
-assert.equal(getModeDefinition(MODE_IDS.DAILY)?.enabled, true);
-assert.equal(getModeDefinition(MODE_IDS.DAILY)?.status, "retired-pending-removal");
+assert.equal(Object.hasOwn(MODE_IDS, "DAILY"), false);
+assert.equal(getModeDefinition("daily"), null);
 assert.equal(getModeDefinition(MODE_IDS.ARCADE_RUSH)?.visible, true);
 assert.equal(getModeDefinition(MODE_IDS.ARCADE_RUSH)?.status, "available");
 assert.equal(getModeDefinition(MODE_IDS.ARCADE_RUSH)?.storesProgress, true);
@@ -67,7 +65,7 @@ const service = createLeaderboardService({
   isOnline: () => true,
   now: () => 1000,
 });
-await service.initializeLeaderboards(LEADERBOARD_BOARDS.DAILY);
+await service.initializeLeaderboards("daily-strike-v1");
 assert.deepEqual(calls.at(-1), {
   name: "get-leaderboard",
   body: { boardKey: LEADERBOARD_BOARDS.ARCADE_RUSH },
@@ -77,7 +75,7 @@ assert.equal(service.getLeaderboardState().selectedCategory, LEADERBOARD_CATEGOR
 
 assert.deepEqual(validateLeaderboardReturnState({
   screen: "leaderboards",
-  selectedCategory: LEADERBOARD_CATEGORIES.DAILY,
+  selectedCategory: "daily",
   typingDuration: 60,
 }), {
   screen: "leaderboards",
@@ -112,11 +110,12 @@ assert.doesNotMatch(mainSource, /function openArcadeRushReady[\s\S]{0,120}if \(!
 assert.doesNotMatch(mainSource, /function startArcadeRush[\s\S]{0,120}if \(!appState\.devMode\)/);
 assert.match(mainSource, /route === "arcade-rush-ready"\) openArcadeRushReady\("mode-select"\)/);
 assert.match(mainSource, /prepareAutomaticResultSubmission\("arcade-rush", result\)/);
-assert.match(mainSource, /Screens\.ARCADE_RUSH_RESULTS, Screens\.DAILY_RESULTS/);
+assert.doesNotMatch(mainSource, /Screens\.DAILY_|MODE_IDS\.DAILY|openDailyReady|startDaily/);
 assert.match(mainSource, /leaderboard-select-arcade-rush/);
 assert.match(mainSource, /LEADERBOARD_CATEGORIES\.ARCADE_RUSH[\s\S]*LEADERBOARD_BOARDS\.ARCADE_RUSH/);
+assert.doesNotMatch(mainSource, /getUtcDateKey\(\)/);
 assert.match(adapterSource, /function openArcadeRushLeaderboard\(\)/);
 assert.doesNotMatch(adapterSource, /function openShadowArcadeRushLeaderboard/);
 assert.match(adapterSource, /leaderboardAvailable: true/);
 
-console.log("Arcade Rush AR14 public mode, public leaderboard, legacy redirects, router wiring, and submission cutover contracts passed.");
+console.log("Arcade Rush public mode, public leaderboard, legacy redirects, router wiring, and submission contracts remain valid after AR16.");

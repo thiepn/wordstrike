@@ -26,10 +26,6 @@ function createHarness(overrides = {}) {
     modeSelection: 0,
     endlessResultsIndex: 0,
     endlessResultsReadyAt: 0,
-    dailyDateKey: "2026-09-01",
-    dailyResult: { modeData: { dateKey: "2026-09-01" } },
-    dailyResultsIndex: 0,
-    dailyResultsReadyAt: 0,
     arcadeRushResult: { score: 42 },
     arcadeRushResultsIndex: 0,
     arcadeRushResultsReadyAt: 0,
@@ -56,7 +52,6 @@ function createHarness(overrides = {}) {
     resetSpeedTestAttempt: record("typing-reset"),
     openModeSelect: record("modes"),
     startEndless: record("endless"),
-    startDaily: record("daily"),
     startArcadeRush: record("rush"),
     retryCurrentLevel: record("campaign-retry"),
     backPracticeLab: record("practice-back"),
@@ -109,10 +104,6 @@ test("result navigation preserves readiness gates and selected action routing", 
   const ready = createHarness({ screen: Screens.RESULTS, resultsReadyAt: 0, resultsIndex: 0 });
   ready.handle(eventFor("Enter"));
   assert.deepEqual(ready.calls, [["start-level", 4, "next-level"]]);
-
-  const daily = createHarness({ screen: Screens.DAILY_RESULTS, dailyResultsReadyAt: 0, dailyResultsIndex: 0 });
-  daily.handle(eventFor("Enter"));
-  assert.deepEqual(daily.calls, [["daily", "retry", "2026-09-01"]]);
 });
 
 test("Arcade Rush ready and results routes use injected high-level actions only", () => {

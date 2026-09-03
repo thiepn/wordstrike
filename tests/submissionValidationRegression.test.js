@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import {
-  buildDailySubmissionResult,
+  buildSubmissionPayload,
   buildTypingSubmissionResult,
   createLeaderboardSubmissionService,
 } from "../js/leaderboardSubmissionService.js";
@@ -8,48 +8,20 @@ import { validateScoreSubmission } from "../supabase/functions/_shared/scoreSubm
 
 const auth = { status: "signed-in", user: { id: "user-1" } };
 const profile = { profile: { username: "Player_1" } };
-const dailyResult = {
+const retiredDailyResult = {
   sessionId: "cb37a745-a075-406e-ab80-a448f5d71772",
   sessionSource: "daily-ready",
   developerMode: false,
   success: true,
-  failureReason: null,
   score: 32031,
-  accuracy: 98.91304347826086,
-  activeDurationMs: 102487.2,
-  words: { completed: 60, missed: 0, total: 60 },
-  modeData: {
-    dateKey: "2026-06-28", challengeVersion: 1, dateOverride: false,
-    totalWords: 60, recordEligible: true, wordsSpawned: 60,
-    wordsResolved: 60, wordsCompleted: 60, integrityRemaining: 3,
-    coreHits: 0, coreBreaches: 0, finalWave: 3, wordPoints: 11900,
-    completionBonus: 10000, integrityBonus: 6000, accuracyBonus: 1978,
-    timeBonus: 2153,
-  },
+  modeData: { recordEligible: true },
 };
-
-// AR15 deliberately leaves the hidden frontend Daily serializer in place until AR16,
-// but the current server contract rejects its board key.
-const beforeDaily = structuredClone(dailyResult);
-assert.equal(buildDailySubmissionResult({
-  ...dailyResult,
-  words: { ...dailyResult.words, completed: 120 },
-  modeData: { ...dailyResult.modeData, wordsCompleted: 120 },
-}), null);
-const normalizedDaily = buildDailySubmissionResult(dailyResult);
-assert.deepEqual(dailyResult, beforeDaily);
-assert.equal(normalizedDaily.wordsCompleted, 60);
-assert.equal(normalizedDaily.wordsResolved, 60);
-const dailyRequest = {
-  boardKey: "daily-strike-v1",
-  sessionId: dailyResult.sessionId,
-  clientVersion: "1.0.0",
-  result: normalizedDaily,
-};
-assert.equal(validateScoreSubmission(dailyRequest).code, "INVALID_BOARD");
+assert.equal(buildSubmissionPayload("daily", retiredDailyResult), null, "retired Daily must have no client submission serializer");
 assert.equal(validateScoreSubmission({
-  ...dailyRequest,
-  result: { ...normalizedDaily, wordsCompleted: 120 },
+  boardKey: "daily-strike-v1",
+  sessionId: retiredDailyResult.sessionId,
+  clientVersion: "1.0.0",
+  result: {},
 }).code, "INVALID_BOARD");
 
 function typingResult(duration, sessionId, source = "tab-reset") {
@@ -116,8 +88,9 @@ const service = createLeaderboardSubmissionService({
   } } }),
   invalidateBoard() {},
 });
-// Hidden Daily client preparation still cannot contaminate a later public result.
-service.prepareResultSubmission("daily", dailyResult, auth, profile);
+service.prepareResultSubmission("daily", retiredDailyResult, auth, profile);
+assert.equal(service.getSubmissionState().status, "ineligible");
+assert.equal(service.getSubmissionState().reason, "invalid-result");
 service.prepareResultSubmission("campaign", campaignResult, auth, profile);
 await service.submitCurrentResult();
 assert.equal(sent.at(-1).boardKey, "campaign-highest-level-v1");
@@ -132,4 +105,4 @@ assert.equal(sent.at(-1).boardKey, "typing-15s-english200-v1");
 assert.equal(sent.at(-1).sessionId, typing15.sessionId);
 assert.equal(sent.at(-2).sessionId, typing15.sessionId);
 
-console.log("Retired Daily client normalization remains isolated while active Typing/Campaign validation and cross-mode payload replacement stay correct.");
+console.log("Retired Daily has no client serializer while active Typing/Campaign validation and cross-mode payload replacement remain correct.");

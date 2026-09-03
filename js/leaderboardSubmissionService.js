@@ -5,7 +5,6 @@ import { buildArcadeRushLeaderboardSubmissionResult } from "./arcadeRushLeaderbo
 
 const MODE_BOARDS = Object.freeze({
   campaign: LEADERBOARD_BOARDS.CAMPAIGN,
-  daily: LEADERBOARD_BOARDS.DAILY,
   endless: LEADERBOARD_BOARDS.ENDLESS,
   "arcade-rush": LEADERBOARD_BOARDS.ARCADE_RUSH,
 });
@@ -58,17 +57,6 @@ export function buildSubmissionPayload(mode, result) {
   const boardKey = boardForMode(mode, result);
   const data = result?.modeData;
   if (!boardKey || !result || !data || !validSessionId(result.sessionId)) return null;
-  if (mode === "daily") {
-    const normalizedResult = buildDailySubmissionResult(result);
-    if (!normalizedResult) return null;
-    const payload = {
-      boardKey,
-      sessionId: result.sessionId,
-      clientVersion: CURRENT_GAME_VERSION,
-      result: normalizedResult,
-    };
-    return hasCompleteMetrics(payload) ? payload : null;
-  }
   if (mode === "arcade-rush") {
     const normalizedResult = buildArcadeRushLeaderboardSubmissionResult(result);
     if (!normalizedResult) return null;
@@ -148,52 +136,6 @@ export function buildSubmissionPayload(mode, result) {
   return hasCompleteMetrics(payload) ? payload : null;
 }
 
-export function buildDailySubmissionResult(result) {
-  const data = result?.modeData;
-  const wordsCompleted = Number(data?.wordsCompleted);
-  const resolved = Number(data?.wordsResolved);
-  const spawned = Number(data?.wordsSpawned);
-  const total = Number(data?.totalWords);
-  const missed = Number(result?.words?.missed);
-  const breaches = Number(data?.coreBreaches);
-  const validCounters = [wordsCompleted, resolved, spawned, total, missed, breaches]
-    .every(Number.isSafeInteger) &&
-    total === 60 &&
-    wordsCompleted >= 0 && missed >= 0 && breaches >= 0 &&
-    wordsCompleted <= resolved && resolved <= spawned && spawned <= total &&
-    missed === breaches && wordsCompleted + missed === resolved &&
-    result?.words?.completed === wordsCompleted;
-  if (!validCounters) return null;
-  const normalized = {
-    score: result?.score,
-    accuracy: result?.accuracy,
-    // Daily's rounded time bonus keeps the same value when fractional frame time is ceiled.
-    durationMs: Math.ceil(result?.activeDurationMs),
-    wordsCompleted,
-    completed: result?.success === true,
-    failureReason: result?.failureReason ?? null,
-    integrityRemaining: data?.integrityRemaining,
-    challengeDate: data?.dateKey,
-    challengeVersion: data?.challengeVersion,
-    wordsResolved: resolved,
-    wordsSpawned: spawned,
-    totalWords: total,
-    dateOverride: data?.dateOverride === true,
-    recordEligible: data?.recordEligible === true,
-    developerMode: result?.developerMode === true,
-    sessionSource: result?.sessionSource,
-    wordPoints: data?.wordPoints,
-    completionBonus: data?.completionBonus,
-    integrityBonus: data?.integrityBonus,
-    accuracyBonus: data?.accuracyBonus,
-    timeBonus: data?.timeBonus,
-    coreHits: data?.coreHits,
-    coreBreaches: data?.coreBreaches,
-    finalWave: data?.finalWave,
-  };
-  return hasCompleteMetrics(normalized) ? normalized : null;
-}
-
 export function buildTypingSubmissionResult(result, durationSeconds) {
   const data = result?.modeData;
   if (![15, 60].includes(durationSeconds)) return null;
@@ -264,9 +206,6 @@ export function createLeaderboardSubmissionService({
         payload.result.metricVersion !== 2
       )
     ) return { status: "ineligible", reason: "unsupported-test" };
-    if (activeMode === "daily" && payload.result.dateOverride !== false) {
-      return { status: "ineligible", reason: "local-only" };
-    }
     if (activeMode === "arcade-rush" && (
       payload.result.completed !== true ||
       payload.result.bossDefeated !== true ||

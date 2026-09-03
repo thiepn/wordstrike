@@ -1,11 +1,11 @@
 import assert from "node:assert/strict";
 import { readdir, readFile } from "node:fs/promises";
-import { DAILY_CHALLENGE_VERSION as CLIENT_DAILY_VERSION } from "../js/dailyConfig.js";
 import { EXPECTED_LEADERBOARD_RULES_VERSIONS } from "../js/leaderboardService.js";
 import { LEADERBOARD_RULES_VERSION, PUBLIC_BOARD_KEYS } from "../supabase/functions/_shared/leaderboardRead.js";
 import { SUPPORTED_BOARD_KEYS, validateScoreSubmission } from "../supabase/functions/_shared/scoreSubmission.js";
 import { dailySubmission } from "./leaderboardSubmissionFixtures.js";
 
+const ARCHIVED_DAILY_CHALLENGE_VERSION = 1;
 const migrationsUrl = new URL("../supabase/migrations/", import.meta.url);
 const migrations = (await readdir(migrationsUrl)).filter((name) => name.endsWith(".sql")).sort();
 const incrementName = "20260630170000_increment_ranked_gameplay_rules_versions.sql";
@@ -37,8 +37,7 @@ assert.doesNotMatch(rollback, /public\.leaderboard_submissions/);
 assert.doesNotMatch(rollback, /\bdelete\s+from\b/i);
 assert.match(rollback, /commit;\s*$/);
 
-// The historical Daily rules remain in old migrations, but AR15 archives the board
-// instead of rewriting or deleting historical submissions.
+// Historical Daily rules remain in immutable migrations and archived fixtures only.
 assert.match(databaseContract, /s\.challenge_version = 1/);
 assert.match(retirement, /where board_key = 'daily-strike-v1'/);
 assert.match(retirement, /set is_active = false,[\s\S]*is_visible = false/);
@@ -46,10 +45,10 @@ assert.doesNotMatch(retirement, /delete from public\.leaderboard_submissions/i);
 assert.doesNotMatch(retirement, /delete from public\.leaderboard_boards/i);
 
 assert.equal(LEADERBOARD_RULES_VERSION, 1);
-assert.equal(CLIENT_DAILY_VERSION, 1);
+assert.equal(ARCHIVED_DAILY_CHALLENGE_VERSION, 1);
 assert.equal(PUBLIC_BOARD_KEYS.includes("daily-strike-v1"), false);
 assert.equal(SUPPORTED_BOARD_KEYS.includes("daily-strike-v1"), false);
 assert.ok(Object.values(EXPECTED_LEADERBOARD_RULES_VERSIONS).every((version) => version === 1));
 assert.equal(validateScoreSubmission(dailySubmission()).code, "INVALID_BOARD");
 
-console.log("Historical rules migrations remain immutable, while AR15 archives Daily without deleting submissions and removes it from current server contracts.");
+console.log("Historical rules migrations remain immutable, while retired Daily has no current frontend or server contract.");

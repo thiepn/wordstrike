@@ -80,17 +80,6 @@ export function clearAttemptRuntime(game) {
     if (Array.isArray(game.phrases)) game.phrases.length = 0;
     game.currentPhrase = "";
     game.transitionElapsedMs = 0;
-  } else if (game.mode === "daily") {
-    if (Array.isArray(game.words)) game.words.length = 0;
-    game.bannerText = "";
-    game.immunityUntilMs = 0;
-    game.targetingState = {
-      mode: "idle",
-      prefix: "",
-      candidateIds: [],
-      activeTargetId: null,
-      startedAtActiveMs: null,
-    };
   }
 }
 

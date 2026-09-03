@@ -9,26 +9,28 @@ const { renderLeaderboards } = await import("../js/leaderboardUi.js");
 const authOut = { status: "signed-out" };
 const profileNone = { status: "idle", profile: null };
 
-// Even a legacy Daily state renders the AR14 public tab strip.
+// A raw legacy return state still selects the replacement Arcade Rush tab, never a Daily tab.
 renderLeaderboards({ status: "loading", selectedBoard: "daily-strike-v1", entries: [] }, authOut, profileNone);
 assert.match(app.html, /GLOBAL LEADERBOARDS/);
 assert.match(app.html, /ARCADE RUSH/);
 assert.doesNotMatch(app.html, />DAILY STRIKE</);
 assert.match(app.html, /ENDLESS/);
 assert.match(app.html, /Loading global rankings/);
+assert.match(app.html, /leaderboard-select-arcade-rush" aria-selected="true"/);
 
-// Direct legacy Daily board rendering remains available only as rollback compatibility.
 renderLeaderboards({
   status: "empty",
-  selectedBoard: "daily-strike-v1",
-  board: { challengeDate: "2026-06-27" },
+  selectedBoard: "arcade-rush-v1",
+  selectedCategory: "arcade-rush",
+  board: { boardKey: "arcade-rush-v1", rulesVersion: 1 },
   entries: [], viewer: null,
 }, authOut, profileNone);
-assert.match(app.html, /LEGACY UTC CHALLENGE 2026-06-27/);
-assert.match(app.html, /No ranked Daily Strike results yet/);
+assert.match(app.html, /RULES V1 \/\/ COMPLETED RUNS ONLY \/\/ ALL-TIME/);
+assert.match(app.html, /No ranked Arcade Rush results yet/);
 assert.match(app.html, /SIGN IN FOR GLOBAL RANKS/);
 assert.match(app.html, /CONTINUE WITH GOOGLE/);
 assert.match(app.html, /ARCADE RUSH/);
+assert.doesNotMatch(app.html, /Daily Strike|UTC CHALLENGE/i);
 
 renderLeaderboards({
   status: "empty", selectedBoard: "endless-v1", entries: [], viewer: null,
@@ -37,10 +39,10 @@ assert.match(app.html, /No ranked Endless results yet/);
 assert.match(app.html, /STANDARD ENDLESS/);
 assert.doesNotMatch(app.html, /RULES VERSION|SEASON|PREVIOUS RULES/);
 
-renderLeaderboards({ status: "offline", selectedBoard: "daily-strike-v1", entries: [] }, authOut, profileNone);
+renderLeaderboards({ status: "offline", selectedBoard: "arcade-rush-v1", selectedCategory: "arcade-rush", entries: [] }, authOut, profileNone);
 assert.match(app.html, /unavailable while offline/);
 assert.match(app.html, /Local gameplay and records are unaffected/);
-renderLeaderboards({ status: "error", selectedBoard: "daily-strike-v1", entries: [] }, authOut, profileNone);
+renderLeaderboards({ status: "error", selectedBoard: "arcade-rush-v1", selectedCategory: "arcade-rush", entries: [] }, authOut, profileNone);
 assert.match(app.html, /Unable to load global rankings/);
 assert.match(app.html, /leaderboard-refresh[^>]*>RETRY/);
 
@@ -81,4 +83,4 @@ renderLeaderboards(
 assert.match(app.html, /Choose a public username to submit scores/);
 assert.match(app.html, /SET USERNAME/);
 
-console.log("Leaderboards screen covers AR14 public tabs, legacy Daily compatibility, loading, empty, offline, error, safe rows, and viewer rank.");
+console.log("Leaderboards screen covers the final public tabs, legacy selection normalization, Arcade Rush, loading, empty, offline, error, safe rows, and viewer rank.");

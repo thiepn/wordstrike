@@ -1,5 +1,4 @@
 import { getSupabaseClient } from "./supabaseClient.js";
-import { getUtcDateKey } from "./dailyDate.js";
 import {
   ARCADE_RUSH_LEADERBOARD_BOARD_KEY,
   ARCADE_RUSH_LEADERBOARD_CATEGORY,
@@ -11,7 +10,6 @@ export const LEADERBOARD_BOARDS = Object.freeze({
   TYPING_60: "typing-60s-english200-v1",
   TYPING_15: "typing-15s-english200-v1",
   ENDLESS: "endless-v1",
-  DAILY: "daily-strike-v1",
   ARCADE_RUSH: ARCADE_RUSH_LEADERBOARD_BOARD_KEY,
 });
 
@@ -19,10 +17,11 @@ export const LEADERBOARD_CATEGORIES = Object.freeze({
   CAMPAIGN: "campaign",
   TYPING: "typing",
   ENDLESS: "endless",
-  DAILY: "daily",
   ARCADE_RUSH: ARCADE_RUSH_LEADERBOARD_CATEGORY,
 });
 
+const LEGACY_DAILY_BOARD_KEY = "daily-strike-v1";
+const LEGACY_DAILY_CATEGORY = "daily";
 const VALID_BOARDS = Object.freeze(Object.values(LEADERBOARD_BOARDS));
 const VALID_CATEGORIES = Object.freeze(Object.values(LEADERBOARD_CATEGORIES));
 const CACHE_TTL_MS = 30000;
@@ -32,7 +31,6 @@ export const EXPECTED_LEADERBOARD_RULES_VERSIONS = Object.freeze({
   [LEADERBOARD_BOARDS.TYPING_60]: 1,
   [LEADERBOARD_BOARDS.TYPING_15]: 1,
   [LEADERBOARD_BOARDS.ENDLESS]: 1,
-  [LEADERBOARD_BOARDS.DAILY]: 1,
   [LEADERBOARD_BOARDS.ARCADE_RUSH]: ARCADE_RUSH_LEADERBOARD_RULES_VERSION,
 });
 
@@ -53,8 +51,8 @@ export function getLeaderboardSelection(boardKey) {
   if (boardKey === LEADERBOARD_BOARDS.ENDLESS) {
     return { selectedCategory: LEADERBOARD_CATEGORIES.ENDLESS, selectedTypingDuration: 60 };
   }
-  if (boardKey === LEADERBOARD_BOARDS.DAILY) {
-    return { selectedCategory: LEADERBOARD_CATEGORIES.DAILY, selectedTypingDuration: 60 };
+  if (boardKey === LEGACY_DAILY_BOARD_KEY) {
+    return { selectedCategory: LEADERBOARD_CATEGORIES.ARCADE_RUSH, selectedTypingDuration: 60 };
   }
   if (boardKey === LEADERBOARD_BOARDS.ARCADE_RUSH) {
     return { selectedCategory: LEADERBOARD_CATEGORIES.ARCADE_RUSH, selectedTypingDuration: 60 };
@@ -67,13 +65,12 @@ export function getBoardKeyForSelection(category, typingDuration = 60) {
     return typingDuration === 15 ? LEADERBOARD_BOARDS.TYPING_15 : LEADERBOARD_BOARDS.TYPING_60;
   }
   if (category === LEADERBOARD_CATEGORIES.ENDLESS) return LEADERBOARD_BOARDS.ENDLESS;
-  if (category === LEADERBOARD_CATEGORIES.DAILY) return LEADERBOARD_BOARDS.DAILY;
+  if (category === LEGACY_DAILY_CATEGORY) return LEADERBOARD_BOARDS.ARCADE_RUSH;
   if (category === LEADERBOARD_CATEGORIES.ARCADE_RUSH) return LEADERBOARD_BOARDS.ARCADE_RUSH;
   return LEADERBOARD_BOARDS.CAMPAIGN;
 }
 
-// AR14 public order. Daily remains addressable by exact legacy board key until
-// AR15 retires the backend, but it is no longer part of public keyboard tabs.
+// Public keyboard order after the Arcade Rush cutover.
 const PUBLIC_KEYBOARD_CATEGORY_ORDER = Object.freeze([
   LEADERBOARD_CATEGORIES.CAMPAIGN,
   LEADERBOARD_CATEGORIES.TYPING,
@@ -90,8 +87,8 @@ export function getLeaderboardKeyboardTarget(state, key) {
   }
   const order = PUBLIC_KEYBOARD_CATEGORY_ORDER;
   let index = order.indexOf(category);
-  // Legacy Daily selections normalize to the new public fourth slot.
-  if (index < 0 && category === LEADERBOARD_CATEGORIES.DAILY) index = order.length - 1;
+  // Legacy pre-cutover Daily selections normalize to Arcade Rush.
+  if (index < 0 && category === LEGACY_DAILY_CATEGORY) index = order.length - 1;
   index = Math.max(0, index);
   if (key === "ArrowLeft") index = (index - 1 + order.length) % order.length;
   else if (key === "ArrowRight") index = (index + 1) % order.length;
@@ -174,7 +171,6 @@ async function functionErrorPayload(error) {
 
 export function createLeaderboardService({
   getClient = getSupabaseClient,
-  getDateKey = getUtcDateKey,
   now = () => Date.now(),
   isOnline = () => globalThis.navigator?.onLine !== false,
 } = {}) {
@@ -190,13 +186,11 @@ export function createLeaderboardService({
     return state;
   };
   const normalizeBoardKey = (boardKey) => (
-    boardKey === LEADERBOARD_BOARDS.DAILY
+    boardKey === LEGACY_DAILY_BOARD_KEY
       ? LEADERBOARD_BOARDS.ARCADE_RUSH
       : boardKey
   );
-  const requestKey = (boardKey) => boardKey === LEADERBOARD_BOARDS.DAILY
-    ? `${boardKey}:${getDateKey()}`
-    : boardKey;
+  const requestKey = (boardKey) => boardKey;
 
   const load = (requestedBoardKey, { force = false } = {}) => {
     const boardKey = normalizeBoardKey(requestedBoardKey);
@@ -217,9 +211,7 @@ export function createLeaderboardService({
     const requestId = ++requestSequence;
     const refreshing = state.selectedBoardKey === boardKey && state.entries.length > 0;
     publish({ ...state, status: refreshing ? "refreshing" : "loading", ...selection, selectedBoardKey: boardKey, error: null });
-    const body = boardKey === LEADERBOARD_BOARDS.DAILY
-      ? { boardKey, challengeDate: getDateKey() }
-      : { boardKey };
+    const body = { boardKey };
     const promise = (async () => {
       try {
         const { data, error } = await client.functions.invoke("get-leaderboard", { body });
@@ -271,7 +263,7 @@ export function createLeaderboardService({
     selectLeaderboardBoard: selectBoard,
     selectLeaderboardCategory(category) {
       if (!VALID_CATEGORIES.includes(category)) return Promise.resolve(state);
-      const publicCategory = category === LEADERBOARD_CATEGORIES.DAILY
+      const publicCategory = category === LEGACY_DAILY_CATEGORY
         ? LEADERBOARD_CATEGORIES.ARCADE_RUSH
         : category;
       return selectBoard(getBoardKeyForSelection(publicCategory, 60));

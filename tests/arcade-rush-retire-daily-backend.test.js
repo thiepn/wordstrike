@@ -84,11 +84,9 @@ assert.doesNotMatch(submitEdge, /scoreSubmissionLegacyDaily/);
 assert.doesNotMatch(submitEdge, /CHALLENGE_MISMATCH|Daily Strike/);
 assert.doesNotMatch(readEdge, /INVALID_CHALLENGE_DATE|Daily Strike/);
 
-// AR16, not AR15, owns deletion of the hidden Daily app implementation.
-const dailyMode = getModeDefinition(MODE_IDS.DAILY);
-assert.ok(dailyMode);
-assert.equal(dailyMode.visible, false);
-assert.equal(dailyMode.enabled, true);
+// AR16 closes the frontend half of the retirement while preserving the backend archive above.
+assert.equal(Object.hasOwn(MODE_IDS, "DAILY"), false);
+assert.equal(getModeDefinition("daily"), null);
 assert.equal(getModeDefinition(MODE_IDS.ARCADE_RUSH).visible, true);
 
-console.log("AR15 retires Daily reads, submissions, ranking, and RPC access while preserving archived data and the hidden AR16 frontend boundary.");
+console.log("AR15 backend retirement remains intact after AR16 deletes the Daily frontend while preserving archived data.");

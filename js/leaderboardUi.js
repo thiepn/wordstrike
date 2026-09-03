@@ -19,7 +19,6 @@ function duration(value) {
 function boardKind(boardKey) {
   if (boardKey === LEADERBOARD_BOARDS.CAMPAIGN) return "campaign";
   if ([LEADERBOARD_BOARDS.TYPING_60, LEADERBOARD_BOARDS.TYPING_15].includes(boardKey)) return "typing";
-  if (boardKey === LEADERBOARD_BOARDS.DAILY) return "daily";
   if (boardKey === LEADERBOARD_BOARDS.ARCADE_RUSH) return "arcade-rush";
   return "endless";
 }
@@ -27,7 +26,6 @@ function boardKind(boardKey) {
 function metricText(entry, kind) {
   if (kind === "campaign") return `Level ${entry.level} · Grade ${entry.grade} · ${entry.accuracy.toFixed(1)}%`;
   if (kind === "typing") return `${entry.wpm.toFixed(1)} WPM · ${entry.accuracy.toFixed(1)}% · ${entry.rawWpm.toFixed(1)} raw`;
-  if (kind === "daily") return `${entry.score.toLocaleString()} pts · ${duration(entry.durationMs)} · ${entry.accuracy.toFixed(1)}%`;
   if (kind === "arcade-rush") return `${entry.score.toLocaleString()} pts · ${entry.accuracy.toFixed(1)}% · ${duration(entry.durationMs)}`;
   return `Stage ${entry.stage} · ${entry.score.toLocaleString()} pts · ${entry.accuracy.toFixed(1)}%`;
 }
@@ -35,7 +33,6 @@ function metricText(entry, kind) {
 function columns(kind) {
   if (kind === "campaign") return ["LEVEL", "GRADE", "ACCURACY"];
   if (kind === "typing") return ["WPM", "ACCURACY", "RAW WPM"];
-  if (kind === "daily") return ["SCORE", "TIME", "ACCURACY"];
   if (kind === "arcade-rush") return ["SCORE", "ACCURACY", "TIME"];
   return ["STAGE", "SCORE", "ACCURACY"];
 }
@@ -43,7 +40,6 @@ function columns(kind) {
 function values(entry, kind) {
   if (kind === "campaign") return [entry.level, entry.grade, `${entry.accuracy.toFixed(1)}%`];
   if (kind === "typing") return [entry.wpm.toFixed(1), `${entry.accuracy.toFixed(1)}%`, entry.rawWpm.toFixed(1)];
-  if (kind === "daily") return [entry.score.toLocaleString(), duration(entry.durationMs), `${entry.accuracy.toFixed(1)}%`];
   if (kind === "arcade-rush") return [entry.score.toLocaleString(), `${entry.accuracy.toFixed(1)}%`, duration(entry.durationMs)];
   return [entry.stage, entry.score.toLocaleString(), `${entry.accuracy.toFixed(1)}%`];
 }
@@ -91,7 +87,6 @@ function viewerPanel(authState, profileState, viewer, entries, kind) {
 function emptyModeLabel(kind) {
   if (kind === "typing") return "Typing Test";
   if (kind === "campaign") return "Campaign";
-  if (kind === "daily") return "Daily Strike";
   if (kind === "arcade-rush") return "Arcade Rush";
   return "Endless";
 }
@@ -120,12 +115,9 @@ export function renderLeaderboards(
   const category = state.selectedCategory || inferredSelection.selectedCategory;
   const typingDuration = state.selectedTypingDuration || inferredSelection.selectedTypingDuration;
   const typing = category === LEADERBOARD_CATEGORIES.TYPING;
-  const daily = boardKey === LEADERBOARD_BOARDS.DAILY;
   const rush = boardKey === LEADERBOARD_BOARDS.ARCADE_RUSH;
-  const meta = daily
-    ? `LEGACY UTC CHALLENGE ${escapeHtml(state.board?.challengeDate || "LOADING")}`
-    : rush
-      ? "RULES V1 // COMPLETED RUNS ONLY // ALL-TIME"
+  const meta = rush
+    ? "RULES V1 // COMPLETED RUNS ONLY // ALL-TIME"
       : boardKey === LEADERBOARD_BOARDS.CAMPAIGN
         ? "HIGHEST SUCCESSFULLY COMPLETED LEVEL"
         : typing
