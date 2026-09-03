@@ -4,7 +4,8 @@ import {
 } from "./leaderboardService.js";
 
 export const LEADERBOARD_RETURN_STORAGE_KEY = "wordstrike_leaderboard_auth_return_v1";
-const CATEGORIES = new Set(Object.values(LEADERBOARD_CATEGORIES));
+const LEGACY_DAILY_CATEGORY = "daily";
+const CATEGORIES = new Set([...Object.values(LEADERBOARD_CATEGORIES), LEGACY_DAILY_CATEGORY]);
 
 export function validateLeaderboardReturnState(value) {
   if (!value || typeof value !== "object" || Array.isArray(value)) return null;
@@ -14,7 +15,7 @@ export function validateLeaderboardReturnState(value) {
   }
   if (value.screen !== "leaderboards" || !CATEGORIES.has(value.selectedCategory)) return null;
   // AR14 redirects any pre-cutover Daily OAuth return to the replacement board.
-  const normalizedCategory = value.selectedCategory === LEADERBOARD_CATEGORIES.DAILY
+  const normalizedCategory = value.selectedCategory === LEGACY_DAILY_CATEGORY
     ? LEADERBOARD_CATEGORIES.ARCADE_RUSH
     : value.selectedCategory;
   const typingDuration = normalizedCategory === LEADERBOARD_CATEGORIES.TYPING
@@ -26,9 +27,7 @@ export function validateLeaderboardReturnState(value) {
 
 export function leaderboardReturnStateForBoard(boardKey) {
   const selection = getLeaderboardSelection(boardKey);
-  const selectedCategory = selection.selectedCategory === LEADERBOARD_CATEGORIES.DAILY
-    ? LEADERBOARD_CATEGORIES.ARCADE_RUSH
-    : selection.selectedCategory;
+  const selectedCategory = selection.selectedCategory;
   return Object.freeze({
     screen: "leaderboards",
     selectedCategory,

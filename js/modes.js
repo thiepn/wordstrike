@@ -2,7 +2,6 @@ export const MODE_IDS = Object.freeze({
   CAMPAIGN: "campaign",
   SPEED_TEST: "speed-test",
   ENDLESS: "endless",
-  DAILY: "daily",
   ARCADE_RUSH: "arcade-rush",
   PRACTICE: "practice",
 });
@@ -43,21 +42,6 @@ const MODE_DEFINITIONS = Object.freeze([
     visible: true,
     status: "available",
     route: "endless-ready",
-    supportsPause: true,
-    supportsSeed: true,
-    storesProgress: true,
-  }),
-  // AR14 removes Daily Strike from public navigation but keeps the definition
-  // registered and enabled until AR15/AR16 retire its backend/frontend code.
-  Object.freeze({
-    id: MODE_IDS.DAILY,
-    name: "Daily Strike",
-    shortLabel: "Daily Challenge",
-    description: "Face one shared challenge each day.",
-    enabled: true,
-    visible: false,
-    status: "retired-pending-removal",
-    route: "daily-ready",
     supportsPause: true,
     supportsSeed: true,
     storesProgress: true,

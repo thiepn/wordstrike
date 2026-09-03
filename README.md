@@ -37,7 +37,7 @@ The core game is local-first: campaign progress, personal records, settings, and
 | **Campaign** | Defend the core through 100 progressively harder levels with a boss encounter every tenth level. |
 | **Typing Test** | Measure WPM, raw WPM, accuracy, corrections, and errors using the curated English 200 word set. |
 | **Endless** | Survive escalating stages with limited core integrity and increasing word pressure. |
-| **Daily Strike** | Play one deterministic three-wave challenge shared by all players for the same UTC date. |
+| **Arcade Rush** | Complete six escalating waves and defeat Core Breaker in a finite score-attack run. |
 | **Practice Lab** | Experimental training architecture; currently not exposed as a normal production mode. |
 
 ---
@@ -82,15 +82,14 @@ Campaign grades:
 - survival, word, combo, and stage-clear scoring
 - local personal records
 
-### Daily Strike
+### Arcade Rush
 
-Daily Strike is derived from:
-
-```text
-UTC date + challenge version
-```
-
-For a given date and version, every player receives the same deterministic challenge plan, including word selection and spawn geometry. Developer date overrides are excluded from normal records and global submission.
+- six escalating normal waves
+- five persistent Core Integrity
+- deterministic per-run vocabulary and trajectories
+- Core Breaker final boss
+- combo, accuracy, perfect-wave, integrity, and boss-time scoring
+- local personal records and an all-time global leaderboard
 
 ---
 
@@ -107,7 +106,7 @@ The browser stores a local player profile and gameplay history used for:
 - lifetime playtime and session totals
 - weighted accuracy and WPM
 - recent-session history
-- Daily Strike streaks and records
+- Arcade Rush personal records and completion statistics
 
 Local gameplay does **not** require an account.
 
@@ -121,7 +120,7 @@ Current leaderboard categories include:
 - Typing Test — 15 seconds
 - Typing Test — 60 seconds
 - Endless
-- Daily Strike
+- Arcade Rush
 
 Score submissions are authenticated and server-validated before storage. Global leaderboards are an optional feature; local gameplay and local progress remain available without signing in.
 
@@ -175,7 +174,8 @@ wordstrike/
 │   ├── boss*.js
 │   ├── speedTest*.js
 │   ├── endless*.js
-│   ├── daily*.js
+│   ├── arcadeRush/
+│   ├── arcadeRush*.js
 │   ├── statistics*.js
 │   ├── leaderboard*.js
 │   └── practiceLab/
@@ -306,7 +306,7 @@ The project includes automated coverage across core gameplay and infrastructure,
 - input and target selection
 - scoring and session lifecycle
 - Typing Test generation and metrics
-- Endless and Daily Strike
+- Endless and Arcade Rush
 - mobile viewport and software keyboard behavior
 - browser-storage failure handling
 - vocabulary quality and fallback behavior
@@ -328,7 +328,7 @@ Detailed implementation notes live in [`docs/`](./docs/), including:
 - [`BOSS_VOCABULARY.md`](./docs/BOSS_VOCABULARY.md)
 - [`TYPING_TEST.md`](./docs/TYPING_TEST.md)
 - [`ENDLESS_MODE.md`](./docs/ENDLESS_MODE.md)
-- [`DAILY_STRIKE.md`](./docs/DAILY_STRIKE.md)
+- [`ARCADE_RUSH_CONTRACT.md`](./docs/ARCADE_RUSH_CONTRACT.md)
 - [`PLAYER_PROFILE_AND_STATISTICS.md`](./docs/PLAYER_PROFILE_AND_STATISTICS.md)
 
 Practice Lab has additional architecture documents under the same directory.

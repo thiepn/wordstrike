@@ -23,12 +23,6 @@ import {
 } from "./speedTestLayout.js";
 import { ENDLESS_CONFIG, getEndlessWordsPerStage } from "./endlessConfig.js";
 import { getEndlessDiagnosticText } from "./endlessMode.js";
-import {
-  DAILY_STARTING_INTEGRITY,
-  DAILY_TOTAL_WORDS,
-  DAILY_WORDS_PER_WAVE,
-} from "./dailyConfig.js";
-import { getDailyDiagnosticText } from "./dailyMode.js";
 
 const app = () => document.querySelector("#app");
 let speedTestLayoutObserver = null;
@@ -208,88 +202,6 @@ export function renderEndlessReady(handlers = {}) {
   const endlessHelp = app().querySelector('[data-tutorial-help="endless"]');
   if (endlessHelp) endlessHelp.onclick = handlers.help;
   app().querySelectorAll('[data-action="back"]').forEach((button) => { button.onclick = handlers.back; });
-}
-
-export function renderDailyReady({ dateKey, record, developer = false } = {}, handlers = {}) {
-  const best = record?.best;
-  app().innerHTML = `
-    <section class="screen daily-ready-screen">
-      <div class="daily-ready-panel">
-        ${screenBackButton()}
-        <div class="eyebrow">${developer ? "Developer challenge preview" : "UTC daily challenge"}</div>
-        <h1>DAILY STRIKE</h1>
-        ${tutorialHelpButton("daily", "Daily Strike")}
-        <p class="daily-date">${dateKey}</p>
-        <div class="daily-ready-rules">
-          <span>3 WAVES</span><span>${DAILY_TOTAL_WORDS} WORDS</span>
-          <span>${DAILY_STARTING_INTEGRITY} CORE INTEGRITY</span>
-        </div>
-        <div class="daily-best">
-          <span>TODAY'S BEST</span>
-          <strong>${best ? best.score.toLocaleString() : "NO ATTEMPT"}</strong>
-          <small>${record?.currentStreak || 0} DAY STREAK // BEST ${record?.bestStreak || 0}</small>
-        </div>
-        <button class="arcade-button selected" data-action="daily-start">PRESS ENTER TO BEGIN</button>
-        <p class="footer-hint">ENTER BEGIN &nbsp;•&nbsp; ESC MODE SELECT</p>
-      </div>
-    </section>`;
-  wireMenuActions(app(), ".daily-ready-panel .arcade-button", {
-    "daily-start": handlers.start,
-  });
-  const dailyHelp = app().querySelector('[data-tutorial-help="daily"]');
-  if (dailyHelp) dailyHelp.onclick = handlers.help;
-  app().querySelector('[data-action="back"]').onclick = handlers.back;
-}
-
-export function renderDailyShell(game, devMode = false, handlers = {}) {
-  app().innerHTML = `
-    <section class="screen game-screen daily-screen">
-      <header class="daily-hud">
-        ${gameplayPauseButton()}
-        <div><strong>WAVE <span id="daily-wave">${game.wave}</span> / 3</strong>
-          <span id="daily-progress">${game.resolvedWordCount} / ${DAILY_TOTAL_WORDS}</span></div>
-        <div>SCORE <strong id="daily-score">0</strong>
-          <span>COMBO <b id="daily-combo">0</b></span></div>
-        <div>WPM <strong id="daily-wpm">0</strong>
-          <span>ACC <b id="daily-accuracy">100%</b></span></div>
-        <div>CORE <strong class="daily-integrity" id="daily-integrity">${"◆".repeat(game.integrity)}</strong></div>
-      </header>
-      ${devMode ? `<aside class="dev-runtime-panel" id="dev-runtime-panel">${getDailyDiagnosticText(game)}</aside>` : ""}
-      <div class="play-area" id="play-area">
-        <div class="core" aria-label="Central core"></div>
-        <div class="daily-wave-banner" id="daily-wave-banner" hidden></div>
-      </div>
-    </section>`;
-  wireGameplayAction(app(), "pause", handlers.pause);
-}
-
-export function updateDailyHud(game) {
-  const accuracy = calculateAccuracy(
-    game.correctKeystrokes,
-    game.totalKeystrokes,
-    game.missedCharacters,
-  );
-  const wpm = calculateWPM(game.correctCharacters, game.elapsedMs);
-  const values = {
-    "#daily-wave": game.wave,
-    "#daily-progress": `${game.resolvedWordCount} / ${DAILY_TOTAL_WORDS}`,
-    "#daily-score": game.score.toLocaleString(),
-    "#daily-combo": game.combo,
-    "#daily-wpm": Math.round(wpm),
-    "#daily-accuracy": `${accuracy.toFixed(0)}%`,
-    "#daily-integrity": "◆".repeat(Math.max(0, game.integrity)),
-  };
-  for (const [selector, value] of Object.entries(values)) {
-    const element = document.querySelector(selector);
-    if (element) element.textContent = value;
-  }
-  const banner = document.querySelector("#daily-wave-banner");
-  if (banner) {
-    banner.hidden = game.elapsedMs >= game.bannerUntilMs || !game.bannerText;
-    banner.textContent = game.bannerText;
-  }
-  const diagnostics = document.querySelector("#dev-runtime-panel");
-  if (diagnostics) diagnostics.textContent = getDailyDiagnosticText(game);
 }
 
 export function renderEndlessShell(game, devMode = false, handlers = {}) {
@@ -1164,29 +1076,6 @@ export function showEndlessPauseOverlay(selectedIndex, handlers) {
   wireMenuActions(overlay, ".arcade-button", handlers);
 }
 
-export function showDailyPauseOverlay(selectedIndex, handlers) {
-  document.querySelector(".pause-overlay")?.remove();
-  const actions = [
-    ["RESUME", "resume"],
-    ["RETRY TODAY", "retry"],
-    ["MODE SELECT", "modes"],
-    ["MAIN MENU", "title"],
-  ];
-  const overlay = document.createElement("div");
-  overlay.className = "pause-overlay";
-  overlay.innerHTML = `
-    <div class="pause-panel">
-      <div class="eyebrow">Daily Strike suspended</div>
-      <h2>PAUSED</h2>
-      <div class="menu-list">${actions.map(([label, action], index) => (
-    menuButton(label, action, index === selectedIndex)
-  )).join("")}</div>
-      <p class="footer-hint">ESC RESUME</p>
-    </div>`;
-  document.querySelector(".daily-screen")?.append(overlay);
-  wireMenuActions(overlay, ".arcade-button", handlers);
-}
-
 export const SPEED_TEST_PAUSE_ACTIONS = Object.freeze([
   Object.freeze(["RESUME", "resume"]),
   Object.freeze(["RESTART TEST", "restart"]),
@@ -1227,7 +1116,6 @@ export function renderGlobalSubmissionMarkup(state = {}) {
     "campaign-highest-level-v1": ["CAMPAIGN", "view-campaign-leaderboard"],
     "typing-60s-english200-v1": ["60S", "view-typing-60-leaderboard"],
     "typing-15s-english200-v1": ["15S", "view-typing-15-leaderboard"],
-    "daily-strike-v1": ["DAILY", "view-daily-leaderboard"],
     "endless-v1": ["ENDLESS", "view-endless-leaderboard"],
   }[state.boardKey]) || (state.mode === "typing"
     ? ["TYPING TEST", "view-typing-60-leaderboard"]
@@ -1332,49 +1220,6 @@ export function renderEndlessResults(result, selectedIndex, handlers, submission
   wireMenuSelection(app(), ".endless-results-panel > .menu-list .arcade-button", handlers.select);
   const endlessBack = app().querySelector?.('[data-screen-back="modes"]');
   if (endlessBack) endlessBack.onclick = handlers.modes;
-}
-
-export function renderDailyResults(result, recordFlags, selectedIndex, handlers, submissionState = {}) {
-  const data = result.modeData;
-  const actions = [
-    ["RETRY", "retry"],
-    ["MODE SELECT", "modes"],
-    ["MAIN MENU", "title"],
-  ];
-  app().innerHTML = `
-    <section class="screen daily-results-screen">
-      <div class="daily-results-panel">
-        ${screenBackButton("modes", true)}
-        <div class="eyebrow">${data.dateKey} // DAILY STRIKE</div>
-        <h1>${result.success ? "CHALLENGE CLEARED" : "STRIKE FAILED"}</h1>
-        ${recordFlags?.newBest ? '<div class="daily-record">NEW DAILY BEST</div>' : ""}
-        <div class="daily-result-headline">
-          <div><span>Score</span><strong>${result.score.toLocaleString()}</strong></div>
-          <div><span>Words</span><strong>${data.wordsCompleted} / ${DAILY_TOTAL_WORDS}</strong></div>
-          <div><span>Time</span><strong>${(result.activeDurationMs / 1000).toFixed(1)}s</strong></div>
-        </div>
-        <div class="daily-result-details">
-          <div><span>Accuracy</span><strong>${result.accuracy.toFixed(1)}%</strong></div>
-          <div><span>Average WPM</span><strong>${result.wpm.toFixed(1)}</strong></div>
-          <div><span>Integrity</span><strong>${data.integrityRemaining} / ${DAILY_STARTING_INTEGRITY}</strong></div>
-          <div><span>Maximum combo</span><strong>${result.combo.maximum}</strong></div>
-          <div><span>Word points</span><strong>${data.wordPoints}</strong></div>
-          <div><span>Completion bonus</span><strong>${data.completionBonus}</strong></div>
-          <div><span>Integrity bonus</span><strong>${data.integrityBonus}</strong></div>
-          <div><span>Accuracy bonus</span><strong>${data.accuracyBonus}</strong></div>
-          <div><span>Time bonus</span><strong>${data.timeBonus}</strong></div>
-          <div><span>Resolved</span><strong>${data.wordsResolved} / ${DAILY_TOTAL_WORDS}</strong></div>
-        </div>
-        ${resultMetricHelp()}
-        ${renderGlobalSubmissionMarkup(submissionState)}
-        <div class="menu-list">${actions.map(([label, action], index) => (
-    menuButton(label, action, index === selectedIndex)
-  )).join("")}</div>
-      </div>
-    </section>`;
-  wireMenuSelection(app(), ".daily-results-panel > .menu-list .arcade-button", handlers.select);
-  const dailyBack = app().querySelector?.('[data-screen-back="modes"]');
-  if (dailyBack) dailyBack.onclick = handlers.modes;
 }
 
 export function hidePauseOverlay() {

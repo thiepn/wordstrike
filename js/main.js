@@ -54,9 +54,6 @@ import {
   renderEndlessReady,
   renderEndlessResults,
   renderEndlessShell,
-  renderDailyReady,
-  renderDailyResults,
-  renderDailyShell,
   renderGameplayShell,
   renderLevelSelect,
   renderModeSelect,
@@ -69,10 +66,8 @@ import {
   renderTitle,
   showPauseOverlay,
   showEndlessPauseOverlay,
-  showDailyPauseOverlay,
   showSpeedTestPauseOverlay,
   updateEndlessHud,
-  updateDailyHud,
   updateBossHud,
   updateHud,
   updateSpeedTestRun,
@@ -115,11 +110,8 @@ import {
   startEndlessRun,
   stopEndlessLoop,
 } from "./endlessMode.js";
-import { createDailyVocabulary, generateDailyPlan } from "./dailyGenerator.js";
-import { getUtcDateKey, isValidDailyDateKey, parseDailyDateOverride } from "./dailyDate.js";
 import {
   ensureStoredPlayerProfile,
-  getDailyRecord,
   loadModeData,
   updateStoredDisplayName,
 } from "./modeStorage.js";
@@ -132,13 +124,6 @@ import {
   updateLeaderboardUsernameFeedback,
   updateProfileAuthSection,
 } from "./statisticsUi.js";
-import {
-  clearDailyRuntime,
-  handleDailyKey,
-  resumeDailyLoop,
-  startDailyRun,
-  stopDailyLoop,
-} from "./dailyMode.js";
 import {
   ARCADE_RUSH_MODE_ID,
   createArcadeRushAppController,
@@ -350,7 +335,6 @@ function stopActiveLoops() {
   stopBossLoop();
   stopSpeedTestLoop();
   stopEndlessLoop();
-  stopDailyLoop();
   arcadeRushAppController?.stop({ abortSession: false });
 }
 
@@ -368,7 +352,6 @@ function discardActiveAttempt() {
   clearSpeedTestLayout();
   clearSpeedTestRuntime();
   clearEndlessRuntime();
-  clearDailyRuntime();
 }
 
 function routeActiveGameplayKey(event) {
@@ -418,9 +401,6 @@ function routeActiveGameplayKey(event) {
   } else if (appState.game?.mode === "endless") {
     handleEndlessKey(event, appState.game);
     updateEndlessHud(appState.game);
-  } else if (appState.game?.mode === "daily") {
-    handleDailyKey(event, appState.game);
-    updateDailyHud(appState.game);
   } else if (appState.game?.mode === "boss") {
     handleBossKey(event, appState.game, appState.save.settings, completeBossPhrase);
     updateBossHud(appState.game);
@@ -535,9 +515,7 @@ function openLeaderboardReturn(returnState) {
       ? LEADERBOARD_BOARDS.ENDLESS
       : returnState?.selectedCategory === LEADERBOARD_CATEGORIES.ARCADE_RUSH
         ? LEADERBOARD_BOARDS.ARCADE_RUSH
-        : returnState?.selectedCategory === LEADERBOARD_CATEGORIES.DAILY
-          ? LEADERBOARD_BOARDS.ARCADE_RUSH
-          : LEADERBOARD_BOARDS.CAMPAIGN;
+        : LEADERBOARD_BOARDS.CAMPAIGN;
   openLeaderboardBoard(boardKey);
 }
 
@@ -564,22 +542,6 @@ function openEndlessReady(reason = "endless-ready") {
   if (reason === "mode-select") {
     openAutomaticTutorial("endless", (choice) => {
       if (choice === "primary") startEndless("mode-select");
-    });
-  }
-}
-
-function openDailyReady(reason = "daily-ready") {
-  cleanupCampaignAttempt(reason);
-  if (!appState.devMode || !appState.dailyDateOverride) {
-    appState.dailyDateKey = getUtcDateKey();
-  }
-  appState.dailyResult = null;
-  appState.dailyRecordFlags = null;
-  changeScreen(Screens.DAILY_READY);
-  renderCurrentScreen();
-  if (reason === "mode-select") {
-    openAutomaticTutorial("daily", (choice) => {
-      if (choice === "primary") startDaily("daily-ready", appState.dailyDateKey);
     });
   }
 }
@@ -763,19 +725,6 @@ function finishEndless(game, result) {
   startPreparedAutomaticSubmission();
 }
 
-function finishDaily(game, result) {
-  if (!result || appState.screen === Screens.DAILY_RESULTS) return;
-  unmountGameplayInput();
-  appState.dailyResult = result;
-  appState.dailyRecordFlags = { ...game.recordFlags };
-  appState.dailyResultsIndex = 0;
-  appState.dailyResultsReadyAt = currentTimeMs() + 200;
-  prepareAutomaticResultSubmission("daily", result);
-  changeScreen(Screens.DAILY_RESULTS);
-  renderCurrentScreen();
-  startPreparedAutomaticSubmission();
-}
-
 function finishArcadeRush(snapshot, result) {
   if (!result || appState.screen === Screens.ARCADE_RUSH_RESULTS) return;
   unmountGameplayInput();
@@ -812,34 +761,6 @@ function startArcadeRush(source = "arcade-rush-ready") {
   changeScreen(Screens.PLAYING);
   mountGameplayInput();
   return true;
-}
-
-function startDaily(source = "daily-ready", dateKey = appState.dailyDateKey) {
-  cleanupCampaignAttempt(source === "retry" ? "retry" : "new-session");
-  const challengeDateKey = isValidDailyDateKey(dateKey) ? dateKey : getUtcDateKey();
-  const vocabulary = createDailyVocabulary({
-    commonWords: appState.commonWordBank.words,
-    campaignBank: appState.wordBank,
-  });
-  const plan = generateDailyPlan({ dateKey: challengeDateKey, vocabulary });
-  const game = startDailyRun({
-    plan,
-    developerMode: appState.devMode,
-    dateOverride: appState.dailyDateOverride,
-    source,
-    onUpdate: updateDailyHud,
-    onComplete: finishDaily,
-  });
-  if (!game) {
-    openDailyReady("start-failed");
-    return;
-  }
-  appState.dailyDateKey = challengeDateKey;
-  changeScreen(Screens.PLAYING);
-  renderDailyShell(game, appState.devMode, { pause: pauseGame });
-  mountGameplayInput();
-  updateDailyHud(game);
-  if (!appState.devMode) beginContextualHints("daily", "COMPLETE ALL WAVES TO FINISH TODAY’S CHALLENGE");
 }
 
 function startEndless(source = "mode-select") {
@@ -994,7 +915,6 @@ function pauseGame() {
   changeScreen(Screens.PAUSED);
   pauseSession();
   if (appState.game?.mode === "endless") stopEndlessLoop();
-  if (appState.game?.mode === "daily") stopDailyLoop();
   appState.pauseIndex = 0;
   renderPauseOverlay();
 }
@@ -1028,16 +948,6 @@ function renderPauseOverlay() {
     });
     return;
   }
-  if (appState.game?.mode === "daily") {
-    showDailyPauseOverlay(appState.pauseIndex, {
-      resume: resumeGame,
-      retry: () => startDaily("retry", appState.game.config.dateKey),
-      modes: openModeSelect,
-      title: openTitle,
-      select: (index) => { appState.pauseIndex = index; },
-    });
-    return;
-  }
   showPauseOverlay(appState.pauseIndex, {
     resume: resumeGame,
     retry: retryCurrentLevel,
@@ -1065,7 +975,6 @@ function resumeGame() {
   resumeSession();
   if (appState.game?.mode === "boss") resumeBossLoop();
   else if (appState.game?.mode === "endless") resumeEndlessLoop();
-  else if (appState.game?.mode === "daily") resumeDailyLoop();
   else resumeGameLoop();
 }
 
@@ -1152,7 +1061,6 @@ function activateSelectedMode(modeId = getAllModes()[appState.modeSelection]?.id
   }
   else if (route === "endless-ready") openEndlessReady("mode-select");
   else if (route === "arcade-rush-ready") openArcadeRushReady("mode-select");
-  else if (route === "daily-ready" && appState.devMode) openDailyReady("developer");
   else return false;
   return true;
 }
@@ -1213,33 +1121,6 @@ function renderCurrentScreen() {
         select: (index) => {
           if (appState.endlessResultsIndex === index) return;
           appState.endlessResultsIndex = index;
-          renderCurrentScreen();
-        },
-      },
-      getSubmissionState(),
-    );
-  } else if (appState.screen === Screens.DAILY_READY) {
-    renderDailyReady({
-      dateKey: appState.dailyDateKey,
-      record: getDailyRecord(appState.dailyDateKey),
-      developer: appState.devMode,
-    }, {
-      start: () => startDaily("daily-ready", appState.dailyDateKey),
-      help: () => openTutorial("daily"),
-      back: openModeSelect,
-    });
-  } else if (appState.screen === Screens.DAILY_RESULTS) {
-    renderDailyResults(
-      appState.dailyResult,
-      appState.dailyRecordFlags,
-      appState.dailyResultsIndex,
-      {
-        retry: () => startDaily("retry", appState.dailyResult.modeData.dateKey),
-        modes: openModeSelect,
-        title: openTitle,
-        select: (index) => {
-          if (appState.dailyResultsIndex === index) return;
-          appState.dailyResultsIndex = index;
           renderCurrentScreen();
         },
       },
@@ -1381,10 +1262,8 @@ function handleAppClick(event) {
   const root = document.querySelector("#app");
   const readyAt = appState.screen === Screens.ENDLESS_RESULTS
     ? appState.endlessResultsReadyAt
-    : appState.screen === Screens.DAILY_RESULTS
-      ? appState.dailyResultsReadyAt
-      : appState.screen === Screens.ARCADE_RUSH_RESULTS
-        ? appState.arcadeRushResultsReadyAt
+    : appState.screen === Screens.ARCADE_RUSH_RESULTS
+      ? appState.arcadeRushResultsReadyAt
         : appState.screen === Screens.SPEED_TEST_RESULTS
           ? appState.speedTestResultsReadyAt
           : appState.resultsReadyAt;
@@ -1429,15 +1308,6 @@ function handleAppClick(event) {
     else if (action === "retry") startEndless("retry");
     else if (action === "modes") openModeSelect();
     else if (action === "title") openTitle();
-  } else if (appState.screen === Screens.DAILY_RESULTS) {
-    if (action === "submit-global-score") void submitCurrentResult();
-    else if (action === "retry-global-score") void retryCurrentSubmission();
-    else if (action === "view-daily-leaderboard") openLeaderboardBoard(LEADERBOARD_BOARDS.ARCADE_RUSH);
-    else if (action === "open-account-settings") openAccountSettings();
-    else if (action === "result-google-sign-in") startResultGoogleSignIn(LEADERBOARD_BOARDS.DAILY, "daily", appState.dailyResult);
-    else if (action === "retry") startDaily("retry", appState.dailyResult.modeData.dateKey);
-    else if (action === "modes") openModeSelect();
-    else if (action === "title") openTitle();
   } else if (appState.screen === Screens.SPEED_TEST_RESULTS) {
     const boardKey = appState.speedTestResult?.modeData?.durationSeconds === 15
       ? LEADERBOARD_BOARDS.TYPING_15
@@ -1476,8 +1346,6 @@ function handleAppClick(event) {
     } else if (action === "leaderboard-select-typing") {
       void selectLeaderboardCategory(LEADERBOARD_CATEGORIES.TYPING);
     } else if (action === "leaderboard-select-arcade-rush") {
-      void selectLeaderboardBoard(LEADERBOARD_BOARDS.ARCADE_RUSH);
-    } else if (action === "leaderboard-select-daily") {
       void selectLeaderboardBoard(LEADERBOARD_BOARDS.ARCADE_RUSH);
     } else if (action === "leaderboard-select-endless") {
       void selectLeaderboardBoard(LEADERBOARD_BOARDS.ENDLESS);
@@ -1542,7 +1410,6 @@ const handleGlobalKeydown = createGlobalKeyboardController({
   resetSpeedTestAttempt,
   openModeSelect,
   startEndless,
-  startDaily,
   startArcadeRush,
   retryCurrentLevel,
   backPracticeLab: () => practiceLabController?.back(),
@@ -1583,7 +1450,7 @@ async function bootstrap() {
       }
     }
     else resetLeaderboardProfile();
-    if ([Screens.ARCADE_RUSH_RESULTS, Screens.DAILY_RESULTS, Screens.ENDLESS_RESULTS, Screens.SPEED_TEST_RESULTS, Screens.RESULTS].includes(appState.screen)) {
+    if ([Screens.ARCADE_RUSH_RESULTS, Screens.ENDLESS_RESULTS, Screens.SPEED_TEST_RESULTS, Screens.RESULTS].includes(appState.screen)) {
       void handleAutomaticSubmissionStateChange(authState, getLeaderboardProfileState());
     }
     if (bootstrapReady) void pendingResultCoordinator.evaluate(authState, getLeaderboardProfileState());
@@ -1603,13 +1470,13 @@ async function bootstrap() {
       else updateProfileAuthSection(getAuthState(), profileState);
     }
     if (appState.screen === Screens.LEADERBOARDS) renderCurrentScreen();
-    if ([Screens.ARCADE_RUSH_RESULTS, Screens.DAILY_RESULTS, Screens.ENDLESS_RESULTS, Screens.SPEED_TEST_RESULTS, Screens.RESULTS].includes(appState.screen)) {
+    if ([Screens.ARCADE_RUSH_RESULTS, Screens.ENDLESS_RESULTS, Screens.SPEED_TEST_RESULTS, Screens.RESULTS].includes(appState.screen)) {
       void handleAutomaticSubmissionStateChange(getAuthState(), profileState);
     }
     if (bootstrapReady) void pendingResultCoordinator.evaluate(getAuthState(), profileState);
   });
   subscribeToSubmissions((submissionState) => {
-    if ([Screens.ARCADE_RUSH_RESULTS, Screens.DAILY_RESULTS, Screens.ENDLESS_RESULTS, Screens.SPEED_TEST_RESULTS, Screens.RESULTS].includes(appState.screen)) {
+    if ([Screens.ARCADE_RUSH_RESULTS, Screens.ENDLESS_RESULTS, Screens.SPEED_TEST_RESULTS, Screens.RESULTS].includes(appState.screen)) {
       updateGlobalSubmissionRegion(submissionState);
     }
   });
@@ -1639,10 +1506,6 @@ async function bootstrap() {
   appState.endlessStartStage = appState.devMode
     ? Math.max(1, Number.parseInt(search.get("stage"), 10) || 1)
     : 1;
-  appState.dailyDateOverride = appState.devMode && isValidDailyDateKey(search.get("date"));
-  appState.dailyDateKey = appState.devMode
-    ? parseDailyDateOverride(window.location.search)
-    : getUtcDateKey();
   appState.save = loadSave();
   [
     appState.wordBank,
@@ -1670,8 +1533,6 @@ async function bootstrap() {
     resetSpeedTestAttempt("developer");
   } else if (appState.devMode && search.get("mode") === MODE_IDS.ENDLESS) {
     openEndlessReady("developer");
-  } else if (appState.devMode && search.get("mode") === MODE_IDS.DAILY) {
-    openDailyReady("developer");
   } else if (appState.devMode && search.get("mode") === MODE_IDS.ARCADE_RUSH) {
     openArcadeRushReady("developer");
   } else if (pendingLeaderboardReturn) {

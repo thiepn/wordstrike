@@ -6,7 +6,7 @@ export function isTextEntryTarget(target) {
 }
 
 const GAMEPLAY_BACKSPACE_MODES = new Set([
-  "campaign", "normal", "endless", "daily", "boss", "typing", "arcade-rush",
+  "campaign", "normal", "endless", "boss", "typing", "arcade-rush",
 ]);
 
 const FORWARDED_BACKSPACE_MODES = new Set(["typing", "arcade-rush"]);

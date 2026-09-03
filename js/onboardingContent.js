@@ -3,7 +3,6 @@ export const ONBOARDING_VERSIONS = Object.freeze({
   campaign: 1,
   typing: 1,
   endless: 1,
-  daily: 1,
   boss: 1,
   leaderboards: 1,
 });
@@ -60,14 +59,6 @@ export const ONBOARDING_TUTORIALS = Object.freeze({
     steps: Object.freeze([
       step("SURVIVE AS LONG AS YOU CAN", "There is no final level. Keep typing and protect the core for as long as possible.", "approaching-word"),
       step("IT KEEPS GETTING HARDER", "Words become faster and more difficult over time. Your final stage and score determine your result.", "difficulty-growth", "START ENDLESS"),
-    ]),
-  }),
-  daily: Object.freeze({
-    id: "daily", version: 1, title: "DAILY STRIKE GUIDE",
-    steps: Object.freeze([
-      step("TODAY’S SHARED CHALLENGE", "Everyone receives the same Daily Strike challenge for the day.", "daily-shared-challenge"),
-      step("SURVIVE EVERY WAVE", "Complete the daily waves while protecting core integrity. Completion, accuracy, speed, and remaining integrity shape your result.", "core-integrity"),
-      step("COMPARE YOUR RESULT", "Finish the normal current-day challenge to submit an eligible global score.", "leaderboard-ranking", "START TODAY’S CHALLENGE"),
     ]),
   }),
   boss: Object.freeze({

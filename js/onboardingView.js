@@ -18,9 +18,6 @@ function visualMarkup(type) {
   if (type === "difficulty-growth") {
     return `<div class="onboarding-growth"><span>STAGE 1</span><span>STAGE 5</span><span>STAGE 10</span></div>`;
   }
-  if (type === "daily-shared-challenge") {
-    return `<div class="onboarding-daily-visual"><span>TODAY</span><strong>60 WORDS</strong><small>SAME CHALLENGE</small></div>`;
-  }
   if (type === "local-first") {
     return `<div class="onboarding-local-visual"><strong>PROGRESS SAVED</strong><span>GLOBAL RANKS OPTIONAL</span></div>`;
   }
