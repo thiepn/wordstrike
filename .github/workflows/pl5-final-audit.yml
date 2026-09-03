@@ -24,6 +24,9 @@ jobs:
         with:
           node-version: 22
 
+      - name: Correct documentation anchors
+        run: node scripts/fixPL5FinalAudit.mjs
+
       - name: Validate patch script
         run: node --check scripts/applyPL5FinalAudit.mjs
 
@@ -42,7 +45,7 @@ jobs:
 
       - name: Commit hardened implementation
         run: |
-          rm scripts/applyPL5FinalAudit.mjs .github/workflows/pl5-final-audit.yml
+          rm scripts/applyPL5FinalAudit.mjs scripts/fixPL5FinalAudit.mjs .github/workflows/pl5-final-audit.yml
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
