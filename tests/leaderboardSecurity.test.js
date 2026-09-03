@@ -7,7 +7,7 @@ assert.equal(validateLeaderboardRequest({ boardKey: "endless-v1" }).valid, true)
 assert.equal(validateLeaderboardRequest({ boardKey: "arcade-rush-v1" }).valid, true);
 assert.equal(validateLeaderboardRequest({ boardKey: "campaign-highest-level-v1" }).valid, true);
 assert.equal(validateLeaderboardRequest({ boardKey: "daily-strike-v1" }).code, "INVALID_BOARD");
-assert.equal(validateLeaderboardRequest({ boardKey: "daily-strike-v1", challengeDate: "2026-06-27" }).code, "INVALID_REQUEST");
+assert.equal(validateLeaderboardRequest({ boardKey: "daily-strike-v1", challengeDate: "2026-06-27" }).code, "INVALID_BOARD");
 assert.equal(validateLeaderboardRequest({ boardKey: "endless-v1", limit: 1000 }).code, "INVALID_REQUEST");
 assert.equal(validateLeaderboardRequest({ boardKey: "endless-v1", orderBy: "raw sql" }).code, "INVALID_REQUEST");
 assert.equal(validateLeaderboardRequest({ boardKey: "endless-v1", user_id: "ignored" }).code, "INVALID_REQUEST");
