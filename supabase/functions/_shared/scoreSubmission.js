@@ -55,8 +55,5 @@ export function validateScoreSubmission(body, options = {}) {
   if (body?.boardKey === RETIRED_DAILY_BOARD_KEY) {
     return Object.freeze({ valid: false, code: "INVALID_BOARD" });
   }
-  if (!SUPPORTED_BOARD_KEYS.includes(body?.boardKey)) {
-    return Object.freeze({ valid: false, code: "INVALID_BOARD" });
-  }
   return validateLegacyScoreSubmission(body, options);
 }
