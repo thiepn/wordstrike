@@ -49,11 +49,7 @@ export function getArcadeRushShadowRunPolicy(
 
 function productionIsolationGate() {
   const publicIds = getAllModes().map(({ id }) => id);
-  const dailyPublic = publicIds.includes(MODE_IDS.DAILY);
-  const rushPublic = publicIds.includes(MODE_IDS.ARCADE_RUSH);
-  // Valid both before and after AR14: the replacement modes must never be
-  // simultaneously public, and they must never both disappear.
-  return dailyPublic !== rushPublic;
+  return publicIds.includes(MODE_IDS.ARCADE_RUSH) && !publicIds.includes("daily");
 }
 
 function validShadowResult(result) {
