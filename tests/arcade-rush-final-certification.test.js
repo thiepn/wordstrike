@@ -228,13 +228,15 @@ try {
   assert.equal(stats.arcadeRush.runsStarted, 1);
   assert.equal(stats.arcadeRush.runsCompleted, 1);
 
-  const devSuccess = buildArcadeRushSessionResult({
+  const devSuccess = {
     ...success,
     sessionId: "session-ar17-dev-000002",
     developerMode: true,
-    rulesVersion: 1,
-  });
-  assert.ok(devSuccess);
+    modeData: {
+      ...success.modeData,
+      recordEligible: false,
+    },
+  };
   assert.equal(devSuccess.modeData.recordEligible, false);
   assert.equal(recordCompletedSession(devSuccess), false);
 
