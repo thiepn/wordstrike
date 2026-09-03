@@ -71,7 +71,7 @@ function reviewDeletes(records) {
   const deletions = new Set();
   const activeByEntity = new Map();
   for (const record of [...records].sort((a, b) => time(b.updatedAt) - time(a.updatedAt))) {
-    const key = `${record.profileId}:\0${record.entityType}:\0${record.entityKey}`;
+    const key = `${record.profileId}:\0${record.contextId}:\0${record.entityType}:\0${record.entityKey}`;
     if (activeByEntity.has(key)) deletions.add(record.reviewItemId);
     else activeByEntity.set(key, record.reviewItemId);
   }

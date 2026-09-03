@@ -2,17 +2,19 @@ export const PRACTICE_MANIFEST_KEY = "wordstrike.practice.manifest.v1";
 export const PRACTICE_MANIFEST_BACKUP_KEY = "wordstrike.practice.manifest.backup.v1";
 export const PRACTICE_MANIFEST_TEMP_KEY = "wordstrike.practice.manifest.temp.v1";
 export const PRACTICE_DATABASE_NAME = "wordstrike-practice-lab";
-export const PRACTICE_DATABASE_VERSION = 1;
+export const PRACTICE_DATABASE_VERSION = 2;
 export const PRACTICE_MANIFEST_VERSION = 1;
+export const PRACTICE_CONTEXT_FINGERPRINT_VERSION = 1;
 
 export const PRACTICE_RECORD_VERSIONS = Object.freeze({
-  profile: 2,
-  skillStat: 1,
-  sessionSummary: 1,
-  reviewItem: 1,
+  context: 1,
+  profile: 3,
+  skillStat: 2,
+  sessionSummary: 2,
+  reviewItem: 2,
   customText: 1,
   preset: 1,
-  checkpoint: 1,
+  checkpoint: 2,
   quarantine: 1,
 });
 
@@ -57,18 +59,32 @@ export const PRACTICE_STORE_DEFINITIONS = Object.freeze({
       Object.freeze({ name: "updatedAt", keyPath: "updatedAt" }),
     ],
   }),
+  contexts: Object.freeze({
+    keyPath: "contextId",
+    indexes: [
+      Object.freeze({ name: "profileId", keyPath: "profileId" }),
+      Object.freeze({ name: "updatedAt", keyPath: "updatedAt" }),
+      Object.freeze({ name: "lastUsedAt", keyPath: "lastUsedAt" }),
+      Object.freeze({
+        name: "profileFingerprint",
+        keyPath: ["profileId", "fingerprint"],
+        options: { unique: true },
+      }),
+    ],
+  }),
   skillStats: Object.freeze({
     keyPath: "statId",
     indexes: [
       Object.freeze({ name: "profileId", keyPath: "profileId" }),
+      Object.freeze({ name: "contextId", keyPath: "contextId" }),
       Object.freeze({ name: "entityType", keyPath: "entityType" }),
       Object.freeze({ name: "updatedAt", keyPath: "updatedAt" }),
       Object.freeze({ name: "priority", keyPath: "priority" }),
       Object.freeze({ name: "confidenceLevel", keyPath: "confidenceLevel" }),
       Object.freeze({ name: "masteryState", keyPath: "masteryState" }),
       Object.freeze({
-        name: "profileEntity",
-        keyPath: ["profileId", "entityType", "entityKey"],
+        name: "profileContextEntity",
+        keyPath: ["profileId", "contextId", "entityType", "entityKey"],
         options: { unique: true },
       }),
     ],
@@ -77,6 +93,7 @@ export const PRACTICE_STORE_DEFINITIONS = Object.freeze({
     keyPath: "sessionId",
     indexes: [
       Object.freeze({ name: "profileId", keyPath: "profileId" }),
+      Object.freeze({ name: "contextId", keyPath: "contextId" }),
       Object.freeze({ name: "experimentId", keyPath: "experimentId" }),
       Object.freeze({ name: "startedAtUtc", keyPath: "startedAtUtc" }),
       Object.freeze({ name: "completedAtUtc", keyPath: "completedAtUtc" }),
@@ -88,14 +105,15 @@ export const PRACTICE_STORE_DEFINITIONS = Object.freeze({
     keyPath: "reviewItemId",
     indexes: [
       Object.freeze({ name: "profileId", keyPath: "profileId" }),
+      Object.freeze({ name: "contextId", keyPath: "contextId" }),
       Object.freeze({ name: "dueAtUtc", keyPath: "dueAtUtc" }),
       Object.freeze({ name: "localDueDayKey", keyPath: "localDueDayKey" }),
       Object.freeze({ name: "state", keyPath: "state" }),
       Object.freeze({ name: "entityType", keyPath: "entityType" }),
       Object.freeze({ name: "entityKey", keyPath: "entityKey" }),
       Object.freeze({
-        name: "profileEntity",
-        keyPath: ["profileId", "entityType", "entityKey"],
+        name: "profileContextEntity",
+        keyPath: ["profileId", "contextId", "entityType", "entityKey"],
         options: { unique: true },
       }),
     ],
@@ -133,6 +151,11 @@ export const PRACTICE_STORE_DEFINITIONS = Object.freeze({
   }),
 });
 
+export const PRACTICE_OBSOLETE_INDEXES = Object.freeze({
+  skillStats: Object.freeze(["profileEntity"]),
+  reviewItems: Object.freeze(["profileEntity"]),
+});
+
 export const PRACTICE_STORE_NAMES = Object.freeze(Object.keys(PRACTICE_STORE_DEFINITIONS));
 export const ENTITY_TYPES = Object.freeze([
   "key", "bigram", "trigram", "word",
@@ -150,6 +173,7 @@ export const COMPLETION_REASONS = Object.freeze([
 export const REVIEW_STATES = Object.freeze([
   "new", "due", "learning", "improving", "stable", "mastered", "suspended",
 ]);
+export const PRACTICE_INPUT_METHODS = Object.freeze(["unknown", "physical", "software"]);
 export const STORAGE_HEALTH_STATES = Object.freeze([
   "healthy", "degraded", "quota-warning", "quota-exceeded",
   "migration-warning", "recovery-required",

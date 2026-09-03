@@ -16,6 +16,13 @@ import {
   STORAGE_HEALTH_STATES,
 } from "./practiceConstants.js";
 import { createSkillStatId, isPracticeId } from "./practiceIds.js";
+import {
+  createPracticeContextFingerprint,
+  normalizePracticeDataLocale,
+  normalizePracticeHardwareProfileId,
+  normalizePracticeInputMethod,
+  normalizePracticeKeyboardLayout,
+} from "./practiceContext.js";
 import { isValidPracticeDayKey, isValidPracticeUtcIso } from "./practiceTime.js";
 
 const SETTINGS_ENUMS = Object.freeze({
@@ -192,11 +199,41 @@ export function validatePracticeProfile(profile) {
   timestamp(errors, profile.updatedAt, "updatedAt");
   requiredString(errors, profile.dataLocale, "dataLocale", 40);
   requiredString(errors, profile.keyboardLayout, "keyboardLayout", 40);
+  validId(errors, profile.activeContextId, "activeContextId", "context");
   if (typeof profile.firstAssessmentCompleted !== "boolean") error(errors, "firstAssessmentCompleted", "INVALID_TYPE", "firstAssessmentCompleted must be boolean");
   for (const key of ["firstAssessmentCompletedAt", "lastAssessmentAt", "lastPracticeAt"]) nullableTimestamp(errors, profile[key], key);
   if (profile.lastTrainingDayKey != null && !isValidPracticeDayKey(profile.lastTrainingDayKey)) error(errors, "lastTrainingDayKey", "INVALID_DAY_KEY", "lastTrainingDayKey must be YYYY-MM-DD or null");
   for (const key of ["totalCompletedSessions", "totalPracticeDurationMs", "activeTrainingDays", "settingsVersion", "summaryVersion"]) finite(errors, profile[key], key, { min: 0, integer: true });
   validateDashboard(errors, profile.dashboardSummary);
+  return result(errors);
+}
+
+export function validatePracticeContext(context) {
+  const errors = [];
+  if (!isPlainObject(context)) return result([{ path: "context", code: "INVALID_TYPE", message: "context must be an object" }]);
+  validId(errors, context.contextId, "contextId", "context");
+  validId(errors, context.profileId, "profileId", "profile");
+  validateVersion(errors, context.recordVersion, PRACTICE_RECORD_VERSIONS.context);
+  timestamp(errors, context.createdAt, "createdAt");
+  timestamp(errors, context.updatedAt, "updatedAt");
+  timestamp(errors, context.lastUsedAt, "lastUsedAt");
+  const locale = normalizePracticeDataLocale(context.dataLocale);
+  if (!locale) error(errors, "dataLocale", "INVALID_LOCALE", "dataLocale is invalid");
+  else if (locale !== context.dataLocale) error(errors, "dataLocale", "NOT_NORMALIZED", "dataLocale must use canonical normalization");
+  const layout = normalizePracticeKeyboardLayout(context.keyboardLayout);
+  if (!layout) error(errors, "keyboardLayout", "INVALID_LAYOUT", "keyboardLayout is invalid");
+  else if (layout !== context.keyboardLayout) error(errors, "keyboardLayout", "NOT_NORMALIZED", "keyboardLayout must be normalized");
+  const inputMethod = normalizePracticeInputMethod(context.inputMethod);
+  if (!inputMethod || inputMethod !== context.inputMethod) error(errors, "inputMethod", "INVALID_ENUM", "inputMethod must be unknown, physical, or software");
+  const hardware = normalizePracticeHardwareProfileId(context.hardwareProfileId);
+  if (hardware === undefined || hardware !== context.hardwareProfileId) error(errors, "hardwareProfileId", "INVALID_ID", "hardwareProfileId must be null or a bounded Practice-local identifier");
+  requiredString(errors, context.fingerprint, "fingerprint", 400);
+  try {
+    const expected = createPracticeContextFingerprint(context);
+    if (context.fingerprint !== expected) error(errors, "fingerprint", "IDENTITY_MISMATCH", "fingerprint does not match normalized context components");
+  } catch {
+    // Component-specific errors above remain the authoritative diagnostics.
+  }
   return result(errors);
 }
 
@@ -217,15 +254,17 @@ export function validateSkillStat(stat) {
   if (!isPlainObject(stat)) return result([{ path: "skillStat", code: "INVALID_TYPE", message: "skillStat must be an object" }]);
   requiredString(errors, stat.statId, "statId", 500);
   validId(errors, stat.profileId, "profileId", "profile");
+  validId(errors, stat.contextId, "contextId", "context");
   validateVersion(errors, stat.recordVersion, PRACTICE_RECORD_VERSIONS.skillStat);
   oneOf(errors, stat.entityType, "entityType", ENTITY_TYPES);
   validEntityKey(errors, stat.entityType, stat.entityKey);
   if (
     typeof stat.profileId === "string"
+    && typeof stat.contextId === "string"
     && typeof stat.entityType === "string"
     && typeof stat.entityKey === "string"
-    && stat.statId !== createSkillStatId(stat.profileId, stat.entityType, stat.entityKey)
-  ) error(errors, "statId", "IDENTITY_MISMATCH", "statId does not match the profile/entity identity");
+    && stat.statId !== createSkillStatId(stat.profileId, stat.contextId, stat.entityType, stat.entityKey)
+  ) error(errors, "statId", "IDENTITY_MISMATCH", "statId does not match the profile/context/entity identity");
   timestamp(errors, stat.createdAt, "createdAt");
   timestamp(errors, stat.updatedAt, "updatedAt");
   for (const key of ["sampleCount", "correctCount", "errorCount", "correctedErrorCount", "uncorrectedErrorCount", "latencyCount", "successfulReviewCount", "failedReviewCount"]) finite(errors, stat[key], key, { min: 0, integer: true });
@@ -251,6 +290,7 @@ export function validateSessionSummary(summary) {
   if (!isPlainObject(summary)) return result([{ path: "sessionSummary", code: "INVALID_TYPE", message: "sessionSummary must be an object" }]);
   validId(errors, summary.sessionId, "sessionId", "session");
   validId(errors, summary.profileId, "profileId", "profile");
+  validId(errors, summary.contextId, "contextId", "context");
   validateVersion(errors, summary.recordVersion, PRACTICE_RECORD_VERSIONS.sessionSummary);
   requiredString(errors, summary.experimentId, "experimentId", 100);
   for (const key of ["experimentVersion", "sessionSchemaVersion", "contentGeneratorVersion"]) finite(errors, summary[key], key, { min: 1, integer: true });
@@ -284,6 +324,7 @@ export function validateReviewItem(item) {
   if (!isPlainObject(item)) return result([{ path: "reviewItem", code: "INVALID_TYPE", message: "reviewItem must be an object" }]);
   validId(errors, item.reviewItemId, "reviewItemId", "review");
   validId(errors, item.profileId, "profileId", "profile");
+  validId(errors, item.contextId, "contextId", "context");
   validateVersion(errors, item.recordVersion, PRACTICE_RECORD_VERSIONS.reviewItem);
   oneOf(errors, item.entityType, "entityType", ENTITY_TYPES);
   validEntityKey(errors, item.entityType, item.entityKey);
@@ -341,6 +382,7 @@ export function validateCheckpoint(record) {
   const errors = [];
   if (!isPlainObject(record)) return result([{ path: "checkpoint", code: "INVALID_TYPE", message: "checkpoint must be an object" }]);
   validId(errors, record.profileId, "profileId", "profile");
+  validId(errors, record.contextId, "contextId", "context");
   validId(errors, record.sessionId, "sessionId", "session");
   validateVersion(errors, record.recordVersion, PRACTICE_RECORD_VERSIONS.checkpoint);
   requiredString(errors, record.experimentId, "experimentId", 100);
@@ -390,6 +432,7 @@ export function normalizePracticeManifest(value) {
   return {
     ...value,
     manifestVersion: Number(value.manifestVersion),
+    databaseVersion: PRACTICE_DATABASE_VERSION,
     settings: normalizePracticeSettings(value.settings),
   };
 }

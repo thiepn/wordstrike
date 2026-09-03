@@ -65,6 +65,7 @@ export function createPracticeSessionEngine({
   repository,
   sessionId = createPracticeSessionId(),
   profileId,
+  contextId,
   clock = () => globalThis.performance?.now?.() ?? Date.now(),
   wallClock = () => new Date(),
   scheduler = defaultScheduler,
@@ -74,6 +75,7 @@ export function createPracticeSessionEngine({
 } = {}) {
   if (!repository || typeof repository.commitCompletedPracticeSession !== "function") throw new TypeError("Practice engine requires a repository");
   if (typeof profileId !== "string") throw new TypeError("Practice engine requires a profileId");
+  if (typeof contextId !== "string") throw new TypeError("Practice engine requires a resolved contextId");
   const segment = createPracticeSegmenter(segmenter);
   const checkpointIntervalMs = checkpointPolicy.minimumIntervalMs ?? PRACTICE_SESSION_LIMITS.checkpointIntervalMs;
   const checkpointCharacterThreshold = checkpointPolicy.characterThreshold ?? PRACTICE_SESSION_LIMITS.checkpointCharacterThreshold;
@@ -146,6 +148,7 @@ export function createPracticeSessionEngine({
       lifecycleState,
       sessionId,
       profileId,
+      contextId,
       experimentId: experiment?.id ?? null,
       experimentVersion: experiment?.version ?? null,
       timing: {
@@ -268,6 +271,7 @@ export function createPracticeSessionEngine({
     const writeVersion = snapshotVersion;
     const checkpoint = buildPracticeCheckpoint({
       profileId,
+      contextId,
       sessionId,
       experiment,
       configuration,
@@ -555,6 +559,7 @@ export function createPracticeSessionEngine({
     preparedFinalResult = buildPracticeSessionResult({
       sessionId,
       profileId,
+      contextId,
       experiment,
       configuration,
       contentPlan,
@@ -723,6 +728,8 @@ export function createPracticeSessionEngine({
     getObservations: () => metrics.observations(),
     getDiagnostics: () => Object.freeze({
       sessionId,
+      profileId,
+      contextId,
       lifecycleState,
       snapshotVersion,
       eventCount: eventBuffer.totalEventCount,
@@ -764,6 +771,7 @@ export async function restorePracticeSessionEngine({
     checkpoint,
     experiment: experimentDescriptor,
     profileId: checkpoint?.profileId,
+    contextId: checkpoint?.contextId,
     wallClock,
     segmenter,
   });
@@ -772,12 +780,23 @@ export async function restorePracticeSessionEngine({
     "Practice checkpoint cannot be restored",
     { operation: "restore", sessionId: checkpoint?.sessionId ?? null, lifecycleState: "created", recoverable: true, details: validation.errors },
   );
+  try {
+    const context = await repository.getPracticeContext(checkpoint.contextId);
+    if (!context || context.profileId !== checkpoint.profileId) throw new Error("checkpoint context is missing or belongs to another profile");
+  } catch (cause) {
+    throw practiceSessionError(
+      PRACTICE_SESSION_ERROR_CODES.RESTORE_FAILED,
+      "Practice checkpoint context cannot be resolved",
+      { operation: "restore", sessionId: checkpoint?.sessionId ?? null, lifecycleState: "created", recoverable: true, cause },
+    );
+  }
   const existing = await repository.getSessionSummary(checkpoint.sessionId);
   if (existing) return Object.freeze({ alreadyCompleted: true, summary: existing, engine: null });
   const engine = createPracticeSessionEngine({
     repository,
     sessionId: checkpoint.sessionId,
     profileId: checkpoint.profileId,
+    contextId: checkpoint.contextId,
     clock,
     wallClock,
     scheduler,

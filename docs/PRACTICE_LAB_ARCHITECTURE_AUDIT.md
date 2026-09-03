@@ -1,5 +1,8 @@
 # Practice Lab Current-System Architecture Audit
 
+> **PL5 current-state notice:** This audit records the pre-PL5 foundation baseline. Any statements below describing IndexedDB structural version 1, profile→entity evidence identity, contextless skill/review/session/checkpoint records, or profile/entity uniqueness are historical and are superseded by **PRACTICE_LAB_CONTEXT_IDENTITY.md** and **PRACTICE_LAB_DATA_ARCHITECTURE.md**. The current canonical boundary is **profile → context → evidence**, with IndexedDB structural version 2.
+
+
 Audit date: 2026-07-05  
 Scope: Practice Lab Prompt 1 of 40  
 Repository: WORDSTRIKE  

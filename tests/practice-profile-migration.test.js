@@ -25,10 +25,11 @@ const original = structuredClone(legacy);
 const migrated = migratePracticeRecord("profile", legacy);
 assert.equal(migrated.ok, true);
 assert.equal(migrated.fromVersion, 1);
-assert.equal(migrated.toVersion, 2);
-assert.deepEqual(migrated.steps, ["profile:1->2"]);
-assert.equal(migrated.value.recordVersion, 2);
+assert.equal(migrated.toVersion, 3);
+assert.deepEqual(migrated.steps, ["profile:1->2", "profile:2->3"]);
+assert.equal(migrated.value.recordVersion, 3);
 assert.equal(migrated.value.lastTrainingDayKey, null);
+assert.equal(migrated.value.activeContextId, current.activeContextId);
 assert.deepEqual(legacy, original);
 assert.deepEqual(migratePracticeRecord("profile", migrated.value).value, migrated.value);
 
@@ -52,20 +53,21 @@ const manifestStore = createPracticeManifestStore({
 const dataStore = createPracticeMemoryStore({ initialData: { profiles: [legacy] } });
 const repository = createPracticeRepository({ dataStore, manifestStore, now });
 const initialized = await repository.initializePracticeStorage();
-assert.equal(initialized.profile.recordVersion, 2);
+assert.equal(initialized.profile.recordVersion, 3);
 assert.equal(initialized.profile.lastTrainingDayKey, null);
 assert.deepEqual(await dataStore.get("profiles", profileId), initialized.profile);
 
-assert.equal(PRACTICE_DATABASE_VERSION, 1);
+assert.equal(PRACTICE_DATABASE_VERSION, 2);
 assert.equal(PRACTICE_MANIFEST_VERSION, 1);
 assert.deepEqual(PRACTICE_RECORD_VERSIONS, {
-  profile: 2,
-  skillStat: 1,
-  sessionSummary: 1,
-  reviewItem: 1,
+  context: 1,
+  profile: 3,
+  skillStat: 2,
+  sessionSummary: 2,
+  reviewItem: 2,
   customText: 1,
   preset: 1,
-  checkpoint: 1,
+  checkpoint: 2,
   quarantine: 1,
 });
 

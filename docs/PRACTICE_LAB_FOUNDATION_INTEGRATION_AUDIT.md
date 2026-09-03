@@ -1,5 +1,8 @@
 # Practice Lab Phase 0 Foundation Integration Audit
 
+> **PL5 current-state notice:** This integration audit predates the context-identity migration. Its Phase-0/Prompt-2 storage and profile/entity identity descriptions are retained as historical audit evidence, not current schema documentation. Current Practice identity is **profile → context → evidence**; see **PRACTICE_LAB_CONTEXT_IDENTITY.md** and **PRACTICE_LAB_DATA_ARCHITECTURE.md**.
+
+
 Audit date: 2026-07-06  
 Scope: Practice Lab Prompt 5 of 40  
 Branch: `feature/practice-lab-foundation`

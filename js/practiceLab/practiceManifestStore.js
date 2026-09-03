@@ -76,7 +76,10 @@ export function createPracticeManifestStore({
       requireStorage();
       const primaryRaw = storage.getItem(PRACTICE_MANIFEST_KEY);
       const primary = parseValid(primaryRaw);
-      if (primary) return { ok: true, manifest: primary, recovery: "none" };
+      if (primary) {
+        if (primaryRaw !== JSON.stringify(primary)) save(primary);
+        return { ok: true, manifest: primary, recovery: "none" };
+      }
       const backupRaw = storage.getItem(PRACTICE_MANIFEST_BACKUP_KEY);
       const backup = parseValid(backupRaw);
       if (backup) {
