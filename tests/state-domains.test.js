@@ -21,21 +21,20 @@ const expectedLegacyKeys = [
   "results", "campaignResult", "menuIndex", "modeSelection", "speedTestConfigId",
   "speedTestResultsIndex", "speedTestResultsReadyAt", "speedTestResult",
   "speedTestRecordFlags", "endlessResult", "endlessResultsIndex",
-  "endlessResultsReadyAt", "endlessStartStage", "dailyDateKey", "dailyDateOverride",
-  "dailyResult", "dailyRecordFlags", "dailyResultsIndex", "dailyResultsReadyAt",
-  "arcadeRushResult", "arcadeRushRecordFlags", "arcadeRushResultsIndex",
-  "arcadeRushResultsReadyAt", "levelSelection", "pauseIndex", "resultsIndex",
-  "resultsReadyAt", "settingsIndex", "statisticsTabIndex", "statisticsRecentFilter",
-  "profileEditing", "profileDraft", "profileNameError", "profileCopyMessage",
+  "endlessResultsReadyAt", "endlessStartStage", "arcadeRushResult",
+  "arcadeRushRecordFlags", "arcadeRushResultsIndex", "arcadeRushResultsReadyAt",
+  "levelSelection", "pauseIndex", "resultsIndex", "resultsReadyAt", "settingsIndex",
+  "statisticsTabIndex", "statisticsRecentFilter", "profileEditing", "profileDraft",
+  "profileNameError", "profileCopyMessage",
 ];
 
-test("legacy appState facade preserves the established surface while domains own every key exactly once", () => {
+test("appState facade preserves the current surface while domains own every key exactly once", () => {
   resetStateDomains();
   assert.deepEqual(Object.keys(appState), expectedLegacyKeys);
   assert.equal(Object.isExtensible(appState), false);
   assert.deepEqual(STATE_DOMAIN_NAMES, [
     "environment", "resources", "navigation", "session", "campaign",
-    "typing", "endless", "daily", "arcadeRush", "profile",
+    "typing", "endless", "arcadeRush", "profile",
   ]);
 
   const owned = new Set();
@@ -58,6 +57,8 @@ test("legacy appState facade preserves the established surface while domains own
   ]) {
     assert.equal(getStateOwner(property), "arcadeRush");
   }
+  assert.equal(getStateDomain("daily"), null);
+  assert.equal(getStateOwner("dailyResult"), null);
 });
 
 test("facade and domain writes stay synchronized without permitting cross-domain patches", () => {
@@ -65,9 +66,9 @@ test("facade and domain writes stay synchronized without permitting cross-domain
   appState.menuIndex = 3;
   assert.equal(stateDomains.navigation.menuIndex, 3);
 
-  const dailyResult = { score: 42 };
-  stateDomains.daily.dailyResult = dailyResult;
-  assert.equal(appState.dailyResult, dailyResult);
+  const endlessResult = { score: 42 };
+  stateDomains.endless.endlessResult = endlessResult;
+  assert.equal(appState.endlessResult, endlessResult);
 
   const rushResult = { score: 99 };
   patchStateDomain("arcadeRush", {
@@ -81,19 +82,21 @@ test("facade and domain writes stay synchronized without permitting cross-domain
   assert.equal(appState.speedTestResultsIndex, 2);
   assert.equal(appState.speedTestResult.wpm, 91);
 
-  assert.throws(() => patchStateDomain("typing", { dailyResult: null }), /Unknown typing state property/);
-  assert.throws(() => patchStateDomain("arcadeRush", { dailyResult: null }), /Unknown arcadeRush state property/);
+  assert.throws(() => patchStateDomain("typing", { endlessResult: null }), /Unknown typing state property/);
+  assert.throws(() => patchStateDomain("arcadeRush", { speedTestResult: null }), /Unknown arcadeRush state property/);
   assert.throws(() => patchStateDomain("missing", {}), /Unknown state domain/);
   assert.throws(() => { appState.accidentalStateKey = true; }, TypeError);
 });
 
-test("screen transitions mutate only navigation state and accept hidden Arcade Rush screens", () => {
+test("screen transitions mutate only navigation state and accept public Arcade Rush screens", () => {
   resetStateDomains();
   const before = snapshotStateDomains();
   changeScreen(Screens.ARCADE_RUSH_READY);
   assert.equal(appState.screen, Screens.ARCADE_RUSH_READY);
   changeScreen(Screens.ARCADE_RUSH_RESULTS);
   assert.equal(appState.screen, Screens.ARCADE_RUSH_RESULTS);
+  assert.equal(Screens.DAILY_READY, undefined);
+  assert.equal(Screens.DAILY_RESULTS, undefined);
   changeScreen(Screens.MODE_SELECT);
   changeScreen(Screens.SETTINGS);
   assert.equal(appState.previousScreen, Screens.MODE_SELECT);
