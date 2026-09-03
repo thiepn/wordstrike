@@ -21,7 +21,6 @@ const MESSAGES: Record<string, string> = Object.freeze({
   WORD_SET_VERSION_MISMATCH: "This Typing Test word-set version is unsupported.",
   METRIC_MISMATCH: "The submitted performance metrics are inconsistent.",
   SCORE_MISMATCH: "The submitted score is inconsistent.",
-  CHALLENGE_MISMATCH: "This Daily Strike challenge is not current.",
   UNSUPPORTED_TEST_DURATION: "This Typing Test duration is not supported.",
   UNSUPPORTED_WORD_SET: "This Typing Test word set is not supported.",
   RATE_LIMITED: "Too many scores were submitted recently.",
