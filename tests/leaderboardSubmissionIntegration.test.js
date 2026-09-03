@@ -20,11 +20,20 @@ assert.equal(rush.modeId, MODE_IDS.ARCADE_RUSH);
 assert.notEqual(rush.id, second.id);
 clearSession();
 
-const endlessMode = await readFile(new URL("../js/endlessMode.js", import.meta.url), "utf8");
-const main = await readFile(new URL("../js/main.js", import.meta.url), "utf8");
+const [endlessMode, main, appController, rushCoordinator] = await Promise.all([
+  readFile(new URL("../js/endlessMode.js", import.meta.url), "utf8"),
+  readFile(new URL("../js/main.js", import.meta.url), "utf8"),
+  readFile(new URL("../js/arcadeRushAppController.js", import.meta.url), "utf8"),
+  readFile(new URL("../js/arcadeRushShadowCoordinator.js", import.meta.url), "utf8"),
+]);
 assert.ok(endlessMode.indexOf("recordCompletedSession(result)") < endlessMode.indexOf("callbacks.onComplete?.(game, result)"));
 assert.match(main, /function finishEndless[\s\S]*prepareAutomaticResultSubmission\("endless", result/);
-assert.match(main, /function finishArcadeRush[\s\S]*recordCompletedSession\(result\)[\s\S]*prepareAutomaticResultSubmission\("arcade-rush", result/);
+assert.match(main, /function finishArcadeRush[\s\S]*prepareAutomaticResultSubmission\("arcade-rush", result/);
+assert.match(appController, /onComplete\(snapshot, result\)[\s\S]*shadowCoordinator\.onTerminal\(result\)[\s\S]*callbacks\.onComplete/);
+assert.match(appController, /onFailure\(snapshot, result\)[\s\S]*shadowCoordinator\.onTerminal\(result\)[\s\S]*callbacks\.onFailure/);
+assert.match(rushCoordinator, /getArcadeRushRecordFlags[\s\S]*recordArcadeRushRunStarted[\s\S]*recordCompletedSession/);
+assert.match(rushCoordinator, /function onStarted[\s\S]*recordArcadeRushRunStarted/);
+assert.match(rushCoordinator, /function onTerminal[\s\S]*getArcadeRushRecordFlags[\s\S]*recordCompletedSession\(result\)/);
 assert.doesNotMatch(main, /function finishDaily|prepareAutomaticResultSubmission\("daily"/);
 
-console.log("Endless and Arcade Rush session identities remain isolated, locally persisted before submission, and separate runs receive separate IDs.");
+console.log("Endless and Arcade Rush sessions remain isolated; Rush persistence occurs before app completion through the app-boundary coordinator, with no Daily submission path.");
