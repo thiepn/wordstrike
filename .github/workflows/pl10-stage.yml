@@ -1,4 +1,4 @@
-name: PL10 Stage
+name: PL10 Finalize
 
 on:
   push:
@@ -6,37 +6,32 @@ on:
       - codex/pl10-context-typability-normalization
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
-  stage:
+  finalize:
     runs-on: ubuntu-latest
     steps:
       - name: Check out branch
         uses: actions/checkout@v4
         with:
           ref: codex/pl10-context-typability-normalization
+          fetch-depth: 0
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Check PL10 source syntax
+      - name: Check PL10 staging syntax
         run: |
-          node --check js/practiceLab/practiceKeyboardGeometry.js
-          node --check js/practiceLab/practiceReferenceFrequency.js
-          node --check js/practiceLab/practiceTextDifficultyFeatures.js
-          node --check js/practiceLab/practiceTypabilityModel.js
-          node --check js/practiceLab/practiceContextFeatures.js
-          node --check js/practiceLab/practiceContextNormalizer.js
-          node --check js/practiceLab/practiceNormalizationValidation.js
-          node --check scripts/lib/practiceTypabilityBuildCore.mjs
-          node --check scripts/buildPracticeTypability.mjs
           node --check scripts/applyPl10Integration.mjs
           node --check scripts/applyPl10LegacyTestUpdates.mjs
-      - name: Apply PL10 integration
+          node --check scripts/applyPl10Docs.mjs
+          node --check scripts/buildPracticeTypability.mjs
+      - name: Apply PL10 integration and documentation
         run: |
           node scripts/applyPl10Integration.mjs
           node scripts/applyPl10LegacyTestUpdates.mjs
+          node scripts/applyPl10Docs.mjs
       - name: Build and validate PL10 artifacts
         run: |
           node scripts/buildPracticeTypability.mjs
@@ -45,6 +40,7 @@ jobs:
           node --check js/practiceLab/practiceNormalizationAnalysis.js
           node --check js/practiceLab/practiceFoundationAnalysis.js
           node --check js/practiceLab/practiceSessionEngine.js
+          node --check js/practiceLab/practiceValidation.js
       - name: Focused PL10 tests
         run: |
           node tests/practice-normalization-keyboard.test.js
@@ -56,5 +52,17 @@ jobs:
           node tests/practice-normalization-session-integration.test.js
           node tests/practice-normalization-import-side-effects.test.js
           node tests/practice-normalization-privacy-performance.test.js
-      - name: Existing suite compatibility
+      - name: Full WordStrike suite
         run: npm test
+      - name: Source hygiene
+        run: |
+          git diff --check
+          test "$(grep -RIl --exclude='PRACTICE_LAB_CONTEXT_TYPABILITY_MODEL.md' 'typabilityAdjustedWpm\|Recovery Debt\|Clean WPM' js/practiceLab 2>/dev/null | wc -l)" -eq 0
+      - name: Commit PL10 implementation
+        run: |
+          rm -f scripts/applyPl10Integration.mjs scripts/applyPl10LegacyTestUpdates.mjs scripts/applyPl10Docs.mjs .github/workflows/pl10-stage.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "feat(practice): implement PL10 context typability normalization"
+          git push origin HEAD:codex/pl10-context-typability-normalization
