@@ -1,0 +1,82 @@
+{
+  "indexSchemaVersion": 1,
+  "indexGeneratorVersion": 1,
+  "corpusId": "practice-en-v1",
+  "corpusVersion": 1,
+  "corpusChecksum": "sha256-28beccf65eed71519da306c129da5040a20f364aed320dc21eea2d16c2a1c404",
+  "language": "en",
+  "partition": "diagnostic",
+  "indexType": "targets",
+  "shardPolicyVersion": 1,
+  "shardCount": 16,
+  "shardId": 11,
+  "entries": [
+    {
+      "entityType": "bigram",
+      "entityKey": "ap",
+      "corpusOccurrenceCount": 8,
+      "contentCoverageCount": 2,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 2,
+      "wordKeys": [
+        "map",
+        "tap"
+      ],
+      "contents": [
+        {
+          "contentId": "practice-en-ws-foundation-probe-001",
+          "familyId": "ws-en-foundation-probeset-001",
+          "count": 4,
+          "positions": [
+            1,
+            5,
+            9,
+            13
+          ]
+        },
+        {
+          "contentId": "practice-en-ws-foundation-probe-002",
+          "familyId": "ws-en-foundation-probeset-001",
+          "count": 4,
+          "positions": [
+            1,
+            5,
+            9,
+            13
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "key",
+      "entityKey": "t",
+      "corpusOccurrenceCount": 4,
+      "contentCoverageCount": 2,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 1,
+      "wordKeys": [
+        "tap"
+      ],
+      "contents": [
+        {
+          "contentId": "practice-en-ws-foundation-probe-001",
+          "familyId": "ws-en-foundation-probeset-001",
+          "count": 2,
+          "positions": [
+            0,
+            8
+          ]
+        },
+        {
+          "contentId": "practice-en-ws-foundation-probe-002",
+          "familyId": "ws-en-foundation-probeset-001",
+          "count": 2,
+          "positions": [
+            4,
+            12
+          ]
+        }
+      ]
+    }
+  ]
+}

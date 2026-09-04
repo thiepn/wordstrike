@@ -1,0 +1,1534 @@
+{
+  "indexManifestVersion": 1,
+  "indexSchemaVersion": 1,
+  "indexGeneratorVersion": 1,
+  "corpusId": "practice-en-v1",
+  "corpusVersion": 1,
+  "corpusChecksum": "sha256-28beccf65eed71519da306c129da5040a20f364aed320dc21eea2d16c2a1c404",
+  "language": "en",
+  "segmentationVersion": 1,
+  "tokenizationVersion": 1,
+  "shardPolicyVersion": 1,
+  "shardCount": 16,
+  "generatedPartitions": {
+    "training": {
+      "reverseTargetSelection": true,
+      "contentCount": 2,
+      "annotationShards": [
+        1,
+        8
+      ],
+      "targetShards": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15
+      ],
+      "wordShards": [
+        0,
+        2,
+        3,
+        4,
+        6,
+        7,
+        9,
+        10,
+        12,
+        13
+      ]
+    },
+    "transfer": {
+      "reverseTargetSelection": false,
+      "contentCount": 1,
+      "annotationShards": [
+        11
+      ],
+      "targetShards": [],
+      "wordShards": []
+    },
+    "benchmark": {
+      "reverseTargetSelection": false,
+      "contentCount": 1,
+      "annotationShards": [
+        2
+      ],
+      "targetShards": [],
+      "wordShards": []
+    },
+    "diagnostic": {
+      "reverseTargetSelection": true,
+      "contentCount": 2,
+      "annotationShards": [
+        7,
+        10
+      ],
+      "targetShards": [
+        0,
+        1,
+        2,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        11,
+        12,
+        14
+      ],
+      "wordShards": [
+        0,
+        15
+      ]
+    },
+    "research-holdout": {
+      "reverseTargetSelection": false,
+      "contentCount": 1,
+      "annotationShards": [
+        13
+      ],
+      "targetShards": [],
+      "wordShards": []
+    }
+  },
+  "counts": {
+    "training": {
+      "contentItems": 2,
+      "families": 1,
+      "graphemes": 145,
+      "wordOccurrences": 22,
+      "uniqueLexicalWords": 21,
+      "uniqueKeys": 27,
+      "uniqueBigrams": 102,
+      "uniqueTrigrams": 134,
+      "reverse": {
+        "targetCount": 284,
+        "rawTargetCount": 263,
+        "wordTargetCount": 21,
+        "targetsWithAtLeastThreeWords": 19,
+        "targetsWithAtLeastThreeFamilies": 0,
+        "largestTargetContentCandidateSet": 2,
+        "largestWordContentCandidateSet": 1
+      },
+      "invalidTargetKeyCount": 0,
+      "invalidWordKeyCount": 0
+    },
+    "transfer": {
+      "contentItems": 1,
+      "families": 1,
+      "graphemes": 80,
+      "wordOccurrences": 13,
+      "uniqueLexicalWords": 11,
+      "uniqueKeys": 23,
+      "uniqueBigrams": 59,
+      "uniqueTrigrams": 70,
+      "reverse": null,
+      "invalidTargetKeyCount": 0,
+      "invalidWordKeyCount": 0
+    },
+    "benchmark": {
+      "contentItems": 1,
+      "families": 1,
+      "graphemes": 77,
+      "wordOccurrences": 13,
+      "uniqueLexicalWords": 13,
+      "uniqueKeys": 20,
+      "uniqueBigrams": 58,
+      "uniqueTrigrams": 71,
+      "reverse": null,
+      "invalidTargetKeyCount": 0,
+      "invalidWordKeyCount": 0
+    },
+    "diagnostic": {
+      "contentItems": 2,
+      "families": 1,
+      "graphemes": 30,
+      "wordOccurrences": 8,
+      "uniqueLexicalWords": 2,
+      "uniqueKeys": 5,
+      "uniqueBigrams": 6,
+      "uniqueTrigrams": 7,
+      "reverse": {
+        "targetCount": 20,
+        "rawTargetCount": 18,
+        "wordTargetCount": 2,
+        "targetsWithAtLeastThreeWords": 0,
+        "targetsWithAtLeastThreeFamilies": 0,
+        "largestTargetContentCandidateSet": 2,
+        "largestWordContentCandidateSet": 2
+      },
+      "invalidTargetKeyCount": 0,
+      "invalidWordKeyCount": 0
+    },
+    "research-holdout": {
+      "contentItems": 1,
+      "families": 1,
+      "graphemes": 77,
+      "wordOccurrences": 14,
+      "uniqueLexicalWords": 13,
+      "uniqueKeys": 22,
+      "uniqueBigrams": 59,
+      "uniqueTrigrams": 69,
+      "reverse": null,
+      "invalidTargetKeyCount": 0,
+      "invalidWordKeyCount": 0
+    }
+  },
+  "coverageWarnings": [
+    {
+      "partition": "diagnostic",
+      "entityType": "bigram",
+      "entityKey": " m",
+      "corpusOccurrenceCount": 3,
+      "contentCoverageCount": 2,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 0
+    },
+    {
+      "partition": "diagnostic",
+      "entityType": "bigram",
+      "entityKey": " t",
+      "corpusOccurrenceCount": 3,
+      "contentCoverageCount": 2,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 0
+    },
+    {
+      "partition": "diagnostic",
+      "entityType": "bigram",
+      "entityKey": "ap",
+      "corpusOccurrenceCount": 8,
+      "contentCoverageCount": 2,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 2
+    },
+    {
+      "partition": "diagnostic",
+      "entityType": "bigram",
+      "entityKey": "ma",
+      "corpusOccurrenceCount": 4,
+      "contentCoverageCount": 2,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 1
+    },
+    {
+      "partition": "diagnostic",
+      "entityType": "bigram",
+      "entityKey": "p ",
+      "corpusOccurrenceCount": 6,
+      "contentCoverageCount": 2,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 0
+    },
+    {
+      "partition": "diagnostic",
+      "entityType": "bigram",
+      "entityKey": "ta",
+      "corpusOccurrenceCount": 4,
+      "contentCoverageCount": 2,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 1
+    },
+    {
+      "partition": "diagnostic",
+      "entityType": "key",
+      "entityKey": "a",
+      "corpusOccurrenceCount": 8,
+      "contentCoverageCount": 2,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 2
+    },
+    {
+      "partition": "diagnostic",
+      "entityType": "key",
+      "entityKey": "m",
+      "corpusOccurrenceCount": 4,
+      "contentCoverageCount": 2,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 1
+    },
+    {
+      "partition": "diagnostic",
+      "entityType": "key",
+      "entityKey": "p",
+      "corpusOccurrenceCount": 8,
+      "contentCoverageCount": 2,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 2
+    },
+    {
+      "partition": "diagnostic",
+      "entityType": "key",
+      "entityKey": "t",
+      "corpusOccurrenceCount": 4,
+      "contentCoverageCount": 2,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 1
+    },
+    {
+      "partition": "diagnostic",
+      "entityType": "trigram",
+      "entityKey": " ma",
+      "corpusOccurrenceCount": 3,
+      "contentCoverageCount": 2,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 0
+    },
+    {
+      "partition": "diagnostic",
+      "entityType": "trigram",
+      "entityKey": " ta",
+      "corpusOccurrenceCount": 3,
+      "contentCoverageCount": 2,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 0
+    },
+    {
+      "partition": "diagnostic",
+      "entityType": "trigram",
+      "entityKey": "ap ",
+      "corpusOccurrenceCount": 6,
+      "contentCoverageCount": 2,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 0
+    },
+    {
+      "partition": "diagnostic",
+      "entityType": "trigram",
+      "entityKey": "map",
+      "corpusOccurrenceCount": 4,
+      "contentCoverageCount": 2,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 1
+    },
+    {
+      "partition": "diagnostic",
+      "entityType": "trigram",
+      "entityKey": "p m",
+      "corpusOccurrenceCount": 3,
+      "contentCoverageCount": 2,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 0
+    },
+    {
+      "partition": "diagnostic",
+      "entityType": "trigram",
+      "entityKey": "p t",
+      "corpusOccurrenceCount": 3,
+      "contentCoverageCount": 2,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 0
+    },
+    {
+      "partition": "diagnostic",
+      "entityType": "trigram",
+      "entityKey": "tap",
+      "corpusOccurrenceCount": 4,
+      "contentCoverageCount": 2,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 1
+    },
+    {
+      "partition": "training",
+      "entityType": "bigram",
+      "entityKey": " a",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 0
+    },
+    {
+      "partition": "training",
+      "entityType": "bigram",
+      "entityKey": " b",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 0
+    },
+    {
+      "partition": "training",
+      "entityType": "bigram",
+      "entityKey": " c",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 0
+    },
+    {
+      "partition": "training",
+      "entityType": "bigram",
+      "entityKey": " e",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 0
+    },
+    {
+      "partition": "training",
+      "entityType": "bigram",
+      "entityKey": " h",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 0
+    },
+    {
+      "partition": "training",
+      "entityType": "bigram",
+      "entityKey": " i",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 0
+    },
+    {
+      "partition": "training",
+      "entityType": "bigram",
+      "entityKey": " m",
+      "corpusOccurrenceCount": 2,
+      "contentCoverageCount": 2,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 0
+    },
+    {
+      "partition": "training",
+      "entityType": "bigram",
+      "entityKey": " p",
+      "corpusOccurrenceCount": 2,
+      "contentCoverageCount": 2,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 0
+    },
+    {
+      "partition": "training",
+      "entityType": "bigram",
+      "entityKey": " r",
+      "corpusOccurrenceCount": 3,
+      "contentCoverageCount": 2,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 0
+    },
+    {
+      "partition": "training",
+      "entityType": "bigram",
+      "entityKey": " s",
+      "corpusOccurrenceCount": 3,
+      "contentCoverageCount": 2,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 0
+    },
+    {
+      "partition": "training",
+      "entityType": "bigram",
+      "entityKey": " t",
+      "corpusOccurrenceCount": 3,
+      "contentCoverageCount": 2,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 0
+    },
+    {
+      "partition": "training",
+      "entityType": "bigram",
+      "entityKey": " w",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 0
+    },
+    {
+      "partition": "training",
+      "entityType": "bigram",
+      "entityKey": ", ",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 0
+    },
+    {
+      "partition": "training",
+      "entityType": "bigram",
+      "entityKey": "A ",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 0
+    },
+    {
+      "partition": "training",
+      "entityType": "bigram",
+      "entityKey": "ab",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 1
+    },
+    {
+      "partition": "training",
+      "entityType": "bigram",
+      "entityKey": "ad",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 1
+    },
+    {
+      "partition": "training",
+      "entityType": "bigram",
+      "entityKey": "ak",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 1
+    },
+    {
+      "partition": "training",
+      "entityType": "bigram",
+      "entityKey": "al",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 1
+    },
+    {
+      "partition": "training",
+      "entityType": "bigram",
+      "entityKey": "an",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 1
+    },
+    {
+      "partition": "training",
+      "entityType": "bigram",
+      "entityKey": "ar",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 1
+    },
+    {
+      "partition": "training",
+      "entityType": "bigram",
+      "entityKey": "as",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 1
+    },
+    {
+      "partition": "training",
+      "entityType": "bigram",
+      "entityKey": "at",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 1
+    },
+    {
+      "partition": "training",
+      "entityType": "bigram",
+      "entityKey": "be",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 1
+    },
+    {
+      "partition": "training",
+      "entityType": "bigram",
+      "entityKey": "bl",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 1
+    },
+    {
+      "partition": "training",
+      "entityType": "bigram",
+      "entityKey": "ca",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 1
+    },
+    {
+      "partition": "training",
+      "entityType": "bigram",
+      "entityKey": "Ca",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 1
+    },
+    {
+      "partition": "training",
+      "entityType": "bigram",
+      "entityKey": "cc",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 1
+    },
+    {
+      "partition": "training",
+      "entityType": "bigram",
+      "entityKey": "ce",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 1
+    },
+    {
+      "partition": "training",
+      "entityType": "bigram",
+      "entityKey": "ct",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 1
+    },
+    {
+      "partition": "training",
+      "entityType": "bigram",
+      "entityKey": "d ",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 0
+    },
+    {
+      "partition": "training",
+      "entityType": "bigram",
+      "entityKey": "e ",
+      "corpusOccurrenceCount": 3,
+      "contentCoverageCount": 2,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 0
+    },
+    {
+      "partition": "training",
+      "entityType": "bigram",
+      "entityKey": "e.",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 0
+    },
+    {
+      "partition": "training",
+      "entityType": "bigram",
+      "entityKey": "l ",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 0
+    },
+    {
+      "partition": "training",
+      "entityType": "bigram",
+      "entityKey": "l.",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 0
+    },
+    {
+      "partition": "training",
+      "entityType": "bigram",
+      "entityKey": "m ",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 0
+    },
+    {
+      "partition": "training",
+      "entityType": "bigram",
+      "entityKey": "m,",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 0
+    },
+    {
+      "partition": "training",
+      "entityType": "bigram",
+      "entityKey": "n ",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 0
+    },
+    {
+      "partition": "training",
+      "entityType": "bigram",
+      "entityKey": "o ",
+      "corpusOccurrenceCount": 3,
+      "contentCoverageCount": 2,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 0
+    },
+    {
+      "partition": "training",
+      "entityType": "bigram",
+      "entityKey": "r ",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 0
+    },
+    {
+      "partition": "training",
+      "entityType": "bigram",
+      "entityKey": "s ",
+      "corpusOccurrenceCount": 3,
+      "contentCoverageCount": 2,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 0
+    },
+    {
+      "partition": "training",
+      "entityType": "bigram",
+      "entityKey": "t ",
+      "corpusOccurrenceCount": 2,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 0
+    },
+    {
+      "partition": "training",
+      "entityType": "bigram",
+      "entityKey": "y ",
+      "corpusOccurrenceCount": 2,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 0
+    },
+    {
+      "partition": "training",
+      "entityType": "key",
+      "entityKey": ",",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 0
+    },
+    {
+      "partition": "training",
+      "entityType": "key",
+      "entityKey": ".",
+      "corpusOccurrenceCount": 2,
+      "contentCoverageCount": 2,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 0
+    },
+    {
+      "partition": "training",
+      "entityType": "trigram",
+      "entityKey": " ac",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 0
+    },
+    {
+      "partition": "training",
+      "entityType": "trigram",
+      "entityKey": " be",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 0
+    },
+    {
+      "partition": "training",
+      "entityType": "trigram",
+      "entityKey": " ca",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 0
+    },
+    {
+      "partition": "training",
+      "entityType": "trigram",
+      "entityKey": " ea",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 0
+    },
+    {
+      "partition": "training",
+      "entityType": "trigram",
+      "entityKey": " he",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 0
+    },
+    {
+      "partition": "training",
+      "entityType": "trigram",
+      "entityKey": " in",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 0
+    },
+    {
+      "partition": "training",
+      "entityType": "trigram",
+      "entityKey": " ma",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 0
+    },
+    {
+      "partition": "training",
+      "entityType": "trigram",
+      "entityKey": " mo",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 0
+    },
+    {
+      "partition": "training",
+      "entityType": "trigram",
+      "entityKey": " pr",
+      "corpusOccurrenceCount": 2,
+      "contentCoverageCount": 2,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 0
+    },
+    {
+      "partition": "training",
+      "entityType": "trigram",
+      "entityKey": " re",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 0
+    },
+    {
+      "partition": "training",
+      "entityType": "trigram",
+      "entityKey": " rh",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 0
+    },
+    {
+      "partition": "training",
+      "entityType": "trigram",
+      "entityKey": " ri",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 0
+    },
+    {
+      "partition": "training",
+      "entityType": "trigram",
+      "entityKey": " sk",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 0
+    },
+    {
+      "partition": "training",
+      "entityType": "trigram",
+      "entityKey": " sp",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 0
+    },
+    {
+      "partition": "training",
+      "entityType": "trigram",
+      "entityKey": " st",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 0
+    },
+    {
+      "partition": "training",
+      "entityType": "trigram",
+      "entityKey": " to",
+      "corpusOccurrenceCount": 2,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 0
+    },
+    {
+      "partition": "training",
+      "entityType": "trigram",
+      "entityKey": " tu",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 0
+    },
+    {
+      "partition": "training",
+      "entityType": "trigram",
+      "entityKey": " wh",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 0
+    },
+    {
+      "partition": "training",
+      "entityType": "trigram",
+      "entityKey": ", r",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 0
+    },
+    {
+      "partition": "training",
+      "entityType": "trigram",
+      "entityKey": "A s",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 0
+    },
+    {
+      "partition": "training",
+      "entityType": "trigram",
+      "entityKey": "ce ",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 0
+    },
+    {
+      "partition": "training",
+      "entityType": "trigram",
+      "entityKey": "cy ",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 0
+    },
+    {
+      "partition": "training",
+      "entityType": "trigram",
+      "entityKey": "d b",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 0
+    },
+    {
+      "partition": "training",
+      "entityType": "trigram",
+      "entityKey": "dy ",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 0
+    },
+    {
+      "partition": "training",
+      "entityType": "trigram",
+      "entityKey": "e s",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 0
+    },
+    {
+      "partition": "training",
+      "entityType": "trigram",
+      "entityKey": "e t",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 0
+    },
+    {
+      "partition": "training",
+      "entityType": "trigram",
+      "entityKey": "e w",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 0
+    },
+    {
+      "partition": "training",
+      "entityType": "trigram",
+      "entityKey": "ed ",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 0
+    },
+    {
+      "partition": "training",
+      "entityType": "trigram",
+      "entityKey": "en ",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 0
+    },
+    {
+      "partition": "training",
+      "entityType": "trigram",
+      "entityKey": "er ",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 0
+    },
+    {
+      "partition": "training",
+      "entityType": "trigram",
+      "entityKey": "es ",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 0
+    },
+    {
+      "partition": "training",
+      "entityType": "trigram",
+      "entityKey": "hm ",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 0
+    },
+    {
+      "partition": "training",
+      "entityType": "trigram",
+      "entityKey": "l p",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 0
+    },
+    {
+      "partition": "training",
+      "entityType": "trigram",
+      "entityKey": "le ",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 0
+    },
+    {
+      "partition": "training",
+      "entityType": "trigram",
+      "entityKey": "ll.",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 0
+    },
+    {
+      "partition": "training",
+      "entityType": "trigram",
+      "entityKey": "lm,",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 0
+    },
+    {
+      "partition": "training",
+      "entityType": "trigram",
+      "entityKey": "m m",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 0
+    },
+    {
+      "partition": "training",
+      "entityType": "trigram",
+      "entityKey": "m, ",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 0
+    },
+    {
+      "partition": "training",
+      "entityType": "trigram",
+      "entityKey": "n s",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 0
+    }
+  ],
+  "diagnostics": {
+    "contentAnalyzed": 7,
+    "wordsExtracted": 70,
+    "invalidTargetKeyCount": 0,
+    "invalidWordKeyCount": 0
+  },
+  "artifactChecksums": [
+    {
+      "path": "benchmark/annotations/annotation-02.json",
+      "sha256": "sha256-fdfd3d2cc45042cf18900272b6807485b1b99f7c315c74cdb0e90429795a9748",
+      "bytes": 42781,
+      "partition": "benchmark",
+      "indexType": "annotations",
+      "shardId": 2
+    },
+    {
+      "path": "benchmark/content.json",
+      "sha256": "sha256-d4ed8456e412e76ddab9456feadcf5f28f60bcfc0d07fb2febaa198d431fd49d",
+      "bytes": 811,
+      "partition": "benchmark",
+      "indexType": "content",
+      "shardId": null
+    },
+    {
+      "path": "diagnostic/annotations/annotation-07.json",
+      "sha256": "sha256-f41cb4789d31dbcfd6cb462495513198eb6fb537b3da72209ad4f70adb95d320",
+      "bytes": 9126,
+      "partition": "diagnostic",
+      "indexType": "annotations",
+      "shardId": 7
+    },
+    {
+      "path": "diagnostic/annotations/annotation-10.json",
+      "sha256": "sha256-8cf5c88c6d84341354cd51eeabf09993d11b903e8ed8935f476a1326ca39d01a",
+      "bytes": 9127,
+      "partition": "diagnostic",
+      "indexType": "annotations",
+      "shardId": 10
+    },
+    {
+      "path": "diagnostic/content.json",
+      "sha256": "sha256-2950634fb22b2ef9994efe54a9ea721a82d02bb9f22e51e365f5f910b5bf29e9",
+      "bytes": 1321,
+      "partition": "diagnostic",
+      "indexType": "content",
+      "shardId": null
+    },
+    {
+      "path": "diagnostic/targets/target-00.json",
+      "sha256": "sha256-68701859c1ff370813959359f13521690114152f6a6139aac9a9725461286a0f",
+      "bytes": 1082,
+      "partition": "diagnostic",
+      "indexType": "targets",
+      "shardId": 0
+    },
+    {
+      "path": "diagnostic/targets/target-01.json",
+      "sha256": "sha256-c2504f4a1b9346c8798676cb32b31a4e68a04474553fc172800c96d63bb6c510",
+      "bytes": 1736,
+      "partition": "diagnostic",
+      "indexType": "targets",
+      "shardId": 1
+    },
+    {
+      "path": "diagnostic/targets/target-02.json",
+      "sha256": "sha256-acfaccfab9f64e73bda807effea15dc956eb6474bcc578467cd9f4ed2f4baabd",
+      "bytes": 1096,
+      "partition": "diagnostic",
+      "indexType": "targets",
+      "shardId": 2
+    },
+    {
+      "path": "diagnostic/targets/target-04.json",
+      "sha256": "sha256-8a400ab6f16b7074a16d9c6cd892bd8c65a3fa58e8d15dd0f52e867b4bdb60b3",
+      "bytes": 1878,
+      "partition": "diagnostic",
+      "indexType": "targets",
+      "shardId": 4
+    },
+    {
+      "path": "diagnostic/targets/target-05.json",
+      "sha256": "sha256-0001da8cb666fe95711c4e60000d1f664f15346d669ee0e8e1cf26940b665c6d",
+      "bytes": 1096,
+      "partition": "diagnostic",
+      "indexType": "targets",
+      "shardId": 5
+    },
+    {
+      "path": "diagnostic/targets/target-06.json",
+      "sha256": "sha256-4b318cdd783bae5a2213c780b31f44b92246f0e084353bdeb893672596c0f924",
+      "bytes": 1050,
+      "partition": "diagnostic",
+      "indexType": "targets",
+      "shardId": 6
+    },
+    {
+      "path": "diagnostic/targets/target-07.json",
+      "sha256": "sha256-5164dbf14e71f9c40123c86da20e496bbf6e48239484fef836083f8378185f45",
+      "bytes": 2608,
+      "partition": "diagnostic",
+      "indexType": "targets",
+      "shardId": 7
+    },
+    {
+      "path": "diagnostic/targets/target-08.json",
+      "sha256": "sha256-d923262b47f9f1432af1670dba1c6f65c489785b1e2d8f3db0464a95d1cc71f4",
+      "bytes": 1088,
+      "partition": "diagnostic",
+      "indexType": "targets",
+      "shardId": 8
+    },
+    {
+      "path": "diagnostic/targets/target-09.json",
+      "sha256": "sha256-2156f8ced14acfb691f5abb88141d070e7f94c07ae631b870650a6a8fd62ae9c",
+      "bytes": 1772,
+      "partition": "diagnostic",
+      "indexType": "targets",
+      "shardId": 9
+    },
+    {
+      "path": "diagnostic/targets/target-11.json",
+      "sha256": "sha256-9baa255f2fdb3bde097a34ae265f7cdc85a8f4550a0c3770adf7b403ce77d875",
+      "bytes": 1879,
+      "partition": "diagnostic",
+      "indexType": "targets",
+      "shardId": 11
+    },
+    {
+      "path": "diagnostic/targets/target-12.json",
+      "sha256": "sha256-cde747a7a25b5c6132a238ccb27b9954549b7a95adc43facd3c674202e86f52d",
+      "bytes": 1053,
+      "partition": "diagnostic",
+      "indexType": "targets",
+      "shardId": 12
+    },
+    {
+      "path": "diagnostic/targets/target-14.json",
+      "sha256": "sha256-c4694922194052c0cd41433a047515496f5c3c64f8ac31ce9f30aca24730936b",
+      "bytes": 1053,
+      "partition": "diagnostic",
+      "indexType": "targets",
+      "shardId": 14
+    },
+    {
+      "path": "diagnostic/words/word-00.json",
+      "sha256": "sha256-c606a409ef09f63cd603d78899434c8732c93ba01e04e672e97a9edc7aad4478",
+      "bytes": 1159,
+      "partition": "diagnostic",
+      "indexType": "words",
+      "shardId": 0
+    },
+    {
+      "path": "diagnostic/words/word-15.json",
+      "sha256": "sha256-c61ff1536fc7c8b9a5a2929f56d2fcc4cd41538e4faafdca9723b91e0b0de472",
+      "bytes": 1160,
+      "partition": "diagnostic",
+      "indexType": "words",
+      "shardId": 15
+    },
+    {
+      "path": "research-holdout/annotations/annotation-13.json",
+      "sha256": "sha256-3e0825b017f4e676faa36902905e71b4ae1ade128ba1ba6e8cb17bf44bad93fc",
+      "bytes": 42981,
+      "partition": "research-holdout",
+      "indexType": "annotations",
+      "shardId": 13
+    },
+    {
+      "path": "research-holdout/content.json",
+      "sha256": "sha256-4a5dfab862bccbedd3de18540fa5b472fc287331a1f737d763680469e045b9e2",
+      "bytes": 825,
+      "partition": "research-holdout",
+      "indexType": "content",
+      "shardId": null
+    },
+    {
+      "path": "training/annotations/annotation-01.json",
+      "sha256": "sha256-bc58cd863b0953ebb683798ba6b2a4626541fc9ccd8230ec803b6b73072cea71",
+      "bytes": 42236,
+      "partition": "training",
+      "indexType": "annotations",
+      "shardId": 1
+    },
+    {
+      "path": "training/annotations/annotation-08.json",
+      "sha256": "sha256-ec0213aebb19f1c39e19ba7702fb0e85a44cfbe81ae8f483243694023c0e3622",
+      "bytes": 37752,
+      "partition": "training",
+      "indexType": "annotations",
+      "shardId": 8
+    },
+    {
+      "path": "training/content.json",
+      "sha256": "sha256-ab2c89c420708ed5604b979a8d4d645da2fdf13733290bc389d1868d0a0aae85",
+      "bytes": 1319,
+      "partition": "training",
+      "indexType": "content",
+      "shardId": null
+    },
+    {
+      "path": "training/targets/target-00.json",
+      "sha256": "sha256-9554e27758a50386e4861fba8371a1172212168bbbed23da90af968a3fec50f9",
+      "bytes": 8301,
+      "partition": "training",
+      "indexType": "targets",
+      "shardId": 0
+    },
+    {
+      "path": "training/targets/target-01.json",
+      "sha256": "sha256-5175cfa6dd3637ebefe3d323edde662db562eb503f89d7e2c35fd60321aef4d3",
+      "bytes": 8853,
+      "partition": "training",
+      "indexType": "targets",
+      "shardId": 1
+    },
+    {
+      "path": "training/targets/target-02.json",
+      "sha256": "sha256-4e4390f3375b9c4452859ada607ddcb4fdae49e63413414606da01315ccb7f8f",
+      "bytes": 8223,
+      "partition": "training",
+      "indexType": "targets",
+      "shardId": 2
+    },
+    {
+      "path": "training/targets/target-03.json",
+      "sha256": "sha256-161e75c059c60a7d01bb9d4c065d86256c532d3b3e4630af825085f0b0f9c0b9",
+      "bytes": 6352,
+      "partition": "training",
+      "indexType": "targets",
+      "shardId": 3
+    },
+    {
+      "path": "training/targets/target-04.json",
+      "sha256": "sha256-bc503c75eba6ac0e3f8119fb3763e842f6d1df39b65e10861936d407229146c5",
+      "bytes": 6537,
+      "partition": "training",
+      "indexType": "targets",
+      "shardId": 4
+    },
+    {
+      "path": "training/targets/target-05.json",
+      "sha256": "sha256-7a4c6d6a2ae02fb02cc72367ee22d240e2154dc532cd58c165210435c47587ae",
+      "bytes": 11967,
+      "partition": "training",
+      "indexType": "targets",
+      "shardId": 5
+    },
+    {
+      "path": "training/targets/target-06.json",
+      "sha256": "sha256-3a522f6363c6c51779cb1b02c271c67fe52fa6859c205757a70f7efc0adea178",
+      "bytes": 9406,
+      "partition": "training",
+      "indexType": "targets",
+      "shardId": 6
+    },
+    {
+      "path": "training/targets/target-07.json",
+      "sha256": "sha256-437a215cd43ff35d0830139e9b2dcd4ab21462cc0df967aa3fc5c82d7c497515",
+      "bytes": 11290,
+      "partition": "training",
+      "indexType": "targets",
+      "shardId": 7
+    },
+    {
+      "path": "training/targets/target-08.json",
+      "sha256": "sha256-b6b4a541ac911b4a62d67900bcc6ff2b6d1ae327e0657e356111743896c83e0f",
+      "bytes": 8007,
+      "partition": "training",
+      "indexType": "targets",
+      "shardId": 8
+    },
+    {
+      "path": "training/targets/target-09.json",
+      "sha256": "sha256-92533429f966e58f68d1528a0f5165ceebad4c31f7c350fa3220130f18f14627",
+      "bytes": 12559,
+      "partition": "training",
+      "indexType": "targets",
+      "shardId": 9
+    },
+    {
+      "path": "training/targets/target-10.json",
+      "sha256": "sha256-ec1b00f3ad9197630a64843a47ad8fb39cbe09239e5a16cc68e28a99e9583527",
+      "bytes": 6427,
+      "partition": "training",
+      "indexType": "targets",
+      "shardId": 10
+    },
+    {
+      "path": "training/targets/target-11.json",
+      "sha256": "sha256-61229785c7f54972b71f60705b7acfffd73afb55f11074ce45ff38ca5dbfae3f",
+      "bytes": 8432,
+      "partition": "training",
+      "indexType": "targets",
+      "shardId": 11
+    },
+    {
+      "path": "training/targets/target-12.json",
+      "sha256": "sha256-2caf4ff25304b8d168a9cc71a161ed1bec5a35f2557e23b6726639337e50119b",
+      "bytes": 10980,
+      "partition": "training",
+      "indexType": "targets",
+      "shardId": 12
+    },
+    {
+      "path": "training/targets/target-13.json",
+      "sha256": "sha256-d5d2110257865df70a0e74ccf6ff191c4b4cac5b8f5b815bec22be1541932076",
+      "bytes": 8390,
+      "partition": "training",
+      "indexType": "targets",
+      "shardId": 13
+    },
+    {
+      "path": "training/targets/target-14.json",
+      "sha256": "sha256-412e7db9695c4bec898e8e00c32bbd92bf02a0c5ef49746caea29c772b37b5b2",
+      "bytes": 9334,
+      "partition": "training",
+      "indexType": "targets",
+      "shardId": 14
+    },
+    {
+      "path": "training/targets/target-15.json",
+      "sha256": "sha256-61418a984695de57cd4cbb45ef361a5b3637c6635c1348692bbf03a88dcc17c5",
+      "bytes": 8465,
+      "partition": "training",
+      "indexType": "targets",
+      "shardId": 15
+    },
+    {
+      "path": "training/words/word-00.json",
+      "sha256": "sha256-5c6114f3ab14cecefc7fba17f7209c1c310a2ab3bb216d904cd54db1d3ee6c81",
+      "bytes": 935,
+      "partition": "training",
+      "indexType": "words",
+      "shardId": 0
+    },
+    {
+      "path": "training/words/word-02.json",
+      "sha256": "sha256-5a5ffecd14fd59e98c3aa5ac5d4b7bdf177e0270cd3383a7161e77941f26a6cc",
+      "bytes": 923,
+      "partition": "training",
+      "indexType": "words",
+      "shardId": 2
+    },
+    {
+      "path": "training/words/word-03.json",
+      "sha256": "sha256-21aa41e051d5f34cd9ca003136563a567662a9811700cf929478639733e0c7f9",
+      "bytes": 1484,
+      "partition": "training",
+      "indexType": "words",
+      "shardId": 3
+    },
+    {
+      "path": "training/words/word-04.json",
+      "sha256": "sha256-7c27208ce0ecbe6c35ccae9cbd5057b7ba7c4503b305d49caddb57d5c7694b84",
+      "bytes": 920,
+      "partition": "training",
+      "indexType": "words",
+      "shardId": 4
+    },
+    {
+      "path": "training/words/word-06.json",
+      "sha256": "sha256-66f2bfecca5350b122fa0abc545d5d6fe4d6c3aa6370090d86aa4fdc705fa1d9",
+      "bytes": 2062,
+      "partition": "training",
+      "indexType": "words",
+      "shardId": 6
+    },
+    {
+      "path": "training/words/word-07.json",
+      "sha256": "sha256-fa6a599de38d4ce0e81f83ee79c6d216bcab6c51800577ec4ca22a32cd6a9666",
+      "bytes": 922,
+      "partition": "training",
+      "indexType": "words",
+      "shardId": 7
+    },
+    {
+      "path": "training/words/word-09.json",
+      "sha256": "sha256-239b662c735832adb84cf2203784a0ef32e1f55ba617e7c0f99e99a297a93a97",
+      "bytes": 2046,
+      "partition": "training",
+      "indexType": "words",
+      "shardId": 9
+    },
+    {
+      "path": "training/words/word-10.json",
+      "sha256": "sha256-83a9e79125358d34c21b9f0b030341e21564a15a66ad710688aaa1194197f4aa",
+      "bytes": 3144,
+      "partition": "training",
+      "indexType": "words",
+      "shardId": 10
+    },
+    {
+      "path": "training/words/word-12.json",
+      "sha256": "sha256-47b1383735db6ece2775c90391178061580f10c3b58f1be504fc260addb2cbd3",
+      "bytes": 918,
+      "partition": "training",
+      "indexType": "words",
+      "shardId": 12
+    },
+    {
+      "path": "training/words/word-13.json",
+      "sha256": "sha256-ff8ae62a8b0af572cb4079230732e2bd0ce50da3c6d3a7fd0e0359bddfb049c5",
+      "bytes": 2043,
+      "partition": "training",
+      "indexType": "words",
+      "shardId": 13
+    },
+    {
+      "path": "transfer/annotations/annotation-11.json",
+      "sha256": "sha256-604043790e052b95c778480b0f832d084d607d598a652154c381ecd47b35cd58",
+      "bytes": 44294,
+      "partition": "transfer",
+      "indexType": "annotations",
+      "shardId": 11
+    },
+    {
+      "path": "transfer/content.json",
+      "sha256": "sha256-ce841e684aeae49776758dd642f5a91eabfb17a45036c4676b811406bc54b238",
+      "bytes": 809,
+      "partition": "transfer",
+      "indexType": "content",
+      "shardId": null
+    }
+  ],
+  "sizeSummary": {
+    "totalGeneratedBytes": 412012,
+    "largestArtifactBytes": 44294,
+    "medianArtifactBytes": 2054,
+    "byPartition": {
+      "training": 240227,
+      "transfer": 45103,
+      "benchmark": 43592,
+      "diagnostic": 39284,
+      "research-holdout": 43806
+    },
+    "byIndexType": {
+      "content": 5085,
+      "annotations": 228297,
+      "targets": 160914,
+      "words": 17716
+    }
+  },
+  "indexChecksum": "sha256-bb198244a6b6cefcae5cb908bf3dee6e9e52259f9ef41576ec69c429a423ff32"
+}

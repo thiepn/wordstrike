@@ -1,0 +1,1723 @@
+{
+  "indexSchemaVersion": 1,
+  "indexGeneratorVersion": 1,
+  "corpusId": "practice-en-v1",
+  "corpusVersion": 1,
+  "corpusChecksum": "sha256-28beccf65eed71519da306c129da5040a20f364aed320dc21eea2d16c2a1c404",
+  "language": "en",
+  "partition": "training",
+  "indexType": "annotations",
+  "shardPolicyVersion": 1,
+  "shardCount": 16,
+  "shardId": 1,
+  "segmentationVersion": 1,
+  "tokenizationVersion": 1,
+  "records": [
+    {
+      "contentId": "practice-en-ws-foundation-001-s2",
+      "familyId": "ws-en-foundation-paragraph-001",
+      "sourceId": "ws-original-en-foundation-v1",
+      "corpusId": "practice-en-v1",
+      "corpusVersion": 1,
+      "partition": "training",
+      "language": "en",
+      "contentHash": "sha256-0a487aae9ecf09c5f3d31255d2b97a26f29188a9cd58bcb57af15ec08a863e6b",
+      "segmentationVersion": 1,
+      "tokenizationVersion": 1,
+      "graphemeCount": 76,
+      "wordCount": 13,
+      "words": [
+        {
+          "surfaceText": "A",
+          "lexicalKey": "a",
+          "startIndex": 0,
+          "endIndex": 1,
+          "wordOrdinal": 0,
+          "capitalizationClass": "upper"
+        },
+        {
+          "surfaceText": "steady",
+          "lexicalKey": "steady",
+          "startIndex": 2,
+          "endIndex": 8,
+          "wordOrdinal": 1,
+          "capitalizationClass": "lower"
+        },
+        {
+          "surfaceText": "rhythm",
+          "lexicalKey": "rhythm",
+          "startIndex": 9,
+          "endIndex": 15,
+          "wordOrdinal": 2,
+          "capitalizationClass": "lower"
+        },
+        {
+          "surfaceText": "makes",
+          "lexicalKey": "makes",
+          "startIndex": 16,
+          "endIndex": 21,
+          "wordOrdinal": 3,
+          "capitalizationClass": "lower"
+        },
+        {
+          "surfaceText": "accuracy",
+          "lexicalKey": "accuracy",
+          "startIndex": 22,
+          "endIndex": 30,
+          "wordOrdinal": 4,
+          "capitalizationClass": "lower"
+        },
+        {
+          "surfaceText": "easier",
+          "lexicalKey": "easier",
+          "startIndex": 31,
+          "endIndex": 37,
+          "wordOrdinal": 5,
+          "capitalizationClass": "lower"
+        },
+        {
+          "surfaceText": "to",
+          "lexicalKey": "to",
+          "startIndex": 38,
+          "endIndex": 40,
+          "wordOrdinal": 6,
+          "capitalizationClass": "lower"
+        },
+        {
+          "surfaceText": "preserve",
+          "lexicalKey": "preserve",
+          "startIndex": 41,
+          "endIndex": 49,
+          "wordOrdinal": 7,
+          "capitalizationClass": "lower"
+        },
+        {
+          "surfaceText": "when",
+          "lexicalKey": "when",
+          "startIndex": 50,
+          "endIndex": 54,
+          "wordOrdinal": 8,
+          "capitalizationClass": "lower"
+        },
+        {
+          "surfaceText": "speed",
+          "lexicalKey": "speed",
+          "startIndex": 55,
+          "endIndex": 60,
+          "wordOrdinal": 9,
+          "capitalizationClass": "lower"
+        },
+        {
+          "surfaceText": "begins",
+          "lexicalKey": "begins",
+          "startIndex": 61,
+          "endIndex": 67,
+          "wordOrdinal": 10,
+          "capitalizationClass": "lower"
+        },
+        {
+          "surfaceText": "to",
+          "lexicalKey": "to",
+          "startIndex": 68,
+          "endIndex": 70,
+          "wordOrdinal": 11,
+          "capitalizationClass": "lower"
+        },
+        {
+          "surfaceText": "rise",
+          "lexicalKey": "rise",
+          "startIndex": 71,
+          "endIndex": 75,
+          "wordOrdinal": 12,
+          "capitalizationClass": "lower"
+        }
+      ],
+      "keyOccurrences": [
+        {
+          "target": "A",
+          "startIndex": 0,
+          "endIndex": 1,
+          "contextClass": "within-word",
+          "wordOrdinal": 0
+        },
+        {
+          "target": " ",
+          "startIndex": 1,
+          "endIndex": 2,
+          "contextClass": "whitespace",
+          "wordOrdinal": null
+        },
+        {
+          "target": "s",
+          "startIndex": 2,
+          "endIndex": 3,
+          "contextClass": "within-word",
+          "wordOrdinal": 1
+        },
+        {
+          "target": "t",
+          "startIndex": 3,
+          "endIndex": 4,
+          "contextClass": "within-word",
+          "wordOrdinal": 1
+        },
+        {
+          "target": "e",
+          "startIndex": 4,
+          "endIndex": 5,
+          "contextClass": "within-word",
+          "wordOrdinal": 1
+        },
+        {
+          "target": "a",
+          "startIndex": 5,
+          "endIndex": 6,
+          "contextClass": "within-word",
+          "wordOrdinal": 1
+        },
+        {
+          "target": "d",
+          "startIndex": 6,
+          "endIndex": 7,
+          "contextClass": "within-word",
+          "wordOrdinal": 1
+        },
+        {
+          "target": "y",
+          "startIndex": 7,
+          "endIndex": 8,
+          "contextClass": "within-word",
+          "wordOrdinal": 1
+        },
+        {
+          "target": " ",
+          "startIndex": 8,
+          "endIndex": 9,
+          "contextClass": "whitespace",
+          "wordOrdinal": null
+        },
+        {
+          "target": "r",
+          "startIndex": 9,
+          "endIndex": 10,
+          "contextClass": "within-word",
+          "wordOrdinal": 2
+        },
+        {
+          "target": "h",
+          "startIndex": 10,
+          "endIndex": 11,
+          "contextClass": "within-word",
+          "wordOrdinal": 2
+        },
+        {
+          "target": "y",
+          "startIndex": 11,
+          "endIndex": 12,
+          "contextClass": "within-word",
+          "wordOrdinal": 2
+        },
+        {
+          "target": "t",
+          "startIndex": 12,
+          "endIndex": 13,
+          "contextClass": "within-word",
+          "wordOrdinal": 2
+        },
+        {
+          "target": "h",
+          "startIndex": 13,
+          "endIndex": 14,
+          "contextClass": "within-word",
+          "wordOrdinal": 2
+        },
+        {
+          "target": "m",
+          "startIndex": 14,
+          "endIndex": 15,
+          "contextClass": "within-word",
+          "wordOrdinal": 2
+        },
+        {
+          "target": " ",
+          "startIndex": 15,
+          "endIndex": 16,
+          "contextClass": "whitespace",
+          "wordOrdinal": null
+        },
+        {
+          "target": "m",
+          "startIndex": 16,
+          "endIndex": 17,
+          "contextClass": "within-word",
+          "wordOrdinal": 3
+        },
+        {
+          "target": "a",
+          "startIndex": 17,
+          "endIndex": 18,
+          "contextClass": "within-word",
+          "wordOrdinal": 3
+        },
+        {
+          "target": "k",
+          "startIndex": 18,
+          "endIndex": 19,
+          "contextClass": "within-word",
+          "wordOrdinal": 3
+        },
+        {
+          "target": "e",
+          "startIndex": 19,
+          "endIndex": 20,
+          "contextClass": "within-word",
+          "wordOrdinal": 3
+        },
+        {
+          "target": "s",
+          "startIndex": 20,
+          "endIndex": 21,
+          "contextClass": "within-word",
+          "wordOrdinal": 3
+        },
+        {
+          "target": " ",
+          "startIndex": 21,
+          "endIndex": 22,
+          "contextClass": "whitespace",
+          "wordOrdinal": null
+        },
+        {
+          "target": "a",
+          "startIndex": 22,
+          "endIndex": 23,
+          "contextClass": "within-word",
+          "wordOrdinal": 4
+        },
+        {
+          "target": "c",
+          "startIndex": 23,
+          "endIndex": 24,
+          "contextClass": "within-word",
+          "wordOrdinal": 4
+        },
+        {
+          "target": "c",
+          "startIndex": 24,
+          "endIndex": 25,
+          "contextClass": "within-word",
+          "wordOrdinal": 4
+        },
+        {
+          "target": "u",
+          "startIndex": 25,
+          "endIndex": 26,
+          "contextClass": "within-word",
+          "wordOrdinal": 4
+        },
+        {
+          "target": "r",
+          "startIndex": 26,
+          "endIndex": 27,
+          "contextClass": "within-word",
+          "wordOrdinal": 4
+        },
+        {
+          "target": "a",
+          "startIndex": 27,
+          "endIndex": 28,
+          "contextClass": "within-word",
+          "wordOrdinal": 4
+        },
+        {
+          "target": "c",
+          "startIndex": 28,
+          "endIndex": 29,
+          "contextClass": "within-word",
+          "wordOrdinal": 4
+        },
+        {
+          "target": "y",
+          "startIndex": 29,
+          "endIndex": 30,
+          "contextClass": "within-word",
+          "wordOrdinal": 4
+        },
+        {
+          "target": " ",
+          "startIndex": 30,
+          "endIndex": 31,
+          "contextClass": "whitespace",
+          "wordOrdinal": null
+        },
+        {
+          "target": "e",
+          "startIndex": 31,
+          "endIndex": 32,
+          "contextClass": "within-word",
+          "wordOrdinal": 5
+        },
+        {
+          "target": "a",
+          "startIndex": 32,
+          "endIndex": 33,
+          "contextClass": "within-word",
+          "wordOrdinal": 5
+        },
+        {
+          "target": "s",
+          "startIndex": 33,
+          "endIndex": 34,
+          "contextClass": "within-word",
+          "wordOrdinal": 5
+        },
+        {
+          "target": "i",
+          "startIndex": 34,
+          "endIndex": 35,
+          "contextClass": "within-word",
+          "wordOrdinal": 5
+        },
+        {
+          "target": "e",
+          "startIndex": 35,
+          "endIndex": 36,
+          "contextClass": "within-word",
+          "wordOrdinal": 5
+        },
+        {
+          "target": "r",
+          "startIndex": 36,
+          "endIndex": 37,
+          "contextClass": "within-word",
+          "wordOrdinal": 5
+        },
+        {
+          "target": " ",
+          "startIndex": 37,
+          "endIndex": 38,
+          "contextClass": "whitespace",
+          "wordOrdinal": null
+        },
+        {
+          "target": "t",
+          "startIndex": 38,
+          "endIndex": 39,
+          "contextClass": "within-word",
+          "wordOrdinal": 6
+        },
+        {
+          "target": "o",
+          "startIndex": 39,
+          "endIndex": 40,
+          "contextClass": "within-word",
+          "wordOrdinal": 6
+        },
+        {
+          "target": " ",
+          "startIndex": 40,
+          "endIndex": 41,
+          "contextClass": "whitespace",
+          "wordOrdinal": null
+        },
+        {
+          "target": "p",
+          "startIndex": 41,
+          "endIndex": 42,
+          "contextClass": "within-word",
+          "wordOrdinal": 7
+        },
+        {
+          "target": "r",
+          "startIndex": 42,
+          "endIndex": 43,
+          "contextClass": "within-word",
+          "wordOrdinal": 7
+        },
+        {
+          "target": "e",
+          "startIndex": 43,
+          "endIndex": 44,
+          "contextClass": "within-word",
+          "wordOrdinal": 7
+        },
+        {
+          "target": "s",
+          "startIndex": 44,
+          "endIndex": 45,
+          "contextClass": "within-word",
+          "wordOrdinal": 7
+        },
+        {
+          "target": "e",
+          "startIndex": 45,
+          "endIndex": 46,
+          "contextClass": "within-word",
+          "wordOrdinal": 7
+        },
+        {
+          "target": "r",
+          "startIndex": 46,
+          "endIndex": 47,
+          "contextClass": "within-word",
+          "wordOrdinal": 7
+        },
+        {
+          "target": "v",
+          "startIndex": 47,
+          "endIndex": 48,
+          "contextClass": "within-word",
+          "wordOrdinal": 7
+        },
+        {
+          "target": "e",
+          "startIndex": 48,
+          "endIndex": 49,
+          "contextClass": "within-word",
+          "wordOrdinal": 7
+        },
+        {
+          "target": " ",
+          "startIndex": 49,
+          "endIndex": 50,
+          "contextClass": "whitespace",
+          "wordOrdinal": null
+        },
+        {
+          "target": "w",
+          "startIndex": 50,
+          "endIndex": 51,
+          "contextClass": "within-word",
+          "wordOrdinal": 8
+        },
+        {
+          "target": "h",
+          "startIndex": 51,
+          "endIndex": 52,
+          "contextClass": "within-word",
+          "wordOrdinal": 8
+        },
+        {
+          "target": "e",
+          "startIndex": 52,
+          "endIndex": 53,
+          "contextClass": "within-word",
+          "wordOrdinal": 8
+        },
+        {
+          "target": "n",
+          "startIndex": 53,
+          "endIndex": 54,
+          "contextClass": "within-word",
+          "wordOrdinal": 8
+        },
+        {
+          "target": " ",
+          "startIndex": 54,
+          "endIndex": 55,
+          "contextClass": "whitespace",
+          "wordOrdinal": null
+        },
+        {
+          "target": "s",
+          "startIndex": 55,
+          "endIndex": 56,
+          "contextClass": "within-word",
+          "wordOrdinal": 9
+        },
+        {
+          "target": "p",
+          "startIndex": 56,
+          "endIndex": 57,
+          "contextClass": "within-word",
+          "wordOrdinal": 9
+        },
+        {
+          "target": "e",
+          "startIndex": 57,
+          "endIndex": 58,
+          "contextClass": "within-word",
+          "wordOrdinal": 9
+        },
+        {
+          "target": "e",
+          "startIndex": 58,
+          "endIndex": 59,
+          "contextClass": "within-word",
+          "wordOrdinal": 9
+        },
+        {
+          "target": "d",
+          "startIndex": 59,
+          "endIndex": 60,
+          "contextClass": "within-word",
+          "wordOrdinal": 9
+        },
+        {
+          "target": " ",
+          "startIndex": 60,
+          "endIndex": 61,
+          "contextClass": "whitespace",
+          "wordOrdinal": null
+        },
+        {
+          "target": "b",
+          "startIndex": 61,
+          "endIndex": 62,
+          "contextClass": "within-word",
+          "wordOrdinal": 10
+        },
+        {
+          "target": "e",
+          "startIndex": 62,
+          "endIndex": 63,
+          "contextClass": "within-word",
+          "wordOrdinal": 10
+        },
+        {
+          "target": "g",
+          "startIndex": 63,
+          "endIndex": 64,
+          "contextClass": "within-word",
+          "wordOrdinal": 10
+        },
+        {
+          "target": "i",
+          "startIndex": 64,
+          "endIndex": 65,
+          "contextClass": "within-word",
+          "wordOrdinal": 10
+        },
+        {
+          "target": "n",
+          "startIndex": 65,
+          "endIndex": 66,
+          "contextClass": "within-word",
+          "wordOrdinal": 10
+        },
+        {
+          "target": "s",
+          "startIndex": 66,
+          "endIndex": 67,
+          "contextClass": "within-word",
+          "wordOrdinal": 10
+        },
+        {
+          "target": " ",
+          "startIndex": 67,
+          "endIndex": 68,
+          "contextClass": "whitespace",
+          "wordOrdinal": null
+        },
+        {
+          "target": "t",
+          "startIndex": 68,
+          "endIndex": 69,
+          "contextClass": "within-word",
+          "wordOrdinal": 11
+        },
+        {
+          "target": "o",
+          "startIndex": 69,
+          "endIndex": 70,
+          "contextClass": "within-word",
+          "wordOrdinal": 11
+        },
+        {
+          "target": " ",
+          "startIndex": 70,
+          "endIndex": 71,
+          "contextClass": "whitespace",
+          "wordOrdinal": null
+        },
+        {
+          "target": "r",
+          "startIndex": 71,
+          "endIndex": 72,
+          "contextClass": "within-word",
+          "wordOrdinal": 12
+        },
+        {
+          "target": "i",
+          "startIndex": 72,
+          "endIndex": 73,
+          "contextClass": "within-word",
+          "wordOrdinal": 12
+        },
+        {
+          "target": "s",
+          "startIndex": 73,
+          "endIndex": 74,
+          "contextClass": "within-word",
+          "wordOrdinal": 12
+        },
+        {
+          "target": "e",
+          "startIndex": 74,
+          "endIndex": 75,
+          "contextClass": "within-word",
+          "wordOrdinal": 12
+        },
+        {
+          "target": ".",
+          "startIndex": 75,
+          "endIndex": 76,
+          "contextClass": "punctuation",
+          "wordOrdinal": null
+        }
+      ],
+      "bigramOccurrences": [
+        {
+          "target": "A ",
+          "startIndex": 0,
+          "endIndex": 2,
+          "contextClass": "word-boundary",
+          "wordOrdinal": null
+        },
+        {
+          "target": " s",
+          "startIndex": 1,
+          "endIndex": 3,
+          "contextClass": "word-boundary",
+          "wordOrdinal": null
+        },
+        {
+          "target": "st",
+          "startIndex": 2,
+          "endIndex": 4,
+          "contextClass": "within-word",
+          "wordOrdinal": 1
+        },
+        {
+          "target": "te",
+          "startIndex": 3,
+          "endIndex": 5,
+          "contextClass": "within-word",
+          "wordOrdinal": 1
+        },
+        {
+          "target": "ea",
+          "startIndex": 4,
+          "endIndex": 6,
+          "contextClass": "within-word",
+          "wordOrdinal": 1
+        },
+        {
+          "target": "ad",
+          "startIndex": 5,
+          "endIndex": 7,
+          "contextClass": "within-word",
+          "wordOrdinal": 1
+        },
+        {
+          "target": "dy",
+          "startIndex": 6,
+          "endIndex": 8,
+          "contextClass": "within-word",
+          "wordOrdinal": 1
+        },
+        {
+          "target": "y ",
+          "startIndex": 7,
+          "endIndex": 9,
+          "contextClass": "word-boundary",
+          "wordOrdinal": null
+        },
+        {
+          "target": " r",
+          "startIndex": 8,
+          "endIndex": 10,
+          "contextClass": "word-boundary",
+          "wordOrdinal": null
+        },
+        {
+          "target": "rh",
+          "startIndex": 9,
+          "endIndex": 11,
+          "contextClass": "within-word",
+          "wordOrdinal": 2
+        },
+        {
+          "target": "hy",
+          "startIndex": 10,
+          "endIndex": 12,
+          "contextClass": "within-word",
+          "wordOrdinal": 2
+        },
+        {
+          "target": "yt",
+          "startIndex": 11,
+          "endIndex": 13,
+          "contextClass": "within-word",
+          "wordOrdinal": 2
+        },
+        {
+          "target": "th",
+          "startIndex": 12,
+          "endIndex": 14,
+          "contextClass": "within-word",
+          "wordOrdinal": 2
+        },
+        {
+          "target": "hm",
+          "startIndex": 13,
+          "endIndex": 15,
+          "contextClass": "within-word",
+          "wordOrdinal": 2
+        },
+        {
+          "target": "m ",
+          "startIndex": 14,
+          "endIndex": 16,
+          "contextClass": "word-boundary",
+          "wordOrdinal": null
+        },
+        {
+          "target": " m",
+          "startIndex": 15,
+          "endIndex": 17,
+          "contextClass": "word-boundary",
+          "wordOrdinal": null
+        },
+        {
+          "target": "ma",
+          "startIndex": 16,
+          "endIndex": 18,
+          "contextClass": "within-word",
+          "wordOrdinal": 3
+        },
+        {
+          "target": "ak",
+          "startIndex": 17,
+          "endIndex": 19,
+          "contextClass": "within-word",
+          "wordOrdinal": 3
+        },
+        {
+          "target": "ke",
+          "startIndex": 18,
+          "endIndex": 20,
+          "contextClass": "within-word",
+          "wordOrdinal": 3
+        },
+        {
+          "target": "es",
+          "startIndex": 19,
+          "endIndex": 21,
+          "contextClass": "within-word",
+          "wordOrdinal": 3
+        },
+        {
+          "target": "s ",
+          "startIndex": 20,
+          "endIndex": 22,
+          "contextClass": "word-boundary",
+          "wordOrdinal": null
+        },
+        {
+          "target": " a",
+          "startIndex": 21,
+          "endIndex": 23,
+          "contextClass": "word-boundary",
+          "wordOrdinal": null
+        },
+        {
+          "target": "ac",
+          "startIndex": 22,
+          "endIndex": 24,
+          "contextClass": "within-word",
+          "wordOrdinal": 4
+        },
+        {
+          "target": "cc",
+          "startIndex": 23,
+          "endIndex": 25,
+          "contextClass": "within-word",
+          "wordOrdinal": 4
+        },
+        {
+          "target": "cu",
+          "startIndex": 24,
+          "endIndex": 26,
+          "contextClass": "within-word",
+          "wordOrdinal": 4
+        },
+        {
+          "target": "ur",
+          "startIndex": 25,
+          "endIndex": 27,
+          "contextClass": "within-word",
+          "wordOrdinal": 4
+        },
+        {
+          "target": "ra",
+          "startIndex": 26,
+          "endIndex": 28,
+          "contextClass": "within-word",
+          "wordOrdinal": 4
+        },
+        {
+          "target": "ac",
+          "startIndex": 27,
+          "endIndex": 29,
+          "contextClass": "within-word",
+          "wordOrdinal": 4
+        },
+        {
+          "target": "cy",
+          "startIndex": 28,
+          "endIndex": 30,
+          "contextClass": "within-word",
+          "wordOrdinal": 4
+        },
+        {
+          "target": "y ",
+          "startIndex": 29,
+          "endIndex": 31,
+          "contextClass": "word-boundary",
+          "wordOrdinal": null
+        },
+        {
+          "target": " e",
+          "startIndex": 30,
+          "endIndex": 32,
+          "contextClass": "word-boundary",
+          "wordOrdinal": null
+        },
+        {
+          "target": "ea",
+          "startIndex": 31,
+          "endIndex": 33,
+          "contextClass": "within-word",
+          "wordOrdinal": 5
+        },
+        {
+          "target": "as",
+          "startIndex": 32,
+          "endIndex": 34,
+          "contextClass": "within-word",
+          "wordOrdinal": 5
+        },
+        {
+          "target": "si",
+          "startIndex": 33,
+          "endIndex": 35,
+          "contextClass": "within-word",
+          "wordOrdinal": 5
+        },
+        {
+          "target": "ie",
+          "startIndex": 34,
+          "endIndex": 36,
+          "contextClass": "within-word",
+          "wordOrdinal": 5
+        },
+        {
+          "target": "er",
+          "startIndex": 35,
+          "endIndex": 37,
+          "contextClass": "within-word",
+          "wordOrdinal": 5
+        },
+        {
+          "target": "r ",
+          "startIndex": 36,
+          "endIndex": 38,
+          "contextClass": "word-boundary",
+          "wordOrdinal": null
+        },
+        {
+          "target": " t",
+          "startIndex": 37,
+          "endIndex": 39,
+          "contextClass": "word-boundary",
+          "wordOrdinal": null
+        },
+        {
+          "target": "to",
+          "startIndex": 38,
+          "endIndex": 40,
+          "contextClass": "within-word",
+          "wordOrdinal": 6
+        },
+        {
+          "target": "o ",
+          "startIndex": 39,
+          "endIndex": 41,
+          "contextClass": "word-boundary",
+          "wordOrdinal": null
+        },
+        {
+          "target": " p",
+          "startIndex": 40,
+          "endIndex": 42,
+          "contextClass": "word-boundary",
+          "wordOrdinal": null
+        },
+        {
+          "target": "pr",
+          "startIndex": 41,
+          "endIndex": 43,
+          "contextClass": "within-word",
+          "wordOrdinal": 7
+        },
+        {
+          "target": "re",
+          "startIndex": 42,
+          "endIndex": 44,
+          "contextClass": "within-word",
+          "wordOrdinal": 7
+        },
+        {
+          "target": "es",
+          "startIndex": 43,
+          "endIndex": 45,
+          "contextClass": "within-word",
+          "wordOrdinal": 7
+        },
+        {
+          "target": "se",
+          "startIndex": 44,
+          "endIndex": 46,
+          "contextClass": "within-word",
+          "wordOrdinal": 7
+        },
+        {
+          "target": "er",
+          "startIndex": 45,
+          "endIndex": 47,
+          "contextClass": "within-word",
+          "wordOrdinal": 7
+        },
+        {
+          "target": "rv",
+          "startIndex": 46,
+          "endIndex": 48,
+          "contextClass": "within-word",
+          "wordOrdinal": 7
+        },
+        {
+          "target": "ve",
+          "startIndex": 47,
+          "endIndex": 49,
+          "contextClass": "within-word",
+          "wordOrdinal": 7
+        },
+        {
+          "target": "e ",
+          "startIndex": 48,
+          "endIndex": 50,
+          "contextClass": "word-boundary",
+          "wordOrdinal": null
+        },
+        {
+          "target": " w",
+          "startIndex": 49,
+          "endIndex": 51,
+          "contextClass": "word-boundary",
+          "wordOrdinal": null
+        },
+        {
+          "target": "wh",
+          "startIndex": 50,
+          "endIndex": 52,
+          "contextClass": "within-word",
+          "wordOrdinal": 8
+        },
+        {
+          "target": "he",
+          "startIndex": 51,
+          "endIndex": 53,
+          "contextClass": "within-word",
+          "wordOrdinal": 8
+        },
+        {
+          "target": "en",
+          "startIndex": 52,
+          "endIndex": 54,
+          "contextClass": "within-word",
+          "wordOrdinal": 8
+        },
+        {
+          "target": "n ",
+          "startIndex": 53,
+          "endIndex": 55,
+          "contextClass": "word-boundary",
+          "wordOrdinal": null
+        },
+        {
+          "target": " s",
+          "startIndex": 54,
+          "endIndex": 56,
+          "contextClass": "word-boundary",
+          "wordOrdinal": null
+        },
+        {
+          "target": "sp",
+          "startIndex": 55,
+          "endIndex": 57,
+          "contextClass": "within-word",
+          "wordOrdinal": 9
+        },
+        {
+          "target": "pe",
+          "startIndex": 56,
+          "endIndex": 58,
+          "contextClass": "within-word",
+          "wordOrdinal": 9
+        },
+        {
+          "target": "ee",
+          "startIndex": 57,
+          "endIndex": 59,
+          "contextClass": "within-word",
+          "wordOrdinal": 9
+        },
+        {
+          "target": "ed",
+          "startIndex": 58,
+          "endIndex": 60,
+          "contextClass": "within-word",
+          "wordOrdinal": 9
+        },
+        {
+          "target": "d ",
+          "startIndex": 59,
+          "endIndex": 61,
+          "contextClass": "word-boundary",
+          "wordOrdinal": null
+        },
+        {
+          "target": " b",
+          "startIndex": 60,
+          "endIndex": 62,
+          "contextClass": "word-boundary",
+          "wordOrdinal": null
+        },
+        {
+          "target": "be",
+          "startIndex": 61,
+          "endIndex": 63,
+          "contextClass": "within-word",
+          "wordOrdinal": 10
+        },
+        {
+          "target": "eg",
+          "startIndex": 62,
+          "endIndex": 64,
+          "contextClass": "within-word",
+          "wordOrdinal": 10
+        },
+        {
+          "target": "gi",
+          "startIndex": 63,
+          "endIndex": 65,
+          "contextClass": "within-word",
+          "wordOrdinal": 10
+        },
+        {
+          "target": "in",
+          "startIndex": 64,
+          "endIndex": 66,
+          "contextClass": "within-word",
+          "wordOrdinal": 10
+        },
+        {
+          "target": "ns",
+          "startIndex": 65,
+          "endIndex": 67,
+          "contextClass": "within-word",
+          "wordOrdinal": 10
+        },
+        {
+          "target": "s ",
+          "startIndex": 66,
+          "endIndex": 68,
+          "contextClass": "word-boundary",
+          "wordOrdinal": null
+        },
+        {
+          "target": " t",
+          "startIndex": 67,
+          "endIndex": 69,
+          "contextClass": "word-boundary",
+          "wordOrdinal": null
+        },
+        {
+          "target": "to",
+          "startIndex": 68,
+          "endIndex": 70,
+          "contextClass": "within-word",
+          "wordOrdinal": 11
+        },
+        {
+          "target": "o ",
+          "startIndex": 69,
+          "endIndex": 71,
+          "contextClass": "word-boundary",
+          "wordOrdinal": null
+        },
+        {
+          "target": " r",
+          "startIndex": 70,
+          "endIndex": 72,
+          "contextClass": "word-boundary",
+          "wordOrdinal": null
+        },
+        {
+          "target": "ri",
+          "startIndex": 71,
+          "endIndex": 73,
+          "contextClass": "within-word",
+          "wordOrdinal": 12
+        },
+        {
+          "target": "is",
+          "startIndex": 72,
+          "endIndex": 74,
+          "contextClass": "within-word",
+          "wordOrdinal": 12
+        },
+        {
+          "target": "se",
+          "startIndex": 73,
+          "endIndex": 75,
+          "contextClass": "within-word",
+          "wordOrdinal": 12
+        },
+        {
+          "target": "e.",
+          "startIndex": 74,
+          "endIndex": 76,
+          "contextClass": "punctuation",
+          "wordOrdinal": null
+        }
+      ],
+      "trigramOccurrences": [
+        {
+          "target": "A s",
+          "startIndex": 0,
+          "endIndex": 3,
+          "contextClass": "word-boundary",
+          "wordOrdinal": null
+        },
+        {
+          "target": " st",
+          "startIndex": 1,
+          "endIndex": 4,
+          "contextClass": "word-boundary",
+          "wordOrdinal": null
+        },
+        {
+          "target": "ste",
+          "startIndex": 2,
+          "endIndex": 5,
+          "contextClass": "within-word",
+          "wordOrdinal": 1
+        },
+        {
+          "target": "tea",
+          "startIndex": 3,
+          "endIndex": 6,
+          "contextClass": "within-word",
+          "wordOrdinal": 1
+        },
+        {
+          "target": "ead",
+          "startIndex": 4,
+          "endIndex": 7,
+          "contextClass": "within-word",
+          "wordOrdinal": 1
+        },
+        {
+          "target": "ady",
+          "startIndex": 5,
+          "endIndex": 8,
+          "contextClass": "within-word",
+          "wordOrdinal": 1
+        },
+        {
+          "target": "dy ",
+          "startIndex": 6,
+          "endIndex": 9,
+          "contextClass": "word-boundary",
+          "wordOrdinal": null
+        },
+        {
+          "target": "y r",
+          "startIndex": 7,
+          "endIndex": 10,
+          "contextClass": "word-boundary",
+          "wordOrdinal": null
+        },
+        {
+          "target": " rh",
+          "startIndex": 8,
+          "endIndex": 11,
+          "contextClass": "word-boundary",
+          "wordOrdinal": null
+        },
+        {
+          "target": "rhy",
+          "startIndex": 9,
+          "endIndex": 12,
+          "contextClass": "within-word",
+          "wordOrdinal": 2
+        },
+        {
+          "target": "hyt",
+          "startIndex": 10,
+          "endIndex": 13,
+          "contextClass": "within-word",
+          "wordOrdinal": 2
+        },
+        {
+          "target": "yth",
+          "startIndex": 11,
+          "endIndex": 14,
+          "contextClass": "within-word",
+          "wordOrdinal": 2
+        },
+        {
+          "target": "thm",
+          "startIndex": 12,
+          "endIndex": 15,
+          "contextClass": "within-word",
+          "wordOrdinal": 2
+        },
+        {
+          "target": "hm ",
+          "startIndex": 13,
+          "endIndex": 16,
+          "contextClass": "word-boundary",
+          "wordOrdinal": null
+        },
+        {
+          "target": "m m",
+          "startIndex": 14,
+          "endIndex": 17,
+          "contextClass": "word-boundary",
+          "wordOrdinal": null
+        },
+        {
+          "target": " ma",
+          "startIndex": 15,
+          "endIndex": 18,
+          "contextClass": "word-boundary",
+          "wordOrdinal": null
+        },
+        {
+          "target": "mak",
+          "startIndex": 16,
+          "endIndex": 19,
+          "contextClass": "within-word",
+          "wordOrdinal": 3
+        },
+        {
+          "target": "ake",
+          "startIndex": 17,
+          "endIndex": 20,
+          "contextClass": "within-word",
+          "wordOrdinal": 3
+        },
+        {
+          "target": "kes",
+          "startIndex": 18,
+          "endIndex": 21,
+          "contextClass": "within-word",
+          "wordOrdinal": 3
+        },
+        {
+          "target": "es ",
+          "startIndex": 19,
+          "endIndex": 22,
+          "contextClass": "word-boundary",
+          "wordOrdinal": null
+        },
+        {
+          "target": "s a",
+          "startIndex": 20,
+          "endIndex": 23,
+          "contextClass": "word-boundary",
+          "wordOrdinal": null
+        },
+        {
+          "target": " ac",
+          "startIndex": 21,
+          "endIndex": 24,
+          "contextClass": "word-boundary",
+          "wordOrdinal": null
+        },
+        {
+          "target": "acc",
+          "startIndex": 22,
+          "endIndex": 25,
+          "contextClass": "within-word",
+          "wordOrdinal": 4
+        },
+        {
+          "target": "ccu",
+          "startIndex": 23,
+          "endIndex": 26,
+          "contextClass": "within-word",
+          "wordOrdinal": 4
+        },
+        {
+          "target": "cur",
+          "startIndex": 24,
+          "endIndex": 27,
+          "contextClass": "within-word",
+          "wordOrdinal": 4
+        },
+        {
+          "target": "ura",
+          "startIndex": 25,
+          "endIndex": 28,
+          "contextClass": "within-word",
+          "wordOrdinal": 4
+        },
+        {
+          "target": "rac",
+          "startIndex": 26,
+          "endIndex": 29,
+          "contextClass": "within-word",
+          "wordOrdinal": 4
+        },
+        {
+          "target": "acy",
+          "startIndex": 27,
+          "endIndex": 30,
+          "contextClass": "within-word",
+          "wordOrdinal": 4
+        },
+        {
+          "target": "cy ",
+          "startIndex": 28,
+          "endIndex": 31,
+          "contextClass": "word-boundary",
+          "wordOrdinal": null
+        },
+        {
+          "target": "y e",
+          "startIndex": 29,
+          "endIndex": 32,
+          "contextClass": "word-boundary",
+          "wordOrdinal": null
+        },
+        {
+          "target": " ea",
+          "startIndex": 30,
+          "endIndex": 33,
+          "contextClass": "word-boundary",
+          "wordOrdinal": null
+        },
+        {
+          "target": "eas",
+          "startIndex": 31,
+          "endIndex": 34,
+          "contextClass": "within-word",
+          "wordOrdinal": 5
+        },
+        {
+          "target": "asi",
+          "startIndex": 32,
+          "endIndex": 35,
+          "contextClass": "within-word",
+          "wordOrdinal": 5
+        },
+        {
+          "target": "sie",
+          "startIndex": 33,
+          "endIndex": 36,
+          "contextClass": "within-word",
+          "wordOrdinal": 5
+        },
+        {
+          "target": "ier",
+          "startIndex": 34,
+          "endIndex": 37,
+          "contextClass": "within-word",
+          "wordOrdinal": 5
+        },
+        {
+          "target": "er ",
+          "startIndex": 35,
+          "endIndex": 38,
+          "contextClass": "word-boundary",
+          "wordOrdinal": null
+        },
+        {
+          "target": "r t",
+          "startIndex": 36,
+          "endIndex": 39,
+          "contextClass": "word-boundary",
+          "wordOrdinal": null
+        },
+        {
+          "target": " to",
+          "startIndex": 37,
+          "endIndex": 40,
+          "contextClass": "word-boundary",
+          "wordOrdinal": null
+        },
+        {
+          "target": "to ",
+          "startIndex": 38,
+          "endIndex": 41,
+          "contextClass": "word-boundary",
+          "wordOrdinal": null
+        },
+        {
+          "target": "o p",
+          "startIndex": 39,
+          "endIndex": 42,
+          "contextClass": "word-boundary",
+          "wordOrdinal": null
+        },
+        {
+          "target": " pr",
+          "startIndex": 40,
+          "endIndex": 43,
+          "contextClass": "word-boundary",
+          "wordOrdinal": null
+        },
+        {
+          "target": "pre",
+          "startIndex": 41,
+          "endIndex": 44,
+          "contextClass": "within-word",
+          "wordOrdinal": 7
+        },
+        {
+          "target": "res",
+          "startIndex": 42,
+          "endIndex": 45,
+          "contextClass": "within-word",
+          "wordOrdinal": 7
+        },
+        {
+          "target": "ese",
+          "startIndex": 43,
+          "endIndex": 46,
+          "contextClass": "within-word",
+          "wordOrdinal": 7
+        },
+        {
+          "target": "ser",
+          "startIndex": 44,
+          "endIndex": 47,
+          "contextClass": "within-word",
+          "wordOrdinal": 7
+        },
+        {
+          "target": "erv",
+          "startIndex": 45,
+          "endIndex": 48,
+          "contextClass": "within-word",
+          "wordOrdinal": 7
+        },
+        {
+          "target": "rve",
+          "startIndex": 46,
+          "endIndex": 49,
+          "contextClass": "within-word",
+          "wordOrdinal": 7
+        },
+        {
+          "target": "ve ",
+          "startIndex": 47,
+          "endIndex": 50,
+          "contextClass": "word-boundary",
+          "wordOrdinal": null
+        },
+        {
+          "target": "e w",
+          "startIndex": 48,
+          "endIndex": 51,
+          "contextClass": "word-boundary",
+          "wordOrdinal": null
+        },
+        {
+          "target": " wh",
+          "startIndex": 49,
+          "endIndex": 52,
+          "contextClass": "word-boundary",
+          "wordOrdinal": null
+        },
+        {
+          "target": "whe",
+          "startIndex": 50,
+          "endIndex": 53,
+          "contextClass": "within-word",
+          "wordOrdinal": 8
+        },
+        {
+          "target": "hen",
+          "startIndex": 51,
+          "endIndex": 54,
+          "contextClass": "within-word",
+          "wordOrdinal": 8
+        },
+        {
+          "target": "en ",
+          "startIndex": 52,
+          "endIndex": 55,
+          "contextClass": "word-boundary",
+          "wordOrdinal": null
+        },
+        {
+          "target": "n s",
+          "startIndex": 53,
+          "endIndex": 56,
+          "contextClass": "word-boundary",
+          "wordOrdinal": null
+        },
+        {
+          "target": " sp",
+          "startIndex": 54,
+          "endIndex": 57,
+          "contextClass": "word-boundary",
+          "wordOrdinal": null
+        },
+        {
+          "target": "spe",
+          "startIndex": 55,
+          "endIndex": 58,
+          "contextClass": "within-word",
+          "wordOrdinal": 9
+        },
+        {
+          "target": "pee",
+          "startIndex": 56,
+          "endIndex": 59,
+          "contextClass": "within-word",
+          "wordOrdinal": 9
+        },
+        {
+          "target": "eed",
+          "startIndex": 57,
+          "endIndex": 60,
+          "contextClass": "within-word",
+          "wordOrdinal": 9
+        },
+        {
+          "target": "ed ",
+          "startIndex": 58,
+          "endIndex": 61,
+          "contextClass": "word-boundary",
+          "wordOrdinal": null
+        },
+        {
+          "target": "d b",
+          "startIndex": 59,
+          "endIndex": 62,
+          "contextClass": "word-boundary",
+          "wordOrdinal": null
+        },
+        {
+          "target": " be",
+          "startIndex": 60,
+          "endIndex": 63,
+          "contextClass": "word-boundary",
+          "wordOrdinal": null
+        },
+        {
+          "target": "beg",
+          "startIndex": 61,
+          "endIndex": 64,
+          "contextClass": "within-word",
+          "wordOrdinal": 10
+        },
+        {
+          "target": "egi",
+          "startIndex": 62,
+          "endIndex": 65,
+          "contextClass": "within-word",
+          "wordOrdinal": 10
+        },
+        {
+          "target": "gin",
+          "startIndex": 63,
+          "endIndex": 66,
+          "contextClass": "within-word",
+          "wordOrdinal": 10
+        },
+        {
+          "target": "ins",
+          "startIndex": 64,
+          "endIndex": 67,
+          "contextClass": "within-word",
+          "wordOrdinal": 10
+        },
+        {
+          "target": "ns ",
+          "startIndex": 65,
+          "endIndex": 68,
+          "contextClass": "word-boundary",
+          "wordOrdinal": null
+        },
+        {
+          "target": "s t",
+          "startIndex": 66,
+          "endIndex": 69,
+          "contextClass": "word-boundary",
+          "wordOrdinal": null
+        },
+        {
+          "target": " to",
+          "startIndex": 67,
+          "endIndex": 70,
+          "contextClass": "word-boundary",
+          "wordOrdinal": null
+        },
+        {
+          "target": "to ",
+          "startIndex": 68,
+          "endIndex": 71,
+          "contextClass": "word-boundary",
+          "wordOrdinal": null
+        },
+        {
+          "target": "o r",
+          "startIndex": 69,
+          "endIndex": 72,
+          "contextClass": "word-boundary",
+          "wordOrdinal": null
+        },
+        {
+          "target": " ri",
+          "startIndex": 70,
+          "endIndex": 73,
+          "contextClass": "word-boundary",
+          "wordOrdinal": null
+        },
+        {
+          "target": "ris",
+          "startIndex": 71,
+          "endIndex": 74,
+          "contextClass": "within-word",
+          "wordOrdinal": 12
+        },
+        {
+          "target": "ise",
+          "startIndex": 72,
+          "endIndex": 75,
+          "contextClass": "within-word",
+          "wordOrdinal": 12
+        },
+        {
+          "target": "se.",
+          "startIndex": 73,
+          "endIndex": 76,
+          "contextClass": "punctuation",
+          "wordOrdinal": null
+        }
+      ],
+      "structuralCounts": {
+        "uppercaseCount": 1,
+        "digitCount": 0,
+        "punctuationCount": 1
+      }
+    }
+  ]
+}

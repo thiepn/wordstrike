@@ -249,6 +249,13 @@ function validEntityKey(errors, type, key, path = "entityKey") {
   }
 }
 
+export function validatePracticeEntityKey(type, key) {
+  const errors = [];
+  if (!ENTITY_TYPES.includes(type)) error(errors, "entityType", "INVALID_ENUM", "entityType has an unsupported value");
+  else validEntityKey(errors, type, key);
+  return result(errors);
+}
+
 export function validateSkillStat(stat) {
   const errors = [];
   if (!isPlainObject(stat)) return result([{ path: "skillStat", code: "INVALID_TYPE", message: "skillStat must be an object" }]);

@@ -1,0 +1,42 @@
+{
+  "indexSchemaVersion": 1,
+  "indexGeneratorVersion": 1,
+  "corpusId": "practice-en-v1",
+  "corpusVersion": 1,
+  "corpusChecksum": "sha256-28beccf65eed71519da306c129da5040a20f364aed320dc21eea2d16c2a1c404",
+  "language": "en",
+  "partition": "training",
+  "indexType": "content",
+  "items": [
+    {
+      "contentId": "practice-en-ws-foundation-001-s1",
+      "familyId": "ws-en-foundation-paragraph-001",
+      "sourceId": "ws-original-en-foundation-v1",
+      "contentType": "sentence",
+      "partition": "training",
+      "language": "en",
+      "contentHash": "sha256-af6f2cf389fffabfad01c864e412fb78993f0898c9ddefb0e5ab737e43e0cb3c",
+      "graphemeCount": 69,
+      "wordCount": 9,
+      "uniqueWordCount": 9,
+      "uppercaseCount": 1,
+      "digitCount": 0,
+      "punctuationCount": 2
+    },
+    {
+      "contentId": "practice-en-ws-foundation-001-s2",
+      "familyId": "ws-en-foundation-paragraph-001",
+      "sourceId": "ws-original-en-foundation-v1",
+      "contentType": "sentence",
+      "partition": "training",
+      "language": "en",
+      "contentHash": "sha256-0a487aae9ecf09c5f3d31255d2b97a26f29188a9cd58bcb57af15ec08a863e6b",
+      "graphemeCount": 76,
+      "wordCount": 13,
+      "uniqueWordCount": 12,
+      "uppercaseCount": 1,
+      "digitCount": 0,
+      "punctuationCount": 1
+    }
+  ]
+}

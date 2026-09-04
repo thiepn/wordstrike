@@ -6,6 +6,8 @@
   "scripts": {
     "test": "node scripts/runTests.mjs",
     "build:practice-corpus": "node scripts/buildPracticeCorpus.mjs",
-    "validate:practice-corpus": "node scripts/buildPracticeCorpus.mjs --validate"
+    "validate:practice-corpus": "node scripts/buildPracticeCorpus.mjs --validate",
+    "build:practice-indexes": "node scripts/buildPracticeIndexes.mjs",
+    "validate:practice-indexes": "node scripts/buildPracticeIndexes.mjs --validate"
   }
 }

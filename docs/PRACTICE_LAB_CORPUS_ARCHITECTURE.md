@@ -265,3 +265,5 @@ PL6 does not provide full production corpus population, frequency statistics, ta
 ## 22. PL7 contract
 
 PL7 may index only PL6-validated content. Every derived word/n-gram/position index must preserve `contentId`, `familyId`, `partition`, `sourceId`, and `corpusVersion`. It may not flatten the corpus into a generic pool or erase the allowed-use boundary.
+
+The implemented indexing contract is documented in **PRACTICE_LAB_TARGET_INDEX_ARCHITECTURE.md**. PL6 remains the source of truth; PL7 assets are rebuildable derived data bound to the PL6 manifest checksum.

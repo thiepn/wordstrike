@@ -17,6 +17,7 @@ The five canonical partitions are `training`, `transfer`, `benchmark`, `diagnost
 - `provenance/LICENSES.md`: content-license/provenance notes; repository code licensing is a separate concern.
 - `manifests/`: generated corpus inventory metadata and checksum; no sentence text.
 - `training/`, `transfer/`, `benchmark/`, `diagnostic/`, `research-holdout/`: generated partition artifacts.
+- `indexes/`: generated PL7 derived metadata/index shards bound to an exact PL6 corpus checksum. Never hand-edit these files.
 
 The PL6 English corpus is intentionally `foundation`, not `ready`. Its few WordStrike-authored items exist to certify the pipeline, not to claim production coverage.
 
@@ -48,6 +49,19 @@ npm run validate:practice-corpus
 Build output is deterministic. The builder completes all validation before replacing canonical files. A source snapshot checksum mismatch, unapproved source, unapproved item, duplicate, hard near-duplicate, partition conflict, or stale generated artifact fails closed.
 
 When a corpus has status `ready` or `retired`, changing its build inventory under the same corpus version is rejected. Create a new corpus version for material changes/repartitioning.
+
+## PL7 index build flow
+
+After changing reviewed corpus source, use the complete deterministic sequence:
+
+```bash
+npm run build:practice-corpus
+npm run validate:practice-corpus
+npm run build:practice-indexes
+npm run validate:practice-indexes
+```
+
+PL7 indexes are derived only. If an index is wrong, fix the PL6 corpus or PL7 analyzer/build logic and rebuild. **Never hand-edit generated PL7 indexes.** Training and diagnostic receive target→content reverse indexes; transfer and benchmark receive content→annotations only.
 
 ## Deliberate isolation
 

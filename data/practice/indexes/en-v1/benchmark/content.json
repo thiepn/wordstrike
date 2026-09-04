@@ -1,0 +1,27 @@
+{
+  "indexSchemaVersion": 1,
+  "indexGeneratorVersion": 1,
+  "corpusId": "practice-en-v1",
+  "corpusVersion": 1,
+  "corpusChecksum": "sha256-28beccf65eed71519da306c129da5040a20f364aed320dc21eea2d16c2a1c404",
+  "language": "en",
+  "partition": "benchmark",
+  "indexType": "content",
+  "items": [
+    {
+      "contentId": "practice-en-ws-foundation-003-s1",
+      "familyId": "ws-en-foundation-sentence-003",
+      "sourceId": "ws-original-en-foundation-v1",
+      "contentType": "sentence",
+      "partition": "benchmark",
+      "language": "en",
+      "contentHash": "sha256-60e3635f75f0210e5d675f986927e5077c2eeae7493e39f303da4d9e2d11b852",
+      "graphemeCount": 77,
+      "wordCount": 13,
+      "uniqueWordCount": 13,
+      "uppercaseCount": 1,
+      "digitCount": 0,
+      "punctuationCount": 1
+    }
+  ]
+}
