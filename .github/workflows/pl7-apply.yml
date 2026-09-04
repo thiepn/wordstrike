@@ -1,0 +1,61 @@
+name: PL7 Apply
+
+on:
+  push:
+    branches:
+      - codex/pl7-target-ngram-content-indexes
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out branch
+        uses: actions/checkout@v4
+        with:
+          ref: codex/pl7-target-ngram-content-indexes
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Extract PL7 implementation
+        run: base64 -d scripts/pl7-payload.b64 | tar -xJf -
+
+      - name: Apply shared-source patches
+        run: node scripts/applyPl7SourcePatches.mjs
+
+      - name: Build Practice indexes
+        run: node scripts/buildPracticeIndexes.mjs
+
+      - name: Validate Practice indexes
+        run: node scripts/buildPracticeIndexes.mjs --validate
+
+      - name: Focused PL7 tests
+        run: |
+          node tests/practice-text-segmentation.test.js
+          node tests/practice-text-analysis.test.js
+          node tests/practice-target-index.test.js
+          node tests/practice-index-sharding.test.js
+          node tests/practice-index-build.test.js
+          node tests/practice-index-partition-isolation.test.js
+          node tests/practice-index-runtime-loader.test.js
+          node tests/practice-index-integrity.test.js
+          node tests/practice-index-import-side-effects.test.js
+          node tests/practice-index-performance.test.js
+
+      - name: Full WordStrike suite
+        run: npm test
+
+      - name: Commit PL7 implementation
+        run: |
+          rm scripts/pl7-payload.b64 scripts/applyPl7SourcePatches.mjs .github/workflows/pl7-apply.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "feat(practice): implement PL7 target and content indexes"
+          git push origin HEAD:codex/pl7-target-ngram-content-indexes
