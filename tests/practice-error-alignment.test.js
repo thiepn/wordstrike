@@ -49,7 +49,7 @@ test("PL9 content classification is orthogonal to structural edit class", () => 
     [",", ".", "punctuation"],
     [" ", "x", "mixed"],
     ["7", "4", "numeric"],
-    ["%", "$", "symbol"],
+    ["$", "€", "symbol"],
   ]) {
     const result = alignment(expected, observed);
     assert.equal(classifyPracticeErrorContent({ expected, observed, alignment: result }), contentClass);
