@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "corpusId": "practice-test-en-v1",
+  "language": "en",
+  "corpusVersion": 1,
+  "partitionPolicyVersion": 1,
+  "status": "foundation",
+  "createdAt": "2026-09-04T00:00:00.000Z",
+  "families": [
+    {
+      "familyId": "fixture-family-001",
+      "sourceId": "test-fixture-en-v1",
+      "partitionLock": "training",
+      "items": [
+        {
+          "contentId": "fixture-content-001",
+          "contentType": "sentence",
+          "text": "A fixture sentence stays outside the production Practice corpus.",
+          "reviewStatus": "approved",
+          "metadata": { "tags": ["fixture"] }
+        }
+      ]
+    }
+  ]
+}

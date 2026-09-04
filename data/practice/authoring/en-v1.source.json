@@ -1,0 +1,130 @@
+{
+  "schemaVersion": 1,
+  "corpusId": "practice-en-v1",
+  "language": "en",
+  "corpusVersion": 1,
+  "partitionPolicyVersion": 1,
+  "status": "foundation",
+  "createdAt": "2026-09-04T00:00:00.000Z",
+  "families": [
+    {
+      "familyId": "ws-en-foundation-paragraph-001",
+      "sourceId": "ws-original-en-foundation-v1",
+      "partitionLock": "training",
+      "items": [
+        {
+          "contentId": "practice-en-ws-foundation-001-s1",
+          "contentType": "sentence",
+          "text": "Careful practice turns hesitant movement into calm, repeatable skill.",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "foundation",
+              "natural-prose"
+            ]
+          }
+        },
+        {
+          "contentId": "practice-en-ws-foundation-001-s2",
+          "contentType": "sentence",
+          "text": "A steady rhythm makes accuracy easier to preserve when speed begins to rise.",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "foundation",
+              "natural-prose"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "familyId": "ws-en-foundation-sentence-002",
+      "sourceId": "ws-original-en-foundation-v1",
+      "partitionLock": "transfer",
+      "items": [
+        {
+          "contentId": "practice-en-ws-foundation-002-s1",
+          "contentType": "sentence",
+          "text": "Morning light reached the quiet platform while the last train crossed the river.",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "foundation",
+              "natural-prose"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "familyId": "ws-en-foundation-sentence-003",
+      "sourceId": "ws-original-en-foundation-v1",
+      "partitionLock": "benchmark",
+      "items": [
+        {
+          "contentId": "practice-en-ws-foundation-003-s1",
+          "contentType": "sentence",
+          "text": "Several small decisions can shape the pace of a long and demanding afternoon.",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "foundation",
+              "natural-prose"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "familyId": "ws-en-foundation-probeset-001",
+      "sourceId": "ws-original-en-foundation-v1",
+      "partitionLock": "diagnostic",
+      "items": [
+        {
+          "contentId": "practice-en-ws-foundation-probe-001",
+          "contentType": "probe",
+          "text": "tap map tap map",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "foundation",
+              "diagnostic-probe"
+            ]
+          }
+        },
+        {
+          "contentId": "practice-en-ws-foundation-probe-002",
+          "contentType": "probe",
+          "text": "map tap map tap",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "foundation",
+              "diagnostic-probe"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "familyId": "ws-en-foundation-sentence-004",
+      "sourceId": "ws-original-en-foundation-v1",
+      "partitionLock": "research-holdout",
+      "items": [
+        {
+          "contentId": "practice-en-ws-foundation-004-s1",
+          "contentType": "sentence",
+          "text": "A narrow path curved beyond the field and disappeared behind a line of trees.",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "foundation",
+              "natural-prose"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

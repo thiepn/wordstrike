@@ -1,0 +1,23 @@
+{
+  "registryVersion": 1,
+  "sources": [
+    {
+      "sourceId": "test-fixture-en-v1",
+      "title": "PL6 test-only corpus fixture",
+      "sourceType": "test-fixture",
+      "upstream": null,
+      "license": {
+        "name": "Test fixture only",
+        "spdx": null,
+        "url": null,
+        "attributionRequired": false,
+        "notes": "Not approved for production Practice display."
+      },
+      "retrievedAt": null,
+      "sourceChecksum": null,
+      "snapshotPath": null,
+      "usageApproval": "test-only",
+      "notes": "PL6 deterministic build fixture."
+    }
+  ]
+}

@@ -71,3 +71,12 @@ Ambiguous proper/common forms are kept only when explicitly documented in
 
 The five reported terms are absent from the ledger's KEEP decisions, generated word
 list, all tiers, and audited fallbacks.
+
+## PL6 Practice corpus boundary
+
+This gameplay audit remains a legacy gameplay concern. PL6 does **not** treat
+`data/commonGameplayWords.json`, its Google-10k-derived source pipeline, or
+`data/english200.json` as approved Practice Lab corpus sources. The Practice corpus has
+its own explicit provenance/usage-approval registry under `data/practice/` and does not
+import these gameplay/ranked datasets. PL6 does not make any new licensing claim about
+the legacy gameplay sources.

@@ -1,0 +1,68 @@
+{
+  "manifestVersion": 1,
+  "corpusSchemaVersion": 1,
+  "corpusId": "practice-en-v1",
+  "language": "en",
+  "corpusVersion": 1,
+  "partitionPolicyVersion": 1,
+  "createdAt": "2026-09-04T00:00:00.000Z",
+  "sourceIds": [
+    "ws-original-en-foundation-v1"
+  ],
+  "partitionCounts": {
+    "training": 2,
+    "transfer": 1,
+    "benchmark": 1,
+    "diagnostic": 2,
+    "research-holdout": 1
+  },
+  "familyCounts": {
+    "total": 5,
+    "byPartition": {
+      "training": 1,
+      "transfer": 1,
+      "benchmark": 1,
+      "diagnostic": 1,
+      "research-holdout": 1
+    }
+  },
+  "contentCounts": {
+    "total": 7,
+    "byPartition": {
+      "training": 2,
+      "transfer": 1,
+      "benchmark": 1,
+      "diagnostic": 2,
+      "research-holdout": 1
+    }
+  },
+  "familyAssignments": [
+    {
+      "familyId": "ws-en-foundation-paragraph-001",
+      "partition": "training",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "ws-en-foundation-probeset-001",
+      "partition": "diagnostic",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "ws-en-foundation-sentence-002",
+      "partition": "transfer",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "ws-en-foundation-sentence-003",
+      "partition": "benchmark",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "ws-en-foundation-sentence-004",
+      "partition": "research-holdout",
+      "assignment": "locked"
+    }
+  ],
+  "status": "foundation",
+  "buildChecksum": "sha256-28beccf65eed71519da306c129da5040a20f364aed320dc21eea2d16c2a1c404"
+}

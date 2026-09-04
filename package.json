@@ -4,6 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node scripts/runTests.mjs"
+    "test": "node scripts/runTests.mjs",
+    "build:practice-corpus": "node scripts/buildPracticeCorpus.mjs",
+    "validate:practice-corpus": "node scripts/buildPracticeCorpus.mjs --validate"
   }
 }

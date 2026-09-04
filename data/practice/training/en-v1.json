@@ -1,0 +1,47 @@
+{
+  "artifactVersion": 1,
+  "corpusSchemaVersion": 1,
+  "corpusId": "practice-en-v1",
+  "language": "en",
+  "corpusVersion": 1,
+  "partitionPolicyVersion": 1,
+  "partition": "training",
+  "items": [
+    {
+      "contentId": "practice-en-ws-foundation-001-s1",
+      "familyId": "ws-en-foundation-paragraph-001",
+      "sourceId": "ws-original-en-foundation-v1",
+      "language": "en",
+      "corpusVersion": 1,
+      "partition": "training",
+      "contentType": "sentence",
+      "text": "Careful practice turns hesitant movement into calm, repeatable skill.",
+      "contentHash": "sha256-af6f2cf389fffabfad01c864e412fb78993f0898c9ddefb0e5ab737e43e0cb3c",
+      "reviewStatus": "approved",
+      "metadata": {
+        "tags": [
+          "foundation",
+          "natural-prose"
+        ]
+      }
+    },
+    {
+      "contentId": "practice-en-ws-foundation-001-s2",
+      "familyId": "ws-en-foundation-paragraph-001",
+      "sourceId": "ws-original-en-foundation-v1",
+      "language": "en",
+      "corpusVersion": 1,
+      "partition": "training",
+      "contentType": "sentence",
+      "text": "A steady rhythm makes accuracy easier to preserve when speed begins to rise.",
+      "contentHash": "sha256-0a487aae9ecf09c5f3d31255d2b97a26f29188a9cd58bcb57af15ec08a863e6b",
+      "reviewStatus": "approved",
+      "metadata": {
+        "tags": [
+          "foundation",
+          "natural-prose"
+        ]
+      }
+    }
+  ]
+}
