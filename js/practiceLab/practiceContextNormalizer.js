@@ -4,9 +4,12 @@ import {
 } from "./practiceRobustStats.js";
 import { createPracticeTransitionContextResolver } from "./practiceContextFeatures.js";
 import { createUnavailablePracticeReferenceFrequencyProvider } from "./practiceReferenceFrequency.js";
+import {
+  PRACTICE_CONTEXT_MODEL_VERSION,
+  PRACTICE_CONTEXT_POLICY_VERSION,
+} from "./practiceNormalizationConstants.js";
 
-export const PRACTICE_CONTEXT_MODEL_VERSION = 1;
-export const PRACTICE_CONTEXT_POLICY_VERSION = 1;
+export { PRACTICE_CONTEXT_MODEL_VERSION, PRACTICE_CONTEXT_POLICY_VERSION } from "./practiceNormalizationConstants.js";
 
 export const PRACTICE_CONTEXT_NORMALIZATION_STATUSES = Object.freeze([
   "normalized",
@@ -87,6 +90,14 @@ function summarizeCounts(values) {
   });
 }
 
+function observedExpectedEntity(contentAnalysis, transition) {
+  const position = Number.isInteger(transition?.textPosition) ? transition.textPosition : null;
+  const entityKey = position != null && position >= 0 && position < contentAnalysis.graphemes.length
+    ? contentAnalysis.graphemes[position]
+    : null;
+  return entityKey == null ? null : freezeDeep({ entityType: "key", entityKey });
+}
+
 export function normalizePracticeContextLatency({
   latencyAnalysis,
   contentAnalysis,
@@ -102,6 +113,7 @@ export function normalizePracticeContextLatency({
   const enriched = latencyAnalysis.classifiedTransitions.map((transition) => Object.freeze({
     transition,
     features: resolver.resolve(transition),
+    expectedEntity: observedExpectedEntity(contentAnalysis, transition),
   }));
 
   const globalFluentMedianMs = finiteLatency(latencyAnalysis.sessionSummary?.fluentMedianMs)
@@ -127,7 +139,7 @@ export function normalizePracticeContextLatency({
   const residualMsValues = [];
   const residualRatioValues = [];
 
-  const normalizedTransitions = enriched.map(({ transition, features }) => {
+  const normalizedTransitions = enriched.map(({ transition, features, expectedEntity }) => {
     const classifiableTransition = ["fluent", "disfluent"].includes(transition.classification) && finiteLatency(transition.latencyMs);
     if (classifiableTransition) {
       classifiable += 1;
@@ -175,6 +187,7 @@ export function normalizePracticeContextLatency({
     return freezeDeep({
       eventIndex: transition.eventIndex,
       textPosition: transition.textPosition,
+      expectedEntity,
       observedLatencyMs: finiteLatency(transition.latencyMs) ? transition.latencyMs : null,
       expectedLatencyMs,
       residualLatencyMs,
