@@ -21,6 +21,7 @@ export function buildPracticeSessionResult({
   timeContext,
   metrics,
   targetEntities,
+  foundationAnalysis = null,
   analysis = null,
 }) {
   const summary = createDefaultSessionSummary({
@@ -65,6 +66,7 @@ export function buildPracticeSessionResult({
       rawWpm: metrics.rawWpm,
       accuracy: metrics.accuracy,
       consistency: metrics.consistency,
+      fluencySummary: foundationAnalysis?.latency?.sessionSummary ?? null,
       beforeMetrics: analysis?.beforeMetrics ?? null,
       afterMetrics: analysis?.afterMetrics ?? null,
       transferMetrics: analysis?.transferMetrics ?? null,

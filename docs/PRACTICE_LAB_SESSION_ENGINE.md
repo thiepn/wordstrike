@@ -1,6 +1,6 @@
 # Practice Lab Session Engine
 
-Status: Prompt 3 headless foundation + PL5 context identity
+Status: Prompt 3 headless foundation + PL5 context identity + PL8 robust latency foundation
 
 ## 1. Scope
 
@@ -89,7 +89,7 @@ Results include accepted/stateChanged, reason, correctness, completed unit IDs, 
 
 ## 13. Timing model
 
-Injected monotonic time drives active/paused duration, latency, words, checkpoint cadence, and transitions. Injected wall time drives UTC timestamps, local-day context, expiry, and wall duration. Active time never derives from wall-clock subtraction and freezes while paused or terminal.
+Injected monotonic time drives active/paused duration, latency, words, checkpoint cadence, and transitions. Injected wall time drives UTC timestamps, local-day context, expiry, and wall duration. Active time never derives from wall-clock subtraction and freezes while paused or terminal. PL8 additionally assigns every input event a deterministic `timingSegmentId`; ordinary pause/resume creates a new segment, checkpoint restore starts a fresh restore segment, and correction activity remains inside the current segment with a separate post-correction boundary.
 
 ## 14. First-input timing
 
@@ -109,7 +109,7 @@ Defaults are 15 seconds minimum, 50 accepted insertions threshold, one timer, an
 
 ## 18. Checkpoint payload
 
-**buildPracticeCheckpoint()** uses the current schema: immutable **profileId + contextId + sessionId**, versions, configuration, full bounded content snapshot and descriptor/hash, cursor/typed buffer, completed units, durations, aggregate metrics, original start/timezone context, and at most 32 recent input events. It contains no unbounded trace, callback, DOM, auth, or ranking data.
+**buildPracticeCheckpoint()** uses the current schema: immutable **profileId + contextId + sessionId**, versions, configuration, full bounded content snapshot and descriptor/hash, cursor/typed buffer, completed units, durations, aggregate metrics, original start/timezone context, at most 32 recent input events, and small content-free event-trace coverage metadata. New tail events include PL8 trace/timing-segment metadata. Historical tails without those fields normalize in memory on restore. It contains no unbounded trace, callback, DOM, auth, or ranking data.
 
 ## 19. Restoration
 
@@ -117,7 +117,7 @@ Restore validates schema/expiry/profile/**context**/experiment/session/content v
 
 ## 20. Event-buffer limits
 
-**createPracticeEventBuffer()** retains the newest 20,000 detailed events by default. It preserves total count, marks truncation, and keeps aggregate metrics independently. Traces are immutable copies, remain in memory, and are cleared during destroy.
+**createPracticeEventBuffer()** retains the newest 20,000 detailed events by default. It preserves total count, marks truncation, and keeps aggregate metrics independently. `getMetadata()` exposes only capacity, retained/total counts, and truncation state; it contains no expected/entered text. PL8 maps that metadata to `complete-session` or `retained-window` analysis scope. Traces are immutable copies, remain in memory, and are cleared during destroy.
 
 ## 21. Metrics formulas
 
@@ -136,6 +136,8 @@ consistency = clamp(100 - CV * 100, 0, 100)
 
 Insufficient evidence returns null.
 
+PL8 does **not** redefine this legacy consistency field. At finalization, a separate robust classifier uses median/MAD and a versioned adaptive threshold to distinguish `fluent`, `disfluent`, `interruption`, and `excluded` transitions. The compact result is persisted as `fluencySummary`; raw/classified event traces are not persisted. See **PRACTICE_LAB_LATENCY_CLASSIFICATION.md**.
+
 ## 22. Key, bigram, trigram, and word observations
 
 Transition latency is attributed to the expected current grapheme. Bigrams use previous plus current expected graphemes. Trigrams use exactly two previous plus current, never four characters. Word observations use units/fallback boundaries and contain start delay, completion duration, correctness, and correction count. Punctuation/number/symbol extension types remain available to later analyzers.
@@ -151,11 +153,11 @@ Evaluation occurs after accepted input, append, tick, and explicit completion.
 
 ## 24. Result construction
 
-**buildPracticeSessionResult()** maps immutable **profileId + contextId + sessionId**, version, content descriptor, UTC/local time, durations, generic metrics, targets, and bounded optional analysis into a current Practice summary. The historical contextId is persisted permanently and is never derived later from activeContextId. It creates no recommendation, mastery, leaderboard, ranked, submission, or raw-event field.
+**buildPracticeSessionResult()** maps immutable **profileId + contextId + sessionId**, version, content descriptor, UTC/local time, durations, generic metrics, targets, canonical PL8 `fluencySummary`, and bounded optional experiment analysis into a current Practice summary. The historical contextId is persisted permanently and is never derived later from activeContextId. `fluencySummary` is owned by generic foundation analysis, not experiment output. It creates no recommendation, mastery, leaderboard, ranked, submission, raw-event, or classified-event field.
 
 ## 25. Experiment analysis hook
 
-Optional **analyzeResult()** receives an immutable snapshot containing the frozen profile/context identity, metrics, bounded in-memory trace, and observations. Any returned skill/review updates must match the completing summary's profileId and contextId; mixed-context output is rejected before commit. Output must be JSON-safe and at most 32 KiB. Analyzer failure blocks commit, pauses an active session, preserves/refreshes its checkpoint, and returns a recoverable **PRACTICE_SESSION_ANALYSIS_FAILED** error. Retry is explicit.
+Before optional experiment analysis, PL8 builds immutable generic `foundationAnalysis` from the bounded trace and coverage metadata. Optional **analyzeResult()** receives the frozen profile/context identity, metrics, bounded in-memory trace, observations, and `foundationAnalysis`. Experiment code may consume but cannot mutate or replace the canonical fluency summary. Any returned skill/review updates must match the completing summary's profileId and contextId; mixed-context output is rejected before commit. Output must be JSON-safe and at most 32 KiB. Foundation-analysis or experiment-analysis failure blocks commit, preserves/refreshes recovery state, and returns a recoverable **PRACTICE_SESSION_ANALYSIS_FAILED** error. Retry is explicit.
 
 ## 26. Atomic completion
 
@@ -164,7 +166,8 @@ lock finalization
  -> freeze active timing
  -> await checkpoint write
  -> calculate metrics/observations
- -> optional analysis
+ -> build generic foundationAnalysis / fluencySummary
+ -> optional experiment analysis
  -> build + validate summary/profile update
  -> repository.commitCompletedPracticeSession() [profile/context ownership enforced]
  -> transaction clears checkpoint
@@ -200,13 +203,13 @@ One checkpoint write may run at a time; forced requests wait/coalesce. Resume wa
 
 ## 33. Diagnostics
 
-**getDiagnostics()** returns session/state/version, total/retained/truncated events, active duration, checkpoint state/count/time, content length, cursor, subscriber count, finalization state, and last error code. It excludes full expected/typed text, custom text, auth, and storage secrets.
+**getDiagnostics()** returns session/state/version, deterministic timing-segment ID, content-free event-buffer coverage metadata, active duration, checkpoint state/count/time, content length, cursor, subscriber count, finalization state, and last error code. It excludes full expected/typed text, custom text, auth, and storage secrets.
 
 ## 34. Repository dependencies
 
 The engine requires only the Prompt 2 repository methods: profile read, checkpoint save/get/clear, summary lookup, and atomic completed-session commit. Tests use the explicitly injected memory repository. The engine neither opens nor selects a storage backend.
 
-The only Prompt 2 schema extension is nullable **lastTrainingDayKey** on profiles, needed to count local active days idempotently. That persisted change advances only the profile record from v1 to v2. The deterministic migration adds null when absent; IndexedDB structural version 1, manifest version 1, and every other record version remain unchanged.
+Current Practice persistence follows the later PL5 context-identity schema: IndexedDB structural version 2, profile record version 3, context record version 1, and checkpoint record version 2. PL8 leaves those structural/profile/checkpoint versions unchanged and advances only `sessionSummary` from v2 to v3 by adding nullable `fluencySummary`. Historical summaries migrate with `fluencySummary: null` because their raw traces were never persisted and robust timing cannot be reconstructed honestly from old means/variances.
 
 ## 35. Testing strategy
 

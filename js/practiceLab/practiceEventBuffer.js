@@ -1,6 +1,13 @@
 import { PRACTICE_SESSION_LIMITS } from "./practiceSessionConstants.js";
 import { clonePracticeValue } from "./practiceStorageContract.js";
 
+const freezeMetadata = ({ capacity, retainedEventCount, totalEventCount, truncated }) => Object.freeze({
+  capacity,
+  retainedEventCount,
+  totalEventCount,
+  truncated,
+});
+
 export function createPracticeEventBuffer({
   capacity = PRACTICE_SESSION_LIMITS.eventBuffer,
 } = {}) {
@@ -18,11 +25,31 @@ export function createPracticeEventBuffer({
       }
       return totalEventCount;
     },
+    restore(restoredEvents = [], metadata = {}) {
+      if (!Array.isArray(restoredEvents)) throw new TypeError("Restored Practice event trace must be an array");
+      events.length = 0;
+      const retained = restoredEvents.slice(-capacity).map((event) => Object.freeze(clonePracticeValue(event)));
+      events.push(...retained);
+      const suppliedTotal = Number.isInteger(metadata.totalEventCount) && metadata.totalEventCount >= 0
+        ? metadata.totalEventCount
+        : retained.length;
+      totalEventCount = Math.max(suppliedTotal, retained.length);
+      truncated = Boolean(metadata.truncated || restoredEvents.length > capacity || totalEventCount > retained.length);
+      return freezeMetadata({ capacity, retainedEventCount: events.length, totalEventCount, truncated });
+    },
     getTrace() {
       return Object.freeze(events.map((event) => Object.freeze(clonePracticeValue(event))));
     },
     getTail(count) {
       return Object.freeze(events.slice(-Math.max(0, count)).map((event) => Object.freeze(clonePracticeValue(event))));
+    },
+    getMetadata() {
+      return freezeMetadata({
+        capacity,
+        retainedEventCount: events.length,
+        totalEventCount,
+        truncated,
+      });
     },
     clear() {
       events.length = 0;
@@ -32,4 +59,3 @@ export function createPracticeEventBuffer({
     get truncated() { return truncated; },
   });
 }
-
