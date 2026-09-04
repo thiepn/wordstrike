@@ -14,8 +14,9 @@ import {
   normalizePracticeContextLatency,
 } from "./practiceContextNormalizer.js";
 import { PRACTICE_KEYBOARD_GEOMETRY_VERSION } from "./practiceKeyboardGeometry.js";
+import { PRACTICE_NORMALIZATION_ANALYSIS_VERSION } from "./practiceNormalizationConstants.js";
 
-export const PRACTICE_NORMALIZATION_ANALYSIS_VERSION = 1;
+export { PRACTICE_NORMALIZATION_ANALYSIS_VERSION } from "./practiceNormalizationConstants.js";
 
 const freezeDeep = (value) => {
   if (!value || typeof value !== "object" || Object.isFrozen(value)) return value;
