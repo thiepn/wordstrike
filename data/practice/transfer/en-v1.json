@@ -1,0 +1,29 @@
+{
+  "artifactVersion": 1,
+  "corpusSchemaVersion": 1,
+  "corpusId": "practice-en-v1",
+  "language": "en",
+  "corpusVersion": 1,
+  "partitionPolicyVersion": 1,
+  "partition": "transfer",
+  "items": [
+    {
+      "contentId": "practice-en-ws-foundation-002-s1",
+      "familyId": "ws-en-foundation-sentence-002",
+      "sourceId": "ws-original-en-foundation-v1",
+      "language": "en",
+      "corpusVersion": 1,
+      "partition": "transfer",
+      "contentType": "sentence",
+      "text": "Morning light reached the quiet platform while the last train crossed the river.",
+      "contentHash": "sha256-3da983784a96c77cc9e6e8a64814c3cc461dcd69e04fee820825d30c5ee00be2",
+      "reviewStatus": "approved",
+      "metadata": {
+        "tags": [
+          "foundation",
+          "natural-prose"
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "registryVersion": 1,
+  "sources": [
+    {
+      "sourceId": "ws-original-en-foundation-v1",
+      "title": "WordStrike Practice English Foundation Samples v1",
+      "sourceType": "wordstrike-original",
+      "upstream": null,
+      "license": {
+        "name": "WordStrike-authored original corpus material",
+        "spdx": null,
+        "url": null,
+        "attributionRequired": false,
+        "notes": "Content-specific reviewed metadata. Repository code licensing is a separate concern."
+      },
+      "retrievedAt": null,
+      "sourceChecksum": "sha256-d7da8abebbefc2558b55b84d22d2c6e4756c3749c8b1a13d6d04c968ee4e03e0",
+      "snapshotPath": "authoring/en-v1.source.json",
+      "usageApproval": "practice-display-approved",
+      "notes": "Small PL6 foundation corpus only; not production-complete coverage."
+    }
+  ]
+}

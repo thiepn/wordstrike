@@ -1,0 +1,47 @@
+{
+  "artifactVersion": 1,
+  "corpusSchemaVersion": 1,
+  "corpusId": "practice-en-v1",
+  "language": "en",
+  "corpusVersion": 1,
+  "partitionPolicyVersion": 1,
+  "partition": "diagnostic",
+  "items": [
+    {
+      "contentId": "practice-en-ws-foundation-probe-001",
+      "familyId": "ws-en-foundation-probeset-001",
+      "sourceId": "ws-original-en-foundation-v1",
+      "language": "en",
+      "corpusVersion": 1,
+      "partition": "diagnostic",
+      "contentType": "probe",
+      "text": "tap map tap map",
+      "contentHash": "sha256-706c9c35726dae6b3b99f6dffde50d3ee4a4811ee75966dee3336c16ec5a1616",
+      "reviewStatus": "approved",
+      "metadata": {
+        "tags": [
+          "foundation",
+          "diagnostic-probe"
+        ]
+      }
+    },
+    {
+      "contentId": "practice-en-ws-foundation-probe-002",
+      "familyId": "ws-en-foundation-probeset-001",
+      "sourceId": "ws-original-en-foundation-v1",
+      "language": "en",
+      "corpusVersion": 1,
+      "partition": "diagnostic",
+      "contentType": "probe",
+      "text": "map tap map tap",
+      "contentHash": "sha256-e27e1ebceab05a150ee287c7a64d50d8b0af23ce5392ac5a06b9b60c983ef8d9",
+      "reviewStatus": "approved",
+      "metadata": {
+        "tags": [
+          "foundation",
+          "diagnostic-probe"
+        ]
+      }
+    }
+  ]
+}

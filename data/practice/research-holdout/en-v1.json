@@ -1,0 +1,29 @@
+{
+  "artifactVersion": 1,
+  "corpusSchemaVersion": 1,
+  "corpusId": "practice-en-v1",
+  "language": "en",
+  "corpusVersion": 1,
+  "partitionPolicyVersion": 1,
+  "partition": "research-holdout",
+  "items": [
+    {
+      "contentId": "practice-en-ws-foundation-004-s1",
+      "familyId": "ws-en-foundation-sentence-004",
+      "sourceId": "ws-original-en-foundation-v1",
+      "language": "en",
+      "corpusVersion": 1,
+      "partition": "research-holdout",
+      "contentType": "sentence",
+      "text": "A narrow path curved beyond the field and disappeared behind a line of trees.",
+      "contentHash": "sha256-09850d3198773dcdfac291f462a7b498f183b0b6cbbb5eae09686be84ecb6b4f",
+      "reviewStatus": "approved",
+      "metadata": {
+        "tags": [
+          "foundation",
+          "natural-prose"
+        ]
+      }
+    }
+  ]
+}

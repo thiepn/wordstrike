@@ -1,0 +1,29 @@
+{
+  "artifactVersion": 1,
+  "corpusSchemaVersion": 1,
+  "corpusId": "practice-en-v1",
+  "language": "en",
+  "corpusVersion": 1,
+  "partitionPolicyVersion": 1,
+  "partition": "benchmark",
+  "items": [
+    {
+      "contentId": "practice-en-ws-foundation-003-s1",
+      "familyId": "ws-en-foundation-sentence-003",
+      "sourceId": "ws-original-en-foundation-v1",
+      "language": "en",
+      "corpusVersion": 1,
+      "partition": "benchmark",
+      "contentType": "sentence",
+      "text": "Several small decisions can shape the pace of a long and demanding afternoon.",
+      "contentHash": "sha256-60e3635f75f0210e5d675f986927e5077c2eeae7493e39f303da4d9e2d11b852",
+      "reviewStatus": "approved",
+      "metadata": {
+        "tags": [
+          "foundation",
+          "natural-prose"
+        ]
+      }
+    }
+  ]
+}
