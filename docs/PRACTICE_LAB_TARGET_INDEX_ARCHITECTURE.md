@@ -230,3 +230,9 @@ Generated data is represented as arrays/plain values rather than target-keyed pr
 PL7 does not implement external/general word frequency, PL8 latency/fluent classification, typability, weakness scoring, ability estimation, adaptive target selection, novelty/exposure history, benchmark forms, transfer selection, personal chunks, actual Practice exercises, or Daily Coach.
 
 PL8 consumes user observations independently. PL10 may consume PL7 structural facts without converting them into user evidence. PL20/PL21 can request training words/content for combinations/keys. PL24 can independently select transfer content and only afterward request its annotations. Future Custom Text may reuse `analyzePracticeText()` in memory without entering static indexes.
+
+## PL10 downstream normalization use
+
+PL10 reuses PL7's canonical grapheme/word segmentation and structural occurrence context rather than creating a competing tokenizer. PL10 may derive coarse context bands and static text-difficulty artifacts from PL6/PL7 outputs, but **only the PL6 training partition fits the typability reference**. Transfer, benchmark, diagnostic and research-holdout data do not fit PL10 medians/scales/weights/percentile reference. Research holdout is not normally scored.
+
+PL7 occurrence/coverage counts remain corpus-local structural counts and are **not** reinterpreted as general-language frequency. PL10 frequency features require a separately governed frequency reference; none exists in the current release. Static PL10 artifacts bind to the exact PL6 corpus checksum and PL7 `indexChecksum`.

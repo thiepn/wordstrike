@@ -1,6 +1,6 @@
 # Practice Lab Data Architecture
 
-Status: PL5 context identity foundation
+Status: PL5 context identity foundation + PL8 latency + PL9 error/recovery + PL10 context/typability normalization
 Database generation: 2
 Runtime integration: explicit Practice-only use; public Practice remains developer gated
 
@@ -64,7 +64,7 @@ Fresh-v2 creation and v1→v2 upgrade are tested to converge on the same declare
 | context | 1 |
 | profile | 3 |
 | skillStat | 2 |
-| sessionSummary | 2 |
+| sessionSummary | 5 |
 | reviewItem | 2 |
 | checkpoint | 2 |
 | customText | 1 |
@@ -169,3 +169,11 @@ Contexts are durable identity records. PL5 implements no arbitrary context delet
 ## 14. Explicit PL5 non-goals
 
 PL5 does not implement physical/software auto-detection, a context-selection UI, hardware keyboard profiles, multilingual corpora, ability/weakness models, Coach logic, adaptive experiments, assessment UI, advanced telemetry, leaderboard behavior, or cloud sync.
+
+## 15. PL10 durable normalization evidence
+
+PL10 keeps IndexedDB structural version **2** and advances only **sessionSummary** from v4 to v5. The new nullable **normalizationSummary** stores compact versioned context/typability evidence. Historical v4 summaries migrate with **normalizationSummary: null**; PL10 never reconstructs normalized residuals or text difficulty from older WPM/latency/error aggregates.
+
+Durable normalization evidence may contain the frozen context fingerprint, locale/layout/input method, transition-normalization coverage/residual aggregates, and compact text-difficulty/reference metadata. It does **not** persist raw text, per-transition residual traces, full feature vectors, entity residual maps, frequency tables, hardware nicknames, browser/device fingerprints, or leaderboard fields.
+
+The exact model contract and protected-partition rules are documented in **PRACTICE_LAB_CONTEXT_TYPABILITY_MODEL.md**.

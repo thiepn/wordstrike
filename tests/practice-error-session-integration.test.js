@@ -36,7 +36,7 @@ test("PL9 live events carry cursor/removal metadata and generic sessions persist
   const beforeComplete = engine.getMetricsSnapshot();
   const result = await engine.complete("manual-stop");
 
-  assert.equal(result.summary.recordVersion, 4);
+  assert.equal(result.summary.recordVersion, 5);
   assert.equal(result.summary.errorSummary.errorEpisodeCount, 1);
   assert.equal(result.summary.errorSummary.correctedEpisodeCount, 1);
   assert.equal(result.summary.errorSummary.incorrectCharactersRemoved, 1);
@@ -88,7 +88,7 @@ test("PL9 experiment analyzers receive frozen errors but cannot overwrite canoni
   const result = await engine.complete("manual-stop");
 
   assert.ok(received?.foundationAnalysis?.errors);
-  assert.equal(received.foundationAnalysis.version, 2);
+  assert.equal(received.foundationAnalysis.version, 3);
   assert.equal(Object.isFrozen(received.foundationAnalysis), true);
   assert.equal(Object.isFrozen(received.foundationAnalysis.errors), true);
   assert.equal(mutationThrew, true);

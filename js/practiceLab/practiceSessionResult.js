@@ -68,6 +68,7 @@ export function buildPracticeSessionResult({
       consistency: metrics.consistency,
       fluencySummary: foundationAnalysis?.latency?.sessionSummary ?? null,
       errorSummary: foundationAnalysis?.errors?.sessionSummary ?? null,
+      normalizationSummary: foundationAnalysis?.normalization?.sessionSummary ?? null,
       beforeMetrics: analysis?.beforeMetrics ?? null,
       afterMetrics: analysis?.afterMetrics ?? null,
       transferMetrics: analysis?.transferMetrics ?? null,

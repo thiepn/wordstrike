@@ -5,8 +5,9 @@ import {
 import { analyzePracticeErrors } from "./practiceErrorAnalyzer.js";
 import { createPracticeErrorTracker } from "./practiceErrorTracker.js";
 import { PRACTICE_ERROR_POLICY_V1 } from "./practiceErrorPolicy.js";
+import { analyzePracticeNormalization } from "./practiceNormalizationAnalysis.js";
 
-export const PRACTICE_FOUNDATION_ANALYSIS_VERSION = 2;
+export const PRACTICE_FOUNDATION_ANALYSIS_VERSION = 3;
 
 const freezeDeep = (value) => {
   if (!value || typeof value !== "object" || Object.isFrozen(value)) return value;
@@ -51,7 +52,7 @@ function buildFallbackTrackerSnapshot(events, traceMetadata, policy) {
       tracker.consume(event);
       cursor = event.cursorAfter;
     } catch {
-      // Live PL9 sessions supply streaming state; this is only a legacy/synthetic fallback.
+      // Live PL9+ sessions supply streaming state; this is only a legacy/synthetic fallback.
     }
   }
   return tracker.finalizeSnapshot();
@@ -63,6 +64,10 @@ export function buildPracticeFoundationAnalysis({
   latencyPolicy = PRACTICE_LATENCY_POLICY_V1,
   errorPolicy = PRACTICE_ERROR_POLICY_V1,
   errorTrackerSnapshot = null,
+  contentPlan = null,
+  context = null,
+  segmenter = null,
+  normalizationOptions = {},
 } = {}) {
   const latency = analyzePracticeLatency({ events, traceMetadata, policy: latencyPolicy });
   const trackerSnapshot = errorTrackerSnapshot ?? buildFallbackTrackerSnapshot(events, traceMetadata, errorPolicy);
@@ -73,5 +78,17 @@ export function buildPracticeFoundationAnalysis({
     latencyAnalysis: latency,
     policy: errorPolicy,
   });
-  return freezeDeep({ version: PRACTICE_FOUNDATION_ANALYSIS_VERSION, latency, errors });
+  const normalization = analyzePracticeNormalization({
+    ...normalizationOptions,
+    latencyAnalysis: latency,
+    contentPlan,
+    context,
+    segmenter,
+  });
+  return freezeDeep({
+    version: PRACTICE_FOUNDATION_ANALYSIS_VERSION,
+    latency,
+    errors,
+    normalization,
+  });
 }

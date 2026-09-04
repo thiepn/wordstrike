@@ -29,7 +29,7 @@ test("generic sessions persist canonical fluencySummary without an experiment an
   await engine.start();
   await typeCorrect(engine, harness, 26);
   const result = await engine.complete("manual-stop");
-  assert.equal(result.summary.recordVersion, 4);
+  assert.equal(result.summary.recordVersion, 5);
   assert.equal(result.summary.fluencySummary.calibration.status, "adaptive");
   assert.equal(result.summary.fluencySummary.fluentTransitionCount, 25);
   assert.equal(result.summary.fluencySummary.disfluentTransitionCount, 0);

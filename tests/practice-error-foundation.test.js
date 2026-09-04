@@ -25,7 +25,7 @@ function insertion(index, latency = index === 1 ? null : 100) {
   };
 }
 
-test("PL9 foundation analysis v2 contains frozen latency and generic errors", () => {
+test("PL9 latency/error outputs remain intact inside PL10 foundation analysis v3", () => {
   const events = Array.from({ length: 30 }, (_, index) => insertion(index + 1));
   const metadata = { capacity: 20_000, retainedEventCount: events.length, totalEventCount: events.length, truncated: false };
   const tracker = createPracticeErrorTracker();
@@ -35,8 +35,8 @@ test("PL9 foundation analysis v2 contains frozen latency and generic errors", ()
     traceMetadata: metadata,
     errorTrackerSnapshot: tracker.finalizeSnapshot(),
   });
-  assert.equal(PRACTICE_FOUNDATION_ANALYSIS_VERSION, 2);
-  assert.equal(foundation.version, 2);
+  assert.equal(PRACTICE_FOUNDATION_ANALYSIS_VERSION, 3);
+  assert.equal(foundation.version, 3);
   assert.ok(foundation.latency);
   assert.ok(foundation.errors);
   assert.equal(foundation.errors.sessionSummary.errorEpisodeCount, 0);
@@ -66,6 +66,6 @@ test("PL9 fallback foundation analysis remains safe for PL8-style synthetic trac
     events,
     traceMetadata: { capacity: 20_000, retainedEventCount: 5, totalEventCount: 5, truncated: false },
   });
-  assert.equal(foundation.version, 2);
+  assert.equal(foundation.version, 3);
   assert.equal(foundation.errors.sessionSummary.errorEpisodeCount, 0);
 });

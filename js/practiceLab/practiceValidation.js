@@ -43,6 +43,7 @@ import {
   PRACTICE_ERROR_TRACE_SCOPES,
   PRACTICE_RECOVERY_POLICY_VERSION,
 } from "./practiceErrorPolicy.js";
+import { validatePracticeNormalizationSummary } from "./practiceNormalizationValidation.js";
 
 const SETTINGS_ENUMS = Object.freeze({
   punctuationFrequency: ["none", "low", "medium", "high"],
@@ -54,7 +55,8 @@ const SETTINGS_ENUMS = Object.freeze({
 const UNSAFE_OBJECT_KEYS = new Set(["__proto__", "constructor", "prototype"]);
 const FORBIDDEN_SESSION_FIELDS = Object.freeze([
   "rawEvents", "eventTrace", "rawEventTrace", "classifiedEventTrace",
-  "errorEpisodeHistory", "mistypedStrings", "rawLatencies", "leaderboardEligible",
+  "errorEpisodeHistory", "mistypedStrings", "rawLatencies", "normalizationTrace",
+  "normalizedTransitions", "typabilityFeatureVector", "leaderboardEligible",
   "submissionPayload", "accessToken", "boardKey", "rulesVersion",
 ]);
 
@@ -459,6 +461,7 @@ export function validateSessionSummary(summary) {
   if (summary.consistency != null) finite(errors, summary.consistency, "consistency", { min: 0, max: 100 });
   if (summary.fluencySummary != null) errors.push(...validatePracticeFluencySummary(summary.fluencySummary).errors.map((entry) => ({ ...entry, path: `fluencySummary.${entry.path}` })));
   if (summary.errorSummary != null) errors.push(...validatePracticeErrorSummary(summary.errorSummary).errors.map((entry) => ({ ...entry, path: `errorSummary.${entry.path}` })));
+  if (summary.normalizationSummary != null) errors.push(...validatePracticeNormalizationSummary(summary.normalizationSummary).errors.map((entry) => ({ ...entry, path: `normalizationSummary.${entry.path}` })));
   appendSerializable(errors, summary.configuration, "configuration");
   appendSerializable(errors, summary.contentDescriptor, "contentDescriptor");
   for (const key of ["beforeMetrics", "afterMetrics", "transferMetrics", "fatigueSummary", "trainingQuality"]) if (summary[key] != null) appendSerializable(errors, summary[key], key);

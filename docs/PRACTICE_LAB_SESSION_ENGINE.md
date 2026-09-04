@@ -1,6 +1,6 @@
 # Practice Lab Session Engine
 
-Status: headless Practice foundation + PL5 context identity + PL8 robust latency + PL9 error/recovery analysis
+Status: headless Practice foundation + PL5 context identity + PL8 robust latency + PL9 error/recovery + PL10 context/typability normalization
 
 ## 1. Scope
 
@@ -29,7 +29,10 @@ Before an engine is created, the caller resolves one valid **profileId + context
 | practiceErrorTracker.js | Bounded streaming whole-session error episode aggregation |
 | practiceErrorAnalyzer.js | PL9 episode/content/reconstruction/session analysis |
 | practiceRecoveryAnalyzer.js | Recovery medians + PL8 fluent-resumption enrichment |
-| practiceFoundationAnalysis.js | Generic PL8 + PL9 analysis orchestration |
+| practiceFoundationAnalysis.js | Generic PL8 + PL9 + PL10 analysis orchestration |
+| practiceContextFeatures.js / practiceContextNormalizer.js | PL10 coarse transition context + residual normalization |
+| practiceTextDifficultyFeatures.js / practiceTypabilityModel.js | PL10 text features + relative typability model |
+| practiceNormalizationAnalysis.js | PL10 session normalization orchestration |
 | practiceCheckpoint.js | Checkpoint builder and restore validation |
 | practiceSessionResult.js | Canonical current summary/profile construction |
 | practiceSessionEngine.js | Lifecycle, timing, streaming analysis, checkpoint and completion orchestration |
@@ -60,7 +63,7 @@ terminal ----> destroyed
 
 Experiment descriptors are runtime-only objects containing stable ID/version, session schema version, correction behavior, supported completion modes, resumability and optional callbacks.
 
-Optional `analyzeResult()` receives generic frozen foundation analysis but does not own the canonical generic `fluencySummary` or `errorSummary`. Callbacks are never persisted.
+Optional `analyzeResult()` receives generic frozen foundation analysis but does not own the canonical generic `fluencySummary`, `errorSummary`, or `normalizationSummary`. Callbacks are never persisted.
 
 ## 7. Content/input model
 
@@ -416,3 +419,9 @@ The suite covers:
 PL9 intentionally does not implement target opportunity-normalized errors, contextual latency residuals, typability, per-entity persistent error phenotype, Recovery Debt, Clean WPM, correction-efficiency composite scores, limiter labels, weakness ranking, ability estimation, target prioritization, Accuracy Control, Daily Coach, adaptive drills or public Practice UI.
 
 PL10 may add contextual expected-latency modeling; PL11 may persist contextual entity evidence; PL12 may interpret limiter phenotypes. Those systems consume PL8/PL9 evidence rather than replacing the foundational measurement contracts.
+
+## PL10 normalization extension
+
+At `prepare()`, the engine resolves and freezes the exact PL5 context record for the immutable session `profileId + contextId`. At finalization, generic **foundationAnalysis v3** is built as `{ latency, errors, normalization }`. PL10 consumes the current content plan plus frozen context and uses PL8 fluent/disfluent classifications without altering PL8 or PL9 outputs.
+
+`sessionSummary` is now v5 and may contain compact **normalizationSummary**. WPM, raw WPM, accuracy, correction metrics, PL8 fluency and PL9 error/recovery formulas are unchanged. Full normalized transitions and text feature vectors remain transient. See **PRACTICE_LAB_CONTEXT_TYPABILITY_MODEL.md**.

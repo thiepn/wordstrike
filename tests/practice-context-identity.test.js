@@ -115,7 +115,7 @@ assert.equal(PRACTICE_DATABASE_VERSION, 2);
 assert.equal(PRACTICE_RECORD_VERSIONS.profile, 3);
 assert.equal(PRACTICE_RECORD_VERSIONS.context, 1);
 assert.equal(PRACTICE_RECORD_VERSIONS.skillStat, 2);
-assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 4);
+assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 5);
 assert.equal(PRACTICE_RECORD_VERSIONS.reviewItem, 2);
 assert.equal(PRACTICE_RECORD_VERSIONS.checkpoint, 2);
 assert.equal(PRACTICE_STORE_DEFINITIONS.skillStats.indexes.some((index) => index.name === "profileEntity"), false);

@@ -25,15 +25,15 @@ function emptyErrorSummary() {
   }).sessionSummary;
 }
 
-test("PL9 advances only sessionSummary to v4 while Practice DB and checkpoint remain unchanged", () => {
+test("PL9 contracts remain intact after PL10 advances only sessionSummary to v5", () => {
   assert.equal(PRACTICE_DATABASE_VERSION, 2);
-  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 4);
+  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 5);
   assert.equal(PRACTICE_RECORD_VERSIONS.checkpoint, 2);
   assert.equal(PRACTICE_RECORD_VERSIONS.skillStat, 2);
   assert.equal(PRACTICE_RECORD_VERSIONS.profile, 3);
 });
 
-test("PL9 sessionSummary v3 migrates sequentially to v4 with null historical error evidence", () => {
+test("PL9 v3 error migration remains intact through PL10 v5", () => {
   const current = createDefaultSessionSummary({ now });
   const legacy = { ...current, recordVersion: 3 };
   delete legacy.errorSummary;
@@ -41,9 +41,10 @@ test("PL9 sessionSummary v3 migrates sequentially to v4 with null historical err
   const migrated = migratePracticeRecord("sessionSummary", legacy);
   assert.equal(migrated.ok, true);
   assert.equal(migrated.fromVersion, 3);
-  assert.equal(migrated.toVersion, 4);
-  assert.deepEqual(migrated.steps, ["sessionSummary:3->4"]);
+  assert.equal(migrated.toVersion, 5);
+  assert.deepEqual(migrated.steps, ["sessionSummary:3->4", "sessionSummary:4->5"]);
   assert.equal(migrated.value.errorSummary, null);
+  assert.equal(migrated.value.normalizationSummary, null);
   assert.deepEqual(legacy, original);
 });
 
@@ -55,9 +56,10 @@ test("PL9 preserves the full historical session migration chain", () => {
   delete v1.errorSummary;
   const migrated = migratePracticeRecord("sessionSummary", v1);
   assert.equal(migrated.ok, true);
-  assert.deepEqual(migrated.steps, ["sessionSummary:1->2", "sessionSummary:2->3", "sessionSummary:3->4"]);
+  assert.deepEqual(migrated.steps, ["sessionSummary:1->2", "sessionSummary:2->3", "sessionSummary:3->4", "sessionSummary:4->5"]);
   assert.equal(migrated.value.fluencySummary, null);
   assert.equal(migrated.value.errorSummary, null);
+  assert.equal(migrated.value.normalizationSummary, null);
 });
 
 test("PL9 validates fixed episode counts, rates, removal relationships and nullability", () => {

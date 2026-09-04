@@ -8,6 +8,8 @@
     "build:practice-corpus": "node scripts/buildPracticeCorpus.mjs",
     "validate:practice-corpus": "node scripts/buildPracticeCorpus.mjs --validate",
     "build:practice-indexes": "node scripts/buildPracticeIndexes.mjs",
-    "validate:practice-indexes": "node scripts/buildPracticeIndexes.mjs --validate"
+    "validate:practice-indexes": "node scripts/buildPracticeIndexes.mjs --validate",
+    "build:practice-typability": "node scripts/buildPracticeTypability.mjs",
+    "validate:practice-typability": "node scripts/buildPracticeTypability.mjs --validate"
   }
 }

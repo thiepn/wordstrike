@@ -474,3 +474,9 @@ PL9 does not implement:
 PL10 may combine PL8/PL9 evidence with contextual expected latency without changing historical classifier versions. PL11 may aggregate error/fluency evidence per `profile -> context -> entity`. PL12 may combine frequency, opportunity, timing, recovery burden, and goals into limiter/weakness interpretation.
 
 Those phases consume PL9 episode evidence. They must not collapse it back into one undifferentiated incorrect-character count.
+
+## PL10 downstream normalization boundary
+
+PL10 is downstream of PL9 and does not alter error-episode or recovery semantics. Generic foundation analysis advances from v2 to **v3** by adding a separate `normalization` member alongside unchanged `latency` and `errors`. PL10 context predictors never use exact target identity, weakness, mastery or priority. Exact observed identity may remain transient for later attribution.
+
+`sessionSummary` advances from v4 to **v5** by adding nullable `normalizationSummary`; historical PL9 summaries receive `normalizationSummary: null`. PL9 `errorSummary` remains canonical and unchanged.

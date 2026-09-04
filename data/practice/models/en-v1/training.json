@@ -1,0 +1,151 @@
+{
+  "artifactVersion": 1,
+  "modelVersion": 1,
+  "featureVersion": 1,
+  "referenceVersion": 1,
+  "corpusId": "practice-en-v1",
+  "corpusVersion": 1,
+  "corpusChecksum": "sha256-28beccf65eed71519da306c129da5040a20f364aed320dc21eea2d16c2a1c404",
+  "indexChecksum": "sha256-bb198244a6b6cefcae5cb908bf3dee6e9e52259f9ef41576ec69c429a423ff32",
+  "partition": "training",
+  "items": [
+    {
+      "contentId": "practice-en-ws-foundation-001-s1",
+      "contentHash": "sha256-af6f2cf389fffabfad01c864e412fb78993f0898c9ddefb0e5ab737e43e0cb3c",
+      "sessionContentHash": "fnv1a32-56bb9746",
+      "partition": "training",
+      "language": "en",
+      "featureVersion": 1,
+      "features": {
+        "featureVersion": 1,
+        "language": "en",
+        "graphemeCount": 69,
+        "wordCount": 9,
+        "nonWhitespaceGraphemeCount": 61,
+        "meanWordLength": 6.555555555555555,
+        "p90WordLength": 8.4,
+        "uppercaseRatio": 0.01639344262295082,
+        "punctuationRatio": 0.03278688524590164,
+        "digitRatio": 0,
+        "symbolRatio": 0,
+        "lexicalRarityScore": null,
+        "bigramRarityScore": null,
+        "frequencyFeatureCoverage": 0,
+        "frequencyCoverage": {
+          "wordEligibleCount": 9,
+          "knownWordCount": 0,
+          "wordFrequencyCoverageRate": 0,
+          "bigramEligibleCount": 50,
+          "knownBigramCount": 0,
+          "bigramFrequencyCoverageRate": 0,
+          "frequencyEligibleCount": 59,
+          "frequencyKnownCount": 0
+        }
+      },
+      "textDifficulty": {
+        "status": "partial",
+        "modelKind": "heuristic-relative-v1",
+        "modelVersion": 1,
+        "referenceVersion": 1,
+        "difficultyIndex": 0.39783691375214275,
+        "relativeDifficultyPercentile": 75,
+        "availableModelWeight": 0.62,
+        "effectiveWeights": {
+          "meanWordLength": 0.25806451612903225,
+          "p90WordLength": 0.12903225806451613,
+          "uppercaseRatio": 0.16129032258064518,
+          "punctuationRatio": 0.1935483870967742,
+          "digitRatio": 0.12903225806451613,
+          "symbolRatio": 0.12903225806451613
+        },
+        "standardizedFeatures": {
+          "meanWordLength": 0.6744907594765955,
+          "p90WordLength": 0.6744907594765968,
+          "uppercaseRatio": 0.03842213114754085,
+          "punctuationRatio": 0.6744907594765952,
+          "digitRatio": 0,
+          "symbolRatio": 0
+        },
+        "contributions": {
+          "meanWordLength": 0.1740621314778311,
+          "p90WordLength": 0.08703106573891571,
+          "uppercaseRatio": 0.006197117927022719,
+          "punctuationRatio": 0.13054659860837325,
+          "digitRatio": 0,
+          "symbolRatio": 0
+        },
+        "referenceItemCount": 2,
+        "percentileMethod": "empirical-midrank-v1"
+      }
+    },
+    {
+      "contentId": "practice-en-ws-foundation-001-s2",
+      "contentHash": "sha256-0a487aae9ecf09c5f3d31255d2b97a26f29188a9cd58bcb57af15ec08a863e6b",
+      "sessionContentHash": "fnv1a32-e476d5d9",
+      "partition": "training",
+      "language": "en",
+      "featureVersion": 1,
+      "features": {
+        "featureVersion": 1,
+        "language": "en",
+        "graphemeCount": 76,
+        "wordCount": 13,
+        "nonWhitespaceGraphemeCount": 64,
+        "meanWordLength": 4.846153846153846,
+        "p90WordLength": 7.600000000000001,
+        "uppercaseRatio": 0.015625,
+        "punctuationRatio": 0.015625,
+        "digitRatio": 0,
+        "symbolRatio": 0,
+        "lexicalRarityScore": null,
+        "bigramRarityScore": null,
+        "frequencyFeatureCoverage": 0,
+        "frequencyCoverage": {
+          "wordEligibleCount": 13,
+          "knownWordCount": 0,
+          "wordFrequencyCoverageRate": 0,
+          "bigramEligibleCount": 50,
+          "knownBigramCount": 0,
+          "bigramFrequencyCoverageRate": 0,
+          "frequencyEligibleCount": 63,
+          "frequencyKnownCount": 0
+        }
+      },
+      "textDifficulty": {
+        "status": "partial",
+        "modelKind": "heuristic-relative-v1",
+        "modelVersion": 1,
+        "referenceVersion": 1,
+        "difficultyIndex": -0.39783691375214225,
+        "relativeDifficultyPercentile": 25,
+        "availableModelWeight": 0.62,
+        "effectiveWeights": {
+          "meanWordLength": 0.25806451612903225,
+          "p90WordLength": 0.12903225806451613,
+          "uppercaseRatio": 0.16129032258064518,
+          "punctuationRatio": 0.1935483870967742,
+          "digitRatio": 0.12903225806451613,
+          "symbolRatio": 0.12903225806451613
+        },
+        "standardizedFeatures": {
+          "meanWordLength": -0.6744907594765949,
+          "p90WordLength": -0.6744907594765938,
+          "uppercaseRatio": -0.0384221311475412,
+          "punctuationRatio": -0.6744907594765952,
+          "digitRatio": 0,
+          "symbolRatio": 0
+        },
+        "contributions": {
+          "meanWordLength": -0.17406213147783092,
+          "p90WordLength": -0.08703106573891532,
+          "uppercaseRatio": -0.006197117927022775,
+          "punctuationRatio": -0.13054659860837325,
+          "digitRatio": 0,
+          "symbolRatio": 0
+        },
+        "referenceItemCount": 2,
+        "percentileMethod": "empirical-midrank-v1"
+      }
+    }
+  ]
+}
