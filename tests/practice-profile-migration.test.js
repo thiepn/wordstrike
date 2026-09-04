@@ -63,7 +63,7 @@ assert.deepEqual(PRACTICE_RECORD_VERSIONS, {
   context: 1,
   profile: 3,
   skillStat: 2,
-  sessionSummary: 4,
+  sessionSummary: 5,
   reviewItem: 2,
   customText: 1,
   preset: 1,

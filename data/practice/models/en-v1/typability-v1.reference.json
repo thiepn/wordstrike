@@ -1,0 +1,109 @@
+{
+  "referenceVersion": 1,
+  "modelVersion": 1,
+  "featureVersion": 1,
+  "modelKind": "heuristic-relative-v1",
+  "language": "en",
+  "referencePartition": "training",
+  "percentileMethod": "empirical-midrank-v1",
+  "corpusId": "practice-en-v1",
+  "corpusVersion": 1,
+  "corpusChecksum": "sha256-28beccf65eed71519da306c129da5040a20f364aed320dc21eea2d16c2a1c404",
+  "indexSchemaVersion": 1,
+  "indexChecksum": "sha256-bb198244a6b6cefcae5cb908bf3dee6e9e52259f9ef41576ec69c429a423ff32",
+  "segmentationVersion": 1,
+  "tokenizationVersion": 1,
+  "sourceIds": [
+    "ws-original-en-foundation-v1"
+  ],
+  "frequencyReferenceVersion": null,
+  "frequencyReferenceChecksum": null,
+  "frequencySourceIds": [],
+  "weights": {
+    "meanWordLength": 0.16,
+    "p90WordLength": 0.08,
+    "uppercaseRatio": 0.1,
+    "punctuationRatio": 0.12,
+    "digitRatio": 0.08,
+    "symbolRatio": 0.08,
+    "lexicalRarityScore": 0.19,
+    "bigramRarityScore": 0.19
+  },
+  "directions": {
+    "meanWordLength": 1,
+    "p90WordLength": 1,
+    "uppercaseRatio": 1,
+    "punctuationRatio": 1,
+    "digitRatio": 1,
+    "symbolRatio": 1,
+    "lexicalRarityScore": 1,
+    "bigramRarityScore": 1
+  },
+  "coverageThresholds": {
+    "full": 0.9,
+    "partial": 0.5
+  },
+  "featureStats": {
+    "meanWordLength": {
+      "sampleCount": 2,
+      "median": 5.7008547008547,
+      "mad": 0.8547008547008548,
+      "robustScale": 1.2671794871794873,
+      "epsilon": 0.25
+    },
+    "p90WordLength": {
+      "sampleCount": 2,
+      "median": 8,
+      "mad": 0.39999999999999947,
+      "robustScale": 0.5930399999999991,
+      "epsilon": 0.5
+    },
+    "uppercaseRatio": {
+      "sampleCount": 2,
+      "median": 0.016009221311475412,
+      "mad": 0.00038422131147541026,
+      "robustScale": 0.0005696465163934432,
+      "epsilon": 0.01
+    },
+    "punctuationRatio": {
+      "sampleCount": 2,
+      "median": 0.02420594262295082,
+      "mad": 0.00858094262295082,
+      "robustScale": 0.012722105532786885,
+      "epsilon": 0.01
+    },
+    "digitRatio": {
+      "sampleCount": 2,
+      "median": 0,
+      "mad": 0,
+      "robustScale": 0,
+      "epsilon": 0.01
+    },
+    "symbolRatio": {
+      "sampleCount": 2,
+      "median": 0,
+      "mad": 0,
+      "robustScale": 0,
+      "epsilon": 0.01
+    },
+    "lexicalRarityScore": {
+      "sampleCount": 0,
+      "median": null,
+      "mad": null,
+      "robustScale": null,
+      "epsilon": 0.05
+    },
+    "bigramRarityScore": {
+      "sampleCount": 0,
+      "median": null,
+      "mad": null,
+      "robustScale": null,
+      "epsilon": 0.05
+    }
+  },
+  "referenceItemCount": 2,
+  "trainingDifficultyScores": [
+    -0.39783691375214225,
+    0.39783691375214275
+  ]
+}

@@ -87,6 +87,11 @@ const migrations = Object.freeze({
       recordVersion: 4,
       errorSummary: null,
     }),
+    4: (value) => ({
+      ...value,
+      recordVersion: 5,
+      normalizationSummary: null,
+    }),
   }),
   reviewItem: Object.freeze({
     1: (value) => ({
@@ -140,12 +145,13 @@ function promoteForCurrentValidation(type, value, version) {
       statId: createSkillStatId(value.profileId, contextId, value.entityType, value.entityKey),
     };
   }
-  if (type === "sessionSummary" && version <= 3) return {
+  if (type === "sessionSummary" && version <= 4) return {
     ...value,
     recordVersion: PRACTICE_RECORD_VERSIONS.sessionSummary,
     contextId: version === 1 ? createDefaultPracticeContextId(value.profileId) : value.contextId,
     fluencySummary: version <= 2 ? null : value.fluencySummary ?? null,
-    errorSummary: null,
+    errorSummary: version <= 3 ? null : value.errorSummary ?? null,
+    normalizationSummary: null,
   };
   if (["reviewItem", "checkpoint"].includes(type) && version === 1) return {
     ...value,

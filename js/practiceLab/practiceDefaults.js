@@ -217,6 +217,7 @@ export function createDefaultSessionSummary({
     consistency: null,
     fluencySummary: null,
     errorSummary: null,
+    normalizationSummary: null,
     beforeMetrics: null,
     afterMetrics: null,
     transferMetrics: null,

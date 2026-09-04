@@ -12,6 +12,7 @@ import { createPracticeMetricsCollector } from "./practiceMetrics.js";
 import { createPracticeEventBuffer } from "./practiceEventBuffer.js";
 import { buildPracticeFoundationAnalysis } from "./practiceFoundationAnalysis.js";
 import { createPracticeErrorTracker } from "./practiceErrorTracker.js";
+import { createPracticeSessionContextSnapshot } from "./practiceContextFeatures.js";
 import {
   buildPracticeCheckpoint,
   validatePracticeCheckpointRestore,
@@ -90,6 +91,7 @@ export function createPracticeSessionEngine({
   let typingState = null;
   let metrics = createPracticeMetricsCollector();
   let errorTracker = createPracticeErrorTracker();
+  let normalizationContext = null;
   const eventBuffer = createPracticeEventBuffer({ capacity: checkpointPolicy.eventCapacity ?? PRACTICE_SESSION_LIMITS.eventBuffer });
   const subscribers = new Set();
   let snapshotVersion = 0;
@@ -346,6 +348,14 @@ export function createPracticeSessionEngine({
     if (!configurationValidation.valid || (nextExperiment.validateConfiguration && nextExperiment.validateConfiguration(nextConfiguration) === false)) throw sessionError(PRACTICE_SESSION_ERROR_CODES.INVALID_CONFIGURATION, "Invalid Practice session configuration", "prepare", false, null, configurationValidation.errors);
     const contentValidation = validatePracticeContentPlan(nextContentPlan, { segmenter });
     if (!contentValidation.valid || !nextExperiment.supportedCompletionModes.includes(nextContentPlan.completion.mode) || (nextExperiment.validateContentPlan && nextExperiment.validateContentPlan(nextContentPlan) === false)) throw sessionError(PRACTICE_SESSION_ERROR_CODES.INVALID_CONTENT, "Invalid Practice content plan", "prepare", false, null, contentValidation.errors);
+    let resolvedContext;
+    try {
+      if (typeof repository.getPracticeContext !== "function") throw new Error("repository does not expose getPracticeContext");
+      resolvedContext = await repository.getPracticeContext(contextId);
+      normalizationContext = createPracticeSessionContextSnapshot(resolvedContext, { profileId, contextId });
+    } catch (cause) {
+      throw sessionError(PRACTICE_SESSION_ERROR_CODES.INVALID_CONFIGURATION, "Practice normalization context could not be resolved", "prepare-context", true, cause);
+    }
     experiment = nextExperiment;
     configuration = freezeDeep(clonePracticeValue(nextConfiguration));
     contentPlan = nextContentPlan;
@@ -519,6 +529,9 @@ export function createPracticeSessionEngine({
         events: eventBuffer.getTrace(),
         traceMetadata: eventBuffer.getMetadata(),
         errorTrackerSnapshot: errorTracker.finalizeSnapshot(),
+        contentPlan,
+        context: normalizationContext,
+        segmenter,
       });
     } catch (cause) {
       throw sessionError(PRACTICE_SESSION_ERROR_CODES.ANALYSIS_FAILED, "Practice foundation analysis failed", "foundation-analysis", true, cause);
@@ -700,6 +713,7 @@ export function createPracticeSessionEngine({
     eventBuffer.clear();
     typingState = null;
     contentPlan = null;
+    normalizationContext = null;
     experiment = null;
     configuration = null;
     return { destroyed: true, repeated: false, warning };
@@ -794,6 +808,7 @@ export function createPracticeSessionEngine({
       timingSegmentId,
       errorEpisodeCount: errorTracker.getSnapshot().errorEpisodeCount,
       activeErrorEpisode: Boolean(errorTracker.activeEpisode),
+      normalizationContextFingerprint: normalizationContext?.fingerprint ?? null,
       activeDurationMs: activeAt(),
       checkpointPending: checkpointTimer != null || checkpointWrite != null,
       lastCheckpointMonotonicMs: lastCheckpointMono,

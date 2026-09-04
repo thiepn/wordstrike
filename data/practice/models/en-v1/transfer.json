@@ -1,0 +1,82 @@
+{
+  "artifactVersion": 1,
+  "modelVersion": 1,
+  "featureVersion": 1,
+  "referenceVersion": 1,
+  "corpusId": "practice-en-v1",
+  "corpusVersion": 1,
+  "corpusChecksum": "sha256-28beccf65eed71519da306c129da5040a20f364aed320dc21eea2d16c2a1c404",
+  "indexChecksum": "sha256-bb198244a6b6cefcae5cb908bf3dee6e9e52259f9ef41576ec69c429a423ff32",
+  "partition": "transfer",
+  "items": [
+    {
+      "contentId": "practice-en-ws-foundation-002-s1",
+      "contentHash": "sha256-3da983784a96c77cc9e6e8a64814c3cc461dcd69e04fee820825d30c5ee00be2",
+      "sessionContentHash": "fnv1a32-c03e759b",
+      "partition": "transfer",
+      "language": "en",
+      "featureVersion": 1,
+      "features": {
+        "featureVersion": 1,
+        "language": "en",
+        "graphemeCount": 80,
+        "wordCount": 13,
+        "nonWhitespaceGraphemeCount": 68,
+        "meanWordLength": 5.153846153846154,
+        "p90WordLength": 7,
+        "uppercaseRatio": 0.014705882352941176,
+        "punctuationRatio": 0.014705882352941176,
+        "digitRatio": 0,
+        "symbolRatio": 0,
+        "lexicalRarityScore": null,
+        "bigramRarityScore": null,
+        "frequencyFeatureCoverage": 0,
+        "frequencyCoverage": {
+          "wordEligibleCount": 13,
+          "knownWordCount": 0,
+          "wordFrequencyCoverageRate": 0,
+          "bigramEligibleCount": 54,
+          "knownBigramCount": 0,
+          "bigramFrequencyCoverageRate": 0,
+          "frequencyEligibleCount": 67,
+          "frequencyKnownCount": 0
+        }
+      },
+      "textDifficulty": {
+        "status": "partial",
+        "modelKind": "heuristic-relative-v1",
+        "modelVersion": 1,
+        "referenceVersion": 1,
+        "difficultyIndex": -0.4945286653756283,
+        "relativeDifficultyPercentile": 0,
+        "availableModelWeight": 0.62,
+        "effectiveWeights": {
+          "meanWordLength": 0.25806451612903225,
+          "p90WordLength": 0.12903225806451613,
+          "uppercaseRatio": 0.16129032258064518,
+          "punctuationRatio": 0.1935483870967742,
+          "digitRatio": 0.12903225806451613,
+          "symbolRatio": 0.12903225806451613
+        },
+        "standardizedFeatures": {
+          "meanWordLength": -0.43167408606502006,
+          "p90WordLength": -1.6862268986914903,
+          "uppercaseRatio": -0.13033389585342356,
+          "punctuationRatio": -0.7467364773485397,
+          "digitRatio": 0,
+          "symbolRatio": 0
+        },
+        "contributions": {
+          "meanWordLength": -0.11139976414581163,
+          "p90WordLength": -0.21757766434728906,
+          "uppercaseRatio": -0.0210215961053909,
+          "punctuationRatio": -0.1445296407771367,
+          "digitRatio": 0,
+          "symbolRatio": 0
+        },
+        "referenceItemCount": 2,
+        "percentileMethod": "empirical-midrank-v1"
+      }
+    }
+  ]
+}

@@ -1,0 +1,91 @@
+{
+  "manifestVersion": 1,
+  "modelVersion": 1,
+  "featureVersion": 1,
+  "referenceVersion": 1,
+  "modelKind": "heuristic-relative-v1",
+  "percentileMethod": "empirical-midrank-v1",
+  "language": "en",
+  "corpusId": "practice-en-v1",
+  "corpusVersion": 1,
+  "corpusChecksum": "sha256-28beccf65eed71519da306c129da5040a20f364aed320dc21eea2d16c2a1c404",
+  "indexSchemaVersion": 1,
+  "indexChecksum": "sha256-bb198244a6b6cefcae5cb908bf3dee6e9e52259f9ef41576ec69c429a423ff32",
+  "segmentationVersion": 1,
+  "tokenizationVersion": 1,
+  "frequencyReferenceVersion": null,
+  "frequencyReferenceChecksum": null,
+  "frequencySourceIds": [],
+  "frequencyReferenceId": null,
+  "weights": {
+    "meanWordLength": 0.16,
+    "p90WordLength": 0.08,
+    "uppercaseRatio": 0.1,
+    "punctuationRatio": 0.12,
+    "digitRatio": 0.08,
+    "symbolRatio": 0.08,
+    "lexicalRarityScore": 0.19,
+    "bigramRarityScore": 0.19
+  },
+  "coverageThresholds": {
+    "full": 0.9,
+    "partial": 0.5
+  },
+  "referencePartition": "training",
+  "referenceItemCount": 2,
+  "fitPartitions": [
+    "training"
+  ],
+  "protectedFitExclusions": [
+    "transfer",
+    "benchmark",
+    "diagnostic",
+    "research-holdout"
+  ],
+  "scoredPartitions": [
+    "training",
+    "transfer",
+    "benchmark",
+    "diagnostic"
+  ],
+  "researchHoldoutScored": false,
+  "referenceChecksum": "sha256-ad320fbf7d7f804d7d9febd4a25595fe42f34baf89a016cd94eae538f10a2807",
+  "artifactChecksums": [
+    {
+      "path": "typability-v1.reference.json",
+      "sha256": "sha256-ad320fbf7d7f804d7d9febd4a25595fe42f34baf89a016cd94eae538f10a2807",
+      "bytes": 2675,
+      "external": false
+    },
+    {
+      "path": "training.json",
+      "sha256": "sha256-128582dbfb5885b165a78fb9997b99b79d29d2c5869f8137ef32655076c9246c",
+      "bytes": 5250,
+      "external": false
+    },
+    {
+      "path": "transfer.json",
+      "sha256": "sha256-405bbc728c4144347b09203786ab1e920a6e6edd18ae83c12f52190462b038af",
+      "bytes": 2823,
+      "external": false
+    },
+    {
+      "path": "benchmark.json",
+      "sha256": "sha256-52b482f50df598b4c13a08f5314159581c53a93ceadc1080a9688d58856843b8",
+      "bytes": 2825,
+      "external": false
+    },
+    {
+      "path": "diagnostic.json",
+      "sha256": "sha256-a4cc974230acbdadcd98ced4509a1253e23bf7033b6d62ea5468e6b1686d8f60",
+      "bytes": 5117,
+      "external": false
+    },
+    {
+      "path": "js/practiceLab/generated/practiceTypabilityRuntimeData.js",
+      "sha256": "sha256-88f6d7342d6406122c14166af513ee97e198a69ca881e9cd721141e210d542a0",
+      "bytes": 18952,
+      "external": true
+    }
+  ]
+}
