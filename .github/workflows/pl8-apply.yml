@@ -1,0 +1,54 @@
+name: PL8 Apply
+
+on:
+  push:
+    branches:
+      - codex/pl8-robust-latency-classification
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out branch
+        uses: actions/checkout@v4
+        with:
+          ref: codex/pl8-robust-latency-classification
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Apply PL8 source patches
+        run: |
+          node scripts/applyPl8SourcePatches.mjs
+          node scripts/applyPl8FollowupPatches.mjs
+
+      - name: Focused PL8 tests
+        run: |
+          node tests/practice-robust-stats.test.js
+          node tests/practice-latency-classifier.test.js
+          node tests/practice-latency-buffer-coverage.test.js
+          node tests/practice-latency-migration-validation.test.js
+          node tests/practice-latency-session-integration.test.js
+          node tests/practice-latency-large-trace.test.js
+          node tests/practice-latency-import-side-effects.test.js
+          node tests/practice-session-input-lifecycle.test.js
+          node tests/practice-session-checkpoint-completion.test.js
+          node tests/practice-validation-migrations.test.js
+
+      - name: Full WordStrike suite
+        run: npm test
+
+      - name: Commit PL8 implementation
+        run: |
+          rm -f scripts/applyPl8SourcePatches.mjs scripts/applyPl8FollowupPatches.mjs .github/workflows/pl8-apply.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "feat(practice): implement PL8 robust latency classification"
+          git push origin HEAD:codex/pl8-robust-latency-classification
