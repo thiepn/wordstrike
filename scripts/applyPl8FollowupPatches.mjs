@@ -1,4 +1,5 @@
 import { readFile, writeFile } from "node:fs/promises";
+import { execFileSync } from "node:child_process";
 
 async function patch(path, edits) {
   let source = await readFile(path, "utf8");
@@ -61,5 +62,12 @@ await patch("tests/practice-latency-classifier.test.js", [[
   "  assert.equal(result.sessionSummary.calibrationSampleCount, 22);",
   "  assert.equal(result.sessionSummary.calibrationSampleCount, 23);",
 ]]);
+
+// Preserve the exact current PL5 regression file; PL8 changes only the session-summary version assertion.
+let contextIdentityTest = execFileSync("git", ["show", "origin/main:tests/practice-context-identity.test.js"], { encoding: "utf8" });
+const versionAnchor = "assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 2);";
+if (!contextIdentityTest.includes(versionAnchor)) throw new Error("Current PL5 context identity version assertion was not found");
+contextIdentityTest = contextIdentityTest.replace(versionAnchor, "assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 3);");
+await writeFile("tests/practice-context-identity.test.js", contextIdentityTest);
 
 console.log("PL8 follow-up patches applied");
