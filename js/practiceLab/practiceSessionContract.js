@@ -12,7 +12,13 @@ import {
   PRACTICE_TIMING_MODES,
 } from "./practiceSessionConstants.js";
 import { isValidPracticeUtcIso } from "./practiceTime.js";
+import {
+  createPracticeSegmenter,
+  isPracticeWordLikeGrapheme,
+} from "./practiceTextSegmentation.js";
 import { validatePracticeSerializable } from "./practiceValidation.js";
+
+export { createPracticeSegmenter } from "./practiceTextSegmentation.js";
 
 export class PracticeSessionError extends Error {
   constructor(code, message, {
@@ -36,15 +42,6 @@ export class PracticeSessionError extends Error {
 
 export function practiceSessionError(code, message, details = {}) {
   return new PracticeSessionError(code, message, details);
-}
-
-export function createPracticeSegmenter(segmenter = null) {
-  if (typeof segmenter === "function") return segmenter;
-  if (globalThis.Intl?.Segmenter) {
-    const instance = new Intl.Segmenter(undefined, { granularity: "grapheme" });
-    return (text) => [...instance.segment(String(text))].map(({ segment }) => segment);
-  }
-  return (text) => Array.from(String(text));
 }
 
 const plainObject = (value) => {
@@ -128,7 +125,7 @@ export function createPracticeContentPlan(input, options = {}) {
   if (input.units == null) {
     let start = null;
     for (let index = 0; index <= graphemes.length; index += 1) {
-      const wordLike = index < graphemes.length && /[\p{L}\p{M}\p{N}'-]/u.test(graphemes[index]);
+      const wordLike = index < graphemes.length && isPracticeWordLikeGrapheme(graphemes[index]);
       if (wordLike && start == null) start = index;
       if (!wordLike && start != null) {
         fallbackUnits.push({

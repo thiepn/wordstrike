@@ -1,0 +1,42 @@
+{
+  "indexSchemaVersion": 1,
+  "indexGeneratorVersion": 1,
+  "corpusId": "practice-en-v1",
+  "corpusVersion": 1,
+  "corpusChecksum": "sha256-28beccf65eed71519da306c129da5040a20f364aed320dc21eea2d16c2a1c404",
+  "language": "en",
+  "partition": "diagnostic",
+  "indexType": "content",
+  "items": [
+    {
+      "contentId": "practice-en-ws-foundation-probe-001",
+      "familyId": "ws-en-foundation-probeset-001",
+      "sourceId": "ws-original-en-foundation-v1",
+      "contentType": "probe",
+      "partition": "diagnostic",
+      "language": "en",
+      "contentHash": "sha256-706c9c35726dae6b3b99f6dffde50d3ee4a4811ee75966dee3336c16ec5a1616",
+      "graphemeCount": 15,
+      "wordCount": 4,
+      "uniqueWordCount": 2,
+      "uppercaseCount": 0,
+      "digitCount": 0,
+      "punctuationCount": 0
+    },
+    {
+      "contentId": "practice-en-ws-foundation-probe-002",
+      "familyId": "ws-en-foundation-probeset-001",
+      "sourceId": "ws-original-en-foundation-v1",
+      "contentType": "probe",
+      "partition": "diagnostic",
+      "language": "en",
+      "contentHash": "sha256-e27e1ebceab05a150ee287c7a64d50d8b0af23ce5392ac5a06b9b60c983ef8d9",
+      "graphemeCount": 15,
+      "wordCount": 4,
+      "uniqueWordCount": 2,
+      "uppercaseCount": 0,
+      "digitCount": 0,
+      "punctuationCount": 0
+    }
+  ]
+}

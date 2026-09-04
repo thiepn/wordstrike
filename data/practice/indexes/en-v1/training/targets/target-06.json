@@ -1,0 +1,405 @@
+{
+  "indexSchemaVersion": 1,
+  "indexGeneratorVersion": 1,
+  "corpusId": "practice-en-v1",
+  "corpusVersion": 1,
+  "corpusChecksum": "sha256-28beccf65eed71519da306c129da5040a20f364aed320dc21eea2d16c2a1c404",
+  "language": "en",
+  "partition": "training",
+  "indexType": "targets",
+  "shardPolicyVersion": 1,
+  "shardCount": 16,
+  "shardId": 6,
+  "entries": [
+    {
+      "entityType": "bigram",
+      "entityKey": " t",
+      "corpusOccurrenceCount": 3,
+      "contentCoverageCount": 2,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 0,
+      "wordKeys": [],
+      "contents": [
+        {
+          "contentId": "practice-en-ws-foundation-001-s1",
+          "familyId": "ws-en-foundation-paragraph-001",
+          "count": 1,
+          "positions": [
+            16
+          ]
+        },
+        {
+          "contentId": "practice-en-ws-foundation-001-s2",
+          "familyId": "ws-en-foundation-paragraph-001",
+          "count": 2,
+          "positions": [
+            37,
+            67
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "bigram",
+      "entityKey": "ak",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 1,
+      "wordKeys": [
+        "makes"
+      ],
+      "contents": [
+        {
+          "contentId": "practice-en-ws-foundation-001-s2",
+          "familyId": "ws-en-foundation-paragraph-001",
+          "count": 1,
+          "positions": [
+            17
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "bigram",
+      "entityKey": "ca",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 1,
+      "wordKeys": [
+        "calm"
+      ],
+      "contents": [
+        {
+          "contentId": "practice-en-ws-foundation-001-s1",
+          "familyId": "ws-en-foundation-paragraph-001",
+          "count": 1,
+          "positions": [
+            46
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "bigram",
+      "entityKey": "Ca",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 1,
+      "wordKeys": [
+        "careful"
+      ],
+      "contents": [
+        {
+          "contentId": "practice-en-ws-foundation-001-s1",
+          "familyId": "ws-en-foundation-paragraph-001",
+          "count": 1,
+          "positions": [
+            0
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "bigram",
+      "entityKey": "d ",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 0,
+      "wordKeys": [],
+      "contents": [
+        {
+          "contentId": "practice-en-ws-foundation-001-s2",
+          "familyId": "ws-en-foundation-paragraph-001",
+          "count": 1,
+          "positions": [
+            59
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "bigram",
+      "entityKey": "eg",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 1,
+      "wordKeys": [
+        "begins"
+      ],
+      "contents": [
+        {
+          "contentId": "practice-en-ws-foundation-001-s2",
+          "familyId": "ws-en-foundation-paragraph-001",
+          "count": 1,
+          "positions": [
+            62
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "bigram",
+      "entityKey": "ic",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 1,
+      "wordKeys": [
+        "practice"
+      ],
+      "contents": [
+        {
+          "contentId": "practice-en-ws-foundation-001-s1",
+          "familyId": "ws-en-foundation-paragraph-001",
+          "count": 1,
+          "positions": [
+            13
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "bigram",
+      "entityKey": "is",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 1,
+      "wordKeys": [
+        "rise"
+      ],
+      "contents": [
+        {
+          "contentId": "practice-en-ws-foundation-001-s2",
+          "familyId": "ws-en-foundation-paragraph-001",
+          "count": 1,
+          "positions": [
+            72
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "bigram",
+      "entityKey": "ki",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 1,
+      "wordKeys": [
+        "skill"
+      ],
+      "contents": [
+        {
+          "contentId": "practice-en-ws-foundation-001-s1",
+          "familyId": "ws-en-foundation-paragraph-001",
+          "count": 1,
+          "positions": [
+            64
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "bigram",
+      "entityKey": "mo",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 1,
+      "wordKeys": [
+        "movement"
+      ],
+      "contents": [
+        {
+          "contentId": "practice-en-ws-foundation-001-s1",
+          "familyId": "ws-en-foundation-paragraph-001",
+          "count": 1,
+          "positions": [
+            32
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "bigram",
+      "entityKey": "t ",
+      "corpusOccurrenceCount": 2,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 0,
+      "wordKeys": [],
+      "contents": [
+        {
+          "contentId": "practice-en-ws-foundation-001-s1",
+          "familyId": "ws-en-foundation-paragraph-001",
+          "count": 2,
+          "positions": [
+            30,
+            39
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "key",
+      "entityKey": "o",
+      "corpusOccurrenceCount": 4,
+      "contentCoverageCount": 2,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 3,
+      "wordKeys": [
+        "into",
+        "movement",
+        "to"
+      ],
+      "contents": [
+        {
+          "contentId": "practice-en-ws-foundation-001-s1",
+          "familyId": "ws-en-foundation-paragraph-001",
+          "count": 2,
+          "positions": [
+            33,
+            44
+          ]
+        },
+        {
+          "contentId": "practice-en-ws-foundation-001-s2",
+          "familyId": "ws-en-foundation-paragraph-001",
+          "count": 2,
+          "positions": [
+            39,
+            69
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "trigram",
+      "entityKey": " ac",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 0,
+      "wordKeys": [],
+      "contents": [
+        {
+          "contentId": "practice-en-ws-foundation-001-s2",
+          "familyId": "ws-en-foundation-paragraph-001",
+          "count": 1,
+          "positions": [
+            21
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "trigram",
+      "entityKey": "ady",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 1,
+      "wordKeys": [
+        "steady"
+      ],
+      "contents": [
+        {
+          "contentId": "practice-en-ws-foundation-001-s2",
+          "familyId": "ws-en-foundation-paragraph-001",
+          "count": 1,
+          "positions": [
+            5
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "trigram",
+      "entityKey": "ier",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 1,
+      "wordKeys": [
+        "easier"
+      ],
+      "contents": [
+        {
+          "contentId": "practice-en-ws-foundation-001-s2",
+          "familyId": "ws-en-foundation-paragraph-001",
+          "count": 1,
+          "positions": [
+            34
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "trigram",
+      "entityKey": "ins",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 1,
+      "wordKeys": [
+        "begins"
+      ],
+      "contents": [
+        {
+          "contentId": "practice-en-ws-foundation-001-s2",
+          "familyId": "ws-en-foundation-paragraph-001",
+          "count": 1,
+          "positions": [
+            64
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "trigram",
+      "entityKey": "ita",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 1,
+      "wordKeys": [
+        "hesitant"
+      ],
+      "contents": [
+        {
+          "contentId": "practice-en-ws-foundation-001-s1",
+          "familyId": "ws-en-foundation-paragraph-001",
+          "count": 1,
+          "positions": [
+            26
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "trigram",
+      "entityKey": "l p",
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "wordCoverageCount": 0,
+      "wordKeys": [],
+      "contents": [
+        {
+          "contentId": "practice-en-ws-foundation-001-s1",
+          "familyId": "ws-en-foundation-paragraph-001",
+          "count": 1,
+          "positions": [
+            6
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,370 @@
+{
+  "indexSchemaVersion": 1,
+  "indexGeneratorVersion": 1,
+  "corpusId": "practice-en-v1",
+  "corpusVersion": 1,
+  "corpusChecksum": "sha256-28beccf65eed71519da306c129da5040a20f364aed320dc21eea2d16c2a1c404",
+  "language": "en",
+  "partition": "diagnostic",
+  "indexType": "annotations",
+  "shardPolicyVersion": 1,
+  "shardCount": 16,
+  "shardId": 7,
+  "segmentationVersion": 1,
+  "tokenizationVersion": 1,
+  "records": [
+    {
+      "contentId": "practice-en-ws-foundation-probe-002",
+      "familyId": "ws-en-foundation-probeset-001",
+      "sourceId": "ws-original-en-foundation-v1",
+      "corpusId": "practice-en-v1",
+      "corpusVersion": 1,
+      "partition": "diagnostic",
+      "language": "en",
+      "contentHash": "sha256-e27e1ebceab05a150ee287c7a64d50d8b0af23ce5392ac5a06b9b60c983ef8d9",
+      "segmentationVersion": 1,
+      "tokenizationVersion": 1,
+      "graphemeCount": 15,
+      "wordCount": 4,
+      "words": [
+        {
+          "surfaceText": "map",
+          "lexicalKey": "map",
+          "startIndex": 0,
+          "endIndex": 3,
+          "wordOrdinal": 0,
+          "capitalizationClass": "lower"
+        },
+        {
+          "surfaceText": "tap",
+          "lexicalKey": "tap",
+          "startIndex": 4,
+          "endIndex": 7,
+          "wordOrdinal": 1,
+          "capitalizationClass": "lower"
+        },
+        {
+          "surfaceText": "map",
+          "lexicalKey": "map",
+          "startIndex": 8,
+          "endIndex": 11,
+          "wordOrdinal": 2,
+          "capitalizationClass": "lower"
+        },
+        {
+          "surfaceText": "tap",
+          "lexicalKey": "tap",
+          "startIndex": 12,
+          "endIndex": 15,
+          "wordOrdinal": 3,
+          "capitalizationClass": "lower"
+        }
+      ],
+      "keyOccurrences": [
+        {
+          "target": "m",
+          "startIndex": 0,
+          "endIndex": 1,
+          "contextClass": "within-word",
+          "wordOrdinal": 0
+        },
+        {
+          "target": "a",
+          "startIndex": 1,
+          "endIndex": 2,
+          "contextClass": "within-word",
+          "wordOrdinal": 0
+        },
+        {
+          "target": "p",
+          "startIndex": 2,
+          "endIndex": 3,
+          "contextClass": "within-word",
+          "wordOrdinal": 0
+        },
+        {
+          "target": " ",
+          "startIndex": 3,
+          "endIndex": 4,
+          "contextClass": "whitespace",
+          "wordOrdinal": null
+        },
+        {
+          "target": "t",
+          "startIndex": 4,
+          "endIndex": 5,
+          "contextClass": "within-word",
+          "wordOrdinal": 1
+        },
+        {
+          "target": "a",
+          "startIndex": 5,
+          "endIndex": 6,
+          "contextClass": "within-word",
+          "wordOrdinal": 1
+        },
+        {
+          "target": "p",
+          "startIndex": 6,
+          "endIndex": 7,
+          "contextClass": "within-word",
+          "wordOrdinal": 1
+        },
+        {
+          "target": " ",
+          "startIndex": 7,
+          "endIndex": 8,
+          "contextClass": "whitespace",
+          "wordOrdinal": null
+        },
+        {
+          "target": "m",
+          "startIndex": 8,
+          "endIndex": 9,
+          "contextClass": "within-word",
+          "wordOrdinal": 2
+        },
+        {
+          "target": "a",
+          "startIndex": 9,
+          "endIndex": 10,
+          "contextClass": "within-word",
+          "wordOrdinal": 2
+        },
+        {
+          "target": "p",
+          "startIndex": 10,
+          "endIndex": 11,
+          "contextClass": "within-word",
+          "wordOrdinal": 2
+        },
+        {
+          "target": " ",
+          "startIndex": 11,
+          "endIndex": 12,
+          "contextClass": "whitespace",
+          "wordOrdinal": null
+        },
+        {
+          "target": "t",
+          "startIndex": 12,
+          "endIndex": 13,
+          "contextClass": "within-word",
+          "wordOrdinal": 3
+        },
+        {
+          "target": "a",
+          "startIndex": 13,
+          "endIndex": 14,
+          "contextClass": "within-word",
+          "wordOrdinal": 3
+        },
+        {
+          "target": "p",
+          "startIndex": 14,
+          "endIndex": 15,
+          "contextClass": "within-word",
+          "wordOrdinal": 3
+        }
+      ],
+      "bigramOccurrences": [
+        {
+          "target": "ma",
+          "startIndex": 0,
+          "endIndex": 2,
+          "contextClass": "within-word",
+          "wordOrdinal": 0
+        },
+        {
+          "target": "ap",
+          "startIndex": 1,
+          "endIndex": 3,
+          "contextClass": "within-word",
+          "wordOrdinal": 0
+        },
+        {
+          "target": "p ",
+          "startIndex": 2,
+          "endIndex": 4,
+          "contextClass": "word-boundary",
+          "wordOrdinal": null
+        },
+        {
+          "target": " t",
+          "startIndex": 3,
+          "endIndex": 5,
+          "contextClass": "word-boundary",
+          "wordOrdinal": null
+        },
+        {
+          "target": "ta",
+          "startIndex": 4,
+          "endIndex": 6,
+          "contextClass": "within-word",
+          "wordOrdinal": 1
+        },
+        {
+          "target": "ap",
+          "startIndex": 5,
+          "endIndex": 7,
+          "contextClass": "within-word",
+          "wordOrdinal": 1
+        },
+        {
+          "target": "p ",
+          "startIndex": 6,
+          "endIndex": 8,
+          "contextClass": "word-boundary",
+          "wordOrdinal": null
+        },
+        {
+          "target": " m",
+          "startIndex": 7,
+          "endIndex": 9,
+          "contextClass": "word-boundary",
+          "wordOrdinal": null
+        },
+        {
+          "target": "ma",
+          "startIndex": 8,
+          "endIndex": 10,
+          "contextClass": "within-word",
+          "wordOrdinal": 2
+        },
+        {
+          "target": "ap",
+          "startIndex": 9,
+          "endIndex": 11,
+          "contextClass": "within-word",
+          "wordOrdinal": 2
+        },
+        {
+          "target": "p ",
+          "startIndex": 10,
+          "endIndex": 12,
+          "contextClass": "word-boundary",
+          "wordOrdinal": null
+        },
+        {
+          "target": " t",
+          "startIndex": 11,
+          "endIndex": 13,
+          "contextClass": "word-boundary",
+          "wordOrdinal": null
+        },
+        {
+          "target": "ta",
+          "startIndex": 12,
+          "endIndex": 14,
+          "contextClass": "within-word",
+          "wordOrdinal": 3
+        },
+        {
+          "target": "ap",
+          "startIndex": 13,
+          "endIndex": 15,
+          "contextClass": "within-word",
+          "wordOrdinal": 3
+        }
+      ],
+      "trigramOccurrences": [
+        {
+          "target": "map",
+          "startIndex": 0,
+          "endIndex": 3,
+          "contextClass": "within-word",
+          "wordOrdinal": 0
+        },
+        {
+          "target": "ap ",
+          "startIndex": 1,
+          "endIndex": 4,
+          "contextClass": "word-boundary",
+          "wordOrdinal": null
+        },
+        {
+          "target": "p t",
+          "startIndex": 2,
+          "endIndex": 5,
+          "contextClass": "word-boundary",
+          "wordOrdinal": null
+        },
+        {
+          "target": " ta",
+          "startIndex": 3,
+          "endIndex": 6,
+          "contextClass": "word-boundary",
+          "wordOrdinal": null
+        },
+        {
+          "target": "tap",
+          "startIndex": 4,
+          "endIndex": 7,
+          "contextClass": "within-word",
+          "wordOrdinal": 1
+        },
+        {
+          "target": "ap ",
+          "startIndex": 5,
+          "endIndex": 8,
+          "contextClass": "word-boundary",
+          "wordOrdinal": null
+        },
+        {
+          "target": "p m",
+          "startIndex": 6,
+          "endIndex": 9,
+          "contextClass": "word-boundary",
+          "wordOrdinal": null
+        },
+        {
+          "target": " ma",
+          "startIndex": 7,
+          "endIndex": 10,
+          "contextClass": "word-boundary",
+          "wordOrdinal": null
+        },
+        {
+          "target": "map",
+          "startIndex": 8,
+          "endIndex": 11,
+          "contextClass": "within-word",
+          "wordOrdinal": 2
+        },
+        {
+          "target": "ap ",
+          "startIndex": 9,
+          "endIndex": 12,
+          "contextClass": "word-boundary",
+          "wordOrdinal": null
+        },
+        {
+          "target": "p t",
+          "startIndex": 10,
+          "endIndex": 13,
+          "contextClass": "word-boundary",
+          "wordOrdinal": null
+        },
+        {
+          "target": " ta",
+          "startIndex": 11,
+          "endIndex": 14,
+          "contextClass": "word-boundary",
+          "wordOrdinal": null
+        },
+        {
+          "target": "tap",
+          "startIndex": 12,
+          "endIndex": 15,
+          "contextClass": "within-word",
+          "wordOrdinal": 3
+        }
+      ],
+      "structuralCounts": {
+        "uppercaseCount": 0,
+        "digitCount": 0,
+        "punctuationCount": 0
+      }
+    }
+  ]
+}

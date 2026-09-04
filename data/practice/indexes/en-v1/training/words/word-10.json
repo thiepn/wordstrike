@@ -1,0 +1,136 @@
+{
+  "indexSchemaVersion": 1,
+  "indexGeneratorVersion": 1,
+  "corpusId": "practice-en-v1",
+  "corpusVersion": 1,
+  "corpusChecksum": "sha256-28beccf65eed71519da306c129da5040a20f364aed320dc21eea2d16c2a1c404",
+  "language": "en",
+  "partition": "training",
+  "indexType": "words",
+  "shardPolicyVersion": 1,
+  "shardCount": 16,
+  "shardId": 10,
+  "entries": [
+    {
+      "entityType": "word",
+      "entityKey": "a",
+      "lexicalKey": "a",
+      "surfaceForms": [
+        {
+          "surfaceText": "A",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "practice-en-ws-foundation-001-s2",
+          "familyId": "ws-en-foundation-paragraph-001",
+          "count": 1,
+          "positions": [
+            0
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "makes",
+      "lexicalKey": "makes",
+      "surfaceForms": [
+        {
+          "surfaceText": "makes",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "practice-en-ws-foundation-001-s2",
+          "familyId": "ws-en-foundation-paragraph-001",
+          "count": 1,
+          "positions": [
+            16
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "rise",
+      "lexicalKey": "rise",
+      "surfaceForms": [
+        {
+          "surfaceText": "rise",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "practice-en-ws-foundation-001-s2",
+          "familyId": "ws-en-foundation-paragraph-001",
+          "count": 1,
+          "positions": [
+            71
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "speed",
+      "lexicalKey": "speed",
+      "surfaceForms": [
+        {
+          "surfaceText": "speed",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "practice-en-ws-foundation-001-s2",
+          "familyId": "ws-en-foundation-paragraph-001",
+          "count": 1,
+          "positions": [
+            55
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "to",
+      "lexicalKey": "to",
+      "surfaceForms": [
+        {
+          "surfaceText": "to",
+          "corpusOccurrenceCount": 2
+        }
+      ],
+      "corpusOccurrenceCount": 2,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "practice-en-ws-foundation-001-s2",
+          "familyId": "ws-en-foundation-paragraph-001",
+          "count": 2,
+          "positions": [
+            38,
+            68
+          ]
+        }
+      ]
+    }
+  ]
+}

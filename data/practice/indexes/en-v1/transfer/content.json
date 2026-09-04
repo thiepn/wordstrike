@@ -1,0 +1,27 @@
+{
+  "indexSchemaVersion": 1,
+  "indexGeneratorVersion": 1,
+  "corpusId": "practice-en-v1",
+  "corpusVersion": 1,
+  "corpusChecksum": "sha256-28beccf65eed71519da306c129da5040a20f364aed320dc21eea2d16c2a1c404",
+  "language": "en",
+  "partition": "transfer",
+  "indexType": "content",
+  "items": [
+    {
+      "contentId": "practice-en-ws-foundation-002-s1",
+      "familyId": "ws-en-foundation-sentence-002",
+      "sourceId": "ws-original-en-foundation-v1",
+      "contentType": "sentence",
+      "partition": "transfer",
+      "language": "en",
+      "contentHash": "sha256-3da983784a96c77cc9e6e8a64814c3cc461dcd69e04fee820825d30c5ee00be2",
+      "graphemeCount": 80,
+      "wordCount": 13,
+      "uniqueWordCount": 11,
+      "uppercaseCount": 1,
+      "digitCount": 0,
+      "punctuationCount": 1
+    }
+  ]
+}
