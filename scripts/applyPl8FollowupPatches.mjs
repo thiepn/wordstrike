@@ -57,4 +57,9 @@ await patch("docs/PRACTICE_LAB_SESSION_ENGINE.md", [
   ],
 ]);
 
+await patch("tests/practice-latency-classifier.test.js", [[
+  "  assert.equal(result.sessionSummary.calibrationSampleCount, 22);",
+  "  assert.equal(result.sessionSummary.calibrationSampleCount, 23);",
+]]);
+
 console.log("PL8 follow-up patches applied");
