@@ -32,8 +32,11 @@ jobs:
           node --check scripts/lib/practiceTypabilityBuildCore.mjs
           node --check scripts/buildPracticeTypability.mjs
           node --check scripts/applyPl10Integration.mjs
+          node --check scripts/applyPl10LegacyTestUpdates.mjs
       - name: Apply PL10 integration
-        run: node scripts/applyPl10Integration.mjs
+        run: |
+          node scripts/applyPl10Integration.mjs
+          node scripts/applyPl10LegacyTestUpdates.mjs
       - name: Build and validate PL10 artifacts
         run: |
           node scripts/buildPracticeTypability.mjs
@@ -42,5 +45,16 @@ jobs:
           node --check js/practiceLab/practiceNormalizationAnalysis.js
           node --check js/practiceLab/practiceFoundationAnalysis.js
           node --check js/practiceLab/practiceSessionEngine.js
+      - name: Focused PL10 tests
+        run: |
+          node tests/practice-normalization-keyboard.test.js
+          node tests/practice-typability-features.test.js
+          node tests/practice-typability-model.test.js
+          node tests/practice-typability-build.test.js
+          node tests/practice-context-normalization.test.js
+          node tests/practice-normalization-migration-validation.test.js
+          node tests/practice-normalization-session-integration.test.js
+          node tests/practice-normalization-import-side-effects.test.js
+          node tests/practice-normalization-privacy-performance.test.js
       - name: Existing suite compatibility
         run: npm test
