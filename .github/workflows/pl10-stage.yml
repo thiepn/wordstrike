@@ -1,0 +1,46 @@
+name: PL10 Stage
+
+on:
+  push:
+    branches:
+      - codex/pl10-context-typability-normalization
+
+permissions:
+  contents: read
+
+jobs:
+  stage:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out branch
+        uses: actions/checkout@v4
+        with:
+          ref: codex/pl10-context-typability-normalization
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Check PL10 source syntax
+        run: |
+          node --check js/practiceLab/practiceKeyboardGeometry.js
+          node --check js/practiceLab/practiceReferenceFrequency.js
+          node --check js/practiceLab/practiceTextDifficultyFeatures.js
+          node --check js/practiceLab/practiceTypabilityModel.js
+          node --check js/practiceLab/practiceContextFeatures.js
+          node --check js/practiceLab/practiceContextNormalizer.js
+          node --check js/practiceLab/practiceNormalizationValidation.js
+          node --check scripts/lib/practiceTypabilityBuildCore.mjs
+          node --check scripts/buildPracticeTypability.mjs
+          node --check scripts/applyPl10Integration.mjs
+      - name: Apply PL10 integration
+        run: node scripts/applyPl10Integration.mjs
+      - name: Build and validate PL10 artifacts
+        run: |
+          node scripts/buildPracticeTypability.mjs
+          node scripts/buildPracticeTypability.mjs --validate
+          node --check js/practiceLab/generated/practiceTypabilityRuntimeData.js
+          node --check js/practiceLab/practiceNormalizationAnalysis.js
+          node --check js/practiceLab/practiceFoundationAnalysis.js
+          node --check js/practiceLab/practiceSessionEngine.js
+      - name: Existing suite compatibility
+        run: npm test
