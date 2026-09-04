@@ -32,4 +32,8 @@ replace("tests/practice-latency-migration-validation.test.js", "migrated.value.r
 replace("tests/practice-latency-migration-validation.test.js", 'test("current v4 session summaries still accept null or valid compact PL8 fluency summaries"', 'test("current v5 session summaries still accept null or valid compact PL8 fluency summaries"');
 replace("tests/practice-latency-migration-validation.test.js", "base.recordVersion, 4", "base.recordVersion, 5");
 
+replace("tests/practice-error-session-integration.test.js", "result.summary.recordVersion, 4", "result.summary.recordVersion, 5");
+replace("tests/practice-error-session-integration.test.js", "received.foundationAnalysis.version, 2", "received.foundationAnalysis.version, 3");
+replace("tests/practice-latency-session-integration.test.js", "result.summary.recordVersion, 4", "result.summary.recordVersion, 5");
+
 console.log("PL10 legacy current-version test assertions updated");
