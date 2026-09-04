@@ -292,7 +292,9 @@ export function createPracticeErrorTracker({
           episode.bounded = true;
         }
       }
-      episode.repairTargetCursor = Math.max(episode.repairTargetCursor, event.cursorAfter);
+      if (episode.firstCorrectionActiveMs == null || incorrect) {
+        episode.repairTargetCursor = Math.max(episode.repairTargetCursor, event.cursorAfter);
+      }
       if (incorrect) {
         episode.independentErroneousInsertions += 1;
         if (episode.firstCorrectionActiveMs != null) episode.postCorrectionErroneousInsertions += 1;
@@ -319,6 +321,7 @@ export function createPracticeErrorTracker({
     }
 
     const policyName = event.correctionPolicy ?? "allow";
+    state.correctionAttemptCount += 1;
     if (policyName === "ignore") state.ignoredCorrectionActionCount += 1;
     if (policyName === "disabled") state.disabledCorrectionAttemptCount += 1;
     const removedCount = Number.isInteger(event.removedCount) ? Math.max(0, event.removedCount) : Math.max(0, event.cursorBefore - event.cursorAfter);
@@ -342,9 +345,8 @@ export function createPracticeErrorTracker({
       state.activeEpisodeTruncatedCount += 1;
     }
     episode.correctionAttempted = true;
-    state.correctionAttemptCount += 1;
+    episode.correctionActionCount += 1;
     if (removedCount > 0) {
-      episode.correctionActionCount += 1;
       episode.charactersRemoved += removedCount;
       episode.incorrectCharactersRemoved += removedIncorrectCount;
       episode.correctCharactersRemoved += removedCorrectCount;

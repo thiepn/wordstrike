@@ -11,6 +11,7 @@ import {
 import { createPracticeMetricsCollector } from "./practiceMetrics.js";
 import { createPracticeEventBuffer } from "./practiceEventBuffer.js";
 import { buildPracticeFoundationAnalysis } from "./practiceFoundationAnalysis.js";
+import { createPracticeErrorTracker } from "./practiceErrorTracker.js";
 import {
   buildPracticeCheckpoint,
   validatePracticeCheckpointRestore,
@@ -88,6 +89,7 @@ export function createPracticeSessionEngine({
   let contentPlan = null;
   let typingState = null;
   let metrics = createPracticeMetricsCollector();
+  let errorTracker = createPracticeErrorTracker();
   const eventBuffer = createPracticeEventBuffer({ capacity: checkpointPolicy.eventCapacity ?? PRACTICE_SESSION_LIMITS.eventBuffer });
   const subscribers = new Set();
   let snapshotVersion = 0;
@@ -286,6 +288,7 @@ export function createPracticeSessionEngine({
       metricsSnapshot: metrics.checkpointSnapshot(),
       recentInputTail: eventBuffer.getTail(PRACTICE_SESSION_LIMITS.checkpointRecentEvents),
       eventTraceMetadata: eventBuffer.getMetadata(),
+      errorTrackerSnapshot: errorTracker.checkpointSnapshot({ contentHash: contentPlan.contentHash, cursorIndex: typingState.cursorIndex }),
       startedAtUtc,
       sessionTimeContext,
       activeElapsedMs: activeAt(),
@@ -384,6 +387,7 @@ export function createPracticeSessionEngine({
     let outcome;
     const activeMs = activeAt(input.monotonicTimestampMs);
     if (isInsertion) {
+      const cursorBefore = typingState.cursorIndex;
       const value = input.type === "space" ? " " : input.value;
       outcome = applyPracticeInsertion(typingState, contentPlan, value, activeMs);
       if (outcome.accepted) {
@@ -393,75 +397,52 @@ export function createPracticeSessionEngine({
         }
         const unit = contentPlan.units.find((candidate) => candidate.unitId === outcome.unitId) || null;
         const latency = metrics.recordInsertion({
-          ...outcome,
-          value,
-          correct: outcome.correctness === "correct",
-          expectedGraphemes: typingState.expectedGraphemes,
-          monotonicMs: input.monotonicTimestampMs,
-          activeMs,
-          performanceStartMono: startMono,
-          unit,
+          ...outcome, value, correct: outcome.correctness === "correct",
+          expectedGraphemes: typingState.expectedGraphemes, monotonicMs: input.monotonicTimestampMs,
+          activeMs, performanceStartMono: startMono, unit,
         });
         for (const unitId of outcome.completedUnitIds) {
           const completedUnit = contentPlan.units.find((candidate) => candidate.unitId === unitId);
           if (completedUnit) metrics.recordUnitCompletion(completedUnit, typingState.typed, activeMs);
         }
-        eventBuffer.push({
-          eventIndex: eventBuffer.totalEventCount + 1,
-          eventTraceVersion: PRACTICE_EVENT_TRACE_VERSION,
-          timingSegmentId,
-          timingSegmentStartReason: hasInsertionInTimingSegment ? null : timingSegmentStartReason,
-          type: input.type,
-          entered: value,
-          expected: outcome.expected,
-          textPosition: outcome.position,
-          unitId: outcome.unitId,
-          correctness: outcome.correctness,
-          correctedLater: false,
-          monotonicTimestampMs: input.monotonicTimestampMs,
-          relativeActiveTimestampMs: activeMs,
-          latencyFromPriorInsertionMs: latency,
-          source: input.source,
-          targetEntityMatches: [],
-        });
+        const errorEvent = {
+          eventIndex: eventBuffer.totalEventCount + 1, eventTraceVersion: PRACTICE_EVENT_TRACE_VERSION,
+          timingSegmentId, timingSegmentStartReason: hasInsertionInTimingSegment ? null : timingSegmentStartReason,
+          type: input.type, entered: value, expected: outcome.expected, textPosition: outcome.position,
+          cursorBefore, cursorAfter: typingState.cursorIndex, unitId: outcome.unitId, correctness: outcome.correctness,
+          correctedLater: false, monotonicTimestampMs: input.monotonicTimestampMs, relativeActiveTimestampMs: activeMs,
+          latencyFromPriorInsertionMs: latency, source: input.source, targetEntityMatches: [],
+        };
+        eventBuffer.push(errorEvent);
+        errorTracker.consume(errorEvent);
         hasInsertionInTimingSegment = true;
         markDirty(true);
       }
     } else {
-      const policy = configuration.correctionBehavior ?? experiment.defaultCorrectionBehavior;
-      outcome = applyPracticeCorrection(typingState, input.type, policy, activeMs);
-      if (policy !== "disabled") metrics.recordCorrection({ type: input.type, policy, removed: outcome.removed, activeMs });
-      if (outcome.stateChanged) {
-        rebuildCompletedPracticeUnits(typingState, contentPlan);
-        markDirty(false);
-      }
-      eventBuffer.push({
-        eventIndex: eventBuffer.totalEventCount + 1,
-        eventTraceVersion: PRACTICE_EVENT_TRACE_VERSION,
-        timingSegmentId,
-        timingSegmentStartReason: null,
-        type: input.type,
-        entered: "",
-        expected: null,
-        textPosition: typingState.cursorIndex,
-        unitId: typingState.currentUnit?.unitId ?? null,
-        correctness: null,
-        correctedLater: false,
-        monotonicTimestampMs: input.monotonicTimestampMs,
-        relativeActiveTimestampMs: activeMs,
-        latencyFromPriorInsertionMs: null,
-        source: input.source,
-        targetEntityMatches: [],
-      });
+      const correctionPolicy = configuration.correctionBehavior ?? experiment.defaultCorrectionBehavior;
+      const cursorBefore = typingState.cursorIndex;
+      outcome = applyPracticeCorrection(typingState, input.type, correctionPolicy, activeMs);
+      if (correctionPolicy !== "disabled") metrics.recordCorrection({ type: input.type, policy: correctionPolicy, removed: outcome.removed, activeMs });
+      if (outcome.stateChanged) { rebuildCompletedPracticeUnits(typingState, contentPlan); markDirty(false); }
+      const removed = Array.isArray(outcome.removed) ? outcome.removed : [];
+      const removedIncorrectCount = removed.filter((entry) => !entry.correct).length;
+      const removedCorrectCount = removed.filter((entry) => entry.correct).length;
+      const errorEvent = {
+        eventIndex: eventBuffer.totalEventCount + 1, eventTraceVersion: PRACTICE_EVENT_TRACE_VERSION, timingSegmentId,
+        timingSegmentStartReason: null, type: input.type, entered: "", expected: null, textPosition: typingState.cursorIndex,
+        cursorBefore, cursorAfter: typingState.cursorIndex, removedCount: removed.length, removedIncorrectCount, removedCorrectCount,
+        removedStartPosition: removed.length ? typingState.cursorIndex : null, correctionPolicy, accepted: outcome.accepted,
+        stateChanged: outcome.stateChanged, unitId: typingState.currentUnit?.unitId ?? null, correctness: null, correctedLater: false,
+        monotonicTimestampMs: input.monotonicTimestampMs, relativeActiveTimestampMs: activeMs, latencyFromPriorInsertionMs: null,
+        source: input.source, targetEntityMatches: [],
+      };
+      eventBuffer.push(errorEvent);
+      errorTracker.consume(errorEvent);
     }
     const completionReason = outcome.accepted ? evaluateCompletion() : null;
     const snapshot = emit("input");
     if (completionReason) queueMicrotask(() => { void complete(completionReason); });
-    return {
-      ...outcome,
-      sessionCompleted: Boolean(completionReason),
-      snapshotVersion: snapshot.snapshotVersion,
-    };
+    return { ...outcome, sessionCompleted: Boolean(completionReason), snapshotVersion: snapshot.snapshotVersion };
   };
 
   const pause = async (reason = "manual") => {
@@ -472,6 +453,7 @@ export function createPracticeSessionEngine({
     if (lifecycleState === "paused") return immutableSnapshot();
     if (lifecycleState !== "active") throw sessionError(PRACTICE_SESSION_ERROR_CODES.INVALID_STATE, "Only an active Practice session can pause", "pause");
     const at = nowMono();
+    errorTracker.markTimingBoundary();
     freezeActiveTiming(at);
     transition("paused", "pause");
     pauseIntervalStart = at;
@@ -536,9 +518,10 @@ export function createPracticeSessionEngine({
       return buildPracticeFoundationAnalysis({
         events: eventBuffer.getTrace(),
         traceMetadata: eventBuffer.getMetadata(),
+        errorTrackerSnapshot: errorTracker.finalizeSnapshot(),
       });
     } catch (cause) {
-      throw sessionError(PRACTICE_SESSION_ERROR_CODES.ANALYSIS_FAILED, "Practice foundation latency analysis failed", "foundation-analysis", true, cause);
+      throw sessionError(PRACTICE_SESSION_ERROR_CODES.ANALYSIS_FAILED, "Practice foundation analysis failed", "foundation-analysis", true, cause);
     }
   };
 
@@ -732,12 +715,33 @@ export function createPracticeSessionEngine({
     }
     rebuildCompletedPracticeUnits(typingState, contentPlan);
     metrics = createPracticeMetricsCollector(checkpoint.metricsSnapshot);
-    const restoredTail = (checkpoint.metricsSnapshot?.recentInputTail || []).map((event) => ({
-      ...event,
-      eventTraceVersion: Number.isInteger(event?.eventTraceVersion) ? event.eventTraceVersion : 1,
-      timingSegmentId: Number.isInteger(event?.timingSegmentId) ? event.timingSegmentId : 0,
-      timingSegmentStartReason: event?.timingSegmentStartReason ?? null,
-    }));
+    const restoredIncorrectCount = typingState.typed.filter((entry) => !entry.correct).length;
+    const trackerSeed = checkpoint.metricsSnapshot?.errorTrackerSnapshot ?? null;
+    const trackerSeedValid = trackerSeed && trackerSeed.contentHash === checkpoint.contentHash && trackerSeed.cursorAtSnapshot === typingState.cursorIndex;
+    try {
+      errorTracker = trackerSeedValid
+        ? createPracticeErrorTracker({ seed: trackerSeed })
+        : createPracticeErrorTracker({ aggregateScope: "post-restore", initialIncorrectCount: restoredIncorrectCount });
+    } catch {
+      errorTracker = createPracticeErrorTracker({ aggregateScope: "post-restore", initialIncorrectCount: restoredIncorrectCount });
+    }
+    errorTracker.markTimingBoundary();
+    const restoredTail = (checkpoint.metricsSnapshot?.recentInputTail || []).map((event) => {
+      const insertion = event?.type === "character" || event?.type === "space";
+      const fallbackBefore = Number.isInteger(event?.textPosition) ? event.textPosition : 0;
+      const fallbackAfter = insertion ? fallbackBefore + 1 : fallbackBefore;
+      return {
+        ...event,
+        eventTraceVersion: Number.isInteger(event?.eventTraceVersion) ? event.eventTraceVersion : 1,
+        timingSegmentId: Number.isInteger(event?.timingSegmentId) ? event.timingSegmentId : 0,
+        timingSegmentStartReason: event?.timingSegmentStartReason ?? null,
+        cursorBefore: Number.isInteger(event?.cursorBefore) ? event.cursorBefore : fallbackBefore,
+        cursorAfter: Number.isInteger(event?.cursorAfter) ? event.cursorAfter : fallbackAfter,
+        removedCount: Number.isInteger(event?.removedCount) ? event.removedCount : 0,
+        removedIncorrectCount: Number.isInteger(event?.removedIncorrectCount) ? event.removedIncorrectCount : 0,
+        removedCorrectCount: Number.isInteger(event?.removedCorrectCount) ? event.removedCorrectCount : 0,
+      };
+    });
     const restoredMetadata = checkpoint.metricsSnapshot?.eventTraceMetadata ?? {
       totalEventCount: restoredTail.length,
       truncated: restoredTail.length > 0,
@@ -788,6 +792,8 @@ export function createPracticeSessionEngine({
       eventTraceTruncated: eventBuffer.truncated,
       eventTraceMetadata: eventBuffer.getMetadata(),
       timingSegmentId,
+      errorEpisodeCount: errorTracker.getSnapshot().errorEpisodeCount,
+      activeErrorEpisode: Boolean(errorTracker.activeEpisode),
       activeDurationMs: activeAt(),
       checkpointPending: checkpointTimer != null || checkpointWrite != null,
       lastCheckpointMonotonicMs: lastCheckpointMono,
