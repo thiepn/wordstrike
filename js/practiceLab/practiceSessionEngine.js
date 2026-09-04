@@ -10,6 +10,7 @@ import {
 } from "./practiceInputEngine.js";
 import { createPracticeMetricsCollector } from "./practiceMetrics.js";
 import { createPracticeEventBuffer } from "./practiceEventBuffer.js";
+import { buildPracticeFoundationAnalysis } from "./practiceFoundationAnalysis.js";
 import {
   buildPracticeCheckpoint,
   validatePracticeCheckpointRestore,
@@ -19,6 +20,7 @@ import {
   buildPracticeSessionResult,
 } from "./practiceSessionResult.js";
 import {
+  PRACTICE_EVENT_TRACE_VERSION,
   PRACTICE_SESSION_ERROR_CODES,
   PRACTICE_SESSION_LIMITS,
   PRACTICE_SESSION_STATES,
@@ -113,6 +115,9 @@ export function createPracticeSessionEngine({
   let finalizationState = "idle";
   let lastErrorCode = null;
   let destroyed = false;
+  let timingSegmentId = 1;
+  let timingSegmentStartReason = "session-start";
+  let hasInsertionInTimingSegment = false;
 
   const nowMono = () => Math.max(0, Number(clock()) || 0);
   const wallDate = () => {
@@ -158,6 +163,7 @@ export function createPracticeSessionEngine({
         wallDurationMs: wallDuration(),
         firstInputTimestamp: typing?.firstInputTimestamp ?? null,
         lastAcceptedInputTimestamp: typing?.lastAcceptedInputTimestamp ?? null,
+        timingSegmentId,
       },
       content: contentPlan ? {
         contentId: contentPlan.contentId,
@@ -279,6 +285,7 @@ export function createPracticeSessionEngine({
       typingSnapshot: typingState.snapshot(),
       metricsSnapshot: metrics.checkpointSnapshot(),
       recentInputTail: eventBuffer.getTail(PRACTICE_SESSION_LIMITS.checkpointRecentEvents),
+      eventTraceMetadata: eventBuffer.getMetadata(),
       startedAtUtc,
       sessionTimeContext,
       activeElapsedMs: activeAt(),
@@ -401,6 +408,9 @@ export function createPracticeSessionEngine({
         }
         eventBuffer.push({
           eventIndex: eventBuffer.totalEventCount + 1,
+          eventTraceVersion: PRACTICE_EVENT_TRACE_VERSION,
+          timingSegmentId,
+          timingSegmentStartReason: hasInsertionInTimingSegment ? null : timingSegmentStartReason,
           type: input.type,
           entered: value,
           expected: outcome.expected,
@@ -414,6 +424,7 @@ export function createPracticeSessionEngine({
           source: input.source,
           targetEntityMatches: [],
         });
+        hasInsertionInTimingSegment = true;
         markDirty(true);
       }
     } else {
@@ -426,6 +437,9 @@ export function createPracticeSessionEngine({
       }
       eventBuffer.push({
         eventIndex: eventBuffer.totalEventCount + 1,
+        eventTraceVersion: PRACTICE_EVENT_TRACE_VERSION,
+        timingSegmentId,
+        timingSegmentStartReason: null,
         type: input.type,
         entered: "",
         expected: null,
@@ -474,7 +488,16 @@ export function createPracticeSessionEngine({
     const at = nowMono();
     if (pauseIntervalStart != null) accumulatedPausedMs += Math.max(0, at - pauseIntervalStart);
     pauseIntervalStart = null;
+    const restoring = pauseReason === "restored";
     transition("active", "resume");
+    if (!restoring) {
+      timingSegmentId += 1;
+      timingSegmentStartReason = "resume";
+      hasInsertionInTimingSegment = false;
+    } else {
+      timingSegmentStartReason = "restore";
+      hasInsertionInTimingSegment = false;
+    }
     if (performanceTimingStarted) activeIntervalStart = at;
     pauseReason = null;
     emit("resumed");
@@ -508,7 +531,18 @@ export function createPracticeSessionEngine({
     return { completed: true, result: await complete(reason) };
   };
 
-  const analyze = async () => {
+  const analyzeFoundation = () => {
+    try {
+      return buildPracticeFoundationAnalysis({
+        events: eventBuffer.getTrace(),
+        traceMetadata: eventBuffer.getMetadata(),
+      });
+    } catch (cause) {
+      throw sessionError(PRACTICE_SESSION_ERROR_CODES.ANALYSIS_FAILED, "Practice foundation latency analysis failed", "foundation-analysis", true, cause);
+    }
+  };
+
+  const analyze = async (foundationAnalysis) => {
     if (typeof experiment.analyzeResult !== "function") return null;
     try {
       const output = await experiment.analyzeResult(freezeDeep({
@@ -516,6 +550,7 @@ export function createPracticeSessionEngine({
         metricsSnapshot: metricsSnapshot(),
         eventTrace: eventBuffer.getTrace(),
         observations: metrics.observations(),
+        foundationAnalysis,
       }));
       const validation = validatePracticeSerializable(output, {
         path: "analysis",
@@ -539,9 +574,11 @@ export function createPracticeSessionEngine({
       pauseIntervalStart = null;
     }
     if (checkpointWrite) await checkpointWrite;
+    let foundationAnalysis;
     let analysis;
     try {
-      analysis = await analyze();
+      foundationAnalysis = analyzeFoundation();
+      analysis = await analyze(foundationAnalysis);
     } catch (error) {
       finalizationState = "error";
       lastErrorCode = error.code;
@@ -571,6 +608,7 @@ export function createPracticeSessionEngine({
       timeContext: sessionTimeContext ?? getPracticeTimeContext(wallDate()),
       metrics: finalMetrics,
       targetEntities: contentPlan.targetEntities,
+      foundationAnalysis,
       analysis,
     });
     const currentProfile = await repository.getPracticeProfile();
@@ -694,7 +732,20 @@ export function createPracticeSessionEngine({
     }
     rebuildCompletedPracticeUnits(typingState, contentPlan);
     metrics = createPracticeMetricsCollector(checkpoint.metricsSnapshot);
-    for (const event of checkpoint.metricsSnapshot?.recentInputTail || []) eventBuffer.push(event);
+    const restoredTail = (checkpoint.metricsSnapshot?.recentInputTail || []).map((event) => ({
+      ...event,
+      eventTraceVersion: Number.isInteger(event?.eventTraceVersion) ? event.eventTraceVersion : 1,
+      timingSegmentId: Number.isInteger(event?.timingSegmentId) ? event.timingSegmentId : 0,
+      timingSegmentStartReason: event?.timingSegmentStartReason ?? null,
+    }));
+    const restoredMetadata = checkpoint.metricsSnapshot?.eventTraceMetadata ?? {
+      totalEventCount: restoredTail.length,
+      truncated: restoredTail.length > 0,
+    };
+    eventBuffer.restore(restoredTail, restoredMetadata);
+    timingSegmentId = restoredTail.reduce((max, event) => Math.max(max, Number.isInteger(event.timingSegmentId) ? event.timingSegmentId : 0), 0) + 1;
+    timingSegmentStartReason = "restore";
+    hasInsertionInTimingSegment = false;
     accumulatedActiveMs = checkpoint.activeElapsedMs;
     accumulatedPausedMs = checkpoint.pausedElapsedMs;
     performanceTimingStarted = values.length > 0 || accumulatedActiveMs > 0;
@@ -735,6 +786,8 @@ export function createPracticeSessionEngine({
       eventCount: eventBuffer.totalEventCount,
       retainedEventCount: eventBuffer.size,
       eventTraceTruncated: eventBuffer.truncated,
+      eventTraceMetadata: eventBuffer.getMetadata(),
+      timingSegmentId,
       activeDurationMs: activeAt(),
       checkpointPending: checkpointTimer != null || checkpointWrite != null,
       lastCheckpointMonotonicMs: lastCheckpointMono,

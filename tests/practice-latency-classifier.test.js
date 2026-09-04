@@ -98,7 +98,7 @@ test("PL8 excludes segment starts, pause boundaries, corrections and incorrect c
   assert.equal(byIndex.get(27).reason, "correctness");
   assert.equal(byIndex.get(28).reason, "correctness");
   assert.equal(byIndex.get(29).classification, "fluent");
-  assert.equal(result.sessionSummary.calibrationSampleCount, 22);
+  assert.equal(result.sessionSummary.calibrationSampleCount, 23);
 });
 
 test("word-delete is a correction boundary and interruptions do not poison later transitions", () => {

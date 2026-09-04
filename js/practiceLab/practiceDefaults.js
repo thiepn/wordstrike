@@ -215,6 +215,7 @@ export function createDefaultSessionSummary({
     rawWpm: 0,
     accuracy: 0,
     consistency: null,
+    fluencySummary: null,
     beforeMetrics: null,
     afterMetrics: null,
     transferMetrics: null,
