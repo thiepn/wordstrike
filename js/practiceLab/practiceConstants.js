@@ -9,12 +9,12 @@ export const PRACTICE_CONTEXT_FINGERPRINT_VERSION = 1;
 export const PRACTICE_RECORD_VERSIONS = Object.freeze({
   context: 1,
   profile: 3,
-  skillStat: 2,
-  sessionSummary: 5,
+  skillStat: 3,
+  sessionSummary: 6,
   reviewItem: 2,
   customText: 1,
   preset: 1,
-  checkpoint: 2,
+  checkpoint: 3,
   quarantine: 1,
 });
 
@@ -31,6 +31,7 @@ export const PRACTICE_LIMITS = Object.freeze({
   recommendationIds: 20,
   targetEntities: 256,
   sessionObjectBytes: 128 * 1024,
+  skillStatBytes: 64 * 1024,
   checkpointBytes: 512 * 1024,
   configurationDepth: 8,
   configurationBytes: 32 * 1024,
@@ -49,15 +50,10 @@ export const PRACTICE_LIMITS = Object.freeze({
 });
 
 export const PRACTICE_STORE_DEFINITIONS = Object.freeze({
-  meta: Object.freeze({
-    keyPath: "key",
-    indexes: [],
-  }),
+  meta: Object.freeze({ keyPath: "key", indexes: [] }),
   profiles: Object.freeze({
     keyPath: "profileId",
-    indexes: [
-      Object.freeze({ name: "updatedAt", keyPath: "updatedAt" }),
-    ],
+    indexes: [Object.freeze({ name: "updatedAt", keyPath: "updatedAt" })],
   }),
   contexts: Object.freeze({
     keyPath: "contextId",
@@ -65,11 +61,7 @@ export const PRACTICE_STORE_DEFINITIONS = Object.freeze({
       Object.freeze({ name: "profileId", keyPath: "profileId" }),
       Object.freeze({ name: "updatedAt", keyPath: "updatedAt" }),
       Object.freeze({ name: "lastUsedAt", keyPath: "lastUsedAt" }),
-      Object.freeze({
-        name: "profileFingerprint",
-        keyPath: ["profileId", "fingerprint"],
-        options: { unique: true },
-      }),
+      Object.freeze({ name: "profileFingerprint", keyPath: ["profileId", "fingerprint"], options: { unique: true } }),
     ],
   }),
   skillStats: Object.freeze({
@@ -82,11 +74,7 @@ export const PRACTICE_STORE_DEFINITIONS = Object.freeze({
       Object.freeze({ name: "priority", keyPath: "priority" }),
       Object.freeze({ name: "confidenceLevel", keyPath: "confidenceLevel" }),
       Object.freeze({ name: "masteryState", keyPath: "masteryState" }),
-      Object.freeze({
-        name: "profileContextEntity",
-        keyPath: ["profileId", "contextId", "entityType", "entityKey"],
-        options: { unique: true },
-      }),
+      Object.freeze({ name: "profileContextEntity", keyPath: ["profileId", "contextId", "entityType", "entityKey"], options: { unique: true } }),
     ],
   }),
   sessionSummaries: Object.freeze({
@@ -111,11 +99,7 @@ export const PRACTICE_STORE_DEFINITIONS = Object.freeze({
       Object.freeze({ name: "state", keyPath: "state" }),
       Object.freeze({ name: "entityType", keyPath: "entityType" }),
       Object.freeze({ name: "entityKey", keyPath: "entityKey" }),
-      Object.freeze({
-        name: "profileContextEntity",
-        keyPath: ["profileId", "contextId", "entityType", "entityKey"],
-        options: { unique: true },
-      }),
+      Object.freeze({ name: "profileContextEntity", keyPath: ["profileId", "contextId", "entityType", "entityKey"], options: { unique: true } }),
     ],
   }),
   customTexts: Object.freeze({
@@ -181,9 +165,7 @@ export const STORAGE_HEALTH_STATES = Object.freeze([
 export const ASSESSMENT_STATES = Object.freeze(["never-started", "incomplete", "complete", "stale"]);
 export const CHECKPOINT_PHASES = Object.freeze(["created", "ready", "active", "paused", "interrupted"]);
 
-export const LATENCY_HISTOGRAM_BOUNDS_MS = Object.freeze([
-  50, 80, 120, 180, 260, 400, 650, Infinity,
-]);
+export const LATENCY_HISTOGRAM_BOUNDS_MS = Object.freeze([50, 80, 120, 180, 260, 400, 650, Infinity]);
 
 export const QUOTA_RECOVERY_STEPS = Object.freeze([
   "expired-checkpoints",
