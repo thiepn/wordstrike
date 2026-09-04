@@ -1,0 +1,51 @@
+name: PL6 Apply
+
+on:
+  push:
+    branches: [codex/pl6-corpus-provenance-partitions]
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out branch
+        uses: actions/checkout@v4
+        with:
+          ref: codex/pl6-corpus-provenance-partitions
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Extract PL6 implementation
+        run: |
+          cat scripts/pl6-payload.part00 scripts/pl6-payload.part01 scripts/pl6-payload.part02 scripts/pl6-payload.part03 scripts/pl6-payload.part04 | base64 -d | tar -xzf -
+
+      - name: Validate Practice corpus artifacts
+        run: node scripts/buildPracticeCorpus.mjs --validate
+
+      - name: Focused PL6 tests
+        run: |
+          node tests/practice-corpus-partition.test.js
+          node tests/practice-corpus-validation.test.js
+          node tests/practice-corpus-build.test.js
+          node tests/practice-corpus-isolation.test.js
+
+      - name: Full WordStrike test suite
+        run: npm test
+
+      - name: Commit PL6 implementation
+        run: |
+          rm scripts/pl6-payload.part00 scripts/pl6-payload.part01 scripts/pl6-payload.part02 scripts/pl6-payload.part03 scripts/pl6-payload.part04 .github/workflows/pl6-apply.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "feat(practice): implement PL6 corpus provenance partitions"
+          git push origin HEAD:codex/pl6-corpus-provenance-partitions
