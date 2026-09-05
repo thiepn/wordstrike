@@ -23,7 +23,9 @@ jobs:
         with:
           node-version: 22
       - name: Apply PL14 integration
-        run: python scripts/pl14_apply.py
+        run: |
+          python scripts/pl14_apply.py
+          python scripts/pl14_fix1.py
       - name: Run focused PL14 gates
         run: |
           node tests/practice-performance-state.test.js
