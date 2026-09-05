@@ -5,7 +5,7 @@ path = root / "js/practiceLab/practiceAbilityObservation.js"
 text = path.read_text()
 old = '''  const core = buildPracticeAdjustedPerformanceObservation({
     wpm: core.wpm,
-    rawWpm: core.rawWpm,
+    rawWpm: session.rawWpm,
     accuracy: core.accuracy,
     activeDurationMs: core.activeDurationMs,
     typedCharacterCount: core.typedCharacterCount,
