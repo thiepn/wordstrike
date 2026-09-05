@@ -30,6 +30,8 @@ jobs:
           fi
           node --check scripts/applyPl11CurrentVersionTests.mjs
           node scripts/applyPl11CurrentVersionTests.mjs
+          node --check scripts/applyPl11FocusedTestFixes.mjs
+          node scripts/applyPl11FocusedTestFixes.mjs
           node --check js/practiceLab/practiceSkillEvidenceCollector.js
           node --check js/practiceLab/practiceSessionEngine.js
           node --check js/practiceLab/practiceValidation.js
