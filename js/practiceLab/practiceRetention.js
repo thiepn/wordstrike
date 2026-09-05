@@ -39,6 +39,15 @@ function sessionDeletes(records, nowMs, preserveSessionIds) {
   return [...deletions];
 }
 
+function canonicalSkillEvidenceAmount(record) {
+  const evidence = record?.evidence;
+  if (!evidence) return 0;
+  return Number(evidence.opportunities?.count || 0)
+    + Number(evidence.timing?.eligibleCount || 0)
+    + Number(evidence.launchTiming?.eligibleCount || 0)
+    + Number(evidence.errors?.primaryEpisodeCount || 0);
+}
+
 function skillDeletes(records, reviewItems = []) {
   const caps = { bigram: PRACTICE_LIMITS.bigramStats, trigram: PRACTICE_LIMITS.trigramStats, word: PRACTICE_LIMITS.wordStats };
   const linked = new Set(reviewItems.map((record) => `${record.profileId}\0${record.contextId}\0${record.entityType}\0${record.entityKey}`));
@@ -46,10 +55,9 @@ function skillDeletes(records, reviewItems = []) {
   const deletions = [];
   const compare = (a, b) => (
     (a.confidenceScore || 0) - (b.confidenceScore || 0)
+    || canonicalSkillEvidenceAmount(a) - canonicalSkillEvidenceAmount(b)
     || (a.evidence?.observation?.targetedSessionCount || 0) - (b.evidence?.observation?.targetedSessionCount || 0)
-    || (a.evidence?.opportunities?.count || 0) - (b.evidence?.opportunities?.count || 0)
     || time(a.lastObservedAt || a.updatedAt) - time(b.lastObservedAt || b.updatedAt)
-    || (a.priority || 0) - (b.priority || 0)
     || String(a.statId).localeCompare(String(b.statId))
   );
   for (const [type, cap] of Object.entries(caps)) {
