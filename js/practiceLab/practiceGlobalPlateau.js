@@ -55,7 +55,8 @@ export function evaluatePracticeGlobalPlateau({
   const confidence = abilityCurve?.confidence ?? "none";
   const unresolved = entityResults.filter((result) =>
     ["likely", "confirmed"].includes(result?.limiter?.status)
-    || result?.mastery?.stage === "learning",
+    || result?.mastery?.stage === "learning"
+    || result?.saturation?.type === "transfer-limited",
   );
   const strongSignals = entityResults.filter((result) => ["likely", "supported"].includes(result?.saturation?.status));
   const transferLimited = entityResults.filter((result) => result?.saturation?.type === "transfer-limited");
