@@ -18,6 +18,7 @@ import {
   validateSessionSummary,
   validateSkillStat,
 } from "./practiceValidation.js";
+import { validatePracticeAbilityState } from "./practiceAbilityValidation.js";
 import {
   createDefaultPracticeContextId,
   createSkillStatId,
@@ -33,6 +34,7 @@ const validators = Object.freeze({
   context: validatePracticeContext,
   profile: validatePracticeProfile,
   skillStat: validateSkillStat,
+  abilityState: validatePracticeAbilityState,
   sessionSummary: validateSessionSummary,
   reviewItem: validateReviewItem,
   customText: validateCustomText,
@@ -44,6 +46,7 @@ const normalizers = Object.freeze({
   context: (value) => value,
   profile: (value) => value,
   skillStat: normalizeSkillStat,
+  abilityState: (value) => value,
   sessionSummary: normalizeSessionSummary,
   reviewItem: (value) => value,
   customText: normalizeCustomTextMetadata,
@@ -75,6 +78,7 @@ const migrations = Object.freeze({
     3: (value) => ({ ...value, recordVersion: 4, errorSummary: null }),
     4: (value) => ({ ...value, recordVersion: 5, normalizationSummary: null }),
     5: (value) => ({ ...value, recordVersion: 6, skillEvidenceSummary: null }),
+    6: (value) => ({ ...value, recordVersion: 7, abilityMeasurementSummary: null }),
   }),
   reviewItem: Object.freeze({
     1: (value) => ({ ...value, recordVersion: 2, contextId: createDefaultPracticeContextId(value.profileId) }),
@@ -125,14 +129,15 @@ function promoteForCurrentValidation(type, value, version) {
     });
   }
   if (type === "skillStat" && version === 2) return migratePracticeSkillStatV2ToV3(value);
-  if (type === "sessionSummary" && version <= 5) return {
+  if (type === "sessionSummary" && version <= 6) return {
     ...value,
     recordVersion: PRACTICE_RECORD_VERSIONS.sessionSummary,
     contextId: version === 1 ? createDefaultPracticeContextId(value.profileId) : value.contextId,
     fluencySummary: version <= 2 ? null : value.fluencySummary ?? null,
     errorSummary: version <= 3 ? null : value.errorSummary ?? null,
     normalizationSummary: version <= 4 ? null : value.normalizationSummary ?? null,
-    skillEvidenceSummary: null,
+    skillEvidenceSummary: version <= 5 ? null : value.skillEvidenceSummary ?? null,
+    abilityMeasurementSummary: null,
   };
   if (type === "reviewItem" && version === 1) return {
     ...value,
