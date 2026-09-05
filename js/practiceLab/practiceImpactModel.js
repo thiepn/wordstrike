@@ -111,28 +111,52 @@ export function computePracticePerformanceBurden(stat, prevalence, policy = PRAC
   });
 }
 
+function lowerBound(sorted, target) {
+  let low = 0;
+  let high = sorted.length;
+  while (low < high) {
+    const mid = (low + high) >> 1;
+    if (sorted[mid] < target) low = mid + 1;
+    else high = mid;
+  }
+  return low;
+}
+
+function upperBound(sorted, target) {
+  let low = 0;
+  let high = sorted.length;
+  while (low < high) {
+    const mid = (low + high) >> 1;
+    if (sorted[mid] <= target) low = mid + 1;
+    else high = mid;
+  }
+  return low;
+}
+
+function midrankFromSorted(sorted, target) {
+  if (!sorted.length || !finite(target)) return null;
+  const below = lowerBound(sorted, target);
+  const aboveEqual = upperBound(sorted, target);
+  const equal = aboveEqual - below;
+  return 100 * (below + 0.5 * equal) / sorted.length;
+}
+
 export function practiceEmpiricalMidrankPercentile(values, target) {
   const finiteValues = (Array.isArray(values) ? values : []).filter(finite).sort((a, b) => a - b);
-  if (!finiteValues.length || !finite(target)) return null;
-  let below = 0;
-  let equal = 0;
-  for (const value of finiteValues) {
-    if (value < target) below += 1;
-    else if (value === target) equal += 1;
-  }
-  return 100 * (below + 0.5 * equal) / finiteValues.length;
+  return midrankFromSorted(finiteValues, target);
 }
 
 export function assignPracticeImpactPercentiles(candidates, policy = PRACTICE_LIMITER_POLICY_V1) {
   const burdens = candidates
     .map((candidate) => candidate.impact?.estimatedPerformanceBurdenMsPer1000)
     .filter(finite)
-    .map((value) => Math.log1p(Math.max(0, value)));
+    .map((value) => Math.log1p(Math.max(0, value)))
+    .sort((a, b) => a - b);
   return candidates.map((candidate) => {
     const impact = candidate.impact;
     if (!impact || impact.status === "unavailable" || !finite(impact.estimatedPerformanceBurdenMsPer1000)) return candidate;
     const transformed = Math.log1p(Math.max(0, impact.estimatedPerformanceBurdenMsPer1000));
-    const percentile = practiceEmpiricalMidrankPercentile(burdens, transformed);
+    const percentile = midrankFromSorted(burdens, transformed);
     const quality = policy.prevalenceQualityWeights[impact.prevalence?.status] ?? 0;
     return {
       ...candidate,
