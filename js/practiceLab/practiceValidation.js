@@ -442,6 +442,7 @@ function validateSkillEvidenceTrackerSnapshot(snapshot, errors, path = "metricsS
   if (!isPlainObject(snapshot)) return error(errors, path, "INVALID_TYPE", "skill evidence tracker snapshot must be an object or null");
   validateVersion(errors, snapshot.trackerVersion, PRACTICE_SKILL_EVIDENCE_TRACKER_VERSION, `${path}.trackerVersion`);
   validateVersion(errors, snapshot.policyVersion, PRACTICE_SKILL_EVIDENCE_POLICY_VERSION, `${path}.policyVersion`);
+  oneOf(errors, snapshot.evidenceRole, `${path}.evidenceRole`, PRACTICE_EVIDENCE_ROLES);
   if (!isPlainObject(snapshot.opportunityTracker)) error(errors, `${path}.opportunityTracker`, "INVALID_TYPE", "opportunity tracker snapshot is required");
   else {
     validateVersion(errors, snapshot.opportunityTracker.trackerVersion, PRACTICE_SKILL_EVIDENCE_TRACKER_VERSION, `${path}.opportunityTracker.trackerVersion`);

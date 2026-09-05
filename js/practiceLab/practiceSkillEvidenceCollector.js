@@ -124,19 +124,26 @@ export function createPracticeSkillEvidenceTracker({
 } = {}) {
   validatePracticeSkillEvidencePolicy(policy);
   const allowWordEntities = evidenceRole !== "custom" || policy.allowCustomWordEvidence;
-  const entityResolver = createPracticeEntityResolver({
-    contentPlan,
-    profileId,
-    contextId,
-    language: contentPlan?.metadata?.language ?? context?.dataLocale ?? "en",
-    segmenter,
-    allowWordEntities,
-  });
-  for (const [type, count] of Object.entries(entityResolver.directTargetsByType)) {
-    if (count > policy.admissionLimits[type]) throw new TypeError(`Practice direct ${type} targets exceed PL11 admission limit`);
-  }
-  const frequencyProvider = createUnavailablePracticeReferenceFrequencyProvider({ language: entityResolver.analysis.language });
-  const contextResolver = createPracticeTransitionContextResolver({ contentAnalysis: entityResolver.analysis, context, frequencyProvider });
+  if (seed?.evidenceRole != null && seed.evidenceRole !== evidenceRole) throw new TypeError("Practice skill evidence role cannot change across restore");
+  const buildResolvers = (nextContentPlan) => {
+    const nextEntityResolver = createPracticeEntityResolver({
+      contentPlan: nextContentPlan,
+      profileId,
+      contextId,
+      language: nextContentPlan?.metadata?.language ?? context?.dataLocale ?? "en",
+      segmenter,
+      allowWordEntities,
+    });
+    for (const [type, count] of Object.entries(nextEntityResolver.directTargetsByType)) {
+      if (count > policy.admissionLimits[type]) throw new TypeError(`Practice direct ${type} targets exceed PL11 admission limit`);
+    }
+    const nextFrequencyProvider = createUnavailablePracticeReferenceFrequencyProvider({ language: nextEntityResolver.analysis.language });
+    return {
+      entityResolver: nextEntityResolver,
+      contextResolver: createPracticeTransitionContextResolver({ contentAnalysis: nextEntityResolver.analysis, context, frequencyProvider: nextFrequencyProvider }),
+    };
+  };
+  let { entityResolver, contextResolver } = buildResolvers(contentPlan);
   const opportunityTracker = createPracticeOpportunityTracker({
     seed: seed?.opportunityTracker ?? null,
     initialCursor,
@@ -379,6 +386,7 @@ export function createPracticeSkillEvidenceTracker({
     return freezeDeep({
       trackerVersion: PRACTICE_SKILL_EVIDENCE_TRACKER_VERSION,
       policyVersion: PRACTICE_SKILL_EVIDENCE_POLICY_VERSION,
+      evidenceRole,
       opportunityTracker: opportunityTracker.getSnapshot(),
       currentWordFirstPassState: clone(currentWordFirstPassState),
       entries: selected,
@@ -393,6 +401,17 @@ export function createPracticeSkillEvidenceTracker({
     recordInsertion,
     recordClosedEpisode,
     finalize,
+    setContentPlan(nextContentPlan) {
+      const rebuilt = buildResolvers(nextContentPlan);
+      entityResolver = rebuilt.entityResolver;
+      contextResolver = rebuilt.contextResolver;
+      for (const key of Object.keys(incidentalAdmitted)) incidentalAdmitted[key] = 0;
+      for (const entry of entries.values()) {
+        entry.directTarget = entityResolver.isDirectTarget(entry.entityType, entry.entityKey);
+        if (!entry.directTarget) incidentalAdmitted[entry.entityType] = Number(incidentalAdmitted[entry.entityType] || 0) + 1;
+      }
+      return true;
+    },
     checkpointSnapshot,
     getSnapshot() {
       return freezeDeep({

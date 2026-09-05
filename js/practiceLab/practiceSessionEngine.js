@@ -527,6 +527,7 @@ export function createPracticeSessionEngine({
     const next = appendPracticeContentPlan(contentPlan, addition, { segmenter });
     contentPlan = next;
     typingState.setContentPlan(next);
+    skillEvidenceTracker?.setContentPlan(next);
     markDirty(false);
     emit("content-appended");
     const reason = evaluateCompletion();
