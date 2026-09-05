@@ -23,6 +23,15 @@ for (const name of files) {
   if (name === "practice-context-migration-hardening.test.js") {
     source = source.replace("assert.equal(migratedSkill.recordVersion, 2);", "assert.equal(migratedSkill.recordVersion, 3);");
   }
+  if (name === "practice-error-foundation.test.js") {
+    source = source.replaceAll("assert.equal(foundation.version, 3);", "assert.equal(foundation.version, 4);");
+    source = source.replace("foundation analysis v3", "foundation analysis v4");
+  }
+  if (name === "practice-normalization-session-integration.test.js") {
+    source = source.replace("assert.equal(result.summary.recordVersion, 5);", "assert.equal(result.summary.recordVersion, 6);");
+    source = source.replace("assert.equal(received.foundationAnalysis.version, 3);", "assert.equal(received.foundationAnalysis.version, 4);");
+    source = source.replace("foundationAnalysis v3", "foundationAnalysis v4");
+  }
   if (source !== original) {
     fs.writeFileSync(file, source);
     changed += 1;
