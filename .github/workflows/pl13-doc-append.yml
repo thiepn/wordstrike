@@ -1,0 +1,59 @@
+name: PL13 Doc Append
+
+on:
+  push:
+    branches: [codex/pl13-ability-estimator-uncertainty]
+
+permissions:
+  contents: write
+
+jobs:
+  append-doc:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: codex/pl13-ability-estimator-uncertainty
+          fetch-depth: 0
+      - name: Append PL13 typability downstream contract
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          path = Path('docs/PRACTICE_LAB_CONTEXT_TYPABILITY_MODEL.md')
+          text = path.read_text()
+          marker = '## 29. PL13 observation-level ability adjustment'
+          if marker not in text:
+              appendix = r'''
+
+## 29. PL13 observation-level ability adjustment
+
+PL13 is the first downstream phase that converts PL10 `difficultyIndex` into a conservative **observation-level** adjustment before latent ability estimation. This does not change PL10 itself: PL10 remains the source of the heuristic text-difficulty index, status, and `availableModelWeight`, and all PL10 model/reference/feature versions remain unchanged.
+
+The versioned PL13 v1 observation policy is:
+
+```text
+D = PL10 difficultyIndex
+C = availableModelWeight in [0,1]
+
+A_d = clamp(0.03 × D × C, -0.12, +0.12)
+AdjustedLogPerformance = ln(canonical WPM) + A_d
+```
+
+Higher PL10 difficulty therefore raises the adjusted ability observation; easier text lowers it. Partial models receive only coverage-proportional adjustment. For PL10 status `insufficient` or `unsupported-language`, PL13 uses zero difficulty adjustment and increases observation uncertainty instead of guessing.
+
+PL13 does **not** use PL10 `relativeDifficultyPercentile` as a WPM correction. It also does not reinterpret PL10's heuristic difficulty index as user ability. The `0.03` coefficient and `±0.12` cap are PL13 engineering policy, isolated in the PL13 observation builder so PL18 can later replace/augment them with empirical passage calibration without redesigning PL10 or `abilityStates`.
+
+Historical PL10 wrapper-version statements above remain documentation of the PL10 phase at its introduction. Current database/session/foundation wrapper versions are documented in `PRACTICE_LAB_DATA_ARCHITECTURE.md`; the full downstream estimator contract is in `PRACTICE_LAB_ABILITY_ESTIMATION.md`.
+'''
+              path.write_text(text.rstrip() + appendix + '\n')
+          PY
+          git diff --check
+      - name: Commit documentation
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/PRACTICE_LAB_CONTEXT_TYPABILITY_MODEL.md
+          git commit -m "docs(practice): add PL13 typability adjustment contract" || true
+          git push origin HEAD:codex/pl13-ability-estimator-uncertainty
