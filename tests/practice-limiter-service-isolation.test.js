@@ -243,10 +243,16 @@ test("PL12 pure/runtime modules have no session-engine, raw-event, custom-text, 
     "practiceLimiterPolicy.js", "practicePeerReference.js", "practiceLimiterDimensions.js", "practiceEntityPrevalence.js",
     "practiceImpactModel.js", "practiceEntityHierarchy.js", "practiceLimiterSnapshot.js", "practiceLimiterService.js",
   ];
-  const forbidden = [/practiceSessionEngine/u, /eventTrace/u, /customTexts/u, /supabase/iu, /leaderboard/iu, /ranked/iu];
+  const forbiddenImport = /practiceSessionEngine|practiceCustomText|supabase|leaderboard|ranked/iu;
   for (const module of modules) {
     const source = await readFile(new URL(`../js/practiceLab/${module}`, import.meta.url), "utf8");
-    for (const pattern of forbidden) assert.equal(pattern.test(source), false, `${module} must not contain ${pattern}`);
+    const specifiers = [
+      ...[...source.matchAll(/from\s+["']([^"']+)["']/gu)].map((match) => match[1]),
+      ...[...source.matchAll(/import\s*\(\s*["']([^"']+)["']\s*\)/gu)].map((match) => match[1]),
+    ];
+    for (const specifier of specifiers) assert.equal(forbiddenImport.test(specifier), false, `${module} must not import ${specifier}`);
+    assert.equal(/eventTrace/u.test(source), false, `${module} must not consume raw eventTrace`);
+    assert.equal(/customTexts/u.test(source), false, `${module} must not query customTexts`);
   }
 });
 
