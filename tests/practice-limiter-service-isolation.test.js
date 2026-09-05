@@ -82,12 +82,12 @@ function peerSet(contextId = contextA, residualMeanMs = 0) {
   return Array.from({ length: 9 }, (_, index) => canonicalStat({ contextId, entityType: "key", entityKey: String.fromCharCode(97 + index), index, residualMeanMs }));
 }
 
-test("PL12 leaves PL11 storage/session/foundation contracts unchanged and keeps custom-word persistence disabled", () => {
-  assert.equal(PRACTICE_DATABASE_VERSION, 2);
+test("PL12 model contracts remain unchanged inside the current PL13 storage/session/foundation envelope", () => {
+  assert.equal(PRACTICE_DATABASE_VERSION, 3);
   assert.equal(PRACTICE_RECORD_VERSIONS.skillStat, 3);
-  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 6);
+  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 7);
   assert.equal(PRACTICE_RECORD_VERSIONS.checkpoint, 3);
-  assert.equal(PRACTICE_FOUNDATION_ANALYSIS_VERSION, 4);
+  assert.equal(PRACTICE_FOUNDATION_ANALYSIS_VERSION, 5);
   assert.equal(PRACTICE_LIMITER_MODEL_VERSION, 1);
   assert.equal(PRACTICE_LIMITER_POLICY_VERSION, 1);
   assert.equal(PRACTICE_IMPACT_MODEL_VERSION, 1);
