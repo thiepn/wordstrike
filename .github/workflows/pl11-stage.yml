@@ -1,0 +1,50 @@
+name: PL11 Stage
+
+on:
+  push:
+    branches: [codex/pl11-contextual-skill-evidence]
+
+permissions:
+  contents: write
+
+jobs:
+  integrate:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: codex/pl11-contextual-skill-evidence
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Apply PL11 integration
+        run: |
+          node --check scripts/applyPl11Integration.mjs
+          node scripts/applyPl11Integration.mjs
+          node --check js/practiceLab/practiceSkillEvidencePolicy.js
+          node --check js/practiceLab/practiceEvidenceConfidence.js
+          node --check js/practiceLab/practiceEntityResolver.js
+          node --check js/practiceLab/practiceEvidenceRole.js
+          node --check js/practiceLab/practiceOpportunityTracker.js
+          node --check js/practiceLab/practiceSkillEvidenceDelta.js
+          node --check js/practiceLab/practiceSkillEvidenceMerge.js
+          node --check js/practiceLab/practiceSkillEvidenceCollector.js
+          node --check js/practiceLab/practiceSkillEvidenceValidation.js
+          node --check js/practiceLab/practiceFoundationAnalysis.js
+          node --check js/practiceLab/practiceSessionEngine.js
+          node --check js/practiceLab/practiceRepository.js
+          node --check js/practiceLab/practiceValidation.js
+          node --check js/practiceLab/practiceMigrations.js
+          git diff --check
+      - name: Commit staged integration
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "feat(practice): integrate PL11 contextual skill evidence" || true
+          git push origin HEAD:codex/pl11-contextual-skill-evidence
+      - name: Run full tests
+        run: npm test
