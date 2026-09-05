@@ -1,6 +1,7 @@
 import { createDefaultSessionSummary } from "./practiceDefaults.js";
 import { toPracticeUtcIso } from "./practiceTime.js";
 import { validateSessionSummary } from "./practiceValidation.js";
+import { validatePracticeLearningEvidenceSummary } from "./practiceLearningValidation.js";
 import {
   PRACTICE_SESSION_ERROR_CODES,
 } from "./practiceSessionConstants.js";
@@ -24,6 +25,15 @@ export function buildPracticeSessionResult({
   foundationAnalysis = null,
   analysis = null,
 }) {
+  const learningEvidenceSummary = foundationAnalysis?.learning?.summary ?? null;
+  if (learningEvidenceSummary != null) {
+    const learningValidation = validatePracticeLearningEvidenceSummary(learningEvidenceSummary);
+    if (!learningValidation.valid) throw practiceSessionError(
+      PRACTICE_SESSION_ERROR_CODES.COMMIT_FAILED,
+      "Practice learning evidence summary failed validation",
+      { operation: "build-result", sessionId, lifecycleState: status, details: learningValidation.errors },
+    );
+  }
   const summary = createDefaultSessionSummary({
     sessionId,
     profileId,
@@ -72,6 +82,7 @@ export function buildPracticeSessionResult({
       skillEvidenceSummary: foundationAnalysis?.skills?.summary ?? null,
       abilityMeasurementSummary: foundationAnalysis?.ability?.sessionSummary ?? null,
       performanceMeasurementSummary: foundationAnalysis?.performance?.sessionSummary ?? null,
+      learningEvidenceSummary,
       beforeMetrics: analysis?.beforeMetrics ?? null,
       afterMetrics: analysis?.afterMetrics ?? null,
       transferMetrics: analysis?.transferMetrics ?? null,
