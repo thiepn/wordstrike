@@ -1284,9 +1284,9 @@ PL12 must not infer stable ability from entity limiter evidence.
 
 ## 45. PL15 contract
 
-PL15 may combine PL12 limiter evidence with PL11 role evidence to distinguish acquired, transferred, robust, and retained skill states.
+PL15 consumes PL12 through the **full per-entity dimension-evaluation layer**, not only the bounded candidate list or `primaryLimiterIds`. `evaluatePracticeLimiterDimensions(...)` is reused for every requested entity so a healthy/low-priority entity can still receive canonical `slow`, `hesitant`, `inaccurate`, `recovery-heavy`, `launch-limited`, and `unstable` results. PL15 does not copy or redefine PL12 formulas, and absence from the bounded limiter snapshot never means severity zero.
 
-PL12 does not set mastery or automaticity.
+PL15 combines those full PL12 evaluations with PL11 role evidence to distinguish acquired, transferred, robust, and retained skill states. PL12 does not set mastery or automaticity.
 
 ## 46. PL17 contract
 

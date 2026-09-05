@@ -29,6 +29,8 @@ Current versions:
 
 PL11 owns observation. PL12 owns limiter/weakness interpretation, PL15 owns mastery, PL16 owns trends/learning curves, and PL17 owns review semantics. Therefore PL11 preserves but does not update `weaknessScore`, `priority`, `masteryState`, `recentTrend`, `successfulReviewCount`, or `failedReviewCount`.
 
+As of PL15, persisted `skillStat.masteryState` is explicitly a **legacy / non-authoritative compatibility placeholder**. Canonical mastery is derived by the PL15 mastery model from PL11 evidence plus PL12 interpretation, protected transfer evidence, and the retention-provider contract. PL15 does not write its derived stage or scores back into `skillStat.masteryState`.
+
 A high evidence confidence score means WordStrike has broad/repeated evidence. It does **not** mean the user is highly skilled.
 
 ## Supported entity identity
@@ -305,7 +307,7 @@ trigram  2000
 word     2000
 ```
 
-Direct targets are reserved/admitted ahead of incidental entities. Existing admitted entities continue accumulating after a cap is reached. Rejected new incidental observations set truncation metadata and increment omitted-observation diagnostics. Direct target counts exceeding a type cap fail setup instead of being silently discarded.
+Direct targets are reserved/admitted ahead of incidental admission. Existing admitted entities continue accumulating after a cap is reached. Rejected new incidental observations set truncation metadata and increment omitted-observation diagnostics. Direct target counts exceeding a type cap fail setup instead of being silently discarded.
 
 A skill stat is capped at **64 KiB** serialized size. The fixed six-role enum and bounded sample rings keep the schema finite. Existing global retention caps remain unchanged.
 
