@@ -18,6 +18,7 @@ import {
 } from "./practiceIds.js";
 import { createEmptyPracticeSkillEvidence } from "./practiceSkillEvidenceMerge.js";
 import { PRACTICE_SKILL_EVIDENCE_VERSION } from "./practiceSkillEvidencePolicy.js";
+import { createEmptyPracticeRetentionState } from "./practiceReviewItem.js";
 import {
   addPracticeMilliseconds,
   getPracticeTimeContext,
@@ -76,12 +77,7 @@ export function createDefaultPracticeManifest({
     createdAt: timestamp,
     updatedAt: timestamp,
     settings: createDefaultPracticeSettings(settings),
-    onboarding: {
-      currentVersion: 1,
-      completedVersion: 0,
-      dismissed: false,
-      completedAt: null,
-    },
+    onboarding: { currentVersion: 1, completedVersion: 0, dismissed: false, completedAt: null },
     assessmentState: "never-started",
     dashboardSummary: createDefaultDashboardSummary(),
     lastCompletedSessionAt: null,
@@ -213,6 +209,7 @@ export function createDefaultSessionSummary({
     abilityMeasurementSummary: null,
     performanceMeasurementSummary: null,
     learningEvidenceSummary: null,
+    retentionReviewSummary: null,
     beforeMetrics: null,
     afterMetrics: null,
     transferMetrics: null,
@@ -233,7 +230,6 @@ export function createDefaultReviewItem({
   overrides = {},
 } = {}) {
   const timestamp = toPracticeUtcIso(now);
-  const localDayKey = getPracticeTimeContext(now).localDayKey;
   return {
     reviewItemId,
     profileId,
@@ -241,20 +237,20 @@ export function createDefaultReviewItem({
     recordVersion: PRACTICE_RECORD_VERSIONS.reviewItem,
     entityType,
     entityKey,
-    sourceExperimentId: "foundation",
-    state: "new",
-    priority: 0,
     createdAt: timestamp,
     updatedAt: timestamp,
-    lastReviewedAt: null,
-    dueAtUtc: timestamp,
-    localDueDayKey: localDayKey,
-    intervalDays: 0,
-    successfulReviewCount: 0,
-    failedReviewCount: 0,
-    consecutiveSuccesses: 0,
-    lastOutcome: null,
-    masteryState: "unmeasured",
+    state: "inactive",
+    dueAtUtc: null,
+    localDueDayKey: null,
+    intervalDays: null,
+    stabilityDays: null,
+    minimumMatureAtUtc: null,
+    lastScheduledAt: null,
+    suspensionReason: null,
+    cycle: null,
+    retention: createEmptyPracticeRetentionState(),
+    recentProbeFamilyIds: [],
+    legacyReviewV2: null,
     ...freshObject(overrides),
   };
 }
