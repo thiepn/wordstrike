@@ -1,6 +1,6 @@
 # Practice Lab Data Architecture
 
-Status: current through PL11 contextual skill aggregation and evidence
+Status: current through PL12 limiter attribution and real-world impact
 
 Database structural version: **2**
 
@@ -37,6 +37,7 @@ Raw per-input traces and high-frequency transition details remain bounded in ses
 | Session memory | normalized input, typing state, bounded event/error state, PL10 transient normalized transitions, PL11 uncommitted entity deltas | durable history |
 | localStorage manifest | settings/defaults, profile/database pointer, dashboard/onboarding/health cache | context identity, skill maps, histories, raw text |
 | IndexedDB | profile/context records, skillStats, session summaries, reviews, custom texts, presets, one checkpoint/profile, quarantine, metadata | ranked/auth/cloud state |
+| PL12 derived memory | context limiter snapshots, peer references, prevalence lookup cache | persistent skill truth, review state, session state |
 
 The manifest remains `wordstrike.practice.manifest.v1`. Canonical `activeContextId` lives on the profile record in IndexedDB.
 
@@ -44,14 +45,14 @@ The manifest remains `wordstrike.practice.manifest.v1`. Canonical `activeContext
 
 Database: `wordstrike-practice-lab`
 
-PL11 does **not** change stores or indexes, so there is no structural version bump.
+PL12 does **not** change stores or indexes, so there is no structural version bump.
 
 | Store | Key path | Important indexes |
 | --- | --- | --- |
 | `meta` | `key` | none |
 | `profiles` | `profileId` | `updatedAt` |
 | `contexts` | `contextId` | `profileId`, `updatedAt`, `lastUsedAt`, unique `[profileId, fingerprint]` |
-| `skillStats` | `statId` | `profileId`, `contextId`, `entityType`, `updatedAt`, `priority`, `confidenceLevel`, `masteryState`, unique `[profileId, contextId, entityType, entityKey]` |
+| `skillStats` | `statId` | `profileId`, `contextId`, `entityType`, `updatedAt`, legacy `priority`, `confidenceLevel`, `masteryState`, unique `[profileId, contextId, entityType, entityKey]` |
 | `sessionSummaries` | `sessionId` | `profileId`, `contextId`, `experimentId`, `startedAtUtc`, `completedAtUtc`, `status`, `localDayKey` |
 | `reviewItems` | `reviewItemId` | `profileId`, `contextId`, `dueAtUtc`, `localDueDayKey`, `state`, `entityType`, `entityKey`, unique `[profileId, contextId, entityType, entityKey]` |
 | `customTexts` | `customTextId` | `profileId`, `updatedAt`, `lastUsedAt`, `normalizedTitle` |
@@ -59,7 +60,7 @@ PL11 does **not** change stores or indexes, so there is no structural version bu
 | `activeSessionCheckpoints` | `profileId` | unique `sessionId`, `expiresAt` |
 | `quarantine` | `quarantineId` | `sourceStore`, `detectedAt` |
 
-The PL5 v1→v2 structural migration removed the contextless skill/review uniqueness indexes and created context-aware replacements. PL11 reuses that topology.
+The PL5 v1→v2 structural migration removed the contextless skill/review uniqueness indexes and created context-aware replacements. PL11 and PL12 reuse that topology. The physical `priority` index remains for schema compatibility, but PL12's derived `priorityScore` is not written there and the legacy top-level `priority` field is non-authoritative.
 
 ## 5. Current record versions
 
@@ -75,7 +76,7 @@ The PL5 v1→v2 structural migration removed the contextless skill/review unique
 | preset | 1 |
 | quarantine | 1 |
 
-Related transient contracts:
+Related transient/derived contracts:
 
 | Contract | Version |
 | --- | ---: |
@@ -85,6 +86,12 @@ Related transient contracts:
 | PL11 evidence delta | 1 |
 | PL11 evidence confidence | 1 |
 | PL11 tracker checkpoint snapshot | 1 |
+| PL12 limiter snapshot | 1 |
+| PL12 limiter model | 1 |
+| PL12 limiter policy | 1 |
+| PL12 impact model | 1 |
+| PL12 hierarchy model | 1 |
+| PL12 prevalence model | 1 |
 
 ## 6. Context identity
 
@@ -102,7 +109,7 @@ Switching active context affects future sessions only. It never relabels prior s
 
 ## 8. skillStat v3
 
-PL11 advances `skillStat` from v2 to v3 without changing its primary key or indexes.
+PL11 advances `skillStat` from v2 to v3 without changing its primary key or indexes. PL12 leaves v3 unchanged.
 
 A canonical v3 skill stat preserves identity and later-phase judgment fields, but replaces old canonical attempt/latency interpretation with explicit versioned evidence:
 
@@ -126,6 +133,8 @@ judgment fields preserved for later phases
 ```
 
 PL11 itself does not update `weaknessScore`, `priority`, `masteryState`, `recentTrend`, `successfulReviewCount`, or `failedReviewCount`.
+
+PL12 derives authoritative limiter-candidate `weaknessScore` and `priorityScore` in memory. It does not write those values back. Existing top-level skill-stat `weaknessScore` and `priority` remain legacy/non-authoritative placeholders.
 
 ### Supported new evidence entities
 
@@ -181,11 +190,15 @@ Default PL11 policy does not create durable `word` skill entities from Custom Te
 
 Neither skill stats nor checkpoints persist full Custom Text, sentence excerpts, containing-word lists, raw event traces, or growing session-ID histories.
 
+PL12 does not read `customTexts` to construct a limiter snapshot and therefore cannot reconstruct a suppressed private Custom Text word entity.
+
 ## 13. Evidence confidence
 
 PL11 confidence is evidence confidence—not skill/mastery probability. It combines quantity with session diversity, day diversity, and bounded contextual breadth under a versioned policy. One extremely large session cannot alone saturate high confidence.
 
 Only general evidence confidence is persisted in the stat. Dimension-specific confidence for accuracy, fluent timing, normalized residual, disfluency, errors, or word launch is derived from the stored canonical evidence when needed.
+
+PL12 reuses those dimension-specific confidence calculations for diagnostic status. It does not create a second confidence system.
 
 ## 14. SessionSummary v6
 
@@ -194,6 +207,8 @@ Session summary v6 adds nullable compact `skillEvidenceSummary` beside the exist
 The summary stores counts/coverage/policy metadata only; per-entity deltas are transient and are explicitly forbidden from session summaries. Historical v5 summaries migrate with `skillEvidenceSummary: null` because older summaries cannot reconstruct PL11 entity evidence.
 
 Raw events, normalized transition arrays, PL11 entity deltas, private Custom Text excerpts, leaderboard payloads, and auth state remain forbidden.
+
+PL12 adds no session-summary field and no v7 migration.
 
 ## 15. Checkpoint v3
 
@@ -209,6 +224,8 @@ The snapshot preserves:
 - truncation/coverage metadata.
 
 Historical v2 checkpoints migrate with `skillEvidenceTrackerSnapshot: null`. Restore remains valid, but PL11 starts from the restored cursor with `partial-session` accuracy coverage rather than pretending missing pre-restore evidence was observed.
+
+PL12 does not alter checkpoint format or session lifecycle.
 
 ## 16. Atomic session commit
 
@@ -226,6 +243,8 @@ Inside one read/write transaction it loads/migrates or creates each stat, merges
 
 Any failure aborts the transaction.
 
+PL12 is not part of this atomic path. A limiter snapshot is requested later from already committed canonical evidence.
+
 ## 17. Exactly-once evidence application
 
 `sessionId` is the commit idempotency boundary. If an identical completed summary already exists, commit returns idempotent success **before** applying skill evidence. If the same `sessionId` is associated with a different summary, commit fails as a duplicate/conflict.
@@ -238,7 +257,15 @@ Direct non-empty `updatedSkillStats` replacement is rejected on the canonical co
 
 Existing global skill/review/session/quarantine caps remain bounded. Skill records are never merged across contexts.
 
-PL11 low-confidence pruning uses canonical v3 evidence confidence and deterministic tie-breakers. At equal confidence, purely incidental evidence is less protected than targeted evidence where practical. Review-linked entities remain protected by current repository integrity rules.
+Skill-stat pruning now uses canonical persistent PL11 evidence rather than PL12-derived or legacy priority:
+
+1. persisted PL11 general `confidenceScore`;
+2. canonical evidence amount from opportunity/timing/launch/error counts;
+3. targeted-session evidence where applicable;
+4. last-observed/update recency;
+5. deterministic stat ID tie-break.
+
+Legacy top-level skill `priority` no longer protects a weakly evidenced stat from pruning. Removed v2 `sampleCount` is not required by v3 retention. Review-linked entities remain protected by current repository integrity rules.
 
 Per-session admission is also bounded. Direct target capacity is reserved ahead of incidental entities, and truncation/omission is represented explicitly rather than silently pretending complete coverage.
 
@@ -248,13 +275,47 @@ Per-session admission is also bounded. Direct target capacity is reserved ahead 
 
 Durable PL11 data is local observational evidence. It does not create leaderboard payloads, remote profiles, browser fingerprints, hardware nicknames, or raw keyboard telemetry.
 
-## 20. Later-phase contract
+PL12 snapshots are in-memory derived objects. Reset has no additional PL12 store to clear.
 
-PL11 ends at evidence accumulation. Later phases may interpret it but must not silently rewrite the measurement definitions:
+## 20. PL12 derived diagnostic layer
 
-- PL12: limiter/weakness interpretation and impact;
-- PL15: mastery;
+PL12 consumes only canonical context-scoped `skillStats` plus a user-independent prevalence provider. Its canonical reasoning chain is:
+
+```text
+PL11 persistent evidence
+      ↓
+PL12 dimension effects + PL11 confidence
+      ↓
+derived phenotype / weakness
+      ↓
+reference or training-proxy prevalence
+      ↓
+modeled burden / context-relative impact
+      ↓
+conservative hierarchy
+      ↓
+derived priority + primary limiter list
+```
+
+The pure snapshot builder does not parse `eventTrace`, access the Session Engine, read Custom Text, or mutate repository state.
+
+The service may cache one bounded snapshot in memory using an evidence/reference/version fingerprint. Evidence changes, context changes, prevalence-reference changes, or PL12 model-version changes invalidate reuse. There is no persistent snapshot cache.
+
+Current PL12 output is bounded to 256 candidates by default, with per-type caps, while peer distributions may evaluate the full context set internally.
+
+The authoritative PL12 model definition is `PRACTICE_LAB_LIMITER_IMPACT_MODEL.md`.
+
+## 21. Later-phase contract
+
+PL11 ends at evidence accumulation. PL12 ends at diagnosis and diagnostic importance. Later phases may consume these layers but must not silently rewrite their measurement definitions:
+
+- PL12: limiter phenotype, confidence-weighted weakness, prevalence-aware burden, hierarchy, derived priority;
+- PL13: stable ability + measurement uncertainty;
+- PL15: mastery/automaticity and transfer/retention state;
 - PL16: trends and learning curves;
-- PL17: review semantics.
+- PL17: review semantics and scheduling value;
+- PL25: final Learning Value / Daily Coach treatment prioritization.
 
-The dedicated PL11 contextual skill aggregation/evidence-model document is authoritative for first-pass opportunity rules, timing lanes, primary error attribution, confidence policy, role semantics, admission bounds, and checkpoint compaction.
+PL12 `priorityScore` is intentionally narrower than later Coach priority. It contains no treatment-effect history, review due state, learning saturation, user goal weighting, or exercise selection.
+
+The dedicated PL11 contextual skill aggregation/evidence-model document remains authoritative for first-pass opportunity rules, timing lanes, primary error attribution, confidence policy, role semantics, admission bounds, and checkpoint compaction. The dedicated PL12 limiter/impact document is authoritative for diagnostic formulas, prevalence, burden, hierarchy, and derived ranking.
