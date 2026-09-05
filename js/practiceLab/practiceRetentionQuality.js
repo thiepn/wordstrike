@@ -1,5 +1,6 @@
 import { PRACTICE_REVIEW_POLICY_V1 } from "./practiceReviewPolicy.js";
 import { clampPracticeStabilityDays } from "./practiceReviewItem.js";
+import { practiceMedian } from "./practiceRobustStats.js";
 
 const finite = Number.isFinite;
 const clamp = (value, min = 0, max = 100) => Math.max(min, Math.min(max, Number(value) || 0));
@@ -57,8 +58,5 @@ export function practiceRetentionConfidence({ verificationCount = 0, distinctRev
 }
 
 export function medianPracticeRetentionScores(values) {
-  const sorted = (Array.isArray(values) ? values : []).filter(finite).slice().sort((a, b) => a - b);
-  if (!sorted.length) return null;
-  const middle = Math.floor(sorted.length / 2);
-  return sorted.length % 2 ? sorted[middle] : (sorted[middle - 1] + sorted[middle]) / 2;
+  return practiceMedian(Array.isArray(values) ? values : [], { min: 0, max: 100 });
 }
