@@ -102,9 +102,10 @@ test("PL13 ordinary non-measurement session stays foundation v5/session v7 with 
 });
 
 test("PL13 declared ability channel with generated/unclassified content is measured as not-eligible and cannot create state", async () => {
+  const generatedText = "alpha beta gamma delta epsilon zeta eta theta iota kappa lambda mu nu xi omicron pi rho sigma tau";
   const harness = await createPracticeSessionHarness({
     suffix: "pl13-no-spoof",
-    text: "a".repeat(100),
+    text: generatedText,
     completion: { mode: "manual", value: null },
     experimentOverrides: { abilityChannel: "common-words" },
   });
