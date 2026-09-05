@@ -106,7 +106,8 @@ test("PL13 valid low and high outliers are incorporated with exact 3-sigma innov
   const prior = seededState(8, { sigma: 0.04 });
   for (const [index, wpm, direction] of [[100, 40, -1], [101, 200, 1]]) {
     const obs = observation(index, { wpm, sigma: 0.08, day: 9 });
-    const pPrior = prior.estimate.varianceLogWpm + PRACTICE_ABILITY_POLICY_V1.estimator.processVariancePerDay;
+    const elapsedDays = Math.max(0, Math.min(PRACTICE_ABILITY_POLICY_V1.estimator.maximumProcessDays, (Date.parse(obs.completedAtUtc) - Date.parse(prior.evidence.lastObservedAt)) / DAY));
+    const pPrior = prior.estimate.varianceLogWpm + PRACTICE_ABILITY_POLICY_V1.estimator.processVariancePerDay * elapsedDays;
     const rVariance = obs.measurementVarianceLog;
     const s = pPrior + rVariance;
     const innovation = Math.log(wpm) - prior.estimate.meanLogWpm;
