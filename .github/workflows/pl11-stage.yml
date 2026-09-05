@@ -20,10 +20,14 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Apply continuity and current-version updates
+      - name: Apply pending gate updates
         run: |
           node --check scripts/applyPl11ContinuityFixes.mjs
-          node scripts/applyPl11ContinuityFixes.mjs
+          if grep -q 'setContentPlan(nextContentPlan)' js/practiceLab/practiceSkillEvidenceCollector.js; then
+            echo 'PL11 continuity fixes already applied'
+          else
+            node scripts/applyPl11ContinuityFixes.mjs
+          fi
           node --check scripts/applyPl11CurrentVersionTests.mjs
           node scripts/applyPl11CurrentVersionTests.mjs
           node --check js/practiceLab/practiceSkillEvidenceCollector.js
@@ -35,7 +39,9 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add js tests
-          git commit -m "fix(practice): harden PL11 evidence continuity" || true
+          git commit -m "test(practice): advance PL11 compatibility coverage" || true
           git push origin HEAD:codex/pl11-contextual-skill-evidence
+      - name: Run focused PL11 core tests
+        run: node tests/practice-skill-evidence-core.test.js
       - name: Run full tests
         run: npm test
