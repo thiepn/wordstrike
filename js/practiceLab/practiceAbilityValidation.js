@@ -70,7 +70,8 @@ export function validatePracticeAbilityState(state, { maxBytes = 32 * 1024, poli
   if (state.recordVersion !== 1 || state.estimatorVersion !== PRACTICE_ABILITY_ESTIMATOR_VERSION || state.estimatorPolicyVersion !== PRACTICE_ABILITY_POLICY_VERSION) add(errors, "versions", "INVALID_VERSION", "ability state version is invalid");
   for (const key of ["createdAt", "updatedAt"]) if (typeof state[key] !== "string" || !UTC_ISO.test(state[key]) || !Number.isFinite(Date.parse(state[key]))) add(errors, key, "INVALID_TIMESTAMP", `${key} is invalid`);
   const evidence = state.evidence;
-  for (const key of ["observationCount", "sessionCount", "dayCount", "totalActiveDurationMs", "totalTypedCharacters", "downweightedObservationCount"]) if (!Number.isInteger(evidence?.[key]) || evidence[key] < 0) add(errors, `evidence.${key}`, "INVALID_COUNT", `${key} must be a non-negative integer`);
+  for (const key of ["observationCount", "sessionCount", "dayCount", "totalTypedCharacters", "downweightedObservationCount"]) if (!Number.isInteger(evidence?.[key]) || evidence[key] < 0) add(errors, `evidence.${key}`, "INVALID_COUNT", `${key} must be a non-negative integer`);
+  if (!Number.isFinite(evidence?.totalActiveDurationMs) || evidence.totalActiveDurationMs < 0) add(errors, "evidence.totalActiveDurationMs", "INVALID_NUMBER", "totalActiveDurationMs must be finite and non-negative");
   if (evidence?.sessionCount !== evidence?.observationCount) add(errors, "evidence.sessionCount", "INVARIANT", "v1 sessionCount must equal observationCount");
   if (evidence?.dayCount > evidence?.observationCount || evidence?.downweightedObservationCount > evidence?.observationCount) add(errors, "evidence", "INVARIANT", "ability evidence counts are inconsistent");
   const roles = evidence?.sourceRoleCounts;
@@ -78,9 +79,7 @@ export function validatePracticeAbilityState(state, { maxBytes = 32 * 1024, poli
   else if (PRACTICE_ABILITY_SOURCE_ROLES.reduce((sum, role) => sum + roles[role], 0) !== evidence.observationCount) add(errors, "evidence.sourceRoleCounts", "INVARIANT", "source role counts must sum to observation count");
   if (evidence?.observationCount === 0) {
     if (evidence.firstObservedAt != null || evidence.lastObservedAt != null || evidence.lastObservedDayKey != null) add(errors, "evidence", "INVARIANT", "unmeasured evidence timestamps must be null");
-  } else {
-    if (!UTC_ISO.test(evidence?.firstObservedAt || "") || !UTC_ISO.test(evidence?.lastObservedAt || "") || !DAY_KEY.test(evidence?.lastObservedDayKey || "")) add(errors, "evidence", "INVALID_TIMESTAMP", "measured evidence timestamps are invalid");
-  }
+  } else if (!UTC_ISO.test(evidence?.firstObservedAt || "") || !UTC_ISO.test(evidence?.lastObservedAt || "") || !DAY_KEY.test(evidence?.lastObservedDayKey || "")) add(errors, "evidence", "INVALID_TIMESTAMP", "measured evidence timestamps are invalid");
   if (!Array.isArray(state.recentObservations) || state.recentObservations.length > policy.recentObservationLimit) add(errors, "recentObservations", "SIZE_LIMIT", "recent observations exceed bound");
   else for (const item of state.recentObservations) {
     if (!isPracticeId(item?.sessionId, "session") || item?.channel !== state.channel || !PRACTICE_ABILITY_SOURCE_ROLES.includes(item?.sourceRole)) add(errors, "recentObservations", "INVALID_ENTRY", "recent observation identity is invalid");
