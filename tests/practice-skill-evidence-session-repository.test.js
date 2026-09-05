@@ -210,11 +210,12 @@ test("PL11 content append extends entity resolution without resetting first-atte
   const engine = engineFor(harness);
   await engine.prepare({ experiment: harness.experiment, configuration: { correctionBehavior: "allow" }, contentPlan: harness.contentPlan });
   await engine.start();
-  await typeText(engine, harness, "ab");
+  engine.handleInput(harness.input("character", "a"));
   engine.handleInput(harness.input("backspace", ""));
-  engine.handleInput(harness.input("character", "b"));
+  engine.handleInput(harness.input("character", "a"));
   const appended = engine.appendContent({ text: "cd" });
   assert.equal(appended.content.expectedLength, 4);
+  engine.handleInput(harness.input("character", "b"));
   engine.handleInput(harness.input("character", "c"));
   engine.handleInput(harness.input("character", "d"));
   await engine.complete("manual-stop");
