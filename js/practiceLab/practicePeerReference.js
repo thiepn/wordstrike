@@ -77,13 +77,14 @@ function makeGroup(type, stats, policy) {
     variabilityValues: Object.freeze(variabilityValues),
     residualReference: Object.freeze({ count: residualNumbers.length, center: residualCenter, mad: residualMad, scale: residualMad == null ? null : Math.max(policy.slow.fallbackScaleFloorMs, 1.4826 * residualMad) }),
     variabilityReference: Object.freeze({ count: variabilityNumbers.length, center: variabilityCenter, mad: variabilityMad, scale: variabilityMad == null ? null : Math.max(policy.unstable.scaleFloorMs, 1.4826 * variabilityMad) }),
+    eligibleStatIds: new Set(eligible.map((entry) => entry.statId)),
     residualStatIds: new Set(residualValues.map((entry) => entry.statId)),
     variabilityStatIds: new Set(variabilityValues.map((entry) => entry.statId)),
   };
 }
 
 function leaveOneOutCounts(group, stat) {
-  const included = group.eligible.some((peer) => peer.statId === stat.statId);
+  const included = group.eligibleStatIds.has(stat.statId);
   const opp = opportunities(stat);
   const time = timing(stat);
   const err = errors(stat);
