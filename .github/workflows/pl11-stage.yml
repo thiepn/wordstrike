@@ -23,8 +23,7 @@ jobs:
       - name: Apply PL11 integration
         run: |
           node --check scripts/applyPl11Integration.mjs
-          node --check scripts/applyPl11IntegrationTail.mjs
-          node --check scripts/applyPl11IntegrationRetention.mjs
+          node --check scripts/applyPl11IntegrationFinal.mjs
 
           set +e
           node scripts/applyPl11Integration.mjs > /tmp/pl11-head.log 2>&1
@@ -35,16 +34,7 @@ jobs:
             grep -q "PL11 patch missing anchor: foundation skill build" /tmp/pl11-head.log || exit "$head_status"
           fi
 
-          set +e
-          node scripts/applyPl11IntegrationTail.mjs > /tmp/pl11-tail.log 2>&1
-          tail_status=$?
-          set -e
-          cat /tmp/pl11-tail.log
-          if [ "$tail_status" -ne 0 ]; then
-            grep -q "record is not defined" /tmp/pl11-tail.log || exit "$tail_status"
-          fi
-
-          node scripts/applyPl11IntegrationRetention.mjs
+          node scripts/applyPl11IntegrationFinal.mjs
 
           node --check js/practiceLab/practiceSkillEvidencePolicy.js
           node --check js/practiceLab/practiceEvidenceConfidence.js
