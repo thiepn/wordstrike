@@ -6,8 +6,9 @@ import { analyzePracticeErrors } from "./practiceErrorAnalyzer.js";
 import { createPracticeErrorTracker } from "./practiceErrorTracker.js";
 import { PRACTICE_ERROR_POLICY_V1 } from "./practiceErrorPolicy.js";
 import { analyzePracticeNormalization } from "./practiceNormalizationAnalysis.js";
+import { PRACTICE_LEARNING_ANALYSIS_VERSION } from "./practiceLearningConstants.js";
 
-export const PRACTICE_FOUNDATION_ANALYSIS_VERSION = 6;
+export const PRACTICE_FOUNDATION_ANALYSIS_VERSION = 7;
 
 const freezeDeep = (value) => {
   if (!value || typeof value !== "object" || Object.isFrozen(value)) return value;
@@ -58,6 +59,23 @@ function buildFallbackTrackerSnapshot(events, traceMetadata, policy) {
   return tracker.finalizeSnapshot();
 }
 
+function emptyLearningAnalysis() {
+  return freezeDeep({
+    version: PRACTICE_LEARNING_ANALYSIS_VERSION,
+    summary: {
+      analysisVersion: PRACTICE_LEARNING_ANALYSIS_VERSION,
+      observationVersion: 1,
+      acquisitionObservationCount: 0,
+      transferObservationCount: 0,
+      completePhaseObservationCount: 0,
+      partialPhaseObservationCount: 0,
+      skippedCount: 0,
+      learningStateUpdateCount: 0,
+    },
+    observationDeltas: [],
+  });
+}
+
 export function buildPracticeFoundationAnalysis({
   events = [],
   traceMetadata = {},
@@ -72,6 +90,7 @@ export function buildPracticeFoundationAnalysis({
   skillEvidenceFinalize = null,
   ability = null,
   performance = null,
+  learning = null,
 } = {}) {
   const latency = analyzePracticeLatency({ events, traceMetadata, policy: latencyPolicy });
   const trackerSnapshot = errorTrackerSnapshot ?? buildFallbackTrackerSnapshot(events, traceMetadata, errorPolicy);
@@ -101,6 +120,7 @@ export function buildPracticeFoundationAnalysis({
     skills,
     ability: ability ?? freezeDeep({ version: 1, channel: null, status: "not-requested", reasons: [], observation: null, sessionSummary: null }),
     performance: performance ?? freezeDeep({ version: 1, status: "not-requested", reasons: [], measurementKind: null, stateProbe: null, warmup: null, frontier: null, sessionSummary: null, performanceStateDelta: null }),
+    learning: learning ?? emptyLearningAnalysis(),
   });
 }
 
@@ -114,4 +134,10 @@ export function withPracticePerformanceAnalysis(foundationAnalysis, performance)
   if (!foundationAnalysis || foundationAnalysis.version !== PRACTICE_FOUNDATION_ANALYSIS_VERSION) throw new TypeError("Practice performance attachment requires current foundation analysis");
   if (!performance || typeof performance !== "object") throw new TypeError("Practice performance analysis is required");
   return freezeDeep({ ...foundationAnalysis, performance });
+}
+
+export function withPracticeLearningAnalysis(foundationAnalysis, learning) {
+  if (!foundationAnalysis || foundationAnalysis.version !== PRACTICE_FOUNDATION_ANALYSIS_VERSION) throw new TypeError("Practice learning attachment requires current foundation analysis");
+  if (!learning || typeof learning !== "object") throw new TypeError("Practice learning analysis is required");
+  return freezeDeep({ ...foundationAnalysis, learning });
 }
