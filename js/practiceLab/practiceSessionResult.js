@@ -34,9 +34,10 @@ export function buildPracticeSessionResult({
       { operation: "build-result", sessionId, lifecycleState: status, details: learningValidation.errors },
     );
   }
-  const retentionReviewSummary = foundationAnalysis?.retention?.measurementKind == null
-    ? null
-    : foundationAnalysis?.retention?.summary ?? null;
+  const retentionReviewSummary = analysis?.__pl17RetentionReviewSummary
+    ?? (foundationAnalysis?.retention?.measurementKind == null
+      ? null
+      : foundationAnalysis?.retention?.summary ?? null);
   const summary = createDefaultSessionSummary({
     sessionId,
     profileId,
