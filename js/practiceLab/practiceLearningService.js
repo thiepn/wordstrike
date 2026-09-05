@@ -135,52 +135,67 @@ export function createPracticeLearningService({
       skillFingerprint,
       abilityFingerprint,
     ].join("|");
-    if (cache.has(cacheKey)) return cache.get(cacheKey);
 
-    const peerIndex = createPracticePeerReferenceIndex(skillStats, limiterPolicy);
-    const statById = new Map(skillStats.map((stat) => [stat.statId, stat]));
-    const masteryResults = buildPracticeMasteryEvaluationSet({ skillStats, context });
-    const masteryById = new Map(masteryResults.map((entry) => [entry.statId, entry]));
-    let impactById = new Map();
-    if (limiterService) {
-      const snapshot = await limiterService.buildContextLimiterSnapshot({ profileId, contextId });
-      impactById = new Map((snapshot?.candidates ?? []).map((candidate) => [candidate.statId, candidate]));
+    let staticEvaluation = cache.get(cacheKey) ?? null;
+    if (!staticEvaluation) {
+      const peerIndex = createPracticePeerReferenceIndex(skillStats, limiterPolicy);
+      const statById = new Map(skillStats.map((stat) => [stat.statId, stat]));
+      const masteryResults = buildPracticeMasteryEvaluationSet({ skillStats, context });
+      const masteryById = new Map(masteryResults.map((entry) => [entry.statId, entry]));
+      let impactById = new Map();
+      if (limiterService) {
+        const snapshot = await limiterService.buildContextLimiterSnapshot({ profileId, contextId });
+        impactById = new Map((snapshot?.candidates ?? []).map((candidate) => [candidate.statId, candidate]));
+      }
+      const results = [];
+      for (const state of learningStates) {
+        const stat = statById.get(state.statId);
+        if (!stat) continue;
+        const mastery = masteryById.get(state.statId) ?? null;
+        const limiter = limiterSummary(stat, peerIndex, impactById.get(state.statId), limiterPolicy);
+        const saturation = evaluatePracticeSaturation({ learningState: state, mastery, limiter, policy });
+        results.push(freezeDeep({
+          statId: state.statId,
+          profileId,
+          contextId,
+          entityType: state.entityType,
+          entityKey: state.entityKey,
+          learningState: state,
+          mastery,
+          limiter,
+          acquisition: acquisitionSummary(state),
+          transfer: transferSummary(state),
+          saturation,
+          marginalGain: state.acquisition.curve.marginalGainStatus,
+          diagnostics: {
+            learningStateUpdatedAt: state.updatedAt,
+            skillStatUpdatedAt: stat.updatedAt,
+            impactAvailable: Number.isFinite(limiter.impactScore),
+          },
+        }));
+      }
+      staticEvaluation = freezeDeep({
+        context,
+        learningStates,
+        skillStats,
+        abilityState,
+        abilityCurve: buildPracticeAbilityLearningCurve(abilityState, { policy }),
+        results,
+        cacheKey,
+      });
+      cache.clear();
+      cache.set(cacheKey, staticEvaluation);
     }
-    const results = [];
-    for (const state of learningStates) {
-      const stat = statById.get(state.statId);
-      if (!stat) continue;
-      const mastery = masteryById.get(state.statId) ?? null;
-      const limiter = limiterSummary(stat, peerIndex, impactById.get(state.statId), limiterPolicy);
-      const saturation = evaluatePracticeSaturation({ learningState: state, mastery, limiter, policy });
-      results.push(freezeDeep({
-        statId: state.statId,
-        profileId,
-        contextId,
-        entityType: state.entityType,
-        entityKey: state.entityKey,
-        learningState: state,
-        mastery,
-        limiter,
-        acquisition: acquisitionSummary(state),
-        transfer: transferSummary(state),
-        saturation,
-        marginalGain: state.acquisition.curve.marginalGainStatus,
-        diagnostics: {
-          learningStateUpdatedAt: state.updatedAt,
-          skillStatUpdatedAt: stat.updatedAt,
-          impactAvailable: Number.isFinite(limiter.impactScore),
-        },
-      }));
-    }
+
     const generatedAt = now();
-    const abilityCurve = buildPracticeAbilityLearningCurve(abilityState, { policy });
-    const recentDose = computePracticeRecentContextDose(learningStates, generatedAt, policy);
-    const globalPlateau = evaluatePracticeGlobalPlateau({ abilityCurve, recentDose, entityResults: results, policy });
-    const evaluated = freezeDeep({ context, learningStates, skillStats, abilityState, abilityCurve, recentDose, globalPlateau, results, cacheKey });
-    cache.clear();
-    cache.set(cacheKey, evaluated);
-    return evaluated;
+    const recentDose = computePracticeRecentContextDose(staticEvaluation.learningStates, generatedAt, policy);
+    const globalPlateau = evaluatePracticeGlobalPlateau({
+      abilityCurve: staticEvaluation.abilityCurve,
+      recentDose,
+      entityResults: staticEvaluation.results,
+      policy,
+    });
+    return freezeDeep({ ...staticEvaluation, recentDose, globalPlateau });
   };
 
   const getEntityLearningState = async (profileId, contextId, entityType, entityKey) => {
