@@ -74,9 +74,10 @@ test("PL16 active recent learning overrides low current quality and yields not-d
 });
 
 test("PL16 approaching saturation requires older improvement with low recent marginal gain below resolved quality", () => {
-  const observations = [45, 55, 65, 72, 76, 77, 77.5, 77.6].map((quality, index) => acq(index, quality, 2));
+  const observations = [45, 55, 65, 70, 71.5, 73, 74.5, 76].map((quality, index) => acq(index, quality, 2));
   const state = learningState(observations);
   assert.equal(state.acquisition.curve.status, "improving");
+  assert.ok(state.acquisition.curve.recentSlopePointsPerDose > 1);
   assert.ok(state.acquisition.curve.recentSlopePointsPerDose <= 2);
   const result = evaluatePracticeSaturation({ learningState: state, mastery: mastery(), limiter: limiter() });
   assert.equal(result.status, "approaching");
