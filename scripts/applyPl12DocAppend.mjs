@@ -14,15 +14,15 @@ PL12 consumes the canonical v3 skill evidence only as a **derived diagnostic vie
 
 Authoritative PL12 derived semantics are:
 
-- candidate `weaknessScore`: maximum confidence-weighted limiter-dimension severity;
-- candidate `impactScore`: context-relative prevalence-quality-adjusted modeled burden percentile;
-- candidate `priorityScore`: impact × primary-dimension confidence × hierarchy penalty.
+- candidate weaknessScore: maximum confidence-weighted limiter-dimension severity;
+- candidate impactScore: context-relative prevalence-quality-adjusted modeled burden percentile;
+- candidate priorityScore: impact × primary-dimension confidence × hierarchy penalty.
 
-These fields live only in the PL12 limiter candidate/snapshot. Existing top-level skill-stat fields named \`weaknessScore\` and \`priority\` are legacy/non-authoritative placeholders and are not PL12 writeback targets.
+These fields live only in the PL12 limiter candidate/snapshot. Existing top-level skill-stat fields named weaknessScore and priority are legacy/non-authoritative placeholders and are not PL12 writeback targets.
 
 PL12 also preserves PL11 Custom Text privacy. Because persistent custom-word evidence remains disabled by default, the limiter layer does not reconstruct private word entities from Custom Text.
 
-See \`PRACTICE_LAB_LIMITER_IMPACT_MODEL.md\` for the authoritative PL12 formulas, prevalence policy, burden model, hierarchy, snapshot bounds, caching, and phase boundaries.
+See PRACTICE_LAB_LIMITER_IMPACT_MODEL.md for the authoritative PL12 formulas, prevalence policy, burden model, hierarchy, snapshot bounds, caching, and phase boundaries.
 `,
   },
   {
@@ -40,13 +40,13 @@ PL12 consumes PL10 normalization without changing PL10 semantics or versions. In
 - anti-leakage from exact target identity;
 - typability-reference fitting and protected-partition contamination rules.
 
-PL12's \`slow\`, \`hesitant\`, \`launch-limited\`, and \`unstable\` diagnostics use PL11-persisted evidence that originated from PL10 expected-vs-observed residuals. PL12 never treats raw latency alone as authoritative slow evidence and never changes PL10 residual zero from its meaning: performance consistent with the current context expectation.
+PL12's slow, hesitant, launch-limited, and unstable diagnostics use PL11-persisted evidence that originated from PL10 expected-vs-observed residuals. PL12 never treats raw latency alone as authoritative slow evidence and never changes PL10 residual zero from its meaning: performance consistent with the current context expectation.
 
-PL12 prevalence is a **separate** statistical contract from PL10 typability/frequency features. No approved population-frequency artifact currently exists in the repository. Therefore PL12 may use PL7 **training-partition occurrence rates** only as an explicitly labelled \`practice-proxy\`; transfer, benchmark, diagnostic, and research-holdout partitions never fit that proxy. The proxy does not retroactively become a PL10 frequency reference and does not change PL10's current null rarity features.
+PL12 prevalence is a **separate** statistical contract from PL10 typability/frequency features. No approved population-frequency artifact currently exists in the repository. Therefore PL12 may use PL7 **training-partition occurrence rates** only as an explicitly labelled practice-proxy; transfer, benchmark, diagnostic, and research-holdout partitions never fit that proxy. The proxy does not retroactively become a PL10 frequency reference and does not change PL10's current null rarity features.
 
-PL12 does not bump the PL10 normalization-analysis, context-model, context-policy, text-feature, typability-model, typability-reference, keyboard-geometry, or static-artifact versions. Historical PL10 documentation above remains the definition of the PL10 phase itself; current wrapper record versions are documented in \`PRACTICE_LAB_DATA_ARCHITECTURE.md\`.
+PL12 does not bump the PL10 normalization-analysis, context-model, context-policy, text-feature, typability-model, typability-reference, keyboard-geometry, or static-artifact versions. Historical PL10 documentation above remains the definition of the PL10 phase itself; current wrapper record versions are documented in PRACTICE_LAB_DATA_ARCHITECTURE.md.
 
-See \`PRACTICE_LAB_LIMITER_IMPACT_MODEL.md\` for the downstream diagnostic formulas and impact/hierarchy semantics.
+See PRACTICE_LAB_LIMITER_IMPACT_MODEL.md for the downstream diagnostic formulas and impact/hierarchy semantics.
 `,
   },
 ];
