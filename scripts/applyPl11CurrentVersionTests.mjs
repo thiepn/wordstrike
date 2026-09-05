@@ -20,6 +20,9 @@ for (const name of files) {
     source = source.replace('assert.deepEqual(migratedStat.steps, ["skillStat:1->2"]);', 'assert.deepEqual(migratedStat.steps, ["skillStat:1->2", "skillStat:2->3"]);');
     source = source.replace("assert.equal(migratedStat.value.sampleCount, stat.sampleCount);", "assert.equal(migratedStat.value.evidence.opportunities.count, 0);\nassert.equal(migratedStat.value.legacyEvidenceV2, null);");
   }
+  if (name === "practice-context-migration-hardening.test.js") {
+    source = source.replace("assert.equal(migratedSkill.recordVersion, 2);", "assert.equal(migratedSkill.recordVersion, 3);");
+  }
   if (source !== original) {
     fs.writeFileSync(file, source);
     changed += 1;
