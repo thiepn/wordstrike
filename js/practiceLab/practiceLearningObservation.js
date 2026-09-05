@@ -1,4 +1,5 @@
 import { createPracticeEntityResolver } from "./practiceEntityResolver.js";
+import { normalizePracticeTarget } from "./practiceTextAnalysis.js";
 import { PRACTICE_LEARNING_ANALYSIS_VERSION, PRACTICE_LEARNING_OBSERVATION_VERSION } from "./practiceLearningConstants.js";
 import { PRACTICE_LEARNING_POLICY_V1 } from "./practiceLearningPolicy.js";
 import { buildPracticeDeltaQuality, buildPracticePhaseQuality } from "./practiceLearningQuality.js";
@@ -19,20 +20,6 @@ function timingRecord(transition) {
     observedLatencyMs: finite(transition.observedLatencyMs) ? transition.observedLatencyMs : null,
     residualLatencyMs: finite(transition.residualLatencyMs) ? transition.residualLatencyMs : null,
   };
-}
-
-function targetOrder(contentPlan, resolver, cap) {
-  const seen = new Set();
-  const values = [];
-  for (const target of contentPlan?.targetEntities ?? []) {
-    if (!["key", "bigram", "trigram", "word"].includes(target?.entityType)) continue;
-    for (const entity of resolver.resolveAtPosition(0)) void entity; // Keep resolver construction/normalization authoritative.
-    const key = identity(target.entityType, String(target.entityKey));
-    if (seen.has(key)) continue;
-    seen.add(key);
-    values.push(key);
-  }
-  return new Set(values.slice(0, cap));
 }
 
 function appendNonWordOpportunity(byEntity, entity, transition) {
@@ -56,11 +43,12 @@ export function extractPracticeLearningPhaseOpportunities({
   maxDirectTargets = PRACTICE_LEARNING_POLICY_V1.phase.maxDirectTargets,
 } = {}) {
   if (!contentPlan || !Array.isArray(normalizedTransitions)) return new Map();
+  const language = contentPlan?.metadata?.language ?? "en";
   const resolver = createPracticeEntityResolver({
     contentPlan,
     profileId,
     contextId,
-    language: contentPlan?.metadata?.language ?? "en",
+    language,
     segmenter,
     allowWordEntities: true,
   });
@@ -68,12 +56,18 @@ export function extractPracticeLearningPhaseOpportunities({
   const seenTargets = new Set();
   for (const target of contentPlan.targetEntities ?? []) {
     if (!["key", "bigram", "trigram", "word"].includes(target?.entityType)) continue;
-    const candidates = [];
-    for (let position = 0; position < resolver.analysis.graphemeCount; position += 1) {
-      const match = resolver.resolveAtPosition(position).find((entity) => entity.entityType === target.entityType && entity.directTarget);
-      if (match && match.entityKey === target.entityKey) { candidates.push(match); break; }
+    let normalized;
+    try {
+      normalized = normalizePracticeTarget({
+        entityType: target.entityType,
+        entityKey: target.entityKey,
+        language,
+        segmenter,
+      });
+    } catch {
+      continue;
     }
-    const key = candidates.length ? identity(candidates[0].entityType, candidates[0].entityKey) : identity(target.entityType, String(target.entityKey));
+    const key = identity(target.entityType, normalized);
     if (!seenTargets.has(key)) {
       seenTargets.add(key);
       orderedTargetKeys.push(key);
@@ -324,16 +318,16 @@ export function buildPracticeLearningAnalysis({
     }
   } else if (evidenceRole === "transfer") {
     const tracked = trackedLearningStatIds instanceof Set ? trackedLearningStatIds : new Set(trackedLearningStatIds ?? []);
-    const eligible = skillDeltas
+    const trackedTransferDeltas = skillDeltas
       .filter((delta) => delta.evidenceRole === "transfer" && tracked.has(delta.statId))
-      .sort((a, b) => a.statId.localeCompare(b.statId))
-      .slice(0, policy.transfer.maxObservationsPerSession);
+      .sort((a, b) => a.statId.localeCompare(b.statId));
+    const eligible = trackedTransferDeltas.slice(0, policy.transfer.maxObservationsPerSession);
     for (const delta of eligible) {
       const learning = buildPracticeTransferObservationDelta({ delta, experimentId, policy });
       if (learning) observationDeltas.push(learning);
       else skippedCount += 1;
     }
-    skippedCount += Math.max(0, skillDeltas.filter((delta) => delta.evidenceRole === "transfer" && tracked.has(delta.statId)).length - eligible.length);
+    skippedCount += Math.max(0, trackedTransferDeltas.length - eligible.length);
   }
 
   const acquisitionObservationCount = observationDeltas.filter((delta) => delta.kind === "acquisition").length;
