@@ -9,6 +9,7 @@ on:
       - scripts/pl14_fix1.py
       - scripts/pl14_fix2.py
       - scripts/pl14_fix3.py
+      - scripts/pl14_fix4.py
       - tests/practice-ability-session-repository.test.js
       - .github/workflows/pl14-apply.yml
 
@@ -32,6 +33,7 @@ jobs:
           python scripts/pl14_fix1.py
           python scripts/pl14_fix2.py
           python scripts/pl14_fix3.py
+          python scripts/pl14_fix4.py
       - name: Run focused PL14 gates
         run: |
           node tests/practice-performance-state.test.js
@@ -40,6 +42,7 @@ jobs:
           node tests/practice-performance-contract-isolation.test.js
           node tests/practice-ability-observation.test.js
           node tests/practice-ability-session-repository.test.js
+          node tests/practice-ability-storage-migration.test.js
       - name: Run full regression suite
         run: npm test
       - name: Commit clean PL14 implementation
