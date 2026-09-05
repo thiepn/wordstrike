@@ -11,13 +11,32 @@ function linearQuality(value, perfectAtOrBelow, zeroAtOrAbove) {
   return 100 * (zeroAtOrAbove - value) / (zeroAtOrAbove - perfectAtOrBelow);
 }
 
-function roleAccuracyQuality(stat, lane, policy) {
+export function computePracticeRelativeResidualQuality(relativeResidual, policy = PRACTICE_MASTERY_POLICY_V1) {
+  if (!finite(relativeResidual)) return null;
+  if (relativeResidual < 0) return 100;
+  return clamp(linearQuality(
+    relativeResidual,
+    policy.roleQuality.speed.perfectAtOrBelow,
+    policy.roleQuality.speed.zeroAtOrAbove,
+  ));
+}
+
+export function computePracticeDisfluencyRateQuality(disfluencyRate, policy = PRACTICE_MASTERY_POLICY_V1) {
+  if (!finite(disfluencyRate)) return null;
+  return clamp(linearQuality(
+    disfluencyRate,
+    policy.roleQuality.disfluency.perfectAtOrBelow,
+    policy.roleQuality.disfluency.zeroAtOrAbove,
+  ));
+}
+
+export function computePracticeRoleAccuracyQuality(entityType, opportunityCount, errorCount, policy = PRACTICE_MASTERY_POLICY_V1) {
   const synthetic = {
-    entityType: stat.entityType,
+    entityType,
     evidence: {
       opportunities: {
-        count: Number(lane?.opportunityCount || 0),
-        errorCount: Number(lane?.errorCount || 0),
+        count: Number(opportunityCount || 0),
+        errorCount: Number(errorCount || 0),
       },
     },
   };
@@ -60,33 +79,19 @@ export function computePracticeRoleQuality(stat, role, policy = PRACTICE_MASTERY
     });
   }
 
-  const accuracy = roleAccuracyQuality(stat, lane, policy);
+  const accuracy = computePracticeRoleAccuracyQuality(stat.entityType, opportunityCount, Number(lane?.errorCount || 0), policy);
   const expected = expectedTimingApprox(stat);
   const residualMean = Number(lane.fluentResidualMeanMs);
   const residualCount = Number(lane.fluentResidualCount || 0);
   const relativeResidual = expected > 0 && residualCount > 0 && finite(residualMean)
     ? residualMean / expected
     : null;
-  const speed = relativeResidual == null
-    ? null
-    : relativeResidual < 0
-      ? 100
-      : clamp(linearQuality(
-          relativeResidual,
-          policy.roleQuality.speed.perfectAtOrBelow,
-          policy.roleQuality.speed.zeroAtOrAbove,
-        ));
+  const speed = computePracticeRelativeResidualQuality(relativeResidual, policy);
 
   const timingEligible = Number(lane.timingEligibleCount || 0);
   const disfluent = Number(lane.disfluentCount || 0);
   const disfluencyRate = timingEligible > 0 ? disfluent / timingEligible : null;
-  const disfluency = disfluencyRate == null
-    ? null
-    : clamp(linearQuality(
-        disfluencyRate,
-        policy.roleQuality.disfluency.perfectAtOrBelow,
-        policy.roleQuality.disfluency.zeroAtOrAbove,
-      ));
+  const disfluency = computePracticeDisfluencyRateQuality(disfluencyRate, policy);
 
   const components = { accuracy, speed, disfluency };
   const weights = policy.roleQuality.weights;
