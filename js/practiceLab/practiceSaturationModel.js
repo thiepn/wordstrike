@@ -27,18 +27,18 @@ function recentPhaseMedians(observations, window) {
   };
 }
 
-function highQualityCeiling(observations, required) {
+function highQualityCeiling(observations, required, threshold) {
   const complete = (observations ?? [])
     .filter((observation) => finite(observation.entryQuality) && finite(observation.exitQuality))
     .slice(-required);
-  return complete.length >= required && complete.every((observation) => observation.entryQuality >= 90 && observation.exitQuality >= 90);
+  return complete.length >= required && complete.every((observation) => observation.entryQuality >= threshold && observation.exitQuality >= threshold);
 }
 
 function transferLimitedEvidence(transfer, acquisition, policy) {
   const curve = transfer?.curve;
-  const acquisitionStrong = Number(acquisition?.curve?.recentQuality || 0) >= 80 || acquisition?.curve?.status === "improving";
+  const acquisitionStrong = Number(acquisition?.curve?.recentQuality ?? 0) >= policy.saturation.resolvedQuality || acquisition?.curve?.status === "improving";
   return acquisitionStrong
-    && Number(curve?.recentQuality || 100) < policy.saturation.transferLimitedQuality
+    && Number(curve?.recentQuality ?? 100) < policy.saturation.transferLimitedQuality
     && ["flat", "worsening"].includes(curve?.status)
     && confidenceAtLeast(curve?.confidence, "medium");
 }
@@ -102,7 +102,7 @@ export function evaluatePracticeSaturation({
     const supported = Number(transferCurve.pointCount || 0) >= policy.saturation.supportedTransfer.observations
       && Number(transferCurve.dayCount || 0) >= policy.saturation.supportedTransfer.days
       && confidenceAtLeast(transferCurve.confidence, "medium")
-      && Number(transferCurve.recentQuality || 100) < policy.saturation.transferLimitedQuality
+      && Number(transferCurve.recentQuality ?? 100) < policy.saturation.transferLimitedQuality
       && Number(transferGain ?? Infinity) <= policy.saturation.supportedTransfer.gainMaximum;
     return freezeDeep({
       modelVersion: PRACTICE_SATURATION_MODEL_VERSION,
@@ -120,9 +120,14 @@ export function evaluatePracticeSaturation({
     });
   }
 
-  const ceiling = highQualityCeiling(acquisition?.observations, policy.saturation.highQualityCeilingSessions);
-  if (acquiredOrHigher && ((Number(currentQuality || 0) >= policy.saturation.resolvedQuality && !criticalLimiter) || ceiling)) {
-    reasons.push("mastery-acquired", "high-quality-ceiling");
+  const ceiling = highQualityCeiling(
+    acquisition?.observations,
+    policy.saturation.highQualityCeilingSessions,
+    policy.saturation.highQualityCeiling,
+  );
+  if (acquiredOrHigher && ((Number(currentQuality ?? 0) >= policy.saturation.resolvedQuality && !criticalLimiter) || ceiling)) {
+    reasons.push("mastery-acquired");
+    if (ceiling) reasons.push("high-quality-ceiling");
     return freezeDeep({
       modelVersion: PRACTICE_SATURATION_MODEL_VERSION,
       status: "resolved",
@@ -165,7 +170,7 @@ export function evaluatePracticeSaturation({
     && Number(curve.doseSpan || 0) >= p.doseSpan
     && finite(recentGain)
     && recentGain <= p.recentGainMaximum
-    && Number(currentQuality || 0) < p.qualityMaximum
+    && Number(currentQuality ?? 0) < p.qualityMaximum
     && (materialLimiter || mastery?.stage === "learning");
   const l = policy.saturation.likely;
   const recentFlatOrWorse = finite(recentGain)
@@ -181,7 +186,7 @@ export function evaluatePracticeSaturation({
     && Number(transferCurve?.pointCount || 0) >= s.observations
     && Number(transferCurve?.dayCount || 0) >= s.days
     && confidenceAtLeast(transferCurve?.confidence, "medium")
-    && Number(transferCurve?.recentQuality || 100) < s.qualityMaximum
+    && Number(transferCurve?.recentQuality ?? 100) < s.qualityMaximum
     && finite(transferGain)
     && transferGain <= s.gainMaximum;
 
@@ -191,7 +196,7 @@ export function evaluatePracticeSaturation({
     && phaseMedians.exit < policy.saturation.overload.exitMedianBelow;
 
   let status = supported ? "supported" : likely ? "likely" : possible ? "possible" : "not-detected";
-  if (status === "not-detected" && curve.status === "improving" && finite(recentGain) && recentGain <= policy.acquisitionCurve.meaningfulGainPerDose && Number(currentQuality || 0) < policy.saturation.resolvedQuality) status = "approaching";
+  if (status === "not-detected" && curve.status === "improving" && finite(recentGain) && recentGain <= policy.acquisitionCurve.meaningfulGainPerDose && Number(currentQuality ?? 0) < policy.saturation.resolvedQuality) status = "approaching";
   if (overload && ["likely", "supported"].includes(status)) status = "possible";
 
   if (curve.status === "flat") reasons.push("curve-flat");
@@ -213,8 +218,8 @@ export function evaluatePracticeSaturation({
     && confidenceAtLeast(curve.confidence, "medium");
   const acquisitionPlateau = ["flat", "worsening"].includes(curve.status)
     && finite(practiceGainMedian) && practiceGainMedian <= policy.practiceGain.acquisitionPlateauMaximum
-    && Number(currentQuality || 0) < policy.saturation.resolvedQuality;
-  const transferPoor = ["flat", "worsening"].includes(transferCurve?.status) && Number(transferCurve?.recentQuality || 100) < 80;
+    && Number(currentQuality ?? 0) < policy.saturation.resolvedQuality;
+  const transferPoor = ["flat", "worsening"].includes(transferCurve?.status) && Number(transferCurve?.recentQuality ?? 100) < policy.saturation.supportedTransfer.qualityMaximum;
   if (reacquisition && transferPoor) type = "mixed";
   else if (reacquisition) type = "reacquisition-loop";
   else if (acquisitionPlateau && transferPoor) type = "mixed";
