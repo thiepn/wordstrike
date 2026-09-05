@@ -78,11 +78,11 @@ function validNormalizationSummary() {
 
 test("PL10 advances only sessionSummary to v5 while Practice DB and checkpoint remain unchanged", () => {
   assert.equal(PRACTICE_DATABASE_VERSION, 2);
-  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 5);
-  assert.equal(PRACTICE_RECORD_VERSIONS.checkpoint, 2);
-  assert.equal(PRACTICE_RECORD_VERSIONS.skillStat, 2);
+  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 6);
+  assert.equal(PRACTICE_RECORD_VERSIONS.checkpoint, 3);
+  assert.equal(PRACTICE_RECORD_VERSIONS.skillStat, 3);
   assert.equal(PRACTICE_RECORD_VERSIONS.profile, 3);
-  assert.equal(PRACTICE_FOUNDATION_ANALYSIS_VERSION, 3);
+  assert.equal(PRACTICE_FOUNDATION_ANALYSIS_VERSION, 4);
   assert.equal(PRACTICE_NORMALIZATION_ANALYSIS_VERSION, 1);
   assert.equal(PRACTICE_CONTEXT_MODEL_VERSION, 1);
   assert.equal(PRACTICE_CONTEXT_POLICY_VERSION, 1);

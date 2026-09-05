@@ -72,7 +72,7 @@ assert.equal(profile.recordVersion, 3);
 assert.equal(profile.activeContextId, defaultA);
 assert.equal(validatePracticeProfile(profile).valid, true);
 const stat = createDefaultSkillStat({ profileId: profileA, contextId: defaultA, entityType: "bigram", entityKey: "er", now });
-assert.equal(stat.recordVersion, 2);
+assert.equal(stat.recordVersion, 3);
 assert.equal(stat.statId, createSkillStatId(profileA, defaultA, "bigram", "er"));
 assert.equal(validateSkillStat(stat).valid, true);
 assert.equal(validateSkillStat({ ...stat, contextId: undefined }).valid, false);
@@ -93,10 +93,11 @@ const legacyStat = { ...stat, recordVersion: 1, statId: "practice-stat_" + encod
 delete legacyStat.contextId;
 const migratedStat = migratePracticeRecord("skillStat", legacyStat);
 assert.equal(migratedStat.ok, true);
-assert.deepEqual(migratedStat.steps, ["skillStat:1->2"]);
+assert.deepEqual(migratedStat.steps, ["skillStat:1->2", "skillStat:2->3"]);
 assert.equal(migratedStat.value.contextId, defaultA);
 assert.equal(migratedStat.value.statId, createSkillStatId(profileA, defaultA, "bigram", "er"));
-assert.equal(migratedStat.value.sampleCount, stat.sampleCount);
+assert.equal(migratedStat.value.evidence.opportunities.count, 0);
+assert.equal(migratedStat.value.legacyEvidenceV2, null);
 assert.equal(migratePracticeRecord("skillStat", migratedStat.value).migrated, false);
 assert.equal(migratePracticeRecord("skillStat", { ...migratedStat.value, recordVersion: 99 }).error.code, "PRACTICE_STORAGE_UNSUPPORTED_VERSION");
 for (const [type, current] of [
@@ -114,10 +115,10 @@ for (const [type, current] of [
 assert.equal(PRACTICE_DATABASE_VERSION, 2);
 assert.equal(PRACTICE_RECORD_VERSIONS.profile, 3);
 assert.equal(PRACTICE_RECORD_VERSIONS.context, 1);
-assert.equal(PRACTICE_RECORD_VERSIONS.skillStat, 2);
-assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 5);
+assert.equal(PRACTICE_RECORD_VERSIONS.skillStat, 3);
+assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 6);
 assert.equal(PRACTICE_RECORD_VERSIONS.reviewItem, 2);
-assert.equal(PRACTICE_RECORD_VERSIONS.checkpoint, 2);
+assert.equal(PRACTICE_RECORD_VERSIONS.checkpoint, 3);
 assert.equal(PRACTICE_STORE_DEFINITIONS.skillStats.indexes.some((index) => index.name === "profileEntity"), false);
 assert.equal(PRACTICE_STORE_DEFINITIONS.reviewItems.indexes.some((index) => index.name === "profileEntity"), false);
 

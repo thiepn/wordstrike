@@ -35,7 +35,7 @@ test("PL9 latency/error outputs remain intact inside PL10 foundation analysis v3
     traceMetadata: metadata,
     errorTrackerSnapshot: tracker.finalizeSnapshot(),
   });
-  assert.equal(PRACTICE_FOUNDATION_ANALYSIS_VERSION, 3);
+  assert.equal(PRACTICE_FOUNDATION_ANALYSIS_VERSION, 4);
   assert.equal(foundation.version, 3);
   assert.ok(foundation.latency);
   assert.ok(foundation.errors);
