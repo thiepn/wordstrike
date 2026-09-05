@@ -6,6 +6,7 @@ const PREFIXES = Object.freeze({
   customText: "practice-text_",
   preset: "practice-preset_",
   quarantine: "practice-quarantine_",
+  ability: "practice-ability_",
 });
 
 function fallbackToken(now, random) {
@@ -29,9 +30,7 @@ export function createPracticeId(kind, {
 } = {}) {
   const prefix = PREFIXES[kind];
   if (!prefix) throw new TypeError(`Unknown Practice ID kind: ${kind}`);
-  const value = uuid?.()
-    ?? cryptoObject?.randomUUID?.()
-    ?? fallbackToken(now, random);
+  const value = uuid?.() ?? cryptoObject?.randomUUID?.() ?? fallbackToken(now, random);
   return `${prefix}${String(value).toLowerCase()}`;
 }
 
@@ -55,9 +54,13 @@ function encodeIdentityPart(value) {
 
 export function createSkillStatId(profileId, contextId, entityType, entityKey) {
   if (arguments.length !== 4) throw new TypeError("createSkillStatId requires profileId, contextId, entityType, and entityKey");
-  return `practice-stat_${[
-    profileId, contextId, entityType, entityKey,
-  ].map(encodeIdentityPart).join("|")}`;
+  return `practice-stat_${[profileId, contextId, entityType, entityKey].map(encodeIdentityPart).join("|")}`;
+}
+
+export function createPracticeAbilityStateId(profileId, contextId, channel) {
+  if (arguments.length !== 3) throw new TypeError("createPracticeAbilityStateId requires profileId, contextId, and channel");
+  if (!isPracticeId(profileId, "profile") || !isPracticeId(contextId, "context") || typeof channel !== "string" || !channel) throw new TypeError("Practice ability state identity is invalid");
+  return `practice-ability_${[profileId, contextId, channel].map(encodeIdentityPart).join("|")}`;
 }
 
 export function hashPracticeContent(value = "") {
