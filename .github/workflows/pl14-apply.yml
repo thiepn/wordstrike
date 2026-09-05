@@ -10,6 +10,7 @@ on:
       - scripts/pl14_fix2.py
       - scripts/pl14_fix3.py
       - scripts/pl14_fix4.py
+      - scripts/pl14_fix5.py
       - tests/practice-ability-session-repository.test.js
       - .github/workflows/pl14-apply.yml
 
@@ -34,7 +35,8 @@ jobs:
           python scripts/pl14_fix2.py
           python scripts/pl14_fix3.py
           python scripts/pl14_fix4.py
-      - name: Run focused PL14 gates
+          python scripts/pl14_fix5.py
+      - name: Run focused PL14 and compatibility gates
         run: |
           node tests/practice-performance-state.test.js
           node tests/practice-control-frontier.test.js
@@ -43,6 +45,20 @@ jobs:
           node tests/practice-ability-observation.test.js
           node tests/practice-ability-session-repository.test.js
           node tests/practice-ability-storage-migration.test.js
+          node tests/practice-context-identity.test.js
+          node tests/practice-corpus-isolation.test.js
+          node tests/practice-error-foundation.test.js
+          node tests/practice-error-migration-validation.test.js
+          node tests/practice-error-session-integration.test.js
+          node tests/practice-foundation-contract.test.js
+          node tests/practice-latency-migration-validation.test.js
+          node tests/practice-latency-session-integration.test.js
+          node tests/practice-limiter-service-isolation.test.js
+          node tests/practice-normalization-migration-validation.test.js
+          node tests/practice-normalization-session-integration.test.js
+          node tests/practice-profile-migration.test.js
+          node tests/practice-schema-defaults.test.js
+          node tests/practice-skill-evidence-session-repository.test.js
       - name: Run full regression suite
         run: npm test
       - name: Commit clean PL14 implementation
