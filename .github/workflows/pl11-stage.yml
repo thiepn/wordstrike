@@ -24,6 +24,7 @@ jobs:
         run: |
           node --check scripts/applyPl11Integration.mjs
           node --check scripts/applyPl11IntegrationFinal.mjs
+          node --check scripts/applyPl11IntegrationAfterCheckpoint.mjs
 
           set +e
           node scripts/applyPl11Integration.mjs > /tmp/pl11-head.log 2>&1
@@ -34,7 +35,16 @@ jobs:
             grep -q "PL11 patch missing anchor: foundation skill build" /tmp/pl11-head.log || exit "$head_status"
           fi
 
-          node scripts/applyPl11IntegrationFinal.mjs
+          set +e
+          node scripts/applyPl11IntegrationFinal.mjs > /tmp/pl11-final.log 2>&1
+          final_status=$?
+          set -e
+          cat /tmp/pl11-final.log
+          if [ "$final_status" -ne 0 ]; then
+            grep -q "PL11 final patch missing anchor: checkpoint engine tracker snapshot" /tmp/pl11-final.log || exit "$final_status"
+          fi
+
+          node scripts/applyPl11IntegrationAfterCheckpoint.mjs
 
           node --check js/practiceLab/practiceSkillEvidencePolicy.js
           node --check js/practiceLab/practiceEvidenceConfidence.js
