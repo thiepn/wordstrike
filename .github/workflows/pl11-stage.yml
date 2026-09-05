@@ -33,6 +33,7 @@ jobs:
           node --check js/practiceLab/practiceSkillEvidenceCollector.js
           node --check js/practiceLab/practiceSessionEngine.js
           node --check js/practiceLab/practiceValidation.js
+          node --check tests/practice-skill-evidence-session-repository.test.js
           git diff --check
       - name: Commit gate updates
         run: |
@@ -43,5 +44,7 @@ jobs:
           git push origin HEAD:codex/pl11-contextual-skill-evidence
       - name: Run focused PL11 core tests
         run: node tests/practice-skill-evidence-core.test.js
+      - name: Run focused PL11 session/repository tests
+        run: node tests/practice-skill-evidence-session-repository.test.js
       - name: Run full tests
         run: npm test
