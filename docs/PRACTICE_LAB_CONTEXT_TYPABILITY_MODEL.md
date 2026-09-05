@@ -636,3 +636,23 @@ PL12 prevalence is a **separate** statistical contract from PL10 typability/freq
 PL12 does not bump the PL10 normalization-analysis, context-model, context-policy, text-feature, typability-model, typability-reference, keyboard-geometry, or static-artifact versions. Historical PL10 documentation above remains the definition of the PL10 phase itself; current wrapper record versions are documented in PRACTICE_LAB_DATA_ARCHITECTURE.md.
 
 See PRACTICE_LAB_LIMITER_IMPACT_MODEL.md for the downstream diagnostic formulas and impact/hierarchy semantics.
+
+## 29. PL13 observation-level ability adjustment
+
+PL13 is the first downstream phase that converts PL10 `difficultyIndex` into a conservative **observation-level** adjustment before latent ability estimation. This does not change PL10 itself: PL10 remains the source of the heuristic text-difficulty index, status, and `availableModelWeight`, and all PL10 model/reference/feature versions remain unchanged.
+
+The versioned PL13 v1 observation policy is:
+
+```text
+D = PL10 difficultyIndex
+C = availableModelWeight in [0,1]
+
+A_d = clamp(0.03 × D × C, -0.12, +0.12)
+AdjustedLogPerformance = ln(canonical WPM) + A_d
+```
+
+Higher PL10 difficulty therefore raises the adjusted ability observation; easier text lowers it. Partial models receive only coverage-proportional adjustment. For PL10 status `insufficient` or `unsupported-language`, PL13 uses zero difficulty adjustment and increases observation uncertainty instead of guessing.
+
+PL13 does **not** use PL10 `relativeDifficultyPercentile` as a WPM correction. It also does not reinterpret PL10's heuristic difficulty index as user ability. The `0.03` coefficient and `±0.12` cap are PL13 engineering policy, isolated in the PL13 observation builder so PL18 can later replace/augment them with empirical passage calibration without redesigning PL10 or `abilityStates`.
+
+Historical PL10 wrapper-version statements above remain documentation of the PL10 phase at its introduction. Current database/session/foundation wrapper versions are documented in `PRACTICE_LAB_DATA_ARCHITECTURE.md`; the full downstream estimator contract is in `PRACTICE_LAB_ABILITY_ESTIMATION.md`.
