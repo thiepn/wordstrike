@@ -10,11 +10,11 @@ export const PRACTICE_RECORD_VERSIONS = Object.freeze({
   context: 1,
   profile: 3,
   skillStat: 3,
-  sessionSummary: 9,
+  sessionSummary: 10,
   abilityState: 1,
   performanceState: 1,
   learningState: 1,
-  reviewItem: 2,
+  reviewItem: 3,
   customText: 1,
   preset: 1,
   checkpoint: 3,
@@ -38,6 +38,7 @@ export const PRACTICE_LIMITS = Object.freeze({
   abilityStateBytes: 32 * 1024,
   performanceStateBytes: 64 * 1024,
   learningStateBytes: 32 * 1024,
+  reviewItemBytes: 32 * 1024,
   checkpointBytes: 512 * 1024,
   configurationDepth: 8,
   configurationBytes: 32 * 1024,
@@ -175,7 +176,7 @@ export const MASTERY_STATES = Object.freeze(["unmeasured", "needs-data", "weak",
 export const CONFIDENCE_LEVELS = Object.freeze(["none", "low", "medium", "high"]);
 export const SESSION_STATUSES = Object.freeze(["completed", "abandoned", "interrupted", "invalid"]);
 export const COMPLETION_REASONS = Object.freeze(["time-complete", "content-complete", "word-target-complete", "manual-stop", "navigation-away", "refresh-interruption", "error"]);
-export const REVIEW_STATES = Object.freeze(["new", "due", "learning", "improving", "stable", "mastered", "suspended"]);
+export const REVIEW_STATES = Object.freeze(["inactive", "active", "suspended"]);
 export const PRACTICE_INPUT_METHODS = Object.freeze(["unknown", "physical", "software"]);
 export const STORAGE_HEALTH_STATES = Object.freeze(["healthy", "degraded", "quota-warning", "quota-exceeded", "migration-warning", "recovery-required"]);
 export const ASSESSMENT_STATES = Object.freeze(["never-started", "incomplete", "complete", "stale"]);
