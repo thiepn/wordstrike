@@ -1,45 +1,69 @@
 # Practice Lab Session Engine
 
-Status: headless Practice foundation + PL5 context identity + PL8 robust latency + PL9 error/recovery + PL10 context/typability normalization
+Status: current through PL11 contextual skill evidence
 
 ## 1. Scope
 
-The modules in **js/practiceLab/** provide a framework-independent typing-session engine for future Practice experiments. They implement lifecycle, content/input contracts, typing state, Practice-only compatibility metrics, bounded events, checkpointing/restoration, generic foundation analysis, completion, abandonment, interruption, subscriptions, and diagnostics.
+The modules in `js/practiceLab/` provide the framework-independent Practice typing-session runtime. The engine owns lifecycle, immutable session identity, normalized input handling, timing, bounded event/error tracking, PL8 latency classification, PL9 error/recovery analysis, PL10 context/typability normalization, PL11 contextual skill evidence collection, checkpoint/restore continuity, session finalization, and atomic repository commit orchestration.
 
-No public Practice route, recommendation system, mastery model, review scheduler, ability estimator, or target prioritizer is implemented here.
+PL11 remains an observation layer. The session engine does not implement weakness ranking, limiter interpretation, mastery, trends, review scheduling, target prioritization, Coach logic, ability estimation, public Practice UI, leaderboard behavior, auth, or cloud sync.
 
-## 2. Protected boundaries
+## 2. Canonical identity
 
-The engine imports Practice contracts and a repository interface. It never directly accesses IndexedDB, localStorage, DOM, Supabase, authentication, leaderboards, ranked Typing records, or WORDSTRIKE saves. **js/main.js** does not import the heavy Practice runtime.
+A session is created with one resolved `profileId + contextId`. Both are immutable for the lifetime of the engine and propagate through snapshots, checkpoints, foundation analysis, skill evidence deltas, session summaries, and repository commits.
 
-Before an engine is created, the caller resolves one valid **profileId + contextId** pair. Both are immutable session identity and propagate through snapshots, checkpoints, foundation/experiment analysis, summaries, and atomic completion.
+Changing the profile's active context after `prepare()` does not relabel an in-flight session. Restore resolves the checkpoint's exact context and never substitutes the current active context.
 
-## 3. Current module map
+## 3. Current version matrix
+
+| Contract | Version |
+| --- | ---: |
+| IndexedDB structural version | 2 |
+| profile | 3 |
+| context | 1 |
+| skillStat | 3 |
+| sessionSummary | 6 |
+| reviewItem | 2 |
+| checkpoint | 3 |
+| foundationAnalysis | 4 |
+| event trace semantics | 3 |
+| PL8 latency classifier/policy | 1 / 1 |
+| PL9 error analyzer/alignment/recovery | 1 / 1 / 1 |
+| PL10 normalization analysis/model | 1 / 1 |
+| PL11 skill evidence/policy/delta | 1 / 1 / 1 |
+| PL11 evidence confidence | 1 |
+| PL11 tracker snapshot | 1 |
+
+Database, record, experiment, content-generator, analysis, and policy versions are independent contracts. PL11 changes record schemas but does not require an IndexedDB structural-version bump.
+
+## 4. Module responsibilities
 
 | Module | Responsibility |
 | --- | --- |
-| practiceSessionConstants.js | States, transitions, limits, event-trace version, errors |
-| practiceSessionContract.js | Experiment, content, input, configuration, segmentation |
-| practiceInputEngine.js | Mutable renderer-independent typing state |
-| practiceMetrics.js | Legacy-compatible Practice metrics/observations |
-| practiceEventBuffer.js | Bounded in-memory detailed event trace + content-free coverage metadata |
-| practiceLatencyClassifier.js | PL8 robust session-local latency analysis |
-| practiceErrorPolicy.js | PL9 versions, enums, bounded engineering policy |
-| practiceErrorAlignment.js | Bounded deterministic local edit alignment |
-| practiceErrorTracker.js | Bounded streaming whole-session error episode aggregation |
-| practiceErrorAnalyzer.js | PL9 episode/content/reconstruction/session analysis |
-| practiceRecoveryAnalyzer.js | Recovery medians + PL8 fluent-resumption enrichment |
-| practiceFoundationAnalysis.js | Generic PL8 + PL9 + PL10 analysis orchestration |
-| practiceContextFeatures.js / practiceContextNormalizer.js | PL10 coarse transition context + residual normalization |
-| practiceTextDifficultyFeatures.js / practiceTypabilityModel.js | PL10 text features + relative typability model |
-| practiceNormalizationAnalysis.js | PL10 session normalization orchestration |
-| practiceCheckpoint.js | Checkpoint builder and restore validation |
-| practiceSessionResult.js | Canonical current summary/profile construction |
-| practiceSessionEngine.js | Lifecycle, timing, streaming analysis, checkpoint and completion orchestration |
+| `practiceSessionContract.js` | Experiment/content/input/configuration contracts and grapheme segmentation |
+| `practiceInputEngine.js` | Mutable renderer-independent typing state and corrections |
+| `practiceMetrics.js` | Existing Practice WPM/accuracy/correction metrics |
+| `practiceEventBuffer.js` | Bounded detailed in-memory event trace and trace-coverage metadata |
+| `practiceLatencyClassifier.js` | PL8 robust session-local latency classification |
+| `practiceErrorTracker.js` | PL9 bounded streaming error episode state and closed-episode drain |
+| `practiceErrorAnalyzer.js` / `practiceRecoveryAnalyzer.js` | PL9 structural/content error and recovery analysis |
+| `practiceContextFeatures.js` / `practiceContextNormalizer.js` | PL10 transition context and normalized timing residuals |
+| `practiceTextDifficultyFeatures.js` / `practiceTypabilityModel.js` | PL10 text/context difficulty model |
+| `practiceEntityResolver.js` | PL11 direct position → key/bigram/trigram/word attribution |
+| `practiceOpportunityTracker.js` | PL11 first-attempt cursor/opportunity continuity |
+| `practiceSkillEvidenceCollector.js` | PL11 bounded streaming per-entity evidence aggregation |
+| `practiceSkillEvidenceDelta.js` | Immutable one-session delta contract and batch validation |
+| `practiceSkillEvidenceMerge.js` | Canonical immutable skillStat v3 evidence merge |
+| `practiceEvidenceConfidence.js` | Versioned evidence-confidence policy |
+| `practiceEvidenceRole.js` | Protected training/transfer/benchmark/diagnostic/custom role resolution |
+| `practiceCheckpoint.js` | Checkpoint v3 construction and restore validation |
+| `practiceFoundationAnalysis.js` | PL8 + PL9 + PL10 + PL11 orchestration |
+| `practiceSessionResult.js` | Canonical sessionSummary v6/profile update construction |
+| `practiceSessionEngine.js` | Lifecycle, streaming collection, restore, finalization, commit orchestration |
 
-## 4. Lifecycle
+## 5. Lifecycle
 
-~~~text
+```text
 created -> ready -> active <-> paused
                     |          |
                     +--> completed
@@ -49,379 +73,184 @@ created -> ready -> active <-> paused
 ready -------> abandoned
 ready -------> destroyed
 terminal ----> destroyed
-~~~
-
-**PRACTICE_SESSION_TRANSITIONS** is authoritative. Invalid transitions throw a structured Practice session error. Repeated safe operations remain idempotent.
-
-## 5. Public API
-
-**createPracticeSessionEngine()** requires a repository plus resolved **profileId** and **contextId**. It exposes prepare, start, handleInput, pause, resume, visibility handling, content append, tick, checkpoint flush, complete, abandon, interrupt, destroy, immutable snapshots/metrics/trace/observations/diagnostics, and subscription.
-
-**restorePracticeSessionEngine()** validates and restores one checkpoint into a new engine. Clocks, scheduling, repository, logging, checkpoint policy, and segmentation remain injectable.
-
-## 6. Experiment contract
-
-Experiment descriptors are runtime-only objects containing stable ID/version, session schema version, correction behavior, supported completion modes, resumability and optional callbacks.
-
-Optional `analyzeResult()` receives generic frozen foundation analysis but does not own the canonical generic `fluencySummary`, `errorSummary`, or `normalizationSummary`. Callbacks are never persisted.
-
-## 7. Content/input model
-
-A Practice content plan is immutable versioned text plus grapheme-indexed units, target entities, completion policy, metadata and content hash. Content, duration, word-count and manual completion are supported.
-
-Normalized input types are:
-
-- `character`
-- `space`
-- `backspace`
-- `word-delete`
-
-The engine consumes normalized values/timestamps and never reads browser keyboard events directly.
-
-## 8. Unicode segmentation
-
-Canonical Practice segmentation uses `Intl.Segmenter` in grapheme mode where available, with a surrogate-safe fallback. PL7 and PL9 reuse the same segmentation contract so target indexing, typing positions and bounded edit alignment do not silently disagree about grapheme boundaries.
-
-## 9. Typing state and correction policies
-
-Typing state stores expected graphemes, accepted attempts, cursor/current units, error positions and corrected-error history without DOM references.
-
-- **allow** removes one grapheme or the preceding whitespace-delimited word.
-- **ignore** records/consumes the correction input without changing typed state.
-- **disabled** rejects the correction without typed-state mutation.
-
-PL9 observes those existing semantics; it does not create a different typing interaction model.
-
-## 10. Compatibility metrics remain unchanged
-
-PL8/PL9 do not remove or silently redefine existing metrics including:
-
-- raw WPM;
-- correct WPM;
-- event accuracy;
-- incorrect insertions;
-- corrected incorrect characters;
-- deleted correct characters;
-- correction inputs;
-- metrics-collector characters removed;
-- `correctionCostMs`;
-- uncorrected errors;
-- word-start delays;
-- legacy coefficient-of-variation consistency.
-
-PL8/PL9 add generic interpretation alongside them.
-
-## 11. Timing model and PL8 timing segments
-
-Injected monotonic time drives active/paused duration and input timing. Wall time drives UTC/local date context and wall duration. Paused time is excluded from active time.
-
-Every PL8/PL9 input event carries deterministic `timingSegmentId`. Ordinary pause/resume and checkpoint restore start fresh comparable timing segments. Correction activity remains in the same segment but creates a separate post-correction boundary for latency interpretation.
-
-A 2,000+ ms insertion transition is an interruption classification; it does not itself mutate the timing segment.
-
-## 12. Event-trace semantics v3
-
-PL9 advances internal event-tail semantics to version 3. Newly recorded insertion/correction events retain the existing minimal fields and add explicit:
-
-```text
-cursorBefore
-cursorAfter
 ```
 
-Insertion normally moves one position. Correction events additionally record bounded structural metadata:
+`PRACTICE_SESSION_TRANSITIONS` is authoritative. Invalid transitions fail with structured Practice session errors. Repeated terminal completion calls are idempotent through the existing finalization lock/result cache.
+
+## 6. Input and typing state
+
+The engine consumes normalized `character`, `space`, `backspace`, and `word-delete` inputs. It never reads browser keyboard events directly. Canonical segmentation is grapheme-based and shared with PL7/PL9/PL11 attribution so target positions, typing positions, error episodes, and evidence entity resolution use one indexing contract.
+
+Correction behavior remains owned by the existing input engine. PL11 does not reinterpret a corrected retry as a second opportunity.
+
+## 7. Timing and bounded traces
+
+Injected monotonic time drives performance timing. Wall time drives UTC/local-day context. Paused time remains excluded from active time.
+
+Event traces remain bounded to the configured PL8/PL9 session capacity and are never durable evidence. Event metadata records only capacity, retained count, total count, and truncation state. Raw expected/entered text is not persisted in the session summary or skill stat.
+
+PL8 classifies comparable insertion transitions as `fluent`, `disfluent`, `interruption`, or `excluded`. PL10 may attach a finite expected-latency model and residual. PL11 consumes those outputs; it does not redefine them.
+
+## 8. PL9 error episodes and PL11 consumption boundary
+
+PL9 owns streaming error episodes. PL11 consumes only bounded compact closed-episode facts through the public drain/preview boundary. It does not reach into PL9 private tracker history.
+
+Each closed episode receives one deterministic primary attribution position. PL11 maps that position directly to at most one key, ending bigram, ending trigram, and containing word. Adjacent transposition uses the expected ending bigram when PL9 supplies sufficient confidence. This is observational attribution, not a causal diagnosis.
+
+## 9. PL11 first-pass opportunity semantics
+
+The evidence tracker keeps a monotonic `maxFirstAttemptCursor`. An accepted insertion at position `p` is a first encounter only when it reaches the not-yet-seen frontier. Revisiting an earlier position after correction is a retry and cannot increment first-pass opportunity counts.
+
+One first encounter may contribute to:
+
+- one expected key;
+- one ending bigram when available;
+- one ending trigram when available;
+- one containing canonical word.
+
+A word is first-pass correct only if every position in that word was correct on its first encounter. Repairing the word later does not rewrite first-pass accuracy.
+
+## 10. Evidence roles and Custom Text privacy
+
+At `prepare()`, PL11 resolves and freezes one evidence role:
 
 ```text
-removedCount
-removedIncorrectCount
-removedCorrectCount
-removedStartPosition
-correctionPolicy
+training
+transfer
+benchmark
+diagnostic
+custom
+unclassified
 ```
 
-Correction events do **not** duplicate the removed text. Earlier insertion attempts already carry the transient expected/entered graphemes needed for local reconstruction.
+Protected roles require trusted content provenance and cannot be spoofed by arbitrary experiment configuration. The frozen role is included in the PL11 tracker checkpoint so restore cannot relabel prior evidence.
 
-`eventIndex` remains monotonically increasing and is the canonical attempt identity; repeated attempts at the same `textPosition` are valid.
+Default Custom Text behavior permits durable key/bigram/trigram motor evidence but suppresses word skill entities. This prevents a secondary durable index of private pasted words while retaining short-sequence motor evidence.
 
-## 13. Event-buffer limit and coverage
+## 11. Content append continuity
 
-**createPracticeEventBuffer()** still retains at most 20,000 detailed events. `getMetadata()` returns only:
+`appendContent()` extends the immutable content plan and typing state. PL11 rebuilds only the position/entity resolver for the extended plan; it preserves all accumulated evidence, the first-attempt cursor boundary, current first-pass word state, truncation state, and observation state.
 
-```text
-capacity
-retainedEventCount
-totalEventCount
-truncated
-```
+Appending content therefore adds future resolvable positions without turning previously seen positions into new opportunities.
 
-No expected/entered text appears in metadata. Traces are immutable copies, in-memory only, and cleared during destroy.
+## 12. Checkpoint v3
 
-PL8/PL9 explicitly distinguish `complete-session` from `retained-window` trace scope rather than pretending an overflowed trace covers the whole session.
+Checkpoint v3 adds a bounded `skillEvidenceTrackerSnapshot` inside `metricsSnapshot`. The snapshot carries:
 
-## 14. PL8 latency foundation
+- tracker/evidence/policy versions;
+- frozen evidence role;
+- first-attempt frontier and accuracy coverage scope;
+- current word first-pass state when needed;
+- bounded admitted entity evidence;
+- last processed closed-episode boundary;
+- omission/truncation flags.
 
-At finalization PL8 uses median/MAD plus a versioned adaptive session threshold to classify comparable insertion timing into:
+The configured checkpoint entity cap is bounded and deterministic compaction prioritizes direct targets, error-bearing entities, stronger opportunity evidence, then stable entity identity ordering.
 
-```text
-fluent
-disfluent
-interruption
-excluded
-```
+Checkpoint persistence remains one checkpoint per profile and uses the checkpoint's immutable `contextId`.
 
-It remains finalization-only rather than sorting the trace on each key. PL9 does not change PL8 threshold/count semantics.
+## 13. Restore behavior
 
-See **PRACTICE_LAB_LATENCY_CLASSIFICATION.md**.
+Restore validates checkpoint schema, expiry, profile/context, experiment/version, content identity, and resumability before reconstructing the session.
 
-## 15. PL9 streaming error tracker
+A valid PL11 tracker snapshot resumes first-pass continuity, so corrected retries after reload do not become new opportunities. If a historical checkpoint lacks PL11 tracker state, the typing session can still restore, but PL11 begins at the restored cursor with `partial-session` accuracy coverage. Missing historical evidence is never fabricated.
 
-PL9 adds a bounded `createPracticeErrorTracker()` to normal input handling. Each input performs only bounded/local updates:
+PL8 timing starts a fresh restore timing boundary as before. PL9 and PL11 each retain their own bounded continuity semantics.
 
-- cursor/current wrong-state update;
-- active episode update;
-- fixed counters;
-- bounded local episode material;
-- capped recovery samples.
+## 14. Foundation analysis v4
 
-The tracker keeps one active episode, fixed aggregate objects, a recent episode ring capped at 64 and recovery sample arrays capped at 64. It does not accumulate full session history.
-
-Local edit alignment runs when an episode closes or at session finalization, not on every accepted character.
-
-## 16. Error episodes
-
-An error episode starts on an accepted incorrect insertion when no unresolved episode owns that mismatch region. It may include additional insertions, corrections, over-deletion and retyping.
-
-PL9 classifies each finalized episode into one structural class:
-
-```text
-substitution
-insertion
-omission
-transposition
-compound
-unknown
-```
-
-and one orthogonal content class:
-
-```text
-letter
-capitalization
-punctuation
-whitespace-boundary
-numeric
-symbol
-mixed
-unknown
-```
-
-Adjacent transposition can therefore be one episode even though legacy incorrect-character count is two.
-
-See **PRACTICE_LAB_ERROR_RECOVERY_MODEL.md**.
-
-## 17. Observable correction/recovery timing
-
-PL9 uses active timestamps and precise observable names:
-
-```text
-correctionInitiationMs = first state-changing correction - error start
-correctionDistanceChars = accepted insertions after initial error before correction
-correctionToRepairMs = repair complete - first correction
-aerrorToRepairMs = repair complete - error start
-repairToResumeMs = next ordinary forward insertion - repair complete
-resumeToFluentMs = first later PL8-fluent transition - repair complete
-```
-
-(`aerrorToRepairMs` above is the formula for the canonical field **errorToRepairMs**; the persisted field name has no prefix.)
-
-At content end, forward-resumption metrics are `null`. These durations are observed windows, not Recovery Debt/counterfactual time loss.
-
-## 18. Checkpoint cadence
-
-Defaults remain 15 seconds minimum, 50 accepted insertions threshold, one timeout and no interval. Meaningful changes mark state dirty; writes coalesce. Pause, hidden visibility, interruption and explicit flush force resumable state where applicable.
-
-## 19. Checkpoint payload and PL9 tracker state
-
-Checkpoint record version remains **2**. Its already-extensible `metricsSnapshot` now includes one bounded `errorTrackerSnapshot` alongside the bounded recent event tail and event-trace coverage metadata.
-
-The error tracker snapshot contains aggregate counters, capped recovery samples and at most one bounded active episode. It is bound to content hash and cursor position and contains no full historical error trace.
-
-Checkpoint top-level record version did not need to change because the new state fits safely inside the existing bounded extensible metrics snapshot contract.
-
-## 20. Restoration
-
-Restore validates schema/expiry/profile/context/experiment/content identity and resumability. It reconstructs typing state, aggregate metrics and the recent tail, then begins a fresh PL8 timing segment.
-
-For PL9:
-
-- a valid tracker snapshot is restored only when tracker version, content hash and cursor anchors match;
-- otherwise the auxiliary tracker is discarded without invalidating the typing session;
-- a historical checkpoint with no tracker state begins a fresh `post-restore` error-analysis coverage boundary;
-- no pre-restore error phenotype is invented from missing raw attempts.
-
-An active restored episode is marked as crossing a timing boundary so recovery/classification confidence can be reduced appropriately.
-
-## 21. Generic foundation analysis v2
-
-Canonical current foundation analysis is:
+Canonical current foundation analysis is deeply frozen before experiment analysis:
 
 ```text
 foundationAnalysis = {
-  version: 2,
+  version: 4,
   latency,
-  errors
+  errors,
+  normalization,
+  skills: {
+    version: 1,
+    policyVersion: 1,
+    summary,
+    deltas
+  }
 }
 ```
 
-PL8 latency analysis is computed first. PL9 then consumes the streaming tracker snapshot, retained trace metadata and transient PL8 classifications for recovery enrichment. The complete object is deeply frozen before optional experiment analysis.
+`latency` is PL8, `errors` is PL9, `normalization` is PL10, and `skills` is PL11. The PL11 collector finalizes after the error tracker has drained closed episodes and previewed any still-active terminal episode.
 
-`foundationAnalysis.errors` may contain transient recent episode diagnostics. Only `foundationAnalysis.errors.sessionSummary` is eligible for durable generic persistence.
+## 15. Experiment analysis boundary
 
-## 22. Experiment analysis hook
+Optional `experiment.analyzeResult()` receives immutable session/metrics/event/foundation inputs. It may derive experiment-specific result fields and may consume PL11 evidence, but it does not own canonical generic summaries or skill writes.
 
-Optional `experiment.analyzeResult()` still receives:
+In particular, analyzer-provided `updatedSkillStats` is not used as a canonical write path. Repository commit rejects non-empty direct full skill-stat replacement. Canonical skill evidence comes only from `foundationAnalysis.skills.deltas`.
+
+## 16. Session summary v6
+
+`buildPracticeSessionResult()` persists compact durable session evidence:
+
+- immutable profile/context/session identity;
+- timestamps/durations and existing typing metrics;
+- compact content descriptor and target list;
+- PL8 `fluencySummary`;
+- PL9 `errorSummary`;
+- PL10 `normalizationSummary`;
+- PL11 `skillEvidenceSummary`;
+- bounded experiment-specific summary fields.
+
+The summary explicitly forbids raw event traces, normalized transition arrays, skill evidence deltas, custom-text excerpts, auth/leaderboard payloads, and other high-volume/private transient data.
+
+Historical v5 summaries migrate to v6 with `skillEvidenceSummary: null`; old summaries are not backfilled from evidence that was never recorded.
+
+## 17. Atomic completion
+
+Current completion is:
 
 ```text
-sessionSnapshot
-metricsSnapshot
-eventTrace
-observations
-foundationAnalysis
-```
-
-All are frozen/cloned according to Practice conventions. Experiment output may consume PL8/PL9 evidence but cannot override canonical generic `fluencySummary` or `errorSummary` because the session-result builder sources those fields only from foundation analysis.
-
-Analyzer failure remains a structured recoverable `PRACTICE_SESSION_ANALYSIS_FAILED` boundary and blocks a half-built commit.
-
-## 23. Session result construction
-
-Current `sessionSummary` record version is **4**.
-
-**buildPracticeSessionResult()** persists immutable profile/context/session identity, content descriptor, dates/durations, legacy-compatible metrics, targets, canonical PL8 `fluencySummary`, canonical PL9 `errorSummary`, and bounded experiment-specific result fields.
-
-It never persists raw/classified traces, recent error episodes, edit scripts, full wrong strings or custom-text excerpts.
-
-## 24. PL9 errorSummary ownership
-
-The compact generic `errorSummary` contains:
-
-- version/policy identifiers;
-- coverage;
-- episode outcome counts;
-- fixed structural/content count objects;
-- doubling/cascade counts;
-- correction/removal counts;
-- over-deletion rate;
-- recovery medians;
-- corrected episode rate;
-- episodes per 1000 accepted insertions;
-- bounded evidence confidence.
-
-Streaming tracker totals own whole-session counts when aggregate coverage is complete. Retained trace enrichment never double-counts those episodes.
-
-## 25. Atomic completion
-
-~~~text
 lock finalization
  -> freeze active timing
  -> await checkpoint write
- -> finalize bounded streaming error tracker
+ -> drain/finalize PL9 tracker
  -> PL8 latency analysis
- -> PL9 error/recovery analysis + trace enrichment
- -> freeze foundationAnalysis v2
+ -> PL9 error/recovery analysis
+ -> PL10 normalization analysis
+ -> PL11 evidence finalization -> compact summary + deltas
+ -> freeze foundationAnalysis v4
  -> optional experiment analysis
- -> build + validate v4 session summary/profile update
- -> repository.commitCompletedPracticeSession()
- -> transaction clears checkpoint
- -> enter terminal state
- -> emit once
-~~~
-
-The repository still enforces profile/context ownership for every atomic record change.
-
-## 26. Analysis failure and retry
-
-Foundation-analysis or experiment-analysis failures do not commit garbage. The engine preserves/refreshes resumable state where possible and returns a structured recoverable analysis error. Completion retry remains explicit and idempotent.
-
-## 27. Abandonment/interruption/destruction
-
-Abandonment thresholds and profile accounting are unchanged. Interruption freezes timing and checkpoints resumable state without creating a session summary. Destroy cancels scheduled work, waits for safe in-flight work, emits once, clears subscribers/events/content references and is idempotent.
-
-Neither PL8 nor PL9 introduces a hidden background task or storage writer.
-
-## 28. Diagnostics
-
-`getDiagnostics()` remains bounded and content-free. In addition to lifecycle/timing/checkpoint/event-buffer data it may expose PL9 episode count and whether one active error episode exists.
-
-It excludes expected/entered passages, custom text, raw event arrays, episode histories, authentication and storage secrets.
-
-## 29. Persistence/version matrix
-
-Current Practice persistence after PL9:
-
-| Contract | Version |
-| --- | ---: |
-| IndexedDB structural version | 2 |
-| Profile record | 3 |
-| Context record | 1 |
-| Skill-stat record | 2 |
-| Session-summary record | 4 |
-| Review-item record | 2 |
-| Checkpoint record | 2 |
-| Foundation analysis | 2 |
-| Event-trace semantics | 3 |
-| PL8 latency classifier/policy | 1 / 1 |
-| PL9 error analyzer/alignment/recovery | 1 / 1 / 1 |
-
-PL9 changes no IndexedDB stores or indexes.
-
-## 30. Historical migrations
-
-PL8 historical summaries still migrate honestly with `fluencySummary: null` when raw timing evidence is unavailable.
-
-PL9 adds sequential:
-
-```text
-sessionSummary v3 -> v4
-errorSummary: null
+ -> build + validate sessionSummary v6/profile update
+ -> repository.commitCompletedPracticeSession(skillEvidenceDeltas, ...)
+ -> atomically merge skillStats + session/review/profile/checkpoint writes
+ -> enter terminal state and emit once
 ```
 
-Earlier summaries therefore follow `v1 -> v2 -> v3 -> v4`. Old aggregate incorrect/corrected counts cannot reconstruct transpositions, omissions, correction initiation or repair timing, so PL9 does not fabricate them.
+The repository validates the whole evidence batch against one session/profile/context identity before writing. Each delta is merged into an existing migrated skill stat or a new default v3 record within the same transaction.
 
-Checkpoint remains v2; historical v2 checkpoints simply lack PL9 tracker state and restore with a fresh analysis continuity boundary.
+## 18. Idempotency and failure safety
 
-## 31. Testing strategy
+An identical existing `sessionId` returns idempotent success before skill deltas are applied. A conflicting duplicate session ID fails. This gives exactly-once evidence application without storing unbounded applied-session-ID histories on each skill stat.
 
-The suite covers:
+Invalid/mixed evidence, context ownership mismatches, invalid review mutations, or merged-stat validation failures abort the transaction. Analysis failure also blocks commit. Recoverable failures preserve checkpoint behavior where possible.
 
-- lifecycle and normalized input;
-- WPM/accuracy/legacy correction metric regressions;
-- PL8 robust latency behavior;
-- PL9 deterministic edit alignment;
-- Unicode content classes;
-- doubling/transposition/cascade semantics;
-- cursor reconstruction failure handling;
-- single/multi correction repairs;
-- word-delete over-deletion;
-- correction initiation/distance/repair timings;
-- forward resumption and PL8 fluent resumption;
-- uncorrected/content-end episodes;
-- bounded active episodes;
-- complete streaming counts beyond 20,000 retained events;
-- no streaming/trace double count;
-- checkpoint tracker restore + legacy restore;
-- session v3 -> v4 migration;
-- durable-summary privacy/size;
-- import side-effect isolation;
-- full WordStrike regressions.
+## 19. Abandonment and interruption
 
-## 32. Known limitations / later phases
+Meaningful abandoned sessions may persist valid observation evidence and are labeled as abandoned in PL11 observation metadata, reducing survivor bias. Existing meaningful-activity thresholds remain authoritative; tiny abandonment does not create skill evidence.
 
-PL9 intentionally does not implement target opportunity-normalized errors, contextual latency residuals, typability, per-entity persistent error phenotype, Recovery Debt, Clean WPM, correction-efficiency composite scores, limiter labels, weakness ranking, ability estimation, target prioritization, Accuracy Control, Daily Coach, adaptive drills or public Practice UI.
+Interrupted resumable sessions do not create permanent skill evidence until they are restored and finalized. Destroy remains idempotent and clears in-memory content/event/evidence references.
 
-PL10 may add contextual expected-latency modeling; PL11 may persist contextual entity evidence; PL12 may interpret limiter phenotypes. Those systems consume PL8/PL9 evidence rather than replacing the foundational measurement contracts.
+## 20. Boundedness and diagnostics
 
-## PL10 normalization extension
+PL11 per-session entity admission is capped by policy; direct target capacity is reserved ahead of incidental admission. Existing admitted entities may continue accumulating after a cap is reached, while omitted new incidental observations set explicit truncation metadata.
 
-At `prepare()`, the engine resolves and freezes the exact PL5 context record for the immutable session `profileId + contextId`. At finalization, generic **foundationAnalysis v3** is built as `{ latency, errors, normalization }`. PL10 consumes the current content plan plus frozen context and uses PL8 fluent/disfluent classifications without altering PL8 or PL9 outputs.
+`getDiagnostics()` may expose content-free bounded PL11 state such as evidence role, entity counts/coverage, and truncation metadata. It does not expose raw text, raw traces, private Custom Text words, auth secrets, or cloud identifiers.
 
-`sessionSummary` is now v5 and may contain compact **normalizationSummary**. WPM, raw WPM, accuracy, correction metrics, PL8 fluency and PL9 error/recovery formulas are unchanged. Full normalized transitions and text feature vectors remain transient. See **PRACTICE_LAB_CONTEXT_TYPABILITY_MODEL.md**.
+## 21. Persistence boundaries and later phases
+
+PL11 skill stats contain observation/evidence plus evidence confidence. They deliberately preserve but do not update judgment fields such as `weaknessScore`, `priority`, `masteryState`, `recentTrend`, and review-success counters.
+
+Later phases consume PL11 rather than rewriting its measurement semantics:
+
+- PL12: limiter/weakness interpretation and impact;
+- PL15: mastery semantics;
+- PL16: trends/learning curves;
+- PL17: review semantics.
+
+The detailed PL11 evidence contract is documented in the dedicated PL11 contextual skill aggregation/evidence-model document. PL8, PL9, and PL10 model documents remain authoritative for their respective measurement layers.
