@@ -149,7 +149,14 @@ export function validatePracticeLimiterPolicy(policy = PRACTICE_LIMITER_POLICY_V
     [policy.recovery.deadbandRatio, policy.recovery.fullSeverityRatio],
     [policy.unstable.ratioDeadband, policy.unstable.ratioFullSeverity],
   ]) if (!Number.isFinite(pair[0]) || !Number.isFinite(pair[1]) || pair[0] < 0 || pair[1] <= pair[0]) throw new TypeError("Practice limiter severity scale is invalid");
-  if (Math.abs(Object.values(policy.prevalenceQualityWeights).reduce((sum, value) => sum + Number(value), 0) - 1.6) > 1e-12) throw new TypeError("Practice prevalence quality weights are invalid");
+  const prevalenceWeights = policy.prevalenceQualityWeights;
+  if (!prevalenceWeights
+    || prevalenceWeights.reference !== 1
+    || prevalenceWeights["practice-proxy"] !== 0.60
+    || prevalenceWeights.unavailable !== 0
+    || Object.keys(prevalenceWeights).length !== 3) {
+    throw new TypeError("Practice prevalence quality weights must be reference=1, practice-proxy=0.60, unavailable=0");
+  }
   const wordCoverageWeight = policy.impactCoverageWeights.slow + policy.impactCoverageWeights.hesitant + policy.impactCoverageWeights.recovery + policy.impactCoverageWeights.launch;
   if (Math.abs(wordCoverageWeight - 1) > 1e-12) throw new TypeError("Practice impact coverage weights must sum to one for words");
   if (!Number.isFinite(policy.hierarchy.partialThreshold) || !Number.isFinite(policy.hierarchy.explainedThreshold) || policy.hierarchy.partialThreshold <= 0 || policy.hierarchy.explainedThreshold <= policy.hierarchy.partialThreshold || policy.hierarchy.explainedThreshold > 1) throw new TypeError("Practice hierarchy thresholds are invalid");
