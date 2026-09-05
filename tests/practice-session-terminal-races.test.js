@@ -28,6 +28,7 @@ await belowEngine.flushCheckpoint("manual");
 const belowResult = await belowEngine.abandon("manual-stop");
 assert.equal(belowResult.persisted, false);
 assert.equal((await below.repository.listSessionSummaries()).length, 0);
+assert.equal((await below.repository.listSkillStats()).length, 0);
 assert.equal((await below.repository.getPracticeProfile()).totalPracticeDurationMs, 0);
 assert.equal(await below.repository.getActiveCheckpoint(), null);
 
@@ -38,7 +39,9 @@ const abandoned = await meaningfulEngine.abandon("manual-stop");
 assert.equal(abandoned.summary.status, "abandoned");
 assert.equal((await meaningful.repository.getPracticeProfile()).totalCompletedSessions, 0);
 assert.equal((await meaningful.repository.getPracticeProfile()).activeTrainingDays, 1);
-assert.equal((await meaningful.repository.listSkillStats()).length, 0);
+const abandonedStats = await meaningful.repository.listSkillStats();
+assert.equal(abandonedStats.length, 3);
+assert.ok(abandonedStats.every((record) => record.evidence.observation.abandonedSessionCount === 1));
 assert.equal((await meaningful.repository.listDueReviewItems()).length, 0);
 
 const timed = await createPracticeSessionHarness({ suffix: "timed-abandon", text: "abc" });
@@ -152,4 +155,4 @@ await pendingCheckpoint;
 assert.equal(dirtyEngine.getSnapshot().checkpoint.dirty, true);
 assert.equal(dirtyHarness.time.timerCount, 1);
 
-console.log("Practice abandonment thresholds, interruption, forced-checkpoint coalescing, completion precedence, and destroy races passed.");
+console.log("Practice abandonment thresholds, PL11 abandoned evidence, interruption, forced-checkpoint coalescing, completion precedence, and destroy races passed.");
