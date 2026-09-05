@@ -24,9 +24,7 @@ function sessionDeletes(records, nowMs, preserveSessionIds) {
   const deletions = new Set();
   const maximumAge = nowMs - PRACTICE_LIMITS.sessionSummaryDays * 86400000;
   for (const record of sorted) {
-    if (!isProtectedSession(record, protectedIds) && time(record.completedAtUtc) < maximumAge) {
-      deletions.add(record.sessionId);
-    }
+    if (!isProtectedSession(record, protectedIds) && time(record.completedAtUtc) < maximumAge) deletions.add(record.sessionId);
   }
   const survivors = sorted.filter((record) => !deletions.has(record.sessionId));
   const target = records.length > PRACTICE_LIMITS.sessionSummaryHardCap
@@ -102,11 +100,14 @@ export function buildPracticeRetentionPlan({
   checkpoints = [],
   sessionSummaries = [],
   skillStats = [],
+  learningStates = [],
   reviewItems = [],
   quarantine = [],
   preserveSessionIds = [],
 } = {}) {
   const nowMs = typeof now === "function" ? Number(now()) : Number(now);
+  const skillStatIds = skillDeletes(skillStats, reviewItems);
+  const prunedStats = new Set(skillStatIds);
   return Object.freeze({
     order: QUOTA_RECOVERY_STEPS,
     activeSessionCheckpoints: checkpoints
@@ -114,7 +115,10 @@ export function buildPracticeRetentionPlan({
       .map((record) => record.profileId),
     sessionSummaries: sessionDeletes(sessionSummaries, nowMs, preserveSessionIds),
     reviewItems: reviewDeletes(reviewItems),
-    skillStats: skillDeletes(skillStats, reviewItems),
+    skillStats: skillStatIds,
+    learningStates: learningStates
+      .filter((record) => prunedStats.has(record.statId))
+      .map((record) => record.learningStateId),
     quarantine: oldest(quarantine, "detectedAt")
       .slice(0, Math.max(0, quarantine.length - PRACTICE_LIMITS.quarantineRecords))
       .map((record) => record.quarantineId),
@@ -122,10 +126,7 @@ export function buildPracticeRetentionPlan({
   });
 }
 
-export function hasMeaningfulAbandonedActivity({
-  typedCharacterCount = 0,
-  activeDurationMs = 0,
-} = {}) {
+export function hasMeaningfulAbandonedActivity({ typedCharacterCount = 0, activeDurationMs = 0 } = {}) {
   return typedCharacterCount >= PRACTICE_LIMITS.abandonmentCharacters
     || activeDurationMs >= PRACTICE_LIMITS.abandonmentActiveMs;
 }

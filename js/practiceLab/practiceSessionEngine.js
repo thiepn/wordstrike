@@ -13,6 +13,7 @@ import { createPracticeEventBuffer } from "./practiceEventBuffer.js";
 import { buildPracticeFoundationAnalysis, withPracticeAbilityAnalysis, withPracticePerformanceAnalysis } from "./practiceFoundationAnalysis.js";
 import { buildPracticePerformanceAnalysis } from "./practicePerformanceAnalysis.js";
 import { buildPracticeAbilityObservation } from "./practiceAbilityObservation.js";
+import { attachPracticeLearningAnalysis } from "./practiceLearningAnalysis.js";
 import { createPracticeErrorTracker } from "./practiceErrorTracker.js";
 import { createPracticeSessionContextSnapshot } from "./practiceContextFeatures.js";
 import { resolvePracticeEvidenceRole } from "./practiceEvidenceRole.js";
@@ -125,6 +126,7 @@ export function createPracticeSessionEngine({
   let finalizationState = "idle";
   let lastErrorCode = null;
   let destroyed = false;
+  let restoredFromCheckpoint = false;
   let timingSegmentId = 1;
   let timingSegmentStartReason = "session-start";
   let hasInsertionInTimingSegment = false;
@@ -661,6 +663,17 @@ export function createPracticeSessionEngine({
         frontierMeasurementError,
       });
       foundationAnalysis = withPracticePerformanceAnalysis(foundationAnalysis, performanceAssessment);
+      foundationAnalysis = await attachPracticeLearningAnalysis({
+        foundationAnalysis,
+        repository,
+        contentPlan,
+        profileId,
+        contextId,
+        experimentId: experiment.id,
+        evidenceRole,
+        phaseContinuityComplete: !restoredFromCheckpoint && !eventBuffer.getMetadata().truncated,
+        segmenter,
+      });
       analysis = await analyze(foundationAnalysis);
     } catch (error) {
       finalizationState = "error";
@@ -702,6 +715,7 @@ export function createPracticeSessionEngine({
         skillEvidenceDeltas: foundationAnalysis.skills?.deltas ?? [],
         abilityObservation: foundationAnalysis.ability?.observation ?? null,
         performanceStateDelta: foundationAnalysis.performance?.performanceStateDelta ?? null,
+        learningObservationDeltas: foundationAnalysis.learning?.observationDeltas ?? [],
         reviewItemChanges: analysis?.reviewItemChanges ?? [],
         updatedProfileSummary: updatedProfile,
         clearCheckpoint: true,
@@ -811,6 +825,7 @@ export function createPracticeSessionEngine({
 
   const internalRestore = async (checkpoint, nextExperiment, restoredContentPlan) => {
     await prepare({ experiment: nextExperiment, configuration: checkpoint.configuration, contentPlan: restoredContentPlan });
+    restoredFromCheckpoint = true;
     const values = segment(checkpoint.typedBuffer);
     for (const value of values) {
       const position = typingState.typed.length;
@@ -914,6 +929,7 @@ export function createPracticeSessionEngine({
       normalizationContextFingerprint: normalizationContext?.fingerprint ?? null,
       evidenceRole,
       skillEvidence: skillEvidenceTracker?.getSnapshot() ?? null,
+      learningPhaseContinuity: restoredFromCheckpoint || eventBuffer.truncated ? "partial" : "complete",
       activeDurationMs: activeAt(),
       checkpointPending: checkpointTimer != null || checkpointWrite != null,
       lastCheckpointMonotonicMs: lastCheckpointMono,
