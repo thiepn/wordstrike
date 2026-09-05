@@ -24,6 +24,18 @@ jobs:
           node-version: 22
       - name: Apply required PL14 documentation integrations
         run: python scripts/pl14_docs_apply.py
+      - name: Normalize documentation EOF
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          for rel in [
+              'docs/PRACTICE_LAB_DATA_ARCHITECTURE.md',
+              'docs/PRACTICE_LAB_ABILITY_ESTIMATION.md',
+              'docs/PRACTICE_LAB_SESSION_ENGINE.md',
+          ]:
+              path = Path(rel)
+              path.write_text(path.read_text().rstrip() + '\n')
+          PY
       - name: Verify documentation contracts
         run: |
           grep -q 'performanceStates' docs/PRACTICE_LAB_DATA_ARCHITECTURE.md
