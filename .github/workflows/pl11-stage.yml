@@ -8,7 +8,7 @@ permissions:
   contents: write
 
 jobs:
-  integrate:
+  test:
     if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -20,53 +20,17 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Apply PL11 integration
+      - name: Update current-version assertions
         run: |
-          node --check scripts/applyPl11Integration.mjs
-          node --check scripts/applyPl11IntegrationFinal.mjs
-          node --check scripts/applyPl11IntegrationAfterCheckpoint.mjs
-
-          set +e
-          node scripts/applyPl11Integration.mjs > /tmp/pl11-head.log 2>&1
-          head_status=$?
-          set -e
-          cat /tmp/pl11-head.log
-          if [ "$head_status" -ne 0 ]; then
-            grep -q "PL11 patch missing anchor: foundation skill build" /tmp/pl11-head.log || exit "$head_status"
-          fi
-
-          set +e
-          node scripts/applyPl11IntegrationFinal.mjs > /tmp/pl11-final.log 2>&1
-          final_status=$?
-          set -e
-          cat /tmp/pl11-final.log
-          if [ "$final_status" -ne 0 ]; then
-            grep -q "PL11 final patch missing anchor: checkpoint engine tracker snapshot" /tmp/pl11-final.log || exit "$final_status"
-          fi
-
-          node scripts/applyPl11IntegrationAfterCheckpoint.mjs
-
-          node --check js/practiceLab/practiceSkillEvidencePolicy.js
-          node --check js/practiceLab/practiceEvidenceConfidence.js
-          node --check js/practiceLab/practiceEntityResolver.js
-          node --check js/practiceLab/practiceEvidenceRole.js
-          node --check js/practiceLab/practiceOpportunityTracker.js
-          node --check js/practiceLab/practiceSkillEvidenceDelta.js
-          node --check js/practiceLab/practiceSkillEvidenceMerge.js
-          node --check js/practiceLab/practiceSkillEvidenceCollector.js
-          node --check js/practiceLab/practiceSkillEvidenceValidation.js
-          node --check js/practiceLab/practiceFoundationAnalysis.js
-          node --check js/practiceLab/practiceSessionEngine.js
-          node --check js/practiceLab/practiceRepository.js
-          node --check js/practiceLab/practiceValidation.js
-          node --check js/practiceLab/practiceMigrations.js
+          node --check scripts/applyPl11CurrentVersionTests.mjs
+          node scripts/applyPl11CurrentVersionTests.mjs
           git diff --check
-      - name: Commit staged integration
+      - name: Commit compatibility updates
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A
-          git commit -m "feat(practice): integrate PL11 contextual skill evidence" || true
+          git add tests
+          git commit -m "test(practice): advance current PL11 version assertions" || true
           git push origin HEAD:codex/pl11-contextual-skill-evidence
       - name: Run full tests
         run: npm test
