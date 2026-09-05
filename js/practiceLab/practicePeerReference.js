@@ -71,13 +71,15 @@ function makeGroup(type, stats, policy) {
   const residualMad = practiceMad(residualNumbers);
   const variabilityCenter = practiceMedian(variabilityNumbers);
   const variabilityMad = practiceMad(variabilityNumbers);
-  return Object.freeze({
+  return {
     type, eligible, totals: Object.freeze(totals),
     residualValues: Object.freeze(residualValues),
     variabilityValues: Object.freeze(variabilityValues),
     residualReference: Object.freeze({ count: residualNumbers.length, center: residualCenter, mad: residualMad, scale: residualMad == null ? null : Math.max(policy.slow.fallbackScaleFloorMs, 1.4826 * residualMad) }),
     variabilityReference: Object.freeze({ count: variabilityNumbers.length, center: variabilityCenter, mad: variabilityMad, scale: variabilityMad == null ? null : Math.max(policy.unstable.scaleFloorMs, 1.4826 * variabilityMad) }),
-  });
+    residualStatIds: new Set(residualValues.map((entry) => entry.statId)),
+    variabilityStatIds: new Set(variabilityValues.map((entry) => entry.statId)),
+  };
 }
 
 function leaveOneOutCounts(group, stat) {
@@ -120,17 +122,17 @@ export function createPracticePeerReferenceIndex(skillStats, policy = PRACTICE_L
     // Pooled rate baselines above are exact leave-one-out; robust median/MAD references use the
     // full eligible group because exact leave-one-out MAD would reintroduce an entity×peers pass.
     const residual = group.residualReference;
-    const residualPeerCount = residual.count - Number(group.residualValues.some((entry) => entry.statId === stat.statId));
+    const residualPeerCount = residual.count - Number(group.residualStatIds.has(stat.statId));
     const slowFallback = residualPeerCount >= policy.slow.fallbackMinimumEntities
       ? Object.freeze({ status: "ready", ...residual, count: residualPeerCount })
       : Object.freeze({ status: "insufficient", ...residual, count: residualPeerCount });
     const variability = group.variabilityReference;
-    const variabilityPeerCount = variability.count - Number(group.variabilityValues.some((entry) => entry.statId === stat.statId));
+    const variabilityPeerCount = variability.count - Number(group.variabilityStatIds.has(stat.statId));
     const instability = variabilityPeerCount >= policy.minimumPeerVariabilityEntities
       ? Object.freeze({ status: "ready", ...variability, count: variabilityPeerCount })
       : Object.freeze({ status: "insufficient", ...variability, count: variabilityPeerCount });
     return Object.freeze({ accuracy, hesitation, recovery, slowFallback, instability });
   };
 
-  return Object.freeze({ groups, forStat });
+  return Object.freeze({ forStat });
 }
