@@ -8,6 +8,7 @@ on:
       - scripts/pl14_apply.py
       - scripts/pl14_fix1.py
       - scripts/pl14_fix2.py
+      - tests/practice-ability-session-repository.test.js
       - .github/workflows/pl14-apply.yml
 
 permissions:
@@ -36,6 +37,7 @@ jobs:
           node tests/practice-performance-storage-repository.test.js
           node tests/practice-performance-contract-isolation.test.js
           node tests/practice-ability-observation.test.js
+          node tests/practice-ability-session-repository.test.js
       - name: Run full regression suite
         run: npm test
       - name: Commit clean PL14 implementation
