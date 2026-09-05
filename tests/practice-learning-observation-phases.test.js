@@ -5,6 +5,7 @@ import {
   buildPracticeAcquisitionObservationDelta,
   extractPracticeLearningPhaseOpportunities,
 } from "../js/practiceLab/practiceLearningObservation.js";
+import { PRACTICE_LEARNING_POLICY_V1 } from "../js/practiceLab/practiceLearningPolicy.js";
 
 const profileId = "practice-profile_pl16-phase-profile-12345678";
 const contextId = "practice-context_pl16-phase-context-12345678";
@@ -53,13 +54,18 @@ function keyDelta(opportunities = 12) {
   };
 }
 
-test("PL16 12 targeted key opportunities split into first four entry and last four exit opportunities", () => {
-  const contentPlan = createPracticeContentPlan({
+function keyContentPlan(suffix) {
+  return createPracticeContentPlan({
+    contentId: `practice-content_pl16-phase-${suffix}`,
     text: "aaaaaaaaaaaa",
     targetEntities: [{ entityType: "key", entityKey: "a" }],
     completion: { mode: "content", value: null },
     metadata: { language: "en" },
   });
+}
+
+test("PL16 12 targeted key opportunities split into first four entry and last four exit opportunities", () => {
+  const contentPlan = keyContentPlan("split");
   const normalizedTransitions = Array.from({ length: 12 }, (_, position) => transition(position, {
     residual: position < 4 ? 20 : position >= 8 ? 0 : 10,
   }));
@@ -88,12 +94,7 @@ test("PL16 12 targeted key opportunities split into first four entry and last fo
 });
 
 test("PL16 middle opportunities do not affect the entry/exit split", () => {
-  const contentPlan = createPracticeContentPlan({
-    text: "aaaaaaaaaaaa",
-    targetEntities: [{ entityType: "key", entityKey: "a" }],
-    completion: { mode: "content", value: null },
-    metadata: { language: "en" },
-  });
+  const contentPlan = keyContentPlan("middle");
   const base = Array.from({ length: 12 }, (_, position) => transition(position, { residual: position < 4 ? 20 : 0 }));
   const changedMiddle = base.map((record, index) => index >= 4 && index < 8
     ? { ...record, correctness: "error", latencyClass: "disfluent", observedLatencyMs: 500, residualLatencyMs: 400 }
@@ -113,10 +114,25 @@ test("PL16 phase analysis refuses overlap rather than fabricating entry/exit qua
     correct: true,
     timing: [{ latencyClass: "fluent", observedLatencyMs: 100, residualLatencyMs: 0 }],
   }));
+  const overlapPolicy = {
+    ...PRACTICE_LEARNING_POLICY_V1,
+    phase: {
+      ...PRACTICE_LEARNING_POLICY_V1.phase,
+      minimumSessionOpportunities: {
+        ...PRACTICE_LEARNING_POLICY_V1.phase.minimumSessionOpportunities,
+        key: 5,
+      },
+      minimumPhaseSize: {
+        ...PRACTICE_LEARNING_POLICY_V1.phase.minimumPhaseSize,
+        key: 3,
+      },
+    },
+  };
   const built = buildPracticeAcquisitionObservationDelta({
-    delta: keyDelta(12),
+    delta: keyDelta(5),
     experimentId: "pl16-phase",
     phaseRecords: tinyRecordSet,
+    policy: overlapPolicy,
   });
   assert.equal(built.observation.entryQuality, null);
   assert.equal(built.observation.exitQuality, null);
