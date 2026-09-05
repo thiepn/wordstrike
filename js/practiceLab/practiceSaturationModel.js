@@ -66,11 +66,13 @@ export function evaluatePracticeSaturation({
   const reasons = [];
   const evidence = {
     acquisitionObservationCount: Number(acquisition?.observationCount || 0),
-    acquisitionDayCount: Number(acquisition?.dayCount || 0),
+    acquisitionValidEntryPointCount: Number(curve?.pointCount || 0),
+    acquisitionDayCount: Number(curve?.dayCount || 0),
     acquisitionDoseSpan: Number(curve?.doseSpan || 0),
     acquisitionCurveConfidence: curve?.confidence ?? "none",
     transferObservationCount: Number(transfer?.observationCount || 0),
-    transferDayCount: Number(transfer?.dayCount || 0),
+    transferValidPointCount: Number(transferCurve?.pointCount || 0),
+    transferDayCount: Number(transferCurve?.dayCount || 0),
     transferCurveConfidence: transferCurve?.confidence ?? "none",
   };
 
@@ -97,8 +99,8 @@ export function evaluatePracticeSaturation({
   const transferLimited = transferLimitedEvidence(transfer, acquisition, policy);
   if (transferLimited) {
     reasons.push("transfer-flat");
-    const supported = transfer.observationCount >= policy.saturation.supportedTransfer.observations
-      && transfer.dayCount >= policy.saturation.supportedTransfer.days
+    const supported = Number(transferCurve.pointCount || 0) >= policy.saturation.supportedTransfer.observations
+      && Number(transferCurve.dayCount || 0) >= policy.saturation.supportedTransfer.days
       && confidenceAtLeast(transferCurve.confidence, "medium")
       && Number(transferCurve.recentQuality || 100) < policy.saturation.transferLimitedQuality
       && Number(transferGain ?? Infinity) <= policy.saturation.supportedTransfer.gainMaximum;
@@ -155,9 +157,11 @@ export function evaluatePracticeSaturation({
     });
   }
 
+  const validAcquisitionPoints = Number(curve.pointCount || 0);
+  const validAcquisitionDays = Number(curve.dayCount || 0);
   const p = policy.saturation.possible;
-  const possible = acquisition.observationCount >= p.observations
-    && acquisition.dayCount >= p.days
+  const possible = validAcquisitionPoints >= p.observations
+    && validAcquisitionDays >= p.days
     && Number(curve.doseSpan || 0) >= p.doseSpan
     && finite(recentGain)
     && recentGain <= p.recentGainMaximum
@@ -167,15 +171,15 @@ export function evaluatePracticeSaturation({
   const recentFlatOrWorse = finite(recentGain)
     && ((recentGain >= l.recentGainMinimum && recentGain <= l.recentGainMaximum) || curve.status === "worsening");
   const likely = possible
-    && acquisition.observationCount >= l.observations
-    && acquisition.dayCount >= l.days
+    && validAcquisitionPoints >= l.observations
+    && validAcquisitionDays >= l.days
     && Number(curve.doseSpan || 0) >= l.doseSpan
     && confidenceAtLeast(curve.confidence, "medium")
     && recentFlatOrWorse;
   const s = policy.saturation.supportedTransfer;
   const supported = likely
-    && transfer.observationCount >= s.observations
-    && transfer.dayCount >= s.days
+    && Number(transferCurve?.pointCount || 0) >= s.observations
+    && Number(transferCurve?.dayCount || 0) >= s.days
     && confidenceAtLeast(transferCurve?.confidence, "medium")
     && Number(transferCurve?.recentQuality || 100) < s.qualityMaximum
     && finite(transferGain)
@@ -198,7 +202,7 @@ export function evaluatePracticeSaturation({
   else if (finite(practiceGainMedian) && practiceGainMedian <= policy.practiceGain.acquisitionPlateauMaximum) reasons.push("practice-gain-low");
   if (materialLimiter) reasons.push("limiter-remains");
   if (overload) reasons.push("possible-overload");
-  if (!transfer.observationCount) reasons.push("transfer-unverified");
+  if (!Number(transferCurve?.pointCount || 0)) reasons.push("transfer-unverified");
   else if (transferCurve?.status === "improving") reasons.push("transfer-improving");
   else if (["flat", "worsening"].includes(transferCurve?.status)) reasons.push("transfer-flat");
 
