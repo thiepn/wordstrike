@@ -7,7 +7,7 @@ import { createPracticeErrorTracker } from "./practiceErrorTracker.js";
 import { PRACTICE_ERROR_POLICY_V1 } from "./practiceErrorPolicy.js";
 import { analyzePracticeNormalization } from "./practiceNormalizationAnalysis.js";
 
-export const PRACTICE_FOUNDATION_ANALYSIS_VERSION = 4;
+export const PRACTICE_FOUNDATION_ANALYSIS_VERSION = 5;
 
 const freezeDeep = (value) => {
   if (!value || typeof value !== "object" || Object.isFrozen(value)) return value;
@@ -70,6 +70,7 @@ export function buildPracticeFoundationAnalysis({
   normalizationOptions = {},
   skillEvidenceTracker = null,
   skillEvidenceFinalize = null,
+  ability = null,
 } = {}) {
   const latency = analyzePracticeLatency({ events, traceMetadata, policy: latencyPolicy });
   const trackerSnapshot = errorTrackerSnapshot ?? buildFallbackTrackerSnapshot(events, traceMetadata, errorPolicy);
@@ -97,5 +98,12 @@ export function buildPracticeFoundationAnalysis({
     errors,
     normalization,
     skills,
+    ability: ability ?? freezeDeep({ version: 1, channel: null, status: "not-requested", reasons: [], observation: null, sessionSummary: null }),
   });
+}
+
+export function withPracticeAbilityAnalysis(foundationAnalysis, ability) {
+  if (!foundationAnalysis || foundationAnalysis.version !== PRACTICE_FOUNDATION_ANALYSIS_VERSION) throw new TypeError("Practice ability attachment requires current foundation analysis");
+  if (!ability || typeof ability !== "object") throw new TypeError("Practice ability analysis is required");
+  return freezeDeep({ ...foundationAnalysis, ability });
 }

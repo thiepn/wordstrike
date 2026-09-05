@@ -1,6 +1,7 @@
 import {
   ENTITY_TYPES,
 } from "./practiceConstants.js";
+import { PRACTICE_ABILITY_CHANNELS } from "./practiceAbilityConstants.js";
 import { hashPracticeContent } from "./practiceIds.js";
 import {
   PRACTICE_COMPLETION_MODES,
@@ -67,6 +68,7 @@ export function validatePracticeExperimentDescriptor(descriptor) {
   if (!PRACTICE_CORRECTION_POLICIES.includes(descriptor.defaultCorrectionBehavior)) errors.push({ path: "defaultCorrectionBehavior", code: "INVALID_ENUM", message: "unsupported correction behavior" });
   if (!Array.isArray(descriptor.supportedCompletionModes) || descriptor.supportedCompletionModes.some((mode) => !PRACTICE_COMPLETION_MODES.includes(mode))) errors.push({ path: "supportedCompletionModes", code: "INVALID_ENUM", message: "unsupported completion mode" });
   if (typeof descriptor.resumable !== "boolean") errors.push({ path: "resumable", code: "INVALID_TYPE", message: "resumable must be boolean" });
+  if (descriptor.abilityChannel != null && !PRACTICE_ABILITY_CHANNELS.includes(descriptor.abilityChannel)) errors.push({ path: "abilityChannel", code: "INVALID_ENUM", message: "unsupported ability channel" });
   return { valid: errors.length === 0, errors };
 }
 
@@ -205,6 +207,7 @@ export function validatePracticeSessionConfiguration(configuration) {
   const errors = [...validation.errors];
   if (configuration?.timingMode != null && !PRACTICE_TIMING_MODES.includes(configuration.timingMode)) errors.push({ path: "timingMode", code: "INVALID_ENUM", message: "unsupported timing mode" });
   if (configuration?.correctionBehavior != null && !PRACTICE_CORRECTION_POLICIES.includes(configuration.correctionBehavior)) errors.push({ path: "correctionBehavior", code: "INVALID_ENUM", message: "unsupported correction behavior" });
+  if (Object.hasOwn(configuration ?? {}, "abilityChannel")) errors.push({ path: "abilityChannel", code: "FORBIDDEN_FIELD", message: "abilityChannel is trusted experiment metadata and cannot be configured per session" });
   return { valid: errors.length === 0, errors };
 }
 
@@ -218,6 +221,7 @@ export function createGenericPracticeExperimentDescriptor(overrides = {}) {
     defaultCorrectionBehavior: "allow",
     supportedCompletionModes: [...PRACTICE_COMPLETION_MODES],
     resumable: true,
+    abilityChannel: null,
     ...overrides,
   });
 }

@@ -112,11 +112,12 @@ for (const [type, current] of [
   assert.equal(migrated.value.contextId, defaultA);
 }
 
-assert.equal(PRACTICE_DATABASE_VERSION, 2);
+assert.equal(PRACTICE_DATABASE_VERSION, 3);
 assert.equal(PRACTICE_RECORD_VERSIONS.profile, 3);
 assert.equal(PRACTICE_RECORD_VERSIONS.context, 1);
 assert.equal(PRACTICE_RECORD_VERSIONS.skillStat, 3);
-assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 6);
+assert.equal(PRACTICE_RECORD_VERSIONS.abilityState, 1);
+assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 7);
 assert.equal(PRACTICE_RECORD_VERSIONS.reviewItem, 2);
 assert.equal(PRACTICE_RECORD_VERSIONS.checkpoint, 3);
 assert.equal(PRACTICE_STORE_DEFINITIONS.skillStats.indexes.some((index) => index.name === "profileEntity"), false);

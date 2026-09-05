@@ -6,6 +6,8 @@ import {
   PRACTICE_MANIFEST_KEY,
   PRACTICE_STORE_DEFINITIONS,
 } from "../js/practiceLab/practiceConstants.js";
+import { createDefaultPracticeAbilityState } from "../js/practiceLab/practiceAbilityEstimator.js";
+import { validatePracticeAbilityState } from "../js/practiceLab/practiceAbilityValidation.js";
 import {
   createDefaultCheckpoint,
   createDefaultCustomText,
@@ -55,6 +57,7 @@ const settings = createDefaultPracticeSettings();
 const manifest = createDefaultPracticeManifest({ profileId, now });
 const profile = createDefaultPracticeProfile({ profileId, now });
 const skill = createDefaultSkillStat({ profileId, now });
+const ability = createDefaultPracticeAbilityState({ profileId, contextId: profile.activeContextId, channel: "controlled-speed", now });
 const summary = createDefaultSessionSummary({ profileId, sessionId, now });
 const review = createDefaultReviewItem({ profileId, reviewItemId, now });
 const customText = createDefaultCustomText({ profileId, customTextId, title: "My Text", text: "one two", now });
@@ -66,6 +69,7 @@ for (const [name, validation] of [
   ["manifest", validatePracticeManifest(manifest)],
   ["profile", validatePracticeProfile(profile)],
   ["skill", validateSkillStat(skill)],
+  ["ability", validatePracticeAbilityState(ability)],
   ["summary", validateSessionSummary(summary)],
   ["review", validateReviewItem(review)],
   ["customText", validateCustomText(customText)],
@@ -87,10 +91,10 @@ assert.match(createPracticePresetId({ uuid: () => "preset-12345678" }), /^practi
 
 assert.equal(PRACTICE_MANIFEST_KEY, "wordstrike.practice.manifest.v1");
 assert.equal(PRACTICE_DATABASE_NAME, "wordstrike-practice-lab");
-assert.equal(PRACTICE_DATABASE_VERSION, 2);
+assert.equal(PRACTICE_DATABASE_VERSION, 3);
 assert.equal(PRACTICE_LIMITS.manifestBytes, 65536);
 assert.deepEqual(Object.keys(PRACTICE_STORE_DEFINITIONS), [
-  "meta", "profiles", "contexts", "skillStats", "sessionSummaries", "reviewItems",
+  "meta", "profiles", "contexts", "skillStats", "abilityStates", "sessionSummaries", "reviewItems",
   "customTexts", "presets", "activeSessionCheckpoints", "quarantine",
 ]);
 assert.equal(toPracticeUtcIso(now), "2026-07-05T18:42:13.000Z");
@@ -99,4 +103,4 @@ assert.equal(isValidPracticeUtcIso("2026-07-05 18:42:13"), false);
 assert.match(getPracticeLocalDayKey(now), /^2026-07-05$/);
 assert.equal(getPracticeTimeContext(now).timezoneOffsetMinutes, new Date(now()).getTimezoneOffset());
 
-console.log("Practice defaults, injected IDs/clocks, independent nested values, and schema descriptors passed.");
+console.log("Practice defaults, injected IDs/clocks, independent nested values, ability state, and DB3 schema descriptors passed.");

@@ -1,9 +1,12 @@
 import {
+  PRACTICE_DATABASE_VERSION,
   PRACTICE_LIMITS,
   PRACTICE_RECORD_VERSIONS,
   PRACTICE_STORE_NAMES,
 } from "./practiceConstants.js";
 import { createDefaultPracticeProfile, createDefaultSkillStat } from "./practiceDefaults.js";
+import { createDefaultPracticeAbilityState, mergePracticeAbilityObservation } from "./practiceAbilityEstimator.js";
+import { validatePracticeAbilityObservation, validatePracticeAbilityState } from "./practiceAbilityValidation.js";
 import { mergePracticeSkillEvidence } from "./practiceSkillEvidenceMerge.js";
 import { validatePracticeSkillEvidenceBatch } from "./practiceSkillEvidenceDelta.js";
 import {
@@ -14,6 +17,7 @@ import { migratePracticeRecord } from "./practiceMigrations.js";
 import {
   createDefaultPracticeContextId,
   createPracticeContextId,
+  createPracticeAbilityStateId,
   createPracticeQuarantineId,
   createSkillStatId,
 } from "./practiceIds.js";
@@ -46,6 +50,7 @@ const validators = Object.freeze({
   profiles: validatePracticeProfile,
   contexts: validatePracticeContext,
   skillStats: validateSkillStat,
+  abilityStates: validatePracticeAbilityState,
   sessionSummaries: validateSessionSummary,
   reviewItems: validateReviewItem,
   customTexts: validateCustomText,
@@ -56,6 +61,7 @@ const recordTypesByStore = Object.freeze({
   profiles: "profile",
   contexts: "context",
   skillStats: "skillStat",
+  abilityStates: "abilityState",
   sessionSummaries: "sessionSummary",
   reviewItems: "reviewItem",
   customTexts: "customText",
@@ -64,7 +70,7 @@ const recordTypesByStore = Object.freeze({
 });
 
 function recordId(record) {
-  return record?.contextId || record?.sessionId || record?.profileId || record?.statId || record?.reviewItemId || record?.customTextId || record?.presetId || null;
+  return record?.abilityStateId || record?.contextId || record?.sessionId || record?.profileId || record?.statId || record?.reviewItemId || record?.customTextId || record?.presetId || null;
 }
 
 function validationError(storeName, record, validation, operation = "save") {
@@ -327,7 +333,7 @@ export function createPracticeRepository({ dataStore, manifestStore, now = Date.
       const profile = await readValidated("profiles", manifest.profileId);
       if (!profile) throw practiceStorageError(PRACTICE_STORAGE_ERROR_CODES.RECOVERY_REQUIRED, "Practice profile could not be initialized", { operation: "initialize", storeName: "profiles", recordId: manifest.profileId, recoverable: true });
       const context = await assertContextOwnership(profile.profileId, profile.activeContextId, { operation: "initialize" });
-      if (manifest.databaseVersion !== 2) saveManifestPatch({ databaseVersion: 2 });
+      if (manifest.databaseVersion !== PRACTICE_DATABASE_VERSION) saveManifestPatch({ databaseVersion: PRACTICE_DATABASE_VERSION });
       return { manifest: ensureManifest(), profile, context, recovery: manifestResult.recovery, backend: dataStore.kind, reconciliation };
     },
 
@@ -425,6 +431,20 @@ export function createPracticeRepository({ dataStore, manifestStore, now = Date.
       return records.filter((record) => validateSkillStat(record).valid);
     },
 
+    async getAbilityState(profileId, contextId, channel) {
+      await assertContextOwnership(profileId, contextId, { operation: "get-ability-state" });
+      return readValidated("abilityStates", createPracticeAbilityStateId(profileId, contextId, channel));
+    },
+    async listAbilityStates(profileId = ensureManifest().profileId, contextId = null) {
+      const resolved = await resolveContextId(profileId, contextId);
+      const records = await dataStore.query("abilityStates", "contextId", resolved);
+      return records.filter((record) => record.profileId === profileId && validatePracticeAbilityState(record).valid);
+    },
+    async listAbilityStatesAcrossContexts(profileId = ensureManifest().profileId) {
+      const records = await dataStore.query("abilityStates", "profileId", profileId);
+      return records.filter((record) => validatePracticeAbilityState(record).valid);
+    },
+
     async saveSessionSummary(summary) {
       validate("sessionSummaries", summary);
       await assertContextOwnership(summary.profileId, summary.contextId, { operation: "save-session" });
@@ -500,8 +520,13 @@ export function createPracticeRepository({ dataStore, manifestStore, now = Date.
     getStorageHealth() { return { status: ensureManifest().storageHealth, backend: dataStore.kind, databaseOpen: dataStore.isOpen }; },
     runPracticeRetention: runRetention,
 
-    async commitCompletedPracticeSession({ sessionSummary, skillEvidenceDeltas = [], updatedSkillStats = null, reviewItemChanges = [], updatedProfileSummary = null, clearCheckpoint = true }) {
+    async commitCompletedPracticeSession({ sessionSummary, skillEvidenceDeltas = [], abilityObservation = null, updatedSkillStats = null, reviewItemChanges = [], updatedProfileSummary = null, clearCheckpoint = true }) {
       validate("sessionSummaries", sessionSummary);
+      if (abilityObservation != null) {
+        const abilityValidation = validatePracticeAbilityObservation(abilityObservation);
+        if (!abilityValidation.valid) throw practiceStorageError(PRACTICE_STORAGE_ERROR_CODES.VALIDATION_FAILED, "Practice ability observation failed validation", { operation: "commit-session", storeName: "abilityStates", recordId: sessionSummary.sessionId, cause: abilityValidation.errors });
+        if (abilityObservation.sessionId !== sessionSummary.sessionId || abilityObservation.profileId !== sessionSummary.profileId || abilityObservation.contextId !== sessionSummary.contextId || sessionSummary.abilityMeasurementSummary?.status !== "eligible" || sessionSummary.abilityMeasurementSummary?.channel !== abilityObservation.channel) throw practiceStorageError(PRACTICE_STORAGE_ERROR_CODES.VALIDATION_FAILED, "Practice ability observation does not match the completed session measurement contract", { operation: "commit-session", storeName: "abilityStates", recordId: sessionSummary.sessionId });
+      }
       if (Array.isArray(updatedSkillStats) && updatedSkillStats.length) throw practiceStorageError(PRACTICE_STORAGE_ERROR_CODES.VALIDATION_FAILED, "Direct full skill-stat replacement is disabled; use canonical skill evidence deltas", { operation: "commit-session", storeName: "skillStats", recordId: sessionSummary.sessionId });
       const batchValidation = validatePracticeSkillEvidenceBatch(skillEvidenceDeltas, { sessionId: sessionSummary.sessionId, profileId: sessionSummary.profileId, contextId: sessionSummary.contextId });
       if (!batchValidation.valid) throw practiceStorageError(PRACTICE_STORAGE_ERROR_CODES.VALIDATION_FAILED, "Practice skill evidence batch failed validation", { operation: "commit-session", storeName: "skillStats", recordId: sessionSummary.sessionId, cause: batchValidation.errors });
@@ -510,16 +535,32 @@ export function createPracticeRepository({ dataStore, manifestStore, now = Date.
       const activeProfileId = ensureManifest().profileId;
       const mismatch = sessionSummary.profileId !== activeProfileId
         || reviewItemChanges.some((change) => change?.action !== "delete" && (change.profileId !== sessionSummary.profileId || change.contextId !== sessionSummary.contextId))
+        || (abilityObservation && (abilityObservation.profileId !== sessionSummary.profileId || abilityObservation.contextId !== sessionSummary.contextId))
         || (updatedProfileSummary && updatedProfileSummary.profileId !== sessionSummary.profileId);
       if (mismatch) throw practiceStorageError(PRACTICE_STORAGE_ERROR_CODES.VALIDATION_FAILED, "Practice completion records must belong to the session profile/context", { operation: "commit-session", storeName: "profiles", recordId: sessionSummary.profileId });
       await assertContextOwnership(sessionSummary.profileId, sessionSummary.contextId, { operation: "commit-session" });
-      const stores = ["contexts", "sessionSummaries", "skillStats", "reviewItems", "profiles", "activeSessionCheckpoints", "meta"];
+      const stores = ["contexts", "sessionSummaries", "skillStats", "abilityStates", "reviewItems", "profiles", "activeSessionCheckpoints", "meta"];
       const transactionResult = await writeWithQuotaRecovery("commit-session", () => dataStore.runTransaction(stores, "readwrite", async (transaction) => {
         await assertContextOwnership(sessionSummary.profileId, sessionSummary.contextId, { transaction, operation: "commit-session" });
         const existing = await transaction.get("sessionSummaries", sessionSummary.sessionId);
         if (existing) {
           if (equivalent(existing, sessionSummary)) return { committed: false, idempotent: true, profileSummary: await transaction.get("profiles", sessionSummary.profileId) };
           throw practiceStorageError(PRACTICE_STORAGE_ERROR_CODES.DUPLICATE, "A different completed Practice session already uses this sessionId", { operation: "commit-session", storeName: "sessionSummaries", recordId: sessionSummary.sessionId });
+        }
+        let mergedAbilityState = null;
+        if (abilityObservation) {
+          const abilityStateId = createPracticeAbilityStateId(abilityObservation.profileId, abilityObservation.contextId, abilityObservation.channel);
+          let abilityState = await transaction.get("abilityStates", abilityStateId);
+          if (abilityState) {
+            const migration = migratePracticeRecord("abilityState", abilityState);
+            if (!migration.ok) throw migration.error;
+            abilityState = migration.value;
+          } else {
+            abilityState = createDefaultPracticeAbilityState({ profileId: abilityObservation.profileId, contextId: abilityObservation.contextId, channel: abilityObservation.channel, now: () => new Date(abilityObservation.completedAtUtc) });
+          }
+          mergedAbilityState = mergePracticeAbilityObservation(abilityState, abilityObservation);
+          const mergedAbilityValidation = validatePracticeAbilityState(mergedAbilityState, { maxBytes: PRACTICE_LIMITS.abilityStateBytes });
+          if (!mergedAbilityValidation.valid) throw practiceStorageError(PRACTICE_STORAGE_ERROR_CODES.VALIDATION_FAILED, "Merged Practice ability state failed validation", { operation: "commit-session", storeName: "abilityStates", recordId: abilityStateId, cause: mergedAbilityValidation.errors });
         }
         const checkpoint = await transaction.get("activeSessionCheckpoints", sessionSummary.profileId);
         if (checkpoint && (checkpoint.profileId !== sessionSummary.profileId || checkpoint.contextId !== sessionSummary.contextId)) throw practiceStorageError(PRACTICE_STORAGE_ERROR_CODES.VALIDATION_FAILED, "Practice checkpoint does not match the completing session context", { operation: "commit-session", storeName: "activeSessionCheckpoints", recordId: sessionSummary.profileId, recoverable: true });
@@ -543,6 +584,7 @@ export function createPracticeRepository({ dataStore, manifestStore, now = Date.
           mergedStats.push(merged);
         }
         for (const merged of mergedStats) await transaction.put("skillStats", merged);
+        if (mergedAbilityState) await transaction.put("abilityStates", mergedAbilityState);
         for (const change of reviewItemChanges) {
           if (change?.action === "delete") await transaction.delete("reviewItems", change.reviewItemId);
           else await transaction.put("reviewItems", change);
@@ -551,7 +593,7 @@ export function createPracticeRepository({ dataStore, manifestStore, now = Date.
         await transaction.put("sessionSummaries", sessionSummary);
         if (clearCheckpoint) await transaction.delete("activeSessionCheckpoints", sessionSummary.profileId);
         await transaction.put("meta", { key: "manifestReconciliation", status: "pending", sessionId: sessionSummary.sessionId, createdAt: toPracticeUtcIso(now), updatedAt: toPracticeUtcIso(now) });
-        return { committed: true, idempotent: false, mergedSkillStatCount: mergedStats.length };
+        return { committed: true, idempotent: false, mergedSkillStatCount: mergedStats.length, abilityUpdated: Boolean(mergedAbilityState) };
       }));
       try {
         const reconciliationProfile = transactionResult.profileSummary ?? updatedProfileSummary;

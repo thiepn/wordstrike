@@ -25,7 +25,7 @@ async function typeCorrect(engine, harness, count, latencyMs = 100) {
   }
 }
 
-test("PL10 generic normalization remains canonical after PL11 adds skill evidence", async () => {
+test("PL10 generic normalization remains canonical inside the current PL13 session envelope", async () => {
   const harness = await createPracticeSessionHarness({ suffix: "pl10-generic", text: "a".repeat(40) });
   const engine = engineFor(harness);
   await engine.prepare({ experiment: harness.experiment, configuration: {}, contentPlan: harness.contentPlan });
@@ -33,7 +33,7 @@ test("PL10 generic normalization remains canonical after PL11 adds skill evidenc
   await typeCorrect(engine, harness, 26);
   const metrics = engine.getMetricsSnapshot();
   const result = await engine.complete("manual-stop");
-  assert.equal(result.summary.recordVersion, 6);
+  assert.equal(result.summary.recordVersion, 7);
   assert.equal(result.summary.wpm, metrics.wpm);
   assert.equal(result.summary.rawWpm, metrics.rawWpm);
   assert.equal(result.summary.accuracy, metrics.accuracy);
@@ -47,7 +47,7 @@ test("PL10 generic normalization remains canonical after PL11 adds skill evidenc
   assert.equal(Object.hasOwn(result.summary.skillEvidenceSummary, "deltas"), false);
 });
 
-test("PL10 experiment analyzers receive frozen foundationAnalysis v4 and cannot own normalization or canonical skill evidence", async () => {
+test("PL10 experiment analyzers receive frozen PL13 foundationAnalysis v5 and cannot own normalization or canonical skill evidence", async () => {
   let received = null;
   let mutationThrew = false;
   const harness = await createPracticeSessionHarness({
@@ -71,7 +71,7 @@ test("PL10 experiment analyzers receive frozen foundationAnalysis v4 and cannot 
   await engine.start();
   await typeCorrect(engine, harness, 26);
   const result = await engine.complete("manual-stop");
-  assert.equal(received.foundationAnalysis.version, 4);
+  assert.equal(received.foundationAnalysis.version, 5);
   assert.ok(received.foundationAnalysis.latency);
   assert.ok(received.foundationAnalysis.errors);
   assert.ok(received.foundationAnalysis.normalization);

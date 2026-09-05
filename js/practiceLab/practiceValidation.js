@@ -44,6 +44,7 @@ import {
   PRACTICE_RECOVERY_POLICY_VERSION,
 } from "./practiceErrorPolicy.js";
 import { validatePracticeNormalizationSummary } from "./practiceNormalizationValidation.js";
+import { validatePracticeAbilityMeasurementSummary } from "./practiceAbilityValidation.js";
 import { validatePracticeSkillStatV3 } from "./practiceSkillEvidenceValidation.js";
 import {
   PRACTICE_EVIDENCE_ACCURACY_SCOPES,
@@ -66,7 +67,7 @@ const UNSAFE_OBJECT_KEYS = new Set(["__proto__", "constructor", "prototype"]);
 const FORBIDDEN_SESSION_FIELDS = Object.freeze([
   "rawEvents", "eventTrace", "rawEventTrace", "classifiedEventTrace",
   "errorEpisodeHistory", "mistypedStrings", "rawLatencies", "normalizationTrace",
-  "normalizedTransitions", "typabilityFeatureVector", "skillEvidenceDeltas", "leaderboardEligible",
+  "normalizedTransitions", "typabilityFeatureVector", "skillEvidenceDeltas", "abilityObservation", "newAbilityEstimate", "leaderboardEligible",
   "submissionPayload", "accessToken", "boardKey", "rulesVersion",
 ]);
 
@@ -488,6 +489,7 @@ export function validateSessionSummary(summary) {
   if (summary.errorSummary != null) errors.push(...validatePracticeErrorSummary(summary.errorSummary).errors.map((entry) => ({ ...entry, path: `errorSummary.${entry.path}` })));
   if (summary.normalizationSummary != null) errors.push(...validatePracticeNormalizationSummary(summary.normalizationSummary).errors.map((entry) => ({ ...entry, path: `normalizationSummary.${entry.path}` })));
   if (summary.skillEvidenceSummary != null) errors.push(...validatePracticeSkillEvidenceSummary(summary.skillEvidenceSummary).errors.map((entry) => ({ ...entry, path: `skillEvidenceSummary.${entry.path}` })));
+  if (summary.abilityMeasurementSummary != null) errors.push(...validatePracticeAbilityMeasurementSummary(summary.abilityMeasurementSummary).errors.map((entry) => ({ ...entry, path: `abilityMeasurementSummary.${entry.path}` })));
   appendSerializable(errors, summary.configuration, "configuration");
   appendSerializable(errors, summary.contentDescriptor, "contentDescriptor");
   for (const key of ["beforeMetrics", "afterMetrics", "transferMetrics", "fatigueSummary", "trainingQuality"]) if (summary[key] != null) appendSerializable(errors, summary[key], key);
