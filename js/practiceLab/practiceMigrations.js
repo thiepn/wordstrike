@@ -14,10 +14,10 @@ import {
   validatePracticeManifest,
   validatePracticeProfile,
   validatePreset,
-  validateReviewItem,
   validateSessionSummary,
   validateSkillStat,
 } from "./practiceValidation.js";
+import { validatePracticeReviewItemV3 } from "./practiceReviewValidation.js";
 import { validatePracticeAbilityState } from "./practiceAbilityValidation.js";
 import { validatePracticePerformanceState } from "./practicePerformanceValidation.js";
 import { validatePracticeLearningState } from "./practiceLearningValidation.js";
@@ -41,7 +41,7 @@ const validators = Object.freeze({
   performanceState: validatePracticePerformanceState,
   learningState: validatePracticeLearningState,
   sessionSummary: validateSessionSummary,
-  reviewItem: validateReviewItem,
+  reviewItem: validatePracticeReviewItemV3,
   customText: validateCustomText,
   preset: validatePreset,
   checkpoint: validateCheckpoint,
