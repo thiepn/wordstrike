@@ -346,3 +346,21 @@ expected content
   -> PL11 persistent entity evidence
   -> profile + context + entity
 ```
+
+## PL12 downstream diagnostic contract
+
+PL11 remains the canonical persistent observation layer after PL12. PL12 does not change the PL11 evidence schema, evidence policy, evidence delta, confidence calculation, checkpoint tracker, skill-stat record version, session-summary record version, foundation-analysis version, or IndexedDB topology.
+
+PL12 consumes the canonical v3 skill evidence only as a **derived diagnostic view**. It reuses PL11 dimension-specific confidence for normalized residuals, disfluency, first-pass accuracy, primary error evidence, and word launch evidence. It does not rewrite opportunity counts, timing lanes, error attribution, role lanes, or confidence inputs.
+
+Authoritative PL12 derived semantics are:
+
+- candidate weaknessScore: maximum confidence-weighted limiter-dimension severity;
+- candidate impactScore: context-relative prevalence-quality-adjusted modeled burden percentile;
+- candidate priorityScore: impact × primary-dimension confidence × hierarchy penalty.
+
+These fields live only in the PL12 limiter candidate/snapshot. Existing top-level skill-stat fields named weaknessScore and priority are legacy/non-authoritative placeholders and are not PL12 writeback targets.
+
+PL12 also preserves PL11 Custom Text privacy. Because persistent custom-word evidence remains disabled by default, the limiter layer does not reconstruct private word entities from Custom Text.
+
+See PRACTICE_LAB_LIMITER_IMPACT_MODEL.md for the authoritative PL12 formulas, prevalence policy, burden model, hierarchy, snapshot bounds, caching, and phase boundaries.

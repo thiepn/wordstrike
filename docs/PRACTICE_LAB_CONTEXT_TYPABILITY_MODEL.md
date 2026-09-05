@@ -618,3 +618,21 @@ Later phases may consume:
 - PL9 error/recovery evidence.
 
 They must not reinterpret PL10's heuristic text difficulty as user ability or use PL10 context predictors to absorb exact-target weakness.
+
+## 28. PL12 downstream diagnostic use
+
+PL12 consumes PL10 normalization without changing PL10 semantics or versions. In particular, PL10 remains authoritative for:
+
+- context-bound expected latency;
+- fluent/disfluent transition eligibility;
+- positive/negative normalized residual meaning;
+- anti-leakage from exact target identity;
+- typability-reference fitting and protected-partition contamination rules.
+
+PL12's slow, hesitant, launch-limited, and unstable diagnostics use PL11-persisted evidence that originated from PL10 expected-vs-observed residuals. PL12 never treats raw latency alone as authoritative slow evidence and never changes PL10 residual zero from its meaning: performance consistent with the current context expectation.
+
+PL12 prevalence is a **separate** statistical contract from PL10 typability/frequency features. No approved population-frequency artifact currently exists in the repository. Therefore PL12 may use PL7 **training-partition occurrence rates** only as an explicitly labelled practice-proxy; transfer, benchmark, diagnostic, and research-holdout partitions never fit that proxy. The proxy does not retroactively become a PL10 frequency reference and does not change PL10's current null rarity features.
+
+PL12 does not bump the PL10 normalization-analysis, context-model, context-policy, text-feature, typability-model, typability-reference, keyboard-geometry, or static-artifact versions. Historical PL10 documentation above remains the definition of the PL10 phase itself; current wrapper record versions are documented in PRACTICE_LAB_DATA_ARCHITECTURE.md.
+
+See PRACTICE_LAB_LIMITER_IMPACT_MODEL.md for the downstream diagnostic formulas and impact/hierarchy semantics.
