@@ -18,37 +18,13 @@ jobs:
           ref: codex/pl13-ability-estimator-uncertainty
           fetch-depth: 0
       - name: Append PL13 typability downstream contract
+        env:
+          APPEND_B64: IyMgMjkuIFBMMTMgb2JzZXJ2YXRpb24tbGV2ZWwgYWJpbGl0eSBhZGp1c3RtZW50CgpQTDEzIGlzIHRoZSBmaXJzdCBkb3duc3RyZWFtIHBoYXNlIHRoYXQgY29udmVydHMgUEwxMCBgZGlmZmljdWx0eUluZGV4YCBpbnRvIGEgY29uc2VydmF0aXZlICoqb2JzZXJ2YXRpb24tbGV2ZWwqKiBhZGp1c3RtZW50IGJlZm9yZSBsYXRlbnQgYWJpbGl0eSBlc3RpbWF0aW9uLiBUaGlzIGRvZXMgbm90IGNoYW5nZSBQTDEwIGl0c2VsZjogUEwxMCByZW1haW5zIHRoZSBzb3VyY2Ugb2YgdGhlIGhldXJpc3RpYyB0ZXh0LWRpZmZpY3VsdHkgaW5kZXgsIHN0YXR1cywgYW5kIGBhdmFpbGFibGVNb2RlbFdlaWdodGAsIGFuZCBhbGwgUEwxMCBtb2RlbC9yZWZlcmVuY2UvZmVhdHVyZSB2ZXJzaW9ucyByZW1haW4gdW5jaGFuZ2VkLgoKVGhlIHZlcnNpb25lZCBQTDEzIHYxIG9ic2VydmF0aW9uIHBvbGljeSBpczoKCmBgYHRleHQKRCA9IFBMMTAgZGlmZmljdWx0eUluZGV4CkMgPSBhdmFpbGFibGVNb2RlbFdlaWdodCBpbiBbMCwxXQoKQV9kID0gY2xhbXAoMC4wMyDDlyBEIMOXIEMsIC0wLjEyLCArMC4xMikKQWRqdXN0ZWRMb2dQZXJmb3JtYW5jZSA9IGxuKGNhbm9uaWNhbCBXUE0pICsgQV9kCmBgYAoKSGlnaGVyIFBMMTAgZGlmZmljdWx0eSB0aGVyZWZvcmUgcmFpc2VzIHRoZSBhZGp1c3RlZCBhYmlsaXR5IG9ic2VydmF0aW9uOyBlYXNpZXIgdGV4dCBsb3dlcnMgaXQuIFBhcnRpYWwgbW9kZWxzIHJlY2VpdmUgb25seSBjb3ZlcmFnZS1wcm9wb3J0aW9uYWwgYWRqdXN0bWVudC4gRm9yIFBMMTAgc3RhdHVzIGBpbnN1ZmZpY2llbnRgIG9yIGB1bnN1cHBvcnRlZC1sYW5ndWFnZWAsIFBMMTMgdXNlcyB6ZXJvIGRpZmZpY3VsdHkgYWRqdXN0bWVudCBhbmQgaW5jcmVhc2VzIG9ic2VydmF0aW9uIHVuY2VydGFpbnR5IGluc3RlYWQgb2YgZ3Vlc3NpbmcuCgpQTDEzIGRvZXMgKipub3QqKiB1c2UgUEwxMCBgcmVsYXRpdmVEaWZmaWN1bHR5UGVyY2VudGlsZWAgYXMgYSBXUE0gY29ycmVjdGlvbi4gSXQgYWxzbyBkb2VzIG5vdCByZWludGVycHJldCBQTDEwJ3MgaGV1cmlzdGljIGRpZmZpY3VsdHkgaW5kZXggYXMgdXNlciBhYmlsaXR5LiBUaGUgYDAuMDNgIGNvZWZmaWNpZW50IGFuZCBgwrEwLjEyYCBjYXAgYXJlIFBMMTMgZW5naW5lZXJpbmcgcG9saWN5LCBpc29sYXRlZCBpbiB0aGUgUEwxMyBvYnNlcnZhdGlvbiBidWlsZGVyIHNvIFBMMTggY2FuIGxhdGVyIHJlcGxhY2UvYXVnbWVudCB0aGVtIHdpdGggZW1waXJpY2FsIHBhc3NhZ2UgY2FsaWJyYXRpb24gd2l0aG91dCByZWRlc2lnbmluZyBQTDEwIG9yIGBhYmlsaXR5U3RhdGVzYC4KCkhpc3RvcmljYWwgUEwxMCB3cmFwcGVyLXZlcnNpb24gc3RhdGVtZW50cyBhYm92ZSByZW1haW4gZG9jdW1lbnRhdGlvbiBvZiB0aGUgUEwxMCBwaGFzZSBhdCBpdHMgaW50cm9kdWN0aW9uLiBDdXJyZW50IGRhdGFiYXNlL3Nlc3Npb24vZm91bmRhdGlvbiB3cmFwcGVyIHZlcnNpb25zIGFyZSBkb2N1bWVudGVkIGluIGBQUkFDVElDRV9MQUJfREFUQV9BUkNISVRFQ1RVUkUubWRgOyB0aGUgZnVsbCBkb3duc3RyZWFtIGVzdGltYXRvciBjb250cmFjdCBpcyBpbiBgUFJBQ1RJQ0VfTEFCX0FCSUxJVFlfRVNUSU1BVElPTi5tZGAuCg==
         run: |
-          python - <<'PY'
-          from pathlib import Path
-          path = Path('docs/PRACTICE_LAB_CONTEXT_TYPABILITY_MODEL.md')
-          text = path.read_text()
-          marker = '## 29. PL13 observation-level ability adjustment'
-          if marker not in text:
-              appendix = r'''
-
-## 29. PL13 observation-level ability adjustment
-
-PL13 is the first downstream phase that converts PL10 `difficultyIndex` into a conservative **observation-level** adjustment before latent ability estimation. This does not change PL10 itself: PL10 remains the source of the heuristic text-difficulty index, status, and `availableModelWeight`, and all PL10 model/reference/feature versions remain unchanged.
-
-The versioned PL13 v1 observation policy is:
-
-```text
-D = PL10 difficultyIndex
-C = availableModelWeight in [0,1]
-
-A_d = clamp(0.03 × D × C, -0.12, +0.12)
-AdjustedLogPerformance = ln(canonical WPM) + A_d
-```
-
-Higher PL10 difficulty therefore raises the adjusted ability observation; easier text lowers it. Partial models receive only coverage-proportional adjustment. For PL10 status `insufficient` or `unsupported-language`, PL13 uses zero difficulty adjustment and increases observation uncertainty instead of guessing.
-
-PL13 does **not** use PL10 `relativeDifficultyPercentile` as a WPM correction. It also does not reinterpret PL10's heuristic difficulty index as user ability. The `0.03` coefficient and `±0.12` cap are PL13 engineering policy, isolated in the PL13 observation builder so PL18 can later replace/augment them with empirical passage calibration without redesigning PL10 or `abilityStates`.
-
-Historical PL10 wrapper-version statements above remain documentation of the PL10 phase at its introduction. Current database/session/foundation wrapper versions are documented in `PRACTICE_LAB_DATA_ARCHITECTURE.md`; the full downstream estimator contract is in `PRACTICE_LAB_ABILITY_ESTIMATION.md`.
-'''
-              path.write_text(text.rstrip() + appendix + '\n')
-          PY
+          if ! grep -q '^## 29. PL13 observation-level ability adjustment$' docs/PRACTICE_LAB_CONTEXT_TYPABILITY_MODEL.md; then
+            printf '\n' >> docs/PRACTICE_LAB_CONTEXT_TYPABILITY_MODEL.md
+            printf '%s' "$APPEND_B64" | base64 -d >> docs/PRACTICE_LAB_CONTEXT_TYPABILITY_MODEL.md
+          fi
           git diff --check
       - name: Commit documentation
         run: |
