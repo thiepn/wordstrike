@@ -26,12 +26,14 @@ jobs:
         run: |
           python scripts/pl14_apply.py
           python scripts/pl14_fix1.py
+          python scripts/pl14_fix2.py
       - name: Run focused PL14 gates
         run: |
           node tests/practice-performance-state.test.js
           node tests/practice-control-frontier.test.js
           node tests/practice-performance-storage-repository.test.js
           node tests/practice-performance-contract-isolation.test.js
+          node tests/practice-ability-observation.test.js
       - name: Run full regression suite
         run: npm test
       - name: Commit clean PL14 implementation
