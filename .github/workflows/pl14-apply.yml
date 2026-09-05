@@ -1,0 +1,42 @@
+name: PL14 integration gate
+
+on:
+  push:
+    branches:
+      - codex/pl14-performance-state-frontier
+    paths:
+      - scripts/pl14_apply.py
+      - .github/workflows/pl14-apply.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: codex/pl14-performance-state-frontier
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Apply PL14 integration
+        run: python scripts/pl14_apply.py
+      - name: Run focused PL14 gates
+        run: |
+          node tests/practice-performance-state.test.js
+          node tests/practice-control-frontier.test.js
+          node tests/practice-performance-storage-repository.test.js
+          node tests/practice-performance-contract-isolation.test.js
+      - name: Run full regression suite
+        run: npm test
+      - name: Commit clean PL14 implementation
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --check
+          git commit -m "PL14: add performance state readiness and control frontier"
+          git push origin HEAD:codex/pl14-performance-state-frontier
