@@ -5,7 +5,6 @@ const updates = [
     path: "docs/PRACTICE_LAB_SKILL_EVIDENCE_MODEL.md",
     marker: "## PL12 downstream diagnostic contract",
     appendix: `
-
 ## PL12 downstream diagnostic contract
 
 PL11 remains the canonical persistent observation layer after PL12. PL12 does not change the PL11 evidence schema, evidence policy, evidence delta, confidence calculation, checkpoint tracker, skill-stat record version, session-summary record version, foundation-analysis version, or IndexedDB topology.
@@ -29,7 +28,6 @@ See PRACTICE_LAB_LIMITER_IMPACT_MODEL.md for the authoritative PL12 formulas, pr
     path: "docs/PRACTICE_LAB_CONTEXT_TYPABILITY_MODEL.md",
     marker: "## 28. PL12 downstream diagnostic use",
     appendix: `
-
 ## 28. PL12 downstream diagnostic use
 
 PL12 consumes PL10 normalization without changing PL10 semantics or versions. In particular, PL10 remains authoritative for:
@@ -55,7 +53,8 @@ let changed = 0;
 for (const update of updates) {
   const source = await readFile(update.path, "utf8");
   if (source.includes(update.marker)) continue;
-  await writeFile(update.path, source.replace(/\s*$/u, "") + update.appendix + "\n", "utf8");
+  const next = `${source.trimEnd()}\n\n${update.appendix.trim()}\n`;
+  await writeFile(update.path, next, "utf8");
   changed += 1;
 }
 console.log(`PL12 documentation addenda applied to ${changed} file(s).`);
