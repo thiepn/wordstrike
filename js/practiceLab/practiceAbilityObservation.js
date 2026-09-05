@@ -19,27 +19,28 @@ const freezeDeep = (value) => {
 };
 const clamp = (value, minimum, maximum) => Math.max(minimum, Math.min(maximum, value));
 
-function assessment(channel, status, reasons, observation = null) {
+function assessment(channel, status, reasons, observation = null, metadata = {}) {
   if (!PRACTICE_ABILITY_ASSESSMENT_STATUSES.includes(status)) throw new TypeError("Invalid Practice ability assessment status");
   if (!Array.isArray(reasons) || reasons.some((reason) => !PRACTICE_ABILITY_REASON_CODES.includes(reason))) throw new TypeError("Invalid Practice ability assessment reason");
+  const uniqueReasons = [...new Set(reasons)];
   return freezeDeep({
     version: PRACTICE_ABILITY_ANALYSIS_VERSION,
     channel,
     status,
-    reasons: [...new Set(reasons)],
+    reasons: uniqueReasons,
     observation,
     sessionSummary: status === "not-requested" ? null : {
       analysisVersion: PRACTICE_ABILITY_ANALYSIS_VERSION,
       observationVersion: PRACTICE_ABILITY_OBSERVATION_VERSION,
       channel,
       status,
-      reasons: [...new Set(reasons)],
-      sourceRole: observation?.sourceRole ?? null,
+      reasons: uniqueReasons,
+      sourceRole: observation?.sourceRole ?? metadata.sourceRole ?? null,
       adjustedWpm: observation?.adjustedWpm ?? null,
       measurementSigmaLog: observation?.measurementSigmaLog ?? null,
       reliabilityWeight: observation?.reliabilityWeight ?? null,
       difficultyAdjustmentLog: observation?.difficultyAdjustmentLog ?? null,
-      difficultyModelStatus: observation?.difficultyModelStatus ?? null,
+      difficultyModelStatus: observation?.difficultyModelStatus ?? metadata.difficultyModelStatus ?? null,
     },
   });
 }
@@ -149,7 +150,7 @@ export function buildPracticeAbilityObservation({
 
   const difficulty = getDifficulty(foundationAnalysis, policy);
   if (!["full", "partial", "insufficient", "unsupported-language"].includes(difficulty.status)) reasons.push("invalid-normalization");
-  if (reasons.length) return assessment(channelName, "not-eligible", reasons);
+  if (reasons.length) return assessment(channelName, "not-eligible", reasons, null, { sourceRole: evidenceRole, difficultyModelStatus: difficulty.status });
 
   const observedLogWpm = Math.log(session.wpm);
   const adjustedLogPerformance = observedLogWpm + difficulty.adjustment;
