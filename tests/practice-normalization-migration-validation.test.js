@@ -76,7 +76,7 @@ function validNormalizationSummary() {
   };
 }
 
-test("PL10 advances only sessionSummary to v5 while Practice DB and checkpoint remain unchanged", () => {
+test("PL10 model versions remain stable while PL11 advances only the surrounding evidence wrappers", () => {
   assert.equal(PRACTICE_DATABASE_VERSION, 2);
   assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 6);
   assert.equal(PRACTICE_RECORD_VERSIONS.checkpoint, 3);
@@ -92,24 +92,26 @@ test("PL10 advances only sessionSummary to v5 while Practice DB and checkpoint r
   assert.equal(PRACTICE_KEYBOARD_GEOMETRY_VERSION, 1);
 });
 
-test("PL10 sessionSummary v4 migrates to v5 with null historical normalization evidence", () => {
+test("PL10 sessionSummary v4 migration preserves null normalization evidence through current PL11 v6", () => {
   const current = createDefaultSessionSummary();
   const historical = { ...current, recordVersion: 4 };
   delete historical.normalizationSummary;
+  delete historical.skillEvidenceSummary;
   const source = structuredClone(historical);
   const migrated = migratePracticeRecord("sessionSummary", historical);
   assert.equal(migrated.ok, true);
   assert.equal(migrated.fromVersion, 4);
-  assert.equal(migrated.toVersion, 5);
-  assert.deepEqual(migrated.steps, ["sessionSummary:4->5"]);
+  assert.equal(migrated.toVersion, 6);
+  assert.deepEqual(migrated.steps, ["sessionSummary:4->5", "sessionSummary:5->6"]);
   assert.equal(migrated.value.normalizationSummary, null);
+  assert.equal(migrated.value.skillEvidenceSummary, null);
   assert.deepEqual(historical, source);
 });
 
-test("PL10 preserves the complete v1 -> v2 -> v3 -> v4 -> v5 migration chain without reconstruction", () => {
+test("PL10 normalization remains null in the complete historical v1 -> v6 migration chain", () => {
   const current = createDefaultSessionSummary();
   const historical = { ...current, recordVersion: 1 };
-  for (const key of ["contextId", "fluencySummary", "errorSummary", "normalizationSummary"]) delete historical[key];
+  for (const key of ["contextId", "fluencySummary", "errorSummary", "normalizationSummary", "skillEvidenceSummary"]) delete historical[key];
   const migrated = migratePracticeRecord("sessionSummary", historical);
   assert.equal(migrated.ok, true);
   assert.deepEqual(migrated.steps, [
@@ -117,10 +119,13 @@ test("PL10 preserves the complete v1 -> v2 -> v3 -> v4 -> v5 migration chain wit
     "sessionSummary:2->3",
     "sessionSummary:3->4",
     "sessionSummary:4->5",
+    "sessionSummary:5->6",
   ]);
+  assert.equal(migrated.value.recordVersion, 6);
   assert.equal(migrated.value.fluencySummary, null);
   assert.equal(migrated.value.errorSummary, null);
   assert.equal(migrated.value.normalizationSummary, null);
+  assert.equal(migrated.value.skillEvidenceSummary, null);
 });
 
 test("PL10 durable normalizationSummary validates compact context/coverage/difficulty only", () => {
