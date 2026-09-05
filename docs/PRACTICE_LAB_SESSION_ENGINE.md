@@ -445,3 +445,70 @@ Later phases may consume PL13 without rewriting it:
 - PL25: later Coach/Learning Value composition.
 
 The detailed PL13 formulas, channel policy, uncertainty model, estimator, interval/SRC, persistence and privacy contract are documented in `PRACTICE_LAB_ABILITY_ESTIMATION.md`.
+
+## PL14 trusted performance-measurement contract
+
+PL14 extends the runtime experiment descriptor with trusted metadata:
+
+```text
+performanceMeasurementKind:
+  null | "state-probe" | "control-frontier"
+
+performanceReferenceChannel:
+  canonical PL13 ability channel for state-probe
+  "controlled-speed" for control-frontier
+```
+
+These fields are descriptor-owned. Session configuration cannot assign or spoof them. PL14 v1 rejects a descriptor that simultaneously declares `abilityChannel != null` and `performanceMeasurementKind != null`.
+
+A trusted `control-frontier` descriptor must additionally provide runtime-only:
+
+```text
+buildPerformanceMeasurement(input) -> { stages: [...] }
+```
+
+The callback is forbidden for other measurement kinds. It receives frozen finalization data (session/metrics snapshots, retained event trace, foundation analysis before PL14 performance attachment, and bounded content-plan metadata). The experiment supplies stage **candidates only**; generic PL14 code validates the callback output, applies canonical text-difficulty adjustment, constructs aggregate frontier points, and owns persistence. Stage text is never persisted.
+
+`state-probe` requires no experiment-supplied measurement callback. Generic PL14 finalization loads the current ability state for `performanceReferenceChannel` before calculating innovation/readiness. A low-confidence or unavailable reference produces bounded `not-eligible` diagnostics and no current-state write rather than inventing readiness.
+
+Foundation analysis advances from v5 to v6 and now has the permanent top-level shape:
+
+```text
+{
+  version: 6,
+  latency,
+  errors,
+  normalization,
+  skills,
+  ability,
+  performance
+}
+```
+
+`foundationAnalysis.performance` is version 1 and contains the bounded measurement result plus the non-durable `performanceStateDelta`. Ordinary sessions carry `status: "not-requested"` and no delta. Experiment analyzers receive the final frozen foundation analysis but do not own the canonical PL14 state/frontier result.
+
+Session summary v8 adds only compact:
+
+```text
+performanceMeasurementSummary
+```
+
+No full current-state record, warm-up window trace, warm-up evidence ring, or frontier-point ring is copied into a session summary.
+
+The completed-session commit API now accepts:
+
+```text
+commitCompletedPracticeSession({
+  sessionSummary,
+  skillEvidenceDeltas,
+  abilityObservation,
+  performanceStateDelta,
+  reviewItemChanges,
+  updatedProfileSummary,
+  clearCheckpoint
+})
+```
+
+The delta is validated and merged only after the duplicate-session guard and inside the existing atomic transaction. A valid typing session can still complete when an auxiliary frontier callback fails: PL14 records `measurement-failed`, omits the performance-state update, and preserves otherwise valid PL8–PL13 evidence. Invariant corruption remains a hard failure.
+
+No PL14 state/frontier model rebuild runs per keypress. State and warm-up analysis run at finalization; the frontier model rebuilds only when a bounded frontier batch is committed or explicitly requested.

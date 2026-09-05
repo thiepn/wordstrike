@@ -403,3 +403,50 @@ One result is an observation, not the latent state itself.
 PL13 does not populate `dashboardSummary.sustainableWpm`, `burstWpm`, or `controlledWpm` and adds no public ability UI.
 
 The dedicated PL11 evidence model remains authoritative for entity measurement; the PL12 limiter model remains authoritative for diagnosis/impact; `PRACTICE_LAB_ABILITY_ESTIMATION.md` is authoritative for PL13 ability measurement, uncertainty, recursive estimation, interval/SRC, storage, and atomicity.
+
+## PL14 — performance state persistence (current DB v4)
+
+PL14 advances the **current Practice IndexedDB structural version from 3 to 4**. The v3 PL13 `abilityStates` store remains unchanged and continues to own slow-changing latent ability. DB v4 adds exactly one new store:
+
+```text
+performanceStates
+```
+
+`performanceStates` is keyed by `performanceStateId` and owns one bounded record per `(profileId, contextId)`. Its indexes are:
+
+```text
+profileId
+contextId
+updatedAt
+profileContext = [profileId, contextId]  // unique
+```
+
+The persisted domains are deliberately separate:
+
+```text
+abilityStates
+= slow-changing latent ability
+
+performanceStates.currentStates
+= temporary, channel-specific performance state/readiness
+
+performanceStates.warmupModels
+= cross-session model of within-session warm-up response
+
+performanceStates.controlFrontier
+= controlled-speed speed/control boundary
+```
+
+The performance-state record is version 1 and capped at 64 KiB. It stores no passage/custom text, raw event trace, target entity list, word list, or containing-word data. Current-state observations are one latest observation per canonical PL13 ability channel; warm-up evidence is bounded to 24 observations per channel; frontier evidence is bounded to 64 aggregate stage points.
+
+A v3→v4 schema upgrade creates only `performanceStates`; existing stores and indexes are not rewritten. Practice reset clears `performanceStates`. Ordinary quota retention does **not** prune it because the record is bounded, context-scoped, and high-value model state.
+
+Session summaries advance from v7 to v8 solely to add compact `performanceMeasurementSummary`. Historical v7 summaries migrate with:
+
+```text
+performanceMeasurementSummary: null
+```
+
+No historical readiness, warm-up, or frontier is inferred or backfilled.
+
+Completed-session persistence accepts an optional `performanceStateDelta`. The existing session-summary duplicate check runs before the delta is merged. When present, the repository loads/creates the matching `(profileId, contextId)` performance state, merges the bounded delta, validates the complete record, and writes it inside the same atomic completed-session transaction as PL11 skill evidence, PL13 ability observation, review/profile changes, and checkpoint clearing. Identical retries therefore apply the performance delta once; conflicting reuse of a session ID applies it zero times.
