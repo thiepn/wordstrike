@@ -10,7 +10,8 @@ import {
 } from "./practiceInputEngine.js";
 import { createPracticeMetricsCollector } from "./practiceMetrics.js";
 import { createPracticeEventBuffer } from "./practiceEventBuffer.js";
-import { buildPracticeFoundationAnalysis } from "./practiceFoundationAnalysis.js";
+import { buildPracticeFoundationAnalysis, withPracticeAbilityAnalysis } from "./practiceFoundationAnalysis.js";
+import { buildPracticeAbilityObservation } from "./practiceAbilityObservation.js";
 import { createPracticeErrorTracker } from "./practiceErrorTracker.js";
 import { createPracticeSessionContextSnapshot } from "./practiceContextFeatures.js";
 import { resolvePracticeEvidenceRole } from "./practiceEvidenceRole.js";
@@ -603,6 +604,18 @@ export function createPracticeSessionEngine({
     completedAtUtc = wallIso();
     try {
       foundationAnalysis = analyzeFoundation({ status, observedAt: completedAtUtc });
+      const abilityMetrics = metricsSnapshot();
+      const abilityAssessment = buildPracticeAbilityObservation({
+        session: {
+          sessionId, profileId, contextId, status, completionReason: reason, completedAtUtc,
+          localDayKey: sessionTimeContext?.localDayKey ?? getPracticeTimeContext(wallDate()).localDayKey,
+          wpm: abilityMetrics.wpm, rawWpm: abilityMetrics.rawWpm, accuracy: abilityMetrics.accuracy,
+          activeDurationMs: abilityMetrics.activeDurationMs, typedCharacterCount: abilityMetrics.acceptedInsertions,
+          configuration: { ...configuration, correctionBehavior: configuration.correctionBehavior ?? experiment.defaultCorrectionBehavior },
+        },
+        experiment, foundationAnalysis, contentPlan, evidenceRole,
+      });
+      foundationAnalysis = withPracticeAbilityAnalysis(foundationAnalysis, abilityAssessment);
       analysis = await analyze(foundationAnalysis);
     } catch (error) {
       finalizationState = "error";
@@ -642,6 +655,7 @@ export function createPracticeSessionEngine({
       const committed = await repository.commitCompletedPracticeSession({
         sessionSummary: preparedFinalResult,
         skillEvidenceDeltas: foundationAnalysis.skills?.deltas ?? [],
+        abilityObservation: foundationAnalysis.ability?.observation ?? null,
         reviewItemChanges: analysis?.reviewItemChanges ?? [],
         updatedProfileSummary: updatedProfile,
         clearCheckpoint: true,

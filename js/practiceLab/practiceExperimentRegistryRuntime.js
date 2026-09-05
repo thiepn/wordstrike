@@ -74,6 +74,7 @@ export function createPracticeExperimentRegistry({
       if (descriptor.category !== catalogEntry.category) throw registryError(PRACTICE_REGISTRY_ERROR_CODES.DESCRIPTOR_MISMATCH, "Practice descriptor category must match its catalog category", { experimentId });
       const validatedDescriptor = Object.freeze({
         ...descriptor,
+        abilityChannel: descriptor.abilityChannel ?? null,
         supportedCompletionModes: Object.freeze([...descriptor.supportedCompletionModes]),
       });
       const stored = Object.freeze({ experimentId, implementationVersion, descriptor: validatedDescriptor, descriptorFactory, ...Object.fromEntries(optionalFactories.filter((key) => registration[key]).map((key) => [key, registration[key]])) });
