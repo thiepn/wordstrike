@@ -20,11 +20,13 @@ const descriptor = Object.freeze({
   supportedCompletionModes: Object.freeze(["content", "manual"]), resumable: true,
 });
 
-test("Phase 0 foundation constants remain intact inside the current PL14 storage envelope", async () => {
+test("Phase 0 foundation constants remain intact inside the current PL16 storage envelope", async () => {
   assert.equal(PRACTICE_MANIFEST_VERSION, 1);
-  assert.equal(PRACTICE_DATABASE_VERSION, 4);
+  assert.equal(PRACTICE_DATABASE_VERSION, 5);
   assert.equal(PRACTICE_RECORD_VERSIONS.profile, 3);
-  assert.equal(PRACTICE_STORE_NAMES.length, 12);
+  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 9);
+  assert.equal(PRACTICE_RECORD_VERSIONS.learningState, 1);
+  assert.equal(PRACTICE_STORE_NAMES.length, 13);
   assert.equal(PRACTICE_LIMITS.checkpointTtlMs, 86_400_000);
   assert.equal(PRACTICE_LIMITS.sessionSummarySoftCap, 1_000);
   const docs = await readFile(new URL("../docs/PRACTICE_LAB_DATA_ARCHITECTURE.md", import.meta.url), "utf8");

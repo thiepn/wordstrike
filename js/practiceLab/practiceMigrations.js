@@ -20,6 +20,7 @@ import {
 } from "./practiceValidation.js";
 import { validatePracticeAbilityState } from "./practiceAbilityValidation.js";
 import { validatePracticePerformanceState } from "./practicePerformanceValidation.js";
+import { validatePracticeLearningState } from "./practiceLearningValidation.js";
 import {
   createDefaultPracticeContextId,
   createSkillStatId,
@@ -37,6 +38,7 @@ const validators = Object.freeze({
   skillStat: validateSkillStat,
   abilityState: validatePracticeAbilityState,
   performanceState: validatePracticePerformanceState,
+  learningState: validatePracticeLearningState,
   sessionSummary: validateSessionSummary,
   reviewItem: validateReviewItem,
   customText: validateCustomText,
@@ -50,6 +52,7 @@ const normalizers = Object.freeze({
   skillStat: normalizeSkillStat,
   abilityState: (value) => value,
   performanceState: (value) => value,
+  learningState: (value) => value,
   sessionSummary: normalizeSessionSummary,
   reviewItem: (value) => value,
   customText: normalizeCustomTextMetadata,
@@ -83,6 +86,7 @@ const migrations = Object.freeze({
     5: (value) => ({ ...value, recordVersion: 6, skillEvidenceSummary: null }),
     6: (value) => ({ ...value, recordVersion: 7, abilityMeasurementSummary: null }),
     7: (value) => ({ ...value, recordVersion: 8, performanceMeasurementSummary: null }),
+    8: (value) => ({ ...value, recordVersion: 9, learningEvidenceSummary: null }),
   }),
   reviewItem: Object.freeze({
     1: (value) => ({ ...value, recordVersion: 2, contextId: createDefaultPracticeContextId(value.profileId) }),
@@ -133,7 +137,7 @@ function promoteForCurrentValidation(type, value, version) {
     });
   }
   if (type === "skillStat" && version === 2) return migratePracticeSkillStatV2ToV3(value);
-  if (type === "sessionSummary" && version <= 7) return {
+  if (type === "sessionSummary" && version <= 8) return {
     ...value,
     recordVersion: PRACTICE_RECORD_VERSIONS.sessionSummary,
     contextId: version === 1 ? createDefaultPracticeContextId(value.profileId) : value.contextId,
@@ -142,7 +146,8 @@ function promoteForCurrentValidation(type, value, version) {
     normalizationSummary: version <= 4 ? null : value.normalizationSummary ?? null,
     skillEvidenceSummary: version <= 5 ? null : value.skillEvidenceSummary ?? null,
     abilityMeasurementSummary: version <= 6 ? null : value.abilityMeasurementSummary ?? null,
-    performanceMeasurementSummary: null,
+    performanceMeasurementSummary: version <= 7 ? null : value.performanceMeasurementSummary ?? null,
+    learningEvidenceSummary: null,
   };
   if (type === "reviewItem" && version === 1) return {
     ...value,

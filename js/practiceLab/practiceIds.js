@@ -70,6 +70,12 @@ export function createPracticePerformanceStateId(profileId, contextId) {
   return `practice-performance_${[profileId, contextId].map(encodeIdentityPart).join("|")}`;
 }
 
+export function createPracticeLearningStateId(profileId, contextId, entityType, entityKey) {
+  if (arguments.length !== 4) throw new TypeError("createPracticeLearningStateId requires profileId, contextId, entityType, and entityKey");
+  if (!isPracticeId(profileId, "profile") || !isPracticeId(contextId, "context") || !["key", "bigram", "trigram", "word"].includes(entityType) || typeof entityKey !== "string" || !entityKey) throw new TypeError("Practice learning state identity is invalid");
+  return `practice-learning_${[profileId, contextId, entityType, entityKey].map(encodeIdentityPart).join("|")}`;
+}
+
 export function hashPracticeContent(value = "") {
   let hash = 0x811c9dc5;
   for (const character of String(value)) {

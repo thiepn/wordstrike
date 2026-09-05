@@ -82,12 +82,13 @@ function peerSet(contextId = contextA, residualMeanMs = 0) {
   return Array.from({ length: 9 }, (_, index) => canonicalStat({ contextId, entityType: "key", entityKey: String.fromCharCode(97 + index), index, residualMeanMs }));
 }
 
-test("PL12 model contracts remain unchanged inside the current PL14 storage/session/foundation envelope", () => {
-  assert.equal(PRACTICE_DATABASE_VERSION, 4);
+test("PL12 model contracts remain unchanged inside the current PL16 storage/session/foundation envelope", () => {
+  assert.equal(PRACTICE_DATABASE_VERSION, 5);
   assert.equal(PRACTICE_RECORD_VERSIONS.skillStat, 3);
-  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 8);
+  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 9);
   assert.equal(PRACTICE_RECORD_VERSIONS.checkpoint, 3);
-  assert.equal(PRACTICE_FOUNDATION_ANALYSIS_VERSION, 6);
+  assert.equal(PRACTICE_RECORD_VERSIONS.learningState, 1);
+  assert.equal(PRACTICE_FOUNDATION_ANALYSIS_VERSION, 7);
   assert.equal(PRACTICE_LIMITER_MODEL_VERSION, 1);
   assert.equal(PRACTICE_LIMITER_POLICY_VERSION, 1);
   assert.equal(PRACTICE_IMPACT_MODEL_VERSION, 1);

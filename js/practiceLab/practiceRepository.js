@@ -11,6 +11,13 @@ import { validatePracticePerformanceState, validatePracticePerformanceStateDelta
 import { validatePracticeAbilityObservation, validatePracticeAbilityState } from "./practiceAbilityValidation.js";
 import { mergePracticeSkillEvidence } from "./practiceSkillEvidenceMerge.js";
 import { validatePracticeSkillEvidenceBatch } from "./practiceSkillEvidenceDelta.js";
+import { createDefaultPracticeLearningState } from "./practiceLearningState.js";
+import { mergePracticeLearningObservation } from "./practiceLearningStateMerge.js";
+import {
+  validatePracticeLearningEvidenceSummary,
+  validatePracticeLearningObservationBatch,
+  validatePracticeLearningState,
+} from "./practiceLearningValidation.js";
 import {
   createDefaultPracticeContext,
   createPracticeContextRecord,
@@ -21,6 +28,7 @@ import {
   createPracticeContextId,
   createPracticeAbilityStateId,
   createPracticePerformanceStateId,
+  createPracticeLearningStateId,
   createPracticeQuarantineId,
   createSkillStatId,
 } from "./practiceIds.js";
@@ -55,6 +63,7 @@ const validators = Object.freeze({
   skillStats: validateSkillStat,
   abilityStates: validatePracticeAbilityState,
   performanceStates: validatePracticePerformanceState,
+  learningStates: validatePracticeLearningState,
   sessionSummaries: validateSessionSummary,
   reviewItems: validateReviewItem,
   customTexts: validateCustomText,
@@ -67,6 +76,7 @@ const recordTypesByStore = Object.freeze({
   skillStats: "skillStat",
   abilityStates: "abilityState",
   performanceStates: "performanceState",
+  learningStates: "learningState",
   sessionSummaries: "sessionSummary",
   reviewItems: "reviewItem",
   customTexts: "customText",
@@ -75,7 +85,7 @@ const recordTypesByStore = Object.freeze({
 });
 
 function recordId(record) {
-  return record?.performanceStateId || record?.abilityStateId || record?.contextId || record?.sessionId || record?.profileId || record?.statId || record?.reviewItemId || record?.customTextId || record?.presetId || null;
+  return record?.learningStateId || record?.performanceStateId || record?.abilityStateId || record?.contextId || record?.sessionId || record?.profileId || record?.statId || record?.reviewItemId || record?.customTextId || record?.presetId || null;
 }
 
 function validationError(storeName, record, validation, operation = "save") {
@@ -295,11 +305,23 @@ export function createPracticeRepository({ dataStore, manifestStore, now = Date.
   };
 
   const runRetention = async () => {
-    const [checkpoints, sessionSummaries, skillStats, reviewItems, quarantineRecords] = await Promise.all([
-      dataStore.list("activeSessionCheckpoints"), dataStore.list("sessionSummaries"), dataStore.list("skillStats"), dataStore.list("reviewItems"), dataStore.list("quarantine"),
+    const [checkpoints, sessionSummaries, skillStats, learningStates, reviewItems, quarantineRecords] = await Promise.all([
+      dataStore.list("activeSessionCheckpoints"),
+      dataStore.list("sessionSummaries"),
+      dataStore.list("skillStats"),
+      dataStore.list("learningStates"),
+      dataStore.list("reviewItems"),
+      dataStore.list("quarantine"),
     ]);
-    const plan = buildPracticeRetentionPlan({ now, checkpoints, sessionSummaries, skillStats, reviewItems, quarantine: quarantineRecords });
-    const deletions = [["activeSessionCheckpoints", plan.activeSessionCheckpoints], ["sessionSummaries", plan.sessionSummaries], ["reviewItems", plan.reviewItems], ["skillStats", plan.skillStats], ["quarantine", plan.quarantine]];
+    const plan = buildPracticeRetentionPlan({ now, checkpoints, sessionSummaries, skillStats, learningStates, reviewItems, quarantine: quarantineRecords });
+    const deletions = [
+      ["activeSessionCheckpoints", plan.activeSessionCheckpoints],
+      ["sessionSummaries", plan.sessionSummaries],
+      ["reviewItems", plan.reviewItems],
+      ["learningStates", plan.learningStates],
+      ["skillStats", plan.skillStats],
+      ["quarantine", plan.quarantine],
+    ];
     await dataStore.runTransaction(deletions.map(([store]) => store), "readwrite", async (transaction) => {
       for (const [storeName, ids] of deletions) for (const id of ids) await transaction.delete(storeName, id);
     });
@@ -436,6 +458,20 @@ export function createPracticeRepository({ dataStore, manifestStore, now = Date.
       return records.filter((record) => validateSkillStat(record).valid);
     },
 
+    async getLearningState(profileId, contextId, entityType, entityKey) {
+      await assertContextOwnership(profileId, contextId, { operation: "get-learning-state" });
+      return readValidated("learningStates", createPracticeLearningStateId(profileId, contextId, entityType, entityKey));
+    },
+    async listLearningStates(profileId = ensureManifest().profileId, contextId = null) {
+      const resolved = await resolveContextId(profileId, contextId);
+      const records = await dataStore.query("learningStates", "contextId", resolved);
+      return records.filter((record) => record.profileId === profileId && validatePracticeLearningState(record).valid);
+    },
+    async listLearningStateIds(profileId = ensureManifest().profileId, contextId = null) {
+      const states = await this.listLearningStates(profileId, contextId);
+      return states.map((state) => state.statId);
+    },
+
     async getAbilityState(profileId, contextId, channel) {
       await assertContextOwnership(profileId, contextId, { operation: "get-ability-state" });
       return readValidated("abilityStates", createPracticeAbilityStateId(profileId, contextId, channel));
@@ -465,6 +501,10 @@ export function createPracticeRepository({ dataStore, manifestStore, now = Date.
 
     async saveSessionSummary(summary) {
       validate("sessionSummaries", summary);
+      if (summary.learningEvidenceSummary != null) {
+        const learningValidation = validatePracticeLearningEvidenceSummary(summary.learningEvidenceSummary);
+        if (!learningValidation.valid) throw validationError("sessionSummaries", summary, learningValidation);
+      }
       await assertContextOwnership(summary.profileId, summary.contextId, { operation: "save-session" });
       const previous = await dataStore.get("sessionSummaries", summary.sessionId);
       if (previous) {
@@ -538,8 +578,12 @@ export function createPracticeRepository({ dataStore, manifestStore, now = Date.
     getStorageHealth() { return { status: ensureManifest().storageHealth, backend: dataStore.kind, databaseOpen: dataStore.isOpen }; },
     runPracticeRetention: runRetention,
 
-    async commitCompletedPracticeSession({ sessionSummary, skillEvidenceDeltas = [], abilityObservation = null, performanceStateDelta = null, updatedSkillStats = null, reviewItemChanges = [], updatedProfileSummary = null, clearCheckpoint = true }) {
+    async commitCompletedPracticeSession({ sessionSummary, skillEvidenceDeltas = [], abilityObservation = null, performanceStateDelta = null, learningObservationDeltas = [], updatedSkillStats = null, reviewItemChanges = [], updatedProfileSummary = null, clearCheckpoint = true }) {
       validate("sessionSummaries", sessionSummary);
+      if (sessionSummary.learningEvidenceSummary != null) {
+        const learningSummaryValidation = validatePracticeLearningEvidenceSummary(sessionSummary.learningEvidenceSummary);
+        if (!learningSummaryValidation.valid) throw practiceStorageError(PRACTICE_STORAGE_ERROR_CODES.VALIDATION_FAILED, "Practice learning evidence summary failed validation", { operation: "commit-session", storeName: "sessionSummaries", recordId: sessionSummary.sessionId, cause: learningSummaryValidation.errors });
+      }
       if (abilityObservation != null) {
         const abilityValidation = validatePracticeAbilityObservation(abilityObservation);
         if (!abilityValidation.valid) throw practiceStorageError(PRACTICE_STORAGE_ERROR_CODES.VALIDATION_FAILED, "Practice ability observation failed validation", { operation: "commit-session", storeName: "abilityStates", recordId: sessionSummary.sessionId, cause: abilityValidation.errors });
@@ -554,17 +598,21 @@ export function createPracticeRepository({ dataStore, manifestStore, now = Date.
       if (Array.isArray(updatedSkillStats) && updatedSkillStats.length) throw practiceStorageError(PRACTICE_STORAGE_ERROR_CODES.VALIDATION_FAILED, "Direct full skill-stat replacement is disabled; use canonical skill evidence deltas", { operation: "commit-session", storeName: "skillStats", recordId: sessionSummary.sessionId });
       const batchValidation = validatePracticeSkillEvidenceBatch(skillEvidenceDeltas, { sessionId: sessionSummary.sessionId, profileId: sessionSummary.profileId, contextId: sessionSummary.contextId });
       if (!batchValidation.valid) throw practiceStorageError(PRACTICE_STORAGE_ERROR_CODES.VALIDATION_FAILED, "Practice skill evidence batch failed validation", { operation: "commit-session", storeName: "skillStats", recordId: sessionSummary.sessionId, cause: batchValidation.errors });
+      const learningBatchValidation = validatePracticeLearningObservationBatch(learningObservationDeltas, { sessionId: sessionSummary.sessionId, profileId: sessionSummary.profileId, contextId: sessionSummary.contextId });
+      if (!learningBatchValidation.valid) throw practiceStorageError(PRACTICE_STORAGE_ERROR_CODES.VALIDATION_FAILED, "Practice learning observation batch failed validation", { operation: "commit-session", storeName: "learningStates", recordId: sessionSummary.sessionId, cause: learningBatchValidation.errors });
+      if (sessionSummary.learningEvidenceSummary && sessionSummary.learningEvidenceSummary.acquisitionObservationCount + sessionSummary.learningEvidenceSummary.transferObservationCount !== learningObservationDeltas.length) throw practiceStorageError(PRACTICE_STORAGE_ERROR_CODES.VALIDATION_FAILED, "Practice learning summary does not match observation-delta batch", { operation: "commit-session", storeName: "learningStates", recordId: sessionSummary.sessionId });
       reviewItemChanges.filter((change) => change?.action !== "delete").forEach((record) => validate("reviewItems", record));
       if (updatedProfileSummary) validate("profiles", updatedProfileSummary);
       const activeProfileId = ensureManifest().profileId;
       const mismatch = sessionSummary.profileId !== activeProfileId
         || reviewItemChanges.some((change) => change?.action !== "delete" && (change.profileId !== sessionSummary.profileId || change.contextId !== sessionSummary.contextId))
+        || learningObservationDeltas.some((delta) => delta.profileId !== sessionSummary.profileId || delta.contextId !== sessionSummary.contextId)
         || (abilityObservation && (abilityObservation.profileId !== sessionSummary.profileId || abilityObservation.contextId !== sessionSummary.contextId))
         || (performanceStateDelta && (performanceStateDelta.profileId !== sessionSummary.profileId || performanceStateDelta.contextId !== sessionSummary.contextId))
         || (updatedProfileSummary && updatedProfileSummary.profileId !== sessionSummary.profileId);
       if (mismatch) throw practiceStorageError(PRACTICE_STORAGE_ERROR_CODES.VALIDATION_FAILED, "Practice completion records must belong to the session profile/context", { operation: "commit-session", storeName: "profiles", recordId: sessionSummary.profileId });
       await assertContextOwnership(sessionSummary.profileId, sessionSummary.contextId, { operation: "commit-session" });
-      const stores = ["contexts", "sessionSummaries", "skillStats", "abilityStates", "performanceStates", "reviewItems", "profiles", "activeSessionCheckpoints", "meta"];
+      const stores = ["contexts", "sessionSummaries", "skillStats", "abilityStates", "performanceStates", "learningStates", "reviewItems", "profiles", "activeSessionCheckpoints", "meta"];
       const transactionResult = await writeWithQuotaRecovery("commit-session", () => dataStore.runTransaction(stores, "readwrite", async (transaction) => {
         await assertContextOwnership(sessionSummary.profileId, sessionSummary.contextId, { transaction, operation: "commit-session" });
         const existing = await transaction.get("sessionSummaries", sessionSummary.sessionId);
@@ -624,6 +672,28 @@ export function createPracticeRepository({ dataStore, manifestStore, now = Date.
           mergedStats.push(merged);
         }
         for (const merged of mergedStats) await transaction.put("skillStats", merged);
+
+        const mergedLearningStates = [];
+        for (const delta of learningObservationDeltas) {
+          const learningStateId = createPracticeLearningStateId(delta.profileId, delta.contextId, delta.entityType, delta.entityKey);
+          let state = await transaction.get("learningStates", learningStateId);
+          if (state) {
+            const migration = migratePracticeRecord("learningState", state);
+            if (!migration.ok) throw migration.error;
+            state = migration.value;
+          } else if (delta.kind === "acquisition") {
+            const skill = await transaction.get("skillStats", delta.statId);
+            if (!skill) throw practiceStorageError(PRACTICE_STORAGE_ERROR_CODES.VALIDATION_FAILED, "Practice acquisition learning state requires canonical skill stat", { operation: "commit-session", storeName: "learningStates", recordId: learningStateId });
+            state = createDefaultPracticeLearningState({ profileId: delta.profileId, contextId: delta.contextId, entityType: delta.entityType, entityKey: delta.entityKey, statId: delta.statId, now: () => new Date(delta.observation.completedAtUtc) });
+          } else {
+            continue;
+          }
+          const merged = mergePracticeLearningObservation(state, delta);
+          const validation = validatePracticeLearningState(merged);
+          if (!validation.valid) throw practiceStorageError(PRACTICE_STORAGE_ERROR_CODES.VALIDATION_FAILED, "Merged Practice learning state failed validation", { operation: "commit-session", storeName: "learningStates", recordId: learningStateId, cause: validation.errors });
+          mergedLearningStates.push(merged);
+        }
+        for (const merged of mergedLearningStates) await transaction.put("learningStates", merged);
         if (mergedAbilityState) await transaction.put("abilityStates", mergedAbilityState);
         if (mergedPerformanceState) await transaction.put("performanceStates", mergedPerformanceState);
         for (const change of reviewItemChanges) {
@@ -634,7 +704,7 @@ export function createPracticeRepository({ dataStore, manifestStore, now = Date.
         await transaction.put("sessionSummaries", sessionSummary);
         if (clearCheckpoint) await transaction.delete("activeSessionCheckpoints", sessionSummary.profileId);
         await transaction.put("meta", { key: "manifestReconciliation", status: "pending", sessionId: sessionSummary.sessionId, createdAt: toPracticeUtcIso(now), updatedAt: toPracticeUtcIso(now) });
-        return { committed: true, idempotent: false, mergedSkillStatCount: mergedStats.length, abilityUpdated: Boolean(mergedAbilityState), performanceUpdated: Boolean(mergedPerformanceState) };
+        return { committed: true, idempotent: false, mergedSkillStatCount: mergedStats.length, learningUpdated: mergedLearningStates.length, abilityUpdated: Boolean(mergedAbilityState), performanceUpdated: Boolean(mergedPerformanceState) };
       }));
       try {
         const reconciliationProfile = transactionResult.profileSummary ?? updatedProfileSummary;
