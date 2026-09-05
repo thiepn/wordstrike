@@ -6,6 +6,8 @@ on:
       - codex/pl14-performance-state-frontier
     paths:
       - scripts/pl14_apply.py
+      - scripts/pl14_fix1.py
+      - scripts/pl14_fix2.py
       - .github/workflows/pl14-apply.yml
 
 permissions:
