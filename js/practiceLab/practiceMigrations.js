@@ -22,6 +22,7 @@ import {
   createDefaultPracticeContextId,
   createSkillStatId,
 } from "./practiceIds.js";
+import { migratePracticeSkillStatV2ToV3 } from "./practiceSkillEvidenceMigration.js";
 import {
   PRACTICE_STORAGE_ERROR_CODES,
   clonePracticeValue,
@@ -54,11 +55,7 @@ const migrations = Object.freeze({
   profile: Object.freeze({
     0: (value) => ({ ...value, recordVersion: 1 }),
     1: (value) => ({ ...value, recordVersion: 2, lastTrainingDayKey: value.lastTrainingDayKey ?? null }),
-    2: (value) => ({
-      ...value,
-      recordVersion: 3,
-      activeContextId: createDefaultPracticeContextId(value.profileId),
-    }),
+    2: (value) => ({ ...value, recordVersion: 3, activeContextId: createDefaultPracticeContextId(value.profileId) }),
   }),
   skillStat: Object.freeze({
     1: (value) => {
@@ -70,41 +67,27 @@ const migrations = Object.freeze({
         statId: createSkillStatId(value.profileId, contextId, value.entityType, value.entityKey),
       };
     },
+    2: (value) => migratePracticeSkillStatV2ToV3(value),
   }),
   sessionSummary: Object.freeze({
-    1: (value) => ({
-      ...value,
-      recordVersion: 2,
-      contextId: createDefaultPracticeContextId(value.profileId),
-    }),
+    1: (value) => ({ ...value, recordVersion: 2, contextId: createDefaultPracticeContextId(value.profileId) }),
+    2: (value) => ({ ...value, recordVersion: 3, fluencySummary: null }),
+    3: (value) => ({ ...value, recordVersion: 4, errorSummary: null }),
+    4: (value) => ({ ...value, recordVersion: 5, normalizationSummary: null }),
+    5: (value) => ({ ...value, recordVersion: 6, skillEvidenceSummary: null }),
+  }),
+  reviewItem: Object.freeze({
+    1: (value) => ({ ...value, recordVersion: 2, contextId: createDefaultPracticeContextId(value.profileId) }),
+  }),
+  checkpoint: Object.freeze({
+    1: (value) => ({ ...value, recordVersion: 2, contextId: createDefaultPracticeContextId(value.profileId) }),
     2: (value) => ({
       ...value,
       recordVersion: 3,
-      fluencySummary: null,
-    }),
-    3: (value) => ({
-      ...value,
-      recordVersion: 4,
-      errorSummary: null,
-    }),
-    4: (value) => ({
-      ...value,
-      recordVersion: 5,
-      normalizationSummary: null,
-    }),
-  }),
-  reviewItem: Object.freeze({
-    1: (value) => ({
-      ...value,
-      recordVersion: 2,
-      contextId: createDefaultPracticeContextId(value.profileId),
-    }),
-  }),
-  checkpoint: Object.freeze({
-    1: (value) => ({
-      ...value,
-      recordVersion: 2,
-      contextId: createDefaultPracticeContextId(value.profileId),
+      metricsSnapshot: {
+        ...(value.metricsSnapshot ?? {}),
+        skillEvidenceTrackerSnapshot: null,
+      },
     }),
   }),
 });
@@ -120,11 +103,7 @@ function validateHistoricalRecord(type, value, version) {
       && typeof value.entityType === "string"
       && typeof value.entityKey === "string"
       && value.statId === createLegacySkillStatId(value.profileId, value.entityType, value.entityKey);
-    if (!validIdentity) errors.push({
-      path: "statId",
-      code: "IDENTITY_MISMATCH",
-      message: "legacy statId does not match the historical profile/entity identity",
-    });
+    if (!validIdentity) errors.push({ path: "statId", code: "IDENTITY_MISMATCH", message: "legacy statId does not match the historical profile/entity identity" });
   }
   return errors;
 }
@@ -138,25 +117,36 @@ function promoteForCurrentValidation(type, value, version) {
   };
   if (type === "skillStat" && version === 1) {
     const contextId = createDefaultPracticeContextId(value.profileId);
-    return {
+    return migratePracticeSkillStatV2ToV3({
       ...value,
-      recordVersion: PRACTICE_RECORD_VERSIONS.skillStat,
+      recordVersion: 2,
       contextId,
       statId: createSkillStatId(value.profileId, contextId, value.entityType, value.entityKey),
-    };
+    });
   }
-  if (type === "sessionSummary" && version <= 4) return {
+  if (type === "skillStat" && version === 2) return migratePracticeSkillStatV2ToV3(value);
+  if (type === "sessionSummary" && version <= 5) return {
     ...value,
     recordVersion: PRACTICE_RECORD_VERSIONS.sessionSummary,
     contextId: version === 1 ? createDefaultPracticeContextId(value.profileId) : value.contextId,
     fluencySummary: version <= 2 ? null : value.fluencySummary ?? null,
     errorSummary: version <= 3 ? null : value.errorSummary ?? null,
-    normalizationSummary: null,
+    normalizationSummary: version <= 4 ? null : value.normalizationSummary ?? null,
+    skillEvidenceSummary: null,
   };
-  if (["reviewItem", "checkpoint"].includes(type) && version === 1) return {
+  if (type === "reviewItem" && version === 1) return {
     ...value,
-    recordVersion: PRACTICE_RECORD_VERSIONS[type],
+    recordVersion: PRACTICE_RECORD_VERSIONS.reviewItem,
     contextId: createDefaultPracticeContextId(value.profileId),
+  };
+  if (type === "checkpoint" && version <= 2) return {
+    ...value,
+    recordVersion: PRACTICE_RECORD_VERSIONS.checkpoint,
+    contextId: version === 1 ? createDefaultPracticeContextId(value.profileId) : value.contextId,
+    metricsSnapshot: {
+      ...(value.metricsSnapshot ?? {}),
+      skillEvidenceTrackerSnapshot: null,
+    },
   };
   return value;
 }
@@ -164,13 +154,9 @@ function promoteForCurrentValidation(type, value, version) {
 function validateIntermediate(type, value, version, validate) {
   const historicalErrors = validateHistoricalRecord(type, value, version);
   if (historicalErrors.length) return { valid: false, errors: historicalErrors };
-  try {
-    return validate(promoteForCurrentValidation(type, value, version));
-  } catch (cause) {
-    return {
-      valid: false,
-      errors: [{ path: type, code: "TRANSITIONAL_VALIDATION_FAILED", message: cause?.message || "Historical Practice record could not be validated" }],
-    };
+  try { return validate(promoteForCurrentValidation(type, value, version)); }
+  catch (cause) {
+    return { valid: false, errors: [{ path: type, code: "TRANSITIONAL_VALIDATION_FAILED", message: cause?.message || "Historical Practice record could not be validated" }] };
   }
 }
 
@@ -199,13 +185,8 @@ function migrate({ input, type, versionField, targetVersion, normalize, validate
   let currentVersion = fromVersion;
   while (currentVersion < targetVersion) {
     const historicalErrors = validateHistoricalRecord(type, value, currentVersion);
-    if (historicalErrors.length) return failure(
-      PRACTICE_STORAGE_ERROR_CODES.MIGRATION_FAILED,
-      type + " failed historical validation before version " + (currentVersion + 1),
-      { cause: historicalErrors },
-    );
-    const migrateStep = migrations[type]?.[currentVersion]
-      ?? (currentVersion === 0 ? (current) => ({ ...current, [versionField]: 1 }) : null);
+    if (historicalErrors.length) return failure(PRACTICE_STORAGE_ERROR_CODES.MIGRATION_FAILED, type + " failed historical validation before version " + (currentVersion + 1), { cause: historicalErrors });
+    const migrateStep = migrations[type]?.[currentVersion] ?? (currentVersion === 0 ? (current) => ({ ...current, [versionField]: 1 }) : null);
     if (!migrateStep) return failure(PRACTICE_STORAGE_ERROR_CODES.MIGRATION_FAILED, `${type} has no migration from version ${currentVersion}`);
     const previousVersion = currentVersion;
     try { value = migrateStep(value); } catch (cause) {
