@@ -111,12 +111,13 @@ const committedId = createPracticeId("session", { uuid: () => "atomic-session-12
 const committed = createDefaultSessionSummary({ profileId, sessionId: committedId, now });
 const atomic = await repository.commitCompletedPracticeSession({
   sessionSummary: committed,
-  updatedSkillStats: [{ ...stat, sampleCount: 1, correctCount: 1 }],
+  skillEvidenceDeltas: [],
   clearCheckpoint: true,
 });
 assert.equal(atomic.committed, true);
 assert.equal(atomic.manifestUpdated, true);
 assert.equal(await repository.getActiveCheckpoint(), null);
+assert.deepEqual(await repository.getSkillStat(profileId, initialized.profile.activeContextId, "bigram", "ou"), stat);
 assert.equal((await repository.commitCompletedPracticeSession({ sessionSummary: committed })).idempotent, true);
 
 await repository.deleteCustomText(customTextId);
@@ -130,4 +131,4 @@ await repository.resetPracticeData();
 assert.equal(values.get("unrelated"), "keep-me");
 assert.equal((await dataStore.list("sessionSummaries")).length, 0);
 
-console.log("Practice memory repository CRUD, duplicate guards, checkpoint replacement, atomic commit, and scoped reset passed.");
+console.log("Practice memory repository CRUD, duplicate guards, checkpoint replacement, PL11 atomic completion, and scoped reset passed.");

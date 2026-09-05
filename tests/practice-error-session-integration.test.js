@@ -23,7 +23,7 @@ async function advanceAndInput(engine, harness, milliseconds, type, value = "") 
   return engine.handleInput(harness.input(type, value));
 }
 
-test("PL9 live events carry cursor/removal metadata and generic sessions persist canonical errorSummary", async () => {
+test("PL9 live events remain intact while PL11 sessions persist canonical errorSummary", async () => {
   const harness = await createPracticeSessionHarness({ suffix: "pl9-live", text: "aaaaaa" });
   const engine = createEngine(harness);
   await engine.prepare({ experiment: harness.experiment, configuration: {}, contentPlan: harness.contentPlan });
@@ -36,7 +36,7 @@ test("PL9 live events carry cursor/removal metadata and generic sessions persist
   const beforeComplete = engine.getMetricsSnapshot();
   const result = await engine.complete("manual-stop");
 
-  assert.equal(result.summary.recordVersion, 5);
+  assert.equal(result.summary.recordVersion, 6);
   assert.equal(result.summary.errorSummary.errorEpisodeCount, 1);
   assert.equal(result.summary.errorSummary.correctedEpisodeCount, 1);
   assert.equal(result.summary.errorSummary.incorrectCharactersRemoved, 1);
@@ -61,7 +61,7 @@ test("PL9 live events carry cursor/removal metadata and generic sessions persist
   assert.equal(Object.hasOwn(result.summary, "errorEpisodes"), false);
 });
 
-test("PL9 experiment analyzers receive frozen errors but cannot overwrite canonical errorSummary", async () => {
+test("PL9 experiment analyzers receive frozen errors inside PL11 foundation v4 but cannot overwrite canonical errorSummary", async () => {
   let received = null;
   let mutationThrew = false;
   const harness = await createPracticeSessionHarness({
@@ -88,7 +88,7 @@ test("PL9 experiment analyzers receive frozen errors but cannot overwrite canoni
   const result = await engine.complete("manual-stop");
 
   assert.ok(received?.foundationAnalysis?.errors);
-  assert.equal(received.foundationAnalysis.version, 3);
+  assert.equal(received.foundationAnalysis.version, 4);
   assert.equal(Object.isFrozen(received.foundationAnalysis), true);
   assert.equal(Object.isFrozen(received.foundationAnalysis.errors), true);
   assert.equal(mutationThrew, true);
@@ -97,7 +97,7 @@ test("PL9 experiment analyzers receive frozen errors but cannot overwrite canoni
   assert.equal(result.summary.errorSummary.errorEpisodeCount, 1);
 });
 
-test("PL9 active bounded error tracker state survives checkpoint restore without cross-restore invention", async () => {
+test("PL9 active bounded error tracker state survives PL11 checkpoint v3 restore without cross-restore invention", async () => {
   const harness = await createPracticeSessionHarness({ suffix: "pl9-restore", text: "aaaaaa" });
   const engine = createEngine(harness);
   await engine.prepare({ experiment: harness.experiment, configuration: {}, contentPlan: harness.contentPlan });
@@ -106,7 +106,7 @@ test("PL9 active bounded error tracker state survives checkpoint restore without
   await advanceAndInput(engine, harness, 100, "character", "x");
   await engine.flushCheckpoint("test", { force: true });
   const checkpoint = await harness.repository.getActiveCheckpoint(harness.profileId);
-  assert.equal(checkpoint.recordVersion, 2);
+  assert.equal(checkpoint.recordVersion, 3);
   assert.equal(checkpoint.metricsSnapshot.errorTrackerSnapshot.trackerVersion, 1);
   assert.ok(checkpoint.metricsSnapshot.errorTrackerSnapshot.activeEpisode);
 

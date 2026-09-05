@@ -3,7 +3,9 @@ import {
   PRACTICE_RECORD_VERSIONS,
   PRACTICE_STORE_NAMES,
 } from "./practiceConstants.js";
-import { createDefaultPracticeProfile } from "./practiceDefaults.js";
+import { createDefaultPracticeProfile, createDefaultSkillStat } from "./practiceDefaults.js";
+import { mergePracticeSkillEvidence } from "./practiceSkillEvidenceMerge.js";
+import { validatePracticeSkillEvidenceBatch } from "./practiceSkillEvidenceDelta.js";
 import {
   createDefaultPracticeContext,
   createPracticeContextRecord,
@@ -498,19 +500,19 @@ export function createPracticeRepository({ dataStore, manifestStore, now = Date.
     getStorageHealth() { return { status: ensureManifest().storageHealth, backend: dataStore.kind, databaseOpen: dataStore.isOpen }; },
     runPracticeRetention: runRetention,
 
-    async commitCompletedPracticeSession({ sessionSummary, updatedSkillStats = [], reviewItemChanges = [], updatedProfileSummary = null, clearCheckpoint = true }) {
+    async commitCompletedPracticeSession({ sessionSummary, skillEvidenceDeltas = [], updatedSkillStats = null, reviewItemChanges = [], updatedProfileSummary = null, clearCheckpoint = true }) {
       validate("sessionSummaries", sessionSummary);
-      updatedSkillStats.forEach((record) => validate("skillStats", record));
+      if (Array.isArray(updatedSkillStats) && updatedSkillStats.length) throw practiceStorageError(PRACTICE_STORAGE_ERROR_CODES.VALIDATION_FAILED, "Direct full skill-stat replacement is disabled; use canonical skill evidence deltas", { operation: "commit-session", storeName: "skillStats", recordId: sessionSummary.sessionId });
+      const batchValidation = validatePracticeSkillEvidenceBatch(skillEvidenceDeltas, { sessionId: sessionSummary.sessionId, profileId: sessionSummary.profileId, contextId: sessionSummary.contextId });
+      if (!batchValidation.valid) throw practiceStorageError(PRACTICE_STORAGE_ERROR_CODES.VALIDATION_FAILED, "Practice skill evidence batch failed validation", { operation: "commit-session", storeName: "skillStats", recordId: sessionSummary.sessionId, cause: batchValidation.errors });
       reviewItemChanges.filter((change) => change?.action !== "delete").forEach((record) => validate("reviewItems", record));
       if (updatedProfileSummary) validate("profiles", updatedProfileSummary);
       const activeProfileId = ensureManifest().profileId;
       const mismatch = sessionSummary.profileId !== activeProfileId
-        || updatedSkillStats.some((record) => record.profileId !== sessionSummary.profileId || record.contextId !== sessionSummary.contextId)
         || reviewItemChanges.some((change) => change?.action !== "delete" && (change.profileId !== sessionSummary.profileId || change.contextId !== sessionSummary.contextId))
         || (updatedProfileSummary && updatedProfileSummary.profileId !== sessionSummary.profileId);
       if (mismatch) throw practiceStorageError(PRACTICE_STORAGE_ERROR_CODES.VALIDATION_FAILED, "Practice completion records must belong to the session profile/context", { operation: "commit-session", storeName: "profiles", recordId: sessionSummary.profileId });
       await assertContextOwnership(sessionSummary.profileId, sessionSummary.contextId, { operation: "commit-session" });
-
       const stores = ["contexts", "sessionSummaries", "skillStats", "reviewItems", "profiles", "activeSessionCheckpoints", "meta"];
       const transactionResult = await writeWithQuotaRecovery("commit-session", () => dataStore.runTransaction(stores, "readwrite", async (transaction) => {
         await assertContextOwnership(sessionSummary.profileId, sessionSummary.contextId, { transaction, operation: "commit-session" });
@@ -526,16 +528,30 @@ export function createPracticeRepository({ dataStore, manifestStore, now = Date.
           const existingReview = await transaction.get("reviewItems", change.reviewItemId);
           if (existingReview && (existingReview.profileId !== sessionSummary.profileId || existingReview.contextId !== sessionSummary.contextId)) throw practiceStorageError(PRACTICE_STORAGE_ERROR_CODES.VALIDATION_FAILED, "Deleted review does not belong to the completing session context", { operation: "commit-session", storeName: "reviewItems", recordId: change.reviewItemId, recoverable: true });
         }
-        await transaction.put("sessionSummaries", sessionSummary);
-        for (const stat of updatedSkillStats) await transaction.put("skillStats", stat);
+        const mergedStats = [];
+        for (const delta of skillEvidenceDeltas) {
+          let stat = await transaction.get("skillStats", delta.statId);
+          if (stat) {
+            const migration = migratePracticeRecord("skillStat", stat);
+            if (!migration.ok) throw migration.error;
+            stat = migration.value;
+          } else {
+            stat = createDefaultSkillStat({ statId: delta.statId, profileId: delta.profileId, contextId: delta.contextId, entityType: delta.entityType, entityKey: delta.entityKey, now: () => new Date(delta.observedAt) });
+          }
+          const merged = mergePracticeSkillEvidence(stat, delta);
+          validate("skillStats", merged);
+          mergedStats.push(merged);
+        }
+        for (const merged of mergedStats) await transaction.put("skillStats", merged);
         for (const change of reviewItemChanges) {
           if (change?.action === "delete") await transaction.delete("reviewItems", change.reviewItemId);
           else await transaction.put("reviewItems", change);
         }
         if (updatedProfileSummary) await transaction.put("profiles", updatedProfileSummary);
+        await transaction.put("sessionSummaries", sessionSummary);
         if (clearCheckpoint) await transaction.delete("activeSessionCheckpoints", sessionSummary.profileId);
         await transaction.put("meta", { key: "manifestReconciliation", status: "pending", sessionId: sessionSummary.sessionId, createdAt: toPracticeUtcIso(now), updatedAt: toPracticeUtcIso(now) });
-        return { committed: true, idempotent: false };
+        return { committed: true, idempotent: false, mergedSkillStatCount: mergedStats.length };
       }));
       try {
         const reconciliationProfile = transactionResult.profileSummary ?? updatedProfileSummary;

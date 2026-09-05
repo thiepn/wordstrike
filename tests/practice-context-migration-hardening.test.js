@@ -114,7 +114,7 @@ assert.equal(migratedContext.inputMethod, "unknown");
 assert.equal(migratedContext.hardwareProfileId, null);
 assert.equal(await legacyDataStore.get("skillStats", legacyStat.statId), null);
 const migratedSkill = await legacyDataStore.get("skillStats", createSkillStatId(migrationProfileId, migrationContextId, "bigram", "th"));
-assert.equal(migratedSkill.recordVersion, 2);
+assert.equal(migratedSkill.recordVersion, 3);
 assert.equal(migratedSkill.contextId, migrationContextId);
 assert.equal((await legacyRepository.getSessionSummary(legacySession.sessionId)).contextId, migrationContextId);
 assert.equal((await legacyRepository.getReviewItem(legacyReview.reviewItemId)).contextId, migrationContextId);

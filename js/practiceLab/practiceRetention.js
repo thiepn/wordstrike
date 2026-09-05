@@ -39,30 +39,29 @@ function sessionDeletes(records, nowMs, preserveSessionIds) {
   return [...deletions];
 }
 
-function skillDeletes(records) {
-  const caps = {
-    bigram: PRACTICE_LIMITS.bigramStats,
-    trigram: PRACTICE_LIMITS.trigramStats,
-    word: PRACTICE_LIMITS.wordStats,
-  };
+function skillDeletes(records, reviewItems = []) {
+  const caps = { bigram: PRACTICE_LIMITS.bigramStats, trigram: PRACTICE_LIMITS.trigramStats, word: PRACTICE_LIMITS.wordStats };
+  const linked = new Set(reviewItems.map((record) => `${record.profileId}\0${record.contextId}\0${record.entityType}\0${record.entityKey}`));
+  const identity = (record) => `${record.profileId}\0${record.contextId}\0${record.entityType}\0${record.entityKey}`;
   const deletions = [];
+  const compare = (a, b) => (
+    (a.confidenceScore || 0) - (b.confidenceScore || 0)
+    || (a.evidence?.observation?.targetedSessionCount || 0) - (b.evidence?.observation?.targetedSessionCount || 0)
+    || (a.evidence?.opportunities?.count || 0) - (b.evidence?.opportunities?.count || 0)
+    || time(a.lastObservedAt || a.updatedAt) - time(b.lastObservedAt || b.updatedAt)
+    || (a.priority || 0) - (b.priority || 0)
+    || String(a.statId).localeCompare(String(b.statId))
+  );
   for (const [type, cap] of Object.entries(caps)) {
     const group = records.filter((record) => record.entityType === type);
     if (group.length <= cap) continue;
-    group.sort((a, b) => (
-      (a.confidenceScore || 0) - (b.confidenceScore || 0)
-      || (a.sampleCount || 0) - (b.sampleCount || 0)
-      || time(a.lastObservedAt || a.updatedAt) - time(b.lastObservedAt || b.updatedAt)
-      || (a.priority || 0) - (b.priority || 0)
-    ));
-    deletions.push(...group.slice(0, group.length - cap).map((record) => record.statId));
+    const candidates = group.filter((record) => !linked.has(identity(record))).sort(compare);
+    deletions.push(...candidates.slice(0, Math.min(candidates.length, group.length - cap)).map((record) => record.statId));
   }
-  const patterns = records.filter((record) => [
-    "punctuation-transition", "number-pattern", "symbol-pattern",
-  ].includes(record.entityType));
+  const patterns = records.filter((record) => ["punctuation-transition", "number-pattern", "symbol-pattern"].includes(record.entityType));
   if (patterns.length > PRACTICE_LIMITS.patternStats) {
-    patterns.sort((a, b) => (a.confidenceScore || 0) - (b.confidenceScore || 0) || time(a.updatedAt) - time(b.updatedAt));
-    deletions.push(...patterns.slice(0, patterns.length - PRACTICE_LIMITS.patternStats).map((record) => record.statId));
+    const candidates = patterns.filter((record) => !linked.has(identity(record))).sort(compare);
+    deletions.push(...candidates.slice(0, Math.min(candidates.length, patterns.length - PRACTICE_LIMITS.patternStats)).map((record) => record.statId));
   }
   return [...new Set(deletions)];
 }
@@ -107,7 +106,7 @@ export function buildPracticeRetentionPlan({
       .map((record) => record.profileId),
     sessionSummaries: sessionDeletes(sessionSummaries, nowMs, preserveSessionIds),
     reviewItems: reviewDeletes(reviewItems),
-    skillStats: skillDeletes(skillStats),
+    skillStats: skillDeletes(skillStats, reviewItems),
     quarantine: oldest(quarantine, "detectedAt")
       .slice(0, Math.max(0, quarantine.length - PRACTICE_LIMITS.quarantineRecords))
       .map((record) => record.quarantineId),

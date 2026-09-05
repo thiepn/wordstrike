@@ -69,6 +69,7 @@ export function buildPracticeSessionResult({
       fluencySummary: foundationAnalysis?.latency?.sessionSummary ?? null,
       errorSummary: foundationAnalysis?.errors?.sessionSummary ?? null,
       normalizationSummary: foundationAnalysis?.normalization?.sessionSummary ?? null,
+      skillEvidenceSummary: foundationAnalysis?.skills?.summary ?? null,
       beforeMetrics: analysis?.beforeMetrics ?? null,
       afterMetrics: analysis?.afterMetrics ?? null,
       transferMetrics: analysis?.transferMetrics ?? null,

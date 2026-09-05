@@ -1,179 +1,260 @@
 # Practice Lab Data Architecture
 
-Status: PL5 context identity foundation + PL8 latency + PL9 error/recovery + PL10 context/typability normalization
-Database generation: 2
-Runtime integration: explicit Practice-only use; public Practice remains developer gated
+Status: current through PL11 contextual skill aggregation and evidence
+
+Database structural version: **2**
 
 ## 1. Canonical identity boundary
 
-Practice adaptive evidence is now identified by:
+All durable adaptive evidence is scoped by:
 
-~~~text
+```text
 PROFILE
   ↓
 CONTEXT
   ↓
 EVIDENCE
-~~~
+```
 
-The durable context boundary exists so English/QWERTY, German/QWERTZ, software-keyboard, alternative-layout, and future hardware-specific evidence cannot be silently mixed. Fine-grained aggregation across contexts is not a default repository behavior.
+Canonical skill identity is:
 
-The authoritative PL5 contract is also documented in **PRACTICE_LAB_CONTEXT_IDENTITY.md**.
+```text
+profileId + contextId + entityType + entityKey
+```
 
-## 2. Protected boundaries
+Current profile preferences such as locale or layout never retroactively relabel historical evidence. Session/checkpoint/stat records carry their own immutable context identity.
 
-Practice persistence remains completely separate from **wordstrike_save**, ranked Typing Test records, Campaign, Endless, Daily Strike, Arcade Rush, leaderboard submissions, authentication, access tokens, Supabase, and global leaderboards. Practice modules do not require auth or cloud services.
+## 2. Protected storage boundary
 
-Raw per-key input traces remain memory-bounded session data. Durable Practice storage contains summaries and aggregates, not continuous keyboard telemetry.
+Practice persistence is isolated from `wordstrike_save`, Campaign, Endless, Arcade Rush, ranked Typing Test records, leaderboard submissions, authentication, Supabase, and cloud state. Practice reset code operates only on namespaced Practice storage.
+
+Raw per-input traces and high-frequency transition details remain bounded in session memory. Durable storage contains compact summaries/aggregates, not continuous keyboard telemetry.
 
 ## 3. Storage tiers
 
-| Tier | Owns | Must not own |
+| Tier | Owns | Does not own |
 | --- | --- | --- |
-| Session memory | normalized input, high-frequency timing, bounded event trace, uncommitted observations | durable history |
-| localStorage manifest | settings, profile/database pointer, onboarding/assessment cache, dashboard cache, storage health | context identity, histories, custom text bodies, skill maps |
-| IndexedDB | profiles, contexts, skill evidence, summaries, reviews, custom text, presets, one checkpoint/profile, quarantine, metadata | ranked/auth/cloud state |
+| Session memory | normalized input, typing state, bounded event/error state, PL10 transient normalized transitions, PL11 uncommitted entity deltas | durable history |
+| localStorage manifest | settings/defaults, profile/database pointer, dashboard/onboarding/health cache | context identity, skill maps, histories, raw text |
+| IndexedDB | profile/context records, skillStats, session summaries, reviews, custom texts, presets, one checkpoint/profile, quarantine, metadata | ranked/auth/cloud state |
 
-The namespaced manifest remains **wordstrike.practice.manifest.v1** at schema version 1. Its database pointer is reconciled to IndexedDB structural version 2. Canonical **activeContextId** lives only on the profile in IndexedDB; PL5 does not duplicate it into the manifest.
+The manifest remains `wordstrike.practice.manifest.v1`. Canonical `activeContextId` lives on the profile record in IndexedDB.
 
 ## 4. IndexedDB structural version 2
 
-Database: **wordstrike-practice-lab**
+Database: `wordstrike-practice-lab`
+
+PL11 does **not** change stores or indexes, so there is no structural version bump.
 
 | Store | Key path | Important indexes |
 | --- | --- | --- |
-| meta | key | none |
-| profiles | profileId | updatedAt |
-| contexts | contextId | profileId, updatedAt, lastUsedAt, unique [profileId, fingerprint] |
-| skillStats | statId | profileId, contextId, entityType, updatedAt, priority, confidenceLevel, masteryState, unique [profileId, contextId, entityType, entityKey] |
-| sessionSummaries | sessionId | profileId, contextId, experimentId, startedAtUtc, completedAtUtc, status, localDayKey |
-| reviewItems | reviewItemId | profileId, contextId, dueAtUtc, localDueDayKey, state, entityType, entityKey, unique [profileId, contextId, entityType, entityKey] |
-| customTexts | customTextId | profileId, updatedAt, lastUsedAt, normalizedTitle |
-| presets | presetId | profileId, experimentId, updatedAt |
-| activeSessionCheckpoints | profileId | unique sessionId, expiresAt |
-| quarantine | quarantineId | sourceStore, detectedAt |
+| `meta` | `key` | none |
+| `profiles` | `profileId` | `updatedAt` |
+| `contexts` | `contextId` | `profileId`, `updatedAt`, `lastUsedAt`, unique `[profileId, fingerprint]` |
+| `skillStats` | `statId` | `profileId`, `contextId`, `entityType`, `updatedAt`, `priority`, `confidenceLevel`, `masteryState`, unique `[profileId, contextId, entityType, entityKey]` |
+| `sessionSummaries` | `sessionId` | `profileId`, `contextId`, `experimentId`, `startedAtUtc`, `completedAtUtc`, `status`, `localDayKey` |
+| `reviewItems` | `reviewItemId` | `profileId`, `contextId`, `dueAtUtc`, `localDueDayKey`, `state`, `entityType`, `entityKey`, unique `[profileId, contextId, entityType, entityKey]` |
+| `customTexts` | `customTextId` | `profileId`, `updatedAt`, `lastUsedAt`, `normalizedTitle` |
+| `presets` | `presetId` | `profileId`, `experimentId`, `updatedAt` |
+| `activeSessionCheckpoints` | `profileId` | unique `sessionId`, `expiresAt` |
+| `quarantine` | `quarantineId` | `sourceStore`, `detectedAt` |
 
-Database upgrade reconciles declared stores/indexes inside the IndexedDB version-change transaction. It explicitly removes the obsolete **skillStats.profileEntity** and **reviewItems.profileEntity** indexes, creates the context-aware replacements, and never deletes unknown stores blindly.
+The PL5 v1→v2 structural migration removed the contextless skill/review uniqueness indexes and created context-aware replacements. PL11 reuses that topology.
 
-Fresh-v2 creation and v1→v2 upgrade are tested to converge on the same declared structure.
-
-## 5. Record versions
+## 5. Current record versions
 
 | Record | Version |
 | --- | ---: |
 | context | 1 |
 | profile | 3 |
-| skillStat | 2 |
-| sessionSummary | 5 |
+| skillStat | 3 |
+| sessionSummary | 6 |
 | reviewItem | 2 |
-| checkpoint | 2 |
+| checkpoint | 3 |
 | customText | 1 |
 | preset | 1 |
 | quarantine | 1 |
 
-Database, record, session, experiment, and generator versions remain independent contracts.
+Related transient contracts:
 
-## 6. Context record
+| Contract | Version |
+| --- | ---: |
+| foundationAnalysis | 4 |
+| PL11 skill evidence schema | 1 |
+| PL11 evidence policy | 1 |
+| PL11 evidence delta | 1 |
+| PL11 evidence confidence | 1 |
+| PL11 tracker checkpoint snapshot | 1 |
 
-A Practice context contains **contextId**, **profileId**, timestamps, **dataLocale**, **keyboardLayout**, **inputMethod**, nullable **hardwareProfileId**, and a versioned deterministic **fingerprint**.
+## 6. Context identity
 
-Context normalization is conservative. Locale strings are trimmed, underscore separators may become hyphens, malformed/empty values are rejected, and layout identifiers are trimmed/lowercased within a bounded safe-string contract. Input method is exactly **unknown**, **physical**, or **software**. PL5 never infers input method or keyboard hardware from user agent, screen size, or touch support.
+A context contains `contextId`, `profileId`, timestamps, `dataLocale`, `keyboardLayout`, `inputMethod`, nullable `hardwareProfileId`, and a deterministic versioned fingerprint.
 
-Fingerprint semantics are explicitly versioned. One profile may own at most one context for a normalized fingerprint. Existing context identity is immutable: a saved contextId cannot later be reassigned to another profile or fingerprint.
+`inputMethod` is exactly `unknown`, `physical`, or `software`. Historical/default contexts use `unknown`; the system does not infer physical/software hardware from browser or screen characteristics.
 
-## 7. Deterministic default context
+Existing context identity is immutable. A saved `contextId` cannot later change owner or fingerprint. One profile has at most one context for a normalized fingerprint.
 
-Every profile has a deterministic default context ID derived only from profileId. It is stable across reloads and does not depend on the clock or browser locale.
+## 7. Profile preference semantics
 
-The default context uses the profile's existing locale/layout preferences plus:
+Profile v3 retains `dataLocale` and `keyboardLayout` as defaults/preferences and stores required `activeContextId`. These preference fields are not sufficient identity for historical adaptive evidence.
 
-~~~text
-inputMethod: "unknown"
-hardwareProfileId: null
-~~~
+Switching active context affects future sessions only. It never relabels prior skill stats, summaries, reviews, or an existing checkpoint.
 
-Historical v1 evidence is mapped to this default context because old records did not distinguish physical from software input. PL5 never invents missing historical precision.
+## 8. skillStat v3
 
-## 8. Profile and settings semantics
+PL11 advances `skillStat` from v2 to v3 without changing its primary key or indexes.
 
-Profile v3 adds required **activeContextId** while retaining **dataLocale** and **keyboardLayout**. Those retained fields are defaults/preferences for future context creation; they are no longer sufficient identity for persisted skill evidence.
+A canonical v3 skill stat preserves identity and later-phase judgment fields, but replaces old canonical attempt/latency interpretation with explicit versioned evidence:
 
-Likewise **settings.keyboardLayout** remains a preference. No context-sensitive query may infer historical identity from current settings. Evidence identity is the record's **contextId**.
+```text
+identity
+recordVersion: 3
+evidenceVersion: 1
+evidence
+  opportunities / first-pass accuracy
+  timing
+  word launch timing where applicable
+  primary error evidence
+  observation diversity/breadth
+  role lanes
+confidenceScore
+confidenceLevel
+lastObservedAt
+lastPractisedAt
+legacyEvidenceV2
+judgment fields preserved for later phases
+```
 
-## 9. Context-sensitive records
+PL11 itself does not update `weaknessScore`, `priority`, `masteryState`, `recentTrend`, `successfulReviewCount`, or `failedReviewCount`.
 
-### Skill statistics
+### Supported new evidence entities
 
-Skill identity is now:
+PL11 creates new evidence only for:
 
-~~~text
-profileId + contextId + entityType + entityKey
-~~~
+- `key`
+- `bigram`
+- `trigram`
+- `word`
 
-**createSkillStatId()** requires all four components and has no contextless overload. Skill-stat v2 validation verifies the ID against that exact identity.
+Historical pattern entity records may migrate for preservation but are not newly emitted by PL11 v1.
 
-### Review items
+## 9. v2→v3 skill migration
 
-Canonical uniqueness is one review item per **profile/context/entity**. The same entity may have independent review state in multiple contexts. Repository and IndexedDB uniqueness both enforce this boundary.
+Migration is sequential, cloned, deterministic, validation-backed, future-version rejecting, and idempotent.
 
-### Session summaries
+A pristine/default v2 record migrates to empty canonical v3 evidence with `legacyEvidenceV2: null`.
 
-Every summary permanently stores the context in which the session produced evidence. Historical summaries never derive context later from the profile's current active context.
+A non-empty v2 record preserves its old fixed accumulator payload in `legacyEvidenceV2`, while canonical v3 first-pass/contextual evidence starts empty with confidence `0 / none`. This avoids fabricating PL11 semantics that old records did not contain: first-pass opportunities, role lanes, contextual breadth, PL10 residual attribution, and PL9 primary episode attribution.
 
-### Checkpoints
+Legacy v2 evidence never contributes to v3 evidence confidence.
 
-The one-checkpoint-per-profile architecture remains. Each checkpoint now also stores immutable **contextId**. Restore resolves that exact context and returns a recoverable failure if it is missing/corrupt; it never substitutes today's active context.
+## 10. PL11 evidence semantics
 
-## 10. Migration and bounded reconciliation
+An opportunity is one first encounter with an expected unit during a session. Correction retries do not add opportunities. Key/bigram/trigram opportunity correctness is tied to the terminal expected position's first attempt. A word opportunity is correct only if every position in that word was correct on first encounter.
 
-Record migration remains cloned, sequential, deterministic, validation-backed, future-version rejecting, and idempotent.
+Direct targeting applies only to an exact target entity. Component/containing entities remain incidental unless separately targeted.
 
-PL5 adds:
+Timing evidence keeps fluent raw latency, fluent normalized residual, and disfluent normalized residual separate. Word launch timing is stored separately from word-internal execution timing.
 
-- profile 2→3: deterministic activeContextId;
-- skillStat 1→2: deterministic default context plus recomputed four-part statId;
-- sessionSummary 1→2: deterministic default context;
-- reviewItem 1→2: deterministic default context;
-- checkpoint 1→2: deterministic default context.
+Error evidence comes from PL9 compact primary episode attribution and remains observational rather than causal.
 
-Historical skill-stat identity is validated against the actual v1 profile/entity ID contract before remapping. Current-version validators never accept contextless records; only migration adapters understand historical schemas.
+## 11. Evidence roles
 
-Storage initialization performs one bounded PL5 reconciliation over the retained Practice stores. It creates missing deterministic default contexts from profile defaults, validates ownership, backfills context-sensitive records, replaces old skill primary keys, and writes the PL5 completion marker only after successful reconciliation. Subsequent initialization is cheap and does not rescan all Practice evidence indefinitely.
+Canonical role enum:
 
-If both a legacy skill record and canonical v2 record resolve to one new key, semantically equivalent duplicates collapse to the canonical record. Independent evidence that cannot be safely merged is quarantined; PL5 does not invent statistical merge formulas.
+```text
+training
+transfer
+benchmark
+diagnostic
+custom
+unclassified
+```
 
-Malformed records follow bounded quarantine/recovery policy. An invalid active profile/context fails closed and cannot mark PL5 migration complete.
+Protected corpus roles require trusted content provenance/content-use validation and cannot be spoofed by arbitrary experiment metadata. Role is frozen for the session and retained by checkpoint v3.
 
-## 11. Repository query and ownership contracts
+Role lanes are bounded aggregates, not histories.
 
-Context repository operations support get/list/save/create, active-context resolution, and atomic active-context switching. Logical duplicate contexts reuse the existing canonical record where possible.
+## 12. Custom Text privacy
 
-Context-sensitive adaptation queries are context-specific by default. Explicit cross-context administrative methods are named as such. Session history may list all contexts, but each summary always exposes its own contextId.
+Default PL11 policy does not create durable `word` skill entities from Custom Text. Local motor evidence for keys, bigrams, and trigrams remains allowed.
 
-Every context-sensitive write verifies **context.profileId === record.profileId**. Atomic session completion verifies the summary context and rejects skill/review/checkpoint changes from any other profile/context before committing.
+Neither skill stats nor checkpoints persist full Custom Text, sentence excerpts, containing-word lists, raw event traces, or growing session-ID histories.
 
-Switching active context changes future evidence only. It never relabels prior stats, sessions, reviews, or an existing checkpoint.
+## 13. Evidence confidence
 
-## 12. Session completion and retention
+PL11 confidence is evidence confidence—not skill/mastery probability. It combines quantity with session diversity, day diversity, and bounded contextual breadth under a versioned policy. One extremely large session cannot alone saturate high confidence.
 
-Completed-session persistence remains atomic across summaries, stats, reviews, profile updates, checkpoints, and reconciliation metadata. A failed mixed-context commit produces no partial session write and preserves existing recovery semantics.
+Only general evidence confidence is persisted in the stat. Dimension-specific confidence for accuracy, fluent timing, normalized residual, disfluency, errors, or word launch is derived from the stored canonical evidence when needed.
 
-Retention caps remain bounded. Skill stats are never merged across contexts, and review deduplication keys include contextId. Existing session/stat/review/quarantine limits otherwise remain unchanged.
+## 14. SessionSummary v6
 
-## 13. Reset and privacy
+Session summary v6 adds nullable compact `skillEvidenceSummary` beside the existing PL8 `fluencySummary`, PL9 `errorSummary`, and PL10 `normalizationSummary`.
 
-**resetPracticeData()** clears all ten Practice stores, including **contexts**, plus the three namespaced Practice manifest keys. It never calls **localStorage.clear()** and never touches gameplay/ranked/auth storage.
+The summary stores counts/coverage/policy metadata only; per-entity deltas are transient and are explicitly forbidden from session summaries. Historical v5 summaries migrate with `skillEvidenceSummary: null` because older summaries cannot reconstruct PL11 entity evidence.
 
-Contexts are durable identity records. PL5 implements no arbitrary context deletion/archive UI because dependent historical evidence would require explicit handling.
+Raw events, normalized transition arrays, PL11 entity deltas, private Custom Text excerpts, leaderboard payloads, and auth state remain forbidden.
 
-## 14. Explicit PL5 non-goals
+## 15. Checkpoint v3
 
-PL5 does not implement physical/software auto-detection, a context-selection UI, hardware keyboard profiles, multilingual corpora, ability/weakness models, Coach logic, adaptive experiments, assessment UI, advanced telemetry, leaderboard behavior, or cloud sync.
+Checkpoint v3 retains existing identity/content/typing/metrics state and adds bounded `skillEvidenceTrackerSnapshot` inside `metricsSnapshot`.
 
-## 15. PL10 durable normalization evidence
+The snapshot preserves:
 
-PL10 keeps IndexedDB structural version **2** and advances only **sessionSummary** from v4 to v5. The new nullable **normalizationSummary** stores compact versioned context/typability evidence. Historical v4 summaries migrate with **normalizationSummary: null**; PL10 never reconstructs normalized residuals or text difficulty from older WPM/latency/error aggregates.
+- frozen evidence role;
+- first-attempt cursor frontier;
+- current word first-pass state;
+- bounded admitted entity evidence;
+- primary-error drain boundary;
+- truncation/coverage metadata.
 
-Durable normalization evidence may contain the frozen context fingerprint, locale/layout/input method, transition-normalization coverage/residual aggregates, and compact text-difficulty/reference metadata. It does **not** persist raw text, per-transition residual traces, full feature vectors, entity residual maps, frequency tables, hardware nicknames, browser/device fingerprints, or leaderboard fields.
+Historical v2 checkpoints migrate with `skillEvidenceTrackerSnapshot: null`. Restore remains valid, but PL11 starts from the restored cursor with `partial-session` accuracy coverage rather than pretending missing pre-restore evidence was observed.
 
-The exact model contract and protected-partition rules are documented in **PRACTICE_LAB_CONTEXT_TYPABILITY_MODEL.md**.
+## 16. Atomic session commit
+
+The canonical session engine supplies `skillEvidenceDeltas`; experiment analyzers do not supply full canonical skill-stat records.
+
+Before committing, the repository validates:
+
+- session/profile/context identity;
+- context ownership;
+- the entire delta batch and each stat ID;
+- review/profile/checkpoint ownership;
+- merged v3 skill-stat validity.
+
+Inside one read/write transaction it loads/migrates or creates each stat, merges its one-session delta, writes merged stats, applies review/profile mutations, writes the session summary, clears the checkpoint, and marks reconciliation metadata.
+
+Any failure aborts the transaction.
+
+## 17. Exactly-once evidence application
+
+`sessionId` is the commit idempotency boundary. If an identical completed summary already exists, commit returns idempotent success **before** applying skill evidence. If the same `sessionId` is associated with a different summary, commit fails as a duplicate/conflict.
+
+This avoids duplicate skill evidence on retry without storing unbounded applied-session-ID lists on every stat.
+
+Direct non-empty `updatedSkillStats` replacement is rejected on the canonical completion API; PL11 canonical writes use evidence deltas only.
+
+## 18. Retention
+
+Existing global skill/review/session/quarantine caps remain bounded. Skill records are never merged across contexts.
+
+PL11 low-confidence pruning uses canonical v3 evidence confidence and deterministic tie-breakers. At equal confidence, purely incidental evidence is less protected than targeted evidence where practical. Review-linked entities remain protected by current repository integrity rules.
+
+Per-session admission is also bounded. Direct target capacity is reserved ahead of incidental entities, and truncation/omission is represented explicitly rather than silently pretending complete coverage.
+
+## 19. Reset and privacy
+
+`resetPracticeData()` clears all Practice stores, including contexts, plus the namespaced Practice manifest keys. It does not call `localStorage.clear()` and does not touch gameplay/ranked/auth/cloud storage.
+
+Durable PL11 data is local observational evidence. It does not create leaderboard payloads, remote profiles, browser fingerprints, hardware nicknames, or raw keyboard telemetry.
+
+## 20. Later-phase contract
+
+PL11 ends at evidence accumulation. Later phases may interpret it but must not silently rewrite the measurement definitions:
+
+- PL12: limiter/weakness interpretation and impact;
+- PL15: mastery;
+- PL16: trends and learning curves;
+- PL17: review semantics.
+
+The dedicated PL11 contextual skill aggregation/evidence-model document is authoritative for first-pass opportunity rules, timing lanes, primary error attribution, confidence policy, role semantics, admission bounds, and checkpoint compaction.

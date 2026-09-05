@@ -13,6 +13,8 @@ import { createPracticeEventBuffer } from "./practiceEventBuffer.js";
 import { buildPracticeFoundationAnalysis } from "./practiceFoundationAnalysis.js";
 import { createPracticeErrorTracker } from "./practiceErrorTracker.js";
 import { createPracticeSessionContextSnapshot } from "./practiceContextFeatures.js";
+import { resolvePracticeEvidenceRole } from "./practiceEvidenceRole.js";
+import { createPracticeSkillEvidenceTracker } from "./practiceSkillEvidenceCollector.js";
 import {
   buildPracticeCheckpoint,
   validatePracticeCheckpointRestore,
@@ -92,6 +94,8 @@ export function createPracticeSessionEngine({
   let metrics = createPracticeMetricsCollector();
   let errorTracker = createPracticeErrorTracker();
   let normalizationContext = null;
+  let skillEvidenceTracker = null;
+  let evidenceRole = "unclassified";
   const eventBuffer = createPracticeEventBuffer({ capacity: checkpointPolicy.eventCapacity ?? PRACTICE_SESSION_LIMITS.eventBuffer });
   const subscribers = new Set();
   let snapshotVersion = 0;
@@ -291,6 +295,7 @@ export function createPracticeSessionEngine({
       recentInputTail: eventBuffer.getTail(PRACTICE_SESSION_LIMITS.checkpointRecentEvents),
       eventTraceMetadata: eventBuffer.getMetadata(),
       errorTrackerSnapshot: errorTracker.checkpointSnapshot({ contentHash: contentPlan.contentHash, cursorIndex: typingState.cursorIndex }),
+      skillEvidenceTrackerSnapshot: skillEvidenceTracker?.checkpointSnapshot() ?? null,
       startedAtUtc,
       sessionTimeContext,
       activeElapsedMs: activeAt(),
@@ -359,6 +364,16 @@ export function createPracticeSessionEngine({
     experiment = nextExperiment;
     configuration = freezeDeep(clonePracticeValue(nextConfiguration));
     contentPlan = nextContentPlan;
+    evidenceRole = resolvePracticeEvidenceRole({ contentPlan, context: normalizationContext });
+    skillEvidenceTracker = createPracticeSkillEvidenceTracker({
+      sessionId,
+      profileId,
+      contextId,
+      contentPlan,
+      context: normalizationContext,
+      evidenceRole,
+      segmenter,
+    });
     typingState = createPracticeTypingState(contentPlan, { segmenter });
     transition("ready", "prepare");
     emit("prepared");
@@ -415,16 +430,18 @@ export function createPracticeSessionEngine({
           const completedUnit = contentPlan.units.find((candidate) => candidate.unitId === unitId);
           if (completedUnit) metrics.recordUnitCompletion(completedUnit, typingState.typed, activeMs);
         }
+        const isFirstAttempt = skillEvidenceTracker.recordInsertion({ position: outcome.position, correctness: outcome.correctness });
         const errorEvent = {
           eventIndex: eventBuffer.totalEventCount + 1, eventTraceVersion: PRACTICE_EVENT_TRACE_VERSION,
           timingSegmentId, timingSegmentStartReason: hasInsertionInTimingSegment ? null : timingSegmentStartReason,
           type: input.type, entered: value, expected: outcome.expected, textPosition: outcome.position,
           cursorBefore, cursorAfter: typingState.cursorIndex, unitId: outcome.unitId, correctness: outcome.correctness,
           correctedLater: false, monotonicTimestampMs: input.monotonicTimestampMs, relativeActiveTimestampMs: activeMs,
-          latencyFromPriorInsertionMs: latency, source: input.source, targetEntityMatches: [],
+          latencyFromPriorInsertionMs: latency, source: input.source, targetEntityMatches: [], isFirstAttempt,
         };
         eventBuffer.push(errorEvent);
         errorTracker.consume(errorEvent);
+        for (const episode of errorTracker.drainClosedEpisodes()) skillEvidenceTracker.recordClosedEpisode(episode);
         hasInsertionInTimingSegment = true;
         markDirty(true);
       }
@@ -444,10 +461,11 @@ export function createPracticeSessionEngine({
         removedStartPosition: removed.length ? typingState.cursorIndex : null, correctionPolicy, accepted: outcome.accepted,
         stateChanged: outcome.stateChanged, unitId: typingState.currentUnit?.unitId ?? null, correctness: null, correctedLater: false,
         monotonicTimestampMs: input.monotonicTimestampMs, relativeActiveTimestampMs: activeMs, latencyFromPriorInsertionMs: null,
-        source: input.source, targetEntityMatches: [],
+        source: input.source, targetEntityMatches: [], isFirstAttempt: null,
       };
       eventBuffer.push(errorEvent);
       errorTracker.consume(errorEvent);
+      for (const episode of errorTracker.drainClosedEpisodes()) skillEvidenceTracker.recordClosedEpisode(episode);
     }
     const completionReason = outcome.accepted ? evaluateCompletion() : null;
     const snapshot = emit("input");
@@ -509,6 +527,7 @@ export function createPracticeSessionEngine({
     const next = appendPracticeContentPlan(contentPlan, addition, { segmenter });
     contentPlan = next;
     typingState.setContentPlan(next);
+    skillEvidenceTracker?.setContentPlan(next);
     markDirty(false);
     emit("content-appended");
     const reason = evaluateCompletion();
@@ -523,8 +542,11 @@ export function createPracticeSessionEngine({
     return { completed: true, result: await complete(reason) };
   };
 
-  const analyzeFoundation = () => {
+  const analyzeFoundation = ({ status, observedAt }) => {
     try {
+      for (const episode of errorTracker.drainClosedEpisodes()) skillEvidenceTracker.recordClosedEpisode(episode);
+      const activeEpisode = errorTracker.previewActiveEpisode();
+      if (activeEpisode) skillEvidenceTracker.recordClosedEpisode(activeEpisode);
       return buildPracticeFoundationAnalysis({
         events: eventBuffer.getTrace(),
         traceMetadata: eventBuffer.getMetadata(),
@@ -532,6 +554,12 @@ export function createPracticeSessionEngine({
         contentPlan,
         context: normalizationContext,
         segmenter,
+        skillEvidenceTracker,
+        skillEvidenceFinalize: {
+          status,
+          observedAt,
+          localDayKey: sessionTimeContext?.localDayKey ?? getPracticeTimeContext(wallDate()).localDayKey,
+        },
       });
     } catch (cause) {
       throw sessionError(PRACTICE_SESSION_ERROR_CODES.ANALYSIS_FAILED, "Practice foundation analysis failed", "foundation-analysis", true, cause);
@@ -572,11 +600,13 @@ export function createPracticeSessionEngine({
     if (checkpointWrite) await checkpointWrite;
     let foundationAnalysis;
     let analysis;
+    completedAtUtc = wallIso();
     try {
-      foundationAnalysis = analyzeFoundation();
+      foundationAnalysis = analyzeFoundation({ status, observedAt: completedAtUtc });
       analysis = await analyze(foundationAnalysis);
     } catch (error) {
       finalizationState = "error";
+      completedAtUtc = null;
       lastErrorCode = error.code;
       if (lifecycleState === "active") {
         transition("paused", "analysis-failed");
@@ -587,7 +617,6 @@ export function createPracticeSessionEngine({
       await flushCheckpoint("analysis-failed", { force: true });
       throw error;
     }
-    completedAtUtc = wallIso();
     const finalMetrics = metricsSnapshot();
     preparedFinalResult = buildPracticeSessionResult({
       sessionId,
@@ -612,7 +641,7 @@ export function createPracticeSessionEngine({
     try {
       const committed = await repository.commitCompletedPracticeSession({
         sessionSummary: preparedFinalResult,
-        updatedSkillStats: analysis?.updatedSkillStats ?? [],
+        skillEvidenceDeltas: foundationAnalysis.skills?.deltas ?? [],
         reviewItemChanges: analysis?.reviewItemChanges ?? [],
         updatedProfileSummary: updatedProfile,
         clearCheckpoint: true,
@@ -714,6 +743,7 @@ export function createPracticeSessionEngine({
     typingState = null;
     contentPlan = null;
     normalizationContext = null;
+    skillEvidenceTracker = null;
     experiment = null;
     configuration = null;
     return { destroyed: true, repeated: false, warning };
@@ -740,6 +770,19 @@ export function createPracticeSessionEngine({
       errorTracker = createPracticeErrorTracker({ aggregateScope: "post-restore", initialIncorrectCount: restoredIncorrectCount });
     }
     errorTracker.markTimingBoundary();
+    const skillSeed = checkpoint.metricsSnapshot?.skillEvidenceTrackerSnapshot ?? null;
+    skillEvidenceTracker = createPracticeSkillEvidenceTracker({
+      sessionId,
+      profileId,
+      contextId,
+      contentPlan,
+      context: normalizationContext,
+      evidenceRole,
+      segmenter,
+      seed: skillSeed,
+      initialCursor: typingState.cursorIndex,
+      historicalRestore: !skillSeed,
+    });
     const restoredTail = (checkpoint.metricsSnapshot?.recentInputTail || []).map((event) => {
       const insertion = event?.type === "character" || event?.type === "space";
       const fallbackBefore = Number.isInteger(event?.textPosition) ? event.textPosition : 0;
@@ -809,6 +852,8 @@ export function createPracticeSessionEngine({
       errorEpisodeCount: errorTracker.getSnapshot().errorEpisodeCount,
       activeErrorEpisode: Boolean(errorTracker.activeEpisode),
       normalizationContextFingerprint: normalizationContext?.fingerprint ?? null,
+      evidenceRole,
+      skillEvidence: skillEvidenceTracker?.getSnapshot() ?? null,
       activeDurationMs: activeAt(),
       checkpointPending: checkpointTimer != null || checkpointWrite != null,
       lastCheckpointMonotonicMs: lastCheckpointMono,

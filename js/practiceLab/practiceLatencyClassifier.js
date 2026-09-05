@@ -108,6 +108,7 @@ function transitionRecord(event, latencyMs, classification, reason) {
     expected: typeof event?.expected === "string" ? event.expected : null,
     timingSegmentId: timingSegmentId(event),
     correctness: event?.correctness ?? null,
+    isFirstAttempt: event?.isFirstAttempt === true,
   };
 }
 

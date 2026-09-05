@@ -196,6 +196,7 @@ export function normalizePracticeContextLatency({
       features,
       latencyClass: transition.classification,
       correctness: transition.correctness,
+      isFirstAttempt: transition.isFirstAttempt === true,
     });
   });
 

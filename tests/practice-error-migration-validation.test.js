@@ -25,41 +25,46 @@ function emptyErrorSummary() {
   }).sessionSummary;
 }
 
-test("PL9 contracts remain intact after PL10 advances only sessionSummary to v5", () => {
+test("PL9 contracts remain intact after PL11 advances evidence records without changing IndexedDB topology", () => {
   assert.equal(PRACTICE_DATABASE_VERSION, 2);
-  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 5);
-  assert.equal(PRACTICE_RECORD_VERSIONS.checkpoint, 2);
-  assert.equal(PRACTICE_RECORD_VERSIONS.skillStat, 2);
+  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 6);
+  assert.equal(PRACTICE_RECORD_VERSIONS.checkpoint, 3);
+  assert.equal(PRACTICE_RECORD_VERSIONS.skillStat, 3);
   assert.equal(PRACTICE_RECORD_VERSIONS.profile, 3);
 });
 
-test("PL9 v3 error migration remains intact through PL10 v5", () => {
+test("PL9 v3 error migration remains intact through PL10 v5 and PL11 v6", () => {
   const current = createDefaultSessionSummary({ now });
   const legacy = { ...current, recordVersion: 3 };
   delete legacy.errorSummary;
+  delete legacy.skillEvidenceSummary;
   const original = structuredClone(legacy);
   const migrated = migratePracticeRecord("sessionSummary", legacy);
   assert.equal(migrated.ok, true);
   assert.equal(migrated.fromVersion, 3);
-  assert.equal(migrated.toVersion, 5);
-  assert.deepEqual(migrated.steps, ["sessionSummary:3->4", "sessionSummary:4->5"]);
+  assert.equal(migrated.toVersion, 6);
+  assert.deepEqual(migrated.steps, ["sessionSummary:3->4", "sessionSummary:4->5", "sessionSummary:5->6"]);
   assert.equal(migrated.value.errorSummary, null);
   assert.equal(migrated.value.normalizationSummary, null);
+  assert.equal(migrated.value.skillEvidenceSummary, null);
   assert.deepEqual(legacy, original);
 });
 
-test("PL9 preserves the full historical session migration chain", () => {
+test("PL9 preserves the full historical session migration chain through PL11", () => {
   const current = createDefaultSessionSummary({ now });
   const v1 = { ...current, recordVersion: 1 };
   delete v1.contextId;
   delete v1.fluencySummary;
   delete v1.errorSummary;
+  delete v1.normalizationSummary;
+  delete v1.skillEvidenceSummary;
   const migrated = migratePracticeRecord("sessionSummary", v1);
   assert.equal(migrated.ok, true);
-  assert.deepEqual(migrated.steps, ["sessionSummary:1->2", "sessionSummary:2->3", "sessionSummary:3->4", "sessionSummary:4->5"]);
+  assert.deepEqual(migrated.steps, ["sessionSummary:1->2", "sessionSummary:2->3", "sessionSummary:3->4", "sessionSummary:4->5", "sessionSummary:5->6"]);
   assert.equal(migrated.value.fluencySummary, null);
   assert.equal(migrated.value.errorSummary, null);
   assert.equal(migrated.value.normalizationSummary, null);
+  assert.equal(migrated.value.skillEvidenceSummary, null);
 });
 
 test("PL9 validates fixed episode counts, rates, removal relationships and nullability", () => {

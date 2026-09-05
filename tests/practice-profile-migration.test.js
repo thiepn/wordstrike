@@ -62,13 +62,13 @@ assert.equal(PRACTICE_MANIFEST_VERSION, 1);
 assert.deepEqual(PRACTICE_RECORD_VERSIONS, {
   context: 1,
   profile: 3,
-  skillStat: 2,
-  sessionSummary: 5,
+  skillStat: 3,
+  sessionSummary: 6,
   reviewItem: 2,
   customText: 1,
   preset: 1,
-  checkpoint: 2,
+  checkpoint: 3,
   quarantine: 1,
 });
 
-console.log("Practice profile v1-to-v2 migration, canonical day key, repository upgrade, and isolated versioning passed.");
+console.log("Practice profile migration, canonical day key, repository upgrade, and PL11-isolated versioning passed.");

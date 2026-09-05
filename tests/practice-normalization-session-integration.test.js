@@ -25,7 +25,7 @@ async function typeCorrect(engine, harness, count, latencyMs = 100) {
   }
 }
 
-test("PL10 generic sessions persist canonical compact normalizationSummary without changing typing metrics", async () => {
+test("PL10 generic normalization remains canonical after PL11 adds skill evidence", async () => {
   const harness = await createPracticeSessionHarness({ suffix: "pl10-generic", text: "a".repeat(40) });
   const engine = engineFor(harness);
   await engine.prepare({ experiment: harness.experiment, configuration: {}, contentPlan: harness.contentPlan });
@@ -33,7 +33,7 @@ test("PL10 generic sessions persist canonical compact normalizationSummary witho
   await typeCorrect(engine, harness, 26);
   const metrics = engine.getMetricsSnapshot();
   const result = await engine.complete("manual-stop");
-  assert.equal(result.summary.recordVersion, 5);
+  assert.equal(result.summary.recordVersion, 6);
   assert.equal(result.summary.wpm, metrics.wpm);
   assert.equal(result.summary.rawWpm, metrics.rawWpm);
   assert.equal(result.summary.accuracy, metrics.accuracy);
@@ -43,9 +43,11 @@ test("PL10 generic sessions persist canonical compact normalizationSummary witho
   assert.equal(result.summary.normalizationSummary.transitionNormalization.status, "normalized");
   assert.equal(Object.hasOwn(result.summary.normalizationSummary, "normalizedTransitions"), false);
   assert.equal(Object.hasOwn(result.summary.normalizationSummary, "features"), false);
+  assert.ok(result.summary.skillEvidenceSummary);
+  assert.equal(Object.hasOwn(result.summary.skillEvidenceSummary, "deltas"), false);
 });
 
-test("PL10 experiment analyzers receive frozen foundationAnalysis v3 but cannot own canonical normalizationSummary", async () => {
+test("PL10 experiment analyzers receive frozen foundationAnalysis v4 and cannot own normalization or canonical skill evidence", async () => {
   let received = null;
   let mutationThrew = false;
   const harness = await createPracticeSessionHarness({
@@ -57,6 +59,8 @@ test("PL10 experiment analyzers receive frozen foundationAnalysis v3 but cannot 
         try { input.foundationAnalysis.normalization.sessionSummary.textDifficulty.difficultyIndex = 999; } catch { mutationThrew = true; }
         return {
           normalizationSummary: { fake: true },
+          skillEvidenceSummary: { fake: true },
+          updatedSkillStats: [{ fake: true }],
           beforeMetrics: { analyzerWorked: true },
         };
       },
@@ -67,14 +71,17 @@ test("PL10 experiment analyzers receive frozen foundationAnalysis v3 but cannot 
   await engine.start();
   await typeCorrect(engine, harness, 26);
   const result = await engine.complete("manual-stop");
-  assert.equal(received.foundationAnalysis.version, 3);
+  assert.equal(received.foundationAnalysis.version, 4);
   assert.ok(received.foundationAnalysis.latency);
   assert.ok(received.foundationAnalysis.errors);
   assert.ok(received.foundationAnalysis.normalization);
+  assert.ok(received.foundationAnalysis.skills);
   assert.equal(Object.isFrozen(received.foundationAnalysis.normalization), true);
+  assert.equal(Object.isFrozen(received.foundationAnalysis.skills), true);
   assert.equal(mutationThrew, true);
   assert.equal(result.summary.beforeMetrics.analyzerWorked, true);
   assert.equal(result.summary.normalizationSummary.fake, undefined);
+  assert.equal(result.summary.skillEvidenceSummary.fake, undefined);
 });
 
 test("PL10 freezes exact PL5 context identity at prepare even if profile active context later changes", async () => {

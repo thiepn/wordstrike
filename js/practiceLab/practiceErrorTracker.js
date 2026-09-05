@@ -150,6 +150,9 @@ function finalizeEpisode(episode, outcome, policy) {
     contentClass: classified.contentClass,
     confidence: classified.confidence,
     startPosition: episode.errorStartPosition,
+    primaryPosition: episode.errorStartPosition,
+    affectedStart: episode.errorStartPosition,
+    affectedEnd: episode.errorStartPosition + Math.max(0, episode.generationExpected.length - 1),
     outcome,
     corrected: outcome === "corrected",
     correctionAttempted: episode.correctionAttempted,
@@ -245,11 +248,14 @@ export function createPracticeErrorTracker({
 } = {}) {
   validatePracticeErrorPolicy(policy);
   const state = createInitialState({ seed, aggregateScope, initialIncorrectCount });
+  const closedEpisodeQueue = [];
 
   const closeCurrent = (outcome) => {
     if (!state.activeEpisode) return null;
     const episode = finalizeEpisode(state.activeEpisode, outcome, policy);
     applyEpisodeAggregate(state, episode, policy);
+    closedEpisodeQueue.push(episode);
+    if (closedEpisodeQueue.length > policy.recentEpisodeSamples) closedEpisodeQueue.splice(0, closedEpisodeQueue.length - policy.recentEpisodeSamples);
     state.activeEpisode = null;
     return episode;
   };
@@ -379,6 +385,16 @@ export function createPracticeErrorTracker({
     },
     finalizeSnapshot() {
       return sanitizedSnapshot(state, policy, { finalizeActive: true });
+    },
+    drainClosedEpisodes() {
+      const result = freezeDeep(clone(closedEpisodeQueue));
+      closedEpisodeQueue.length = 0;
+      return result;
+    },
+    previewActiveEpisode() {
+      if (!state.activeEpisode) return null;
+      const outcome = finiteNonNegative(state.activeEpisode.repairCompleteActiveMs) ? "corrected" : "uncorrected";
+      return freezeDeep(finalizeEpisode(state.activeEpisode, outcome, policy));
     },
     checkpointSnapshot({ contentHash = null, cursorIndex = state.currentCursor } = {}) {
       const snapshot = sanitizedSnapshot(state, policy);
