@@ -65,7 +65,19 @@ function makeGroup(type, stats, policy) {
   }
   residualValues.sort((a, b) => a.value - b.value || a.statId.localeCompare(b.statId));
   variabilityValues.sort((a, b) => a.value - b.value || a.statId.localeCompare(b.statId));
-  return Object.freeze({ type, eligible, totals: Object.freeze(totals), residualValues: Object.freeze(residualValues), variabilityValues: Object.freeze(variabilityValues) });
+  const residualNumbers = residualValues.map((entry) => entry.value);
+  const variabilityNumbers = variabilityValues.map((entry) => entry.value);
+  const residualCenter = practiceMedian(residualNumbers);
+  const residualMad = practiceMad(residualNumbers);
+  const variabilityCenter = practiceMedian(variabilityNumbers);
+  const variabilityMad = practiceMad(variabilityNumbers);
+  return Object.freeze({
+    type, eligible, totals: Object.freeze(totals),
+    residualValues: Object.freeze(residualValues),
+    variabilityValues: Object.freeze(variabilityValues),
+    residualReference: Object.freeze({ count: residualNumbers.length, center: residualCenter, mad: residualMad, scale: residualMad == null ? null : Math.max(policy.slow.fallbackScaleFloorMs, 1.4826 * residualMad) }),
+    variabilityReference: Object.freeze({ count: variabilityNumbers.length, center: variabilityCenter, mad: variabilityMad, scale: variabilityMad == null ? null : Math.max(policy.unstable.scaleFloorMs, 1.4826 * variabilityMad) }),
+  });
 }
 
 function leaveOneOutCounts(group, stat) {
@@ -86,14 +98,6 @@ function leaveOneOutCounts(group, stat) {
   });
 }
 
-function robustReference(entries, statId, floor = 0) {
-  const peers = entries.filter((entry) => entry.statId !== statId).map((entry) => entry.value);
-  if (!peers.length) return Object.freeze({ count: 0, center: null, mad: null, scale: null });
-  const center = practiceMedian(peers);
-  const mad = practiceMad(peers);
-  return Object.freeze({ count: peers.length, center, mad, scale: mad == null ? null : Math.max(floor, 1.4826 * mad) });
-}
-
 export function createPracticePeerReferenceIndex(skillStats, policy = PRACTICE_LIMITER_POLICY_V1) {
   const stats = Array.isArray(skillStats) ? skillStats : [];
   const groups = new Map(TYPES.map((type) => [type, makeGroup(type, stats, policy)]));
@@ -112,14 +116,19 @@ export function createPracticePeerReferenceIndex(skillStats, policy = PRACTICE_L
     const recovery = peerEntityEnough && counts.recoveryEpisodes >= policy.minimumPeerRecoveryEpisodes
       ? Object.freeze({ status: "ready", entityCount: counts.entityCount, episodeCount: counts.recoveryEpisodes, meanMs: counts.recoveryMsSum / counts.recoveryEpisodes })
       : Object.freeze({ status: "insufficient", entityCount: counts.entityCount, episodeCount: counts.recoveryEpisodes, meanMs: null });
-    const residual = robustReference(group.residualValues, stat.statId, policy.slow.fallbackScaleFloorMs);
-    const slowFallback = residual.count >= policy.slow.fallbackMinimumEntities
-      ? Object.freeze({ status: "ready", ...residual })
-      : Object.freeze({ status: "insufficient", ...residual });
-    const variability = robustReference(group.variabilityValues, stat.statId, policy.unstable.scaleFloorMs);
-    const instability = variability.count >= policy.minimumPeerVariabilityEntities
-      ? Object.freeze({ status: "ready", ...variability })
-      : Object.freeze({ status: "insufficient", ...variability });
+    // Robust distributions are precomputed once per entity type to keep snapshot construction O(n).
+    // Pooled rate baselines above are exact leave-one-out; robust median/MAD references use the
+    // full eligible group because exact leave-one-out MAD would reintroduce an entity×peers pass.
+    const residual = group.residualReference;
+    const residualPeerCount = residual.count - Number(group.residualValues.some((entry) => entry.statId === stat.statId));
+    const slowFallback = residualPeerCount >= policy.slow.fallbackMinimumEntities
+      ? Object.freeze({ status: "ready", ...residual, count: residualPeerCount })
+      : Object.freeze({ status: "insufficient", ...residual, count: residualPeerCount });
+    const variability = group.variabilityReference;
+    const variabilityPeerCount = variability.count - Number(group.variabilityValues.some((entry) => entry.statId === stat.statId));
+    const instability = variabilityPeerCount >= policy.minimumPeerVariabilityEntities
+      ? Object.freeze({ status: "ready", ...variability, count: variabilityPeerCount })
+      : Object.freeze({ status: "insufficient", ...variability, count: variabilityPeerCount });
     return Object.freeze({ accuracy, hesitation, recovery, slowFallback, instability });
   };
 
