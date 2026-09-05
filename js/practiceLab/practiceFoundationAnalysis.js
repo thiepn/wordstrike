@@ -7,7 +7,7 @@ import { createPracticeErrorTracker } from "./practiceErrorTracker.js";
 import { PRACTICE_ERROR_POLICY_V1 } from "./practiceErrorPolicy.js";
 import { analyzePracticeNormalization } from "./practiceNormalizationAnalysis.js";
 
-export const PRACTICE_FOUNDATION_ANALYSIS_VERSION = 3;
+export const PRACTICE_FOUNDATION_ANALYSIS_VERSION = 4;
 
 const freezeDeep = (value) => {
   if (!value || typeof value !== "object" || Object.isFrozen(value)) return value;
@@ -68,6 +68,8 @@ export function buildPracticeFoundationAnalysis({
   context = null,
   segmenter = null,
   normalizationOptions = {},
+  skillEvidenceTracker = null,
+  skillEvidenceFinalize = null,
 } = {}) {
   const latency = analyzePracticeLatency({ events, traceMetadata, policy: latencyPolicy });
   const trackerSnapshot = errorTrackerSnapshot ?? buildFallbackTrackerSnapshot(events, traceMetadata, errorPolicy);
@@ -85,10 +87,15 @@ export function buildPracticeFoundationAnalysis({
     context,
     segmenter,
   });
+  const partial = { latency, errors, normalization };
+  const skills = skillEvidenceTracker && skillEvidenceFinalize
+    ? skillEvidenceTracker.finalize({ foundationAnalysis: partial, ...skillEvidenceFinalize })
+    : freezeDeep({ version: 1, policyVersion: 1, summary: null, deltas: [] });
   return freezeDeep({
     version: PRACTICE_FOUNDATION_ANALYSIS_VERSION,
     latency,
     errors,
     normalization,
+    skills,
   });
 }

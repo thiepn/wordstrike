@@ -44,6 +44,16 @@ import {
   PRACTICE_RECOVERY_POLICY_VERSION,
 } from "./practiceErrorPolicy.js";
 import { validatePracticeNormalizationSummary } from "./practiceNormalizationValidation.js";
+import { validatePracticeSkillStatV3 } from "./practiceSkillEvidenceValidation.js";
+import {
+  PRACTICE_EVIDENCE_ACCURACY_SCOPES,
+  PRACTICE_EVIDENCE_ROLES,
+  PRACTICE_EVIDENCE_TIMING_SCOPES,
+  PRACTICE_SKILL_EVIDENCE_POLICY_V1,
+  PRACTICE_SKILL_EVIDENCE_POLICY_VERSION,
+  PRACTICE_SKILL_EVIDENCE_TRACKER_VERSION,
+  PRACTICE_SKILL_EVIDENCE_VERSION,
+} from "./practiceSkillEvidencePolicy.js";
 
 const SETTINGS_ENUMS = Object.freeze({
   punctuationFrequency: ["none", "low", "medium", "high"],
@@ -56,7 +66,7 @@ const UNSAFE_OBJECT_KEYS = new Set(["__proto__", "constructor", "prototype"]);
 const FORBIDDEN_SESSION_FIELDS = Object.freeze([
   "rawEvents", "eventTrace", "rawEventTrace", "classifiedEventTrace",
   "errorEpisodeHistory", "mistypedStrings", "rawLatencies", "normalizationTrace",
-  "normalizedTransitions", "typabilityFeatureVector", "leaderboardEligible",
+  "normalizedTransitions", "typabilityFeatureVector", "skillEvidenceDeltas", "leaderboardEligible",
   "submissionPayload", "accessToken", "boardKey", "rulesVersion",
 ]);
 
@@ -279,35 +289,7 @@ export function validatePracticeEntityKey(type, key) {
 }
 
 export function validateSkillStat(stat) {
-  const errors = [];
-  if (!isPlainObject(stat)) return result([{ path: "skillStat", code: "INVALID_TYPE", message: "skillStat must be an object" }]);
-  requiredString(errors, stat.statId, "statId", 500);
-  validId(errors, stat.profileId, "profileId", "profile");
-  validId(errors, stat.contextId, "contextId", "context");
-  validateVersion(errors, stat.recordVersion, PRACTICE_RECORD_VERSIONS.skillStat);
-  oneOf(errors, stat.entityType, "entityType", ENTITY_TYPES);
-  validEntityKey(errors, stat.entityType, stat.entityKey);
-  if (
-    typeof stat.profileId === "string"
-    && typeof stat.contextId === "string"
-    && typeof stat.entityType === "string"
-    && typeof stat.entityKey === "string"
-    && stat.statId !== createSkillStatId(stat.profileId, stat.contextId, stat.entityType, stat.entityKey)
-  ) error(errors, "statId", "IDENTITY_MISMATCH", "statId does not match the profile/context/entity identity");
-  timestamp(errors, stat.createdAt, "createdAt");
-  timestamp(errors, stat.updatedAt, "updatedAt");
-  for (const key of ["sampleCount", "correctCount", "errorCount", "correctedErrorCount", "uncorrectedErrorCount", "latencyCount", "successfulReviewCount", "failedReviewCount"]) finite(errors, stat[key], key, { min: 0, integer: true });
-  if (stat.correctCount + stat.errorCount > stat.sampleCount) error(errors, "sampleCount", "IMPOSSIBLE_RELATIONSHIP", "correct and error counts exceed sampleCount");
-  if (stat.correctedErrorCount + stat.uncorrectedErrorCount > stat.errorCount) error(errors, "errorCount", "IMPOSSIBLE_RELATIONSHIP", "error detail exceeds errorCount");
-  for (const key of ["latencyMeanMs", "latencyM2", "confidenceScore", "weaknessScore", "priority"]) finite(errors, stat[key], key, { min: 0 });
-  for (const key of ["latencyMinMs", "latencyMaxMs", "latencyEmaMs"]) if (stat[key] != null) finite(errors, stat[key], key, { min: 0 });
-  if (!Array.isArray(stat.latencyHistogram) || stat.latencyHistogram.length !== LATENCY_HISTOGRAM_BOUNDS_MS.length || stat.latencyHistogram.some((value) => !Number.isInteger(value) || value < 0)) error(errors, "latencyHistogram", "INVALID_HISTOGRAM", "latencyHistogram has invalid buckets");
-  if (!Array.isArray(stat.recentLatencySamples) || stat.recentLatencySamples.length > PRACTICE_LIMITS.recentLatencySamples || stat.recentLatencySamples.some((value) => !Number.isFinite(value) || value < 0)) error(errors, "recentLatencySamples", "ARRAY_LIMIT", "recentLatencySamples is invalid");
-  oneOf(errors, stat.confidenceLevel, "confidenceLevel", CONFIDENCE_LEVELS);
-  oneOf(errors, stat.masteryState, "masteryState", MASTERY_STATES);
-  nullableTimestamp(errors, stat.lastObservedAt, "lastObservedAt");
-  nullableTimestamp(errors, stat.lastPractisedAt, "lastPractisedAt");
-  return result(errors);
+  return validatePracticeSkillStatV3(stat);
 }
 
 function appendSerializable(errors, value, path, bytes = PRACTICE_LIMITS.configurationBytes) {
@@ -435,6 +417,48 @@ export function validatePracticeErrorSummary(summary) {
   oneOf(errors, summary.classificationConfidence, "classificationConfidence", PRACTICE_ERROR_SUMMARY_CONFIDENCE);
   return result(errors);
 }
+
+export function validatePracticeSkillEvidenceSummary(summary) {
+  const errors = [];
+  if (!isPlainObject(summary)) return result([{ path: "skillEvidenceSummary", code: "INVALID_TYPE", message: "skillEvidenceSummary must be an object" }]);
+  validateVersion(errors, summary.analysisVersion, 1, "analysisVersion");
+  validateVersion(errors, summary.evidenceVersion, PRACTICE_SKILL_EVIDENCE_VERSION, "evidenceVersion");
+  validateVersion(errors, summary.policyVersion, PRACTICE_SKILL_EVIDENCE_POLICY_VERSION, "policyVersion");
+  oneOf(errors, summary.evidenceRole, "evidenceRole", PRACTICE_EVIDENCE_ROLES);
+  if (!isPlainObject(summary.entityCounts)) error(errors, "entityCounts", "INVALID_TYPE", "entityCounts must be an object");
+  else for (const key of ["key", "bigram", "trigram", "word"]) finite(errors, summary.entityCounts[key], `entityCounts.${key}`, { min: 0, integer: true });
+  for (const key of ["opportunityCount", "fluentTimingCount", "disfluentTimingCount", "normalizedResidualCount", "primaryErrorEpisodeCount", "directTargetEntityCount", "omittedObservationCount"]) finite(errors, summary[key], key, { min: 0, integer: true });
+  oneOf(errors, summary.accuracyScope, "accuracyScope", PRACTICE_EVIDENCE_ACCURACY_SCOPES);
+  oneOf(errors, summary.timingScope, "timingScope", PRACTICE_EVIDENCE_TIMING_SCOPES);
+  if (typeof summary.entityCoverageTruncated !== "boolean") error(errors, "entityCoverageTruncated", "INVALID_TYPE", "entityCoverageTruncated must be boolean");
+  const entityTotal = isPlainObject(summary.entityCounts) ? ["key", "bigram", "trigram", "word"].reduce((sum, key) => sum + Number(summary.entityCounts[key] || 0), 0) : 0;
+  if (summary.directTargetEntityCount > entityTotal) error(errors, "directTargetEntityCount", "IMPOSSIBLE_RELATIONSHIP", "direct target entities exceed entity count");
+  if (summary.normalizedResidualCount > summary.fluentTimingCount + summary.disfluentTimingCount) error(errors, "normalizedResidualCount", "IMPOSSIBLE_RELATIONSHIP", "normalized residual count exceeds timing evidence");
+  return result(errors);
+}
+
+function validateSkillEvidenceTrackerSnapshot(snapshot, errors, path = "metricsSnapshot.skillEvidenceTrackerSnapshot") {
+  if (snapshot == null) return;
+  if (!isPlainObject(snapshot)) return error(errors, path, "INVALID_TYPE", "skill evidence tracker snapshot must be an object or null");
+  validateVersion(errors, snapshot.trackerVersion, PRACTICE_SKILL_EVIDENCE_TRACKER_VERSION, `${path}.trackerVersion`);
+  validateVersion(errors, snapshot.policyVersion, PRACTICE_SKILL_EVIDENCE_POLICY_VERSION, `${path}.policyVersion`);
+  if (!isPlainObject(snapshot.opportunityTracker)) error(errors, `${path}.opportunityTracker`, "INVALID_TYPE", "opportunity tracker snapshot is required");
+  else {
+    validateVersion(errors, snapshot.opportunityTracker.trackerVersion, PRACTICE_SKILL_EVIDENCE_TRACKER_VERSION, `${path}.opportunityTracker.trackerVersion`);
+    finite(errors, snapshot.opportunityTracker.maxFirstAttemptCursor, `${path}.opportunityTracker.maxFirstAttemptCursor`, { min: 0, integer: true });
+    oneOf(errors, snapshot.opportunityTracker.accuracyScope, `${path}.opportunityTracker.accuracyScope`, PRACTICE_EVIDENCE_ACCURACY_SCOPES);
+  }
+  if (!Array.isArray(snapshot.entries) || snapshot.entries.length > PRACTICE_SKILL_EVIDENCE_POLICY_V1.checkpointEntityCap) error(errors, `${path}.entries`, "ARRAY_LIMIT", "checkpoint evidence entity snapshot exceeds PL11 cap");
+  else for (const [index, entry] of snapshot.entries.entries()) {
+    oneOf(errors, entry?.entityType, `${path}.entries[${index}].entityType`, ENTITY_TYPES);
+    if (typeof entry?.entityKey !== "string" || !entry.entityKey) error(errors, `${path}.entries[${index}].entityKey`, "INVALID_ENTITY", "checkpoint entityKey is required");
+    if (Array.isArray(entry?.breadthHashes) && entry.breadthHashes.length > PRACTICE_SKILL_EVIDENCE_POLICY_V1.maxBreadthPointsPerEntityPerSession) error(errors, `${path}.entries[${index}].breadthHashes`, "ARRAY_LIMIT", "checkpoint breadth hashes exceed cap");
+    for (const forbidden of ["text", "containingWords", "sentenceExcerpt", "eventTrace", "rawEvents"]) if (Object.hasOwn(entry ?? {}, forbidden)) error(errors, `${path}.entries[${index}].${forbidden}`, "FORBIDDEN_FIELD", "raw content is forbidden in skill tracker snapshots");
+  }
+  for (const key of ["omittedObservationCount", "lastProcessedEpisodeId"]) finite(errors, snapshot[key], `${path}.${key}`, { min: 0, integer: true });
+  for (const key of ["evidenceTruncated", "checkpointEvidenceTruncated"]) if (typeof snapshot[key] !== "boolean") error(errors, `${path}.${key}`, "INVALID_TYPE", `${key} must be boolean`);
+}
+
 export function validateSessionSummary(summary) {
   const errors = [];
   if (!isPlainObject(summary)) return result([{ path: "sessionSummary", code: "INVALID_TYPE", message: "sessionSummary must be an object" }]);
@@ -462,6 +486,7 @@ export function validateSessionSummary(summary) {
   if (summary.fluencySummary != null) errors.push(...validatePracticeFluencySummary(summary.fluencySummary).errors.map((entry) => ({ ...entry, path: `fluencySummary.${entry.path}` })));
   if (summary.errorSummary != null) errors.push(...validatePracticeErrorSummary(summary.errorSummary).errors.map((entry) => ({ ...entry, path: `errorSummary.${entry.path}` })));
   if (summary.normalizationSummary != null) errors.push(...validatePracticeNormalizationSummary(summary.normalizationSummary).errors.map((entry) => ({ ...entry, path: `normalizationSummary.${entry.path}` })));
+  if (summary.skillEvidenceSummary != null) errors.push(...validatePracticeSkillEvidenceSummary(summary.skillEvidenceSummary).errors.map((entry) => ({ ...entry, path: `skillEvidenceSummary.${entry.path}` })));
   appendSerializable(errors, summary.configuration, "configuration");
   appendSerializable(errors, summary.contentDescriptor, "contentDescriptor");
   for (const key of ["beforeMetrics", "afterMetrics", "transferMetrics", "fatigueSummary", "trainingQuality"]) if (summary[key] != null) appendSerializable(errors, summary[key], key);
@@ -546,7 +571,8 @@ export function validateCheckpoint(record) {
   appendSerializable(errors, record.configuration, "configuration");
   appendSerializable(errors, record.contentDescriptor, "contentDescriptor");
   appendSerializable(errors, record.cursorState, "cursorState");
-  appendSerializable(errors, record.metricsSnapshot, "metricsSnapshot");
+  appendSerializable(errors, record.metricsSnapshot, "metricsSnapshot", PRACTICE_LIMITS.checkpointBytes);
+  validateSkillEvidenceTrackerSnapshot(record.metricsSnapshot?.skillEvidenceTrackerSnapshot ?? null, errors);
   if (record.contentSnapshot != null && typeof record.contentSnapshot !== "string") error(errors, "contentSnapshot", "INVALID_TYPE", "contentSnapshot must be text or null");
   if (record.contentReference != null && typeof record.contentReference !== "string") error(errors, "contentReference", "INVALID_TYPE", "contentReference must be a string or null");
   requiredString(errors, record.contentHash, "contentHash", 100);
@@ -592,10 +618,14 @@ export function normalizePracticeManifest(value) {
 
 export function normalizeSkillStat(value) {
   if (!isPlainObject(value)) return null;
-  return {
+  const copy = {
     ...value,
     entityType: String(value.entityType || "").toLowerCase(),
     entityKey: String(value.entityKey || ""),
+  };
+  if (Number(copy.recordVersion) >= 3) return copy;
+  return {
+    ...copy,
     recentLatencySamples: Array.isArray(value.recentLatencySamples)
       ? value.recentLatencySamples.slice(-PRACTICE_LIMITS.recentLatencySamples)
       : [],

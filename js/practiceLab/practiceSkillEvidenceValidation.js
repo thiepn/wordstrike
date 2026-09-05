@@ -1,5 +1,6 @@
 import {
   CONFIDENCE_LEVELS,
+  ENTITY_TYPES,
   LATENCY_HISTOGRAM_BOUNDS_MS,
   MASTERY_STATES,
   PRACTICE_LIMITS,
@@ -27,6 +28,7 @@ function validEntity(type, key) {
   if (type === "bigram") return points.length === 2;
   if (type === "trigram") return points.length === 3;
   if (type === "word") return /^[\p{L}\p{M}'-]{1,64}$/u.test(key);
+  if (["punctuation-transition", "number-pattern", "symbol-pattern"].includes(type)) return /^[a-z0-9][a-z0-9-]{0,79}$/.test(key);
   return false;
 }
 
@@ -74,7 +76,7 @@ export function validatePracticeSkillStatV3(stat) {
   if (!isObject(stat)) return { valid: false, errors: [{ path: "skillStat", code: "INVALID_TYPE", message: "skillStat must be an object" }] };
   if (!isPracticeId(stat.profileId, "profile")) push(errors, "profileId", "INVALID_ID", "invalid profileId");
   if (!isPracticeId(stat.contextId, "context")) push(errors, "contextId", "INVALID_ID", "invalid contextId");
-  if (!validEntity(stat.entityType, stat.entityKey)) push(errors, "entityKey", "INVALID_ENTITY", "invalid canonical PL11 entity");
+  if (!ENTITY_TYPES.includes(stat.entityType) || !validEntity(stat.entityType, stat.entityKey)) push(errors, "entityKey", "INVALID_ENTITY", "invalid Practice skill entity");
   if (stat.statId !== createSkillStatId(stat.profileId, stat.contextId, stat.entityType, stat.entityKey)) push(errors, "statId", "IDENTITY_MISMATCH", "statId does not match identity");
   if (stat.recordVersion !== PRACTICE_RECORD_VERSIONS.skillStat) push(errors, "recordVersion", "UNSUPPORTED_VERSION", `skillStat recordVersion must equal ${PRACTICE_RECORD_VERSIONS.skillStat}`);
   if (!validTimestamp(stat.createdAt) || !validTimestamp(stat.updatedAt)) push(errors, "updatedAt", "INVALID_TIMESTAMP", "createdAt/updatedAt must be ISO timestamps");

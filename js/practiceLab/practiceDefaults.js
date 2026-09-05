@@ -343,7 +343,7 @@ export function createDefaultCheckpoint({
     completedUnitCount: 0,
     activeElapsedMs: 0,
     pausedElapsedMs: 0,
-    metricsSnapshot: {},
+    metricsSnapshot: { skillEvidenceTrackerSnapshot: null },
     resumable: true,
     recoveryReason: null,
     ...freshObject(overrides),
