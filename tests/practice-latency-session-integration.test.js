@@ -14,7 +14,7 @@ async function typeCorrect(engine, harness, count, latencyMs = 100) {
   }
 }
 
-test("generic sessions persist canonical fluencySummary inside the current PL13 session envelope", async () => {
+test("generic sessions persist canonical fluencySummary inside the current PL14 session envelope", async () => {
   const harness = await createPracticeSessionHarness({ suffix: "pl8-generic", text: "a".repeat(40) });
   const engine = createPracticeSessionEngine({
     repository: harness.repository,
@@ -29,7 +29,7 @@ test("generic sessions persist canonical fluencySummary inside the current PL13 
   await engine.start();
   await typeCorrect(engine, harness, 26);
   const result = await engine.complete("manual-stop");
-  assert.equal(result.summary.recordVersion, 7);
+  assert.equal(result.summary.recordVersion, 8);
   assert.equal(result.summary.fluencySummary.calibration.status, "adaptive");
   assert.equal(result.summary.fluencySummary.fluentTransitionCount, 25);
   assert.equal(result.summary.fluencySummary.disfluentTransitionCount, 0);

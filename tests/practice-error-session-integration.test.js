@@ -23,7 +23,7 @@ async function advanceAndInput(engine, harness, milliseconds, type, value = "") 
   return engine.handleInput(harness.input(type, value));
 }
 
-test("PL9 live events remain intact while PL13 sessions persist canonical errorSummary", async () => {
+test("PL9 live events remain intact while PL14 sessions persist canonical errorSummary", async () => {
   const harness = await createPracticeSessionHarness({ suffix: "pl9-live", text: "aaaaaa" });
   const engine = createEngine(harness);
   await engine.prepare({ experiment: harness.experiment, configuration: {}, contentPlan: harness.contentPlan });
@@ -36,7 +36,7 @@ test("PL9 live events remain intact while PL13 sessions persist canonical errorS
   const beforeComplete = engine.getMetricsSnapshot();
   const result = await engine.complete("manual-stop");
 
-  assert.equal(result.summary.recordVersion, 7);
+  assert.equal(result.summary.recordVersion, 8);
   assert.equal(result.summary.abilityMeasurementSummary, null);
   assert.equal(result.summary.errorSummary.errorEpisodeCount, 1);
   assert.equal(result.summary.errorSummary.correctedEpisodeCount, 1);
@@ -62,7 +62,7 @@ test("PL9 live events remain intact while PL13 sessions persist canonical errorS
   assert.equal(Object.hasOwn(result.summary, "errorEpisodes"), false);
 });
 
-test("PL9 experiment analyzers receive frozen errors inside PL13 foundation v5 but cannot overwrite canonical errorSummary", async () => {
+test("PL9 experiment analyzers receive frozen errors inside PL14 foundation v6 but cannot overwrite canonical errorSummary", async () => {
   let received = null;
   let mutationThrew = false;
   const harness = await createPracticeSessionHarness({
@@ -89,7 +89,7 @@ test("PL9 experiment analyzers receive frozen errors inside PL13 foundation v5 b
   const result = await engine.complete("manual-stop");
 
   assert.ok(received?.foundationAnalysis?.errors);
-  assert.equal(received.foundationAnalysis.version, 5);
+  assert.equal(received.foundationAnalysis.version, 6);
   assert.equal(received.foundationAnalysis.ability.status, "not-requested");
   assert.equal(Object.isFrozen(received.foundationAnalysis), true);
   assert.equal(Object.isFrozen(received.foundationAnalysis.errors), true);

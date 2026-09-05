@@ -10,7 +10,8 @@ import {
 } from "./practiceInputEngine.js";
 import { createPracticeMetricsCollector } from "./practiceMetrics.js";
 import { createPracticeEventBuffer } from "./practiceEventBuffer.js";
-import { buildPracticeFoundationAnalysis, withPracticeAbilityAnalysis } from "./practiceFoundationAnalysis.js";
+import { buildPracticeFoundationAnalysis, withPracticeAbilityAnalysis, withPracticePerformanceAnalysis } from "./practiceFoundationAnalysis.js";
+import { buildPracticePerformanceAnalysis } from "./practicePerformanceAnalysis.js";
 import { buildPracticeAbilityObservation } from "./practiceAbilityObservation.js";
 import { createPracticeErrorTracker } from "./practiceErrorTracker.js";
 import { createPracticeSessionContextSnapshot } from "./practiceContextFeatures.js";
@@ -605,17 +606,61 @@ export function createPracticeSessionEngine({
     try {
       foundationAnalysis = analyzeFoundation({ status, observedAt: completedAtUtc });
       const abilityMetrics = metricsSnapshot();
+      const measurementSession = freezeDeep({
+        sessionId, profileId, contextId, status, completionReason: reason, completedAtUtc,
+        localDayKey: sessionTimeContext?.localDayKey ?? getPracticeTimeContext(wallDate()).localDayKey,
+        wpm: abilityMetrics.wpm, rawWpm: abilityMetrics.rawWpm, accuracy: abilityMetrics.accuracy,
+        activeDurationMs: abilityMetrics.activeDurationMs, typedCharacterCount: abilityMetrics.acceptedInsertions,
+        configuration: { ...configuration, correctionBehavior: configuration.correctionBehavior ?? experiment.defaultCorrectionBehavior },
+      });
       const abilityAssessment = buildPracticeAbilityObservation({
-        session: {
-          sessionId, profileId, contextId, status, completionReason: reason, completedAtUtc,
-          localDayKey: sessionTimeContext?.localDayKey ?? getPracticeTimeContext(wallDate()).localDayKey,
-          wpm: abilityMetrics.wpm, rawWpm: abilityMetrics.rawWpm, accuracy: abilityMetrics.accuracy,
-          activeDurationMs: abilityMetrics.activeDurationMs, typedCharacterCount: abilityMetrics.acceptedInsertions,
-          configuration: { ...configuration, correctionBehavior: configuration.correctionBehavior ?? experiment.defaultCorrectionBehavior },
-        },
+        session: measurementSession,
         experiment, foundationAnalysis, contentPlan, evidenceRole,
       });
       foundationAnalysis = withPracticeAbilityAnalysis(foundationAnalysis, abilityAssessment);
+      const performanceKind = experiment.performanceMeasurementKind ?? null;
+      let referenceAbilityState = null;
+      let existingPerformanceState = null;
+      let frontierMeasurement = null;
+      let frontierMeasurementError = null;
+      if (performanceKind) {
+        existingPerformanceState = typeof repository.getPerformanceState === "function" ? await repository.getPerformanceState(profileId, contextId) : null;
+        if (performanceKind === "state-probe") referenceAbilityState = await repository.getAbilityState(profileId, contextId, experiment.performanceReferenceChannel);
+        if (performanceKind === "control-frontier") {
+          try {
+            frontierMeasurement = await experiment.buildPerformanceMeasurement(freezeDeep({
+              sessionSnapshot: immutableSnapshot(),
+              metricsSnapshot: metricsSnapshot(),
+              eventTrace: eventBuffer.getTrace(),
+              foundationAnalysisWithoutPerformance: foundationAnalysis,
+              contentPlan: {
+                contentId: contentPlan.contentId,
+                contentHash: contentPlan.contentHash,
+                completion: contentPlan.completion,
+                targetEntities: contentPlan.targetEntities,
+                metadata: contentPlan.metadata,
+              },
+            }));
+          } catch (cause) {
+            frontierMeasurementError = cause;
+            logger?.warn?.("Practice frontier measurement callback failed", { cause });
+          }
+        }
+      }
+      const performanceAssessment = buildPracticePerformanceAnalysis({
+        session: measurementSession,
+        experiment,
+        foundationAnalysis,
+        contentPlan,
+        evidenceRole,
+        referenceAbilityState,
+        existingPerformanceState,
+        eventTrace: eventBuffer.getTrace(),
+        traceMetadata: eventBuffer.getMetadata(),
+        frontierMeasurement,
+        frontierMeasurementError,
+      });
+      foundationAnalysis = withPracticePerformanceAnalysis(foundationAnalysis, performanceAssessment);
       analysis = await analyze(foundationAnalysis);
     } catch (error) {
       finalizationState = "error";
@@ -656,6 +701,7 @@ export function createPracticeSessionEngine({
         sessionSummary: preparedFinalResult,
         skillEvidenceDeltas: foundationAnalysis.skills?.deltas ?? [],
         abilityObservation: foundationAnalysis.ability?.observation ?? null,
+        performanceStateDelta: foundationAnalysis.performance?.performanceStateDelta ?? null,
         reviewItemChanges: analysis?.reviewItemChanges ?? [],
         updatedProfileSummary: updatedProfile,
         clearCheckpoint: true,

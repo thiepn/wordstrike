@@ -71,6 +71,7 @@ export function buildPracticeSessionResult({
       normalizationSummary: foundationAnalysis?.normalization?.sessionSummary ?? null,
       skillEvidenceSummary: foundationAnalysis?.skills?.summary ?? null,
       abilityMeasurementSummary: foundationAnalysis?.ability?.sessionSummary ?? null,
+      performanceMeasurementSummary: foundationAnalysis?.performance?.sessionSummary ?? null,
       beforeMetrics: analysis?.beforeMetrics ?? null,
       afterMetrics: analysis?.afterMetrics ?? null,
       transferMetrics: analysis?.transferMetrics ?? null,

@@ -16,7 +16,7 @@ function adaptiveSummary() {
   return analyzePracticeLatency({ events }).sessionSummary;
 }
 
-test("PL8 sessionSummary v2 fluency migration proceeds sequentially through PL13 v7", () => {
+test("PL8 sessionSummary v2 fluency migration proceeds sequentially through PL14 v8", () => {
   const current = createDefaultSessionSummary();
   const historical = { ...current, recordVersion: 2 };
   delete historical.fluencySummary;
@@ -27,8 +27,8 @@ test("PL8 sessionSummary v2 fluency migration proceeds sequentially through PL13
   const source = structuredClone(historical);
   const migrated = migratePracticeRecord("sessionSummary", historical);
   assert.equal(migrated.ok, true);
-  assert.deepEqual(migrated.steps, ["sessionSummary:2->3", "sessionSummary:3->4", "sessionSummary:4->5", "sessionSummary:5->6", "sessionSummary:6->7"]);
-  assert.equal(migrated.value.recordVersion, 7);
+  assert.deepEqual(migrated.steps, ["sessionSummary:2->3", "sessionSummary:3->4", "sessionSummary:4->5", "sessionSummary:5->6", "sessionSummary:6->7", "sessionSummary:7->8"]);
+  assert.equal(migrated.value.recordVersion, 8);
   assert.equal(migrated.value.fluencySummary, null);
   assert.equal(migrated.value.errorSummary, null);
   assert.equal(migrated.value.normalizationSummary, null);
@@ -37,7 +37,7 @@ test("PL8 sessionSummary v2 fluency migration proceeds sequentially through PL13
   assert.deepEqual(historical, source);
 });
 
-test("PL8 context/fluency migration remains intact in the full v1 -> v2 -> v3 -> v4 -> v5 -> v6 -> v7 chain", () => {
+test("PL8 context/fluency migration remains intact in the full v1 -> v2 -> v3 -> v4 -> v5 -> v6 -> v7 -> v8 chain", () => {
   const current = createDefaultSessionSummary();
   const historical = { ...current, recordVersion: 1 };
   delete historical.contextId;
@@ -48,8 +48,8 @@ test("PL8 context/fluency migration remains intact in the full v1 -> v2 -> v3 ->
   delete historical.abilityMeasurementSummary;
   const migrated = migratePracticeRecord("sessionSummary", historical);
   assert.equal(migrated.ok, true);
-  assert.deepEqual(migrated.steps, ["sessionSummary:1->2", "sessionSummary:2->3", "sessionSummary:3->4", "sessionSummary:4->5", "sessionSummary:5->6", "sessionSummary:6->7"]);
-  assert.equal(migrated.value.recordVersion, 7);
+  assert.deepEqual(migrated.steps, ["sessionSummary:1->2", "sessionSummary:2->3", "sessionSummary:3->4", "sessionSummary:4->5", "sessionSummary:5->6", "sessionSummary:6->7", "sessionSummary:7->8"]);
+  assert.equal(migrated.value.recordVersion, 8);
   assert.equal(migrated.value.fluencySummary, null);
   assert.equal(migrated.value.errorSummary, null);
   assert.equal(migrated.value.normalizationSummary, null);
@@ -74,9 +74,9 @@ test("PL8 fluency summary validator enforces versions, rates, counts and thresho
   assert.equal(validatePracticeFluencySummary(badThreshold).valid, false);
 });
 
-test("current v7 session summaries still accept null or valid compact PL8 fluency summaries", () => {
+test("current v8 session summaries still accept null or valid compact PL8 fluency summaries", () => {
   const base = createDefaultSessionSummary();
-  assert.equal(base.recordVersion, 7);
+  assert.equal(base.recordVersion, 8);
   assert.equal(base.fluencySummary, null);
   assert.equal(base.errorSummary, null);
   assert.equal(base.normalizationSummary, null);

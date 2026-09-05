@@ -211,6 +211,7 @@ export function createDefaultSessionSummary({
     normalizationSummary: null,
     skillEvidenceSummary: null,
     abilityMeasurementSummary: null,
+    performanceMeasurementSummary: null,
     beforeMetrics: null,
     afterMetrics: null,
     transferMetrics: null,

@@ -71,11 +71,14 @@ test("PL14 narrow speed evidence is insufficient-range and poor low-speed baseli
 
 test("PL14 non-monotonic pass/fail evidence without two consecutive failures remains provisional", () => {
   const stages = [
+    { wpm: 80, accuracy: 99, disfluency: 0.02, correction: 0.01 },
     { wpm: 90, accuracy: 99, disfluency: 0.02, correction: 0.01 },
-    { wpm: 100, accuracy: 95, disfluency: 0.08, correction: 0.07 },
+    { wpm: 100, accuracy: 99, disfluency: 0.02, correction: 0.01 },
     { wpm: 110, accuracy: 99, disfluency: 0.02, correction: 0.01 },
     { wpm: 120, accuracy: 95, disfluency: 0.08, correction: 0.07 },
     { wpm: 130, accuracy: 99, disfluency: 0.02, correction: 0.01 },
+    { wpm: 140, accuracy: 95, disfluency: 0.08, correction: 0.07 },
+    { wpm: 150, accuracy: 99, disfluency: 0.02, correction: 0.01 },
   ];
   assert.equal(buildPracticeControlFrontier(batch("a", stages).points).status, "provisional");
 });

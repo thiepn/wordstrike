@@ -22,6 +22,7 @@ export const PRACTICE_RECORD_TYPES = Object.freeze({
   profile: Object.freeze({ storeName: "profiles", versionField: "recordVersion" }),
   skillStat: Object.freeze({ storeName: "skillStats", versionField: "recordVersion" }),
   abilityState: Object.freeze({ storeName: "abilityStates", versionField: "recordVersion" }),
+  performanceState: Object.freeze({ storeName: "performanceStates", versionField: "recordVersion" }),
   sessionSummary: Object.freeze({ storeName: "sessionSummaries", versionField: "recordVersion" }),
   reviewItem: Object.freeze({ storeName: "reviewItems", versionField: "recordVersion" }),
   customText: Object.freeze({ storeName: "customTexts", versionField: "recordVersion" }),

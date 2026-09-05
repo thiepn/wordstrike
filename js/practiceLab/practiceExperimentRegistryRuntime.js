@@ -75,6 +75,8 @@ export function createPracticeExperimentRegistry({
       const validatedDescriptor = Object.freeze({
         ...descriptor,
         abilityChannel: descriptor.abilityChannel ?? null,
+        performanceMeasurementKind: descriptor.performanceMeasurementKind ?? null,
+        performanceReferenceChannel: descriptor.performanceReferenceChannel ?? null,
         supportedCompletionModes: Object.freeze([...descriptor.supportedCompletionModes]),
       });
       const stored = Object.freeze({ experimentId, implementationVersion, descriptor: validatedDescriptor, descriptorFactory, ...Object.fromEntries(optionalFactories.filter((key) => registration[key]).map((key) => [key, registration[key]])) });

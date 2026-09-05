@@ -7,7 +7,7 @@ import { createPracticeErrorTracker } from "./practiceErrorTracker.js";
 import { PRACTICE_ERROR_POLICY_V1 } from "./practiceErrorPolicy.js";
 import { analyzePracticeNormalization } from "./practiceNormalizationAnalysis.js";
 
-export const PRACTICE_FOUNDATION_ANALYSIS_VERSION = 5;
+export const PRACTICE_FOUNDATION_ANALYSIS_VERSION = 6;
 
 const freezeDeep = (value) => {
   if (!value || typeof value !== "object" || Object.isFrozen(value)) return value;
@@ -71,6 +71,7 @@ export function buildPracticeFoundationAnalysis({
   skillEvidenceTracker = null,
   skillEvidenceFinalize = null,
   ability = null,
+  performance = null,
 } = {}) {
   const latency = analyzePracticeLatency({ events, traceMetadata, policy: latencyPolicy });
   const trackerSnapshot = errorTrackerSnapshot ?? buildFallbackTrackerSnapshot(events, traceMetadata, errorPolicy);
@@ -99,6 +100,7 @@ export function buildPracticeFoundationAnalysis({
     normalization,
     skills,
     ability: ability ?? freezeDeep({ version: 1, channel: null, status: "not-requested", reasons: [], observation: null, sessionSummary: null }),
+    performance: performance ?? freezeDeep({ version: 1, status: "not-requested", reasons: [], measurementKind: null, stateProbe: null, warmup: null, frontier: null, sessionSummary: null, performanceStateDelta: null }),
   });
 }
 
@@ -106,4 +108,10 @@ export function withPracticeAbilityAnalysis(foundationAnalysis, ability) {
   if (!foundationAnalysis || foundationAnalysis.version !== PRACTICE_FOUNDATION_ANALYSIS_VERSION) throw new TypeError("Practice ability attachment requires current foundation analysis");
   if (!ability || typeof ability !== "object") throw new TypeError("Practice ability analysis is required");
   return freezeDeep({ ...foundationAnalysis, ability });
+}
+
+export function withPracticePerformanceAnalysis(foundationAnalysis, performance) {
+  if (!foundationAnalysis || foundationAnalysis.version !== PRACTICE_FOUNDATION_ANALYSIS_VERSION) throw new TypeError("Practice performance attachment requires current foundation analysis");
+  if (!performance || typeof performance !== "object") throw new TypeError("Practice performance analysis is required");
+  return freezeDeep({ ...foundationAnalysis, performance });
 }
