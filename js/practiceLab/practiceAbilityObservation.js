@@ -11,6 +11,7 @@ import {
   PRACTICE_ABILITY_POLICY_V1,
   validatePracticeAbilityPolicy,
 } from "./practiceAbilityPolicy.js";
+import { buildPracticeAdjustedPerformanceObservation, getPracticeDifficultyAdjustment } from "./practiceAdjustedPerformance.js";
 
 const freezeDeep = (value) => {
   if (!value || typeof value !== "object" || Object.isFrozen(value)) return value;
@@ -45,77 +46,6 @@ function assessment(channel, status, reasons, observation = null, metadata = {})
   });
 }
 
-function getDifficulty(foundationAnalysis, policy) {
-  const summary = foundationAnalysis?.normalization?.sessionSummary?.textDifficulty
-    ?? foundationAnalysis?.normalization?.textDifficulty?.score
-    ?? null;
-  const status = typeof summary?.status === "string" ? summary.status : "insufficient";
-  const difficultyIndex = Number.isFinite(summary?.difficultyIndex) ? summary.difficultyIndex : null;
-  const coverage = Number.isFinite(summary?.availableModelWeight) ? clamp(summary.availableModelWeight, 0, 1) : 0;
-  let adjustment = 0;
-  if (["full", "partial"].includes(status) && difficultyIndex != null) {
-    adjustment = clamp(
-      policy.difficulty.logCoefficient * difficultyIndex * coverage,
-      -policy.difficulty.maxAbsoluteLogAdjustment,
-      policy.difficulty.maxAbsoluteLogAdjustment,
-    );
-  }
-  return { status, difficultyIndex, coverage, adjustment };
-}
-
-function calculateMeasurementUncertainty({ activeDurationMs, accuracy, channelPolicy, difficulty, latencySummary, policy }) {
-  const uncertainty = policy.uncertainty;
-  const durationSeconds = activeDurationMs / 1000;
-  const durationForSigma = clamp(
-    durationSeconds,
-    channelPolicy.durationReferenceFloorSeconds,
-    uncertainty.durationReferenceCeilingSeconds,
-  );
-  const durationSigma = uncertainty.baseSigmaLogAt60Seconds
-    * Math.sqrt(uncertainty.durationReferenceSeconds / durationForSigma);
-  const accuracyRatio = clamp(accuracy / 100, 0, 1);
-  const accuracyPenalty = 1 + uncertainty.accuracyPenaltySlope * Math.max(0, uncertainty.accuracyReference - accuracyRatio);
-
-  const fluentMedian = latencySummary?.fluentMedianMs;
-  const fluentMad = latencySummary?.fluentMadMs;
-  const rhythmPenalty = Number.isFinite(fluentMedian) && fluentMedian > 0 && Number.isFinite(fluentMad) && fluentMad >= 0
-    ? 1 + Math.min(uncertainty.maximumRhythmPenaltyExtra, fluentMad / fluentMedian)
-    : uncertainty.missingRhythmPenalty;
-
-  const difficultyPenalty = uncertainty.difficultyPenalties[difficulty.status] ?? uncertainty.difficultyPenalties.insufficient;
-  const interruptionRate = latencySummary?.interruptionRate;
-  const interruptionPenalty = Number.isFinite(interruptionRate) && interruptionRate >= 0
-    ? 1 + Math.min(uncertainty.maximumInterruptionPenaltyExtra, uncertainty.interruptionPenaltySlope * interruptionRate)
-    : 1;
-  const tracePenalty = latencySummary?.coverage?.scope === "retained-window"
-    ? uncertainty.tracePartialPenalty
-    : 1;
-
-  const sigma = clamp(
-    durationSigma * accuracyPenalty * rhythmPenalty * difficultyPenalty * interruptionPenalty * tracePenalty,
-    uncertainty.sigmaFloor,
-    uncertainty.sigmaCeiling,
-  );
-  const reliabilityWeight = clamp(
-    (uncertainty.reliabilityReferenceSigma / sigma) ** 2,
-    uncertainty.reliabilityMinimum,
-    uncertainty.reliabilityMaximum,
-  );
-  return {
-    measurementSigmaLog: sigma,
-    measurementVarianceLog: sigma ** 2,
-    reliabilityWeight,
-    components: {
-      durationSigmaLog: durationSigma,
-      accuracyPenalty,
-      rhythmPenalty,
-      difficultyPenalty,
-      interruptionPenalty,
-      tracePenalty,
-    },
-  };
-}
-
 export function buildPracticeAbilityObservation({
   session,
   experiment,
@@ -148,18 +78,18 @@ export function buildPracticeAbilityObservation({
   if (!Number.isFinite(session?.accuracy) || session.accuracy < channelPolicy.minimumAccuracy) reasons.push("accuracy-too-low");
   if (!Number.isFinite(session?.wpm) || session.wpm <= 0) reasons.push("invalid-wpm");
 
-  const difficulty = getDifficulty(foundationAnalysis, policy);
+  const difficulty = getPracticeDifficultyAdjustment(foundationAnalysis, policy);
   if (!["full", "partial", "insufficient", "unsupported-language"].includes(difficulty.status)) reasons.push("invalid-normalization");
   if (reasons.length) return assessment(channelName, "not-eligible", reasons, null, { sourceRole: evidenceRole, difficultyModelStatus: difficulty.status });
 
-  const observedLogWpm = Math.log(session.wpm);
-  const adjustedLogPerformance = observedLogWpm + difficulty.adjustment;
-  const uncertainty = calculateMeasurementUncertainty({
-    activeDurationMs: session.activeDurationMs,
+  const core = buildPracticeAdjustedPerformanceObservation({
+    wpm: session.wpm,
+    rawWpm: session.rawWpm,
     accuracy: session.accuracy,
+    activeDurationMs: session.activeDurationMs,
+    typedCharacterCount: session.typedCharacterCount,
+    foundationAnalysis,
     channelPolicy,
-    difficulty,
-    latencySummary: foundationAnalysis?.latency?.sessionSummary ?? null,
     policy,
   });
   const observation = freezeDeep({
@@ -171,20 +101,20 @@ export function buildPracticeAbilityObservation({
     sourceRole: evidenceRole,
     completedAtUtc: session.completedAtUtc,
     localDayKey: session.localDayKey,
-    rawWpm: Number.isFinite(session.rawWpm) ? session.rawWpm : null,
+    rawWpm: core.rawWpm,
     wpm: session.wpm,
-    adjustedWpm: Math.exp(adjustedLogPerformance),
-    adjustedLogPerformance,
+    adjustedWpm: core.adjustedWpm,
+    adjustedLogPerformance: core.adjustedLogPerformance,
     accuracy: session.accuracy,
     activeDurationMs: session.activeDurationMs,
     typedCharacterCount: session.typedCharacterCount,
-    difficultyIndex: difficulty.difficultyIndex,
-    difficultyAdjustmentLog: difficulty.adjustment,
-    difficultyModelStatus: difficulty.status,
-    difficultyCoverage: difficulty.coverage,
-    measurementSigmaLog: uncertainty.measurementSigmaLog,
-    measurementVarianceLog: uncertainty.measurementVarianceLog,
-    reliabilityWeight: uncertainty.reliabilityWeight,
+    difficultyIndex: core.difficultyIndex,
+    difficultyAdjustmentLog: core.difficultyAdjustmentLog,
+    difficultyModelStatus: core.difficultyModelStatus,
+    difficultyCoverage: core.difficultyCoverage,
+    measurementSigmaLog: core.measurementSigmaLog,
+    measurementVarianceLog: core.measurementVarianceLog,
+    reliabilityWeight: core.reliabilityWeight,
   });
   return assessment(channelName, "eligible", [], observation);
 }

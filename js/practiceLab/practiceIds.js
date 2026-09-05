@@ -7,6 +7,7 @@ const PREFIXES = Object.freeze({
   preset: "practice-preset_",
   quarantine: "practice-quarantine_",
   ability: "practice-ability_",
+  performance: "practice-performance_",
 });
 
 function fallbackToken(now, random) {
@@ -61,6 +62,12 @@ export function createPracticeAbilityStateId(profileId, contextId, channel) {
   if (arguments.length !== 3) throw new TypeError("createPracticeAbilityStateId requires profileId, contextId, and channel");
   if (!isPracticeId(profileId, "profile") || !isPracticeId(contextId, "context") || typeof channel !== "string" || !channel) throw new TypeError("Practice ability state identity is invalid");
   return `practice-ability_${[profileId, contextId, channel].map(encodeIdentityPart).join("|")}`;
+}
+
+export function createPracticePerformanceStateId(profileId, contextId) {
+  if (arguments.length !== 2) throw new TypeError("createPracticePerformanceStateId requires profileId and contextId");
+  if (!isPracticeId(profileId, "profile") || !isPracticeId(contextId, "context")) throw new TypeError("Practice performance state identity is invalid");
+  return `practice-performance_${[profileId, contextId].map(encodeIdentityPart).join("|")}`;
 }
 
 export function hashPracticeContent(value = "") {

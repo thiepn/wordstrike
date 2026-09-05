@@ -35,8 +35,8 @@ test("all PL6 runtime corpus modules import with zero storage/network/listener/t
   }
 });
 
-test("Practice corpus architecture stays isolated while later PL13 advances IndexedDB to v3", async () => {
-  assert.equal(PRACTICE_DATABASE_VERSION, 3);
+test("Practice corpus architecture stays isolated while later PL14 advances IndexedDB to v4", async () => {
+  assert.equal(PRACTICE_DATABASE_VERSION, 4);
   const practiceRoot = new URL("../js/practiceLab/", import.meta.url);
   const runtimeNames = (await readdir(practiceRoot)).filter((name) => /^practiceCorpus.*\.js$/.test(name));
   const runtime = (await Promise.all(runtimeNames.map((name) => readFile(new URL(name, practiceRoot), "utf8")))).join("\n");

@@ -45,6 +45,7 @@ import {
 } from "./practiceErrorPolicy.js";
 import { validatePracticeNormalizationSummary } from "./practiceNormalizationValidation.js";
 import { validatePracticeAbilityMeasurementSummary } from "./practiceAbilityValidation.js";
+import { validatePracticePerformanceMeasurementSummary } from "./practicePerformanceValidation.js";
 import { validatePracticeSkillStatV3 } from "./practiceSkillEvidenceValidation.js";
 import {
   PRACTICE_EVIDENCE_ACCURACY_SCOPES,
@@ -67,7 +68,7 @@ const UNSAFE_OBJECT_KEYS = new Set(["__proto__", "constructor", "prototype"]);
 const FORBIDDEN_SESSION_FIELDS = Object.freeze([
   "rawEvents", "eventTrace", "rawEventTrace", "classifiedEventTrace",
   "errorEpisodeHistory", "mistypedStrings", "rawLatencies", "normalizationTrace",
-  "normalizedTransitions", "typabilityFeatureVector", "skillEvidenceDeltas", "abilityObservation", "newAbilityEstimate", "leaderboardEligible",
+  "normalizedTransitions", "typabilityFeatureVector", "skillEvidenceDeltas", "abilityObservation", "newAbilityEstimate", "performanceStateDelta", "leaderboardEligible",
   "submissionPayload", "accessToken", "boardKey", "rulesVersion",
 ]);
 
@@ -490,6 +491,7 @@ export function validateSessionSummary(summary) {
   if (summary.normalizationSummary != null) errors.push(...validatePracticeNormalizationSummary(summary.normalizationSummary).errors.map((entry) => ({ ...entry, path: `normalizationSummary.${entry.path}` })));
   if (summary.skillEvidenceSummary != null) errors.push(...validatePracticeSkillEvidenceSummary(summary.skillEvidenceSummary).errors.map((entry) => ({ ...entry, path: `skillEvidenceSummary.${entry.path}` })));
   if (summary.abilityMeasurementSummary != null) errors.push(...validatePracticeAbilityMeasurementSummary(summary.abilityMeasurementSummary).errors.map((entry) => ({ ...entry, path: `abilityMeasurementSummary.${entry.path}` })));
+  if (summary.performanceMeasurementSummary != null) errors.push(...validatePracticePerformanceMeasurementSummary(summary.performanceMeasurementSummary).errors.map((entry) => ({ ...entry, path: `performanceMeasurementSummary.${entry.path}` })));
   appendSerializable(errors, summary.configuration, "configuration");
   appendSerializable(errors, summary.contentDescriptor, "contentDescriptor");
   for (const key of ["beforeMetrics", "afterMetrics", "transferMetrics", "fatigueSummary", "trainingQuality"]) if (summary[key] != null) appendSerializable(errors, summary[key], key);

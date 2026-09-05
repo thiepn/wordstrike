@@ -1213,3 +1213,13 @@ The correct terminology is:
 > **Estimated underlying ability under this Practice channel and context.**
 
 PL13's responsibility is to ensure later Progress, Assessment, Coach, and research systems can operate on an uncertainty-aware latent estimate rather than noisy score chasing.
+
+## PL14 boundary — latent ability is not current readiness
+
+PL14 does not change the meaning of `abilityStates`. PL13 ability remains a **slow-changing latent capability estimate** scoped by `(profileId, contextId, abilityChannel)`. It is not a container for current readiness, warm-up response, or the control frontier.
+
+A PL14 `state-probe` loads a frozen copy of the relevant PL13 ability state and compares the current adjusted log performance against that reference. Under the PL14 v1 trusted-descriptor contract, a session cannot simultaneously declare an `abilityChannel` measurement and a PL14 `performanceMeasurementKind`. Consequently, a temporary state probe cannot update ability merely because the user is unusually slow or fast today.
+
+Likewise, PL14 control-frontier stage points never write `abilityStates`. The frontier is a separate speed/control boundary learned from controlled-stage observations. A future protocol may deliberately support more than one measurement role, but that requires a new versioned contract rather than implicit pooling.
+
+The shared adjusted-performance extraction introduced by PL14 preserves PL13's v1 ability-observation mathematics exactly: the same typability adjustment, uncertainty components, sigma/reliability calculations, eligibility gates, and recursive ability estimator remain authoritative. PL14 consumes those pure calculations; it does not redefine them.

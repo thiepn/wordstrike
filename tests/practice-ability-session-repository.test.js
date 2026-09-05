@@ -81,7 +81,7 @@ function measurement({ profileId, contextId, sessionId, channel = "controlled-sp
   return { assessment, summary };
 }
 
-test("PL13 ordinary non-measurement session stays foundation v5/session v7 with no ability state", async () => {
+test("PL13 ordinary non-measurement session stays ability-isolated inside PL14 foundation v6/session v8 wrappers", async () => {
   let foundationSeen = null;
   const harness = await createPracticeSessionHarness({
     suffix: "pl13-ordinary",
@@ -93,11 +93,13 @@ test("PL13 ordinary non-measurement session stays foundation v5/session v7 with 
   await engine.start();
   await typeText(engine, harness, "abcdef");
   const result = await engine.complete("manual-stop");
-  assert.equal(foundationSeen.version, 5);
+  assert.equal(foundationSeen.version, 6);
   assert.equal(foundationSeen.ability.status, "not-requested");
   assert.equal(foundationSeen.ability.observation, null);
-  assert.equal(result.summary.recordVersion, 7);
+  assert.equal(foundationSeen.performance.status, "not-requested");
+  assert.equal(result.summary.recordVersion, 8);
   assert.equal(result.summary.abilityMeasurementSummary, null);
+  assert.equal(result.summary.performanceMeasurementSummary, null);
   assert.deepEqual(await harness.repository.listAbilityStates(harness.profileId, harness.contextId), []);
 });
 

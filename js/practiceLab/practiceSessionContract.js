@@ -2,6 +2,7 @@ import {
   ENTITY_TYPES,
 } from "./practiceConstants.js";
 import { PRACTICE_ABILITY_CHANNELS } from "./practiceAbilityConstants.js";
+import { PRACTICE_PERFORMANCE_MEASUREMENT_KINDS } from "./practicePerformanceConstants.js";
 import { hashPracticeContent } from "./practiceIds.js";
 import {
   PRACTICE_COMPLETION_MODES,
@@ -69,6 +70,15 @@ export function validatePracticeExperimentDescriptor(descriptor) {
   if (!Array.isArray(descriptor.supportedCompletionModes) || descriptor.supportedCompletionModes.some((mode) => !PRACTICE_COMPLETION_MODES.includes(mode))) errors.push({ path: "supportedCompletionModes", code: "INVALID_ENUM", message: "unsupported completion mode" });
   if (typeof descriptor.resumable !== "boolean") errors.push({ path: "resumable", code: "INVALID_TYPE", message: "resumable must be boolean" });
   if (descriptor.abilityChannel != null && !PRACTICE_ABILITY_CHANNELS.includes(descriptor.abilityChannel)) errors.push({ path: "abilityChannel", code: "INVALID_ENUM", message: "unsupported ability channel" });
+  const performanceKind = descriptor.performanceMeasurementKind ?? null;
+  const performanceChannel = descriptor.performanceReferenceChannel ?? null;
+  if (performanceKind != null && !PRACTICE_PERFORMANCE_MEASUREMENT_KINDS.includes(performanceKind)) errors.push({ path: "performanceMeasurementKind", code: "INVALID_ENUM", message: "unsupported performance measurement kind" });
+  if (descriptor.abilityChannel != null && performanceKind != null) errors.push({ path: "performanceMeasurementKind", code: "CONFLICT", message: "PL14 v1 cannot combine ability and performance measurement roles" });
+  if (performanceKind == null && performanceChannel != null) errors.push({ path: "performanceReferenceChannel", code: "CONFLICT", message: "performance reference channel requires a performance measurement" });
+  if (performanceKind === "state-probe" && !PRACTICE_ABILITY_CHANNELS.includes(performanceChannel)) errors.push({ path: "performanceReferenceChannel", code: "INVALID_ENUM", message: "state probe requires a canonical ability reference channel" });
+  if (performanceKind === "control-frontier" && performanceChannel !== "controlled-speed") errors.push({ path: "performanceReferenceChannel", code: "INVALID_ENUM", message: "control frontier must reference controlled-speed" });
+  if (performanceKind === "control-frontier" && typeof descriptor.buildPerformanceMeasurement !== "function") errors.push({ path: "buildPerformanceMeasurement", code: "REQUIRED", message: "control frontier requires a trusted measurement callback" });
+  if (performanceKind !== "control-frontier" && descriptor.buildPerformanceMeasurement != null) errors.push({ path: "buildPerformanceMeasurement", code: "FORBIDDEN_FIELD", message: "frontier measurement callback is allowed only for control-frontier" });
   return { valid: errors.length === 0, errors };
 }
 
@@ -208,6 +218,8 @@ export function validatePracticeSessionConfiguration(configuration) {
   if (configuration?.timingMode != null && !PRACTICE_TIMING_MODES.includes(configuration.timingMode)) errors.push({ path: "timingMode", code: "INVALID_ENUM", message: "unsupported timing mode" });
   if (configuration?.correctionBehavior != null && !PRACTICE_CORRECTION_POLICIES.includes(configuration.correctionBehavior)) errors.push({ path: "correctionBehavior", code: "INVALID_ENUM", message: "unsupported correction behavior" });
   if (Object.hasOwn(configuration ?? {}, "abilityChannel")) errors.push({ path: "abilityChannel", code: "FORBIDDEN_FIELD", message: "abilityChannel is trusted experiment metadata and cannot be configured per session" });
+  if (Object.hasOwn(configuration ?? {}, "performanceMeasurementKind")) errors.push({ path: "performanceMeasurementKind", code: "FORBIDDEN_FIELD", message: "performanceMeasurementKind is trusted experiment metadata and cannot be configured per session" });
+  if (Object.hasOwn(configuration ?? {}, "performanceReferenceChannel")) errors.push({ path: "performanceReferenceChannel", code: "FORBIDDEN_FIELD", message: "performanceReferenceChannel is trusted experiment metadata and cannot be configured per session" });
   return { valid: errors.length === 0, errors };
 }
 
@@ -222,6 +234,9 @@ export function createGenericPracticeExperimentDescriptor(overrides = {}) {
     supportedCompletionModes: [...PRACTICE_COMPLETION_MODES],
     resumable: true,
     abilityChannel: null,
+    performanceMeasurementKind: null,
+    performanceReferenceChannel: null,
+    buildPerformanceMeasurement: null,
     ...overrides,
   });
 }
