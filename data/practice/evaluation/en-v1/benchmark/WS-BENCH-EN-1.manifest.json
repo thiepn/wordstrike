@@ -1,0 +1,64 @@
+{
+  "suiteId": "WS-BENCH-EN-1",
+  "suiteSchemaVersion": 1,
+  "suiteVersion": 1,
+  "language": "en",
+  "abilityChannel": "cold-natural-text",
+  "status": "draft",
+  "comparabilityClass": "engineering-matched",
+  "measurementProtocol": {
+    "protocolId": "ws-benchmark-60s-v1",
+    "protocolVersion": 1,
+    "kind": "benchmark",
+    "abilityChannel": "cold-natural-text",
+    "durationMs": 60000,
+    "completionMode": "duration",
+    "completionReason": "time-complete",
+    "correctionBehavior": "allow",
+    "timingMode": "on-first-input",
+    "targeted": false,
+    "resumable": false,
+    "appendAllowed": false,
+    "pauseAllowed": false,
+    "feedback": {
+      "showLiveWpm": false,
+      "showLiveAccuracy": false,
+      "showRhythmFeedback": false,
+      "metronomeSoundEnabled": false,
+      "adaptiveHints": false,
+      "targetHints": false,
+      "mode": "measurement-minimal"
+    }
+  },
+  "corpusBinding": {
+    "corpusId": "practice-en-v1",
+    "corpusVersion": 1,
+    "corpusChecksum": "sha256-28beccf65eed71519da306c129da5040a20f364aed320dc21eea2d16c2a1c404",
+    "partitionArtifactChecksum": "sha256-e623270c14c25ee216b2b66737d4dae967a1eebc81c6dbb398d59d5794d20f97"
+  },
+  "indexBinding": {
+    "indexChecksum": "sha256-bb198244a6b6cefcae5cb908bf3dee6e9e52259f9ef41576ec69c429a423ff32"
+  },
+  "typabilityBinding": {
+    "modelVersion": 1,
+    "featureVersion": 1,
+    "referenceVersion": 1,
+    "artifactChecksum": "sha256-2f427226ade1080f8bf4345e3046fa578c62969c0a8971c51b4b2e2b6ffc7ae4"
+  },
+  "matchPolicyVersion": 1,
+  "forms": [],
+  "matchReport": {
+    "valid": false,
+    "blockers": [
+      "no-valid-forms"
+    ],
+    "forms": [],
+    "releaseBlockers": [
+      "minimum-ready-form-count:0/6",
+      "insufficient-protected-form-length",
+      "typability-coverage-below-0.90"
+    ]
+  },
+  "calibration": null,
+  "checksum": "fnv1a32-742432d2"
+}
