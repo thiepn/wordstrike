@@ -110,11 +110,12 @@ function summaryFor(harness, sessionId, evidenceSummary, completedAtUtc = "2026-
   });
 }
 
-test("PL16 DB v5 learning-state contract remains intact while PL17 advances review/session record versions", () => {
-  assert.equal(PRACTICE_DATABASE_VERSION, 5);
+test("PL16 learning-state contract remains intact inside the PL18 DB6/session11 envelope", () => {
+  assert.equal(PRACTICE_DATABASE_VERSION, 6);
   assert.equal(PRACTICE_RECORD_VERSIONS.learningState, 1);
   assert.equal(PRACTICE_RECORD_VERSIONS.reviewItem, 3);
-  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 10);
+  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 11);
+  assert.equal(PRACTICE_RECORD_VERSIONS.evaluationState, 1);
   assert.equal(PRACTICE_STORE_DEFINITIONS.learningStates.keyPath, "learningStateId");
   assert.ok(PRACTICE_STORE_DEFINITIONS.learningStates.indexes.some((index) => index.name === "statId" && index.options?.unique));
   assert.ok(PRACTICE_STORE_DEFINITIONS.learningStates.indexes.some((index) => index.name === "profileContextEntity" && index.options?.unique));
