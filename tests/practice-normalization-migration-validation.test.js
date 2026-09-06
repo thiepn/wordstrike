@@ -76,14 +76,15 @@ function validNormalizationSummary() {
   };
 }
 
-test("PL10 model versions remain stable inside the current PL16 storage/session/foundation envelope", () => {
+test("PL10 model versions remain stable inside the current PL17 storage/session/foundation envelope", () => {
   assert.equal(PRACTICE_DATABASE_VERSION, 5);
-  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 9);
+  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 10);
+  assert.equal(PRACTICE_RECORD_VERSIONS.reviewItem, 3);
   assert.equal(PRACTICE_RECORD_VERSIONS.checkpoint, 3);
   assert.equal(PRACTICE_RECORD_VERSIONS.skillStat, 3);
   assert.equal(PRACTICE_RECORD_VERSIONS.learningState, 1);
   assert.equal(PRACTICE_RECORD_VERSIONS.profile, 3);
-  assert.equal(PRACTICE_FOUNDATION_ANALYSIS_VERSION, 7);
+  assert.equal(PRACTICE_FOUNDATION_ANALYSIS_VERSION, 8);
   assert.equal(PRACTICE_NORMALIZATION_ANALYSIS_VERSION, 1);
   assert.equal(PRACTICE_CONTEXT_MODEL_VERSION, 1);
   assert.equal(PRACTICE_CONTEXT_POLICY_VERSION, 1);
@@ -93,7 +94,7 @@ test("PL10 model versions remain stable inside the current PL16 storage/session/
   assert.equal(PRACTICE_KEYBOARD_GEOMETRY_VERSION, 1);
 });
 
-test("PL10 sessionSummary v4 migration preserves null normalization evidence through current PL16 v9", () => {
+test("PL10 sessionSummary v4 migration preserves null normalization evidence through current PL17 v10", () => {
   const current = createDefaultSessionSummary();
   const historical = { ...current, recordVersion: 4 };
   delete historical.normalizationSummary;
@@ -101,24 +102,26 @@ test("PL10 sessionSummary v4 migration preserves null normalization evidence thr
   delete historical.abilityMeasurementSummary;
   delete historical.performanceMeasurementSummary;
   delete historical.learningEvidenceSummary;
+  delete historical.retentionReviewSummary;
   const source = structuredClone(historical);
   const migrated = migratePracticeRecord("sessionSummary", historical);
   assert.equal(migrated.ok, true);
   assert.equal(migrated.fromVersion, 4);
-  assert.equal(migrated.toVersion, 9);
-  assert.deepEqual(migrated.steps, ["sessionSummary:4->5", "sessionSummary:5->6", "sessionSummary:6->7", "sessionSummary:7->8", "sessionSummary:8->9"]);
+  assert.equal(migrated.toVersion, 10);
+  assert.deepEqual(migrated.steps, ["sessionSummary:4->5", "sessionSummary:5->6", "sessionSummary:6->7", "sessionSummary:7->8", "sessionSummary:8->9", "sessionSummary:9->10"]);
   assert.equal(migrated.value.normalizationSummary, null);
   assert.equal(migrated.value.skillEvidenceSummary, null);
   assert.equal(migrated.value.abilityMeasurementSummary, null);
   assert.equal(migrated.value.performanceMeasurementSummary, null);
   assert.equal(migrated.value.learningEvidenceSummary, null);
+  assert.equal(migrated.value.retentionReviewSummary, null);
   assert.deepEqual(historical, source);
 });
 
-test("PL10 normalization remains null in the complete historical v1 -> v9 migration chain", () => {
+test("PL10 normalization remains null in the complete historical v1 -> v10 migration chain", () => {
   const current = createDefaultSessionSummary();
   const historical = { ...current, recordVersion: 1 };
-  for (const key of ["contextId", "fluencySummary", "errorSummary", "normalizationSummary", "skillEvidenceSummary", "abilityMeasurementSummary", "performanceMeasurementSummary", "learningEvidenceSummary"]) delete historical[key];
+  for (const key of ["contextId", "fluencySummary", "errorSummary", "normalizationSummary", "skillEvidenceSummary", "abilityMeasurementSummary", "performanceMeasurementSummary", "learningEvidenceSummary", "retentionReviewSummary"]) delete historical[key];
   const migrated = migratePracticeRecord("sessionSummary", historical);
   assert.equal(migrated.ok, true);
   assert.deepEqual(migrated.steps, [
@@ -130,8 +133,9 @@ test("PL10 normalization remains null in the complete historical v1 -> v9 migrat
     "sessionSummary:6->7",
     "sessionSummary:7->8",
     "sessionSummary:8->9",
+    "sessionSummary:9->10",
   ]);
-  assert.equal(migrated.value.recordVersion, 9);
+  assert.equal(migrated.value.recordVersion, 10);
   assert.equal(migrated.value.fluencySummary, null);
   assert.equal(migrated.value.errorSummary, null);
   assert.equal(migrated.value.normalizationSummary, null);
@@ -139,6 +143,7 @@ test("PL10 normalization remains null in the complete historical v1 -> v9 migrat
   assert.equal(migrated.value.abilityMeasurementSummary, null);
   assert.equal(migrated.value.performanceMeasurementSummary, null);
   assert.equal(migrated.value.learningEvidenceSummary, null);
+  assert.equal(migrated.value.retentionReviewSummary, null);
 });
 
 test("PL10 durable normalizationSummary validates compact context/coverage/difficulty only", () => {
