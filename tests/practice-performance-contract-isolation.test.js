@@ -26,9 +26,9 @@ test("PL14 session configuration cannot spoof trusted performance metadata", () 
   assert.equal(validatePracticeSessionConfiguration({ abilityChannel: "controlled-speed" }).valid, false);
 });
 
-test("PL14 performance attachment remains immutable inside PL17 foundation analysis v8", () => {
-  assert.equal(PRACTICE_FOUNDATION_ANALYSIS_VERSION, 8);
-  const base = Object.freeze({ version: 8, latency: null, errors: null, normalization: null, skills: null, ability: null, performance: null, learning: null, retention: null });
+test("PL14 performance attachment remains immutable inside PL18 foundation analysis v9", () => {
+  assert.equal(PRACTICE_FOUNDATION_ANALYSIS_VERSION, 9);
+  const base = Object.freeze({ version: 9, latency: null, errors: null, normalization: null, skills: null, ability: null, performance: null, learning: null, retention: null, evaluation: null });
   const performance = { version: 1, status: "not-requested", reasons: [], measurementKind: null, stateProbe: null, warmup: null, frontier: null, sessionSummary: null, performanceStateDelta: null };
   const attached = withPracticePerformanceAnalysis(base, performance);
   assert.equal(attached.performance.status, "not-requested");

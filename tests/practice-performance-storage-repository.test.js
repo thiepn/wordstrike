@@ -29,11 +29,12 @@ function fakeUpgradeDatabase(initialNames) {
   };
 }
 
-test("PL14 performance-state contract remains intact inside the current PL17 DB/session envelope", () => {
-  assert.equal(PRACTICE_DATABASE_VERSION, 5);
+test("PL14 performance-state contract remains intact inside the current PL18 DB/session envelope", () => {
+  assert.equal(PRACTICE_DATABASE_VERSION, 6);
   assert.equal(PRACTICE_RECORD_VERSIONS.performanceState, 1);
-  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 10);
+  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 11);
   assert.equal(PRACTICE_RECORD_VERSIONS.learningState, 1);
+  assert.equal(PRACTICE_RECORD_VERSIONS.evaluationState, 1);
   assert.equal(PRACTICE_RECORD_VERSIONS.reviewItem, 3);
   assert.equal(PRACTICE_LIMITS.performanceStateBytes, 64 * 1024);
   assert.deepEqual(PRACTICE_STORE_DEFINITIONS.performanceStates, {
@@ -54,7 +55,7 @@ test("PL14 performance-state contract remains intact inside the current PL17 DB/
   assert.deepEqual(fresh.created.sort(), Object.keys(PRACTICE_STORE_DEFINITIONS).sort());
 });
 
-test("PL14 historical session v7 performance migration remains null through the current PL17 v10 wrapper", () => {
+test("PL14 historical session v7 performance migration remains null through the current PL18 v11 wrapper", () => {
   const harnessProfile = "practice-profile_pl14-migration-profile-12345678";
   const harnessContext = "practice-context_pl14-migration-context-12345678";
   const current = createDefaultSessionSummary({ profileId: harnessProfile, contextId: harnessContext, sessionId: "practice-session_pl14-migration-session-12345678", now: () => new Date("2026-09-05T12:00:00Z") });
@@ -62,13 +63,15 @@ test("PL14 historical session v7 performance migration remains null through the 
   delete legacy.performanceMeasurementSummary;
   delete legacy.learningEvidenceSummary;
   delete legacy.retentionReviewSummary;
+  delete legacy.evaluationSummary;
   const migration = migratePracticeRecord("sessionSummary", legacy);
   assert.equal(migration.ok, true);
-  assert.equal(migration.toVersion, 10);
-  assert.deepEqual(migration.steps, ["sessionSummary:7->8", "sessionSummary:8->9", "sessionSummary:9->10"]);
+  assert.equal(migration.toVersion, 11);
+  assert.deepEqual(migration.steps, ["sessionSummary:7->8", "sessionSummary:8->9", "sessionSummary:9->10", "sessionSummary:10->11"]);
   assert.equal(migration.value.performanceMeasurementSummary, null);
   assert.equal(migration.value.learningEvidenceSummary, null);
   assert.equal(migration.value.retentionReviewSummary, null);
+  assert.equal(migration.value.evaluationSummary, null);
   assert.equal(migration.value.abilityMeasurementSummary, current.abilityMeasurementSummary);
 });
 

@@ -21,6 +21,7 @@ import { validatePracticeReviewItemV3 } from "./practiceReviewValidation.js";
 import { validatePracticeAbilityState } from "./practiceAbilityValidation.js";
 import { validatePracticePerformanceState } from "./practicePerformanceValidation.js";
 import { validatePracticeLearningState } from "./practiceLearningValidation.js";
+import { validatePracticeEvaluationState } from "./practiceEvaluationValidation.js";
 import { createEmptyPracticeRetentionState } from "./practiceReviewItem.js";
 import {
   createDefaultPracticeContextId,
@@ -40,6 +41,7 @@ const validators = Object.freeze({
   abilityState: validatePracticeAbilityState,
   performanceState: validatePracticePerformanceState,
   learningState: validatePracticeLearningState,
+  evaluationState: validatePracticeEvaluationState,
   sessionSummary: validateSessionSummary,
   reviewItem: validatePracticeReviewItemV3,
   customText: validateCustomText,
@@ -54,6 +56,7 @@ const normalizers = Object.freeze({
   abilityState: (value) => value,
   performanceState: (value) => value,
   learningState: (value) => value,
+  evaluationState: (value) => value,
   sessionSummary: normalizeSessionSummary,
   reviewItem: (value) => value,
   customText: normalizeCustomTextMetadata,
@@ -122,6 +125,7 @@ const migrations = Object.freeze({
     7: (value) => ({ ...value, recordVersion: 8, performanceMeasurementSummary: null }),
     8: (value) => ({ ...value, recordVersion: 9, learningEvidenceSummary: null }),
     9: (value) => ({ ...value, recordVersion: 10, retentionReviewSummary: null }),
+    10: (value) => ({ ...value, recordVersion: 11, evaluationSummary: null }),
   }),
   reviewItem: Object.freeze({
     1: (value) => ({ ...value, recordVersion: 2, contextId: createDefaultPracticeContextId(value.profileId) }),
@@ -161,7 +165,7 @@ function promoteForCurrentValidation(type, value, version) {
     return migratePracticeSkillStatV2ToV3({ ...value, recordVersion: 2, contextId, statId: createSkillStatId(value.profileId, contextId, value.entityType, value.entityKey) });
   }
   if (type === "skillStat" && version === 2) return migratePracticeSkillStatV2ToV3(value);
-  if (type === "sessionSummary" && version <= 9) return {
+  if (type === "sessionSummary" && version <= 10) return {
     ...value,
     recordVersion: PRACTICE_RECORD_VERSIONS.sessionSummary,
     contextId: version === 1 ? createDefaultPracticeContextId(value.profileId) : value.contextId,
@@ -172,7 +176,8 @@ function promoteForCurrentValidation(type, value, version) {
     abilityMeasurementSummary: version <= 6 ? null : value.abilityMeasurementSummary ?? null,
     performanceMeasurementSummary: version <= 7 ? null : value.performanceMeasurementSummary ?? null,
     learningEvidenceSummary: version <= 8 ? null : value.learningEvidenceSummary ?? null,
-    retentionReviewSummary: null,
+    retentionReviewSummary: version <= 9 ? null : value.retentionReviewSummary ?? null,
+    evaluationSummary: null,
   };
   if (type === "reviewItem" && version === 1) return migrateReviewV2ToV3({ ...value, recordVersion: 2, contextId: createDefaultPracticeContextId(value.profileId) });
   if (type === "reviewItem" && version === 2) return migrateReviewV2ToV3(value);

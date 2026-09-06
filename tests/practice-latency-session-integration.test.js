@@ -14,7 +14,7 @@ async function typeCorrect(engine, harness, count, latencyMs = 100) {
   }
 }
 
-test("generic sessions persist canonical fluencySummary inside the current PL17 session envelope", async () => {
+test("generic sessions persist canonical fluencySummary inside the current PL18 session v11 envelope", async () => {
   const harness = await createPracticeSessionHarness({ suffix: "pl8-generic", text: "a".repeat(40) });
   const engine = createPracticeSessionEngine({
     repository: harness.repository,
@@ -29,8 +29,9 @@ test("generic sessions persist canonical fluencySummary inside the current PL17 
   await engine.start();
   await typeCorrect(engine, harness, 26);
   const result = await engine.complete("manual-stop");
-  assert.equal(result.summary.recordVersion, 10);
+  assert.equal(result.summary.recordVersion, 11);
   assert.equal(result.summary.retentionReviewSummary, null);
+  assert.equal(result.summary.evaluationSummary, null);
   assert.equal(result.summary.fluencySummary.calibration.status, "adaptive");
   assert.equal(result.summary.fluencySummary.fluentTransitionCount, 25);
   assert.equal(result.summary.fluencySummary.disfluentTransitionCount, 0);
@@ -40,7 +41,7 @@ test("generic sessions persist canonical fluencySummary inside the current PL17 
   assert.equal(Object.hasOwn(result.summary, "classifiedEventTrace"), false);
 });
 
-test("experiment analyzers receive immutable foundationAnalysis but cannot own fluencySummary", async () => {
+test("experiment analyzers receive immutable PL18 foundation v9 analysis but cannot own fluencySummary", async () => {
   let received = null;
   let mutationThrew = false;
   const harness = await createPracticeSessionHarness({
@@ -71,8 +72,9 @@ test("experiment analyzers receive immutable foundationAnalysis but cannot own f
   await typeCorrect(engine, harness, 26);
   const result = await engine.complete("manual-stop");
   assert.ok(received?.foundationAnalysis?.latency);
-  assert.equal(received.foundationAnalysis.version, 8);
+  assert.equal(received.foundationAnalysis.version, 9);
   assert.equal(received.foundationAnalysis.retention.status, "not-requested");
+  assert.equal(received.foundationAnalysis.evaluation.status, "not-requested");
   assert.ok(Object.isFrozen(received.foundationAnalysis));
   assert.ok(Object.isFrozen(received.foundationAnalysis.latency));
   assert.equal(mutationThrew, true);

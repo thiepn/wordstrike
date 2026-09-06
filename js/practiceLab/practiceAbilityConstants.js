@@ -46,6 +46,7 @@ export const PRACTICE_ABILITY_REASON_CODES = Object.freeze([
   "invalid-wpm",
   "context-mismatch",
   "invalid-normalization",
+  "evaluation-not-fresh",
 ]);
 
 export const PRACTICE_ABILITY_SOURCE_ROLES = Object.freeze([

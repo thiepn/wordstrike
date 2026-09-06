@@ -1,0 +1,56 @@
+{
+  "poolId": "WS-TRANSFER-EN-1",
+  "poolSchemaVersion": 1,
+  "poolVersion": 1,
+  "language": "en",
+  "status": "draft",
+  "selectionPolicyVersion": 1,
+  "measurementProtocol": {
+    "protocolId": "ws-cold-transfer-60s-v1",
+    "protocolVersion": 1,
+    "kind": "cold-transfer",
+    "abilityChannel": "cold-natural-text",
+    "durationMs": 60000,
+    "completionMode": "duration",
+    "completionReason": "time-complete",
+    "correctionBehavior": "allow",
+    "timingMode": "on-first-input",
+    "targeted": false,
+    "resumable": false,
+    "appendAllowed": false,
+    "pauseAllowed": false,
+    "feedback": {
+      "showLiveWpm": false,
+      "showLiveAccuracy": false,
+      "showRhythmFeedback": false,
+      "metronomeSoundEnabled": false,
+      "adaptiveHints": false,
+      "targetHints": false,
+      "mode": "measurement-minimal"
+    }
+  },
+  "corpusBinding": {
+    "corpusId": "practice-en-v1",
+    "corpusVersion": 1,
+    "corpusChecksum": "sha256-28beccf65eed71519da306c129da5040a20f364aed320dc21eea2d16c2a1c404",
+    "partitionArtifactChecksum": "sha256-7778168540e97de197daf5e71d7c0fda4bac63811dc73ad6d49a47b8b49ea6cf"
+  },
+  "indexBinding": {
+    "indexChecksum": "sha256-bb198244a6b6cefcae5cb908bf3dee6e9e52259f9ef41576ec69c429a423ff32"
+  },
+  "typabilityBinding": {
+    "modelVersion": 1,
+    "featureVersion": 1,
+    "referenceVersion": 1,
+    "artifactChecksum": "sha256-405bbc728c4144347b09203786ab1e920a6e6edd18ae83c12f52190462b038af"
+  },
+  "separator": "\n\n",
+  "units": [],
+  "releaseReport": {
+    "releaseBlockers": [
+      "minimum-ready-unit-count:0/16",
+      "insufficient-protected-unit-length"
+    ]
+  },
+  "checksum": "fnv1a32-af0883c7"
+}

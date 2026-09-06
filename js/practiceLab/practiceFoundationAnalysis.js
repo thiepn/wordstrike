@@ -8,8 +8,9 @@ import { PRACTICE_ERROR_POLICY_V1 } from "./practiceErrorPolicy.js";
 import { analyzePracticeNormalization } from "./practiceNormalizationAnalysis.js";
 import { PRACTICE_LEARNING_ANALYSIS_VERSION } from "./practiceLearningConstants.js";
 import { createEmptyPracticeRetentionAnalysis } from "./practiceRetentionAnalysis.js";
+import { createEmptyPracticeEvaluationAnalysis } from "./practiceEvaluationAnalysis.js";
 
-export const PRACTICE_FOUNDATION_ANALYSIS_VERSION = 8;
+export const PRACTICE_FOUNDATION_ANALYSIS_VERSION = 9;
 
 const freezeDeep = (value) => {
   if (!value || typeof value !== "object" || Object.isFrozen(value)) return value;
@@ -83,6 +84,7 @@ export function buildPracticeFoundationAnalysis({
   performance = null,
   learning = null,
   retention = null,
+  evaluation = null,
 } = {}) {
   const latency = analyzePracticeLatency({ events, traceMetadata, policy: latencyPolicy });
   const trackerSnapshot = errorTrackerSnapshot ?? buildFallbackTrackerSnapshot(events, traceMetadata, errorPolicy);
@@ -102,29 +104,18 @@ export function buildPracticeFoundationAnalysis({
     performance: performance ?? freezeDeep({ version: 1, status: "not-requested", reasons: [], measurementKind: null, stateProbe: null, warmup: null, frontier: null, sessionSummary: null, performanceStateDelta: null }),
     learning: learning ?? emptyLearningAnalysis(),
     retention: retention ?? createEmptyPracticeRetentionAnalysis(),
+    evaluation: evaluation ?? createEmptyPracticeEvaluationAnalysis(),
   });
 }
 
-export function withPracticeAbilityAnalysis(foundationAnalysis, ability) {
-  if (!foundationAnalysis || foundationAnalysis.version !== PRACTICE_FOUNDATION_ANALYSIS_VERSION) throw new TypeError("Practice ability attachment requires current foundation analysis");
-  if (!ability || typeof ability !== "object") throw new TypeError("Practice ability analysis is required");
-  return freezeDeep({ ...foundationAnalysis, ability });
+function attach(foundationAnalysis, field, value, label) {
+  if (!foundationAnalysis || foundationAnalysis.version !== PRACTICE_FOUNDATION_ANALYSIS_VERSION) throw new TypeError(`Practice ${label} attachment requires current foundation analysis`);
+  if (!value || typeof value !== "object") throw new TypeError(`Practice ${label} analysis is required`);
+  return freezeDeep({ ...foundationAnalysis, [field]: value });
 }
 
-export function withPracticePerformanceAnalysis(foundationAnalysis, performance) {
-  if (!foundationAnalysis || foundationAnalysis.version !== PRACTICE_FOUNDATION_ANALYSIS_VERSION) throw new TypeError("Practice performance attachment requires current foundation analysis");
-  if (!performance || typeof performance !== "object") throw new TypeError("Practice performance analysis is required");
-  return freezeDeep({ ...foundationAnalysis, performance });
-}
-
-export function withPracticeLearningAnalysis(foundationAnalysis, learning) {
-  if (!foundationAnalysis || foundationAnalysis.version !== PRACTICE_FOUNDATION_ANALYSIS_VERSION) throw new TypeError("Practice learning attachment requires current foundation analysis");
-  if (!learning || typeof learning !== "object") throw new TypeError("Practice learning analysis is required");
-  return freezeDeep({ ...foundationAnalysis, learning });
-}
-
-export function withPracticeRetentionAnalysis(foundationAnalysis, retention) {
-  if (!foundationAnalysis || foundationAnalysis.version !== PRACTICE_FOUNDATION_ANALYSIS_VERSION) throw new TypeError("Practice retention attachment requires current foundation analysis");
-  if (!retention || typeof retention !== "object") throw new TypeError("Practice retention analysis is required");
-  return freezeDeep({ ...foundationAnalysis, retention });
-}
+export function withPracticeAbilityAnalysis(foundationAnalysis, ability) { return attach(foundationAnalysis, "ability", ability, "ability"); }
+export function withPracticePerformanceAnalysis(foundationAnalysis, performance) { return attach(foundationAnalysis, "performance", performance, "performance"); }
+export function withPracticeLearningAnalysis(foundationAnalysis, learning) { return attach(foundationAnalysis, "learning", learning, "learning"); }
+export function withPracticeRetentionAnalysis(foundationAnalysis, retention) { return attach(foundationAnalysis, "retention", retention, "retention"); }
+export function withPracticeEvaluationAnalysis(foundationAnalysis, evaluation) { return attach(foundationAnalysis, "evaluation", evaluation, "evaluation"); }

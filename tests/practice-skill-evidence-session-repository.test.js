@@ -29,7 +29,7 @@ async function typeText(engine, harness, text, latencyMs = 100) {
   }
 }
 
-test("PL11 canonical deltas remain intact inside PL17 foundation v8/session v10, and experiment full-stat output cannot replace evidence", async () => {
+test("PL11 canonical deltas remain intact inside PL18 foundation v9/session v11, and experiment full-stat output cannot replace evidence", async () => {
   let foundation = null;
   const harness = await createPracticeSessionHarness({
     suffix: "pl11-session-foundation",
@@ -50,12 +50,14 @@ test("PL11 canonical deltas remain intact inside PL17 foundation v8/session v10,
   await engine.start();
   await typeText(engine, harness, harness.contentPlan.text);
   const result = await engine.complete("manual-stop");
-  assert.equal(foundation.version, 8);
+  assert.equal(foundation.version, 9);
   assert.equal(foundation.retention.status, "not-requested");
+  assert.equal(foundation.evaluation.status, "not-requested");
   assert.equal(Object.isFrozen(foundation.skills), true);
   assert.ok(foundation.skills.deltas.length > 0);
-  assert.equal(result.summary.recordVersion, 10);
+  assert.equal(result.summary.recordVersion, 11);
   assert.equal(result.summary.retentionReviewSummary, null);
+  assert.equal(result.summary.evaluationSummary, null);
   assert.equal(result.summary.beforeMetrics.analyzerObservedSkills, true);
   assert.equal(result.summary.skillEvidenceSummary.fake, undefined);
   assert.equal(Object.hasOwn(result.summary.skillEvidenceSummary, "deltas"), false);

@@ -25,7 +25,9 @@ export function buildPracticeSessionResult({
   foundationAnalysis = null,
   analysis = null,
 }) {
-  const learningEvidenceSummary = foundationAnalysis?.learning?.summary ?? null;
+  const skillEvidenceSummary = analysis?.__pl18SkillEvidenceSummary ?? foundationAnalysis?.skills?.summary ?? null;
+  const abilityMeasurementSummary = analysis?.__pl18AbilityMeasurementSummary ?? foundationAnalysis?.ability?.sessionSummary ?? null;
+  const learningEvidenceSummary = analysis?.__pl18LearningEvidenceSummary ?? foundationAnalysis?.learning?.summary ?? null;
   if (learningEvidenceSummary != null) {
     const learningValidation = validatePracticeLearningEvidenceSummary(learningEvidenceSummary);
     if (!learningValidation.valid) throw practiceSessionError(
@@ -38,6 +40,7 @@ export function buildPracticeSessionResult({
     ?? (foundationAnalysis?.retention?.measurementKind == null
       ? null
       : foundationAnalysis?.retention?.summary ?? null);
+  const evaluationSummary = analysis?.__pl18EvaluationSummary ?? null;
   const summary = createDefaultSessionSummary({
     sessionId,
     profileId,
@@ -83,11 +86,12 @@ export function buildPracticeSessionResult({
       fluencySummary: foundationAnalysis?.latency?.sessionSummary ?? null,
       errorSummary: foundationAnalysis?.errors?.sessionSummary ?? null,
       normalizationSummary: foundationAnalysis?.normalization?.sessionSummary ?? null,
-      skillEvidenceSummary: foundationAnalysis?.skills?.summary ?? null,
-      abilityMeasurementSummary: foundationAnalysis?.ability?.sessionSummary ?? null,
+      skillEvidenceSummary,
+      abilityMeasurementSummary,
       performanceMeasurementSummary: foundationAnalysis?.performance?.sessionSummary ?? null,
       learningEvidenceSummary,
       retentionReviewSummary,
+      evaluationSummary,
       beforeMetrics: analysis?.beforeMetrics ?? null,
       afterMetrics: analysis?.afterMetrics ?? null,
       transferMetrics: analysis?.transferMetrics ?? null,
