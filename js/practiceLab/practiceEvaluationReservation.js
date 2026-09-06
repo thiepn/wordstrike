@@ -114,7 +114,13 @@ export function reservePracticeColdTransferUnitState(options = {}) {
   assertPracticeEvaluationOptionsTargetBlind(options, TRANSFER_ALLOWED);
   const now = options.now ?? (() => new Date());
   const cleaned = cleanupExpiredPracticeEvaluationReservations(options.evaluationState, now);
-  const selection = selectPracticeColdTransferUnit({ ...options, evaluationState: cleaned });
+  const selection = selectPracticeColdTransferUnit({
+    profileId: options.profileId,
+    contextId: options.contextId,
+    poolId: options.poolId,
+    pool: options.pool,
+    evaluationState: cleaned,
+  });
   const reservation = createReservation({ profileId: options.profileId, kind: "cold-transfer", selection, now });
   return freezeDeep({ reservation, state: withPracticeEvaluationReservation(cleaned, reservation, now) });
 }
