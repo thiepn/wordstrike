@@ -2,7 +2,7 @@ export const PRACTICE_MANIFEST_KEY = "wordstrike.practice.manifest.v1";
 export const PRACTICE_MANIFEST_BACKUP_KEY = "wordstrike.practice.manifest.backup.v1";
 export const PRACTICE_MANIFEST_TEMP_KEY = "wordstrike.practice.manifest.temp.v1";
 export const PRACTICE_DATABASE_NAME = "wordstrike-practice-lab";
-export const PRACTICE_DATABASE_VERSION = 6;
+export const PRACTICE_DATABASE_VERSION = 7;
 export const PRACTICE_MANIFEST_VERSION = 1;
 export const PRACTICE_CONTEXT_FINGERPRINT_VERSION = 1;
 
@@ -10,12 +10,13 @@ export const PRACTICE_RECORD_VERSIONS = Object.freeze({
   context: 1,
   profile: 3,
   skillStat: 3,
-  sessionSummary: 11,
+  sessionSummary: 12,
   abilityState: 1,
   performanceState: 1,
   learningState: 1,
   reviewItem: 3,
   evaluationState: 1,
+  assessmentRun: 1,
   customText: 1,
   preset: 1,
   checkpoint: 3,
@@ -41,6 +42,7 @@ export const PRACTICE_LIMITS = Object.freeze({
   learningStateBytes: 32 * 1024,
   reviewItemBytes: 32 * 1024,
   evaluationStateBytes: 64 * 1024,
+  assessmentRunBytes: 128 * 1024,
   checkpointBytes: 512 * 1024,
   configurationDepth: 8,
   configurationBytes: 32 * 1024,
@@ -52,6 +54,7 @@ export const PRACTICE_LIMITS = Object.freeze({
   wordStats: 5_000,
   patternStats: 1_000,
   reviewItems: 5_000,
+  assessmentRuns: 50,
   quarantineRecords: 100,
   checkpointTtlMs: 24 * 60 * 60 * 1000,
   abandonmentCharacters: 20,
@@ -118,6 +121,18 @@ export const PRACTICE_STORE_DEFINITIONS = Object.freeze({
     indexes: [
       Object.freeze({ name: "profileId", keyPath: "profileId", options: { unique: true } }),
       Object.freeze({ name: "updatedAt", keyPath: "updatedAt" }),
+    ],
+  }),
+  assessmentRuns: Object.freeze({
+    keyPath: "assessmentRunId",
+    indexes: [
+      Object.freeze({ name: "profileId", keyPath: "profileId" }),
+      Object.freeze({ name: "contextId", keyPath: "contextId" }),
+      Object.freeze({ name: "status", keyPath: "status" }),
+      Object.freeze({ name: "depth", keyPath: "depth" }),
+      Object.freeze({ name: "startedAt", keyPath: "startedAt" }),
+      Object.freeze({ name: "completedAt", keyPath: "completedAt" }),
+      Object.freeze({ name: "profileStatus", keyPath: ["profileId", "status"] }),
     ],
   }),
   sessionSummaries: Object.freeze({
