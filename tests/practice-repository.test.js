@@ -12,6 +12,7 @@ import { createPracticeId } from "../js/practiceLab/practiceIds.js";
 import { createPracticeManifestStore } from "../js/practiceLab/practiceManifestStore.js";
 import { createPracticeMemoryStore } from "../js/practiceLab/practiceMemoryStore.js";
 import { createPracticeRepository } from "../js/practiceLab/practiceRepository.js";
+import { activatePracticeReviewItem } from "../js/practiceLab/practiceReviewItem.js";
 
 const now = () => new Date("2026-07-05T18:42:13.000Z");
 const profileId = createPracticeId("profile", { uuid: () => "repository-profile-12345678" });
@@ -50,6 +51,15 @@ assert.equal((await repository.listSkillStats()).length, 1);
 const review = createDefaultReviewItem({ profileId, reviewItemId, now });
 await repository.saveReviewItem(review);
 assert.deepEqual(await repository.getReviewItem(reviewItemId), review);
+assert.equal((await repository.listDueReviewItems()).length, 0);
+const activeReview = activatePracticeReviewItem(review, {
+  masteryStage: "acquired",
+  referenceAtUtc: "2026-07-04T00:00:00.000Z",
+  referenceQuality: 80,
+  now,
+});
+await repository.saveReviewItem(activeReview);
+assert.deepEqual(await repository.getReviewItem(reviewItemId), activeReview);
 assert.equal((await repository.listDueReviewItems()).length, 1);
 await assert.rejects(
   repository.saveReviewItem(createDefaultReviewItem({
@@ -131,4 +141,4 @@ await repository.resetPracticeData();
 assert.equal(values.get("unrelated"), "keep-me");
 assert.equal((await dataStore.list("sessionSummaries")).length, 0);
 
-console.log("Practice memory repository CRUD, duplicate guards, checkpoint replacement, PL11 atomic completion, and scoped reset passed.");
+console.log("Practice memory repository CRUD, duplicate guards, PL17 review lifecycle, checkpoint replacement, PL11 atomic completion, and scoped reset passed.");
