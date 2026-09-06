@@ -7,17 +7,19 @@ export function createPracticeRepository(options = {}) {
   const core = createLegacyPracticeRepository(options);
   if (!dataStore) return core;
 
-  const listReviewItems = async (profileId, contextId = null) => {
-    const resolvedContextId = contextId ?? (await core.getPracticeProfile())?.activeContextId ?? null;
-    if (!resolvedContextId) return [];
+  const listReviewItems = async (profileId = null, contextId = null) => {
+    const activeProfile = await core.getPracticeProfile();
+    const resolvedProfileId = profileId ?? activeProfile?.profileId ?? null;
+    const resolvedContextId = contextId ?? activeProfile?.activeContextId ?? null;
+    if (!resolvedProfileId || !resolvedContextId) return [];
     const records = await dataStore.query("reviewItems", "contextId", resolvedContextId);
-    return records.filter((record) => record.profileId === profileId && record.contextId === resolvedContextId);
+    return records.filter((record) => record.profileId === resolvedProfileId && record.contextId === resolvedContextId);
   };
 
   return Object.freeze({
     ...core,
     listReviewItems,
-    async listDueReviewItems(profileId, contextId = null, dueAtUtc = toPracticeUtcIso(now)) {
+    async listDueReviewItems(profileId = null, contextId = null, dueAtUtc = toPracticeUtcIso(now)) {
       const items = await listReviewItems(profileId, contextId);
       const queryNow = new Date(dueAtUtc);
       return items
