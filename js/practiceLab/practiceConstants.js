@@ -2,7 +2,7 @@ export const PRACTICE_MANIFEST_KEY = "wordstrike.practice.manifest.v1";
 export const PRACTICE_MANIFEST_BACKUP_KEY = "wordstrike.practice.manifest.backup.v1";
 export const PRACTICE_MANIFEST_TEMP_KEY = "wordstrike.practice.manifest.temp.v1";
 export const PRACTICE_DATABASE_NAME = "wordstrike-practice-lab";
-export const PRACTICE_DATABASE_VERSION = 5;
+export const PRACTICE_DATABASE_VERSION = 6;
 export const PRACTICE_MANIFEST_VERSION = 1;
 export const PRACTICE_CONTEXT_FINGERPRINT_VERSION = 1;
 
@@ -10,11 +10,12 @@ export const PRACTICE_RECORD_VERSIONS = Object.freeze({
   context: 1,
   profile: 3,
   skillStat: 3,
-  sessionSummary: 10,
+  sessionSummary: 11,
   abilityState: 1,
   performanceState: 1,
   learningState: 1,
   reviewItem: 3,
+  evaluationState: 1,
   customText: 1,
   preset: 1,
   checkpoint: 3,
@@ -39,6 +40,7 @@ export const PRACTICE_LIMITS = Object.freeze({
   performanceStateBytes: 64 * 1024,
   learningStateBytes: 32 * 1024,
   reviewItemBytes: 32 * 1024,
+  evaluationStateBytes: 64 * 1024,
   checkpointBytes: 512 * 1024,
   configurationDepth: 8,
   configurationBytes: 32 * 1024,
@@ -109,6 +111,13 @@ export const PRACTICE_STORE_DEFINITIONS = Object.freeze({
       Object.freeze({ name: "updatedAt", keyPath: "updatedAt" }),
       Object.freeze({ name: "statId", keyPath: "statId", options: { unique: true } }),
       Object.freeze({ name: "profileContextEntity", keyPath: ["profileId", "contextId", "entityType", "entityKey"], options: { unique: true } }),
+    ],
+  }),
+  evaluationStates: Object.freeze({
+    keyPath: "evaluationStateId",
+    indexes: [
+      Object.freeze({ name: "profileId", keyPath: "profileId", options: { unique: true } }),
+      Object.freeze({ name: "updatedAt", keyPath: "updatedAt" }),
     ],
   }),
   sessionSummaries: Object.freeze({

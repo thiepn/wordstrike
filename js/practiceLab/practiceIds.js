@@ -3,6 +3,7 @@ const PREFIXES = Object.freeze({
   context: "practice-context_",
   session: "practice-session_",
   review: "practice-review_",
+  evaluationReservation: "practice-evaluation-reservation_",
   customText: "practice-text_",
   preset: "practice-preset_",
   quarantine: "practice-quarantine_",
@@ -39,6 +40,7 @@ export const createPracticeProfileId = (options) => createPracticeId("profile", 
 export const createPracticeContextId = (options) => createPracticeId("context", options);
 export const createPracticeSessionId = (options) => createPracticeId("session", options);
 export const createPracticeReviewItemId = (options) => createPracticeId("review", options);
+export const createPracticeEvaluationReservationId = (options) => createPracticeId("evaluationReservation", options);
 export const createPracticeCustomTextId = (options) => createPracticeId("customText", options);
 export const createPracticePresetId = (options) => createPracticeId("preset", options);
 export const createPracticeQuarantineId = (options) => createPracticeId("quarantine", options);
@@ -74,6 +76,11 @@ export function createPracticeLearningStateId(profileId, contextId, entityType, 
   if (arguments.length !== 4) throw new TypeError("createPracticeLearningStateId requires profileId, contextId, entityType, and entityKey");
   if (!isPracticeId(profileId, "profile") || !isPracticeId(contextId, "context") || !["key", "bigram", "trigram", "word"].includes(entityType) || typeof entityKey !== "string" || !entityKey) throw new TypeError("Practice learning state identity is invalid");
   return `practice-learning_${[profileId, contextId, entityType, entityKey].map(encodeIdentityPart).join("|")}`;
+}
+
+export function createPracticeEvaluationStateId(profileId) {
+  if (arguments.length !== 1 || !isPracticeId(profileId, "profile")) throw new TypeError("createPracticeEvaluationStateId requires a valid profileId");
+  return `practice-evaluation_${encodeIdentityPart(profileId)}`;
 }
 
 export function hashPracticeContent(value = "") {
