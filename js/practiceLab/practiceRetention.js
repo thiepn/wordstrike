@@ -85,16 +85,18 @@ function reviewPruneRank(record) {
   return 2;
 }
 
-function reviewDeletes(records, skillStats = [], prunedStatIds = new Set()) {
+function reviewDeletes(records, skillStats = [], prunedStatIds = new Set(), { skillStateKnown = true } = {}) {
   const deletions = new Set();
   const skillByEntity = new Map(skillStats.map((record) => [entityIdentity(record), record]));
   const activeByEntity = new Map();
   for (const record of [...records].sort((a, b) => time(b.updatedAt) - time(a.updatedAt))) {
     const key = entityIdentity(record);
-    const skill = skillByEntity.get(key);
-    if (!skill || prunedStatIds.has(skill.statId)) {
-      deletions.add(record.reviewItemId);
-      continue;
+    if (skillStateKnown) {
+      const skill = skillByEntity.get(key);
+      if (!skill || prunedStatIds.has(skill.statId)) {
+        deletions.add(record.reviewItemId);
+        continue;
+      }
     }
     if (activeByEntity.has(key)) deletions.add(record.reviewItemId);
     else activeByEntity.set(key, record.reviewItemId);
@@ -121,7 +123,7 @@ export function buildPracticeRetentionPlan({
   now = Date.now(),
   checkpoints = [],
   sessionSummaries = [],
-  skillStats = [],
+  skillStats = null,
   learningStates = [],
   reviewItems = [],
   quarantine = [],
@@ -129,7 +131,9 @@ export function buildPracticeRetentionPlan({
 } = {}) {
   const rawNow = typeof now === "function" ? now() : now;
   const nowMs = rawNow instanceof Date ? rawNow.getTime() : Number(rawNow);
-  const skillStatIds = skillDeletes(skillStats, reviewItems);
+  const skillStateKnown = Array.isArray(skillStats);
+  const canonicalSkillStats = skillStateKnown ? skillStats : [];
+  const skillStatIds = skillDeletes(canonicalSkillStats, reviewItems);
   const prunedStats = new Set(skillStatIds);
   return Object.freeze({
     order: QUOTA_RECOVERY_STEPS,
@@ -137,7 +141,7 @@ export function buildPracticeRetentionPlan({
       .filter((record) => time(record.expiresAt, Infinity) <= nowMs)
       .map((record) => record.profileId),
     sessionSummaries: sessionDeletes(sessionSummaries, nowMs, preserveSessionIds),
-    reviewItems: reviewDeletes(reviewItems, skillStats, prunedStats),
+    reviewItems: reviewDeletes(reviewItems, canonicalSkillStats, prunedStats, { skillStateKnown }),
     skillStats: skillStatIds,
     learningStates: learningStates
       .filter((record) => prunedStats.has(record.statId))
