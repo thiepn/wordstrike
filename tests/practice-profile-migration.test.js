@@ -57,16 +57,17 @@ assert.equal(initialized.profile.recordVersion, 3);
 assert.equal(initialized.profile.lastTrainingDayKey, null);
 assert.deepEqual(await dataStore.get("profiles", profileId), initialized.profile);
 
-assert.equal(PRACTICE_DATABASE_VERSION, 5);
+assert.equal(PRACTICE_DATABASE_VERSION, 6);
 assert.equal(PRACTICE_MANIFEST_VERSION, 1);
 assert.deepEqual(PRACTICE_RECORD_VERSIONS, {
   context: 1,
   profile: 3,
   skillStat: 3,
-  sessionSummary: 10,
+  sessionSummary: 11,
   abilityState: 1,
   performanceState: 1,
   learningState: 1,
+  evaluationState: 1,
   reviewItem: 3,
   customText: 1,
   preset: 1,
@@ -74,4 +75,4 @@ assert.deepEqual(PRACTICE_RECORD_VERSIONS, {
   quarantine: 1,
 });
 
-console.log("Practice profile migration, canonical day key, repository upgrade, and PL17 version envelope passed.");
+console.log("Practice profile migration, canonical day key, repository upgrade, and PL18 version envelope passed.");
