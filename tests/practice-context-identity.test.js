@@ -118,8 +118,8 @@ assert.equal(PRACTICE_RECORD_VERSIONS.context, 1);
 assert.equal(PRACTICE_RECORD_VERSIONS.skillStat, 3);
 assert.equal(PRACTICE_RECORD_VERSIONS.abilityState, 1);
 assert.equal(PRACTICE_RECORD_VERSIONS.learningState, 1);
-assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 9);
-assert.equal(PRACTICE_RECORD_VERSIONS.reviewItem, 2);
+assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 10);
+assert.equal(PRACTICE_RECORD_VERSIONS.reviewItem, 3);
 assert.equal(PRACTICE_RECORD_VERSIONS.checkpoint, 3);
 assert.equal(PRACTICE_STORE_DEFINITIONS.skillStats.indexes.some((index) => index.name === "profileEntity"), false);
 assert.equal(PRACTICE_STORE_DEFINITIONS.reviewItems.indexes.some((index) => index.name === "profileEntity"), false);
@@ -162,8 +162,10 @@ const aReview = createDefaultReviewItem({ reviewItemId: createPracticeId("review
 const bReview = createDefaultReviewItem({ reviewItemId: createPracticeId("review", { uuid: () => "review-b-12345678" }), profileId: profileA, contextId: contextB.contextId, entityType: "bigram", entityKey: "er", now });
 await repository.saveReviewItem(aReview);
 await repository.saveReviewItem(bReview);
-assert.equal((await repository.listDueReviewItems(profileA, defaultA)).length, 1);
-assert.equal((await repository.listDueReviewItems(profileA, contextB.contextId)).length, 1);
+assert.equal((await repository.listReviewItems(profileA, defaultA)).length, 1);
+assert.equal((await repository.listReviewItems(profileA, contextB.contextId)).length, 1);
+assert.equal((await repository.listDueReviewItems(profileA, defaultA)).length, 0);
+assert.equal((await repository.listDueReviewItems(profileA, contextB.contextId)).length, 0);
 
 const oldSession = createDefaultSessionSummary({ sessionId: createPracticeId("session", { uuid: () => "history-a-12345678" }), profileId: profileA, contextId: defaultA, now });
 await repository.saveSessionSummary(oldSession);
