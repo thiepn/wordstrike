@@ -73,7 +73,7 @@ test("PL16 v4-to-v5 database upgrade adds only learningStates and preserves ever
   assert.ok(database.stores.get("learningStates").snapshot().some((index) => index.name === "profileContextEntity" && index.options?.unique));
 });
 
-test("PL16 historical sessionSummary v8 migrates only to v9 with learningEvidenceSummary null and no fabricated curve payload", () => {
+test("PL16 historical sessionSummary v8 reaches PL17 v10 with learning and retention summaries null and no fabricated curve payload", () => {
   const current = createDefaultSessionSummary({
     profileId: "practice-profile_pl16-migration-profile-12345678",
     contextId: "practice-context_pl16-migration-context-12345678",
@@ -81,16 +81,18 @@ test("PL16 historical sessionSummary v8 migrates only to v9 with learningEvidenc
   });
   const historical = { ...current, recordVersion: 8 };
   delete historical.learningEvidenceSummary;
+  delete historical.retentionReviewSummary;
   const migration = migratePracticeRecord("sessionSummary", historical);
   assert.equal(migration.ok, true, JSON.stringify(migration.error));
-  assert.deepEqual(migration.steps, ["sessionSummary:8->9"]);
-  assert.equal(migration.value.recordVersion, 9);
+  assert.deepEqual(migration.steps, ["sessionSummary:8->9", "sessionSummary:9->10"]);
+  assert.equal(migration.value.recordVersion, 10);
   assert.equal(migration.value.learningEvidenceSummary, null);
+  assert.equal(migration.value.retentionReviewSummary, null);
   assert.equal("learningObservationDeltas" in migration.value, false);
   assert.equal("learningCurve" in migration.value, false);
 });
 
-test("PL16 skill-stat pruning plan cascades to matching learning state but never independently prunes a flat state", () => {
+test("PL16 skill-stat pruning plan cascades to matching learning state and PL17 review item but never independently prunes a flat state", () => {
   const profileId = "practice-profile_pl16-retention-profile-12345678";
   const contextId = "practice-context_pl16-retention-context-12345678";
   const makeStat = (index, confidenceScore = index === 0 ? 0 : 90) => createDefaultSkillStat({
@@ -142,10 +144,11 @@ test("PL16 reset clears learningStates with the rest of Practice data", async ()
   assert.equal((await harness.dataStore.list("learningStates")).length, 0);
 });
 
-test("PL16 current version report matches DB5 / learning1 / session9", () => {
+test("PL17 current version report preserves DB5 / learning1 while advancing review3 / session10", () => {
   assert.equal(PRACTICE_DATABASE_VERSION, 5);
   assert.equal(PRACTICE_RECORD_VERSIONS.learningState, 1);
-  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 9);
+  assert.equal(PRACTICE_RECORD_VERSIONS.reviewItem, 3);
+  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 10);
 });
 
 test("PL16 runtime modules import with zero storage/network/listener/timer side effects", async () => {

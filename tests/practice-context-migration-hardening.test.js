@@ -173,7 +173,7 @@ const uniqueReviewB = createDefaultReviewItem({
   entityType: "bigram",
   entityKey: "er",
   now,
-  overrides: { state: "suspended" },
+  overrides: { state: "suspended", suspensionReason: "uniqueness-test" },
 });
 await legacyRepository.saveReviewItem(uniqueReviewA);
 await assert.rejects(legacyRepository.saveReviewItem(uniqueReviewB), (error) => error.code === "PRACTICE_STORAGE_DUPLICATE");

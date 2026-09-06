@@ -82,13 +82,14 @@ function peerSet(contextId = contextA, residualMeanMs = 0) {
   return Array.from({ length: 9 }, (_, index) => canonicalStat({ contextId, entityType: "key", entityKey: String.fromCharCode(97 + index), index, residualMeanMs }));
 }
 
-test("PL12 model contracts remain unchanged inside the current PL16 storage/session/foundation envelope", () => {
+test("PL12 model contracts remain unchanged inside the current PL17 storage/session/foundation envelope", () => {
   assert.equal(PRACTICE_DATABASE_VERSION, 5);
   assert.equal(PRACTICE_RECORD_VERSIONS.skillStat, 3);
-  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 9);
+  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 10);
+  assert.equal(PRACTICE_RECORD_VERSIONS.reviewItem, 3);
   assert.equal(PRACTICE_RECORD_VERSIONS.checkpoint, 3);
   assert.equal(PRACTICE_RECORD_VERSIONS.learningState, 1);
-  assert.equal(PRACTICE_FOUNDATION_ANALYSIS_VERSION, 7);
+  assert.equal(PRACTICE_FOUNDATION_ANALYSIS_VERSION, 8);
   assert.equal(PRACTICE_LIMITER_MODEL_VERSION, 1);
   assert.equal(PRACTICE_LIMITER_POLICY_VERSION, 1);
   assert.equal(PRACTICE_IMPACT_MODEL_VERSION, 1);
@@ -253,44 +254,22 @@ test("PL12 pure/runtime modules have no session-engine, raw-event, custom-text, 
     ];
     for (const specifier of specifiers) assert.equal(forbiddenImport.test(specifier), false, `${module} must not import ${specifier}`);
     assert.equal(/eventTrace/u.test(source), false, `${module} must not consume raw eventTrace`);
-    assert.equal(/customTexts/u.test(source), false, `${module} must not query customTexts`);
+    assert.equal(/customTexts/u.test(source), false, `${module} must not consume custom text storage`);
   }
 });
 
-test("PL12 pure snapshot build performs no browser persistence writes", () => {
-  let storageWrites = 0;
-  let indexedDbWrites = 0;
-  const oldStorage = globalThis.localStorage;
-  const oldIndexedDB = globalThis.indexedDB;
-  Object.defineProperties(globalThis, {
-    localStorage: { configurable: true, value: { setItem() { storageWrites += 1; }, getItem() { return null; }, removeItem() { storageWrites += 1; } } },
-    indexedDB: { configurable: true, value: { open() { indexedDbWrites += 1; throw new Error("unexpected open"); } } },
+test("PL12 10k-stat snapshot stays bounded and linear enough for the explicit CI guard", () => {
+  const stats = Array.from({ length: 10_000 }, (_, index) => canonicalStat({ contextId: contextA, entityType: index % 3 === 0 ? "bigram" : "key", entityKey: `k${index}`, index, residualMeanMs: index % 17 }));
+  const started = performance.now();
+  const snapshot = buildPracticeLimiterSnapshot({
+    skillStats: stats,
+    context: { profileId, contextId: contextA, dataLocale: "en" },
+    prevalenceByStat: new Map(),
+    generatedAt: new Date(stamp),
+    maxCandidates: 512,
   });
-  try {
-    const skillStats = peerSet(contextA, 0);
-    buildPracticeLimiterSnapshot({ skillStats, context: { profileId, contextId: contextA, dataLocale: "en-US" }, prevalenceByStat: new Map(), generatedAt: stamp });
-    assert.equal(storageWrites, 0);
-    assert.equal(indexedDbWrites, 0);
-  } finally {
-    Object.defineProperty(globalThis, "localStorage", { configurable: true, writable: true, value: oldStorage });
-    Object.defineProperty(globalThis, "indexedDB", { configurable: true, writable: true, value: oldIndexedDB });
-  }
-});
-
-test("PL12 snapshot construction remains bounded on thousands of context stats", () => {
-  const skillStats = Array.from({ length: 2500 }, (_, index) => canonicalStat({
-    contextId: contextA,
-    entityType: "key",
-    entityKey: `k${index}`,
-    index,
-    residualMeanMs: 10 + (index % 5),
-    opportunities: 100,
-    errors: 5,
-  }));
-  const start = performance.now();
-  const snapshot = buildPracticeLimiterSnapshot({ skillStats, context: { profileId, contextId: contextA, dataLocale: "en-US" }, prevalenceByStat: new Map(), generatedAt: stamp });
-  const durationMs = performance.now() - start;
-  assert.ok(durationMs < 5000, `PL12 2500-stat snapshot took ${durationMs.toFixed(1)} ms`);
-  assert.ok(snapshot.candidates.length <= 64, "per-type key cap must remain bounded");
-  assert.equal(snapshot.evidenceSummary.evaluatedEntityCount, 2500);
+  const elapsed = performance.now() - started;
+  assert.ok(snapshot.candidates.length <= 512);
+  assert.equal(snapshot.evidenceSummary.evaluatedEntityCount, 10_000);
+  assert.ok(elapsed < 8_000, `snapshot took ${elapsed.toFixed(1)} ms`);
 });

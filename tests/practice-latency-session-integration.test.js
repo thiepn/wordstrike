@@ -14,7 +14,7 @@ async function typeCorrect(engine, harness, count, latencyMs = 100) {
   }
 }
 
-test("generic sessions persist canonical fluencySummary inside the current PL16 session envelope", async () => {
+test("generic sessions persist canonical fluencySummary inside the current PL17 session envelope", async () => {
   const harness = await createPracticeSessionHarness({ suffix: "pl8-generic", text: "a".repeat(40) });
   const engine = createPracticeSessionEngine({
     repository: harness.repository,
@@ -29,7 +29,8 @@ test("generic sessions persist canonical fluencySummary inside the current PL16 
   await engine.start();
   await typeCorrect(engine, harness, 26);
   const result = await engine.complete("manual-stop");
-  assert.equal(result.summary.recordVersion, 9);
+  assert.equal(result.summary.recordVersion, 10);
+  assert.equal(result.summary.retentionReviewSummary, null);
   assert.equal(result.summary.fluencySummary.calibration.status, "adaptive");
   assert.equal(result.summary.fluencySummary.fluentTransitionCount, 25);
   assert.equal(result.summary.fluencySummary.disfluentTransitionCount, 0);
@@ -70,6 +71,8 @@ test("experiment analyzers receive immutable foundationAnalysis but cannot own f
   await typeCorrect(engine, harness, 26);
   const result = await engine.complete("manual-stop");
   assert.ok(received?.foundationAnalysis?.latency);
+  assert.equal(received.foundationAnalysis.version, 8);
+  assert.equal(received.foundationAnalysis.retention.status, "not-requested");
   assert.ok(Object.isFrozen(received.foundationAnalysis));
   assert.ok(Object.isFrozen(received.foundationAnalysis.latency));
   assert.equal(mutationThrew, true);

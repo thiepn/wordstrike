@@ -25,9 +25,10 @@ function emptyErrorSummary() {
   }).sessionSummary;
 }
 
-test("PL9 contracts remain intact while PL16 advances only the surrounding storage/session envelope", () => {
+test("PL9 contracts remain intact while PL17 advances only the surrounding storage/session envelope", () => {
   assert.equal(PRACTICE_DATABASE_VERSION, 5);
-  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 9);
+  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 10);
+  assert.equal(PRACTICE_RECORD_VERSIONS.reviewItem, 3);
   assert.equal(PRACTICE_RECORD_VERSIONS.checkpoint, 3);
   assert.equal(PRACTICE_RECORD_VERSIONS.skillStat, 3);
   assert.equal(PRACTICE_RECORD_VERSIONS.abilityState, 1);
@@ -35,7 +36,7 @@ test("PL9 contracts remain intact while PL16 advances only the surrounding stora
   assert.equal(PRACTICE_RECORD_VERSIONS.profile, 3);
 });
 
-test("PL9 v3 error migration remains intact through PL10 v5, PL11 v6, PL13 v7, PL14 v8 and PL16 v9", () => {
+test("PL9 v3 error migration remains intact through PL10 v5, PL11 v6, PL13 v7, PL14 v8, PL16 v9 and PL17 v10", () => {
   const current = createDefaultSessionSummary({ now });
   const legacy = { ...current, recordVersion: 3 };
   delete legacy.errorSummary;
@@ -43,21 +44,23 @@ test("PL9 v3 error migration remains intact through PL10 v5, PL11 v6, PL13 v7, P
   delete legacy.skillEvidenceSummary;
   delete legacy.abilityMeasurementSummary;
   delete legacy.learningEvidenceSummary;
+  delete legacy.retentionReviewSummary;
   const original = structuredClone(legacy);
   const migrated = migratePracticeRecord("sessionSummary", legacy);
   assert.equal(migrated.ok, true);
   assert.equal(migrated.fromVersion, 3);
-  assert.equal(migrated.toVersion, 9);
-  assert.deepEqual(migrated.steps, ["sessionSummary:3->4", "sessionSummary:4->5", "sessionSummary:5->6", "sessionSummary:6->7", "sessionSummary:7->8", "sessionSummary:8->9"]);
+  assert.equal(migrated.toVersion, 10);
+  assert.deepEqual(migrated.steps, ["sessionSummary:3->4", "sessionSummary:4->5", "sessionSummary:5->6", "sessionSummary:6->7", "sessionSummary:7->8", "sessionSummary:8->9", "sessionSummary:9->10"]);
   assert.equal(migrated.value.errorSummary, null);
   assert.equal(migrated.value.normalizationSummary, null);
   assert.equal(migrated.value.skillEvidenceSummary, null);
   assert.equal(migrated.value.abilityMeasurementSummary, null);
   assert.equal(migrated.value.learningEvidenceSummary, null);
+  assert.equal(migrated.value.retentionReviewSummary, null);
   assert.deepEqual(legacy, original);
 });
 
-test("PL9 preserves the full historical session migration chain through PL16", () => {
+test("PL9 preserves the full historical session migration chain through PL17", () => {
   const current = createDefaultSessionSummary({ now });
   const v1 = { ...current, recordVersion: 1 };
   delete v1.contextId;
@@ -67,15 +70,17 @@ test("PL9 preserves the full historical session migration chain through PL16", (
   delete v1.skillEvidenceSummary;
   delete v1.abilityMeasurementSummary;
   delete v1.learningEvidenceSummary;
+  delete v1.retentionReviewSummary;
   const migrated = migratePracticeRecord("sessionSummary", v1);
   assert.equal(migrated.ok, true);
-  assert.deepEqual(migrated.steps, ["sessionSummary:1->2", "sessionSummary:2->3", "sessionSummary:3->4", "sessionSummary:4->5", "sessionSummary:5->6", "sessionSummary:6->7", "sessionSummary:7->8", "sessionSummary:8->9"]);
+  assert.deepEqual(migrated.steps, ["sessionSummary:1->2", "sessionSummary:2->3", "sessionSummary:3->4", "sessionSummary:4->5", "sessionSummary:5->6", "sessionSummary:6->7", "sessionSummary:7->8", "sessionSummary:8->9", "sessionSummary:9->10"]);
   assert.equal(migrated.value.fluencySummary, null);
   assert.equal(migrated.value.errorSummary, null);
   assert.equal(migrated.value.normalizationSummary, null);
   assert.equal(migrated.value.skillEvidenceSummary, null);
   assert.equal(migrated.value.abilityMeasurementSummary, null);
   assert.equal(migrated.value.learningEvidenceSummary, null);
+  assert.equal(migrated.value.retentionReviewSummary, null);
 });
 
 test("PL9 validates fixed episode counts, rates, removal relationships and nullability", () => {

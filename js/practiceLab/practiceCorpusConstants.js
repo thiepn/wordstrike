@@ -39,6 +39,7 @@ export const PRACTICE_CORPUS_USAGE_APPROVALS = Object.freeze([
 
 export const PRACTICE_CORPUS_PURPOSE_PARTITIONS = Object.freeze({
   training: "training",
+  "retention-review": "training",
   "cold-transfer": "transfer",
   benchmark: "benchmark",
   diagnostic: "diagnostic",

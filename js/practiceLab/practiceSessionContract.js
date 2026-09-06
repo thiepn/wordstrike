@@ -3,6 +3,7 @@ import {
 } from "./practiceConstants.js";
 import { PRACTICE_ABILITY_CHANNELS } from "./practiceAbilityConstants.js";
 import { PRACTICE_PERFORMANCE_MEASUREMENT_KINDS } from "./practicePerformanceConstants.js";
+import { PRACTICE_RETENTION_MEASUREMENT_KINDS } from "./practiceReviewConstants.js";
 import { hashPracticeContent } from "./practiceIds.js";
 import {
   PRACTICE_COMPLETION_MODES,
@@ -72,8 +73,13 @@ export function validatePracticeExperimentDescriptor(descriptor) {
   if (descriptor.abilityChannel != null && !PRACTICE_ABILITY_CHANNELS.includes(descriptor.abilityChannel)) errors.push({ path: "abilityChannel", code: "INVALID_ENUM", message: "unsupported ability channel" });
   const performanceKind = descriptor.performanceMeasurementKind ?? null;
   const performanceChannel = descriptor.performanceReferenceChannel ?? null;
+  const retentionKind = descriptor.retentionMeasurementKind ?? null;
   if (performanceKind != null && !PRACTICE_PERFORMANCE_MEASUREMENT_KINDS.includes(performanceKind)) errors.push({ path: "performanceMeasurementKind", code: "INVALID_ENUM", message: "unsupported performance measurement kind" });
+  if (!PRACTICE_RETENTION_MEASUREMENT_KINDS.includes(retentionKind)) errors.push({ path: "retentionMeasurementKind", code: "INVALID_ENUM", message: "unsupported retention measurement kind" });
   if (descriptor.abilityChannel != null && performanceKind != null) errors.push({ path: "performanceMeasurementKind", code: "CONFLICT", message: "PL14 v1 cannot combine ability and performance measurement roles" });
+  if (retentionKind != null && descriptor.abilityChannel != null) errors.push({ path: "retentionMeasurementKind", code: "CONFLICT", message: "PL17 v1 retention review cannot also be an ability measurement" });
+  if (retentionKind != null && performanceKind != null) errors.push({ path: "retentionMeasurementKind", code: "CONFLICT", message: "PL17 v1 retention review cannot also be a PL14 performance measurement" });
+  if (retentionKind != null && descriptor.defaultCorrectionBehavior !== "allow") errors.push({ path: "defaultCorrectionBehavior", code: "CONFLICT", message: "PL17 retention review requires correctionBehavior=allow" });
   if (performanceKind == null && performanceChannel != null) errors.push({ path: "performanceReferenceChannel", code: "CONFLICT", message: "performance reference channel requires a performance measurement" });
   if (performanceKind === "state-probe" && !PRACTICE_ABILITY_CHANNELS.includes(performanceChannel)) errors.push({ path: "performanceReferenceChannel", code: "INVALID_ENUM", message: "state probe requires a canonical ability reference channel" });
   if (performanceKind === "control-frontier" && performanceChannel !== "controlled-speed") errors.push({ path: "performanceReferenceChannel", code: "INVALID_ENUM", message: "control frontier must reference controlled-speed" });
@@ -140,14 +146,7 @@ export function createPracticeContentPlan(input, options = {}) {
       const wordLike = index < graphemes.length && isPracticeWordLikeGrapheme(graphemes[index]);
       if (wordLike && start == null) start = index;
       if (!wordLike && start != null) {
-        fallbackUnits.push({
-          unitId: `word_${fallbackUnits.length + 1}`,
-          type: "word",
-          startIndex: start,
-          endIndex: index,
-          text: graphemes.slice(start, index).join(""),
-          metadata: { derived: true },
-        });
+        fallbackUnits.push({ unitId: `word_${fallbackUnits.length + 1}`, type: "word", startIndex: start, endIndex: index, text: graphemes.slice(start, index).join(""), metadata: { derived: true } });
         start = null;
       }
     }
@@ -173,18 +172,11 @@ export function appendPracticeContentPlan(plan, addition, options = {}) {
   const baseLength = segment(plan.text).length;
   const appendedText = String(addition.text ?? "");
   const derived = addition.units == null
-    ? createPracticeContentPlan({
-      contentId: "practice-content_append-fragment",
-      text: appendedText,
-      completion: { mode: "manual", value: null },
-      metadata: {},
-    }, options).units
+    ? createPracticeContentPlan({ contentId: "practice-content_append-fragment", text: appendedText, completion: { mode: "manual", value: null }, metadata: {} }, options).units
     : addition.units;
   const units = derived.map((unit, index) => ({
     ...clone(unit),
-    unitId: addition.units == null
-      ? `unit_${plan.units.length + index + 1}`
-      : unit.unitId,
+    unitId: addition.units == null ? `unit_${plan.units.length + index + 1}` : unit.unitId,
     startIndex: unit.startIndex + baseLength,
     endIndex: unit.endIndex + baseLength,
   }));
@@ -220,6 +212,7 @@ export function validatePracticeSessionConfiguration(configuration) {
   if (Object.hasOwn(configuration ?? {}, "abilityChannel")) errors.push({ path: "abilityChannel", code: "FORBIDDEN_FIELD", message: "abilityChannel is trusted experiment metadata and cannot be configured per session" });
   if (Object.hasOwn(configuration ?? {}, "performanceMeasurementKind")) errors.push({ path: "performanceMeasurementKind", code: "FORBIDDEN_FIELD", message: "performanceMeasurementKind is trusted experiment metadata and cannot be configured per session" });
   if (Object.hasOwn(configuration ?? {}, "performanceReferenceChannel")) errors.push({ path: "performanceReferenceChannel", code: "FORBIDDEN_FIELD", message: "performanceReferenceChannel is trusted experiment metadata and cannot be configured per session" });
+  if (Object.hasOwn(configuration ?? {}, "retentionMeasurementKind")) errors.push({ path: "retentionMeasurementKind", code: "FORBIDDEN_FIELD", message: "retentionMeasurementKind is trusted experiment metadata and cannot be configured per session" });
   return { valid: errors.length === 0, errors };
 }
 
@@ -236,6 +229,7 @@ export function createGenericPracticeExperimentDescriptor(overrides = {}) {
     abilityChannel: null,
     performanceMeasurementKind: null,
     performanceReferenceChannel: null,
+    retentionMeasurementKind: null,
     buildPerformanceMeasurement: null,
     ...overrides,
   });

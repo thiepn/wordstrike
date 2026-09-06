@@ -34,6 +34,10 @@ export function buildPracticeSessionResult({
       { operation: "build-result", sessionId, lifecycleState: status, details: learningValidation.errors },
     );
   }
+  const retentionReviewSummary = analysis?.__pl17RetentionReviewSummary
+    ?? (foundationAnalysis?.retention?.measurementKind == null
+      ? null
+      : foundationAnalysis?.retention?.summary ?? null);
   const summary = createDefaultSessionSummary({
     sessionId,
     profileId,
@@ -83,6 +87,7 @@ export function buildPracticeSessionResult({
       abilityMeasurementSummary: foundationAnalysis?.ability?.sessionSummary ?? null,
       performanceMeasurementSummary: foundationAnalysis?.performance?.sessionSummary ?? null,
       learningEvidenceSummary,
+      retentionReviewSummary,
       beforeMetrics: analysis?.beforeMetrics ?? null,
       afterMetrics: analysis?.afterMetrics ?? null,
       transferMetrics: analysis?.transferMetrics ?? null,
@@ -100,9 +105,7 @@ export function buildPracticeSessionResult({
   return Object.freeze(summary);
 }
 
-export function buildPracticeProfileUpdate(profile, summary, {
-  completed = true,
-} = {}) {
+export function buildPracticeProfileUpdate(profile, summary, { completed = true } = {}) {
   const newDay = profile.lastTrainingDayKey !== summary.localDayKey;
   return Object.freeze({
     ...profile,

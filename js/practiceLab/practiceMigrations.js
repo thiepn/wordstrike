@@ -14,13 +14,14 @@ import {
   validatePracticeManifest,
   validatePracticeProfile,
   validatePreset,
-  validateReviewItem,
   validateSessionSummary,
   validateSkillStat,
 } from "./practiceValidation.js";
+import { validatePracticeReviewItemV3 } from "./practiceReviewValidation.js";
 import { validatePracticeAbilityState } from "./practiceAbilityValidation.js";
 import { validatePracticePerformanceState } from "./practicePerformanceValidation.js";
 import { validatePracticeLearningState } from "./practiceLearningValidation.js";
+import { createEmptyPracticeRetentionState } from "./practiceReviewItem.js";
 import {
   createDefaultPracticeContextId,
   createSkillStatId,
@@ -40,7 +41,7 @@ const validators = Object.freeze({
   performanceState: validatePracticePerformanceState,
   learningState: validatePracticeLearningState,
   sessionSummary: validateSessionSummary,
-  reviewItem: validateReviewItem,
+  reviewItem: validatePracticeReviewItemV3,
   customText: validateCustomText,
   preset: validatePreset,
   checkpoint: validateCheckpoint,
@@ -60,6 +61,44 @@ const normalizers = Object.freeze({
   checkpoint: (value) => value,
 });
 
+function migrateReviewV2ToV3(value) {
+  return {
+    reviewItemId: value.reviewItemId,
+    profileId: value.profileId,
+    contextId: value.contextId,
+    recordVersion: 3,
+    entityType: value.entityType,
+    entityKey: value.entityKey,
+    createdAt: value.createdAt,
+    updatedAt: value.updatedAt,
+    state: "inactive",
+    dueAtUtc: null,
+    localDueDayKey: null,
+    intervalDays: null,
+    stabilityDays: null,
+    minimumMatureAtUtc: null,
+    lastScheduledAt: null,
+    suspensionReason: "legacy-unverified",
+    cycle: null,
+    retention: createEmptyPracticeRetentionState(),
+    recentProbeFamilyIds: [],
+    legacyReviewV2: {
+      sourceExperimentId: value.sourceExperimentId ?? null,
+      state: value.state ?? null,
+      priority: value.priority ?? null,
+      lastReviewedAt: value.lastReviewedAt ?? null,
+      dueAtUtc: value.dueAtUtc ?? null,
+      localDueDayKey: value.localDueDayKey ?? null,
+      intervalDays: value.intervalDays ?? null,
+      successfulReviewCount: value.successfulReviewCount ?? 0,
+      failedReviewCount: value.failedReviewCount ?? 0,
+      consecutiveSuccesses: value.consecutiveSuccesses ?? 0,
+      lastOutcome: value.lastOutcome ?? null,
+      masteryState: value.masteryState ?? null,
+    },
+  };
+}
+
 const migrations = Object.freeze({
   profile: Object.freeze({
     0: (value) => ({ ...value, recordVersion: 1 }),
@@ -69,12 +108,7 @@ const migrations = Object.freeze({
   skillStat: Object.freeze({
     1: (value) => {
       const contextId = createDefaultPracticeContextId(value.profileId);
-      return {
-        ...value,
-        recordVersion: 2,
-        contextId,
-        statId: createSkillStatId(value.profileId, contextId, value.entityType, value.entityKey),
-      };
+      return { ...value, recordVersion: 2, contextId, statId: createSkillStatId(value.profileId, contextId, value.entityType, value.entityKey) };
     },
     2: (value) => migratePracticeSkillStatV2ToV3(value),
   }),
@@ -87,20 +121,15 @@ const migrations = Object.freeze({
     6: (value) => ({ ...value, recordVersion: 7, abilityMeasurementSummary: null }),
     7: (value) => ({ ...value, recordVersion: 8, performanceMeasurementSummary: null }),
     8: (value) => ({ ...value, recordVersion: 9, learningEvidenceSummary: null }),
+    9: (value) => ({ ...value, recordVersion: 10, retentionReviewSummary: null }),
   }),
   reviewItem: Object.freeze({
     1: (value) => ({ ...value, recordVersion: 2, contextId: createDefaultPracticeContextId(value.profileId) }),
+    2: (value) => migrateReviewV2ToV3(value),
   }),
   checkpoint: Object.freeze({
     1: (value) => ({ ...value, recordVersion: 2, contextId: createDefaultPracticeContextId(value.profileId) }),
-    2: (value) => ({
-      ...value,
-      recordVersion: 3,
-      metricsSnapshot: {
-        ...(value.metricsSnapshot ?? {}),
-        skillEvidenceTrackerSnapshot: null,
-      },
-    }),
+    2: (value) => ({ ...value, recordVersion: 3, metricsSnapshot: { ...(value.metricsSnapshot ?? {}), skillEvidenceTrackerSnapshot: null } }),
   }),
 });
 
@@ -129,15 +158,10 @@ function promoteForCurrentValidation(type, value, version) {
   };
   if (type === "skillStat" && version === 1) {
     const contextId = createDefaultPracticeContextId(value.profileId);
-    return migratePracticeSkillStatV2ToV3({
-      ...value,
-      recordVersion: 2,
-      contextId,
-      statId: createSkillStatId(value.profileId, contextId, value.entityType, value.entityKey),
-    });
+    return migratePracticeSkillStatV2ToV3({ ...value, recordVersion: 2, contextId, statId: createSkillStatId(value.profileId, contextId, value.entityType, value.entityKey) });
   }
   if (type === "skillStat" && version === 2) return migratePracticeSkillStatV2ToV3(value);
-  if (type === "sessionSummary" && version <= 8) return {
+  if (type === "sessionSummary" && version <= 9) return {
     ...value,
     recordVersion: PRACTICE_RECORD_VERSIONS.sessionSummary,
     contextId: version === 1 ? createDefaultPracticeContextId(value.profileId) : value.contextId,
@@ -147,21 +171,16 @@ function promoteForCurrentValidation(type, value, version) {
     skillEvidenceSummary: version <= 5 ? null : value.skillEvidenceSummary ?? null,
     abilityMeasurementSummary: version <= 6 ? null : value.abilityMeasurementSummary ?? null,
     performanceMeasurementSummary: version <= 7 ? null : value.performanceMeasurementSummary ?? null,
-    learningEvidenceSummary: null,
+    learningEvidenceSummary: version <= 8 ? null : value.learningEvidenceSummary ?? null,
+    retentionReviewSummary: null,
   };
-  if (type === "reviewItem" && version === 1) return {
-    ...value,
-    recordVersion: PRACTICE_RECORD_VERSIONS.reviewItem,
-    contextId: createDefaultPracticeContextId(value.profileId),
-  };
+  if (type === "reviewItem" && version === 1) return migrateReviewV2ToV3({ ...value, recordVersion: 2, contextId: createDefaultPracticeContextId(value.profileId) });
+  if (type === "reviewItem" && version === 2) return migrateReviewV2ToV3(value);
   if (type === "checkpoint" && version <= 2) return {
     ...value,
     recordVersion: PRACTICE_RECORD_VERSIONS.checkpoint,
     contextId: version === 1 ? createDefaultPracticeContextId(value.profileId) : value.contextId,
-    metricsSnapshot: {
-      ...(value.metricsSnapshot ?? {}),
-      skillEvidenceTrackerSnapshot: null,
-    },
+    metricsSnapshot: { ...(value.metricsSnapshot ?? {}), skillEvidenceTrackerSnapshot: null },
   };
   return value;
 }
@@ -170,27 +189,16 @@ function validateIntermediate(type, value, version, validate) {
   const historicalErrors = validateHistoricalRecord(type, value, version);
   if (historicalErrors.length) return { valid: false, errors: historicalErrors };
   try { return validate(promoteForCurrentValidation(type, value, version)); }
-  catch (cause) {
-    return { valid: false, errors: [{ path: type, code: "TRANSITIONAL_VALIDATION_FAILED", message: cause?.message || "Historical Practice record could not be validated" }] };
-  }
+  catch (cause) { return { valid: false, errors: [{ path: type, code: "TRANSITIONAL_VALIDATION_FAILED", message: cause?.message || "Historical Practice record could not be validated" }] }; }
 }
 
 function failure(code, message, details = {}) {
-  return {
-    ok: false,
-    error: practiceStorageError(code, message, {
-      operation: "migrate",
-      recoverable: code !== PRACTICE_STORAGE_ERROR_CODES.UNSUPPORTED_VERSION,
-      ...details,
-    }),
-  };
+  return { ok: false, error: practiceStorageError(code, message, { operation: "migrate", recoverable: code !== PRACTICE_STORAGE_ERROR_CODES.UNSUPPORTED_VERSION, ...details }) };
 }
 
 function migrate({ input, type, versionField, targetVersion, normalize, validate }) {
   let value;
-  try { value = clonePracticeValue(input); } catch (cause) {
-    return failure(PRACTICE_STORAGE_ERROR_CODES.MIGRATION_FAILED, `Unable to clone ${type}`, { cause });
-  }
+  try { value = clonePracticeValue(input); } catch (cause) { return failure(PRACTICE_STORAGE_ERROR_CODES.MIGRATION_FAILED, `Unable to clone ${type}`, { cause }); }
   if (!value || typeof value !== "object" || Array.isArray(value)) return failure(PRACTICE_STORAGE_ERROR_CODES.MIGRATION_FAILED, `${type} must be an object`);
   const suppliedVersion = value[versionField];
   const fromVersion = suppliedVersion == null ? 0 : Number(suppliedVersion);
@@ -204,9 +212,7 @@ function migrate({ input, type, versionField, targetVersion, normalize, validate
     const migrateStep = migrations[type]?.[currentVersion] ?? (currentVersion === 0 ? (current) => ({ ...current, [versionField]: 1 }) : null);
     if (!migrateStep) return failure(PRACTICE_STORAGE_ERROR_CODES.MIGRATION_FAILED, `${type} has no migration from version ${currentVersion}`);
     const previousVersion = currentVersion;
-    try { value = migrateStep(value); } catch (cause) {
-      return failure(PRACTICE_STORAGE_ERROR_CODES.MIGRATION_FAILED, `${type} migration from version ${previousVersion} failed`, { cause });
-    }
+    try { value = migrateStep(value); } catch (cause) { return failure(PRACTICE_STORAGE_ERROR_CODES.MIGRATION_FAILED, `${type} migration from version ${previousVersion} failed`, { cause }); }
     currentVersion = Number(value[versionField]);
     if (!Number.isInteger(currentVersion) || currentVersion !== previousVersion + 1) return failure(PRACTICE_STORAGE_ERROR_CODES.MIGRATION_FAILED, `${type} migration did not advance sequentially`);
     const intermediate = validateIntermediate(type, value, currentVersion, validate);

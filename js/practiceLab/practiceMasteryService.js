@@ -14,7 +14,7 @@ import {
 } from "./practiceLimiterPolicy.js";
 import { buildPracticeMasteryEvaluationSet, buildPracticeMasterySnapshot } from "./practiceMasterySnapshot.js";
 import {
-  createDefaultPracticeRetentionEvidenceProvider,
+  createPracticeReviewRetentionEvidenceProvider,
   getPracticeRetentionEvidence,
 } from "./practiceRetentionEvidence.js";
 
@@ -48,13 +48,15 @@ async function readContext(repository, profileId, contextId) {
     repository.getPracticeContext(contextId),
     repository.listSkillStats(profileId, contextId),
   ]);
-  if (!context || context.profileId !== profileId) {
-    throw new TypeError("Practice mastery context is missing or belongs to another profile");
-  }
+  if (!context || context.profileId !== profileId) throw new TypeError("Practice mastery context is missing or belongs to another profile");
   return { context, skillStats: Array.isArray(skillStats) ? skillStats : [] };
 }
 
-async function retentionMapFor(provider, stats) {
+async function retentionMapFor(provider, stats, profileId, contextId) {
+  if (typeof provider?.getPracticeRetentionEvidenceMap === "function") {
+    const mapped = await provider.getPracticeRetentionEvidenceMap({ profileId, contextId, skillStats: stats });
+    if (mapped instanceof Map) return mapped;
+  }
   const entries = await Promise.all(stats.map(async (stat) => [
     stat.statId,
     await getPracticeRetentionEvidence(provider, {
@@ -70,7 +72,7 @@ async function retentionMapFor(provider, stats) {
 export function createPracticeMasteryService({
   repository,
   limiterService = null,
-  retentionProvider = createDefaultPracticeRetentionEvidenceProvider(),
+  retentionProvider = null,
   now = () => new Date(),
   policy = PRACTICE_MASTERY_POLICY_V1,
   limiterPolicy = PRACTICE_LIMITER_POLICY_V1,
@@ -78,10 +80,9 @@ export function createPracticeMasteryService({
   if (!repository || typeof repository.getPracticeContext !== "function" || typeof repository.listSkillStats !== "function") {
     throw new TypeError("Practice mastery service requires repository context/skillStat reads");
   }
-  if (limiterService != null && typeof limiterService !== "object") {
-    throw new TypeError("Practice mastery limiterService is invalid");
-  }
-  if (!retentionProvider || typeof retentionProvider.getPracticeRetentionEvidence !== "function") {
+  if (limiterService != null && typeof limiterService !== "object") throw new TypeError("Practice mastery limiterService is invalid");
+  const resolvedRetentionProvider = retentionProvider ?? createPracticeReviewRetentionEvidenceProvider({ repository });
+  if (!resolvedRetentionProvider || typeof resolvedRetentionProvider.getPracticeRetentionEvidence !== "function") {
     throw new TypeError("Practice mastery service requires retention provider contract");
   }
   if (typeof now !== "function") throw new TypeError("Practice mastery service requires injected now()");
@@ -93,13 +94,11 @@ export function createPracticeMasteryService({
     maxEntities = policy.snapshot.maxEntities,
     entityTypes = null,
   } = {}) => {
-    if (typeof profileId !== "string" || typeof contextId !== "string") {
-      throw new TypeError("Practice mastery snapshot service requires profileId and contextId");
-    }
+    if (typeof profileId !== "string" || typeof contextId !== "string") throw new TypeError("Practice mastery snapshot service requires profileId and contextId");
     const { context, skillStats } = await readContext(repository, profileId, contextId);
     const evidenceFingerprint = createPracticeMasteryEvidenceFingerprint(skillStats);
-    const retentionFingerprint = typeof retentionProvider.getFingerprint === "function"
-      ? await retentionProvider.getFingerprint({ profileId, contextId })
+    const retentionFingerprint = typeof resolvedRetentionProvider.getFingerprint === "function"
+      ? await resolvedRetentionProvider.getFingerprint({ profileId, contextId })
       : null;
     const limiterFingerprint = typeof limiterService?.getFingerprint === "function"
       ? await limiterService.getFingerprint({ profileId, contextId })
@@ -117,7 +116,7 @@ export function createPracticeMasteryService({
       PRACTICE_LIMITER_MODEL_VERSION,
       PRACTICE_LIMITER_POLICY_VERSION,
       evidenceFingerprint,
-      retentionProvider.version ?? "unknown",
+      resolvedRetentionProvider.version ?? "unknown",
       retentionFingerprint ?? "uncacheable",
       limiterFingerprint,
       maxEntities,
@@ -125,7 +124,7 @@ export function createPracticeMasteryService({
     ].join("|");
     if (cacheable && cache.has(cacheKey)) return cache.get(cacheKey);
 
-    const retentionEvidenceMap = await retentionMapFor(retentionProvider, skillStats);
+    const retentionEvidenceMap = await retentionMapFor(resolvedRetentionProvider, skillStats, profileId, contextId);
     const snapshot = buildPracticeMasterySnapshot({
       skillStats,
       context,
@@ -144,23 +143,15 @@ export function createPracticeMasteryService({
   };
 
   const getEntityMastery = async (profileId, contextId, entityType, entityKey) => {
-    if (![profileId, contextId, entityType, entityKey].every((value) => typeof value === "string")) {
-      throw new TypeError("Practice entity mastery query requires string identity fields");
-    }
+    if (![profileId, contextId, entityType, entityKey].every((value) => typeof value === "string")) throw new TypeError("Practice entity mastery query requires string identity fields");
     const { context, skillStats } = await readContext(repository, profileId, contextId);
     const target = skillStats.find((stat) => stat.entityType === entityType && stat.entityKey === entityKey);
     if (!target) return null;
     const retentionEvidenceMap = new Map([[
       target.statId,
-      await getPracticeRetentionEvidence(retentionProvider, { profileId, contextId, entityType, entityKey }),
+      await getPracticeRetentionEvidence(resolvedRetentionProvider, { profileId, contextId, entityType, entityKey }),
     ]]);
-    const results = buildPracticeMasteryEvaluationSet({
-      skillStats,
-      context,
-      retentionEvidenceMap,
-      policy,
-      limiterPolicy,
-    });
+    const results = buildPracticeMasteryEvaluationSet({ skillStats, context, retentionEvidenceMap, policy, limiterPolicy });
     return results.find((entry) => entry.statId === target.statId) ?? null;
   };
 
@@ -172,8 +163,11 @@ export function createPracticeMasteryService({
         const parts = key.split("|");
         if (parts[1] === contextId) cache.delete(key);
       }
+      if (typeof resolvedRetentionProvider.invalidateContext === "function") {
+        // Profile is not encoded in this service method; provider cache will also invalidate by fingerprint on the next read.
+      }
     },
-    clear() { cache.clear(); },
+    clear() { cache.clear(); resolvedRetentionProvider.clear?.(); },
     getCacheSize() { return cache.size; },
   });
 }
