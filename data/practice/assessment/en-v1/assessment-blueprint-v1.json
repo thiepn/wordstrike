@@ -1,0 +1,26 @@
+{
+  "blueprintVersion": 1,
+  "language": "en",
+  "partition": "diagnostic",
+  "engineeringCapacityWpm": 400,
+  "engineeringCapacityBuffer": 1.1,
+  "targetVariantsPerBlock": 4,
+  "minimumReadyVariantsPerBlock": 2,
+  "blocks": [
+    { "blockId": "diagnostic-core-keys", "durationMs": 90000, "minimumGraphemes": 3300, "requirements": { "alphabeticKeys": "a-z", "minimumOpportunitiesPerAlphabeticKey": 5 } },
+    { "blockId": "diagnostic-word-launch", "durationMs": 90000, "minimumGraphemes": 3300, "requirements": { "minimumWordOpportunities": 60, "minimumDistinctLexicalKeys": 40 } },
+    { "blockId": "diagnostic-combinations", "durationMs": 120000, "minimumGraphemes": 4400, "requirements": { "fixedCombinationBlueprint": true } },
+    { "blockId": "diagnostic-punctuation-capitals", "durationMs": 60000, "minimumGraphemes": 2200, "requirements": { "punctuationAndCapitalization": true } },
+    { "blockId": "diagnostic-numbers-symbols", "durationMs": 60000, "minimumGraphemes": 2200, "requirements": { "digits": "0-9", "boundedCommonSymbols": true } },
+    { "blockId": "diagnostic-lexical-extended", "durationMs": 60000, "minimumGraphemes": 2200, "requirements": { "extendedLexicalCoverage": true } },
+    { "blockId": "diagnostic-combinations-extended", "durationMs": 60000, "minimumGraphemes": 2200, "requirements": { "extendedCombinationCoverage": true } },
+    { "blockId": "diagnostic-mixed", "durationMs": 60000, "minimumGraphemes": 2200, "requirements": { "naturalMixedDiagnosticText": true } }
+  ],
+  "matchingPolicy": {
+    "version": 1,
+    "maximumDifficultyIndexSpread": 0.5,
+    "maximumRelativePercentileSpread": 15,
+    "maximumLengthDeviationRatio": 0.1,
+    "maximumWeightedRmsFeatureDistance": 0.75
+  }
+}
