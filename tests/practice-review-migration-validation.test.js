@@ -55,11 +55,12 @@ function legacyReviewV2() {
   };
 }
 
-test("PL17 storage/version envelope is DB5 review3 session10 foundation8 with all PL17 model versions v1", () => {
-  assert.equal(PRACTICE_DATABASE_VERSION, 5);
+test("PL17 review contracts remain intact inside the PL18 DB6/session11/foundation9 envelope", () => {
+  assert.equal(PRACTICE_DATABASE_VERSION, 6);
   assert.equal(PRACTICE_RECORD_VERSIONS.reviewItem, 3);
-  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 10);
-  assert.equal(PRACTICE_FOUNDATION_ANALYSIS_VERSION, 8);
+  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 11);
+  assert.equal(PRACTICE_RECORD_VERSIONS.evaluationState, 1);
+  assert.equal(PRACTICE_FOUNDATION_ANALYSIS_VERSION, 9);
   assert.equal(PRACTICE_LIMITS.reviewItemBytes, 32 * 1024);
   assert.deepEqual([
     PRACTICE_REVIEW_MODEL_VERSION,
@@ -94,7 +95,7 @@ test("PL17 review v2 -> v3 preserves legacy scheduler history but creates zero c
   assert.equal(validateReviewItem(migrated.value).valid, true);
 });
 
-test("PL17 session v9 -> v10 adds only retentionReviewSummary=null and cannot backfill retention", () => {
+test("PL17 session v9 retention migration remains null through the current PL18 v11 wrapper", () => {
   const current = createDefaultSessionSummary({
     profileId: baseIdentity.profileId,
     contextId: baseIdentity.contextId,
@@ -103,10 +104,13 @@ test("PL17 session v9 -> v10 adds only retentionReviewSummary=null and cannot ba
   });
   const v9 = { ...current, recordVersion: 9 };
   delete v9.retentionReviewSummary;
+  delete v9.evaluationSummary;
   const migrated = migratePracticeRecord("sessionSummary", v9);
   assert.equal(migrated.ok, true, JSON.stringify(migrated.error));
-  assert.deepEqual(migrated.steps, ["sessionSummary:9->10"]);
+  assert.deepEqual(migrated.steps, ["sessionSummary:9->10", "sessionSummary:10->11"]);
+  assert.equal(migrated.value.recordVersion, 11);
   assert.equal(migrated.value.retentionReviewSummary, null);
+  assert.equal(migrated.value.evaluationSummary, null);
   assert.equal(validateSessionSummary(migrated.value).valid, true);
 });
 
@@ -143,12 +147,13 @@ test("PL17 review validation enforces bounded family/probe history and rejects r
   assert.equal(validateReviewItem({ ...inactive, customText: "private passage" }).valid, false);
 });
 
-test("PL17 foundation analysis v8 always owns an explicit retention component", () => {
+test("PL17 retention component remains explicit inside PL18 foundation analysis v9", () => {
   const foundation = buildPracticeFoundationAnalysis({ events: [], traceMetadata: { truncated: false } });
-  assert.equal(foundation.version, 8);
+  assert.equal(foundation.version, 9);
   assert.equal(foundation.retention.version, 1);
   assert.equal(foundation.retention.measurementKind, null);
   assert.equal(foundation.retention.status, "not-requested");
   assert.deepEqual(foundation.retention.probeResults, []);
   assert.deepEqual(foundation.retention.reviewDeltas, []);
+  assert.equal(foundation.evaluation.status, "not-requested");
 });
