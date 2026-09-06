@@ -54,7 +54,13 @@ export function normalizePracticeRetentionEvidence(value) {
 }
 
 export function buildPracticeRetentionEvidence(reviewItem, policy = PRACTICE_REVIEW_POLICY_V1) {
-  if (!reviewItem || reviewItem.recordVersion !== 3 || !reviewItem.retention || !reviewItem.cycle) return UNAVAILABLE_RETENTION;
+  if (reviewItem == null) return DEFAULT_UNVERIFIED_RETENTION;
+  if (reviewItem.recordVersion !== 3 || !reviewItem.retention) return UNAVAILABLE_RETENTION;
+  if (!reviewItem.cycle) {
+    return reviewItem.state === "inactive" || reviewItem.state === "suspended"
+      ? DEFAULT_UNVERIFIED_RETENTION
+      : UNAVAILABLE_RETENTION;
+  }
   const retention = reviewItem.retention;
   const verificationCount = Math.max(0, Number(retention.currentCycleVerificationCount) || 0);
   const latest = retention.lastOutcome ?? null;
@@ -141,11 +147,11 @@ export function createPracticeReviewRetentionEvidenceProvider({ repository, poli
       return (await load(profileId, contextId)).fingerprint;
     },
     async getPracticeRetentionEvidence({ profileId, contextId, entityType, entityKey }) {
-      return (await load(profileId, contextId)).byEntity.get(identity(entityType, entityKey)) ?? UNAVAILABLE_RETENTION;
+      return (await load(profileId, contextId)).byEntity.get(identity(entityType, entityKey)) ?? DEFAULT_UNVERIFIED_RETENTION;
     },
     async getPracticeRetentionEvidenceMap({ profileId, contextId, skillStats = [] }) {
       const byEntity = (await load(profileId, contextId)).byEntity;
-      return new Map(skillStats.map((stat) => [stat.statId, byEntity.get(identity(stat.entityType, stat.entityKey)) ?? UNAVAILABLE_RETENTION]));
+      return new Map(skillStats.map((stat) => [stat.statId, byEntity.get(identity(stat.entityType, stat.entityKey)) ?? DEFAULT_UNVERIFIED_RETENTION]));
     },
     invalidateContext(profileId, contextId) { cache.delete(`${profileId}\u0000${contextId}`); },
     clear() { cache.clear(); },
