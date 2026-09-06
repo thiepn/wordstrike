@@ -204,7 +204,8 @@ export function practiceReviewElapsedDays(item, at = new Date()) {
 }
 
 export function clampPracticeStabilityDays(value, policy = PRACTICE_REVIEW_POLICY_V1) {
-  return clamp(Number(value), policy.stability.minimumDays, policy.stability.maximumDays);
+  const bounded = clamp(Number(value), policy.stability.minimumDays, policy.stability.maximumDays);
+  return Number(bounded.toFixed(12));
 }
 
 export { DAY_MS as PRACTICE_REVIEW_DAY_MS };
