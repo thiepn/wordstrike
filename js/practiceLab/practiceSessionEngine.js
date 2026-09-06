@@ -61,11 +61,11 @@ export function createPracticeSessionEngine(options = {}) {
   let finalStatus = "completed";
   let finalReason = null;
 
-  const repositoryProxy = new Proxy(repository, {
-    get(target, property, receiver) {
-      if (property !== "commitCompletedPracticeSession") return Reflect.get(target, property, receiver);
-      return async (payload) => commitCompletedPracticeRetentionSession({
-        repository: target,
+  const repositoryFacade = Object.freeze({
+    ...repository,
+    async commitCompletedPracticeSession(payload) {
+      return commitCompletedPracticeRetentionSession({
+        repository,
         sessionSummary: payload.sessionSummary,
         skillEvidenceDeltas: payload.skillEvidenceDeltas,
         abilityObservation: payload.abilityObservation,
@@ -79,7 +79,7 @@ export function createPracticeSessionEngine(options = {}) {
     },
   });
 
-  const base = createLegacyPracticeSessionEngine({ ...options, repository: repositoryProxy });
+  const base = createLegacyPracticeSessionEngine({ ...options, repository: repositoryFacade });
 
   const prepare = async ({ experiment, configuration = {}, contentPlan, reviewPlan: suppliedReviewPlan = null }) => {
     const retentionKind = experiment?.retentionMeasurementKind ?? null;
