@@ -80,13 +80,13 @@ function validObservation(index = 1) {
   };
 }
 
-test("PL13 ability contracts remain intact inside the PL16 storage/session/foundation envelope", () => {
+test("PL13 ability contracts remain intact inside the PL17 storage/session/foundation envelope", () => {
   assert.equal(PRACTICE_DATABASE_VERSION, 5);
   assert.equal(PRACTICE_RECORD_VERSIONS.abilityState, 1);
   assert.equal(PRACTICE_RECORD_VERSIONS.skillStat, 3);
-  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 9);
+  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 10);
   assert.equal(PRACTICE_RECORD_VERSIONS.checkpoint, 3);
-  assert.equal(PRACTICE_FOUNDATION_ANALYSIS_VERSION, 7);
+  assert.equal(PRACTICE_FOUNDATION_ANALYSIS_VERSION, 8);
   assert.equal(PRACTICE_ABILITY_ESTIMATOR_VERSION, 1);
   assert.equal(PRACTICE_ABILITY_POLICY_VERSION, 1);
   assert.equal(PRACTICE_ABILITY_OBSERVATION_VERSION, 1);
@@ -125,19 +125,21 @@ test("PL13 v2-to-v3 ability-store upgrade still creates only abilityStates when 
   assert.equal(upgraded.stores.get("abilityStates").snapshot().find((index) => index.name === "profileContextChannel")?.options?.unique, true);
 });
 
-test("PL13 sessionSummary v6 ability migration remains null through the current PL16 v9 wrapper", () => {
+test("PL13 sessionSummary v6 ability migration remains null through the current PL17 v10 wrapper", () => {
   const current = createDefaultSessionSummary({ profileId, contextId, now: () => new Date("2026-09-05T10:00:00.000Z") });
   const historical = { ...current, recordVersion: 6 };
   delete historical.abilityMeasurementSummary;
   delete historical.performanceMeasurementSummary;
   delete historical.learningEvidenceSummary;
+  delete historical.retentionReviewSummary;
   const migration = migratePracticeRecord("sessionSummary", historical);
   assert.equal(migration.ok, true);
-  assert.deepEqual(migration.steps, ["sessionSummary:6->7", "sessionSummary:7->8", "sessionSummary:8->9"]);
-  assert.equal(migration.value.recordVersion, 9);
+  assert.deepEqual(migration.steps, ["sessionSummary:6->7", "sessionSummary:7->8", "sessionSummary:8->9", "sessionSummary:9->10"]);
+  assert.equal(migration.value.recordVersion, 10);
   assert.equal(migration.value.abilityMeasurementSummary, null);
   assert.equal(migration.value.performanceMeasurementSummary, null);
   assert.equal(migration.value.learningEvidenceSummary, null);
+  assert.equal(migration.value.retentionReviewSummary, null);
   assert.equal(Object.hasOwn(migration.value, "newAbilityEstimate"), false);
 });
 
