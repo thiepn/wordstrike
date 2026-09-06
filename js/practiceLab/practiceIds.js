@@ -4,6 +4,7 @@ const PREFIXES = Object.freeze({
   session: "practice-session_",
   review: "practice-review_",
   evaluationReservation: "practice-evaluation-reservation_",
+  assessment: "practice-assessment_",
   customText: "practice-text_",
   preset: "practice-preset_",
   quarantine: "practice-quarantine_",
@@ -41,6 +42,7 @@ export const createPracticeContextId = (options) => createPracticeId("context", 
 export const createPracticeSessionId = (options) => createPracticeId("session", options);
 export const createPracticeReviewItemId = (options) => createPracticeId("review", options);
 export const createPracticeEvaluationReservationId = (options) => createPracticeId("evaluationReservation", options);
+export const createPracticeAssessmentRunId = (options) => createPracticeId("assessment", options);
 export const createPracticeCustomTextId = (options) => createPracticeId("customText", options);
 export const createPracticePresetId = (options) => createPracticeId("preset", options);
 export const createPracticeQuarantineId = (options) => createPracticeId("quarantine", options);
