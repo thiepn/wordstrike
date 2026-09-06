@@ -102,7 +102,7 @@ export function mergePracticeRetentionReviewDelta(item, delta, policy = PRACTICE
   retention.score = medianPracticeRetentionScores(aggregateScores);
   const confidence = practiceRetentionConfidence({
     verificationCount: retention.currentCycleVerificationCount,
-    distinctReviewDays: retention.currentCycleDistinctReviewDays,
+    distinctReviewDays: retention.currentCycleDistinctSuccessfulDays,
     maxSuccessfulDelayDays: retention.currentCycleMaxSuccessfulDelayDays,
   }, policy);
   retention.confidenceScore = confidence.score;
