@@ -15,15 +15,45 @@ export function createNotRequestedPracticeAssessmentAnalysis() {
   });
 }
 
-export function buildPracticeAssessmentAnalysis({ binding = null, blockKind = null, summary = null, foundationAnalysis = null, coverage = null, evaluationSummary = null, diagnosticFormId = null, diagnosticFreshness = null } = {}) {
+function resolveStatus({ summary, evaluationSummary, blockKind, runtime }) {
+  if (summary?.status !== "completed" || summary?.completionReason !== "time-complete") return "invalid";
+  if (runtime?.pauseObserved || runtime?.contentAppendObserved || runtime?.restoredFromCheckpoint) return "invalid";
+  if (["benchmark", "cold-transfer"].includes(blockKind)) {
+    if (!evaluationSummary || ["invalid", "measurement-failed", "not-eligible"].includes(evaluationSummary.status)) return "measurement-failed";
+    if (evaluationSummary.freshness === "repeat" || evaluationSummary.freshnessStatus === "repeat" || evaluationSummary.integrityStatus === "nonstandard") return "nonstandard";
+  }
+  return "measured";
+}
+
+export function buildPracticeAssessmentAnalysis({
+  binding = null,
+  blockKind = null,
+  summary = null,
+  foundationAnalysis = null,
+  coverage = null,
+  evaluationSummary = null,
+  diagnosticFormId = null,
+  diagnosticFreshness = null,
+  runtime = {},
+} = {}) {
   if (!binding) return createNotRequestedPracticeAssessmentAnalysis();
   const fluency = foundationAnalysis?.latency ?? foundationAnalysis?.fluency ?? null;
   const errors = foundationAnalysis?.errors ?? null;
   const skills = foundationAnalysis?.skills ?? null;
-  const status = summary?.status === "completed" && summary?.completionReason === "time-complete" ? "measured" : "invalid";
-  const opportunityCount = finiteOrNull(skills?.summary?.opportunityCount ?? summary?.skillEvidenceSummary?.firstPassOpportunityCount);
-  const correctCount = finiteOrNull(skills?.summary?.correctOpportunityCount ?? summary?.skillEvidenceSummary?.firstPassCorrectCount);
+  const status = resolveStatus({ summary, evaluationSummary, blockKind, runtime });
+  const opportunityCount = finiteOrNull(
+    skills?.summary?.opportunityCount
+      ?? skills?.summary?.firstPassOpportunityCount
+      ?? summary?.skillEvidenceSummary?.firstPassOpportunityCount,
+  );
+  const correctCount = finiteOrNull(
+    skills?.summary?.correctOpportunityCount
+      ?? skills?.summary?.firstPassCorrectCount
+      ?? summary?.skillEvidenceSummary?.firstPassCorrectCount,
+  );
   const firstPassErrorCount = opportunityCount != null && correctCount != null ? Math.max(0, opportunityCount - correctCount) : null;
+  const fluentTransitionCount = finiteOrNull(fluency?.fluentTransitionCount ?? fluency?.counts?.fluent);
+  const disfluentTransitionCount = finiteOrNull(fluency?.disfluentTransitionCount ?? fluency?.counts?.disfluent);
   const blockMetrics = Object.freeze({
     activeDurationMs: finiteOrNull(summary?.metrics?.activeDurationMs ?? summary?.activeDurationMs),
     typedCharacterCount: finiteOrNull(summary?.metrics?.typedCharacterCount ?? summary?.typedCharacterCount),
@@ -34,15 +64,16 @@ export function buildPracticeAssessmentAnalysis({ binding = null, blockKind = nu
     firstPassCorrectCount: correctCount,
     firstPassErrorCount,
     firstPassAccuracy: ratioOrNull(correctCount, opportunityCount),
-    fluentTransitionCount: finiteOrNull(fluency?.fluentTransitionCount),
-    disfluentTransitionCount: finiteOrNull(fluency?.disfluentTransitionCount),
-    disfluencyRate: finiteOrNull(fluency?.disfluencyRate),
-    correctionInputCount: finiteOrNull(errors?.correctionInputCount ?? summary?.metrics?.correctionInputCount),
-    correctionCharactersRemoved: finiteOrNull(errors?.correctionCharactersRemoved),
-    correctionCostMs: finiteOrNull(errors?.correctionCostMs),
-    errorEpisodeCount: finiteOrNull(errors?.episodeCount ?? errors?.errorEpisodeCount),
+    fluentTransitionCount,
+    disfluentTransitionCount,
+    disfluencyRate: finiteOrNull(fluency?.disfluencyRate) ?? ratioOrNull(disfluentTransitionCount, (fluentTransitionCount ?? 0) + (disfluentTransitionCount ?? 0)),
+    correctionInputCount: finiteOrNull(errors?.correctionInputCount ?? errors?.counts?.correctionActions ?? summary?.metrics?.correctionInputCount),
+    correctionCharactersRemoved: finiteOrNull(errors?.correctionCharactersRemoved ?? errors?.counts?.charactersRemoved),
+    correctionCostMs: finiteOrNull(errors?.correctionCostMs ?? errors?.timing?.correctionCostMs),
+    errorEpisodeCount: finiteOrNull(errors?.episodeCount ?? errors?.errorEpisodeCount ?? errors?.counts?.episodes),
     wordLaunchResidualMedianMs: finiteOrNull(foundationAnalysis?.normalization?.wordLaunchResidualMedianMs),
   });
+  const terminalUsable = status === "measured" || status === "nonstandard";
   const delta = Object.freeze({
     deltaVersion: 1,
     assessmentRunId: binding.assessmentRunId,
@@ -52,7 +83,7 @@ export function buildPracticeAssessmentAnalysis({ binding = null, blockKind = nu
     profileId: summary?.profileId ?? null,
     contextId: summary?.contextId ?? null,
     completedAtUtc: summary?.completedAtUtc ?? null,
-    status: status === "measured" ? "completed" : "invalid",
+    status: terminalUsable ? "completed" : "invalid",
     blockMetrics,
     coverage: coverage ?? null,
     evaluationSummary: evaluationSummary ?? summary?.evaluationSummary ?? null,
