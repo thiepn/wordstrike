@@ -82,7 +82,7 @@ test("controller mount/unmount stress leaves no listeners, subscribers, or stale
   for (let cycle = 0; cycle < 50; cycle += 1) {
     controller.mount();
     for (let index = 0; index < 10; index += 1) controller.navigate(createPracticeLabRoute(index % 2 ? PRACTICE_LAB_ROUTES.SKILL_MAP : PRACTICE_LAB_ROUTES.PROGRESS));
-    assert.equal(listeners.size, 1);
+    assert.equal(listeners.size, 2);
     assert.equal(registry.getDiagnostics().subscriberCount, 1);
     controller.unmount();
     assert.equal(listeners.size, 0);

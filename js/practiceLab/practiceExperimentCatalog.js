@@ -19,9 +19,9 @@ export const PRACTICE_EXPERIMENT_IDS = Object.freeze(IDS);
 
 const definitions = [
   ["full-assessment", "Full Assessment", "Assessment", "assessment", "Measure a structured baseline with protected natural text and fixed diagnostics.", "Choose Quick, Standard, or Deep. The battery measures natural-text performance, first-pass control, diagnostic coverage, limiter evidence, and—when Deep is fully available—precommitted cold transfer. It reports uncertainty and unmeasured dimensions without producing one universal score.", 4, 12, 12, "all-levels", false, false, 6, 10, "assessment", "assessment", "structured typing measurement"],
-  ["weak-keys", "Weak Keys", "Weak Keys", "precision", "Strengthen individual keys that cause errors or hesitation.", "Focused repetitions will use assessment and practice evidence to repair specific weak keys without wasting time on mastered keys.", 1, 3, 5, "adaptive", true, true, 8, 10, "key", "precision", "key speed and accuracy"],
+  ["weak-keys", "Weak Keys", "Weak Keys", "precision", "Focused practice for one difficult letter, using varied words and contexts rather than isolated repetition.", "Train one measured letter across varied words, word positions, and surrounding transitions. A fixed Baseline → Focus → Context → Mix → Check protocol supplies one direct key-learning dose without prescribing a finger or treating the final check as transfer.", 4, 5, 6, "adaptive", false, false, 8, 10, "key", "precision", "context-dependent key execution"],
   ["combination-repair", "Combination Repair", "Combinations", "precision", "Train slow or inaccurate key combinations.", "Targeted bigram and trigram practice will smooth transitions that repeatedly slow you down or cause mistakes.", 1, 3, 5, "adaptive", false, false, 9, 20, "combination", "precision", "combination timing"],
-  ["problem-words", "Problem Words", "Problem Words", "precision", "Repair words that repeatedly break your rhythm.", "Practice troublesome words in varied contexts while tracking accuracy, correction cost, and fluent completion.", 2, 4, 6, "adaptive", false, true, 10, 30, "word", "precision", "word accuracy"],
+  ["problem-words", "Problem Words", "Problem Words", "precision", "Focused practice for difficult words, separating how you start the word from how you execute it internally.", "Train one canonical lexical target across Baseline, Focus, Context, Mix, and Check. The mode keeps whole-word first-pass accuracy, starting-the-word execution, and inside-the-word execution distinct while avoiding spelling recall and rote adjacent repetition.", 4, 5, 6, "adaptive", false, false, 10, 30, "word", "precision", "lexical execution"],
   ["accuracy-control", "Accuracy Control", "Accuracy", "precision", "Build control at a sustainable error rate.", "Pacing and correction constraints will help you value clean execution before adding more speed.", 2, 4, 6, "all-levels", false, false, 11, 40, "target", "precision", "accuracy control"],
   ["burst-sprints", "Burst Sprints", "Sprints", "speed", "Practice short, controlled bursts above sustainable speed.", "Brief sprint intervals will develop top-end speed while separating useful acceleration from uncontrolled errors.", 1, 3, 5, "adaptive", false, true, 12, 10, "bolt", "speed", "burst speed"],
   ["common-words", "Common Words", "Common Words", "fluency", "Build automatic rhythm on high-frequency words.", "Repeat and vary common words to reduce hesitation and make everyday typing more fluent.", 2, 5, 8, "all-levels", false, false, 13, 10, "words", "fluency", "common-word fluency"],
@@ -45,11 +45,11 @@ const deepFreeze = (value) => {
 
 const buildEntry = ([id, title, shortTitle, category, description, longDescription, minimum, recommended, maximum, difficulty, requiresAssessment, requiresPracticeData, implementationPrompt, displayOrder, iconKey, accentKey, primarySkill]) => deepFreeze({
   id, version: 1, title, shortTitle, category, description, longDescription,
-  status: ["full-assessment", "combination-repair"].includes(id) ? "preview" : "planned",
+  status: ["full-assessment", "weak-keys", "combination-repair", "problem-words"].includes(id) ? "preview" : "planned",
   estimatedDurationMinutes: { minimum, recommended, maximum }, difficulty,
   requiresAssessment, requiresPracticeData, supportsMobile: true,
   supportsPhysicalKeyboard: true, supportsSoftwareKeyboard: true,
-  capabilities: id === "combination-repair" ? ["manual-target", "recommended-target", "fixed-dose", "same-session-check"] : [],
+  capabilities: ["weak-keys", "combination-repair", "problem-words"].includes(id) ? ["manual-target", "recommended-target", "fixed-dose", "same-session-check"] : [],
   tags: [category, primarySkill], implementationPrompt, displayOrder,
   iconKey, accentKey, primarySkill,
 });

@@ -546,3 +546,17 @@ May consume mastery stage, automaticity, anchor eligibility, and hierarchy readi
 ## PL19 Full Assessment integration
 
 PL19 never assigns mastery stages. Full Assessment may strengthen the PL11 evidence later consumed by PL15, and its final historical report stores only bounded mastery/automaticity distribution counts from the canonical PL15 snapshot.
+
+## PL21 Weak Keys mastery boundary
+
+PL21 uses PL15 only as recommendation context. `Learning` and `Acquired` keys with unresolved limiter evidence are preferred; `Robust` and `Retained` are not normally recommended, although a user may still manually practice a valid key.
+
+Weak Keys never assigns, promotes, or persists mastery. One strong same-session Check probe cannot set Acquired/Robust/Retained and is never serialized as “Mastered.” PL15 remains the sole mastery/automaticity owner.
+
+See `PRACTICE_LAB_WEAK_KEYS.md`.
+
+## PL22 — Problem Words mastery boundary
+
+Problem Words does **not** assign, promote, or persist mastery. PL15 remains the canonical derived mastery/automaticity owner. PL22 may use the current PL15 word stage to de-emphasize Robust/Retained recommendations, but manual practice remains available after normal target/content validation.
+
+A strong PL22 Check probe is immediate target-enriched training evidence only and cannot by itself produce `Mastered`, `Transferred`, `Robust`, or `Retained` semantics.

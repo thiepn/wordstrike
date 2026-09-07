@@ -5,7 +5,7 @@ import {
 
 const IS_NODE_RUNTIME = Boolean(globalThis.process?.versions?.node);
 const nodeRuntime = IS_NODE_RUNTIME
-  ? await import("./practiceLabControllerRuntime.js")
+  ? await import("./practiceLabControllerRuntimeV22.js")
   : null;
 
 export const PRACTICE_LAB_ONBOARDING_VERSION = 1;
@@ -43,8 +43,11 @@ export function createPracticeLabController(options = {}) {
     runtimePromise = Promise.all([
       import("./practiceExperimentRegistryRuntime.js"),
       import("./practiceLabControllerRuntime.js"),
+      import("./practiceLabControllerRuntimeV22.js"),
       import("./practiceCombinationRepairExperiment.js"),
-    ]).then(([registryModule, controllerModule, combinationRepairModule]) => {
+      import("./practiceWeakKeysExperiment.js"),
+      import("./practiceProblemWordsExperiment.js"),
+    ]).then(([registryModule, _canonicalControllerModule, controllerModule, combinationRepairModule, weakKeysModule, problemWordsModule]) => {
       const lazyRegistry = getPracticeRegistryLazyState(experimentRegistry);
       if (lazyRegistry?.destroyed) return null;
 
@@ -55,14 +58,14 @@ export function createPracticeLabController(options = {}) {
       }
 
       combinationRepairModule.registerPracticeCombinationRepairExperiment(resolvedRegistry);
+      weakKeysModule.registerPracticeWeakKeysExperiment(resolvedRegistry);
+      problemWordsModule.registerPracticeProblemWordsExperiment(resolvedRegistry);
 
       runtimeController = controllerModule.createPracticeLabController({
         ...options,
         experimentRegistry: resolvedRegistry,
       });
-      for (const listener of pendingSubscribers) {
-        runtimeUnsubscribers.set(listener, runtimeController.subscribe(listener));
-      }
+      for (const listener of pendingSubscribers) runtimeUnsubscribers.set(listener, runtimeController.subscribe(listener));
       if (mountRequested) runtimeController.mount(requestedRoute);
       return runtimeController;
     }).catch((error) => {
@@ -79,15 +82,11 @@ export function createPracticeLabController(options = {}) {
       mountRequested = true;
       requestedRoute = initialRoute;
       if (runtimeController) return runtimeController.mount(initialRoute);
-      if (root && "innerHTML" in root) {
-        root.innerHTML = '<section class="practice-lab-shell" aria-busy="true"><p>LOADING PRACTICE LAB...</p></section>';
-      }
+      if (root && "innerHTML" in root) root.innerHTML = '<section class="practice-lab-shell" aria-busy="true"><p>LOADING PRACTICE LAB...</p></section>';
       void loadRuntime();
       return loadingSnapshot();
     },
-    navigate(...args) {
-      return runtimeController?.navigate(...args) ?? false;
-    },
+    navigate(...args) { return runtimeController?.navigate(...args) ?? false; },
     back() {
       if (runtimeController) return runtimeController.back();
       if (!mountRequested) return false;
@@ -95,9 +94,7 @@ export function createPracticeLabController(options = {}) {
       appNavigation.exit?.();
       return true;
     },
-    getSnapshot() {
-      return runtimeController?.getSnapshot() ?? loadingSnapshot();
-    },
+    getSnapshot() { return runtimeController?.getSnapshot() ?? loadingSnapshot(); },
     subscribe(listener) {
       if (typeof listener !== "function") throw new TypeError("Controller listener must be a function");
       if (runtimeController) return runtimeController.subscribe(listener);

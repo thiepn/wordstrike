@@ -1,0 +1,393 @@
+.practice-weak-key-detail {
+  display: grid;
+  gap: 18px;
+}
+
+.practice-weak-key-target-field {
+  display: grid;
+  gap: 7px;
+  width: min(320px, 100%);
+  margin: 14px 0;
+}
+
+.practice-weak-key-target-field > span {
+  color: var(--muted-strong);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.practice-weak-key-target-field input {
+  width: 100%;
+  min-height: 54px;
+  padding: 10px 13px;
+  border: 1px solid var(--border);
+  outline: none;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 28px;
+  letter-spacing: 0.16em;
+}
+
+.practice-weak-key-target-field input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgb(0 255 242 / 10%);
+}
+
+.practice-weak-key-target-field small,
+.practice-weak-key-recommendations small {
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.practice-weak-key-recommendations {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.practice-weak-key-recommendations button {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  min-height: 94px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  outline: none;
+  background: var(--panel);
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.practice-weak-key-recommendations button:hover,
+.practice-weak-key-recommendations button:focus-visible {
+  border-color: var(--primary);
+  background: rgb(0 255 242 / 7%);
+}
+
+.practice-weak-key-recommendations strong {
+  color: var(--primary);
+  font-size: 25px;
+  line-height: 1;
+}
+
+.practice-weak-key-recommendations span {
+  color: var(--muted-strong);
+  font-size: 10px;
+  overflow-wrap: anywhere;
+}
+
+.practice-weak-key-recommendations small {
+  font-size: 9px;
+}
+
+.practice-weak-key-plan,
+.practice-weak-key-phase-strip {
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.practice-weak-key-plan {
+  display: grid;
+  gap: 1px;
+  border: 1px solid var(--border);
+  background: var(--border);
+}
+
+.practice-weak-key-plan li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: var(--panel);
+}
+
+.practice-weak-key-plan p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.practice-weak-key-plan li > span:last-child {
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.practice-weak-key-plan-index {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--primary);
+  color: var(--primary);
+}
+
+.practice-weak-key-session .practice-lab-shell,
+.practice-weak-key-results .practice-lab-shell {
+  width: min(1040px, 100%);
+  margin-inline: auto;
+}
+
+.practice-weak-key-session-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 18px;
+}
+
+.practice-weak-key-session-header h1 {
+  margin: 5px 0 0;
+  color: var(--primary);
+  font-size: clamp(28px, 5vw, 48px);
+  letter-spacing: 0.08em;
+}
+
+.practice-weak-key-session-actions,
+.practice-weak-key-result-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.practice-weak-key-session-actions button,
+.practice-weak-key-result-actions button,
+.practice-weak-key-detail .practice-lab-primary-action {
+  min-height: 42px;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: var(--text);
+  cursor: pointer;
+  letter-spacing: 0.08em;
+}
+
+.practice-weak-key-session-actions button:hover,
+.practice-weak-key-session-actions button:focus-visible,
+.practice-weak-key-result-actions button:hover,
+.practice-weak-key-result-actions button:focus-visible,
+.practice-weak-key-detail .practice-lab-primary-action:hover:not(:disabled) {
+  border-color: var(--primary);
+  outline: none;
+  color: var(--primary);
+  background: rgb(0 255 242 / 7%);
+}
+
+.practice-weak-key-detail .practice-lab-primary-action:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.practice-weak-key-phase-strip {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.practice-weak-key-phase-strip li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  padding: 9px 10px;
+  border: 1px solid var(--border);
+  background: rgb(16 23 32 / 72%);
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.practice-weak-key-phase-strip li[data-phase-state="active"] {
+  border-color: var(--primary);
+  color: var(--text);
+  background: rgb(0 255 242 / 8%);
+}
+
+.practice-weak-key-phase-strip li[data-phase-state="active"] > span {
+  color: var(--primary);
+}
+
+.practice-weak-key-phase-strip li[data-phase-state="complete"] {
+  border-color: rgb(76 255 142 / 40%);
+  color: var(--muted-strong);
+}
+
+.practice-weak-key-phase-strip li[data-phase-state="complete"] > span {
+  color: var(--success);
+}
+
+.practice-weak-key-phase-card {
+  min-height: 82px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  background: var(--panel);
+}
+
+.practice-weak-key-phase-card p {
+  margin: 9px 0 0;
+  color: var(--muted-strong);
+  line-height: 1.55;
+}
+
+.practice-weak-key-progress {
+  height: 5px;
+  margin-top: 14px;
+  overflow: hidden;
+  background: var(--locked);
+}
+
+.practice-weak-key-progress > span {
+  display: block;
+  height: 100%;
+  background: var(--primary);
+  transition: width 120ms linear;
+}
+
+.practice-weak-key-progress-label {
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 10px;
+  text-align: right;
+  letter-spacing: 0.08em;
+}
+
+.practice-weak-key-typing {
+  min-height: 220px;
+  margin: 16px 0;
+  padding: clamp(18px, 3vw, 28px);
+  border: 1px solid rgb(0 255 242 / 28%);
+  background: rgb(10 14 20 / 92%);
+  color: var(--text);
+  font-size: clamp(20px, 2.4vw, 30px);
+  line-height: 1.8;
+  letter-spacing: 0.025em;
+  overflow-wrap: anywhere;
+  user-select: none;
+}
+
+.practice-weak-key-typing[data-session-paused="true"] {
+  opacity: 0.45;
+}
+
+.practice-weak-key-char {
+  border-radius: 2px;
+}
+
+.practice-weak-key-char.is-typed {
+  color: var(--muted);
+}
+
+.practice-weak-key-char.is-error {
+  color: var(--danger);
+  background: rgb(255 71 87 / 13%);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+}
+
+.practice-weak-key-char.is-current {
+  color: var(--bg);
+  background: var(--primary);
+  box-shadow: 0 0 0 2px rgb(0 255 242 / 18%);
+}
+
+.practice-weak-key-char.is-target-strong:not(.is-current) {
+  color: var(--primary);
+  background: rgb(0 255 242 / 10%);
+  text-decoration-line: underline;
+  text-decoration-style: double;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 5px;
+}
+
+.practice-weak-key-char.is-target-subtle:not(.is-current) {
+  text-decoration-line: underline;
+  text-decoration-style: dashed;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+}
+
+.practice-weak-key-result-grid,
+.practice-weak-key-results .practice-lab-empty-state dl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  margin: 14px 0;
+  background: var(--border);
+}
+
+.practice-weak-key-result-grid > div,
+.practice-weak-key-results .practice-lab-empty-state dl > div {
+  padding: 12px;
+  background: var(--panel);
+}
+
+.practice-weak-key-result-grid dt,
+.practice-weak-key-results dt {
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.practice-weak-key-result-grid dd,
+.practice-weak-key-results dd {
+  margin: 6px 0 0;
+  color: var(--primary);
+  font-size: 18px;
+}
+
+@media (max-width: 760px) {
+  .practice-weak-key-recommendations {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .practice-weak-key-session-header {
+    flex-direction: column;
+  }
+
+  .practice-weak-key-phase-strip {
+    grid-template-columns: 1fr;
+  }
+
+  .practice-weak-key-plan li {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .practice-weak-key-plan li > span:last-child {
+    grid-column: 2;
+  }
+
+  .practice-weak-key-typing {
+    min-height: 180px;
+    font-size: clamp(18px, 5.5vw, 24px);
+  }
+
+  .practice-weak-key-result-grid,
+  .practice-weak-key-results .practice-lab-empty-state dl {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 420px) {
+  .practice-weak-key-recommendations {
+    grid-template-columns: 1fr;
+  }
+
+  .practice-weak-key-session-actions,
+  .practice-weak-key-session-actions button,
+  .practice-weak-key-result-actions,
+  .practice-weak-key-result-actions button,
+  .practice-weak-key-detail .practice-lab-primary-action {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .practice-weak-key-progress > span {
+    transition: none;
+  }
+}

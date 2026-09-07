@@ -3,6 +3,9 @@ import { normalizePracticeTarget } from "./practiceTextAnalysis.js";
 import { PRACTICE_LEARNING_ANALYSIS_VERSION, PRACTICE_LEARNING_OBSERVATION_VERSION } from "./practiceLearningConstants.js";
 import { PRACTICE_LEARNING_POLICY_V1 } from "./practiceLearningPolicy.js";
 import { buildPracticeDeltaQuality, buildPracticePhaseQuality } from "./practiceLearningQuality.js";
+import { getPracticeTrustedCombinationRepairBinding } from "./practiceCombinationRepairTrust.js";
+import { getPracticeTrustedWeakKeysBinding } from "./practiceWeakKeysTrust.js";
+import { getPracticeTrustedProblemWordsBinding } from "./practiceProblemWordsTrust.js";
 
 const finite = Number.isFinite;
 const identity = (type, key) => `${type}\u0000${key}`;
@@ -99,39 +102,101 @@ export function extractPracticeLearningPhaseOpportunities({
   return byEntity;
 }
 
-function phaseAnalysis(delta, records, phaseContinuityComplete, policy) {
-  const opportunityCount = Number(delta?.opportunities?.count || 0);
-  const minimum = policy.phase.minimumSessionOpportunities?.[delta.entityType] ?? Infinity;
-  const minimumPhase = policy.phase.minimumPhaseSize?.[delta.entityType] ?? Infinity;
-  if (!phaseContinuityComplete) return { entryQuality: null, exitQuality: null, practiceGain: null, phaseCoverage: { status: "partial", entryOpportunityCount: 0, exitOpportunityCount: 0, entryQualityCoverage: 0, exitQualityCoverage: 0, reason: "chronology-unavailable" } };
-  if (!Array.isArray(records) || opportunityCount < minimum || records.length < minimum) return { entryQuality: null, exitQuality: null, practiceGain: null, phaseCoverage: { status: "unavailable", entryOpportunityCount: 0, exitOpportunityCount: 0, entryQualityCoverage: 0, exitQualityCoverage: 0, reason: "insufficient-opportunities" } };
-  const phaseSize = Math.max(minimumPhase, Math.floor(records.length / 3));
-  if (phaseSize * 2 > records.length) return { entryQuality: null, exitQuality: null, practiceGain: null, phaseCoverage: { status: "unavailable", entryOpportunityCount: 0, exitOpportunityCount: 0, entryQualityCoverage: 0, exitQualityCoverage: 0, reason: "phase-overlap" } };
-  const entry = buildPracticePhaseQuality(delta.entityType, records.slice(0, phaseSize), policy);
-  const exit = buildPracticePhaseQuality(delta.entityType, records.slice(-phaseSize), policy);
-  const entryQuality = entry.quality;
-  const exitQuality = exit.quality;
+function validRange(range) {
+  return range && Number.isInteger(range.startIndex) && Number.isInteger(range.endIndex) && range.startIndex >= 0 && range.endIndex > range.startIndex;
+}
+
+function trustedInterventionMetadata(contentPlan) {
+  if (getPracticeTrustedCombinationRepairBinding(contentPlan)) return contentPlan?.metadata?.combinationRepair ?? null;
+  if (getPracticeTrustedWeakKeysBinding(contentPlan)) return contentPlan?.metadata?.weakKeys ?? null;
+  if (getPracticeTrustedProblemWordsBinding(contentPlan)) return contentPlan?.metadata?.problemWords ?? null;
+  return null;
+}
+
+export function resolvePracticeTrustedLearningPhaseBounds(contentPlan) {
+  const metadata = trustedInterventionMetadata(contentPlan);
+  if (!metadata) return null;
+  const ranges = Array.isArray(metadata.phaseRanges) ? metadata.phaseRanges : [];
+  const entry = ranges.find((range) => range?.id === "entry-probe") ?? null;
+  const exit = ranges.find((range) => range?.id === "exit-probe") ?? null;
+  if (!validRange(entry) || !validRange(exit) || entry.endIndex > exit.startIndex) return null;
+  return freezeDeep({
+    kind: "trusted-intervention",
+    entry: { phaseId: "entry-probe", startIndex: entry.startIndex, endIndex: entry.endIndex },
+    exit: { phaseId: "exit-probe", startIndex: exit.startIndex, endIndex: exit.endIndex },
+  });
+}
+
+function phaseResult(entry, exit, entryRecords, exitRecords, reason = null) {
+  const entryQuality = entry?.quality ?? null;
+  const exitQuality = exit?.quality ?? null;
   const complete = finite(entryQuality) && finite(exitQuality);
   return {
     entryQuality,
     exitQuality,
     practiceGain: complete ? exitQuality - entryQuality : null,
-    phaseCoverage: { status: complete ? "complete" : "partial", entryOpportunityCount: phaseSize, exitOpportunityCount: phaseSize, entryQualityCoverage: entry.availableQualityWeight, exitQualityCoverage: exit.availableQualityWeight, reason: complete ? null : "quality-coverage" },
-    entryMetrics: entry.metrics,
-    exitMetrics: exit.metrics,
+    phaseCoverage: {
+      status: complete ? "complete" : "partial",
+      entryOpportunityCount: entryRecords.length,
+      exitOpportunityCount: exitRecords.length,
+      entryQualityCoverage: entry?.availableQualityWeight ?? 0,
+      exitQualityCoverage: exit?.availableQualityWeight ?? 0,
+      reason: complete ? null : (reason ?? "quality-coverage"),
+    },
+    entryMetrics: entry?.metrics ?? null,
+    exitMetrics: exit?.metrics ?? null,
   };
+}
+
+function phaseAnalysis(delta, records, phaseContinuityComplete, policy, explicitBounds = null) {
+  const opportunityCount = Number(delta?.opportunities?.count || 0);
+  const minimum = policy.phase.minimumSessionOpportunities?.[delta.entityType] ?? Infinity;
+  const minimumPhase = policy.phase.minimumPhaseSize?.[delta.entityType] ?? Infinity;
+  if (!phaseContinuityComplete) return { entryQuality: null, exitQuality: null, practiceGain: null, phaseCoverage: { status: "partial", entryOpportunityCount: 0, exitOpportunityCount: 0, entryQualityCoverage: 0, exitQualityCoverage: 0, reason: "chronology-unavailable" } };
+  if (!Array.isArray(records) || opportunityCount < minimum || records.length < minimum) return { entryQuality: null, exitQuality: null, practiceGain: null, phaseCoverage: { status: "unavailable", entryOpportunityCount: 0, exitOpportunityCount: 0, entryQualityCoverage: 0, exitQualityCoverage: 0, reason: "insufficient-opportunities" } };
+
+  if (explicitBounds?.kind === "trusted-intervention") {
+    const entryRecords = records.filter((record) => Number.isInteger(record?.textPosition) && record.textPosition >= explicitBounds.entry.startIndex && record.textPosition < explicitBounds.entry.endIndex);
+    const exitRecords = records.filter((record) => Number.isInteger(record?.textPosition) && record.textPosition >= explicitBounds.exit.startIndex && record.textPosition < explicitBounds.exit.endIndex);
+    if (entryRecords.length < minimumPhase || exitRecords.length < minimumPhase) {
+      return {
+        entryQuality: null,
+        exitQuality: null,
+        practiceGain: null,
+        phaseCoverage: {
+          status: "unavailable",
+          entryOpportunityCount: entryRecords.length,
+          exitOpportunityCount: exitRecords.length,
+          entryQualityCoverage: 0,
+          exitQualityCoverage: 0,
+          reason: "trusted-phase-insufficient-opportunities",
+        },
+      };
+    }
+    const entry = buildPracticePhaseQuality(delta.entityType, entryRecords, policy);
+    const exit = buildPracticePhaseQuality(delta.entityType, exitRecords, policy);
+    return phaseResult(entry, exit, entryRecords, exitRecords);
+  }
+
+  const phaseSize = Math.max(minimumPhase, Math.floor(records.length / 3));
+  if (phaseSize * 2 > records.length) return { entryQuality: null, exitQuality: null, practiceGain: null, phaseCoverage: { status: "unavailable", entryOpportunityCount: 0, exitOpportunityCount: 0, entryQualityCoverage: 0, exitQualityCoverage: 0, reason: "phase-overlap" } };
+  const entryRecords = records.slice(0, phaseSize);
+  const exitRecords = records.slice(-phaseSize);
+  const entry = buildPracticePhaseQuality(delta.entityType, entryRecords, policy);
+  const exit = buildPracticePhaseQuality(delta.entityType, exitRecords, policy);
+  return phaseResult(entry, exit, entryRecords, exitRecords);
 }
 
 function baseDelta(delta, kind, experimentId, observation) {
   return freezeDeep({ observationVersion: PRACTICE_LEARNING_OBSERVATION_VERSION, kind, sessionId: delta.sessionId, profileId: delta.profileId, contextId: delta.contextId, statId: delta.statId, entityType: delta.entityType, entityKey: delta.entityKey, evidenceRole: delta.evidenceRole, experimentId: typeof experimentId === "string" ? experimentId.slice(0, 100) : "unknown", observation });
 }
 
-export function buildPracticeAcquisitionObservationDelta({ delta, experimentId, phaseRecords = null, phaseContinuityComplete = true, policy = PRACTICE_LEARNING_POLICY_V1 } = {}) {
+export function buildPracticeAcquisitionObservationDelta({ delta, experimentId, phaseRecords = null, phaseContinuityComplete = true, phaseBounds = null, policy = PRACTICE_LEARNING_POLICY_V1 } = {}) {
   if (delta?.evidenceRole !== "training" || delta?.directTarget !== true || Number(delta?.opportunities?.count || 0) <= 0) return null;
   const scale = policy.doseScales?.[delta.entityType];
   if (!finite(scale) || scale <= 0) return null;
   const whole = buildPracticeDeltaQuality(delta, policy);
-  const phases = phaseAnalysis(delta, phaseRecords, phaseContinuityComplete, policy);
+  const phases = phaseAnalysis(delta, phaseRecords, phaseContinuityComplete, policy, phaseBounds);
   const opportunityCount = Number(delta.opportunities.count);
   const observation = freezeDeep({
     kind: "acquisition",
@@ -194,6 +259,7 @@ export function buildPracticeLearningAnalysis({
   const phaseMap = evidenceRole === "training" && acquisitionAllowed
     ? extractPracticeLearningPhaseOpportunities({ profileId, contextId, contentPlan, normalizedTransitions: foundationAnalysis?.normalization?.normalizedTransitions ?? [], segmenter, maxDirectTargets: policy.phase.maxDirectTargets })
     : new Map();
+  const trustedPhaseBounds = evidenceRole === "training" && acquisitionAllowed ? resolvePracticeTrustedLearningPhaseBounds(contentPlan) : null;
   const observationDeltas = [];
   let completePhaseObservationCount = 0;
   let partialPhaseObservationCount = 0;
@@ -202,7 +268,14 @@ export function buildPracticeLearningAnalysis({
   if (evidenceRole === "training" && acquisitionAllowed) {
     for (const delta of skillDeltas) {
       if (delta.evidenceRole !== "training" || delta.directTarget !== true) continue;
-      const learning = buildPracticeAcquisitionObservationDelta({ delta, experimentId, phaseRecords: phaseMap.get(identity(delta.entityType, delta.entityKey)) ?? null, phaseContinuityComplete, policy });
+      const learning = buildPracticeAcquisitionObservationDelta({
+        delta,
+        experimentId,
+        phaseRecords: phaseMap.get(identity(delta.entityType, delta.entityKey)) ?? null,
+        phaseContinuityComplete,
+        phaseBounds: trustedPhaseBounds,
+        policy,
+      });
       if (!learning) { skippedCount += 1; continue; }
       observationDeltas.push(learning);
       if (learning.observation.phaseCoverage.status === "complete") completePhaseObservationCount += 1;
