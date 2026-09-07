@@ -63,11 +63,12 @@ assert.deepEqual(PRACTICE_RECORD_VERSIONS, {
   context: 1,
   profile: 3,
   skillStat: 3,
-  sessionSummary: 11,
+  sessionSummary: 12,
   abilityState: 1,
   performanceState: 1,
   learningState: 1,
   evaluationState: 1,
+  assessmentRun: 1,
   reviewItem: 3,
   customText: 1,
   preset: 1,
@@ -75,4 +76,4 @@ assert.deepEqual(PRACTICE_RECORD_VERSIONS, {
   quarantine: 1,
 });
 
-console.log("Practice profile migration, canonical day key, repository upgrade, and PL18 version envelope passed.");
+console.log("Practice profile migration, canonical day key, repository upgrade, and PL19 version envelope passed.");
