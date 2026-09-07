@@ -41,6 +41,7 @@ export function buildPracticeSessionResult({
       ? null
       : foundationAnalysis?.retention?.summary ?? null);
   const evaluationSummary = analysis?.__pl18EvaluationSummary ?? null;
+  const assessmentBinding = analysis?.__pl19AssessmentBinding ?? null;
   const summary = createDefaultSessionSummary({
     sessionId,
     profileId,
@@ -92,6 +93,7 @@ export function buildPracticeSessionResult({
       learningEvidenceSummary,
       retentionReviewSummary,
       evaluationSummary,
+      assessmentBinding,
       beforeMetrics: analysis?.beforeMetrics ?? null,
       afterMetrics: analysis?.afterMetrics ?? null,
       transferMetrics: analysis?.transferMetrics ?? null,

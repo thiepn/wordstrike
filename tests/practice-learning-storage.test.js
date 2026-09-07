@@ -64,7 +64,7 @@ test("PL16 v4-to-v5 learning-store contract remains intact inside the PL18 DB6 e
   const before = new Map([...stores].map(([name, store]) => [name, JSON.stringify(store.snapshot())]));
   const database = makeDatabase(stores);
   applyPracticeDatabaseUpgrade(database, { objectStore: (name) => database.stores.get(name) });
-  assert.equal(PRACTICE_DATABASE_VERSION, 6);
+  assert.equal(PRACTICE_DATABASE_VERSION, 7);
   assert.deepEqual(database.createdStores, ["learningStates"]);
   for (const [name, snapshot] of before) {
     assert.equal(JSON.stringify(database.stores.get(name).snapshot()), snapshot, `${name} changed during PL16 upgrade`);
@@ -85,8 +85,8 @@ test("PL16 historical sessionSummary v8 reaches PL18 v11 with learning, retentio
   delete historical.evaluationSummary;
   const migration = migratePracticeRecord("sessionSummary", historical);
   assert.equal(migration.ok, true, JSON.stringify(migration.error));
-  assert.deepEqual(migration.steps, ["sessionSummary:8->9", "sessionSummary:9->10", "sessionSummary:10->11"]);
-  assert.equal(migration.value.recordVersion, 11);
+  assert.deepEqual(migration.steps, ["sessionSummary:8->9", "sessionSummary:9->10", "sessionSummary:10->11", "sessionSummary:11->12"]);
+  assert.equal(migration.value.recordVersion, 12);
   assert.equal(migration.value.learningEvidenceSummary, null);
   assert.equal(migration.value.retentionReviewSummary, null);
   assert.equal(migration.value.evaluationSummary, null);
@@ -147,11 +147,11 @@ test("PL16 reset clears learningStates with the rest of Practice data", async ()
 });
 
 test("PL16/PL17 record contracts remain intact inside PL18 DB6 / evaluation1 / session11", () => {
-  assert.equal(PRACTICE_DATABASE_VERSION, 6);
+  assert.equal(PRACTICE_DATABASE_VERSION, 7);
   assert.equal(PRACTICE_RECORD_VERSIONS.learningState, 1);
   assert.equal(PRACTICE_RECORD_VERSIONS.reviewItem, 3);
   assert.equal(PRACTICE_RECORD_VERSIONS.evaluationState, 1);
-  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 11);
+  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 12);
 });
 
 test("PL16 runtime modules import with zero storage/network/listener/timer side effects", async () => {

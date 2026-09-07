@@ -35,8 +35,8 @@ test("PL9 latency/error outputs remain intact inside PL18 foundation analysis v9
     traceMetadata: metadata,
     errorTrackerSnapshot: tracker.finalizeSnapshot(),
   });
-  assert.equal(PRACTICE_FOUNDATION_ANALYSIS_VERSION, 9);
-  assert.equal(foundation.version, 9);
+  assert.equal(PRACTICE_FOUNDATION_ANALYSIS_VERSION, 10);
+  assert.equal(foundation.version, 10);
   assert.ok(foundation.latency);
   assert.ok(foundation.errors);
   assert.ok(foundation.normalization);
@@ -73,7 +73,7 @@ test("PL9 fallback foundation analysis remains safe for PL8-style synthetic trac
     events,
     traceMetadata: { capacity: 20_000, retainedEventCount: 5, totalEventCount: 5, truncated: false },
   });
-  assert.equal(foundation.version, 9);
+  assert.equal(foundation.version, 10);
   assert.equal(foundation.errors.sessionSummary.errorEpisodeCount, 0);
   assert.equal(foundation.skills.version, 1);
   assert.equal(foundation.skills.summary, null);

@@ -7,5 +7,6 @@ export function createDefaultSessionSummary(options = {}) {
   return {
     ...summary,
     evaluationSummary: summary.evaluationSummary ?? null,
+    assessmentBinding: summary.assessmentBinding ?? null,
   };
 }

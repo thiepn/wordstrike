@@ -135,11 +135,13 @@ export function buildPracticeRetentionPlan({
   const canonicalSkillStats = skillStateKnown ? skillStats : [];
   const skillStatIds = skillDeletes(canonicalSkillStats, reviewItems);
   const prunedStats = new Set(skillStatIds);
+  const expiredCheckpointProfileIds = checkpoints
+    .filter((record) => time(record.expiresAt, Infinity) <= nowMs)
+    .map((record) => record.profileId);
   return Object.freeze({
     order: QUOTA_RECOVERY_STEPS,
-    activeSessionCheckpoints: checkpoints
-      .filter((record) => time(record.expiresAt, Infinity) <= nowMs)
-      .map((record) => record.profileId),
+    activeSessionCheckpoints: expiredCheckpointProfileIds,
+    checkpoints: expiredCheckpointProfileIds,
     sessionSummaries: sessionDeletes(sessionSummaries, nowMs, preserveSessionIds),
     reviewItems: reviewDeletes(reviewItems, canonicalSkillStats, prunedStats, { skillStateKnown }),
     skillStats: skillStatIds,

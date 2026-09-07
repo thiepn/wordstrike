@@ -189,3 +189,7 @@ The canonical transfer path is protected pool -> target-blind reservation -> opt
 The canonical benchmark path is protected benchmark corpus -> build-time form construction -> PL10 engineering matching -> versioned immutable suite -> profile-wide rotation -> claim/exposure tracking -> standardized session -> adjusted performance + uncertainty.
 
 Fresh benchmark is not repeated benchmark; cold transfer is not target-rich unseen practice; engineering-matched is not empirically equated; benchmark measurement is not latent ability; transfer absence is not transfer failure.
+
+## PL19 Full Assessment integration
+
+PL19 Full Assessment reserves the benchmark form during frozen-plan creation and, for Deep, precommits the cold-transfer unit before Block 1. Reservation never reveals content; PL18 claim-before-reveal, freshness, exposure, and integrity rules remain authoritative. A repeated benchmark remains nonstandard and a claimed interrupted transfer remains consumed.

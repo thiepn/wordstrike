@@ -17,11 +17,11 @@ const profileId = "practice-profile_123456789";
 const contextId = "practice-context_123456789";
 const sessionId = "practice-session_123456789";
 
-test("PL18 version envelope is DB6/evaluation1/session11/foundation9 with v1 framework contracts", () => {
-  assert.equal(PRACTICE_DATABASE_VERSION, 6);
+test("PL18 evaluation contracts remain intact inside the PL19 DB7/session12/foundation10 envelope", () => {
+  assert.equal(PRACTICE_DATABASE_VERSION, 7);
   assert.equal(PRACTICE_RECORD_VERSIONS.evaluationState, 1);
-  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 11);
-  assert.equal(PRACTICE_FOUNDATION_ANALYSIS_VERSION, 9);
+  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 12);
+  assert.equal(PRACTICE_FOUNDATION_ANALYSIS_VERSION, 10);
   assert.equal(PRACTICE_EVALUATION_FRAMEWORK_VERSION, 1);
   assert.equal(PRACTICE_EVALUATION_STATE_VERSION, 1);
   assert.equal(PRACTICE_EVALUATION_SELECTION_POLICY_VERSION, 1);
@@ -32,13 +32,15 @@ test("PL18 version envelope is DB6/evaluation1/session11/foundation9 with v1 fra
   assert.equal(PRACTICE_STORE_DEFINITIONS.evaluationStates.indexes[0].options.unique, true);
 });
 
-test("PL18 historical session v10 migrates to v11 with evaluationSummary null only", () => {
+test("PL18 historical session v10 evaluation migration remains null through the current PL19 v12 wrapper", () => {
   const current = createDefaultSessionSummary({ sessionId, profileId, contextId, experimentId: "full-assessment", now: () => new Date("2026-09-06T12:00:00Z") });
   const historical = { ...current, recordVersion: 10 };
   delete historical.evaluationSummary;
+  delete historical.assessmentBinding;
   const migrated = migratePracticeRecord("sessionSummary", historical);
   assert.equal(migrated.ok, true);
-  assert.equal(migrated.value.recordVersion, 11);
+  assert.equal(migrated.value.recordVersion, 12);
   assert.equal(migrated.value.evaluationSummary, null);
-  assert.deepEqual(migrated.steps.slice(-1), ["sessionSummary:10->11"]);
+  assert.equal(migrated.value.assessmentBinding, null);
+  assert.deepEqual(migrated.steps.slice(-2), ["sessionSummary:10->11", "sessionSummary:11->12"]);
 });

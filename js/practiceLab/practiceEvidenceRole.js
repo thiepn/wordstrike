@@ -1,6 +1,7 @@
 import { assertPracticeContentUse } from "./practiceCorpusUseGuard.js";
 import { resolvePracticeTypabilityRuntime } from "./practiceTypabilityRuntime.js";
 import { PRACTICE_EVIDENCE_ROLES } from "./practiceSkillEvidencePolicy.js";
+import { getPracticeTrustedAssessmentBinding } from "./practiceAssessmentRegistry.js";
 
 const PARTITION_TO_ROLE = Object.freeze({
   training: "training",
@@ -30,6 +31,15 @@ function looksCustom(contentPlan) {
   );
 }
 
+function resolveTrustedAssessmentDiagnostic(contentPlan) {
+  const binding = getPracticeTrustedAssessmentBinding(contentPlan);
+  if (!binding) return null;
+  if (binding.expectedExperimentId !== "full-assessment-diagnostic") return null;
+  if (!String(binding.blockId ?? "").startsWith("diagnostic-")) return null;
+  if ((contentPlan?.targetEntities?.length ?? 0) !== 0) return null;
+  return "diagnostic";
+}
+
 function resolveTrustedStaticPartition(contentPlan, language) {
   const runtime = resolvePracticeTypabilityRuntime({ language });
   if (!runtime || !contentPlan) return null;
@@ -50,6 +60,8 @@ function resolveTrustedStaticPartition(contentPlan, language) {
 
 export function resolvePracticeEvidenceRole({ contentPlan, context = null } = {}) {
   if (looksCustom(contentPlan)) return "custom";
+  const assessmentRole = resolveTrustedAssessmentDiagnostic(contentPlan);
+  if (assessmentRole) return assessmentRole;
   const language = baseLanguage(contentPlan?.metadata?.language ?? context?.dataLocale);
   const partition = resolveTrustedStaticPartition(contentPlan, language);
   const role = PARTITION_TO_ROLE[partition] ?? "unclassified";

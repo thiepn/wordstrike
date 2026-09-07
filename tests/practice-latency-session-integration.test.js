@@ -29,7 +29,7 @@ test("generic sessions persist canonical fluencySummary inside the current PL18 
   await engine.start();
   await typeCorrect(engine, harness, 26);
   const result = await engine.complete("manual-stop");
-  assert.equal(result.summary.recordVersion, 11);
+  assert.equal(result.summary.recordVersion, 12);
   assert.equal(result.summary.retentionReviewSummary, null);
   assert.equal(result.summary.evaluationSummary, null);
   assert.equal(result.summary.fluencySummary.calibration.status, "adaptive");
@@ -72,7 +72,7 @@ test("experiment analyzers receive immutable PL18 foundation v9 analysis but can
   await typeCorrect(engine, harness, 26);
   const result = await engine.complete("manual-stop");
   assert.ok(received?.foundationAnalysis?.latency);
-  assert.equal(received.foundationAnalysis.version, 9);
+  assert.equal(received.foundationAnalysis.version, 10);
   assert.equal(received.foundationAnalysis.retention.status, "not-requested");
   assert.equal(received.foundationAnalysis.evaluation.status, "not-requested");
   assert.ok(Object.isFrozen(received.foundationAnalysis));

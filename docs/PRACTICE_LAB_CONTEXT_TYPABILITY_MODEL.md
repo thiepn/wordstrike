@@ -656,3 +656,7 @@ Higher PL10 difficulty therefore raises the adjusted ability observation; easier
 PL13 does **not** use PL10 `relativeDifficultyPercentile` as a WPM correction. It also does not reinterpret PL10's heuristic difficulty index as user ability. The `0.03` coefficient and `±0.12` cap are PL13 engineering policy, isolated in the PL13 observation builder so PL18 can later replace/augment them with empirical passage calibration without redesigning PL10 or `abilityStates`.
 
 Historical PL10 wrapper-version statements above remain documentation of the PL10 phase at its introduction. Current database/session/foundation wrapper versions are documented in `PRACTICE_LAB_DATA_ARCHITECTURE.md`; the full downstream estimator contract is in `PRACTICE_LAB_ABILITY_ESTIMATION.md`.
+
+## PL19 Full Assessment integration
+
+PL19 Full Assessment Block 1 may contribute exactly one `cold-natural-text` PL13 ability observation when PL18 admits a fresh valid benchmark. The Deep cold-transfer block deliberately has `abilityChannel = null`, preventing two correlated ability observations from one assessment battery.

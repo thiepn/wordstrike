@@ -450,3 +450,7 @@ performanceMeasurementSummary: null
 No historical readiness, warm-up, or frontier is inferred or backfilled.
 
 Completed-session persistence accepts an optional `performanceStateDelta`. The existing session-summary duplicate check runs before the delta is merged. When present, the repository loads/creates the matching `(profileId, contextId)` performance state, merges the bounded delta, validates the complete record, and writes it inside the same atomic completed-session transaction as PL11 skill evidence, PL13 ability observation, review/profile changes, and checkpoint clearing. Identical retries therefore apply the performance delta once; conflicting reuse of a session ID applies it zero times.
+
+## PL19 Full Assessment integration
+
+PL19 advances Practice IndexedDB to v7 with `assessmentRuns` (assessmentRun v1), sessionSummary v12 with nullable `assessmentBinding`, and foundationAnalysis v10 with explicit `assessment`. Historical v11 sessions migrate with `assessmentBinding = null` and are never retroactively certified as assessment blocks.

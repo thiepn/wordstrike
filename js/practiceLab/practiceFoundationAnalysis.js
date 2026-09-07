@@ -9,8 +9,9 @@ import { analyzePracticeNormalization } from "./practiceNormalizationAnalysis.js
 import { PRACTICE_LEARNING_ANALYSIS_VERSION } from "./practiceLearningConstants.js";
 import { createEmptyPracticeRetentionAnalysis } from "./practiceRetentionAnalysis.js";
 import { createEmptyPracticeEvaluationAnalysis } from "./practiceEvaluationAnalysis.js";
+import { createNotRequestedPracticeAssessmentAnalysis } from "./practiceAssessmentAnalysis.js";
 
-export const PRACTICE_FOUNDATION_ANALYSIS_VERSION = 9;
+export const PRACTICE_FOUNDATION_ANALYSIS_VERSION = 10;
 
 const freezeDeep = (value) => {
   if (!value || typeof value !== "object" || Object.isFrozen(value)) return value;
@@ -85,6 +86,7 @@ export function buildPracticeFoundationAnalysis({
   learning = null,
   retention = null,
   evaluation = null,
+  assessment = null,
 } = {}) {
   const latency = analyzePracticeLatency({ events, traceMetadata, policy: latencyPolicy });
   const trackerSnapshot = errorTrackerSnapshot ?? buildFallbackTrackerSnapshot(events, traceMetadata, errorPolicy);
@@ -105,6 +107,7 @@ export function buildPracticeFoundationAnalysis({
     learning: learning ?? emptyLearningAnalysis(),
     retention: retention ?? createEmptyPracticeRetentionAnalysis(),
     evaluation: evaluation ?? createEmptyPracticeEvaluationAnalysis(),
+    assessment: assessment ?? createNotRequestedPracticeAssessmentAnalysis(),
   });
 }
 
@@ -119,3 +122,4 @@ export function withPracticePerformanceAnalysis(foundationAnalysis, performance)
 export function withPracticeLearningAnalysis(foundationAnalysis, learning) { return attach(foundationAnalysis, "learning", learning, "learning"); }
 export function withPracticeRetentionAnalysis(foundationAnalysis, retention) { return attach(foundationAnalysis, "retention", retention, "retention"); }
 export function withPracticeEvaluationAnalysis(foundationAnalysis, evaluation) { return attach(foundationAnalysis, "evaluation", evaluation, "evaluation"); }
+export function withPracticeAssessmentAnalysis(foundationAnalysis, assessment) { return attach(foundationAnalysis, "assessment", assessment, "assessment"); }

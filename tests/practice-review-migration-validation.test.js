@@ -56,11 +56,11 @@ function legacyReviewV2() {
 }
 
 test("PL17 review contracts remain intact inside the PL18 DB6/session11/foundation9 envelope", () => {
-  assert.equal(PRACTICE_DATABASE_VERSION, 6);
+  assert.equal(PRACTICE_DATABASE_VERSION, 7);
   assert.equal(PRACTICE_RECORD_VERSIONS.reviewItem, 3);
-  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 11);
+  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 12);
   assert.equal(PRACTICE_RECORD_VERSIONS.evaluationState, 1);
-  assert.equal(PRACTICE_FOUNDATION_ANALYSIS_VERSION, 9);
+  assert.equal(PRACTICE_FOUNDATION_ANALYSIS_VERSION, 10);
   assert.equal(PRACTICE_LIMITS.reviewItemBytes, 32 * 1024);
   assert.deepEqual([
     PRACTICE_REVIEW_MODEL_VERSION,
@@ -107,8 +107,8 @@ test("PL17 session v9 retention migration remains null through the current PL18 
   delete v9.evaluationSummary;
   const migrated = migratePracticeRecord("sessionSummary", v9);
   assert.equal(migrated.ok, true, JSON.stringify(migrated.error));
-  assert.deepEqual(migrated.steps, ["sessionSummary:9->10", "sessionSummary:10->11"]);
-  assert.equal(migrated.value.recordVersion, 11);
+  assert.deepEqual(migrated.steps, ["sessionSummary:9->10", "sessionSummary:10->11", "sessionSummary:11->12"]);
+  assert.equal(migrated.value.recordVersion, 12);
   assert.equal(migrated.value.retentionReviewSummary, null);
   assert.equal(migrated.value.evaluationSummary, null);
   assert.equal(validateSessionSummary(migrated.value).valid, true);
@@ -149,7 +149,7 @@ test("PL17 review validation enforces bounded family/probe history and rejects r
 
 test("PL17 retention component remains explicit inside PL18 foundation analysis v9", () => {
   const foundation = buildPracticeFoundationAnalysis({ events: [], traceMetadata: { truncated: false } });
-  assert.equal(foundation.version, 9);
+  assert.equal(foundation.version, 10);
   assert.equal(foundation.retention.version, 1);
   assert.equal(foundation.retention.measurementKind, null);
   assert.equal(foundation.retention.status, "not-requested");
