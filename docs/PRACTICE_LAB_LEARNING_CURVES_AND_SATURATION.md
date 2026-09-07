@@ -1307,3 +1307,11 @@ Corrections/retries do not create additional dose; other keys/bigrams/trigrams/w
 PL21's explicit Baseline/Check result is same-session training evidence only. It does not replace the generic PL16 acquisition observation, does not add transfer evidence, and is not named `learningGain`. PL21 recommendations may consume the canonical PL16 saturation status to de-emphasize `likely`/`supported` saturated keys; Weak Keys does not write or redefine saturation state.
 
 See `PRACTICE_LAB_WEAK_KEYS.md` for the versioned intervention contract.
+
+## PL22 — Problem Words acquisition dose
+
+PL22 `problem-words` is a direct word-acquisition intervention. Its v1 standard session contributes exactly **15 direct target word opportunities = 1.0 PL16 word acquisition dose unit** for the single selected PL11 `word` entity. Incidental keys, bigrams, trigrams, and other words receive no direct PL22 acquisition dose.
+
+For trusted PL20–PL22 intervention objects, PL16 may consume the immutable explicit `entry-probe` and `exit-probe` phase bounds for entry/exit acquisition semantics. This privilege is object-bound by the intervention trust layer; serialized configuration or metadata alone cannot claim it. Generic Practice sessions continue to use the existing fallback phase semantics.
+
+PL22 itself does not decide long-term learning or saturation. PL16 remains the canonical owner of cumulative acquisition dose, longitudinal curves, marginal gain, saturation, and protected transfer observations.
