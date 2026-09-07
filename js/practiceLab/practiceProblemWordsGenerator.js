@@ -317,7 +317,7 @@ export function buildPracticeProblemWordsContentPlan({ plan, contentItems = [], 
       const text = unitText(unit, byId);
       if (pieces.length) { pieces.push(UNIT_SEPARATOR); cursor += segment(UNIT_SEPARATOR).length; }
       const startIndex = cursor; const analysis = analyzePracticeText({ text, language: plan.language, segmenter });
-      const localWords = (analysis.words ?? []).filter((word) => word.lexicalKey === plan.target.entityKey && word.surface === plan.target.entityKey);
+      const localWords = (analysis.words ?? []).filter((word) => word.lexicalKey === plan.target.entityKey && word.surfaceText === plan.target.entityKey);
       if (localWords.length !== unit.targetOpportunityCount) throw createPracticeProblemWordsError(PRACTICE_PROBLEM_WORDS_ERRORS.CONTENT_HASH_MISMATCH, "Problem Words lexical target count changed while materializing the immutable plan", { candidateId: unit.candidateId });
       const absoluteRanges = localWords.map((word) => ({ startIndex: startIndex + word.startIndex, endIndex: startIndex + word.endIndex }));
       wordRanges.push(...absoluteRanges); pieces.push(text); cursor += segment(text).length;
