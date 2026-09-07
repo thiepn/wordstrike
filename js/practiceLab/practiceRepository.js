@@ -128,7 +128,8 @@ export function createPracticeRepository(options = {}) {
       let run = await transaction.get("assessmentRuns", assessmentBlockDelta.assessmentRunId);
       if (!run || run.profileId !== sessionSummary.profileId || run.contextId !== sessionSummary.contextId) throw fail(PRACTICE_STORAGE_ERROR_CODES.VALIDATION_FAILED, "Assessment parent run is missing or mismatched");
       run = reconcilePracticeAssessmentRunExpiry(run, { now });
-      if (run.status !== "active") throw fail(PRACTICE_STORAGE_ERROR_CODES.VALIDATION_FAILED, "Assessment parent run is no longer active", { assessmentRunId: run.assessmentRunId, status: run.status });
+      const parentExpired = run.status === "expired";
+      if (run.status !== "active" && !parentExpired) throw fail(PRACTICE_STORAGE_ERROR_CODES.VALIDATION_FAILED, "Assessment parent run is no longer active", { assessmentRunId: run.assessmentRunId, status: run.status });
 
       const mergedStats = [];
       for (const delta of skillEvidenceDeltas) {
@@ -172,17 +173,33 @@ export function createPracticeRepository(options = {}) {
         mergedLearning.push(merged);
       }
 
-      run = mergePracticeAssessmentBlockDelta(run, assessmentBlockDelta);
+      if (parentExpired) {
+        const blockIndex = run.blocks.findIndex((block) => block.blockId === assessmentBlockDelta.blockId && block.ordinal === assessmentBlockDelta.blockOrdinal);
+        const currentBlock = blockIndex >= 0 ? run.blocks[blockIndex] : null;
+        if (!currentBlock || currentBlock.status !== "active" || currentBlock.childSessionId !== sessionSummary.sessionId) throw fail(PRACTICE_STORAGE_ERROR_CODES.VALIDATION_FAILED, "Expired assessment parent block identity mismatch");
+        const expiredRun = JSON.parse(JSON.stringify(run));
+        expiredRun.blocks[blockIndex].status = "invalid";
+        expiredRun.blocks[blockIndex].completedAt = assessmentBlockDelta.completedAtUtc;
+        expiredRun.blocks[blockIndex].result = { ...assessmentBlockDelta, status: "invalid", reason: "parent-expired" };
+        expiredRun.progress.terminalBlockCount += 1;
+        expiredRun.progress.currentBlockIndex = Math.min(blockIndex + 1, expiredRun.blocks.length);
+        if (expiredRun.integrityStatus !== "invalid") expiredRun.integrityStatus = "partial";
+        run = expiredRun;
+      } else {
+        run = mergePracticeAssessmentBlockDelta(run, assessmentBlockDelta);
+      }
       const runValidation = validatePracticeAssessmentRun(run);
       if (!runValidation.valid) throw fail(PRACTICE_STORAGE_ERROR_CODES.VALIDATION_FAILED, "Merged assessment run failed validation", { cause: runValidation.errors });
-      for (const stat of mergedStats) await transaction.put("skillStats", stat);
-      if (mergedAbility) await transaction.put("abilityStates", mergedAbility);
-      for (const learning of mergedLearning) await transaction.put("learningStates", learning);
+      if (!parentExpired) {
+        for (const stat of mergedStats) await transaction.put("skillStats", stat);
+        if (mergedAbility) await transaction.put("abilityStates", mergedAbility);
+        for (const learning of mergedLearning) await transaction.put("learningStates", learning);
+      }
       if (updatedProfileSummary) await transaction.put("profiles", updatedProfileSummary);
       await transaction.put("assessmentRuns", run);
       await transaction.put("sessionSummaries", sessionSummary);
       if (clearCheckpoint) await transaction.delete("activeSessionCheckpoints", sessionSummary.profileId);
-      return { committed: true, idempotent: false, assessmentUpdated: true, mergedSkillStatCount: mergedStats.length, learningUpdated: mergedLearning.length, abilityUpdated: Boolean(mergedAbility) };
+      return { committed: true, idempotent: false, assessmentUpdated: true, assessmentInvalidatedByExpiry: parentExpired, mergedSkillStatCount: parentExpired ? 0 : mergedStats.length, learningUpdated: parentExpired ? 0 : mergedLearning.length, abilityUpdated: parentExpired ? false : Boolean(mergedAbility) };
     });
   };
 

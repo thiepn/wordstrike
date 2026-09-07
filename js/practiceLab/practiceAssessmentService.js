@@ -285,10 +285,15 @@ export function createPracticeAssessmentService({
   const reconcileAssessmentState = async ({ profileId, contextId } = {}) => {
     const runs = await repository.listAssessmentRuns(profileId, { contextId });
     if (!runs.length) return freezeDeep({ state: "never-started", latestCompletedAt: null, assessmentRunId: null });
-    const compatible = runs
-      .filter((run) => run.status === "completed" && run.report?.reportStatus === "complete" && run.protocolVersion === PRACTICE_ASSESSMENT_PROTOCOL_VERSION)
+    const completed = runs
+      .filter((run) => run.status === "completed" && run.report?.reportStatus === "complete")
       .sort((a, b) => String(b.completedAt ?? "").localeCompare(String(a.completedAt ?? "")));
-    if (!compatible.length) return freezeDeep({ state: "incomplete", latestCompletedAt: null, assessmentRunId: runs[0]?.assessmentRunId ?? null });
+    if (!completed.length) return freezeDeep({ state: "incomplete", latestCompletedAt: null, assessmentRunId: runs[0]?.assessmentRunId ?? null });
+    const compatible = completed.filter((run) => run.protocolVersion === PRACTICE_ASSESSMENT_PROTOCOL_VERSION);
+    if (!compatible.length) {
+      const latestCompleted = completed[0];
+      return freezeDeep({ state: "stale", latestCompletedAt: latestCompleted.completedAt, assessmentRunId: latestCompleted.assessmentRunId, reason: "protocol-outdated" });
+    }
     const latest = compatible[0];
     const ageMs = nowDate(now).getTime() - Date.parse(latest.completedAt);
     return freezeDeep({
