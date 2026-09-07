@@ -1,7 +1,10 @@
 import { createPracticeLabController as createPracticeLabControllerV21 } from "./practiceLabControllerRuntime.js";
-import { createPracticeLabRendererV22 } from "./practiceLabRendererV22.js";
+import { renderPracticeLabV21 } from "./practiceLabRendererV21.js";
+import { renderPracticeProblemWordsDetail } from "./practiceLabRendererV22.js";
+import { buildPracticeProblemWordsDetailViewModel } from "./practiceProblemWordsUi.js";
 import { registerPracticeProblemWordsExperiment } from "./practiceProblemWordsExperiment.js";
 import { createDefaultPracticeProblemWordsUiState, normalizePracticeProblemWordsManualInput, normalizePracticeProblemWordsUiState } from "./practiceProblemWordsUi.js";
+import { PRACTICE_LAB_ROUTES } from "./practiceLabRoutes.js";
 
 const PROBLEM_WORDS_ID = "problem-words";
 const LIMITED_CODES = new Set(["INSUFFICIENT_WORD_CONTEXTS", "INSUFFICIENT_TARGET_FAMILIES", "INSUFFICIENT_NEUTRAL_CONTENT", "INSUFFICIENT_PROBE_MATCH"]);
@@ -12,10 +15,17 @@ export function createPracticeLabController(options = {}) {
   registerPracticeProblemWordsExperiment(experimentRegistry);
   let state = createDefaultPracticeProblemWordsUiState();
   let sessionHost = null; let mounted = false; let lastView = null; let inspectEpoch = 0; let prepareEpoch = 0; let recommendationEpoch = 0;
-  const renderV22 = createPracticeLabRendererV22({ getProblemWordsState: () => state });
-  const renderer = (renderRoot, view, rendererOptions) => { lastView = view; return renderV22(renderRoot, view, rendererOptions); };
+  const externalRenderer = typeof options.renderer === "function" ? options.renderer : null;
+  const renderer = (renderRoot, view, rendererOptions = {}) => {
+    lastView = view;
+    if (view?.kind === "experiment-detail" && view?.title === "Problem Words") {
+      const detail = buildPracticeProblemWordsDetailViewModel({ entry: view, resolved: { runnable: view.runnable }, state });
+      return externalRenderer ? externalRenderer(renderRoot, detail, rendererOptions) : renderPracticeProblemWordsDetail(renderRoot, detail, rendererOptions);
+    }
+    return externalRenderer ? externalRenderer(renderRoot, view, rendererOptions) : renderPracticeLabV21(renderRoot, view, rendererOptions);
+  };
   const base = createPracticeLabControllerV21({ ...options, renderer });
-  const isProblemRoute = () => base.getSnapshot()?.route?.name === "experiment-detail" && base.getSnapshot()?.route?.params?.experimentId === PROBLEM_WORDS_ID;
+  const isProblemRoute = () => base.getSnapshot()?.route?.name === PRACTICE_LAB_ROUTES.EXPERIMENT_DETAIL && base.getSnapshot()?.route?.params?.experimentId === PROBLEM_WORDS_ID;
   const rerender = (focusSelector = null) => { if (mounted && !sessionHost && isProblemRoute() && lastView) renderer(root, lastView, { focusSelector }); };
   const setState = (patch, focusSelector = null) => { state = normalizePracticeProblemWordsUiState({ ...state, ...patch }); rerender(focusSelector); };
 
@@ -77,7 +87,7 @@ export function createPracticeLabController(options = {}) {
     else if (action === "start-problem-words") { event.stopPropagation(); const value = root.querySelector?.("[data-problem-word-target]")?.value ?? state.targetValue; void prepare({ entityKey: value, targetSource: state.selectedSource ?? "manual" }); }
   };
   const input = (event) => { const target = event.target?.closest?.("[data-problem-word-target]"); if (!target || !root?.contains?.(target)) return; void inspect({ entityKey: target.value, targetSource: "manual" }); };
-  const afterRoute = () => { if (isProblemRoute()) { if (state.recommendationStatus === "idle") void loadRecommendations(); } };
+  const afterRoute = () => { if (isProblemRoute() && state.recommendationStatus === "idle") void loadRecommendations(); };
 
   return Object.freeze({
     mount(route) { mounted = true; root?.addEventListener?.("click", click, true); root?.addEventListener?.("input", input, true); const result = base.mount(route); queueMicrotask(afterRoute); return result; },
