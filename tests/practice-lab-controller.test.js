@@ -15,7 +15,7 @@ function fakeRoot() {
   };
 }
 
-test("controller mounts deterministically, navigates with bounded history, and unmounts its one listener", () => {
+test("controller mounts deterministically, navigates with bounded history, and unmounts its delegated listeners", () => {
   const root = fakeRoot();
   const gate = createPracticeFeatureGate({ developerMode: true });
   const registry = createPracticeExperimentRegistry({ featureGate: gate });
@@ -23,7 +23,7 @@ test("controller mounts deterministically, navigates with bounded history, and u
   let exits = 0;
   const controller = createPracticeLabController({ root, featureGate: gate, experimentRegistry: registry, appNavigation: { exit: () => { exits += 1; } }, renderer: (_root, view) => rendered.push(view.kind) });
   controller.mount();
-  assert.equal(root.listeners.size, 1);
+  assert.deepEqual([...root.listeners.keys()].sort(), ["click", "input"]);
   assert.equal(controller.getSnapshot().route.name, "home");
   controller.navigate(createPracticeLabRoute(PRACTICE_LAB_ROUTES.SKILL_MAP));
   assert.equal(controller.getSnapshot().route.name, "skill-map");
