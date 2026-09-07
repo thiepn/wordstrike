@@ -275,6 +275,51 @@ function buildProbeBundles(candidates, { sessionId, entityKey, policy, compositi
   return Object.freeze(bundles);
 }
 
+function probeUnitSourceIds(unit, directKey, sourceKey) {
+  const direct = unit?.[directKey];
+  if (typeof direct === "string" && direct) return [direct];
+  return Array.isArray(unit?.[sourceKey]) ? unit[sourceKey].filter(Boolean) : [];
+}
+
+function candidateIsDisjointFromProbe(candidate, probe) {
+  const probeFamilies = new Set((probe?.units ?? []).flatMap((unit) => probeUnitSourceIds(unit, "familyId", "sourceFamilyIds")));
+  const probeContents = new Set((probe?.units ?? []).flatMap((unit) => probeUnitSourceIds(unit, "contentId", "sourceContentIds")));
+  const candidateFamilies = probeUnitSourceIds(candidate, "familyId", "sourceFamilyIds");
+  const candidateContents = probeUnitSourceIds(candidate, "contentId", "sourceContentIds");
+  if (!candidateFamilies.length || !candidateContents.length) return false;
+  return candidateFamilies.every((id) => !probeFamilies.has(id))
+    && candidateContents.every((id) => !probeContents.has(id));
+}
+
+function probePairTieKey(pair) {
+  return `${pair?.entry?.probeId ?? ""}|${pair?.exit?.probeId ?? ""}`;
+}
+
+function selectConstructedProbePair(candidates, options) {
+  const entryBundles = buildProbeBundles(candidates, options);
+  let best = null;
+  for (const entry of entryBundles) {
+    const disjointCandidates = candidates.filter((candidate) => candidateIsDisjointFromProbe(candidate, entry));
+    if (!disjointCandidates.length) continue;
+    const exitBundles = buildProbeBundles(disjointCandidates, {
+      ...options,
+      salt: `${options.salt}:exit:${entry.probeId}`,
+    });
+    const pair = selectPracticeWeakKeysProbePair({
+      entryCandidates: [entry],
+      exitCandidates: exitBundles,
+      policy: options.policy,
+    });
+    if (!pair) continue;
+    if (!best
+      || pair.match.score < best.match.score
+      || (pair.match.score === best.match.score && probePairTieKey(pair).localeCompare(probePairTieKey(best)) < 0)) {
+      best = pair;
+    }
+  }
+  return best;
+}
+
 async function buildNeutralMaterial({ targetIndex, contentItems, targetKey, language, policy, annotationCache }) {
   const natural = [];
   const wordsByIdentity = new Map();
@@ -378,9 +423,15 @@ async function composeWeakKeysPhases({ sessionId, context, target, targetIndex, 
   if (!naturalCandidates.length && !wordCandidates.length) throw createPracticeWeakKeysError(PRACTICE_WEAK_KEYS_ERRORS.INSUFFICIENT_KEY_CONTENT, "Weak Keys has no approved indexed target content");
 
   const generatedProbePool = generatedTargetPool(wordCandidates, 8, { compositionMode: "generated-word-sequence", salt: "probe" });
-  const naturalProbeBundles = buildProbeBundles(naturalCandidates, { sessionId, entityKey: target.entityKey, policy, compositionMode: "natural-text-bundle", salt: "natural-probe" });
+  const naturalProbePair = selectConstructedProbePair(naturalCandidates, {
+    sessionId,
+    entityKey: target.entityKey,
+    policy,
+    compositionMode: "natural-text-bundle",
+    salt: "natural-probe",
+  });
   const availableDistinctWords = new Set(wordCandidates.map((entry) => entry.wordKey)).size;
-  const preferredGeneratedProbeBundles = buildProbeBundles(generatedProbePool, {
+  const preferredGeneratedProbePair = selectConstructedProbePair(generatedProbePool, {
     sessionId,
     entityKey: target.entityKey,
     policy,
@@ -388,7 +439,7 @@ async function composeWeakKeysPhases({ sessionId, context, target, targetIndex, 
     salt: "generated-probe-preferred",
     requiredDistinctLexical: availableDistinctWords >= policy.probes.preferredGeneratedDistinctLexicalItems ? policy.probes.preferredGeneratedDistinctLexicalItems : 0,
   });
-  const fallbackGeneratedProbeBundles = buildProbeBundles(generatedProbePool, {
+  const fallbackGeneratedProbePair = selectConstructedProbePair(generatedProbePool, {
     sessionId,
     entityKey: target.entityKey,
     policy,
@@ -396,9 +447,7 @@ async function composeWeakKeysPhases({ sessionId, context, target, targetIndex, 
     salt: "generated-probe-fallback",
     requiredDistinctLexical: 0,
   });
-  const probePair = selectPracticeWeakKeysProbePair({ entryCandidates: naturalProbeBundles, exitCandidates: naturalProbeBundles, policy })
-    ?? selectPracticeWeakKeysProbePair({ entryCandidates: preferredGeneratedProbeBundles, exitCandidates: preferredGeneratedProbeBundles, policy })
-    ?? selectPracticeWeakKeysProbePair({ entryCandidates: fallbackGeneratedProbeBundles, exitCandidates: fallbackGeneratedProbeBundles, policy });
+  const probePair = naturalProbePair ?? preferredGeneratedProbePair ?? fallbackGeneratedProbePair;
   if (!probePair) throw createPracticeWeakKeysError(PRACTICE_WEAK_KEYS_ERRORS.INSUFFICIENT_PROBE_MATCH, "Weak Keys could not construct responsible family-disjoint matched Baseline/Check probes");
 
   const probeFamilies = new Set([...probePair.entry.units, ...probePair.exit.units].flatMap((unit) => unit.familyId ? [unit.familyId] : unit.sourceFamilyIds ?? []));
