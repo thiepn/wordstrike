@@ -236,3 +236,13 @@ PL8 consumes user observations independently. PL10 may consume PL7 structural fa
 PL10 reuses PL7's canonical grapheme/word segmentation and structural occurrence context rather than creating a competing tokenizer. PL10 may derive coarse context bands and static text-difficulty artifacts from PL6/PL7 outputs, but **only the PL6 training partition fits the typability reference**. Transfer, benchmark, diagnostic and research-holdout data do not fit PL10 medians/scales/weights/percentile reference. Research holdout is not normally scored.
 
 PL7 occurrence/coverage counts remain corpus-local structural counts and are **not** reinterpreted as general-language frequency. PL10 frequency features require a separately governed frequency reference; none exists in the current release. Static PL10 artifacts bind to the exact PL6 corpus checksum and PL7 `indexChecksum`.
+
+## PL21 Weak Keys consumer
+
+PL21 is an explicit **training `key → words/content` consumer** of this architecture. It resolves one selected PL11 `key` through the training reverse target index, then loads only the target/word/content annotation shards needed to test feasibility and compose the fixed Weak Keys plan.
+
+Weak Keys does not perform a runtime whole-corpus target scan and does not use `content.includes(key)` as a selection fallback. Target opportunity counts, lexical provenance, and word-position information are verified against PL7 annotations. Natural source records must remain approved training items with matching content/family/hash bindings; stale annotations are rejected.
+
+Neutral Mix material is also training-derived. Natural neutral candidates are accepted only when their canonical annotations contain zero selected-key occurrences. Generated neutral word sequences use approved training-derived lexical candidates whose indexed/annotated source occurrences contain zero selected-key opportunities.
+
+The protected-partition rule remains unchanged: Weak Keys performs **zero target-driven lookups** against transfer, benchmark, diagnostic, or research-holdout material. Sparse key coverage therefore produces `limited-content` instead of a protected fallback. See `PRACTICE_LAB_WEAK_KEYS.md` for the complete PL21 intervention contract.
