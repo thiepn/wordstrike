@@ -42,11 +42,12 @@ export function createPracticeLabController(options = {}) {
     if (runtimePromise) return runtimePromise;
     runtimePromise = Promise.all([
       import("./practiceExperimentRegistryRuntime.js"),
+      import("./practiceLabControllerRuntime.js"),
       import("./practiceLabControllerRuntimeV22.js"),
       import("./practiceCombinationRepairExperiment.js"),
       import("./practiceWeakKeysExperiment.js"),
       import("./practiceProblemWordsExperiment.js"),
-    ]).then(([registryModule, controllerModule, combinationRepairModule, weakKeysModule, problemWordsModule]) => {
+    ]).then(([registryModule, _canonicalControllerModule, controllerModule, combinationRepairModule, weakKeysModule, problemWordsModule]) => {
       const lazyRegistry = getPracticeRegistryLazyState(experimentRegistry);
       if (lazyRegistry?.destroyed) return null;
 
