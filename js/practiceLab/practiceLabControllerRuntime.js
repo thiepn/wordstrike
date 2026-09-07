@@ -87,7 +87,7 @@ export function createPracticeLabController({
   const prepareCombinationRepair = async ({ entityType, entityKey, targetSource = "manual" }) => {
     const epoch = ++combinationPrepareEpoch;
     setCombinationState({ entityType, targetValue: entityKey, selectedSource: targetSource, status: "preparing", reasonCode: null, message: null }, "combination-prepare");
-    const registration = experimentRegistry.getRegistration(COM BINATION_REPAIR_ID);
+    const registration = experimentRegistry.getRegistration(COMBINATION_REPAIR_ID);
     if (!registration?.setupFactory || !registration?.sessionFactory) {
       if (epoch !== combinationPrepareEpoch) return;
       setCombinationState({ status: "unavailable", reasonCode: "TRAINING_CORPUS_NOT_READY" }, "combination-unavailable");
