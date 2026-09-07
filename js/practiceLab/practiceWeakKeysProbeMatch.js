@@ -22,13 +22,17 @@ const list = (value) => Array.isArray(value) ? value : value == null ? [] : [val
 
 function familySet(probe) {
   const result = new Set();
-  for (const unit of probe?.units ?? []) for (const id of list(unit.familyIds ?? unit.familyId)) if (id) result.add(id);
+  for (const unit of probe?.units ?? []) {
+    for (const id of list(unit.familyIds ?? unit.familyId ?? unit.sourceFamilyIds)) if (id) result.add(id);
+  }
   return result;
 }
 
 function contentSet(probe) {
   const result = new Set();
-  for (const unit of probe?.units ?? []) for (const id of list(unit.contentIds ?? unit.contentId)) if (id) result.add(id);
+  for (const unit of probe?.units ?? []) {
+    for (const id of list(unit.contentIds ?? unit.contentId ?? unit.sourceContentIds)) if (id) result.add(id);
+  }
   return result;
 }
 
