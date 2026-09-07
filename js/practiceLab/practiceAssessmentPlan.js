@@ -27,6 +27,8 @@ export function validatePracticeAssessmentPlan(plan) {
     const actual = plan.blocks[i];
     if (actual.blockId !== expected.blockId || actual.ordinal !== expected.ordinal || actual.durationMs !== expected.durationMs || actual.blockKind !== expected.blockKind) errors.push({ path: `blocks.${i}`, code: "CANONICAL_BLOCK_MISMATCH" });
     if (Array.isArray(actual.targetEntities) && actual.targetEntities.length) errors.push({ path: `blocks.${i}.targetEntities`, code: "PERSONAL_TARGETS_FORBIDDEN" });
+    if (actual.blockKind === "benchmark" && (!actual.evaluationArtifactId || !Number.isInteger(actual.evaluationArtifactVersion))) errors.push({ path: `blocks.${i}.evaluationArtifactId`, code: "PROTECTED_ARTIFACT_REQUIRED" });
+    if (actual.blockKind === "cold-transfer" && (!actual.evaluationArtifactId || !Number.isInteger(actual.evaluationArtifactVersion))) errors.push({ path: `blocks.${i}.evaluationArtifactId`, code: "PROTECTED_ARTIFACT_REQUIRED" });
     for (const forbidden of ["entityKey", "skillStatId", "limiterId", "masteryStage", "learningStateId", "text", "content"]) if (Object.hasOwn(actual, forbidden)) errors.push({ path: `blocks.${i}.${forbidden}`, code: "PERSONAL_OR_CONTENT_FIELD_FORBIDDEN" });
   }
   const expectedHash = hashPracticeContent(stablePlanPayload({ ...plan, planHash: undefined }));
@@ -62,14 +64,20 @@ export async function buildPracticeAssessmentPlan({
   const blocks = getPracticeAssessmentBlocksForDepth(depth).map((block) => {
     let diagnosticFormId = null;
     let evaluationReservationId = null;
+    let evaluationArtifactId = null;
+    let evaluationArtifactVersion = null;
     let expectedPartition = "diagnostic";
     let expectedExperimentId = PRACTICE_ASSESSMENT_EXPERIMENT_IDS.diagnostic;
     if (block.blockKind === "benchmark") {
       evaluationReservationId = benchmarkReservation?.reservation?.reservationId ?? benchmarkReservation?.state?.activeReservations?.at?.(-1)?.reservationId ?? null;
+      evaluationArtifactId = benchmarkSuite?.suiteId ?? null;
+      evaluationArtifactVersion = benchmarkSuite?.suiteVersion ?? null;
       expectedPartition = "benchmark";
       expectedExperimentId = PRACTICE_ASSESSMENT_EXPERIMENT_IDS.benchmark;
     } else if (block.blockKind === "cold-transfer") {
       evaluationReservationId = transferReservation?.reservation?.reservationId ?? transferReservation?.state?.activeReservations?.at?.(-1)?.reservationId ?? null;
+      evaluationArtifactId = transferPool?.poolId ?? null;
+      evaluationArtifactVersion = transferPool?.poolVersion ?? null;
       expectedPartition = "transfer";
       expectedExperimentId = PRACTICE_ASSESSMENT_EXPERIMENT_IDS.coldTransfer;
     } else {
@@ -84,6 +92,8 @@ export async function buildPracticeAssessmentPlan({
       diagnosticFormSetId: block.blockKind === "diagnostic" ? `${language}:${block.blockId}:v1` : null,
       diagnosticFormId,
       evaluationReservationId,
+      evaluationArtifactId,
+      evaluationArtifactVersion,
       expectedPartition,
       expectedExperimentId,
       targetEntities: Object.freeze([]),
