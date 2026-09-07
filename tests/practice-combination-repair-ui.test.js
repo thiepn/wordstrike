@@ -12,6 +12,9 @@ import {
 import { createPracticeLabRoute, PRACTICE_LAB_ROUTES } from "../js/practiceLab/practiceLabRoutes.js";
 
 const root = () => ({ innerHTML: "", querySelector: () => null });
+const renderedPhaseText = (html) => [...String(html).matchAll(/data-char-index="\d+">([^<]*)<\/span>/g)]
+  .map((match) => match[1].replaceAll("&nbsp;", " ").replaceAll("&amp;", "&").replaceAll("&lt;", "<").replaceAll("&gt;", ">"))
+  .join("");
 
 function setup() {
   const gate = createPracticeFeatureGate({ developerMode: true });
@@ -93,7 +96,7 @@ test("active Combination Repair exposes only the current phase and no live aggre
       metrics: { wpm: 88, accuracy: 99.9 },
     },
   });
-  assert.match(target.innerHTML, /BASETH/);
+  assert.equal(renderedPhaseText(target.innerHTML), "BASETH");
   assert.doesNotMatch(target.innerHTML, /FOCUSTH/);
   assert.doesNotMatch(target.innerHTML, /CHECKSECRETTH/);
   assert.doesNotMatch(target.innerHTML, />WPM</i);
