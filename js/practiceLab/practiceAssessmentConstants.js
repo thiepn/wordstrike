@@ -92,6 +92,7 @@ export function getPracticeAssessmentDurationMs(depth) {
 
 export function getPracticeAssessmentMinimumFormGraphemes(durationMs) {
   if (!Number.isFinite(durationMs) || durationMs <= 0) return null;
-  const minutes = durationMs / 60_000;
-  return Math.ceil(minutes * PRACTICE_ASSESSMENT_LIMITS.engineeringCapacityWpm * 5 * PRACTICE_ASSESSMENT_LIMITS.engineeringCapacityBuffer);
+  // 400 WPM * 5 graphemes/word * 110%, expressed as an integer ratio so
+  // canonical 60/90/120-second blocks cannot drift upward from IEEE-754 noise.
+  return Math.ceil((durationMs * PRACTICE_ASSESSMENT_LIMITS.engineeringCapacityWpm * 5 * 11) / (60_000 * 10));
 }
