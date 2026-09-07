@@ -14,6 +14,10 @@ function candidateIdentity(candidate) {
   return String(candidate?.candidateId ?? candidate?.generatedUnitId ?? candidate?.contentId ?? candidate?.wordKey ?? candidate?.lexicalKey ?? "");
 }
 
+function primaryLexicalIdentity(candidate) {
+  return String(candidate?.wordKeys?.[0] ?? candidate?.lexicalKeys?.[0] ?? candidate?.lexicalKey ?? candidateIdentity(candidate));
+}
+
 export function practiceWeakKeysCandidateOrderKey(candidate, {
   sessionId,
   entityKey,
@@ -134,6 +138,36 @@ export function selectPracticeWeakKeysExactQuota(candidates, quota, options = {}
     metrics: solutionMetrics(units, options.preferredTypabilityRange),
     solutionHash: hashPracticeContent(solutionTieKey(units, orderKeys)),
   });
+}
+
+export function orderPracticeWeakKeysLexicalCoverage(units, options = {}) {
+  const source = Array.isArray(units) ? units : [];
+  if (source.length < 2) return Object.freeze([...source]);
+  const groups = new Map();
+  for (const unit of source) {
+    const key = primaryLexicalIdentity(unit);
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(unit);
+  }
+  const lexicalKeys = [...groups.keys()].sort((a, b) => {
+    const ah = hashPracticeContent(`${options.sessionId ?? ""}|${options.entityKey ?? ""}|${options.salt ?? "lexical-coverage"}|${a}`);
+    const bh = hashPracticeContent(`${options.sessionId ?? ""}|${options.entityKey ?? ""}|${options.salt ?? "lexical-coverage"}|${b}`);
+    return ah.localeCompare(bh) || a.localeCompare(b);
+  });
+  for (const key of lexicalKeys) {
+    groups.get(key).sort((a, b) => practiceWeakKeysCandidateOrderKey(a, options).localeCompare(practiceWeakKeysCandidateOrderKey(b, options)) || candidateIdentity(a).localeCompare(candidateIdentity(b)));
+  }
+  const ordered = [];
+  let remaining = source.length;
+  while (remaining > 0) {
+    for (const key of lexicalKeys) {
+      const queue = groups.get(key);
+      if (!queue.length) continue;
+      ordered.push(queue.shift());
+      remaining -= 1;
+    }
+  }
+  return Object.freeze(ordered);
 }
 
 export function summarizePracticeWeakKeysSolution(units = []) {
