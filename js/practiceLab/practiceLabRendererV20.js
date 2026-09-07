@@ -13,7 +13,10 @@ function statusNotice(view) {
 }
 
 function recommendationList(view) {
-  if (!view.recommendations.length) return '<p class="practice-lab-muted">No evidence-based recommendations are loaded in this shell yet. Manual targeting remains available and does not require an assessment.</p>';
+  if (view.recommendationStatus === "loading") return '<p class="practice-lab-muted" role="status">Loading evidence-based recommendations…</p>';
+  if (view.recommendationStatus === "unavailable") return `<div class="practice-lab-notice" role="status"><strong>Recommendations unavailable.</strong><p>Manual targeting still works and does not require an assessment.${view.recommendationErrorCode ? ` Diagnostic: ${escapeHtml(view.recommendationErrorCode)}.` : ""}</p></div>`;
+  if (view.recommendationStatus === "no-evidence") return '<p class="practice-lab-muted">No current bigram or trigram weakness evidence is strong enough to recommend a target. Manual targeting remains available.</p>';
+  if (!view.recommendations.length) return '<p class="practice-lab-muted">Recommendations load from existing Practice evidence when this screen opens. Manual targeting remains available and does not require an assessment.</p>';
   return `<div class="practice-combination-recommendations">${view.recommendations.map((item) => `<button type="button" data-practice-action="choose-combination-target" data-entity-type="${escapeHtml(item.entityType)}" data-entity-key="${escapeHtml(item.entityKey)}" data-target-source="recommended"><strong>${escapeHtml(item.entityKey)}</strong><span>${escapeHtml(item.entityType)} · evidence ${Number(item.evidenceConfidenceScore ?? 0).toFixed(0)}%</span></button>`).join("")}</div>`;
 }
 
