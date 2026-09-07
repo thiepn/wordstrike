@@ -512,3 +512,11 @@ commitCompletedPracticeSession({
 The delta is validated and merged only after the duplicate-session guard and inside the existing atomic transaction. A valid typing session can still complete when an auxiliary frontier callback fails: PL14 records `measurement-failed`, omits the performance-state update, and preserves otherwise valid PL8–PL13 evidence. Invariant corruption remains a hard failure.
 
 No PL14 state/frontier model rebuild runs per keypress. State and warm-up analysis run at finalization; the frontier model rebuilds only when a bounded frontier batch is committed or explicitly requested.
+
+## PL21 Weak Keys session contract
+
+Weak Keys uses one canonical Practice session with exactly one direct target entity (`key`), `evidenceRole = training`, correction behavior `allow`, content completion, and `resumable = false`. Its immutable phase metadata is Baseline → Focus → Context → Mix → Check with direct-target quotas 8/24/20/20/8.
+
+No ability, performance-frontier, retention, evaluation, or assessment measurement privilege is attached. The browser host reuses the shared input/session engine, supports software-keyboard input, displays no live aggregate WPM/accuracy, and uses precomputed phase target positions for cue fading. Refresh/abandon ends the v1 intervention; there is no active checkpoint restore.
+
+See `PRACTICE_LAB_WEAK_KEYS.md`.

@@ -1351,3 +1351,13 @@ LIMITER SNAPSHOT
 ```
 
 Treatment selection begins only after those questions have been answered by later phases.
+
+## PL21 Weak Keys consumer
+
+PL21 consumes PL12 **key-level** limiter candidates as recommendation evidence; it does not create a parallel weakness or phenotype model. `confirmed` and `likely` keys are preferred, with `possible` evidence secondary. The v1 Weak Keys treatment remains the same across slow, hesitant, inaccurate, recovery-heavy, unstable, or mixed phenotypes so later treatment-effect work has a stable intervention identity.
+
+Weak Keys also derives bounded downstream relevance from the existing hierarchy: for one key stat ID it counts likely/confirmed bigram, trigram, and word limiter candidates whose `hierarchy.explainedBy` includes that key. UI wording remains explanatory rather than causal (for example, “also appears in higher-level limiter explanations”).
+
+PL21 never mutates a limiter snapshot/hierarchy. After key evidence changes, PL12 may independently recompute whether higher-level limiters remain explained or become independently weak.
+
+See `PRACTICE_LAB_WEAK_KEYS.md`.

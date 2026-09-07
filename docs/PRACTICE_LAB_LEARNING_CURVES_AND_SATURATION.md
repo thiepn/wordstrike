@@ -1292,3 +1292,18 @@ Each stronger interpretation requires stronger, differently structured evidence.
 ## PL19 Full Assessment integration
 
 PL19 fixed diagnostic blocks are diagnostic evidence with `targetEntities: []` and contribute zero PL16 acquisition dose. Benchmark also contributes zero acquisition dose. A valid Deep cold-transfer block may add PL16 transfer observations for already tracked entities through PL18 admission.
+
+## PL21 Weak Keys dose contract
+
+Weak Keys is a canonical PL16 direct-training consumer for `entityType = "key"`. Its v1 immutable intervention supplies exactly:
+
+```text
+8 Baseline + 24 Focus + 20 Context + 20 Mix + 8 Check = 80 direct key opportunities
+80 direct key opportunities = 1.0 PL16 key dose unit
+```
+
+Corrections/retries do not create additional dose; other keys/bigrams/trigrams/words receive no **direct** acquisition dose from Weak Keys. PL11 may still collect their ordinary incidental evidence.
+
+PL21's explicit Baseline/Check result is same-session training evidence only. It does not replace the generic PL16 acquisition observation, does not add transfer evidence, and is not named `learningGain`. PL21 recommendations may consume the canonical PL16 saturation status to de-emphasize `likely`/`supported` saturated keys; Weak Keys does not write or redefine saturation state.
+
+See `PRACTICE_LAB_WEAK_KEYS.md` for the versioned intervention contract.

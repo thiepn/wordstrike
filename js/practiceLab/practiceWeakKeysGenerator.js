@@ -377,16 +377,25 @@ async function composeWeakKeysPhases({ sessionId, context, target, targetIndex, 
   const generatedProbePool = generatedTargetPool(wordCandidates, 8, { compositionMode: "generated-word-sequence", salt: "probe" });
   const naturalProbeBundles = buildProbeBundles(naturalCandidates, { sessionId, entityKey: target.entityKey, policy, compositionMode: "natural-text-bundle", salt: "natural-probe" });
   const availableDistinctWords = new Set(wordCandidates.map((entry) => entry.wordKey)).size;
-  const generatedProbeBundles = buildProbeBundles(generatedProbePool, {
+  const preferredGeneratedProbeBundles = buildProbeBundles(generatedProbePool, {
     sessionId,
     entityKey: target.entityKey,
     policy,
     compositionMode: "generated-word-sequence",
-    salt: "generated-probe",
+    salt: "generated-probe-preferred",
     requiredDistinctLexical: availableDistinctWords >= policy.probes.preferredGeneratedDistinctLexicalItems ? policy.probes.preferredGeneratedDistinctLexicalItems : 0,
   });
+  const fallbackGeneratedProbeBundles = buildProbeBundles(generatedProbePool, {
+    sessionId,
+    entityKey: target.entityKey,
+    policy,
+    compositionMode: "generated-word-sequence",
+    salt: "generated-probe-fallback",
+    requiredDistinctLexical: 0,
+  });
   const probePair = selectPracticeWeakKeysProbePair({ entryCandidates: naturalProbeBundles, exitCandidates: naturalProbeBundles, policy })
-    ?? selectPracticeWeakKeysProbePair({ entryCandidates: generatedProbeBundles, exitCandidates: generatedProbeBundles, policy });
+    ?? selectPracticeWeakKeysProbePair({ entryCandidates: preferredGeneratedProbeBundles, exitCandidates: preferredGeneratedProbeBundles, policy })
+    ?? selectPracticeWeakKeysProbePair({ entryCandidates: fallbackGeneratedProbeBundles, exitCandidates: fallbackGeneratedProbeBundles, policy });
   if (!probePair) throw createPracticeWeakKeysError(PRACTICE_WEAK_KEYS_ERRORS.INSUFFICIENT_PROBE_MATCH, "Weak Keys could not construct responsible family-disjoint matched Baseline/Check probes");
 
   const probeFamilies = new Set([...probePair.entry.units, ...probePair.exit.units].flatMap((unit) => unit.familyId ? [unit.familyId] : unit.sourceFamilyIds ?? []));
@@ -403,9 +412,11 @@ async function composeWeakKeysPhases({ sessionId, context, target, targetIndex, 
 
   const generatedContext = generatedTargetPool(wordCandidates, PRACTICE_WEAK_KEYS_PHASE_QUOTAS.context, { compositionMode: "generated-word-sequence", salt: "context" });
   const contextPreferred = [...naturalCandidates.filter((unit) => !probeFamilies.has(unit.familyId) && !probeContents.has(unit.contentId)), ...generatedContext.filter((unit) => !(unit.sourceFamilyIds ?? []).some((id) => probeFamilies.has(id)) && !(unit.sourceContentIds ?? []).some((id) => probeContents.has(id)))];
-  const contextPool = contextPreferred.length ? contextPreferred : [...naturalCandidates, ...generatedContext];
-  const contextSelection = selectPracticeWeakKeysExactQuota(contextPool, PRACTICE_WEAK_KEYS_PHASE_QUOTAS.context, {
-    sessionId, entityKey: target.entityKey, generatorVersion: PRACTICE_WEAK_KEYS_GENERATOR_VERSION, policyVersion: policy.version, salt: "context",
+  const fullContextPool = [...naturalCandidates, ...generatedContext];
+  const contextSelection = (contextPreferred.length ? selectPracticeWeakKeysExactQuota(contextPreferred, PRACTICE_WEAK_KEYS_PHASE_QUOTAS.context, {
+    sessionId, entityKey: target.entityKey, generatorVersion: PRACTICE_WEAK_KEYS_GENERATOR_VERSION, policyVersion: policy.version, salt: "context-preferred",
+  }) : null) ?? selectPracticeWeakKeysExactQuota(fullContextPool, PRACTICE_WEAK_KEYS_PHASE_QUOTAS.context, {
+    sessionId, entityKey: target.entityKey, generatorVersion: PRACTICE_WEAK_KEYS_GENERATOR_VERSION, policyVersion: policy.version, salt: "context-fallback",
   });
   if (!contextSelection) throw createPracticeWeakKeysError(PRACTICE_WEAK_KEYS_ERRORS.INSUFFICIENT_KEY_CONTENT, "Weak Keys Context phase cannot satisfy its exact target quota");
   const supportPositionClasses = new Set([...naturalCandidates, ...generatedContext].flatMap((unit) => unit.positionClasses ?? [])).size;
