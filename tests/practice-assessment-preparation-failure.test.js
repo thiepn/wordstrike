@@ -61,10 +61,5 @@ test("PL19 post-claim preparation failure invalidates the frozen block and canno
   assert.equal(run.progress.currentBlockIndex, 1);
   assert.equal(run.integrityStatus, "partial");
   assert.equal(run.blocks[0].result.reason, "PRACTICE_EVALUATION_CLAIMED_LOAD_FAILED");
-
-  assert.throws(
-    () => run.blocks[run.progress.currentBlockIndex].blockId === "benchmark-natural" && (() => { throw new Error("benchmark replayed"); })(),
-    undefined,
-  );
   assert.notEqual(run.blocks[run.progress.currentBlockIndex].blockId, "benchmark-natural");
 });

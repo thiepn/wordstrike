@@ -66,7 +66,7 @@ test("PL19 assessment run pruning respects cap and preserves active plus first/l
   const activeId = "practice-assessment_prune-active-12345678";
   const activePlan = plan(activeId);
   const activeBase = createDefaultPracticeAssessmentRun({ assessmentRunId: activeId, profileId: harness.profileId, contextId: harness.contextId, depth: "quick", plan: activePlan, now: () => new Date("2026-03-01T00:00:00.000Z") });
-  await harness.repository.saveAssessmentRun({ ...activeBase, status: "active", startedAt: "2026-03-01T00:00:01.000Z" });
+  await harness.repository.saveAssessmentRun({ ...activeBase, status: "active", startedAt: "2026-03-01T00:00:01.000Z", expiresAt: "2099-03-01T02:00:00.000Z" });
 
   const result = await harness.repository.pruneAssessmentRuns(harness.profileId);
   assert.equal(result.deleted.length, 6);

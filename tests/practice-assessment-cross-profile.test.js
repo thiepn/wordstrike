@@ -1,7 +1,8 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { createDefaultPracticeAssessmentRun } from "../js/practiceLab/practiceAssessmentRun.js";
-import { createDefaultPracticeContext, createDefaultPracticeProfile, createDefaultSessionSummary } from "../js/practiceLab/practiceDefaults.js";
+import { createDefaultPracticeProfile, createDefaultSessionSummary } from "../js/practiceLab/practiceDefaults.js";
+import { createDefaultPracticeContext } from "../js/practiceLab/practiceContext.js";
 import { getPracticeAssessmentBlocksForDepth } from "../js/practiceLab/practiceAssessmentConstants.js";
 import { createPracticeId, hashPracticeContent } from "../js/practiceLab/practiceIds.js";
 import { createPracticeSessionHarness } from "./practiceSessionFixtures.js";
