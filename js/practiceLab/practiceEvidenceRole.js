@@ -3,6 +3,7 @@ import { resolvePracticeTypabilityRuntime } from "./practiceTypabilityRuntime.js
 import { PRACTICE_EVIDENCE_ROLES } from "./practiceSkillEvidencePolicy.js";
 import { getPracticeTrustedAssessmentBinding } from "./practiceAssessmentRegistry.js";
 import { getPracticeTrustedCombinationRepairBinding } from "./practiceCombinationRepairTrust.js";
+import { getPracticeTrustedWeakKeysBinding } from "./practiceWeakKeysTrust.js";
 
 const PARTITION_TO_ROLE = Object.freeze({
   training: "training",
@@ -49,6 +50,15 @@ function resolveTrustedCombinationRepair(contentPlan) {
   return "training";
 }
 
+function resolveTrustedWeakKeys(contentPlan) {
+  const binding = getPracticeTrustedWeakKeysBinding(contentPlan);
+  if (!binding) return null;
+  if (binding.experimentId !== "weak-keys") return null;
+  if (binding.partition !== "training" || binding.evidenceRole !== "training") return null;
+  if (binding.target?.entityType !== "key" || !binding.target?.entityKey) return null;
+  return "training";
+}
+
 function resolveTrustedStaticPartition(contentPlan, language) {
   const runtime = resolvePracticeTypabilityRuntime({ language });
   if (!runtime || !contentPlan) return null;
@@ -73,6 +83,8 @@ export function resolvePracticeEvidenceRole({ contentPlan, context = null } = {}
   if (assessmentRole) return assessmentRole;
   const combinationRepairRole = resolveTrustedCombinationRepair(contentPlan);
   if (combinationRepairRole) return combinationRepairRole;
+  const weakKeysRole = resolveTrustedWeakKeys(contentPlan);
+  if (weakKeysRole) return weakKeysRole;
   const language = baseLanguage(contentPlan?.metadata?.language ?? context?.dataLocale);
   const partition = resolveTrustedStaticPartition(contentPlan, language);
   const role = PARTITION_TO_ROLE[partition] ?? "unclassified";
