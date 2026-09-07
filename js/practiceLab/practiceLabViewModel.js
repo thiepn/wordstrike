@@ -2,6 +2,7 @@ import {
   PRACTICE_CATEGORY_LABELS, PRACTICE_DAILY_TRAINING, PRACTICE_EXPERIMENT_CATEGORIES,
 } from "./practiceExperimentCatalog.js";
 import { PRACTICE_LAB_ROUTES } from "./practiceLabRoutes.js";
+import { buildPracticeCombinationRepairDetailViewModel } from "./practiceCombinationRepairUi.js";
 
 const durationLabel = (duration) => duration.minimum === duration.maximum
   ? `${duration.recommended} min`
@@ -100,7 +101,7 @@ export function buildPracticeHomeViewModel({ registry, featureGate, helpAvailabl
   });
 }
 
-export function buildExperimentDetailViewModel({ route, registry, assessmentAvailability = null, assessmentRun = null, assessmentReport = null }) {
+export function buildExperimentDetailViewModel({ route, registry, assessmentAvailability = null, assessmentRun = null, assessmentReport = null, combinationRepairState = null }) {
   const resolved = registry.getResolvedExperiment(route.params?.experimentId);
   if (!resolved) return Object.freeze({ kind: "not-found", title: "Experiment not found", description: "That Practice Lab experiment does not exist.", backLabel: "Back to Practice Lab" });
   const entry = resolved.catalogEntry;
@@ -115,6 +116,11 @@ export function buildExperimentDetailViewModel({ route, registry, assessmentAvai
     unavailableMessage: resolved.runnable ? "" : "This experiment is not available in the current development build.",
     backLabel: "Back to Practice Lab",
   };
+  if (entry.id === "combination-repair") return Object.freeze({
+    ...base,
+    ...buildPracticeCombinationRepairDetailViewModel({ entry, resolved, state: combinationRepairState }),
+    backLabel: "Back to Practice Lab",
+  });
   if (entry.id !== "full-assessment") return Object.freeze({ kind: "experiment-detail", ...base });
   const availability = assessmentAvailability ?? CURRENT_ASSESSMENT_UNAVAILABLE;
   return Object.freeze({
@@ -135,9 +141,9 @@ export const buildReviewQueueEmptyViewModel = () => emptyView("review-queue", "R
 export const buildProgressEmptyViewModel = () => emptyView("progress", "Progress", "A future home for training time, sustainable and burst speed, accuracy, consistency, mastered weaknesses, and experiment history.", "No training history", "Complete future Practice sessions to begin a local training history.", ["Training activity", "Speed and accuracy", "Consistency", "Mastered weaknesses"]);
 export const buildPracticeUnavailableViewModel = () => Object.freeze({ kind: "unavailable", title: "Practice Lab", description: "Practice Lab is coming soon.", backLabel: "Back" });
 
-export function buildPracticeLabViewModel({ route, registry, featureGate, helpAvailable = false, assessmentAvailability = null, assessmentRun = null, assessmentReport = null }) {
+export function buildPracticeLabViewModel({ route, registry, featureGate, helpAvailable = false, assessmentAvailability = null, assessmentRun = null, assessmentReport = null, combinationRepairState = null }) {
   if (!featureGate.canAccess() || route.name === "unavailable") return buildPracticeUnavailableViewModel();
-  if (route.name === PRACTICE_LAB_ROUTES.EXPERIMENT_DETAIL) return buildExperimentDetailViewModel({ route, registry, assessmentAvailability, assessmentRun, assessmentReport });
+  if (route.name === PRACTICE_LAB_ROUTES.EXPERIMENT_DETAIL) return buildExperimentDetailViewModel({ route, registry, assessmentAvailability, assessmentRun, assessmentReport, combinationRepairState });
   if (route.name === PRACTICE_LAB_ROUTES.SKILL_MAP) return buildSkillMapEmptyViewModel();
   if (route.name === PRACTICE_LAB_ROUTES.REVIEW_QUEUE) return buildReviewQueueEmptyViewModel();
   if (route.name === PRACTICE_LAB_ROUTES.PROGRESS) return buildProgressEmptyViewModel();
