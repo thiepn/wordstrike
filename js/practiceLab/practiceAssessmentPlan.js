@@ -108,14 +108,16 @@ export async function buildPracticeAssessmentPlan({
   return Object.freeze({ ...plan, blocks: Object.freeze(blocks) });
 }
 
-export function createPracticeAssessmentBlockBinding(plan, block) {
+export function createPracticeAssessmentBlockBinding(plan, block, { diagnosticFreshness = null } = {}) {
   if (!plan || !block) throw new TypeError("Assessment block binding requires plan and block");
   return Object.freeze({
     assessmentRunId: plan.assessmentRunId,
     blockId: block.blockId,
     blockOrdinal: block.ordinal,
+    protocolVersion: plan.protocolVersion,
     planVersion: plan.planVersion,
     planHash: plan.planHash,
     expectedExperimentId: block.expectedExperimentId,
+    diagnosticFreshness: block.blockKind === "diagnostic" ? diagnosticFreshness : null,
   });
 }
