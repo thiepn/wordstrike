@@ -21,6 +21,20 @@ const boundedStrings = (values, max = 32) => Object.freeze([...(new Set((Array.i
 const compactCounts = (counts = {}) => Object.freeze(Object.fromEntries(Object.entries(counts).filter(([, value]) => Number.isFinite(value) && value >= 0).map(([key, value]) => [key, Number(value)])));
 const compactFeatures = (features = {}) => Object.freeze(Object.fromEntries(Object.entries(features).filter(([, value]) => value == null || Number.isFinite(value))));
 
+function compactContextBinding(context) {
+  for (const key of ["contextId", "fingerprint", "dataLocale", "keyboardLayout", "inputMethod"]) {
+    if (typeof context?.[key] !== "string" || !context[key]) throw new TypeError(`Weak Keys requires PL5 context ${key}`);
+  }
+  return freezeDeep({
+    contextId: context.contextId,
+    fingerprint: context.fingerprint,
+    dataLocale: context.dataLocale,
+    keyboardLayout: context.keyboardLayout,
+    inputMethod: context.inputMethod,
+    hardwareProfileId: typeof context.hardwareProfileId === "string" && context.hardwareProfileId ? context.hardwareProfileId : null,
+  });
+}
+
 function normalizeUnit(unit, phaseId, policy) {
   if (!unit || typeof unit !== "object") throw new TypeError(`Weak Keys ${phaseId} unit is invalid`);
   const targetOpportunityCount = Number(unit.targetOpportunityCount);
@@ -95,12 +109,19 @@ export function buildPracticeWeakKeysPlan({
   if (!target) throw new TypeError("Weak Keys requires one canonical English lowercase letter target");
   if (typeof sessionId !== "string" || !sessionId) throw new TypeError("Weak Keys plan requires sessionId");
   if (!corpusBinding?.corpusId || !Number.isInteger(corpusBinding?.corpusVersion) || !Number.isInteger(corpusBinding?.indexVersion)) throw new TypeError("Weak Keys requires corpus/index binding");
+  const contextBinding = compactContextBinding(context);
   let opportunityCursor = 0;
   const phases = PRACTICE_WEAK_KEYS_PHASES.map((phase, index) => {
     const built = buildPhase(phase, index + 1, phaseUnits[phase.id], policy, opportunityCursor);
     opportunityCursor += built.opportunityQuota;
     return built;
   });
+  const phaseBoundaries = phases.map((phase) => ({
+    id: phase.id,
+    ordinal: phase.ordinal,
+    targetOpportunityStart: phase.targetOpportunityStart,
+    targetOpportunityEnd: phase.targetOpportunityEnd,
+  }));
   const plan = {
     version: PRACTICE_WEAK_KEYS_VERSION,
     policyVersion: policy.version,
@@ -110,6 +131,7 @@ export function buildPracticeWeakKeysPlan({
     experimentVersion: PRACTICE_WEAK_KEYS_EXPERIMENT_VERSION,
     sessionId,
     language: String(language).trim().replace(/_/g, "-").toLowerCase().split("-")[0],
+    contextBinding,
     target,
     targetSource,
     targetOpportunityBudget: PRACTICE_WEAK_KEYS_PHASE_QUOTAS.total,
@@ -121,12 +143,7 @@ export function buildPracticeWeakKeysPlan({
       manifestHash: corpusBinding.manifestHash ? String(corpusBinding.manifestHash) : null,
     },
     phases,
-    phaseBoundaries: phases.map((phase) => ({
-      id: phase.id,
-      ordinal: phase.ordinal,
-      targetOpportunityStart: phase.targetOpportunityStart,
-      targetOpportunityEnd: phase.targetOpportunityEnd,
-    })),
+    phaseBoundaries,
     contextCoveragePlan: freezeDeep({ ...contextCoveragePlan }),
     contentDescriptor: {
       type: "generated",
@@ -157,6 +174,7 @@ export function createPracticeWeakKeysContentPlanMetadata(plan) {
       planHash: plan.planHash,
       targetSource: plan.targetSource,
       targetOpportunityBudget: plan.targetOpportunityBudget,
+      contextBinding: plan.contextBinding,
       phaseSequence: plan.phases.map((phase) => ({ id: phase.id, ordinal: phase.ordinal, cue: phase.cue, opportunityQuota: phase.opportunityQuota })),
       contextCoveragePlan: plan.contextCoveragePlan,
       resumable: false,
