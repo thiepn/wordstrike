@@ -1,0 +1,200 @@
+name: PL21 probe construction fix
+
+on:
+  push:
+    branches:
+      - codex/pl21-weak-keys
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch-and-verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: codex/pl21-weak-keys
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Apply constructive probe-pair fix
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path('js/practiceLab/practiceWeakKeysGenerator.js')
+          text = path.read_text(encoding='utf-8')
+
+          old_bundle = '''function buildProbeBundles(candidates, { sessionId, entityKey, policy, compositionMode, salt, requiredDistinctLexical = 0 }) {
+            const bundles = [];
+            const seen = new Set();
+            for (let attempt = 0; attempt < 24; attempt += 1) {
+              const selection = selectPracticeWeakKeysExactQuota(candidates, policy.probes.targetOpportunityCount, {
+                sessionId,
+                entityKey,
+                generatorVersion: PRACTICE_WEAK_KEYS_GENERATOR_VERSION,
+                policyVersion: policy.version,
+                salt: `${salt}:${attempt}`,
+              });
+              if (!selection) continue;
+              const identity = selection.units.map((unit) => unit.candidateId).sort().join("|");
+              if (seen.has(identity)) continue;
+              seen.add(identity);
+              if (requiredDistinctLexical > 0 && selection.metrics.distinctLexicalCount < requiredDistinctLexical) continue;
+              bundles.push(aggregateProbe(selection.units, `${salt}-${attempt + 1}`, compositionMode));
+            }
+            return Object.freeze(bundles);
+          }
+          '''
+
+          helper = '''function buildProbeBundles(candidates, { sessionId, entityKey, policy, compositionMode, salt, requiredDistinctLexical = 0 }) {
+            const bundles = [];
+            const seen = new Set();
+            for (let attempt = 0; attempt < 24; attempt += 1) {
+              const selection = selectPracticeWeakKeysExactQuota(candidates, policy.probes.targetOpportunityCount, {
+                sessionId,
+                entityKey,
+                generatorVersion: PRACTICE_WEAK_KEYS_GENERATOR_VERSION,
+                policyVersion: policy.version,
+                salt: `${salt}:${attempt}`,
+              });
+              if (!selection) continue;
+              const identity = selection.units.map((unit) => unit.candidateId).sort().join("|");
+              if (seen.has(identity)) continue;
+              seen.add(identity);
+              if (requiredDistinctLexical > 0 && selection.metrics.distinctLexicalCount < requiredDistinctLexical) continue;
+              bundles.push(aggregateProbe(selection.units, `${salt}-${attempt + 1}`, compositionMode));
+            }
+            return Object.freeze(bundles);
+          }
+
+          function probeUnitSourceIds(unit, directKey, sourceKey) {
+            const direct = unit?.[directKey];
+            if (typeof direct === "string" && direct) return [direct];
+            return Array.isArray(unit?.[sourceKey]) ? unit[sourceKey].filter(Boolean) : [];
+          }
+
+          function candidateIsDisjointFromProbe(candidate, probe) {
+            const probeFamilies = new Set((probe?.units ?? []).flatMap((unit) => probeUnitSourceIds(unit, "familyId", "sourceFamilyIds")));
+            const probeContents = new Set((probe?.units ?? []).flatMap((unit) => probeUnitSourceIds(unit, "contentId", "sourceContentIds")));
+            const candidateFamilies = probeUnitSourceIds(candidate, "familyId", "sourceFamilyIds");
+            const candidateContents = probeUnitSourceIds(candidate, "contentId", "sourceContentIds");
+            if (!candidateFamilies.length || !candidateContents.length) return false;
+            return candidateFamilies.every((id) => !probeFamilies.has(id))
+              && candidateContents.every((id) => !probeContents.has(id));
+          }
+
+          function probePairTieKey(pair) {
+            return `${pair?.entry?.probeId ?? ""}|${pair?.exit?.probeId ?? ""}`;
+          }
+
+          function selectConstructedProbePair(candidates, options) {
+            const entryBundles = buildProbeBundles(candidates, options);
+            let best = null;
+            for (const entry of entryBundles) {
+              const disjointCandidates = candidates.filter((candidate) => candidateIsDisjointFromProbe(candidate, entry));
+              if (!disjointCandidates.length) continue;
+              const exitBundles = buildProbeBundles(disjointCandidates, {
+                ...options,
+                salt: `${options.salt}:exit:${entry.probeId}`,
+              });
+              const pair = selectPracticeWeakKeysProbePair({
+                entryCandidates: [entry],
+                exitCandidates: exitBundles,
+                policy: options.policy,
+              });
+              if (!pair) continue;
+              if (!best
+                || pair.match.score < best.match.score
+                || (pair.match.score === best.match.score && probePairTieKey(pair).localeCompare(probePairTieKey(best)) < 0)) {
+                best = pair;
+              }
+            }
+            return best;
+          }
+          '''
+
+          if 'function selectConstructedProbePair(candidates, options)' not in text:
+              if old_bundle not in text:
+                  raise SystemExit('Expected buildProbeBundles block not found')
+              text = text.replace(old_bundle, helper, 1)
+
+          old_probe = '''  const generatedProbePool = generatedTargetPool(wordCandidates, 8, { compositionMode: "generated-word-sequence", salt: "probe" });
+            const naturalProbeBundles = buildProbeBundles(naturalCandidates, { sessionId, entityKey: target.entityKey, policy, compositionMode: "natural-text-bundle", salt: "natural-probe" });
+            const availableDistinctWords = new Set(wordCandidates.map((entry) => entry.wordKey)).size;
+            const preferredGeneratedProbeBundles = buildProbeBundles(generatedProbePool, {
+              sessionId,
+              entityKey: target.entityKey,
+              policy,
+              compositionMode: "generated-word-sequence",
+              salt: "generated-probe-preferred",
+              requiredDistinctLexical: availableDistinctWords >= policy.probes.preferredGeneratedDistinctLexicalItems ? policy.probes.preferredGeneratedDistinctLexicalItems : 0,
+            });
+            const fallbackGeneratedProbeBundles = buildProbeBundles(generatedProbePool, {
+              sessionId,
+              entityKey: target.entityKey,
+              policy,
+              compositionMode: "generated-word-sequence",
+              salt: "generated-probe-fallback",
+              requiredDistinctLexical: 0,
+            });
+            const probePair = selectPracticeWeakKeysProbePair({ entryCandidates: naturalProbeBundles, exitCandidates: naturalProbeBundles, policy })
+              ?? selectPracticeWeakKeysProbePair({ entryCandidates: preferredGeneratedProbeBundles, exitCandidates: preferredGeneratedProbeBundles, policy })
+              ?? selectPracticeWeakKeysProbePair({ entryCandidates: fallbackGeneratedProbeBundles, exitCandidates: fallbackGeneratedProbeBundles, policy });
+          '''
+
+          new_probe = '''  const generatedProbePool = generatedTargetPool(wordCandidates, 8, { compositionMode: "generated-word-sequence", salt: "probe" });
+            const naturalProbePair = selectConstructedProbePair(naturalCandidates, {
+              sessionId,
+              entityKey: target.entityKey,
+              policy,
+              compositionMode: "natural-text-bundle",
+              salt: "natural-probe",
+            });
+            const availableDistinctWords = new Set(wordCandidates.map((entry) => entry.wordKey)).size;
+            const preferredGeneratedProbePair = selectConstructedProbePair(generatedProbePool, {
+              sessionId,
+              entityKey: target.entityKey,
+              policy,
+              compositionMode: "generated-word-sequence",
+              salt: "generated-probe-preferred",
+              requiredDistinctLexical: availableDistinctWords >= policy.probes.preferredGeneratedDistinctLexicalItems ? policy.probes.preferredGeneratedDistinctLexicalItems : 0,
+            });
+            const fallbackGeneratedProbePair = selectConstructedProbePair(generatedProbePool, {
+              sessionId,
+              entityKey: target.entityKey,
+              policy,
+              compositionMode: "generated-word-sequence",
+              salt: "generated-probe-fallback",
+              requiredDistinctLexical: 0,
+            });
+            const probePair = naturalProbePair ?? preferredGeneratedProbePair ?? fallbackGeneratedProbePair;
+          '''
+
+          if 'const naturalProbePair = selectConstructedProbePair' not in text:
+              if old_probe not in text:
+                  raise SystemExit('Expected probe selection block not found')
+              text = text.replace(old_probe, new_probe, 1)
+
+          path.write_text(text, encoding='utf-8')
+          PY
+      - name: Verify focused PL21 generator and matcher suites
+        run: |
+          node --test tests/practice-weak-keys-generator.test.js tests/practice-weak-keys-algorithm.test.js
+          git diff --check
+      - name: Commit verified fix
+        shell: bash
+        run: |
+          if git diff --quiet -- js/practiceLab/practiceWeakKeysGenerator.js; then
+            echo "PL21 probe construction fix already applied."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add js/practiceLab/practiceWeakKeysGenerator.js
+          git commit -m "Fix PL21 disjoint probe construction"
+          git push origin HEAD:codex/pl21-weak-keys
