@@ -6,6 +6,12 @@ const sameBinding = (left, right) => left?.corpusId === right?.corpusId
   && Number(left?.corpusVersion) === Number(right?.corpusVersion)
   && Number(left?.indexVersion) === Number(right?.indexVersion)
   && (left?.manifestHash ?? null) === (right?.manifestHash ?? null);
+const sameContextBinding = (left, right) => left?.contextId === right?.contextId
+  && left?.fingerprint === right?.fingerprint
+  && left?.dataLocale === right?.dataLocale
+  && left?.keyboardLayout === right?.keyboardLayout
+  && left?.inputMethod === right?.inputMethod
+  && (left?.hardwareProfileId ?? null) === (right?.hardwareProfileId ?? null);
 
 function validateContentBinding(contentPlan, plan) {
   const validation = validatePracticeWeakKeysPlan(plan);
@@ -17,9 +23,25 @@ function validateContentBinding(contentPlan, plan) {
   if (contentPlan.metadata?.weakKeys?.resumable !== false) return { valid: false, reason: "resumable-content" };
   if (contentPlan.metadata?.weakKeys?.completionMode !== "content") return { valid: false, reason: "completion-mode-mismatch" };
   if (!sameBinding(contentPlan.metadata?.corpusBinding, plan.corpusBinding)) return { valid: false, reason: "corpus-binding-mismatch" };
+  if (!sameContextBinding(contentPlan.metadata?.weakKeys?.contextBinding, plan.contextBinding)) return { valid: false, reason: "context-binding-mismatch" };
   const targets = contentPlan.targetEntities ?? [];
   if (targets.length !== 1 || targets[0]?.entityType !== "key" || targets[0]?.entityKey !== plan.target.entityKey || targets[0]?.directTarget !== true) return { valid: false, reason: "target-mismatch" };
   return { valid: true };
+}
+
+export function assertPracticeWeakKeysSessionContext(plan, context) {
+  if (!sameContextBinding(plan?.contextBinding, context)) {
+    const error = new Error("Weak Keys active Practice context changed after the immutable plan was built");
+    error.code = "PRACTICE_WEAK_KEYS_CONTEXT_MISMATCH";
+    error.details = {
+      plannedContextId: plan?.contextBinding?.contextId ?? null,
+      activeContextId: context?.contextId ?? null,
+      plannedFingerprint: plan?.contextBinding?.fingerprint ?? null,
+      activeFingerprint: context?.fingerprint ?? null,
+    };
+    throw error;
+  }
+  return true;
 }
 
 export function trustPracticeWeakKeysContentPlan(contentPlan, plan) {
@@ -40,6 +62,7 @@ export function trustPracticeWeakKeysContentPlan(contentPlan, plan) {
     planHash: plan.planHash,
     sessionId: plan.sessionId,
     target: Object.freeze({ ...plan.target }),
+    contextBinding: Object.freeze({ ...plan.contextBinding }),
     corpusBinding: Object.freeze({ ...plan.corpusBinding }),
     partition: "training",
     evidenceRole: "training",
