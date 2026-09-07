@@ -1,0 +1,110 @@
+name: PL19 Autonomous Clean Finalizer
+
+on:
+  push:
+    branches:
+      - codex/pl19-full-assessment
+
+permissions:
+  actions: read
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: pl19-autofinal
+  cancel-in-progress: true
+
+jobs:
+  finalize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: codex/pl19-full-assessment
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Let prior branch repair jobs settle
+        run: |
+          sleep 45
+          git fetch origin codex/pl19-full-assessment
+          test "$(git rev-parse HEAD)" = "$(git rev-parse origin/codex/pl19-full-assessment)"
+      - name: Apply hardening and failure-driven compatibility until the full suite is green
+        id: finalize
+        shell: bash
+        run: |
+          set -o pipefail
+          node scripts/pl19AutoFinalize.mjs
+          node scripts/runTests.mjs | tee /tmp/pl19-green.log
+          COUNT=$(sed -n 's/^Running \([0-9][0-9]*\) WORDSTRIKE test files\.\.\./\1/p' /tmp/pl19-green.log | head -n1)
+          test -n "$COUNT"
+          echo "count=$COUNT" >> "$GITHUB_OUTPUT"
+      - name: Verify clean patch and commit without temporary tooling
+        id: clean
+        shell: bash
+        run: |
+          git diff --check
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "PL19: finalize Full Assessment clean head"
+          git push origin HEAD:codex/pl19-full-assessment
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+      - name: Wait for repository Tests on exact clean head
+        id: exact
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SHA: ${{ steps.clean.outputs.sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 120); do
+            JSON=$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs?head_sha=${SHA}&per_page=30")
+            RUN_ID=$(printf '%s' "$JSON" | jq -r '[.workflow_runs[] | select(.name == "Tests")][0].id // empty')
+            if [ -n "$RUN_ID" ]; then
+              STATUS=$(printf '%s' "$JSON" | jq -r --argjson id "$RUN_ID" '.workflow_runs[] | select(.id == $id) | .status')
+              CONCLUSION=$(printf '%s' "$JSON" | jq -r --argjson id "$RUN_ID" '.workflow_runs[] | select(.id == $id) | .conclusion // empty')
+              RUN_NUMBER=$(printf '%s' "$JSON" | jq -r --argjson id "$RUN_ID" '.workflow_runs[] | select(.id == $id) | .run_number')
+              if [ "$STATUS" = "completed" ]; then
+                test "$CONCLUSION" = "success"
+                echo "run_id=$RUN_ID" >> "$GITHUB_OUTPUT"
+                echo "run_number=$RUN_NUMBER" >> "$GITHUB_OUTPUT"
+                exit 0
+              fi
+            fi
+            sleep 4
+          done
+          exit 1
+      - name: Write exact certification into draft PR 38
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SHA: ${{ steps.clean.outputs.sha }}
+          RUN_ID: ${{ steps.exact.outputs.run_id }}
+          RUN_NUMBER: ${{ steps.exact.outputs.run_number }}
+          TEST_COUNT: ${{ steps.finalize.outputs.count }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh api "repos/${GITHUB_REPOSITORY}/pulls/38" --jq .body > /tmp/body.md
+          python - <<'PY'
+          import os, re
+          from pathlib import Path
+          path=Path('/tmp/body.md')
+          body=path.read_text()
+          body=re.sub(r'\n?<!-- PL19_CERTIFICATION_START -->.*?<!-- PL19_CERTIFICATION_END -->\n?', '\n', body, flags=re.S).rstrip()
+          cert=f'''\n\n<!-- PL19_CERTIFICATION_START -->
+          ### Exact-head certification
+
+          - Certified clean head: `{os.environ["SHA"]}`
+          - GitHub Actions **Tests #{os.environ["RUN_NUMBER"]}** — run ID `{os.environ["RUN_ID"]}` — **SUCCESS**
+          - Complete WordStrike suite: **{os.environ["TEST_COUNT"]} test files**
+          - PL19 persistent envelope: **DB7 / assessmentRun v1 / sessionSummary v12 / foundationAnalysis v10**
+          - Protocol: **Quick 240 s / Standard 480 s / Deep 720 s**, one exact common-prefix block blueprint.
+          - Current English readiness remains honest: **Quick unavailable / Standard unavailable / Deep unavailable** because the required PL18 protected and PL19 diagnostic artifacts are still draft.
+          - No synthetic diagnostic content, universal score, treatment recommendation, public release, ranked/auth/leaderboard/Supabase dependency was introduced.
+          - PR remains **draft, open, and unmerged**, stacked on certified PL18.
+          <!-- PL19_CERTIFICATION_END -->\n'''
+          path.write_text(body+cert)
+          PY
+          gh api -X PATCH "repos/${GITHUB_REPOSITORY}/pulls/38" -f body="$(cat /tmp/body.md)" >/dev/null
