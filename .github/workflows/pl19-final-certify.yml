@@ -1,0 +1,123 @@
+name: PL19 Final Exact-Head Certification
+
+on:
+  push:
+    branches:
+      - codex/pl19-full-assessment
+
+permissions:
+  actions: read
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: pl19-final-certification
+  cancel-in-progress: true
+
+jobs:
+  certify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: codex/pl19-full-assessment
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Run complete WordStrike suite on current PL19 head
+        id: suite
+        shell: bash
+        run: |
+          set -o pipefail
+          node scripts/runTests.mjs | tee /tmp/pl19-tests.log
+          COUNT=$(sed -n 's/^Running \([0-9][0-9]*\) WORDSTRIKE test files\.\.\./\1/p' /tmp/pl19-tests.log | head -n1)
+          test -n "$COUNT"
+          echo "count=$COUNT" >> "$GITHUB_OUTPUT"
+      - name: Remove all temporary PL19 sweep/certification tooling
+        shell: bash
+        run: |
+          rm -f \
+            .github/workflows/pl19-final-certify.yml \
+            .github/workflows/pl19-compatibility-loop.yml \
+            .github/workflows/pl19-hardening-commit.yml \
+            .github/workflows/pl19-hardening-sweep.yml \
+            .github/workflows/pl19-test-corrections.yml \
+            .github/workflows/pl19-compat-sweep.yml \
+            scripts/pl19CompatibilityLoop.mjs \
+            scripts/pl19HardeningCommit.mjs \
+            scripts/pl19HardeningSweep.mjs \
+            scripts/pl19TestCorrections.mjs \
+            scripts/pl19CompatibilitySweep.mjs
+          git diff --check
+      - name: Push cleanup-only certification head
+        id: cleanup
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "PL19: remove temporary certification tooling"
+          git push origin HEAD:codex/pl19-full-assessment
+          SHA=$(git rev-parse HEAD)
+          echo "sha=$SHA" >> "$GITHUB_OUTPUT"
+      - name: Wait for normal Tests workflow on exact cleanup SHA
+        id: exact
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SHA: ${{ steps.cleanup.outputs.sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          RUN_ID=""
+          RUN_NUMBER=""
+          for i in $(seq 1 90); do
+            JSON=$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs?head_sha=${SHA}&per_page=30")
+            RUN_ID=$(printf '%s' "$JSON" | jq -r '[.workflow_runs[] | select(.name == "Tests")][0].id // empty')
+            if [ -n "$RUN_ID" ]; then
+              STATUS=$(printf '%s' "$JSON" | jq -r --argjson id "$RUN_ID" '.workflow_runs[] | select(.id == $id) | .status')
+              CONCLUSION=$(printf '%s' "$JSON" | jq -r --argjson id "$RUN_ID" '.workflow_runs[] | select(.id == $id) | .conclusion // empty')
+              RUN_NUMBER=$(printf '%s' "$JSON" | jq -r --argjson id "$RUN_ID" '.workflow_runs[] | select(.id == $id) | .run_number')
+              if [ "$STATUS" = "completed" ]; then
+                test "$CONCLUSION" = "success"
+                echo "run_id=$RUN_ID" >> "$GITHUB_OUTPUT"
+                echo "run_number=$RUN_NUMBER" >> "$GITHUB_OUTPUT"
+                exit 0
+              fi
+            fi
+            sleep 4
+          done
+          echo "Timed out waiting for exact-head Tests workflow" >&2
+          exit 1
+      - name: Record exact certification in draft PR 38
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SHA: ${{ steps.cleanup.outputs.sha }}
+          RUN_ID: ${{ steps.exact.outputs.run_id }}
+          RUN_NUMBER: ${{ steps.exact.outputs.run_number }}
+          TEST_COUNT: ${{ steps.suite.outputs.count }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh api "repos/${GITHUB_REPOSITORY}/pulls/38" --jq .body > /tmp/body.md
+          python - <<'PY'
+          import os, re
+          from pathlib import Path
+          path=Path('/tmp/body.md')
+          body=path.read_text()
+          body=re.sub(r'\n?<!-- PL19_CERTIFICATION_START -->.*?<!-- PL19_CERTIFICATION_END -->\n?', '\n', body, flags=re.S).rstrip()
+          cert=f'''\n\n<!-- PL19_CERTIFICATION_START -->
+          ### Exact-head certification
+
+          - Certified head: `{os.environ["SHA"]}`
+          - GitHub Actions **Tests #{os.environ["RUN_NUMBER"]}** — run ID `{os.environ["RUN_ID"]}` — **SUCCESS**
+          - Complete WordStrike suite: **{os.environ["TEST_COUNT"]} test files**
+          - PL19 envelope: **DB7 / assessmentRun v1 / sessionSummary v12 / foundationAnalysis v10**
+          - Current English Quick/Standard/Deep availability remains honestly unavailable while required PL18 protected and PL19 diagnostic artifacts are draft.
+          - Scope remains Practice Lab-local/dev-gated; no public release, ranked/auth/leaderboard/Supabase dependency.
+          - PR remains draft/open/unmerged and stacked on PL18.
+          <!-- PL19_CERTIFICATION_END -->\n'''
+          path.write_text(body+cert)
+          PY
+          BODY=$(cat /tmp/body.md)
+          gh api -X PATCH "repos/${GITHUB_REPOSITORY}/pulls/38" -f body="$BODY" >/dev/null
