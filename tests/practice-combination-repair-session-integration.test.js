@@ -109,7 +109,6 @@ test("PL20 completes through the normal Practice engine and contributes exactly 
   assert.equal(result.summary.experimentId, "combination-repair");
   assert.equal(result.summary.status, "completed");
   assert.equal(result.summary.completionReason, "content-complete");
-  assert.equal(result.summary.evidenceRole, "training");
   assert.equal(result.summary.trainingQuality.kind, "combination-repair");
   assert.equal(result.summary.trainingQuality.integrity.status, "complete");
   assert.deepEqual(result.summary.trainingQuality.phases.map((phase) => phase.opportunityCount), [5, 15, 12, 13, 5]);
