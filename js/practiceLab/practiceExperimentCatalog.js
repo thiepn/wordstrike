@@ -45,11 +45,12 @@ const deepFreeze = (value) => {
 
 const buildEntry = ([id, title, shortTitle, category, description, longDescription, minimum, recommended, maximum, difficulty, requiresAssessment, requiresPracticeData, implementationPrompt, displayOrder, iconKey, accentKey, primarySkill]) => deepFreeze({
   id, version: 1, title, shortTitle, category, description, longDescription,
-  status: id === "full-assessment" ? "preview" : "planned",
+  status: ["full-assessment", "combination-repair"].includes(id) ? "preview" : "planned",
   estimatedDurationMinutes: { minimum, recommended, maximum }, difficulty,
   requiresAssessment, requiresPracticeData, supportsMobile: true,
   supportsPhysicalKeyboard: true, supportsSoftwareKeyboard: true,
-  capabilities: [], tags: [category, primarySkill], implementationPrompt, displayOrder,
+  capabilities: id === "combination-repair" ? ["manual-target", "recommended-target", "fixed-dose", "same-session-check"] : [],
+  tags: [category, primarySkill], implementationPrompt, displayOrder,
   iconKey, accentKey, primarySkill,
 });
 
