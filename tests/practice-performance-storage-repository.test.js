@@ -30,9 +30,9 @@ function fakeUpgradeDatabase(initialNames) {
 }
 
 test("PL14 performance-state contract remains intact inside the current PL18 DB/session envelope", () => {
-  assert.equal(PRACTICE_DATABASE_VERSION, 6);
+  assert.equal(PRACTICE_DATABASE_VERSION, 7);
   assert.equal(PRACTICE_RECORD_VERSIONS.performanceState, 1);
-  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 11);
+  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 12);
   assert.equal(PRACTICE_RECORD_VERSIONS.learningState, 1);
   assert.equal(PRACTICE_RECORD_VERSIONS.evaluationState, 1);
   assert.equal(PRACTICE_RECORD_VERSIONS.reviewItem, 3);
@@ -67,7 +67,7 @@ test("PL14 historical session v7 performance migration remains null through the 
   const migration = migratePracticeRecord("sessionSummary", legacy);
   assert.equal(migration.ok, true);
   assert.equal(migration.toVersion, 11);
-  assert.deepEqual(migration.steps, ["sessionSummary:7->8", "sessionSummary:8->9", "sessionSummary:9->10", "sessionSummary:10->11"]);
+  assert.deepEqual(migration.steps, ["sessionSummary:7->8", "sessionSummary:8->9", "sessionSummary:9->10", "sessionSummary:10->11", "sessionSummary:11->12"]);
   assert.equal(migration.value.performanceMeasurementSummary, null);
   assert.equal(migration.value.learningEvidenceSummary, null);
   assert.equal(migration.value.retentionReviewSummary, null);

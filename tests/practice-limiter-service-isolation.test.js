@@ -83,14 +83,14 @@ function peerSet(contextId = contextA, residualMeanMs = 0) {
 }
 
 test("PL12 model contracts remain unchanged inside the current PL18 storage/session/foundation envelope", () => {
-  assert.equal(PRACTICE_DATABASE_VERSION, 6);
+  assert.equal(PRACTICE_DATABASE_VERSION, 7);
   assert.equal(PRACTICE_RECORD_VERSIONS.skillStat, 3);
-  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 11);
+  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 12);
   assert.equal(PRACTICE_RECORD_VERSIONS.reviewItem, 3);
   assert.equal(PRACTICE_RECORD_VERSIONS.checkpoint, 3);
   assert.equal(PRACTICE_RECORD_VERSIONS.learningState, 1);
   assert.equal(PRACTICE_RECORD_VERSIONS.evaluationState, 1);
-  assert.equal(PRACTICE_FOUNDATION_ANALYSIS_VERSION, 9);
+  assert.equal(PRACTICE_FOUNDATION_ANALYSIS_VERSION, 10);
   assert.equal(PRACTICE_LIMITER_MODEL_VERSION, 1);
   assert.equal(PRACTICE_LIMITER_POLICY_VERSION, 1);
   assert.equal(PRACTICE_IMPACT_MODEL_VERSION, 1);

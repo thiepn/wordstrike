@@ -33,7 +33,7 @@ test("PL10 generic normalization remains canonical inside the current PL18 sessi
   await typeCorrect(engine, harness, 26);
   const metrics = engine.getMetricsSnapshot();
   const result = await engine.complete("manual-stop");
-  assert.equal(result.summary.recordVersion, 11);
+  assert.equal(result.summary.recordVersion, 12);
   assert.equal(result.summary.retentionReviewSummary, null);
   assert.equal(result.summary.evaluationSummary, null);
   assert.equal(result.summary.wpm, metrics.wpm);
@@ -73,7 +73,7 @@ test("PL10 experiment analyzers receive frozen PL18 foundationAnalysis v9 and ca
   await engine.start();
   await typeCorrect(engine, harness, 26);
   const result = await engine.complete("manual-stop");
-  assert.equal(received.foundationAnalysis.version, 9);
+  assert.equal(received.foundationAnalysis.version, 10);
   assert.ok(received.foundationAnalysis.latency);
   assert.ok(received.foundationAnalysis.errors);
   assert.ok(received.foundationAnalysis.normalization);

@@ -1288,3 +1288,7 @@ one session performance
 ```
 
 Each stronger interpretation requires stronger, differently structured evidence. That separation is the core PL16 contract.
+
+## PL19 Full Assessment integration
+
+PL19 fixed diagnostic blocks are diagnostic evidence with `targetEntities: []` and contribute zero PL16 acquisition dose. Benchmark also contributes zero acquisition dose. A valid Deep cold-transfer block may add PL16 transfer observations for already tracked entities through PL18 admission.

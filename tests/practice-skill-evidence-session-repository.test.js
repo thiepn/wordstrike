@@ -50,12 +50,12 @@ test("PL11 canonical deltas remain intact inside PL18 foundation v9/session v11,
   await engine.start();
   await typeText(engine, harness, harness.contentPlan.text);
   const result = await engine.complete("manual-stop");
-  assert.equal(foundation.version, 9);
+  assert.equal(foundation.version, 10);
   assert.equal(foundation.retention.status, "not-requested");
   assert.equal(foundation.evaluation.status, "not-requested");
   assert.equal(Object.isFrozen(foundation.skills), true);
   assert.ok(foundation.skills.deltas.length > 0);
-  assert.equal(result.summary.recordVersion, 11);
+  assert.equal(result.summary.recordVersion, 12);
   assert.equal(result.summary.retentionReviewSummary, null);
   assert.equal(result.summary.evaluationSummary, null);
   assert.equal(result.summary.beforeMetrics.analyzerObservedSkills, true);

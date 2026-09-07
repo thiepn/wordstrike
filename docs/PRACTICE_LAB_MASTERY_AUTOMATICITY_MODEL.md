@@ -542,3 +542,7 @@ Implements the real delay-aware retention evidence provider and makes Retained r
 ### PL25 — Daily Coach
 
 May consume mastery stage, automaticity, anchor eligibility, and hierarchy readiness as durable inputs. PL15 does not choose treatments, exercises, practice minutes, or Coach priority. Robust and Retained entities must remain available as potential stable anchors rather than being permanently excluded from future practice.
+
+## PL19 Full Assessment integration
+
+PL19 never assigns mastery stages. Full Assessment may strengthen the PL11 evidence later consumed by PL15, and its final historical report stores only bounded mastery/automaticity distribution counts from the canonical PL15 snapshot.

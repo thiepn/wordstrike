@@ -18,10 +18,10 @@ const contextId = "practice-context_123456789";
 const sessionId = "practice-session_123456789";
 
 test("PL18 version envelope is DB6/evaluation1/session11/foundation9 with v1 framework contracts", () => {
-  assert.equal(PRACTICE_DATABASE_VERSION, 6);
+  assert.equal(PRACTICE_DATABASE_VERSION, 7);
   assert.equal(PRACTICE_RECORD_VERSIONS.evaluationState, 1);
-  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 11);
-  assert.equal(PRACTICE_FOUNDATION_ANALYSIS_VERSION, 9);
+  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 12);
+  assert.equal(PRACTICE_FOUNDATION_ANALYSIS_VERSION, 10);
   assert.equal(PRACTICE_EVALUATION_FRAMEWORK_VERSION, 1);
   assert.equal(PRACTICE_EVALUATION_STATE_VERSION, 1);
   assert.equal(PRACTICE_EVALUATION_SELECTION_POLICY_VERSION, 1);
@@ -38,7 +38,7 @@ test("PL18 historical session v10 migrates to v11 with evaluationSummary null on
   delete historical.evaluationSummary;
   const migrated = migratePracticeRecord("sessionSummary", historical);
   assert.equal(migrated.ok, true);
-  assert.equal(migrated.value.recordVersion, 11);
+  assert.equal(migrated.value.recordVersion, 12);
   assert.equal(migrated.value.evaluationSummary, null);
-  assert.deepEqual(migrated.steps.slice(-1), ["sessionSummary:10->11"]);
+  assert.deepEqual(migrated.steps.slice(-1), ["sessionSummary:10->11", "sessionSummary:11->12"]);
 });

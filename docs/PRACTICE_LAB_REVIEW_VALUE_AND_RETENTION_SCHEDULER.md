@@ -766,3 +766,7 @@ Later Practice Lab phases may tune recommendation strategy, content assembly, or
 6. review importance cannot move due timestamps;
 7. retention-review practice cannot inflate PL16 acquisition dose;
 8. legacy v2 review counters are compatibility history, not canonical PL17 evidence.
+
+## PL19 Full Assessment integration
+
+PL19 assessment child sessions are never PL17 retention reviews. The parent assessment run is separate from review scheduling; active assessment child summaries receive temporary retention protection only while their parent run is active.

@@ -27,7 +27,7 @@ test("PL14 session configuration cannot spoof trusted performance metadata", () 
 });
 
 test("PL14 performance attachment remains immutable inside PL18 foundation analysis v9", () => {
-  assert.equal(PRACTICE_FOUNDATION_ANALYSIS_VERSION, 9);
+  assert.equal(PRACTICE_FOUNDATION_ANALYSIS_VERSION, 10);
   const base = Object.freeze({ version: 9, latency: null, errors: null, normalization: null, skills: null, ability: null, performance: null, learning: null, retention: null, evaluation: null });
   const performance = { version: 1, status: "not-requested", reasons: [], measurementKind: null, stateProbe: null, warmup: null, frontier: null, sessionSummary: null, performanceStateDelta: null };
   const attached = withPracticePerformanceAnalysis(base, performance);

@@ -1223,3 +1223,7 @@ A PL14 `state-probe` loads a frozen copy of the relevant PL13 ability state and 
 Likewise, PL14 control-frontier stage points never write `abilityStates`. The frontier is a separate speed/control boundary learned from controlled-stage observations. A future protocol may deliberately support more than one measurement role, but that requires a new versioned contract rather than implicit pooling.
 
 The shared adjusted-performance extraction introduced by PL14 preserves PL13's v1 ability-observation mathematics exactly: the same typability adjustment, uncertainty components, sigma/reliability calculations, eligibility gates, and recursive ability estimator remain authoritative. PL14 consumes those pure calculations; it does not redefine them.
+
+## PL19 Full Assessment integration
+
+PL19 Full Assessment Block 1 may contribute exactly one `cold-natural-text` PL13 ability observation when PL18 admits a fresh valid benchmark. The Deep cold-transfer block deliberately has `abilityChannel = null`, preventing two correlated ability observations from one assessment battery.

@@ -36,7 +36,7 @@ test("PL9 live events remain intact while PL18 sessions persist canonical errorS
   const beforeComplete = engine.getMetricsSnapshot();
   const result = await engine.complete("manual-stop");
 
-  assert.equal(result.summary.recordVersion, 11);
+  assert.equal(result.summary.recordVersion, 12);
   assert.equal(result.summary.abilityMeasurementSummary, null);
   assert.equal(result.summary.retentionReviewSummary, null);
   assert.equal(result.summary.evaluationSummary, null);
@@ -91,7 +91,7 @@ test("PL9 experiment analyzers receive frozen errors inside PL18 foundation v9 b
   const result = await engine.complete("manual-stop");
 
   assert.ok(received?.foundationAnalysis?.errors);
-  assert.equal(received.foundationAnalysis.version, 9);
+  assert.equal(received.foundationAnalysis.version, 10);
   assert.equal(received.foundationAnalysis.ability.status, "not-requested");
   assert.equal(received.foundationAnalysis.retention.status, "not-requested");
   assert.equal(received.foundationAnalysis.evaluation.status, "not-requested");
