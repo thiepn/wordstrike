@@ -18,7 +18,7 @@ const IDS = [
 export const PRACTICE_EXPERIMENT_IDS = Object.freeze(IDS);
 
 const definitions = [
-  ["full-assessment", "Full Assessment", "Assessment", "assessment", "Build a complete baseline of your typing skills.", "Measure sustainable and burst speed, accuracy, consistency, weak keys, combinations, problem words, and real-text performance.", 4, 4, 6, "adaptive", false, false, 6, 10, "assessment", "assessment", "complete typing profile"],
+  ["full-assessment", "Full Assessment", "Assessment", "assessment", "Measure a structured baseline with protected natural text and fixed diagnostics.", "Choose Quick, Standard, or Deep. The battery measures natural-text performance, first-pass control, diagnostic coverage, limiter evidence, and—when Deep is fully available—precommitted cold transfer. It reports uncertainty and unmeasured dimensions without producing one universal score.", 4, 12, 12, "all-levels", false, false, 6, 10, "assessment", "assessment", "structured typing measurement"],
   ["weak-keys", "Weak Keys", "Weak Keys", "precision", "Strengthen individual keys that cause errors or hesitation.", "Focused repetitions will use assessment and practice evidence to repair specific weak keys without wasting time on mastered keys.", 1, 3, 5, "adaptive", true, true, 8, 10, "key", "precision", "key speed and accuracy"],
   ["combination-repair", "Combination Repair", "Combinations", "precision", "Train slow or inaccurate key combinations.", "Targeted bigram and trigram practice will smooth transitions that repeatedly slow you down or cause mistakes.", 1, 3, 5, "adaptive", false, true, 9, 20, "combination", "precision", "combination timing"],
   ["problem-words", "Problem Words", "Problem Words", "precision", "Repair words that repeatedly break your rhythm.", "Practice troublesome words in varied contexts while tracking accuracy, correction cost, and fluent completion.", 2, 4, 6, "adaptive", false, true, 10, 30, "word", "precision", "word accuracy"],
@@ -90,5 +90,5 @@ export const PRACTICE_DAILY_TRAINING = deepFreeze({
   id: "daily-training", version: 1, title: "Today's Training",
   description: "Personalized sessions will combine weakness repair, accuracy, fluency, transfer, and speed practice.",
   recommendedDurationMinutes: 12, supportedDurationsMinutes: [5, 8, 12, 15], status: "planned",
-  requiresAssessment: true, requiresPracticeData: true, implementationPrompt: 15,
+  requiresAssessment: false, requiresPracticeData: true, implementationPrompt: 15,
 });
