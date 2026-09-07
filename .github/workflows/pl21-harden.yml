@@ -1,0 +1,32 @@
+name: PL21 harden
+
+on:
+  pull_request:
+
+permissions:
+  contents: write
+
+jobs:
+  harden:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: codex/pl21-weak-keys
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python scripts/pl21Harden.py
+      - run: |
+          if git diff --quiet; then
+            echo "No hardening changes needed."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add js/practiceLab/practiceWeakKeysSessionHost.js js/practiceLab/practiceLabControllerRuntime.js js/practiceLab/practiceWeakKeysGenerator.js tests/practice-weak-keys-session-integration.test.js tests/practice-weak-keys-composer-probes.test.js tests/practice-weak-keys-contract.test.js docs/PRACTICE_LAB_WEAK_KEYS.md
+          git commit -m "PL21: harden context and diversity contracts"
+          git push origin HEAD:codex/pl21-weak-keys
