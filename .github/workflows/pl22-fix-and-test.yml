@@ -16,7 +16,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Apply narrow source fixes
+      - name: Apply and commit narrow source fixes
         run: |
           python - <<'PY'
           from pathlib import Path
@@ -25,13 +25,11 @@ jobs:
           s = s.replace('word.surface === target', 'word.surfaceText === target')
           p.write_text(s)
           PY
-      - name: Run full suite
-        run: npm test
-      - name: Commit source fix if needed
-        run: |
           if git diff --quiet; then exit 0; fi
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add js/practiceLab/practiceProblemWordsGenerator.js
           git commit -m 'PL22 apply automated source fixes'
           git push origin HEAD:codex/pl22-problem-words
+      - name: Run full suite
+        run: npm test
