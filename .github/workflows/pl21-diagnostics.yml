@@ -1,0 +1,27 @@
+name: PL21 diagnostics
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  pl21:
+    strategy:
+      fail-fast: false
+      matrix:
+        test:
+          - practice-weak-keys-contract.test.js
+          - practice-weak-keys-composer-probes.test.js
+          - practice-weak-keys-selection.test.js
+          - practice-weak-keys-session-integration.test.js
+    name: ${{ matrix.test }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node tests/${{ matrix.test }}
