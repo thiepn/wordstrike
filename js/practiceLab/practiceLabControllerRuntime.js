@@ -10,6 +10,7 @@ export const PRACTICE_LAB_ONBOARDING_VERSION = 1;
 const HISTORY_LIMIT = 20;
 const COMBINATION_REPAIR_ID = "combination-repair";
 const LIMITED_CODES = new Set(["INSUFFICIENT_TARGET_WORDS", "INSUFFICIENT_TARGET_CONTENT", "INSUFFICIENT_PROBE_MATCH"]);
+const RECOMMENDATION_STATUSES = new Set(["ready", "no-evidence", "unavailable"]);
 
 export function createPracticeLabController({
   root,
@@ -17,6 +18,7 @@ export function createPracticeLabController({
   experimentRegistry,
   featureGate,
   renderer = renderPracticeLabV20,
+  combinationRepairRecommendationLoader = null,
   logger = null,
 } = {}) {
   let mounted = false;
@@ -28,12 +30,21 @@ export function createPracticeLabController({
   let combinationRepairState = createDefaultPracticeCombinationRepairUiState();
   let combinationSessionHost = null;
   let combinationPrepareEpoch = 0;
+  let combinationRecommendationEpoch = 0;
   const subscribers = new Set();
 
+  const isCombinationRepairRoute = () => route.name === PRACTICE_LAB_ROUTES.EXPERIMENT_DETAIL
+    && route.params?.experimentId === COMBINATION_REPAIR_ID;
   const snapshot = () => Object.freeze({
     mounted, route, historyDepth: history.length, listenerCount: mounted ? 1 : 0,
     renderCount, lastRenderReason, featureGate: featureGate.getSnapshot(), registry: experimentRegistry.getDiagnostics(),
-    combinationRepair: Object.freeze({ status: combinationRepairState.status, entityType: combinationRepairState.entityType, sessionActive: Boolean(combinationSessionHost) }),
+    combinationRepair: Object.freeze({
+      status: combinationRepairState.status,
+      entityType: combinationRepairState.entityType,
+      recommendationStatus: combinationRepairState.recommendationStatus,
+      recommendationCount: combinationRepairState.recommendations.length,
+      sessionActive: Boolean(combinationSessionHost),
+    }),
   });
   const emit = (type) => {
     const value = Object.freeze({ type, ...snapshot() });
@@ -53,12 +64,47 @@ export function createPracticeLabController({
     emit("rendered");
     return true;
   };
+  const setCombinationState = (patch, reason = "combination-state", focusSelector = null) => {
+    combinationRepairState = normalizePracticeCombinationRepairUiState({ ...combinationRepairState, ...patch });
+    render(reason, focusSelector);
+  };
+
+  const loadCombinationRepairRecommendations = async () => {
+    if (!mounted || !isCombinationRepairRoute() || combinationRepairState.recommendationStatus !== "idle") return false;
+    const epoch = ++combinationRecommendationEpoch;
+    setCombinationState({ recommendationStatus: "loading", recommendationErrorCode: null }, "combination-recommendations-loading");
+    try {
+      const result = typeof combinationRepairRecommendationLoader === "function"
+        ? await combinationRepairRecommendationLoader()
+        : await import("./practiceCombinationRepairRecommendationRuntime.js")
+            .then((module) => module.loadPracticeCombinationRepairRecommendations());
+      if (!mounted || epoch !== combinationRecommendationEpoch) return false;
+      const status = RECOMMENDATION_STATUSES.has(result?.status) ? result.status : "unavailable";
+      setCombinationState({
+        recommendationStatus: status,
+        recommendationErrorCode: status === "unavailable" ? result?.errorCode ?? "RECOMMENDATIONS_UNAVAILABLE" : null,
+        recommendations: status === "ready" ? result?.recommendations ?? [] : [],
+      }, "combination-recommendations-loaded");
+      return status === "ready";
+    } catch (error) {
+      if (!mounted || epoch !== combinationRecommendationEpoch) return false;
+      logger?.warn?.("Combination Repair recommendations failed", error);
+      setCombinationState({
+        recommendationStatus: "unavailable",
+        recommendationErrorCode: error?.code ?? "RECOMMENDATIONS_UNAVAILABLE",
+        recommendations: [],
+      }, "combination-recommendations-failed");
+      return false;
+    }
+  };
+
   const navigate = (nextRoute, { replace = false, returnFocusSelector = null } = {}) => {
     if (!mounted || !featureGate.canAccess() || combinationSessionHost) return false;
     const normalized = normalizePracticeLabRoute(nextRoute, { featureGate });
     if (!replace) history = [...history.slice(-(HISTORY_LIMIT - 1)), { route, focusSelector: returnFocusSelector }];
     route = normalized;
     render("navigation");
+    if (isCombinationRepairRoute()) void loadCombinationRepairRecommendations();
     return true;
   };
   const back = () => {
@@ -72,6 +118,7 @@ export function createPracticeLabController({
       route = previous.route;
       history = history.slice(0, -1);
       render("back", previous.focusSelector);
+      if (isCombinationRepairRoute()) void loadCombinationRepairRecommendations();
       return true;
     }
     appNavigation.exit?.();
@@ -79,11 +126,6 @@ export function createPracticeLabController({
   };
 
   const readCombinationTarget = () => root.querySelector?.("[data-combination-target]")?.value ?? combinationRepairState.targetValue;
-  const setCombinationState = (patch, reason = "combination-state", focusSelector = null) => {
-    combinationRepairState = normalizePracticeCombinationRepairUiState({ ...combinationRepairState, ...patch });
-    render(reason, focusSelector);
-  };
-
   const prepareCombinationRepair = async ({ entityType, entityKey, targetSource = "manual" }) => {
     const epoch = ++combinationPrepareEpoch;
     setCombinationState({ entityType, targetValue: entityKey, selectedSource: targetSource, status: "preparing", reasonCode: null, message: null }, "combination-prepare");
@@ -165,6 +207,7 @@ export function createPracticeLabController({
       root.addEventListener("click", click);
       unsubscribeRegistry = experimentRegistry.subscribe(() => render("registry-change"));
       render("mount");
+      if (isCombinationRepairRoute()) void loadCombinationRepairRecommendations();
       emit("mounted");
       return snapshot();
     },
@@ -179,6 +222,7 @@ export function createPracticeLabController({
     unmount() {
       if (!mounted) return false;
       combinationPrepareEpoch += 1;
+      combinationRecommendationEpoch += 1;
       if (combinationSessionHost) void combinationSessionHost.exit();
       combinationSessionHost = null;
       root.removeEventListener("click", click);
