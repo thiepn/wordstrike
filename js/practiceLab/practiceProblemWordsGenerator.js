@@ -119,7 +119,7 @@ function neutralLexicalPool(candidates, annotationsByContent, contentById, targe
 function makeGeneratedUnit({ words, target, source, id, compositionMode, language, context }) {
   const text = words.join(" ");
   const analysis = analyzePracticeText({ text, language });
-  const targetWords = (analysis.words ?? []).filter((word) => word.lexicalKey === target && word.surface === target);
+  const targetWords = (analysis.words ?? []).filter((word) => word.lexicalKey === target && word.surfaceText === target);
   if (targetWords.length > 2) throw new TypeError("Problem Words generated unit exceeded its target cap");
   const targetOpportunityCount = targetWords.length;
   const launchSignatures = targetWords.map((word) => {
