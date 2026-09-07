@@ -5,6 +5,7 @@ import { buildPracticeWeakKeysPlan } from "../js/practiceLab/practiceWeakKeysPla
 import { buildPracticeWeakKeysContentPlan } from "../js/practiceLab/practiceWeakKeysGenerator.js";
 import { createPracticeWeakKeysRegistration } from "../js/practiceLab/practiceWeakKeysExperiment.js";
 import { resolvePracticeEvidenceRole } from "../js/practiceLab/practiceEvidenceRole.js";
+import { assertPracticeWeakKeysSessionContext } from "../js/practiceLab/practiceWeakKeysTrust.js";
 import { createPracticeSessionHarness } from "./practiceSessionFixtures.js";
 
 const TARGET_WORDS = Object.freeze(["rain", "road", "green", "crisp", "drum", "frame", "bread", "star"]);
@@ -76,7 +77,14 @@ function fixturePlan(sessionId) {
   });
   return buildPracticeWeakKeysPlan({
     sessionId,
-    context: { dataLocale: "en", keyboardLayout: "qwerty" },
+    context: {
+      contextId: "practice-context_pl21-plan-fixture",
+      fingerprint: "pl21-plan-fixture-fingerprint",
+      dataLocale: "en",
+      keyboardLayout: "qwerty",
+      inputMethod: "physical-keyboard",
+      hardwareProfileId: null,
+    },
     language: "en",
     entityKey: "r",
     targetSource: "manual",
@@ -124,6 +132,9 @@ test("PL21 plan/content are immutable, fixed-dose, cue-faded, and contain no iso
   assert.deepEqual(plan.phases.map((phase) => phase.targetOpportunityCount), [8, 24, 20, 20, 8]);
   assert.deepEqual(plan.phases.map((phase) => phase.cue), ["none", "strong", "subtle", "none", "none"]);
   assert.equal(plan.targetOpportunityBudget, 80);
+  assert.equal(plan.contextBinding.contextId, "practice-context_pl21-plan-fixture");
+  assert.deepEqual(plan.phaseBoundaries.map((phase) => [phase.targetOpportunityStart, phase.targetOpportunityEnd]), [[0, 8], [8, 32], [32, 52], [52, 72], [72, 80]]);
+  assert.equal(contentPlan.metadata.weakKeys.contextBinding.fingerprint, "pl21-plan-fixture-fingerprint");
   assert.equal(contentPlan.metadata.partition, "training");
   assert.equal(contentPlan.metadata.weakKeys.resumable, false);
   assert.equal(contentPlan.completion.mode, "content");
@@ -138,6 +149,15 @@ test("PL21 trusted training role is object-bound and a serialized metadata clone
   assert.equal(resolvePracticeEvidenceRole({ contentPlan: session.contentPlan }), "training");
   const clone = JSON.parse(JSON.stringify(session.contentPlan));
   assert.equal(resolvePracticeEvidenceRole({ contentPlan: clone }), "unclassified");
+});
+
+test("PL21 rejects a session when the active PL5 context changed after plan generation", async () => {
+  const session = await preparedSession("practice-session_pl21-context-fixture");
+  assert.equal(assertPracticeWeakKeysSessionContext(session.weakKeysPlan, session.weakKeysPlan.contextBinding), true);
+  assert.throws(
+    () => assertPracticeWeakKeysSessionContext(session.weakKeysPlan, { ...session.weakKeysPlan.contextBinding, fingerprint: "different-fingerprint" }),
+    (error) => error.code === "PRACTICE_WEAK_KEYS_CONTEXT_MISMATCH",
+  );
 });
 
 test("PL21 completes through the shared Practice engine with exactly one direct PL16 key dose", async () => {

@@ -51,7 +51,7 @@ export function createPracticeLabController({
   const isWeakKeysRoute = () => route.name === PRACTICE_LAB_ROUTES.EXPERIMENT_DETAIL && route.params?.experimentId === WEAK_KEYS_ID;
   const hasSessionHost = () => Boolean(combinationSessionHost || weakKeysSessionHost);
   const snapshot = () => Object.freeze({
-    mounted, route, historyDepth: history.length, listenerCount: mounted ? 1 : 0,
+    mounted, route, historyDepth: history.length, listenerCount: mounted ? 2 : 0,
     renderCount, lastRenderReason, featureGate: featureGate.getSnapshot(), registry: experimentRegistry.getDiagnostics(),
     combinationRepair: Object.freeze({
       status: combinationRepairState.status,

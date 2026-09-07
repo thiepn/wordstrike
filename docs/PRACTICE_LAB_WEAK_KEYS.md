@@ -216,7 +216,7 @@ The phase sequence is fixed:
 
 The plan is immutable after construction. Poor performance does not double the dose; a strong Baseline does not skip Focus; the target never changes mid-session.
 
-The plan hash binds target, versions, phase quotas/order, source IDs/hashes, generated word IDs, cue policy, and corpus/index identity.
+The plan hash binds target, versions, explicit phase boundaries, ordered source IDs/hashes, generated word IDs, cue policy, corpus/index identity, and the active PL5 context identity. If the active Practice context fingerprint changes between plan generation and session start, the session fails instead of reusing geometry/content assumptions under another context.
 
 ## 15. No isolated-letter spam
 

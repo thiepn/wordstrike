@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
+  orderPracticeWeakKeysLexicalCoverage,
   selectPracticeWeakKeysExactQuota,
 } from "../js/practiceLab/practiceWeakKeysComposer.js";
 import {
@@ -69,6 +70,20 @@ test("PL21 exact composer prefers the more diverse valid solution", () => {
   assert.equal(selected.metrics.uniqueFamilyCount, 2);
   assert.equal(selected.metrics.distinctLexicalCount, 2);
   assert.equal(selected.metrics.positionClassCount, 2);
+});
+
+test("PL21 lexical ordering visits every selected word before beginning a repetition round", () => {
+  const units = [
+    candidate("a1", 1, "f1", "rain"),
+    candidate("a2", 1, "f1", "rain"),
+    candidate("b1", 1, "f2", "road"),
+    candidate("b2", 1, "f2", "road"),
+    candidate("c1", 1, "f3", "river"),
+    candidate("c2", 1, "f3", "river"),
+  ];
+  const ordered = orderPracticeWeakKeysLexicalCoverage(units, baseOptions);
+  assert.equal(new Set(ordered.slice(0, 3).map((unit) => unit.lexicalKey)).size, 3);
+  assert.equal(new Set(ordered.slice(3, 6).map((unit) => unit.lexicalKey)).size, 3);
 });
 
 function probeUnit({ id, family, content, positionCounts, geometryCounts, typability = 0.5, featureShift = 0 }) {

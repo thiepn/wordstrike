@@ -2,6 +2,7 @@ import { createPracticeIndexedDbStore } from "./practiceIndexedDbStore.js";
 import { createPracticeManifestStore } from "./practiceManifestStore.js";
 import { createPracticeRepository } from "./practiceRepository.js";
 import { createPracticeSessionEngine } from "./practiceSessionEngine.js";
+import { assertPracticeWeakKeysSessionContext } from "./practiceWeakKeysTrust.js";
 
 const SESSION_ACTION_SELECTOR = "[data-weak-keys-session-action]";
 const INSERT_TYPES = new Set(["insertText", "insertCompositionText"]);
@@ -147,6 +148,7 @@ export async function mountPracticeWeakKeysSession({
   const manifestStore = dependencies.manifestStore ?? createPracticeManifestStore();
   const repository = dependencies.repository ?? createPracticeRepository({ dataStore, manifestStore });
   const initialized = dependencies.initialized ?? await repository.initializePracticeStorage();
+  assertPracticeWeakKeysSessionContext(session.weakKeysPlan, initialized.context);
   const engineFactory = dependencies.engineFactory ?? createPracticeSessionEngine;
   const engine = engineFactory({
     repository,

@@ -24,6 +24,7 @@ import {
 import { normalizePracticeWeakKeysManualInput } from "../js/practiceLab/practiceWeakKeysUi.js";
 import { getPracticeExperiment } from "../js/practiceLab/practiceExperimentCatalog.js";
 import { createPracticeWeakKeysDescriptor } from "../js/practiceLab/practiceWeakKeysExperiment.js";
+import { classifyPracticeKeyboardGeometry } from "../js/practiceLab/practiceKeyboardGeometry.js";
 
 function readyIndex() {
   const calls = [];
@@ -89,6 +90,16 @@ test("English Weak Keys rejects multi-character, whitespace, digits, punctuation
 test("non-English target policy is explicitly unsupported rather than globally ASCII-normalized", () => {
   assert.deepEqual(getPracticeWeakKeysLanguageSupport("fr-FR"), { language: "fr", supported: false, version: 1 });
   assert.equal(normalizePracticeWeakKeyTarget({ entityType: "key", entityKey: "r", language: "fr" }), null);
+});
+
+test("Weak Keys geometry uses the declared QWERTZ/AZERTY layout and leaves unknown layouts unavailable", () => {
+  const qwertz = classifyPracticeKeyboardGeometry({ layout: "qwertz", previousExpected: "y", currentExpected: "z" });
+  const azerty = classifyPracticeKeyboardGeometry({ layout: "azerty", previousExpected: "a", currentExpected: "z" });
+  const unknown = classifyPracticeKeyboardGeometry({ layout: "custom-layout", previousExpected: "a", currentExpected: "z" });
+  assert.equal(qwertz.known, true);
+  assert.equal(azerty.known, true);
+  assert.equal(unknown.known, false);
+  assert.equal(unknown.geometryClass, "unknown");
 });
 
 test("target availability consumes only training reverse-index APIs", async () => {

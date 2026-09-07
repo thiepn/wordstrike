@@ -11,7 +11,10 @@ import {
   PRACTICE_WEAK_KEYS_PHASE_QUOTAS,
 } from "./practiceWeakKeysConstants.js";
 import { PRACTICE_WEAK_KEYS_POLICY_V1 } from "./practiceWeakKeysPolicy.js";
-import { selectPracticeWeakKeysExactQuota } from "./practiceWeakKeysComposer.js";
+import {
+  orderPracticeWeakKeysLexicalCoverage,
+  selectPracticeWeakKeysExactQuota,
+} from "./practiceWeakKeysComposer.js";
 import { selectPracticeWeakKeysProbePair } from "./practiceWeakKeysProbeMatch.js";
 import {
   buildPracticeWeakKeysPlan,
@@ -403,12 +406,31 @@ async function composeWeakKeysPhases({ sessionId, context, target, targetIndex, 
 
   const focusAll = generatedTargetPool(wordCandidates, PRACTICE_WEAK_KEYS_PHASE_QUOTAS.focus, { compositionMode: "generated-word-sequence", salt: "focus" });
   const preferredFocus = focusAll.filter((unit) => unit.wordLength >= policy.content.focusPreferredWordLengthMin && unit.wordLength <= policy.content.focusPreferredWordLengthMax);
-  const focusOptions = preferredFocus.length >= policy.content.hardMinimumTargetWords ? preferredFocus : focusAll;
-  const focus = selectPracticeWeakKeysExactQuota(focusOptions, PRACTICE_WEAK_KEYS_PHASE_QUOTAS.focus, {
-    sessionId, entityKey: target.entityKey, generatorVersion: PRACTICE_WEAK_KEYS_GENERATOR_VERSION, policyVersion: policy.version, salt: "focus",
-    preferredTypabilityRange: [policy.content.focusPreferredTypabilityPercentileMin, policy.content.focusPreferredTypabilityPercentileMax],
-  });
+  const disjointFromProbes = (unit) => !(unit.sourceFamilyIds ?? []).some((id) => probeFamilies.has(id))
+    && !(unit.sourceContentIds ?? []).some((id) => probeContents.has(id));
+  const focusPools = [
+    [preferredFocus.filter(disjointFromProbes), "focus-short-disjoint"],
+    [focusAll.filter(disjointFromProbes), "focus-disjoint"],
+    [preferredFocus, "focus-short"],
+    [focusAll, "focus-fallback"],
+  ];
+  let focus = null;
+  for (const [pool, salt] of focusPools) {
+    if (!pool.length) continue;
+    focus = selectPracticeWeakKeysExactQuota(pool, PRACTICE_WEAK_KEYS_PHASE_QUOTAS.focus, {
+      sessionId, entityKey: target.entityKey, generatorVersion: PRACTICE_WEAK_KEYS_GENERATOR_VERSION, policyVersion: policy.version, salt,
+      preferredTypabilityRange: [policy.content.focusPreferredTypabilityPercentileMin, policy.content.focusPreferredTypabilityPercentileMax],
+    });
+    if (focus) break;
+  }
   if (!focus || focus.metrics.distinctLexicalCount < policy.content.hardMinimumTargetWords) throw createPracticeWeakKeysError(PRACTICE_WEAK_KEYS_ERRORS.INSUFFICIENT_KEY_WORDS, "Weak Keys Focus phase cannot satisfy lexical diversity and exact dose");
+  const focusUnits = orderPracticeWeakKeysLexicalCoverage(focus.units, {
+    sessionId,
+    entityKey: target.entityKey,
+    generatorVersion: PRACTICE_WEAK_KEYS_GENERATOR_VERSION,
+    policyVersion: policy.version,
+    salt: "focus-lexical-coverage",
+  });
 
   const generatedContext = generatedTargetPool(wordCandidates, PRACTICE_WEAK_KEYS_PHASE_QUOTAS.context, { compositionMode: "generated-word-sequence", salt: "context" });
   const contextPreferred = [...naturalCandidates.filter((unit) => !probeFamilies.has(unit.familyId) && !probeContents.has(unit.contentId)), ...generatedContext.filter((unit) => !(unit.sourceFamilyIds ?? []).some((id) => probeFamilies.has(id)) && !(unit.sourceContentIds ?? []).some((id) => probeContents.has(id)))];
@@ -425,8 +447,11 @@ async function composeWeakKeysPhases({ sessionId, context, target, targetIndex, 
   }
 
   const mixTargetPool = generatedTargetPool(wordCandidates, PRACTICE_WEAK_KEYS_PHASE_QUOTAS.interleave, { compositionMode: "generated-word-sequence", salt: "mix-target" });
-  const mixTarget = selectPracticeWeakKeysExactQuota(mixTargetPool, PRACTICE_WEAK_KEYS_PHASE_QUOTAS.interleave, {
-    sessionId, entityKey: target.entityKey, generatorVersion: PRACTICE_WEAK_KEYS_GENERATOR_VERSION, policyVersion: policy.version, salt: "mix-target",
+  const mixDisjointPool = mixTargetPool.filter(disjointFromProbes);
+  const mixTarget = (mixDisjointPool.length ? selectPracticeWeakKeysExactQuota(mixDisjointPool, PRACTICE_WEAK_KEYS_PHASE_QUOTAS.interleave, {
+    sessionId, entityKey: target.entityKey, generatorVersion: PRACTICE_WEAK_KEYS_GENERATOR_VERSION, policyVersion: policy.version, salt: "mix-target-disjoint",
+  }) : null) ?? selectPracticeWeakKeysExactQuota(mixTargetPool, PRACTICE_WEAK_KEYS_PHASE_QUOTAS.interleave, {
+    sessionId, entityKey: target.entityKey, generatorVersion: PRACTICE_WEAK_KEYS_GENERATOR_VERSION, policyVersion: policy.version, salt: "mix-target-fallback",
   });
   if (!mixTarget) throw createPracticeWeakKeysError(PRACTICE_WEAK_KEYS_ERRORS.INSUFFICIENT_KEY_CONTENT, "Weak Keys Mix phase cannot satisfy its exact target quota");
 
@@ -447,12 +472,12 @@ async function composeWeakKeysPhases({ sessionId, context, target, targetIndex, 
     interleaved.push(mixTarget.units[index]);
     interleaved.push(neutralUnits[index % neutralUnits.length]);
   }
-  const targetTrainingUnits = [...focus.units, ...contextSelection.units, ...mixTarget.units];
+  const targetTrainingUnits = [...focusUnits, ...contextSelection.units, ...mixTarget.units];
   const coverage = aggregateCoverage(targetTrainingUnits, neutralUnits);
   return freezeDeep({
     phaseUnits: {
       "entry-probe": probePair.entry.units,
-      focus: focus.units,
+      focus: focusUnits,
       context: contextSelection.units,
       interleave: interleaved,
       "exit-probe": probePair.exit.units,
