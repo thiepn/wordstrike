@@ -80,14 +80,15 @@ function validObservation(index = 1) {
   };
 }
 
-test("PL13 ability contracts remain intact inside the PL18 storage/session/foundation envelope", () => {
-  assert.equal(PRACTICE_DATABASE_VERSION, 6);
+test("PL13 ability contracts remain intact inside the PL19 storage/session/foundation envelope", () => {
+  assert.equal(PRACTICE_DATABASE_VERSION, 7);
   assert.equal(PRACTICE_RECORD_VERSIONS.abilityState, 1);
   assert.equal(PRACTICE_RECORD_VERSIONS.skillStat, 3);
-  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 11);
+  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 12);
   assert.equal(PRACTICE_RECORD_VERSIONS.checkpoint, 3);
   assert.equal(PRACTICE_RECORD_VERSIONS.evaluationState, 1);
-  assert.equal(PRACTICE_FOUNDATION_ANALYSIS_VERSION, 9);
+  assert.equal(PRACTICE_RECORD_VERSIONS.assessmentRun, 1);
+  assert.equal(PRACTICE_FOUNDATION_ANALYSIS_VERSION, 10);
   assert.equal(PRACTICE_ABILITY_ESTIMATOR_VERSION, 1);
   assert.equal(PRACTICE_ABILITY_POLICY_VERSION, 1);
   assert.equal(PRACTICE_ABILITY_OBSERVATION_VERSION, 1);
@@ -104,7 +105,7 @@ test("PL13 abilityStates schema has exact key/index ownership and unique profile
   assert.equal(PRACTICE_LIMITS.abilityStateBytes, 32 * 1024);
 });
 
-test("PL13 abilityStates remain structurally correct in the current fresh DB v6 schema", () => {
+test("PL13 abilityStates remain structurally correct in the current fresh DB v7 schema", () => {
   const fresh = makeDatabase();
   applyPracticeDatabaseUpgrade(fresh);
   assert.deepEqual([...fresh.stores.keys()], PRACTICE_STORE_NAMES);
@@ -126,7 +127,7 @@ test("PL13 v2-to-v3 ability-store upgrade still creates only abilityStates when 
   assert.equal(upgraded.stores.get("abilityStates").snapshot().find((index) => index.name === "profileContextChannel")?.options?.unique, true);
 });
 
-test("PL13 sessionSummary v6 ability migration remains null through the current PL18 v11 wrapper", () => {
+test("PL13 sessionSummary v6 ability migration remains null through the current PL19 v12 wrapper", () => {
   const current = createDefaultSessionSummary({ profileId, contextId, now: () => new Date("2026-09-05T10:00:00.000Z") });
   const historical = { ...current, recordVersion: 6 };
   delete historical.abilityMeasurementSummary;
@@ -134,15 +135,17 @@ test("PL13 sessionSummary v6 ability migration remains null through the current 
   delete historical.learningEvidenceSummary;
   delete historical.retentionReviewSummary;
   delete historical.evaluationSummary;
+  delete historical.assessmentBinding;
   const migration = migratePracticeRecord("sessionSummary", historical);
   assert.equal(migration.ok, true);
-  assert.deepEqual(migration.steps, ["sessionSummary:6->7", "sessionSummary:7->8", "sessionSummary:8->9", "sessionSummary:9->10", "sessionSummary:10->11"]);
-  assert.equal(migration.value.recordVersion, 11);
+  assert.deepEqual(migration.steps, ["sessionSummary:6->7", "sessionSummary:7->8", "sessionSummary:8->9", "sessionSummary:9->10", "sessionSummary:10->11", "sessionSummary:11->12"]);
+  assert.equal(migration.value.recordVersion, 12);
   assert.equal(migration.value.abilityMeasurementSummary, null);
   assert.equal(migration.value.performanceMeasurementSummary, null);
   assert.equal(migration.value.learningEvidenceSummary, null);
   assert.equal(migration.value.retentionReviewSummary, null);
   assert.equal(migration.value.evaluationSummary, null);
+  assert.equal(migration.value.assessmentBinding, null);
   assert.equal(Object.hasOwn(migration.value, "newAbilityEstimate"), false);
 });
 
