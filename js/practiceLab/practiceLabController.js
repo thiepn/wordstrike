@@ -43,7 +43,8 @@ export function createPracticeLabController(options = {}) {
     runtimePromise = Promise.all([
       import("./practiceExperimentRegistryRuntime.js"),
       import("./practiceLabControllerRuntime.js"),
-    ]).then(([registryModule, controllerModule]) => {
+      import("./practiceCombinationRepairExperiment.js"),
+    ]).then(([registryModule, controllerModule, combinationRepairModule]) => {
       const lazyRegistry = getPracticeRegistryLazyState(experimentRegistry);
       if (lazyRegistry?.destroyed) return null;
 
@@ -52,6 +53,8 @@ export function createPracticeLabController(options = {}) {
         resolvedRegistry = registryModule.createPracticeExperimentRegistry(lazyRegistry.options);
         if (!attachPracticeRegistryRuntime(experimentRegistry, resolvedRegistry)) return null;
       }
+
+      combinationRepairModule.registerPracticeCombinationRepairExperiment(resolvedRegistry);
 
       runtimeController = controllerModule.createPracticeLabController({
         ...options,
