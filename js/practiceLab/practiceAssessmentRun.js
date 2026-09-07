@@ -9,6 +9,7 @@ import { createPracticeAssessmentRunId } from "./practiceIds.js";
 
 const iso = (value) => new Date(value).toISOString();
 const clone = (value) => JSON.parse(JSON.stringify(value));
+const encodedBytes = (value) => new TextEncoder().encode(JSON.stringify(value)).byteLength;
 
 export function createDefaultPracticeAssessmentRun({ assessmentRunId = createPracticeAssessmentRunId(), profileId, contextId, depth, plan, now = Date.now } = {}) {
   const createdAt = iso(now());
@@ -60,7 +61,7 @@ export function validatePracticeAssessmentRun(run) {
     if (block.status === "completed" && (!block.childSessionId || !block.completedAt || !block.result)) errors.push({ path: `blocks.${i}`, code: "COMPLETED_INCOMPLETE" });
   }
   if (run.status === "completed" && !run.completedAt) errors.push({ path: "completedAt", code: "REQUIRED" });
-  if (run.report && JSON.stringify(run).length > 128 * 1024) errors.push({ path: "run", code: "SIZE" });
+  if (encodedBytes(run) > 128 * 1024) errors.push({ path: "run", code: "SIZE" });
   return { valid: errors.length === 0, errors };
 }
 
@@ -82,6 +83,21 @@ export function markPracticeAssessmentBlockStarted(run, { blockId, childSessionI
   block.status = "active";
   block.startedAt = iso(now());
   block.childSessionId = childSessionId;
+  return next;
+}
+
+export function invalidatePracticeAssessmentPendingBlock(run, { blockId, reason = "preparation-failed", now = Date.now } = {}) {
+  const index = run.progress.currentBlockIndex;
+  const current = run.blocks[index];
+  if (run.status !== "active" || !current || current.blockId !== blockId || current.status !== "pending") throw new Error("Assessment pending block cannot be invalidated out of order");
+  const next = clone(run);
+  const block = next.blocks[index];
+  block.status = "invalid";
+  block.completedAt = iso(now());
+  block.result = { status: "invalid", reason };
+  next.progress.terminalBlockCount += 1;
+  next.progress.currentBlockIndex = Math.min(index + 1, next.blocks.length);
+  if (next.integrityStatus !== "invalid") next.integrityStatus = "partial";
   return next;
 }
 
