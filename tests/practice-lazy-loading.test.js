@@ -39,6 +39,7 @@ assert.match(controllerRuntime, /from "\.\/practiceLabRendererV20\.js"/);
 assert.match(controllerRuntime, /from "\.\/practiceLabRoutes\.js"/);
 assert.doesNotMatch(controllerRuntime, /from "\.\/practice(?:SessionEngine|Repository|IndexedDbStore|ManifestStore)\.js"/);
 assert.match(controllerRuntime, /import\("\.\/practiceCombinationRepairSessionHost\.js"\)/);
+assert.match(controllerRuntime, /import\("\.\/practiceCombinationRepairRecommendationRuntime\.js"\)/);
 assert.match(registryRuntime, /from "\.\/practiceSessionContract\.js"/);
 assert.match(registryRuntime, /from "\.\/practiceExperimentCatalog\.js"/);
 
@@ -48,4 +49,4 @@ const browserStaticPracticeImports = [
 ].map((match) => match[1]);
 assert.deepEqual(browserStaticPracticeImports, ["./practiceExperimentRegistry.js"]);
 
-console.log("Practice Lab heavy runtime is excluded from the normal browser static import graph; PL20 session storage/engine code remains lazy until a runnable target starts.");
+console.log("Practice Lab heavy runtime is excluded from the normal browser static import graph; PL20 recommendation storage and session engine code load only on the relevant Practice routes.");
