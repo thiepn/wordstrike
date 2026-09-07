@@ -11,6 +11,7 @@ import {
   activatePracticeAssessmentRun,
   abandonPracticeAssessmentRun,
   createDefaultPracticeAssessmentRun,
+  invalidatePracticeAssessmentPendingBlock,
   mergePracticeAssessmentBlockDelta,
 } from "./practiceAssessmentRun.js";
 import {
@@ -67,22 +68,6 @@ function transferReservable(state, pool) {
     .filter((entry) => entry.kind === "cold-transfer" && entry.poolId === pool.poolId && entry.poolVersion === pool.poolVersion)
     .map((entry) => entry.selectedUnitId));
   return pool.units.some((unit) => !claimed.has(unit.unitId) && !reserved.has(unit.unitId));
-}
-
-async function abandonPlanReservations(repository, plan) {
-  if (!plan) return;
-  for (const block of plan.blocks ?? []) {
-    if (!block.evaluationReservationId) continue;
-    try {
-      await repository.abandonPracticeEvaluationReservation({
-        profileId: plan.profileId ?? null,
-        contextId: plan.contextId ?? null,
-        reservationId: block.evaluationReservationId,
-      });
-    } catch {
-      // Reservation expiry remains a safe fallback. Never create an exposure while cleaning up.
-    }
-  }
 }
 
 export function createPracticeAssessmentService({
@@ -157,6 +142,19 @@ export function createPracticeAssessmentService({
     }
   };
 
+  const invalidatePreparationFailure = async (run, block, cause) => {
+    const latest = await repository.getAssessmentRun(run.assessmentRunId);
+    const current = latest?.blocks?.[latest?.progress?.currentBlockIndex] ?? null;
+    if (latest?.status === "active" && current?.blockId === block.blockId && current.status === "pending") {
+      const next = invalidatePracticeAssessmentPendingBlock(latest, {
+        blockId: block.blockId,
+        reason: cause?.code ?? "preparation-failed",
+        now,
+      });
+      await repository.saveAssessmentRun(next);
+    }
+  };
+
   const prepareNextBlock = async ({ assessmentRunId, sessionId } = {}) => {
     const run = await repository.getAssessmentRun(assessmentRunId);
     if (!run || run.status !== "active") throw serviceError("PRACTICE_ASSESSMENT_RUN_INACTIVE", "Full Assessment run is missing or inactive");
@@ -171,62 +169,67 @@ export function createPracticeAssessmentService({
     let rawContent = null;
     let diagnosticFreshness = null;
 
-    if (block.blockKind === "diagnostic") {
-      const runs = await repository.listAssessmentRuns(run.profileId);
-      const exposures = countDiagnosticStartedExposures(runs);
-      diagnosticFreshness = Number(exposures[block.diagnosticFormId] ?? 0) > 0 ? "repeat" : "fresh";
-      const set = diagnosticRegistry.getFormSet(run.plan?.language ?? run.language ?? "en", block.blockId)
-        ?? diagnosticRegistry.listArtifacts().flatMap((artifact) => artifact.formSets ?? []).find((entry) => entry.blockId === block.blockId && entry.forms?.some((form) => form.formId === block.diagnosticFormId));
-      const form = set?.forms?.find((entry) => entry.formId === block.diagnosticFormId) ?? null;
-      if (!form || set?.status !== "ready") throw serviceError("PRACTICE_ASSESSMENT_DIAGNOSTIC_NOT_READY", "Frozen diagnostic form is unavailable");
-      if (typeof loadDiagnosticFormContent !== "function") throw new TypeError("Assessment diagnostic start requires explicit same-origin diagnostic content loader");
-      const loaded = await loadDiagnosticFormContent({ blockId: block.blockId, formId: block.diagnosticFormId, form });
-      if (!loaded || typeof loaded.text !== "string") throw serviceError("PRACTICE_ASSESSMENT_DIAGNOSTIC_LOAD_FAILED", "Diagnostic content loader returned no text");
-      rawContent = {
-        contentId: loaded.contentId ?? `practice-content_assessment-${block.diagnosticFormId}`.replace(/[^a-z0-9._-]/gi, "-"),
-        contentGeneratorVersion: 1,
-        text: loaded.text,
-        targetEntities: [],
-        completion: { mode: "duration", value: block.durationMs },
-        metadata: {
-          sourceType: "assessment-diagnostic",
-          partition: "diagnostic",
-          assessmentDiagnosticFormId: block.diagnosticFormId,
-          assessmentBlockId: block.blockId,
-        },
-      };
-    } else {
-      evaluationArtifact = block.blockKind === "benchmark"
-        ? (benchmarkRegistry.getSuite(block.evaluationArtifactId) ?? await benchmarkRegistry.loadSuite(block.evaluationArtifactId))
-        : (transferRegistry.getPool(block.evaluationArtifactId) ?? await transferRegistry.loadPool(block.evaluationArtifactId));
-      const version = block.blockKind === "benchmark" ? evaluationArtifact?.suiteVersion : evaluationArtifact?.poolVersion;
-      if (!evaluationArtifact || evaluationArtifact.status !== "ready" || version !== block.evaluationArtifactVersion) throw serviceError("PRACTICE_ASSESSMENT_PROTECTED_ARTIFACT_STALE", "Frozen protected evaluation artifact is unavailable or stale");
-      if (!block.evaluationReservationId) throw serviceError("PRACTICE_ASSESSMENT_RESERVATION_MISSING", "Frozen protected block has no reservation");
-      const claim = await repository.claimPracticeEvaluationReservation({
-        profileId: run.profileId,
-        contextId: run.contextId,
-        reservationId: block.evaluationReservationId,
-        sessionId,
-        artifact: evaluationArtifact,
-        now,
-      });
-      evaluationPlan = buildPracticeEvaluationPlan({ binding: claim.binding, artifact: evaluationArtifact, historyStatus: claim.state?.historyStatus ?? "partial" });
-      rawContent = await loadPracticeEvaluationContent({ plan: evaluationPlan, loadContentItems: loadProtectedContentItems });
-    }
+    try {
+      if (block.blockKind === "diagnostic") {
+        const runs = await repository.listAssessmentRuns(run.profileId);
+        const exposures = countDiagnosticStartedExposures(runs);
+        diagnosticFreshness = Number(exposures[block.diagnosticFormId] ?? 0) > 0 ? "repeat" : "fresh";
+        const set = diagnosticRegistry.getFormSet(run.plan.language, block.blockId)
+          ?? diagnosticRegistry.listArtifacts().flatMap((artifact) => artifact.formSets ?? []).find((entry) => entry.blockId === block.blockId && entry.forms?.some((form) => form.formId === block.diagnosticFormId));
+        const form = set?.forms?.find((entry) => entry.formId === block.diagnosticFormId) ?? null;
+        if (!form || set?.status !== "ready") throw serviceError("PRACTICE_ASSESSMENT_DIAGNOSTIC_NOT_READY", "Frozen diagnostic form is unavailable");
+        if (typeof loadDiagnosticFormContent !== "function") throw serviceError("PRACTICE_ASSESSMENT_DIAGNOSTIC_LOAD_FAILED", "Assessment diagnostic start requires explicit same-origin diagnostic content loader");
+        const loaded = await loadDiagnosticFormContent({ blockId: block.blockId, formId: block.diagnosticFormId, form });
+        if (!loaded || typeof loaded.text !== "string") throw serviceError("PRACTICE_ASSESSMENT_DIAGNOSTIC_LOAD_FAILED", "Diagnostic content loader returned no text");
+        rawContent = {
+          contentId: loaded.contentId ?? `practice-content_assessment-${block.diagnosticFormId}`.replace(/[^a-z0-9._-]/gi, "-"),
+          contentGeneratorVersion: 1,
+          text: loaded.text,
+          targetEntities: [],
+          completion: { mode: "duration", value: block.durationMs },
+          metadata: {
+            sourceType: "assessment-diagnostic",
+            partition: "diagnostic",
+            assessmentDiagnosticFormId: block.diagnosticFormId,
+            assessmentBlockId: block.blockId,
+          },
+        };
+      } else {
+        evaluationArtifact = block.blockKind === "benchmark"
+          ? (benchmarkRegistry.getSuite(block.evaluationArtifactId) ?? await benchmarkRegistry.loadSuite(block.evaluationArtifactId))
+          : (transferRegistry.getPool(block.evaluationArtifactId) ?? await transferRegistry.loadPool(block.evaluationArtifactId));
+        const version = block.blockKind === "benchmark" ? evaluationArtifact?.suiteVersion : evaluationArtifact?.poolVersion;
+        if (!evaluationArtifact || evaluationArtifact.status !== "ready" || version !== block.evaluationArtifactVersion) throw serviceError("PRACTICE_ASSESSMENT_PROTECTED_ARTIFACT_STALE", "Frozen protected evaluation artifact is unavailable or stale");
+        if (!block.evaluationReservationId) throw serviceError("PRACTICE_ASSESSMENT_RESERVATION_MISSING", "Frozen protected block has no reservation");
+        const claim = await repository.claimPracticeEvaluationReservation({
+          profileId: run.profileId,
+          contextId: run.contextId,
+          reservationId: block.evaluationReservationId,
+          sessionId,
+          artifact: evaluationArtifact,
+          now,
+        });
+        evaluationPlan = buildPracticeEvaluationPlan({ binding: claim.binding, artifact: evaluationArtifact, historyStatus: claim.state?.historyStatus ?? "partial" });
+        rawContent = await loadPracticeEvaluationContent({ plan: evaluationPlan, loadContentItems: loadProtectedContentItems });
+      }
 
-    const contentPlan = createPracticeContentPlan(rawContent);
-    const assessmentBinding = createPracticeAssessmentBlockBinding(run.plan, block, { diagnosticFreshness });
-    registerPracticeTrustedAssessmentBinding(contentPlan, assessmentBinding);
-    return freezeDeep({
-      run,
-      block,
-      descriptor,
-      configuration: {},
-      contentPlan,
-      assessmentBinding,
-      evaluationPlan,
-      evaluationArtifact,
-    });
+      const contentPlan = createPracticeContentPlan(rawContent);
+      const assessmentBinding = createPracticeAssessmentBlockBinding(run.plan, block, { diagnosticFreshness });
+      registerPracticeTrustedAssessmentBinding(contentPlan, assessmentBinding);
+      return freezeDeep({
+        run,
+        block,
+        descriptor,
+        configuration: {},
+        contentPlan,
+        assessmentBinding,
+        evaluationPlan,
+        evaluationArtifact,
+      });
+    } catch (cause) {
+      await invalidatePreparationFailure(run, block, cause);
+      throw cause;
+    }
   };
 
   const reconcileRun = async (assessmentRunId) => {
