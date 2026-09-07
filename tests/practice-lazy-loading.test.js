@@ -26,6 +26,7 @@ assert.doesNotMatch(main, /practice(?:LabController|ExperimentRegistry)Runtime\.
 
 assert.match(controllerFacade, /import\("\.\/practiceLabControllerRuntime\.js"\)/);
 assert.match(controllerFacade, /import\("\.\/practiceExperimentRegistryRuntime\.js"\)/);
+assert.match(controllerFacade, /import\("\.\/practiceCombinationRepairExperiment\.js"\)/);
 assert.doesNotMatch(controllerFacade, /from "\.\/practiceLab(?:ViewModel|Renderer|Routes)\.js"/);
 assert.doesNotMatch(controllerFacade, /from "\.\/practice(?:SessionEngine|Repository|IndexedDbStore|ManifestStore)\.js"/);
 
@@ -34,8 +35,10 @@ assert.doesNotMatch(registryFacade, /from "\.\/practiceSessionContract\.js"/);
 assert.doesNotMatch(registryFacade, /from "\.\/practiceExperimentCatalog\.js"/);
 
 assert.match(controllerRuntime, /from "\.\/practiceLabViewModel\.js"/);
-assert.match(controllerRuntime, /from "\.\/practiceLabRenderer\.js"/);
+assert.match(controllerRuntime, /from "\.\/practiceLabRendererV20\.js"/);
 assert.match(controllerRuntime, /from "\.\/practiceLabRoutes\.js"/);
+assert.doesNotMatch(controllerRuntime, /from "\.\/practice(?:SessionEngine|Repository|IndexedDbStore|ManifestStore)\.js"/);
+assert.match(controllerRuntime, /import\("\.\/practiceCombinationRepairSessionHost\.js"\)/);
 assert.match(registryRuntime, /from "\.\/practiceSessionContract\.js"/);
 assert.match(registryRuntime, /from "\.\/practiceExperimentCatalog\.js"/);
 
@@ -45,4 +48,4 @@ const browserStaticPracticeImports = [
 ].map((match) => match[1]);
 assert.deepEqual(browserStaticPracticeImports, ["./practiceExperimentRegistry.js"]);
 
-console.log("Practice Lab heavy runtime is excluded from the normal browser static import graph.");
+console.log("Practice Lab heavy runtime is excluded from the normal browser static import graph; PL20 session storage/engine code remains lazy until a runnable target starts.");
