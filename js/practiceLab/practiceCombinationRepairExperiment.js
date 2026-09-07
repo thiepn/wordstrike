@@ -4,6 +4,7 @@ import {
 } from "./practiceCombinationRepairConstants.js";
 import { analyzePracticeCombinationRepairResult } from "./practiceCombinationRepairAnalyzer.js";
 import { createPracticeCombinationRepairRuntime } from "./practiceCombinationRepairRuntime.js";
+import { trustPracticeCombinationRepairContentPlan } from "./practiceCombinationRepairTrust.js";
 
 export const PRACTICE_COMBINATION_REPAIR_IMPLEMENTATION_VERSION = 1;
 
@@ -58,6 +59,7 @@ export function createPracticeCombinationRepairRegistration({
     setupFactory: (setup) => runtime.prepare(setup),
     sessionFactory(prepared) {
       if (!prepared?.contentPlan || !prepared?.plan) throw new TypeError("Combination Repair sessionFactory requires a prepared plan");
+      trustPracticeCombinationRepairContentPlan(prepared.contentPlan, prepared.plan);
       return freezeDeep({
         experiment: createPracticeCombinationRepairDescriptor({ contentPlan: prepared.contentPlan }),
         configuration: {
