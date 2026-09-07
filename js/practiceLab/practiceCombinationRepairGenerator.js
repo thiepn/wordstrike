@@ -20,6 +20,7 @@ import {
 
 const MIN_TARGET_WORDS = 3;
 const MAX_PROBE_FAMILY_WIDTH = 3;
+const UNIT_SEPARATOR = " ";
 
 const freezeDeep = (value) => {
   if (!value || typeof value !== "object" || Object.isFrozen(value)) return value;
@@ -145,6 +146,23 @@ function generatorError(code, message, details = null) {
   return createPracticeCombinationRepairError(code, message, details);
 }
 
+async function loadTargetRefs({ targetIndex, target }) {
+  return Promise.all([
+    targetIndex.getTargetContentRefs({
+      partition: "training",
+      entityType: target.entityType,
+      entityKey: target.entityKey,
+      purpose: "training",
+    }),
+    targetIndex.getTargetWordRefs({
+      partition: "training",
+      entityType: target.entityType,
+      entityKey: target.entityKey,
+      purpose: "training",
+    }),
+  ]);
+}
+
 export async function inspectPracticeCombinationRepairAvailability({
   targetIndex,
   contentItems = [],
@@ -154,7 +172,11 @@ export async function inspectPracticeCombinationRepairAvailability({
   policy = PRACTICE_COMBINATION_REPAIR_POLICY_V1,
 } = {}) {
   const target = normalizePracticeCombinationRepairTarget({ entityType, entityKey, language });
-  if (!target) return freezeDeep({ status: "unsupported", target: null, reasons: [PRACTICE_COMBINATION_REPAIR_ERRORS.UNSUPPORTED_COMBINATION_TARGET] });
+  if (!target) return freezeDeep({
+    status: "unsupported",
+    target: null,
+    reasons: [PRACTICE_COMBINATION_REPAIR_ERRORS.UNSUPPORTED_COMBINATION_TARGET],
+  });
   if (!targetIndex || typeof targetIndex.getTargetContentRefs !== "function" || typeof targetIndex.getTargetWordRefs !== "function") {
     return freezeDeep({ status: "unavailable", target, reasons: [PRACTICE_COMBINATION_REPAIR_ERRORS.TARGET_INDEX_NOT_FOUND] });
   }
@@ -162,12 +184,13 @@ export async function inspectPracticeCombinationRepairAvailability({
   let refs;
   let words;
   try {
-    [refs, words] = await Promise.all([
-      targetIndex.getTargetContentRefs({ partition: "training", entityType: target.entityType, entityKey: target.entityKey, purpose: "training" }),
-      targetIndex.getTargetWordRefs({ partition: "training", entityType: target.entityType, entityKey: target.entityKey, purpose: "training" }),
-    ]);
+    [refs, words] = await loadTargetRefs({ targetIndex, target });
   } catch (error) {
-    return freezeDeep({ status: "unavailable", target, reasons: [error?.code || PRACTICE_COMBINATION_REPAIR_ERRORS.TARGET_INDEX_NOT_FOUND] });
+    return freezeDeep({
+      status: "unavailable",
+      target,
+      reasons: [error?.code || PRACTICE_COMBINATION_REPAIR_ERRORS.TARGET_INDEX_NOT_FOUND],
+    });
   }
 
   if ((words?.length ?? 0) < MIN_TARGET_WORDS) {
@@ -180,7 +203,9 @@ export async function inspectPracticeCombinationRepairAvailability({
     });
   }
 
-  const contentById = new Map((contentItems || []).filter((item) => item?.partition === "training").map((item) => [item.contentId, item]));
+  const contentById = new Map((contentItems || [])
+    .filter((item) => item?.partition === "training")
+    .map((item) => [item.contentId, item]));
   const probeCandidates = sortedCandidates(refs, contentById, policy.content.maxTargetOpportunitiesPerUnit);
   const targetCandidates = sortedCandidates(refs, contentById, policy.content.acquireMaxTargetOpportunitiesPerUnit);
   if (!probeCandidates.length || !targetCandidates.length) {
@@ -228,25 +253,41 @@ export async function buildPracticeCombinationRepairTrainingPlan({
   policy = PRACTICE_COMBINATION_REPAIR_POLICY_V1,
 } = {}) {
   const target = normalizePracticeCombinationRepairTarget({ entityType, entityKey, language });
-  if (!target) throw generatorError(PRACTICE_COMBINATION_REPAIR_ERRORS.UNSUPPORTED_COMBINATION_TARGET, "Combination Repair requires one lowercase bigram or trigram target");
-  if (!targetIndex) throw generatorError(PRACTICE_COMBINATION_REPAIR_ERRORS.TARGET_INDEX_NOT_FOUND, "Combination Repair target index is unavailable");
+  if (!target) throw generatorError(
+    PRACTICE_COMBINATION_REPAIR_ERRORS.UNSUPPORTED_COMBINATION_TARGET,
+    "Combination Repair requires one lowercase bigram or trigram target",
+  );
+  if (!targetIndex) throw generatorError(
+    PRACTICE_COMBINATION_REPAIR_ERRORS.TARGET_INDEX_NOT_FOUND,
+    "Combination Repair target index is unavailable",
+  );
 
-  const availability = await inspectPracticeCombinationRepairAvailability({ targetIndex, contentItems, entityType, entityKey, language, policy });
+  const availability = await inspectPracticeCombinationRepairAvailability({
+    targetIndex,
+    contentItems,
+    entityType,
+    entityKey,
+    language,
+    policy,
+  });
   if (availability.status !== "ready") {
     const code = availability.reasons[0] || PRACTICE_COMBINATION_REPAIR_ERRORS.INSUFFICIENT_TARGET_CONTENT;
     throw generatorError(code, `Combination Repair cannot build a safe ${target.entityType} plan for ${target.entityKey}`, availability);
   }
 
-  const [refs] = await Promise.all([
-    targetIndex.getTargetContentRefs({ partition: "training", entityType: target.entityType, entityKey: target.entityKey, purpose: "training" }),
-  ]);
-  const contentById = new Map((contentItems || []).filter((item) => item?.partition === "training").map((item) => [item.contentId, item]));
+  const [refs] = await loadTargetRefs({ targetIndex, target });
+  const contentById = new Map((contentItems || [])
+    .filter((item) => item?.partition === "training")
+    .map((item) => [item.contentId, item]));
   const probeCandidates = sortedCandidates(refs, contentById, policy.content.maxTargetOpportunitiesPerUnit);
   const acquireCandidates = sortedCandidates(refs, contentById, policy.content.acquireMaxTargetOpportunitiesPerUnit);
   const probeQuota = policy.quotas[target.entityType]["entry-probe"];
   const probeOptions = buildProbeCandidates(probeCandidates, probeQuota, "probe");
   const matched = selectPracticeCombinationRepairProbePair({ entryCandidates: probeOptions, exitCandidates: probeOptions, policy });
-  if (!matched) throw generatorError(PRACTICE_COMBINATION_REPAIR_ERRORS.INSUFFICIENT_PROBE_MATCH, "Combination Repair could not create family-disjoint matched probes");
+  if (!matched) throw generatorError(
+    PRACTICE_COMBINATION_REPAIR_ERRORS.INSUFFICIENT_PROBE_MATCH,
+    "Combination Repair could not create family-disjoint matched probes",
+  );
 
   const phaseUnits = {
     "entry-probe": matched.entry.units,
@@ -257,7 +298,11 @@ export async function buildPracticeCombinationRepairTrainingPlan({
   };
 
   for (const phase of PRACTICE_COMBINATION_REPAIR_PHASES) {
-    if (!phaseUnits[phase.id]) throw generatorError(PRACTICE_COMBINATION_REPAIR_ERRORS.INSUFFICIENT_TARGET_CONTENT, `Combination Repair cannot satisfy the ${phase.id} opportunity quota`, { phaseId: phase.id, quota: PRACTICE_COMBINATION_REPAIR_PHASE_QUOTAS[target.entityType][phase.id] });
+    if (!phaseUnits[phase.id]) throw generatorError(
+      PRACTICE_COMBINATION_REPAIR_ERRORS.INSUFFICIENT_TARGET_CONTENT,
+      `Combination Repair cannot satisfy the ${phase.id} opportunity quota`,
+      { phaseId: phase.id, quota: PRACTICE_COMBINATION_REPAIR_PHASE_QUOTAS[target.entityType][phase.id] },
+    );
   }
 
   return buildPracticeCombinationRepairPlan({
@@ -277,7 +322,9 @@ export function buildPracticeCombinationRepairContentPlan({
   segmenter = null,
 } = {}) {
   if (!plan?.target || plan.partition !== "training") throw new TypeError("Combination Repair content requires a frozen training plan");
-  const byId = new Map((contentItems || []).filter((item) => item?.partition === "training").map((item) => [item.contentId, item]));
+  const byId = new Map((contentItems || [])
+    .filter((item) => item?.partition === "training")
+    .map((item) => [item.contentId, item]));
   const segment = createPracticeSegmenter(segmenter);
   const pieces = [];
   const units = [];
@@ -285,20 +332,28 @@ export function buildPracticeCombinationRepairContentPlan({
   let cursor = 0;
 
   for (const phase of plan.phases) {
-    const phaseStart = cursor;
+    let phaseStart = null;
     for (const [unitIndex, unit] of phase.units.entries()) {
       const content = byId.get(unit.contentId);
       if (!content || content.contentHash !== unit.contentHash || content.familyId !== unit.familyId) {
-        throw generatorError(PRACTICE_COMBINATION_REPAIR_ERRORS.CONTENT_HASH_MISMATCH, `Combination Repair source content no longer matches ${unit.contentId}`);
+        throw generatorError(
+          PRACTICE_COMBINATION_REPAIR_ERRORS.CONTENT_HASH_MISMATCH,
+          `Combination Repair source content no longer matches ${unit.contentId}`,
+        );
       }
       const actualCount = countTargetOccurrences(content.text, plan.target.entityKey, plan.language);
       if (actualCount !== unit.targetOpportunityCount) {
-        throw generatorError(PRACTICE_COMBINATION_REPAIR_ERRORS.CONTENT_HASH_MISMATCH, `Combination Repair target count changed for ${unit.contentId}`, { expected: unit.targetOpportunityCount, actual: actualCount });
+        throw generatorError(
+          PRACTICE_COMBINATION_REPAIR_ERRORS.CONTENT_HASH_MISMATCH,
+          `Combination Repair target count changed for ${unit.contentId}`,
+          { expected: unit.targetOpportunityCount, actual: actualCount },
+        );
       }
       if (pieces.length) {
-        pieces.push("\n");
-        cursor += 1;
+        pieces.push(UNIT_SEPARATOR);
+        cursor += segment(UNIT_SEPARATOR).length;
       }
+      phaseStart ??= cursor;
       const startIndex = cursor;
       const graphemes = segment(content.text);
       pieces.push(content.text);
@@ -326,7 +381,7 @@ export function buildPracticeCombinationRepairContentPlan({
       ordinal: phase.ordinal,
       label: phase.label,
       cue: phase.cue,
-      startIndex: phaseStart,
+      startIndex: phaseStart ?? cursor,
       endIndex: cursor,
       opportunityQuota: phase.opportunityQuota,
     });
@@ -342,6 +397,7 @@ export function buildPracticeCombinationRepairContentPlan({
     completion: { mode: "content", value: null },
     metadata: {
       ...metadata,
+      language: plan.language,
       combinationRepair: {
         ...metadata.combinationRepair,
         target: { ...plan.target },
