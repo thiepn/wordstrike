@@ -30,13 +30,69 @@
     "No diagnostic block has the minimum two valid matched variants required for ready status."
   ],
   "formSets": [
-    { "blockId": "diagnostic-core-keys", "status": "draft", "forms": [], "reasons": ["coverage-and-capacity-insufficient"] },
-    { "blockId": "diagnostic-word-launch", "status": "draft", "forms": [], "reasons": ["coverage-and-capacity-insufficient"] },
-    { "blockId": "diagnostic-combinations", "status": "draft", "forms": [], "reasons": ["coverage-and-capacity-insufficient"] },
-    { "blockId": "diagnostic-punctuation-capitals", "status": "draft", "forms": [], "reasons": ["coverage-and-capacity-insufficient"] },
-    { "blockId": "diagnostic-numbers-symbols", "status": "draft", "forms": [], "reasons": ["coverage-and-capacity-insufficient"] },
-    { "blockId": "diagnostic-lexical-extended", "status": "draft", "forms": [], "reasons": ["coverage-and-capacity-insufficient"] },
-    { "blockId": "diagnostic-combinations-extended", "status": "draft", "forms": [], "reasons": ["coverage-and-capacity-insufficient"] },
-    { "blockId": "diagnostic-mixed", "status": "draft", "forms": [], "reasons": ["coverage-and-capacity-insufficient"] }
+    {
+      "blockId": "diagnostic-core-keys",
+      "status": "draft",
+      "forms": [],
+      "reasons": [
+        "coverage-and-capacity-insufficient"
+      ]
+    },
+    {
+      "blockId": "diagnostic-word-launch",
+      "status": "draft",
+      "forms": [],
+      "reasons": [
+        "coverage-and-capacity-insufficient"
+      ]
+    },
+    {
+      "blockId": "diagnostic-combinations",
+      "status": "draft",
+      "forms": [],
+      "reasons": [
+        "coverage-and-capacity-insufficient"
+      ]
+    },
+    {
+      "blockId": "diagnostic-punctuation-capitals",
+      "status": "draft",
+      "forms": [],
+      "reasons": [
+        "coverage-and-capacity-insufficient"
+      ]
+    },
+    {
+      "blockId": "diagnostic-numbers-symbols",
+      "status": "draft",
+      "forms": [],
+      "reasons": [
+        "coverage-and-capacity-insufficient"
+      ]
+    },
+    {
+      "blockId": "diagnostic-lexical-extended",
+      "status": "draft",
+      "forms": [],
+      "reasons": [
+        "coverage-and-capacity-insufficient"
+      ]
+    },
+    {
+      "blockId": "diagnostic-combinations-extended",
+      "status": "draft",
+      "forms": [],
+      "reasons": [
+        "coverage-and-capacity-insufficient"
+      ]
+    },
+    {
+      "blockId": "diagnostic-mixed",
+      "status": "draft",
+      "forms": [],
+      "reasons": [
+        "coverage-and-capacity-insufficient"
+      ]
+    }
   ]
 }
