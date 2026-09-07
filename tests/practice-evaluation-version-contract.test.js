@@ -36,9 +36,11 @@ test("PL18 historical session v10 evaluation migration remains null through the 
   const current = createDefaultSessionSummary({ sessionId, profileId, contextId, experimentId: "full-assessment", now: () => new Date("2026-09-06T12:00:00Z") });
   const historical = { ...current, recordVersion: 10 };
   delete historical.evaluationSummary;
+  delete historical.assessmentBinding;
   const migrated = migratePracticeRecord("sessionSummary", historical);
   assert.equal(migrated.ok, true);
   assert.equal(migrated.value.recordVersion, 12);
   assert.equal(migrated.value.evaluationSummary, null);
+  assert.equal(migrated.value.assessmentBinding, null);
   assert.deepEqual(migrated.steps.slice(-2), ["sessionSummary:10->11", "sessionSummary:11->12"]);
 });
