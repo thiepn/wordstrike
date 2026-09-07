@@ -16,6 +16,15 @@ jobs:
           - practice-weak-keys-composer-probes.test.js
           - practice-weak-keys-selection.test.js
           - practice-weak-keys-session-integration.test.js
+          - practice-weak-keys-ui.test.js
+          - practice-lab-controller.test.js
+          - practice-lazy-loading.test.js
+          - practice-lab-renderer.test.js
+          - practice-experiment-registry.test.js
+          - practice-import-side-effects.test.js
+          - practice-foundation-contract.test.js
+          - practice-combination-repair-ui.test.js
+          - practice-combination-repair-recommendation-ui.test.js
     name: ${{ matrix.test }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
