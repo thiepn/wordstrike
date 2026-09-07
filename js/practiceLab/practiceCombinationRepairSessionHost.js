@@ -43,19 +43,25 @@ function targetHighlightPositions(contentPlan, phase) {
 }
 
 function renderTypingText(contentPlan, snapshot, phase) {
+  if (!phase) return "";
   const graphemes = Array.from(contentPlan.text);
   const cursor = snapshot.cursorIndex ?? 0;
   const errors = new Set(snapshot.errorPositions ?? []);
   const highlighted = targetHighlightPositions(contentPlan, phase);
-  const cueClass = phase?.cue === "strong" ? "strong" : phase?.cue === "subtle" ? "subtle" : "none";
-  return graphemes.map((value, index) => {
+  const cueClass = phase.cue === "strong" ? "strong" : phase.cue === "subtle" ? "subtle" : "none";
+  const visibleStart = Math.max(0, Math.min(cursor, phase.startIndex));
+  const visibleEnd = Math.min(graphemes.length, phase.endIndex);
+  const output = [];
+  for (let index = visibleStart; index < visibleEnd; index += 1) {
+    const value = graphemes[index];
     const classes = ["practice-combination-char"];
     if (index < cursor) classes.push(errors.has(index) ? "is-error" : "is-typed");
     if (index === cursor) classes.push("is-current");
     if (highlighted.has(index)) classes.push(`is-target-${cueClass}`);
     const shown = value === " " ? "&nbsp;" : value === "\n" ? "<br>" : escapeHtml(value);
-    return `<span class="${classes.join(" ")}" data-char-index="${index}">${shown}</span>`;
-  }).join("");
+    output.push(`<span class="${classes.join(" ")}" data-char-index="${index}">${shown}</span>`);
+  }
+  return output.join("");
 }
 
 function phaseInstruction(phase, target) {
@@ -75,7 +81,7 @@ function phaseStrip(contentPlan, activePhase) {
   }).join("")}</ol>`;
 }
 
-function renderActive(root, { contentPlan, snapshot }) {
+export function renderPracticeCombinationRepairSessionSnapshot(root, { contentPlan, snapshot }) {
   const phase = phaseForCursor(contentPlan, snapshot.cursorIndex ?? 0);
   const target = contentPlan.metadata.combinationRepair.target.entityKey;
   const quota = phase?.opportunityQuota ?? null;
@@ -97,10 +103,10 @@ function renderActive(root, { contentPlan, snapshot }) {
         <p>${escapeHtml(phaseInstruction(phase, target))}</p>
       </section>
       <div class="practice-combination-progress" aria-label="Session progress"><span style="width:${progress.toFixed(2)}%"></span></div>
-      <section class="practice-combination-typing" aria-label="Typing passage" data-session-paused="${paused ? "true" : "false"}">${renderTypingText(contentPlan, snapshot, phase)}</section>
-      <dl class="practice-combination-live-metrics"><div><dt>WPM</dt><dd>${formatNumber(snapshot.metrics?.wpm)}</dd></div><div><dt>Accuracy</dt><dd>${formatPercent(snapshot.metrics?.accuracy)}</dd></div><div><dt>Progress</dt><dd>${Math.round(progress)}%</dd></div></dl>
+      <div class="practice-combination-progress-label">${Math.round(progress)}% complete</div>
+      <section class="practice-combination-typing" aria-label="Current phase typing passage" data-session-paused="${paused ? "true" : "false"}">${renderTypingText(contentPlan, snapshot, phase)}</section>
       ${paused ? '<div class="practice-lab-notice" role="status"><strong>Paused.</strong> Resume to continue; paused time is excluded from active typing time.</div>' : ""}
-      <textarea class="practice-combination-input-capture" data-combination-input aria-label="Combination Repair typing input" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"></textarea>
+      <textarea class="practice-combination-input-capture" data-combination-input aria-label="Combination Repair typing input" inputmode="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" style="position:fixed;left:-10000px;top:0;width:1px;height:1px;opacity:0"></textarea>
     </div>
   </section>`;
 }
@@ -117,9 +123,9 @@ function resultInterpretation(analysis) {
   return `<section class="practice-lab-empty-state"><div class="eyebrow">Same-session check</div><h2>${escapeHtml(check.immediateDirection)}</h2><dl><div><dt>Baseline quality</dt><dd>${formatNumber(check.entryQuality)}</dd></div><div><dt>Check quality</dt><dd>${formatNumber(check.exitQuality)}</dd></div><div><dt>Immediate change</dt><dd>${signed}</dd></div></dl><p>${escapeHtml(check.interpretation.wording)}</p><p><strong>Not established:</strong> mastery, retention, transfer, or causal improvement.</p></section>`;
 }
 
-function renderResult(root, finalResult) {
+export function renderPracticeCombinationRepairResult(root, finalResult) {
   const summary = finalResult?.summary ?? null;
-  const analysis = summary?.analysis ?? null;
+  const analysis = summary?.trainingQuality ?? null;
   root.innerHTML = `<section class="screen practice-lab-screen practice-combination-results" data-practice-view="session-result">
     <div class="practice-lab-shell"><main class="practice-lab-detail">
       <div class="eyebrow">Combination Repair complete</div>
@@ -127,7 +133,7 @@ function renderResult(root, finalResult) {
       <p class="practice-lab-lead">This is an immediate within-session training check, not a mastery or transfer test.</p>
       ${resultInterpretation(analysis)}
       <section class="practice-lab-empty-state"><h2>Phase evidence</h2><table><thead><tr><th>Phase</th><th>Opportunities</th><th>Quality</th></tr></thead><tbody>${phaseResultRows(analysis)}</tbody></table></section>
-      <section class="practice-lab-empty-state"><h2>Session</h2><dl><div><dt>WPM</dt><dd>${formatNumber(summary?.metrics?.wpm)}</dd></div><div><dt>Accuracy</dt><dd>${formatPercent(summary?.metrics?.accuracy)}</dd></div></dl></section>
+      <section class="practice-lab-empty-state"><h2>Session</h2><dl><div><dt>WPM</dt><dd>${formatNumber(summary?.wpm)}</dd></div><div><dt>Accuracy</dt><dd>${formatPercent(summary?.accuracy)}</dd></div></dl></section>
       <button type="button" data-combination-session-action="finish">BACK TO COMBINATION REPAIR</button>
     </main></div>
   </section>`;
@@ -177,7 +183,7 @@ export async function mountPracticeCombinationRepairSession({
   const focusCapture = () => queueMicrotask(() => root.querySelector?.("[data-combination-input]")?.focus?.({ preventScroll: true }));
   const renderSnapshot = (snapshot) => {
     if (closed || finalResult) return;
-    renderActive(root, { contentPlan: session.contentPlan, snapshot });
+    renderPracticeCombinationRepairSessionSnapshot(root, { contentPlan: session.contentPlan, snapshot });
     if (snapshot.lifecycleState === "active") focusCapture();
   };
 
@@ -258,7 +264,7 @@ export async function mountPracticeCombinationRepairSession({
       if (event === "completed") {
         void engine.complete().then((result) => {
           finalResult = result;
-          renderResult(root, result);
+          renderPracticeCombinationRepairResult(root, result);
         }).catch((error) => {
           logger?.warn?.("Combination Repair result retrieval failed", error);
           renderFailure(root, error);
