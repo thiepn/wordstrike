@@ -12,6 +12,7 @@ const REASON_COPY = Object.freeze({
   CONTENT_HASH_MISMATCH: "A selected training item changed after the plan was built. Start with a fresh plan.",
 });
 
+const RECOMMENDATION_STATUSES = new Set(["idle", "loading", "ready", "no-evidence", "unavailable"]);
 const freezeDeep = (value) => { if (!value || typeof value !== "object" || Object.isFrozen(value)) return value; Object.values(value).forEach(freezeDeep); return Object.freeze(value); };
 
 export function createDefaultPracticeCombinationRepairUiState() {
@@ -22,6 +23,8 @@ export function createDefaultPracticeCombinationRepairUiState() {
     reasonCode: null,
     message: null,
     recommendations: [],
+    recommendationStatus: "idle",
+    recommendationErrorCode: null,
     selectedSource: "manual",
   });
 }
@@ -29,11 +32,14 @@ export function createDefaultPracticeCombinationRepairUiState() {
 export function normalizePracticeCombinationRepairUiState(state = {}) {
   const entityType = state.entityType === "trigram" ? "trigram" : "bigram";
   const targetValue = typeof state.targetValue === "string" ? state.targetValue.slice(0, entityType === "bigram" ? 2 : 3) : "";
+  const recommendationStatus = RECOMMENDATION_STATUSES.has(state.recommendationStatus) ? state.recommendationStatus : "idle";
   return freezeDeep({
     ...createDefaultPracticeCombinationRepairUiState(),
     ...state,
     entityType,
     targetValue,
+    recommendationStatus,
+    recommendationErrorCode: typeof state.recommendationErrorCode === "string" ? state.recommendationErrorCode.slice(0, 120) : null,
     recommendations: Array.isArray(state.recommendations) ? state.recommendations.slice(0, 8) : [],
   });
 }
@@ -57,6 +63,8 @@ export function buildPracticeCombinationRepairDetailViewModel({ entry, resolved,
     message: ui.message ?? (ui.reasonCode ? getPracticeCombinationRepairReasonCopy(ui.reasonCode) : null),
     selectedSource: ui.selectedSource,
     recommendations: ui.recommendations,
+    recommendationStatus: ui.recommendationStatus,
+    recommendationErrorCode: ui.recommendationErrorCode,
     totalOpportunityCount: quotas.total,
     phases: PRACTICE_COMBINATION_REPAIR_PHASES.map((phase) => ({
       ...phase,
