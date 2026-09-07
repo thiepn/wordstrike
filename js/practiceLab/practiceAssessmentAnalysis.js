@@ -3,6 +3,40 @@ import { PRACTICE_ASSESSMENT_ANALYSIS_VERSION } from "./practiceAssessmentConsta
 const finiteOrNull = (value) => Number.isFinite(value) ? Number(value) : null;
 const ratioOrNull = (numerator, denominator) => Number.isFinite(numerator) && Number.isFinite(denominator) && denominator > 0 ? numerator / denominator : null;
 
+const COVERAGE_TYPE = Object.freeze({
+  key: "key",
+  bigram: "bigram",
+  trigram: "trigram",
+  word: "word",
+  "punctuation-transition": "punctuation",
+  "number-pattern": "numeric",
+  "symbol-pattern": "symbol",
+});
+
+function deriveDiagnosticCoverage(skills) {
+  const deltas = Array.isArray(skills?.deltas) ? skills.deltas : [];
+  const sets = new Map();
+  for (const delta of deltas) {
+    const type = COVERAGE_TYPE[delta?.entityType];
+    if (!type || typeof delta?.entityKey !== "string" || !delta.entityKey) continue;
+    let values = sets.get(type);
+    if (!values) {
+      values = new Set();
+      sets.set(type, values);
+    }
+    values.add(delta.entityKey);
+  }
+  const entityTypeCounts = {};
+  for (const type of ["key", "bigram", "trigram", "word", "punctuation", "numeric", "symbol"]) {
+    const count = sets.get(type)?.size ?? 0;
+    if (count > 0) entityTypeCounts[type] = count;
+  }
+  return Object.freeze({
+    entityTypeCounts: Object.freeze(entityTypeCounts),
+    coverageRatio: null,
+  });
+}
+
 export function createNotRequestedPracticeAssessmentAnalysis() {
   return Object.freeze({
     version: PRACTICE_ASSESSMENT_ANALYSIS_VERSION,
@@ -54,6 +88,7 @@ export function buildPracticeAssessmentAnalysis({
   const firstPassErrorCount = opportunityCount != null && correctCount != null ? Math.max(0, opportunityCount - correctCount) : null;
   const fluentTransitionCount = finiteOrNull(fluency?.fluentTransitionCount ?? fluency?.counts?.fluent);
   const disfluentTransitionCount = finiteOrNull(fluency?.disfluentTransitionCount ?? fluency?.counts?.disfluent);
+  const resolvedCoverage = coverage ?? (blockKind === "diagnostic" ? deriveDiagnosticCoverage(skills) : null);
   const blockMetrics = Object.freeze({
     activeDurationMs: finiteOrNull(summary?.metrics?.activeDurationMs ?? summary?.activeDurationMs),
     typedCharacterCount: finiteOrNull(summary?.metrics?.typedCharacterCount ?? summary?.typedCharacterCount),
@@ -85,7 +120,7 @@ export function buildPracticeAssessmentAnalysis({
     completedAtUtc: summary?.completedAtUtc ?? null,
     status: terminalUsable ? "completed" : "invalid",
     blockMetrics,
-    coverage: coverage ?? null,
+    coverage: resolvedCoverage,
     evaluationSummary: evaluationSummary ?? summary?.evaluationSummary ?? null,
     diagnosticFormId,
     diagnosticFreshness,
@@ -96,7 +131,7 @@ export function buildPracticeAssessmentAnalysis({
     blockId: binding.blockId,
     blockKind,
     blockMetrics,
-    coverage: coverage ?? null,
+    coverage: resolvedCoverage,
     assessmentBlockDelta: delta,
   });
 }
