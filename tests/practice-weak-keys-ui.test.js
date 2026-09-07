@@ -88,7 +88,7 @@ test("Weak Keys limited content fails closed instead of weakening the protocol",
   assert.match(target.innerHTML, /Limited training content/);
   assert.match(target.innerHTML, /No responsible family-disjoint matched Baseline\/Check pair/);
   assert.match(target.innerHTML, /No weaker protocol or protected-text fallback/);
-  assert.match(target.innerHTML, /START WEAK KEYS" disabled/);
+  assert.match(target.innerHTML, /data-practice-action="start-weak-keys" disabled>START WEAK KEYS/);
 });
 
 test("active Weak Keys renders only the current phase and no live aggregate WPM or accuracy", () => {
