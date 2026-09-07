@@ -520,3 +520,13 @@ Weak Keys uses one canonical Practice session with exactly one direct target ent
 No ability, performance-frontier, retention, evaluation, or assessment measurement privilege is attached. The browser host reuses the shared input/session engine, supports software-keyboard input, displays no live aggregate WPM/accuracy, and uses precomputed phase target positions for cue fading. Refresh/abandon ends the v1 intervention; there is no active checkpoint restore.
 
 See `PRACTICE_LAB_WEAK_KEYS.md`.
+
+## PL22 — Problem Words session contract
+
+PL22 executes one canonical Practice session with exactly one direct target `{ entityType: "word", entityKey }`. The role/purpose is `training`; corrections are allowed; the session is **non-resumable**; successful termination is content completion; and all five immutable phase boundaries are carried in the generated content plan:
+
+`Baseline (3) → Focus (4) → Context (3) → Mix (2) → Check (3)`.
+
+Focus uses a strong whole-word cue, Context a subtle whole-word cue, and Baseline/Mix/Check are uncued. The active session does not expose live aggregate WPM/accuracy, PB, leaderboard, metronome, or rhythm-coach feedback.
+
+PL22 declares no ability, performance-frontier, retention-review, protected-evaluation, or assessment measurement role. Its final Check is training evidence, not transfer.

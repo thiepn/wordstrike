@@ -1361,3 +1361,9 @@ Weak Keys also derives bounded downstream relevance from the existing hierarchy:
 PL21 never mutates a limiter snapshot/hierarchy. After key evidence changes, PL12 may independently recompute whether higher-level limiters remain explained or become independently weak.
 
 See `PRACTICE_LAB_WEAK_KEYS.md`.
+
+## PL22 — Problem Words limiter consumption
+
+PL22 consumes canonical PL12 **word** limiter evaluations when building optional recommendations. Relevant word phenotypes include `launch-limited`, slow, hesitant, inaccurate, recovery-heavy, unstable, and mixed. `confirmed` and `likely` candidates are preferred; `possible` candidates are secondary.
+
+PL12 hierarchy explanation remains authoritative. A word strongly explained by lower-level keys/bigrams/trigrams may be de-emphasized, while an independent or launch-limited word is a natural PL22 candidate. PL22 never rewrites `hierarchy.explainedBy`, never declares a constituent entity causal, and never silently changes the intervention into Weak Keys or Combination Repair.

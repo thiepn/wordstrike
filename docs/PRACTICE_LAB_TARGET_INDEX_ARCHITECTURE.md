@@ -246,3 +246,9 @@ Weak Keys does not perform a runtime whole-corpus target scan and does not use `
 Neutral Mix material is also training-derived. Natural neutral candidates are accepted only when their canonical annotations contain zero selected-key occurrences. Generated neutral word sequences use approved training-derived lexical candidates whose indexed/annotated source occurrences contain zero selected-key opportunities.
 
 The protected-partition rule remains unchanged: Weak Keys performs **zero target-driven lookups** against transfer, benchmark, diagnostic, or research-holdout material. Sparse key coverage therefore produces `limited-content` instead of a protected fallback. See `PRACTICE_LAB_WEAK_KEYS.md` for the complete PL21 intervention contract.
+
+## PL22 — word-to-training-content consumer
+
+PL22 is a production consumer of the PL7 **`word → training content`** reverse index and canonical per-content word annotations. Target lookup uses the canonical lowercase PL7/PL11 `lexicalKey`; substring scans are not target evidence. Content and annotation access is requested only with `partition = training` and training purpose.
+
+The generator validates family/content/hash binding and lowercase target surface identity before use. Generated word-sequence units are session-generated from approved training-derived lexical candidates and are not added to the static corpus. PL22 never target-selects transfer, benchmark, diagnostic, or research-holdout partitions.
