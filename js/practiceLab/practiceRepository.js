@@ -11,6 +11,7 @@ import { validatePracticeSkillEvidenceBatch } from "./practiceSkillEvidenceDelta
 import { validatePracticeAbilityObservation, validatePracticeAbilityState } from "./practiceAbilityValidation.js";
 import { validatePracticeLearningObservationBatch, validatePracticeLearningState } from "./practiceLearningValidation.js";
 import { migratePracticeRecord } from "./practiceMigrations.js";
+import { buildPracticeRetentionPlan } from "./practiceRetention.js";
 import {
   createPracticeAbilityStateId,
   createPracticeLearningStateId,
@@ -185,6 +186,50 @@ export function createPracticeRepository(options = {}) {
     });
   };
 
+  const runAssessmentAwareRetention = async () => {
+    const profile = await core.getPracticeProfile();
+    const assessmentRuns = profile ? await listAssessmentRuns(profile.profileId) : [];
+    const preserveSessionIds = new Set();
+    for (const run of assessmentRuns) {
+      if (run.status !== "active") continue;
+      for (const block of run.blocks ?? []) if (block.childSessionId && ["active", "completed"].includes(block.status)) preserveSessionIds.add(block.childSessionId);
+    }
+    const [checkpoints, sessionSummaries, skillStats, learningStates, reviewItems, quarantine] = await Promise.all([
+      dataStore.list("activeSessionCheckpoints"),
+      dataStore.list("sessionSummaries"),
+      dataStore.list("skillStats"),
+      dataStore.list("learningStates"),
+      dataStore.list("reviewItems"),
+      dataStore.list("quarantine"),
+    ]);
+    const plan = buildPracticeRetentionPlan({
+      checkpoints,
+      sessionSummaries,
+      skillStats,
+      learningStates,
+      reviewItems,
+      quarantine,
+      preserveSessionIds: [...preserveSessionIds],
+      now,
+    });
+    const deletions = [
+      ["activeSessionCheckpoints", plan.checkpoints],
+      ["sessionSummaries", plan.sessionSummaries],
+      ["reviewItems", plan.reviewItems],
+      ["learningStates", plan.learningStates ?? []],
+      ["skillStats", plan.skillStats],
+      ["quarantine", plan.quarantine],
+    ];
+    const stores = deletions.filter(([, ids]) => ids.length).map(([store]) => store);
+    if (stores.length) {
+      await dataStore.runTransaction(stores, "readwrite", async (transaction) => {
+        for (const [storeName, ids] of deletions) for (const id of ids) await transaction.delete(storeName, id);
+      });
+    }
+    const assessment = profile ? await pruneAssessmentRuns(profile.profileId) : { deleted: [] };
+    return { ...plan, assessmentRuns: assessment.deleted, preserveSessionIds: [...preserveSessionIds] };
+  };
+
   return Object.freeze({
     ...core,
     listReviewItems,
@@ -254,11 +299,6 @@ export function createPracticeRepository(options = {}) {
       });
     },
     pruneAssessmentRuns,
-    async runPracticeRetention() {
-      const basePlan = await core.runPracticeRetention();
-      const profile = await core.getPracticeProfile();
-      const assessment = profile ? await pruneAssessmentRuns(profile.profileId) : { deleted: [] };
-      return { ...basePlan, assessmentRuns: assessment.deleted };
-    },
+    runPracticeRetention: runAssessmentAwareRetention,
   });
 }
