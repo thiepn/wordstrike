@@ -25,7 +25,7 @@ function emptyErrorSummary() {
   }).sessionSummary;
 }
 
-test("PL9 contracts remain intact while PL18 advances only the surrounding storage/session envelope", () => {
+test("PL9 contracts remain intact inside the current PL19 storage/session envelope", () => {
   assert.equal(PRACTICE_DATABASE_VERSION, 7);
   assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 12);
   assert.equal(PRACTICE_RECORD_VERSIONS.reviewItem, 3);
@@ -37,7 +37,7 @@ test("PL9 contracts remain intact while PL18 advances only the surrounding stora
   assert.equal(PRACTICE_RECORD_VERSIONS.profile, 3);
 });
 
-test("PL9 v3 error migration remains intact through PL10 v5, PL11 v6, PL13 v7, PL14 v8, PL16 v9, PL17 v10 and PL18 v11", () => {
+test("PL9 v3 error migration remains intact through the current PL19 v12 wrapper", () => {
   const current = createDefaultSessionSummary({ now });
   const legacy = { ...current, recordVersion: 3 };
   delete legacy.errorSummary;
@@ -51,7 +51,7 @@ test("PL9 v3 error migration remains intact through PL10 v5, PL11 v6, PL13 v7, P
   const migrated = migratePracticeRecord("sessionSummary", legacy);
   assert.equal(migrated.ok, true);
   assert.equal(migrated.fromVersion, 3);
-  assert.equal(migrated.toVersion, 11);
+  assert.equal(migrated.toVersion, 12);
   assert.deepEqual(migrated.steps, ["sessionSummary:3->4", "sessionSummary:4->5", "sessionSummary:5->6", "sessionSummary:6->7", "sessionSummary:7->8", "sessionSummary:8->9", "sessionSummary:9->10", "sessionSummary:10->11", "sessionSummary:11->12"]);
   assert.equal(migrated.value.errorSummary, null);
   assert.equal(migrated.value.normalizationSummary, null);
@@ -63,7 +63,7 @@ test("PL9 v3 error migration remains intact through PL10 v5, PL11 v6, PL13 v7, P
   assert.deepEqual(legacy, original);
 });
 
-test("PL9 preserves the full historical session migration chain through PL18", () => {
+test("PL9 preserves the full historical session migration chain through PL19", () => {
   const current = createDefaultSessionSummary({ now });
   const v1 = { ...current, recordVersion: 1 };
   delete v1.contextId;
