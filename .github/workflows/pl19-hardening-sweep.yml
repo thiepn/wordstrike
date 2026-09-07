@@ -1,0 +1,39 @@
+name: PL19 Hardening Sweep
+
+on:
+  push:
+    branches:
+      - codex/pl19-full-assessment
+
+permissions:
+  contents: write
+
+jobs:
+  harden:
+    if: ${{ !contains(github.event.head_commit.message, '[pl19-hardening-sweep]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: codex/pl19-full-assessment
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Apply PL19 hardening and compatibility updates
+        run: node scripts/pl19HardeningSweep.mjs
+      - name: Verify diff
+        run: git diff --check
+      - name: Run complete WordStrike suite before commit
+        run: npm test
+      - name: Commit hardening and remove temporary tooling
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No hardening changes required."
+            exit 0
+          fi
+          git commit -m "PL19: finalize orchestration hardening [pl19-hardening-sweep]"
+          git push origin HEAD:codex/pl19-full-assessment
