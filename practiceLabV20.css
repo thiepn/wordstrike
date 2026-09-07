@@ -20,9 +20,9 @@
 .practice-combination-detail .practice-lab-primary-action {
   min-height: 42px;
   padding: 10px 14px;
-  border: 1px solid var(--border-subtle);
+  border: 1px solid var(--border);
   background: var(--panel);
-  color: var(--text-primary);
+  color: var(--text);
   cursor: pointer;
   letter-spacing: 0.08em;
 }
@@ -45,7 +45,7 @@
 }
 
 .practice-combination-target-field > span {
-  color: var(--text-secondary);
+  color: var(--muted-strong);
   font-size: 11px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -55,10 +55,10 @@
   width: 100%;
   min-height: 48px;
   padding: 10px 13px;
-  border: 1px solid var(--border-subtle);
+  border: 1px solid var(--border);
   outline: none;
   background: var(--bg);
-  color: var(--text-primary);
+  color: var(--text);
   font-size: 20px;
   letter-spacing: 0.12em;
 }
@@ -70,7 +70,7 @@
 
 .practice-combination-target-field small,
 .practice-lab-muted {
-  color: var(--text-muted);
+  color: var(--muted);
   line-height: 1.55;
 }
 
@@ -87,9 +87,9 @@
   min-width: 0;
   min-height: 72px;
   padding: 12px;
-  border: 1px solid var(--border-subtle);
+  border: 1px solid var(--border);
   background: var(--panel);
-  color: var(--text-primary);
+  color: var(--text);
   text-align: left;
   cursor: pointer;
 }
@@ -108,7 +108,7 @@
 }
 
 .practice-combination-recommendations span {
-  color: var(--text-muted);
+  color: var(--muted);
   font-size: 10px;
   overflow-wrap: anywhere;
 }
@@ -123,8 +123,8 @@
 .practice-combination-plan {
   display: grid;
   gap: 1px;
-  border: 1px solid var(--border-subtle);
-  background: var(--border-subtle);
+  border: 1px solid var(--border);
+  background: var(--border);
 }
 
 .practice-combination-plan li {
@@ -138,14 +138,14 @@
 }
 
 .practice-combination-plan li > span:last-child {
-  color: var(--text-muted);
+  color: var(--muted);
   font-size: 10px;
   text-align: right;
 }
 
 .practice-combination-plan p {
   margin: 4px 0 0;
-  color: var(--text-muted);
+  color: var(--muted);
   font-size: 11px;
 }
 
@@ -193,19 +193,19 @@
   gap: 7px;
   min-width: 0;
   padding: 9px 10px;
-  border: 1px solid var(--border-subtle);
+  border: 1px solid var(--border);
   background: rgb(16 23 32 / 72%);
-  color: var(--text-muted);
+  color: var(--muted);
   font-size: 10px;
 }
 
 .practice-combination-phase-strip li > span {
-  color: var(--text-disabled);
+  color: var(--muted);
 }
 
 .practice-combination-phase-strip li[data-phase-state="active"] {
   border-color: var(--primary);
-  color: var(--text-primary);
+  color: var(--text);
   background: rgb(0 255 242 / 8%);
 }
 
@@ -215,7 +215,7 @@
 
 .practice-combination-phase-strip li[data-phase-state="complete"] {
   border-color: rgb(76 255 142 / 40%);
-  color: var(--text-secondary);
+  color: var(--muted-strong);
 }
 
 .practice-combination-phase-strip li[data-phase-state="complete"] > span {
@@ -225,13 +225,13 @@
 .practice-combination-phase-card {
   min-height: 82px;
   padding: 14px 16px;
-  border: 1px solid var(--border-subtle);
+  border: 1px solid var(--border);
   background: var(--panel);
 }
 
 .practice-combination-phase-card p {
   margin: 9px 0 0;
-  color: var(--text-secondary);
+  color: var(--muted-strong);
   line-height: 1.55;
 }
 
@@ -251,7 +251,7 @@
 
 .practice-combination-progress-label {
   margin-top: 6px;
-  color: var(--text-muted);
+  color: var(--muted);
   font-size: 10px;
   text-align: right;
   letter-spacing: 0.08em;
@@ -263,7 +263,7 @@
   padding: clamp(18px, 3vw, 28px);
   border: 1px solid rgb(0 255 242 / 28%);
   background: rgb(10 14 20 / 92%);
-  color: var(--text-primary);
+  color: var(--text);
   font-size: clamp(20px, 2.4vw, 30px);
   line-height: 1.8;
   letter-spacing: 0.025em;
@@ -280,7 +280,7 @@
 }
 
 .practice-combination-char.is-typed {
-  color: var(--text-disabled);
+  color: var(--muted);
 }
 
 .practice-combination-char.is-error {
@@ -315,16 +315,16 @@
 .practice-combination-results th,
 .practice-combination-results td {
   padding: 10px 12px;
-  border-bottom: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--border);
   text-align: left;
 }
 
 .practice-combination-results th {
-  color: var(--text-secondary);
+  color: var(--muted-strong);
 }
 
 .practice-combination-results td {
-  color: var(--text-primary);
+  color: var(--text);
 }
 
 .practice-combination-results dl {
@@ -332,7 +332,7 @@
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1px;
   margin: 12px 0 0;
-  background: var(--border-subtle);
+  background: var(--border);
 }
 
 .practice-combination-results dl > div {
@@ -341,7 +341,7 @@
 }
 
 .practice-combination-results dt {
-  color: var(--text-muted);
+  color: var(--muted);
   font-size: 10px;
 }
 
