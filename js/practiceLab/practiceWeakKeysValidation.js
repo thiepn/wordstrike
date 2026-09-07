@@ -4,6 +4,7 @@ import {
   PRACTICE_WEAK_KEYS_GENERATOR_VERSION,
   PRACTICE_WEAK_KEYS_PHASE_QUOTAS,
   PRACTICE_WEAK_KEYS_PHASES,
+  PRACTICE_WEAK_KEYS_POLICY_VERSION,
   PRACTICE_WEAK_KEYS_SELECTION_VERSION,
   PRACTICE_WEAK_KEYS_TARGET_SOURCES,
   PRACTICE_WEAK_KEYS_VERSION,
@@ -75,6 +76,7 @@ export function stablePracticeWeakKeysPlanPayload(plan) {
     experimentVersion: plan.experimentVersion,
     sessionId: plan.sessionId,
     language: plan.language,
+    contextBinding: plan.contextBinding,
     target: plan.target,
     targetSource: plan.targetSource,
     targetOpportunityBudget: plan.targetOpportunityBudget,
@@ -86,8 +88,11 @@ export function stablePracticeWeakKeysPlanPayload(plan) {
       label: phase.label,
       cue: phase.cue,
       opportunityQuota: phase.opportunityQuota,
+      targetOpportunityStart: phase.targetOpportunityStart,
+      targetOpportunityEnd: phase.targetOpportunityEnd,
       units: (phase.units ?? []).map(stableUnit),
     })),
+    phaseBoundaries: plan.phaseBoundaries,
     contextCoveragePlan: plan.contextCoveragePlan,
     contentDescriptor: plan.contentDescriptor,
   });
@@ -97,10 +102,15 @@ export function validatePracticeWeakKeysPlan(plan) {
   const errors = [];
   if (!plan || typeof plan !== "object" || Array.isArray(plan)) return { valid: false, errors: [{ path: "plan", code: "TYPE" }] };
   if (plan.version !== PRACTICE_WEAK_KEYS_VERSION) errors.push({ path: "version", code: "VERSION" });
+  if (plan.policyVersion !== PRACTICE_WEAK_KEYS_POLICY_VERSION) errors.push({ path: "policyVersion", code: "VERSION" });
   if (plan.generatorVersion !== PRACTICE_WEAK_KEYS_GENERATOR_VERSION) errors.push({ path: "generatorVersion", code: "VERSION" });
   if (plan.selectionVersion !== PRACTICE_WEAK_KEYS_SELECTION_VERSION) errors.push({ path: "selectionVersion", code: "VERSION" });
   if (plan.experimentId !== PRACTICE_WEAK_KEYS_EXPERIMENT_ID || plan.experimentVersion !== PRACTICE_WEAK_KEYS_EXPERIMENT_VERSION) errors.push({ path: "experimentId", code: "EXPERIMENT" });
   if (typeof plan.sessionId !== "string" || !plan.sessionId) errors.push({ path: "sessionId", code: "SESSION_ID" });
+  for (const key of ["contextId", "fingerprint", "dataLocale", "keyboardLayout", "inputMethod"]) {
+    if (typeof plan.contextBinding?.[key] !== "string" || !plan.contextBinding[key]) errors.push({ path: `contextBinding.${key}`, code: "CONTEXT_BINDING" });
+  }
+  if (plan.contextBinding?.hardwareProfileId != null && typeof plan.contextBinding.hardwareProfileId !== "string") errors.push({ path: "contextBinding.hardwareProfileId", code: "CONTEXT_BINDING" });
   const target = normalizePracticeWeakKeyTarget({ entityType: plan.target?.entityType, entityKey: plan.target?.entityKey, language: plan.language });
   if (!target || target.entityKey !== plan.target?.entityKey) errors.push({ path: "target", code: "UNSUPPORTED_KEY_TARGET" });
   if (!PRACTICE_WEAK_KEYS_TARGET_SOURCES.includes(plan.targetSource)) errors.push({ path: "targetSource", code: "TARGET_SOURCE" });
@@ -110,12 +120,20 @@ export function validatePracticeWeakKeysPlan(plan) {
   if (plan.contentDescriptor?.type !== "generated" || plan.contentDescriptor?.generator !== "weak-keys" || plan.contentDescriptor?.generatorVersion !== PRACTICE_WEAK_KEYS_GENERATOR_VERSION) errors.push({ path: "contentDescriptor", code: "CONTENT_DESCRIPTOR" });
 
   if (!Array.isArray(plan.phases) || plan.phases.length !== PRACTICE_WEAK_KEYS_PHASES.length) errors.push({ path: "phases", code: "PHASE_COUNT" });
+  if (!Array.isArray(plan.phaseBoundaries) || plan.phaseBoundaries.length !== PRACTICE_WEAK_KEYS_PHASES.length) errors.push({ path: "phaseBoundaries", code: "PHASE_BOUNDARIES" });
+  let opportunityCursor = 0;
   for (let index = 0; index < Math.min(plan.phases?.length ?? 0, PRACTICE_WEAK_KEYS_PHASES.length); index += 1) {
     const expected = PRACTICE_WEAK_KEYS_PHASES[index];
     const actual = plan.phases[index];
-    if (actual.id !== expected.id || actual.label !== expected.label || actual.cue !== expected.cue || actual.ordinal !== index + 1) errors.push({ path: `phases.${index}`, code: "PHASE_SEQUENCE" });
     const quota = PRACTICE_WEAK_KEYS_PHASE_QUOTAS[expected.id];
+    const expectedStart = opportunityCursor;
+    const expectedEnd = expectedStart + quota;
+    opportunityCursor = expectedEnd;
+    if (actual.id !== expected.id || actual.label !== expected.label || actual.cue !== expected.cue || actual.ordinal !== index + 1) errors.push({ path: `phases.${index}`, code: "PHASE_SEQUENCE" });
     if (actual.opportunityQuota !== quota || actual.targetOpportunityCount !== quota) errors.push({ path: `phases.${index}.targetOpportunityCount`, code: "PHASE_QUOTA" });
+    if (actual.targetOpportunityStart !== expectedStart || actual.targetOpportunityEnd !== expectedEnd) errors.push({ path: `phases.${index}`, code: "PHASE_BOUNDARIES" });
+    const boundary = plan.phaseBoundaries?.[index];
+    if (!boundary || boundary.id !== expected.id || boundary.ordinal !== index + 1 || boundary.targetOpportunityStart !== expectedStart || boundary.targetOpportunityEnd !== expectedEnd) errors.push({ path: `phaseBoundaries.${index}`, code: "PHASE_BOUNDARIES" });
     if (!Array.isArray(actual.units) || !actual.units.length) errors.push({ path: `phases.${index}.units`, code: "CONTENT_REQUIRED" });
     for (const unit of actual.units ?? []) {
       if (unit.partition !== "training") errors.push({ path: `phases.${index}.units.partition`, code: "TRAINING_ONLY" });
@@ -126,7 +144,10 @@ export function validatePracticeWeakKeysPlan(plan) {
     }
   }
   const total = (plan.phases ?? []).reduce((sum, phase) => sum + Number(phase.targetOpportunityCount || 0), 0);
-  if (total !== PRACTICE_WEAK_KEYS_PHASE_QUOTAS.total) errors.push({ path: "phases", code: "TOTAL_QUOTA" });
+  if (total !== PRACTICE_WEAK_KEYS_PHASE_QUOTAS.total || opportunityCursor !== PRACTICE_WEAK_KEYS_PHASE_QUOTAS.total) errors.push({ path: "phases", code: "TOTAL_QUOTA" });
+
+  const mix = plan.phases?.[3];
+  if (!(mix?.units ?? []).some((unit) => unit.targetOpportunityCount > 0) || !(mix?.units ?? []).some((unit) => unit.targetOpportunityCount === 0)) errors.push({ path: "phases.3.units", code: "INTERLEAVE_NEUTRAL_REQUIRED" });
 
   const entry = plan.phases?.[0];
   const exit = plan.phases?.[4];
