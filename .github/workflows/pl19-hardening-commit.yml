@@ -1,0 +1,37 @@
+name: PL19 Hardening Commit
+
+on:
+  push:
+    branches:
+      - codex/pl19-full-assessment
+
+permissions:
+  contents: write
+
+jobs:
+  commit-hardening:
+    if: ${{ !contains(github.event.head_commit.message, '[pl19-hardening-commit]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: codex/pl19-full-assessment
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Apply hardening and structural wrapper updates
+        run: node scripts/pl19HardeningCommit.mjs
+      - name: Verify diff
+        run: git diff --check
+      - name: Commit hardening and remove all temporary sweep tooling
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No hardening changes required."
+            exit 0
+          fi
+          git commit -m "PL19: commit final hardening [pl19-hardening-commit]"
+          git push origin HEAD:codex/pl19-full-assessment
