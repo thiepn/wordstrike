@@ -5,6 +5,7 @@ import { getPracticeTrustedAssessmentBinding } from "./practiceAssessmentRegistr
 import { getPracticeTrustedCombinationRepairBinding } from "./practiceCombinationRepairTrust.js";
 import { getPracticeTrustedWeakKeysBinding } from "./practiceWeakKeysTrust.js";
 import { getPracticeTrustedProblemWordsBinding } from "./practiceProblemWordsTrust.js";
+import { getPracticeTrustedAccuracyRecoveryBinding } from "./practiceAccuracyRecoveryTrust.js";
 
 const PARTITION_TO_ROLE = Object.freeze({ training: "training", transfer: "transfer", benchmark: "benchmark", diagnostic: "diagnostic" });
 const PARTITION_TO_PURPOSE = Object.freeze({ training: "training", transfer: "cold-transfer", benchmark: "benchmark", diagnostic: "diagnostic" });
@@ -13,6 +14,7 @@ function looksCustom(contentPlan) { const metadata = contentPlan?.metadata ?? {}
 function resolveTrustedAssessmentDiagnostic(contentPlan) { const binding = getPracticeTrustedAssessmentBinding(contentPlan); if (!binding || binding.expectedExperimentId !== "full-assessment-diagnostic" || !String(binding.blockId ?? "").startsWith("diagnostic-") || (contentPlan?.targetEntities?.length ?? 0) !== 0) return null; return "diagnostic"; }
 function resolveTrustedCombinationRepair(contentPlan) { const binding = getPracticeTrustedCombinationRepairBinding(contentPlan); if (!binding || binding.experimentId !== "combination-repair" || binding.partition !== "training" || binding.evidenceRole !== "training") return null; return "training"; }
 function resolveTrustedWeakKeys(contentPlan) { const binding = getPracticeTrustedWeakKeysBinding(contentPlan); if (!binding || binding.experimentId !== "weak-keys" || binding.partition !== "training" || binding.evidenceRole !== "training" || binding.target?.entityType !== "key" || !binding.target?.entityKey) return null; return "training"; }
+function resolveTrustedAccuracyRecovery(contentPlan) { const binding = getPracticeTrustedAccuracyRecoveryBinding(contentPlan); if (!binding || binding.experimentId !== "accuracy-control" || binding.partition !== "training" || binding.evidenceRole !== "training" || !["key", "bigram", "trigram", "word"].includes(binding.target?.entityType) || !binding.target?.entityKey) return null; return "training"; }
 function resolveTrustedProblemWords(contentPlan) { const binding = getPracticeTrustedProblemWordsBinding(contentPlan); if (!binding || binding.experimentId !== "problem-words" || binding.partition !== "training" || binding.evidenceRole !== "training" || binding.target?.entityType !== "word" || !binding.target?.entityKey) return null; return "training"; }
 function resolveTrustedStaticPartition(contentPlan, language) {
   const runtime = resolvePracticeTypabilityRuntime({ language }); if (!runtime || !contentPlan) return null;
@@ -26,6 +28,7 @@ export function resolvePracticeEvidenceRole({ contentPlan, context = null } = {}
   const combinationRepairRole = resolveTrustedCombinationRepair(contentPlan); if (combinationRepairRole) return combinationRepairRole;
   const weakKeysRole = resolveTrustedWeakKeys(contentPlan); if (weakKeysRole) return weakKeysRole;
   const problemWordsRole = resolveTrustedProblemWords(contentPlan); if (problemWordsRole) return problemWordsRole;
+  const accuracyRecoveryRole = resolveTrustedAccuracyRecovery(contentPlan); if (accuracyRecoveryRole) return accuracyRecoveryRole;
   const language = baseLanguage(contentPlan?.metadata?.language ?? context?.dataLocale); const partition = resolveTrustedStaticPartition(contentPlan, language); const role = PARTITION_TO_ROLE[partition] ?? "unclassified";
   if (!PRACTICE_EVIDENCE_ROLES.includes(role)) return "unclassified"; return role;
 }

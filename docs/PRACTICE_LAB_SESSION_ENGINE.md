@@ -530,3 +530,11 @@ PL22 executes one canonical Practice session with exactly one direct target `{ e
 Focus uses a strong whole-word cue, Context a subtle whole-word cue, and Baseline/Mix/Check are uncued. The active session does not expose live aggregate WPM/accuracy, PB, leaderboard, metronome, or rhythm-coach feedback.
 
 PL22 declares no ability, performance-frontier, retention-review, protected-evaluation, or assessment measurement role. Its final Check is training evidence, not transfer.
+
+## PL23 — Accuracy & Recovery session contract
+
+PL23 executes one canonical Practice session with exactly one direct target (`key`, `bigram`, `trigram`, or `word`). The session role/purpose is `training`, correction behavior is `allow`, completion is content-based, and v1 is non-resumable with no active checkpoint.
+
+The immutable five-phase protocol is `Baseline → Control → Repair → Mix → Check`. Baseline/Mix/Check are uncued; Control and Repair use subtle target cues. Live aggregate WPM/accuracy, PBs, leaderboard, metronome, rhythm coach, and live repair milliseconds remain off. The only PL23-specific live feedback is a brief target-attributed repair status after a real closed PL9 error episode in the Repair phase; it never pauses input.
+
+PL23 requests no ability, performance-frontier, retention-review, protected-evaluation, or assessment measurement role. Its final Check is target-enriched training evidence, not transfer. The trusted plan binds target, context, corpus/index identity, exact entity dose, phase quotas, cue policy, and repair-feedback policy.

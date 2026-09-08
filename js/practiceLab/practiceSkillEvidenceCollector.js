@@ -1,4 +1,5 @@
 import { createPracticeTransitionContextResolver } from "./practiceContextFeatures.js";
+import { resolvePracticePrimaryErrorAttribution } from "./practicePrimaryErrorAttribution.js";
 import { createPracticeEntityResolver } from "./practiceEntityResolver.js";
 import { createPracticeOpportunityTracker } from "./practiceOpportunityTracker.js";
 import { createUnavailablePracticeReferenceFrequencyProvider } from "./practiceReferenceFrequency.js";
@@ -247,10 +248,9 @@ export function createPracticeSkillEvidenceTracker({
   const recordClosedEpisode = (episode) => {
     if (!episode || !Number.isInteger(episode.episodeId) || episode.episodeId <= lastProcessedEpisodeId) return false;
     lastProcessedEpisodeId = episode.episodeId;
-    let position = Number.isInteger(episode.primaryPosition) ? episode.primaryPosition : episode.startPosition;
-    if (episode.editClass === "transposition" && ["high", "medium"].includes(episode.confidence) && Number.isInteger(episode.affectedStart) && Number.isInteger(episode.affectedEnd) && episode.affectedEnd > episode.affectedStart) position = episode.affectedStart + 1;
-    if (!Number.isInteger(position) || position < 0) return false;
-    for (const entity of entityResolver.resolveAtPosition(position)) {
+    const attribution = resolvePracticePrimaryErrorAttribution({ episode, entityResolver });
+    if (!attribution.length) return false;
+    for (const entity of attribution) {
       const entry = admit(entity);
       if (!entry) continue;
       entry.errors.primaryEpisodeCount += 1;
@@ -399,6 +399,7 @@ export function createPracticeSkillEvidenceTracker({
 
   return Object.freeze({
     recordInsertion,
+    resolveClosedEpisodeAttribution(episode) { return resolvePracticePrimaryErrorAttribution({ episode, entityResolver }); },
     recordClosedEpisode,
     finalize,
     setContentPlan(nextContentPlan) {

@@ -480,3 +480,11 @@ Those phases consume PL9 episode evidence. They must not collapse it back into o
 PL10 is downstream of PL9 and does not alter error-episode or recovery semantics. Generic foundation analysis advances from v2 to **v3** by adding a separate `normalization` member alongside unchanged `latency` and `errors`. PL10 context predictors never use exact target identity, weakness, mastery or priority. Exact observed identity may remain transient for later attribution.
 
 `sessionSummary` advances from v4 to **v5** by adding nullable `normalizationSummary`; historical PL9 summaries receive `normalizationSummary: null`. PL9 `errorSummary` remains canonical and unchanged.
+
+## PL23 — Accuracy & Recovery intervention consumer
+
+PL23 `accuracy-control` is the first deliberate-practice intervention that directly consumes PL9's closed error/recovery facts. It does not create another error tracker and does not infer cognitive intent. Observable recovery behavior remains distinct from explanations such as carelessness, panic, noticing late, or loss of focus.
+
+The shared Practice engine forwards a compact closed PL9 episode only after canonical PL11 primary error attribution. PL23 can emit one transient repair cue only when that episode is attributed to the selected target **and** its primary error position lies inside the immutable `Repair` phase. The cue is observational: `repair-clean` when no correct text was removed, `repair-extra-deletion` when correct text was also deleted, or `repair-complete` when repair completion is known but precision detail is unavailable. It never blocks input or displays live repair milliseconds.
+
+PL23 recovery results aggregate selected-target episodes from Control, Repair, and Mix. No corrected target episode means recovery was **not observed**, not perfect. Counterfactual Recovery Debt remains intentionally absent.

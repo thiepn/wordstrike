@@ -1367,3 +1367,11 @@ See `PRACTICE_LAB_WEAK_KEYS.md`.
 PL22 consumes canonical PL12 **word** limiter evaluations when building optional recommendations. Relevant word phenotypes include `launch-limited`, slow, hesitant, inaccurate, recovery-heavy, unstable, and mixed. `confirmed` and `likely` candidates are preferred; `possible` candidates are secondary.
 
 PL12 hierarchy explanation remains authoritative. A word strongly explained by lower-level keys/bigrams/trigrams may be de-emphasized, while an independent or launch-limited word is a natural PL22 candidate. PL22 never rewrites `hierarchy.explainedBy`, never declares a constituent entity causal, and never silently changes the intervention into Weak Keys or Combination Repair.
+
+## PL23 — Accuracy & Recovery candidate consumption
+
+PL23 consumes existing PL12 limiter evidence only for target recommendation. The primary control dimensions are `inaccurate` and `recovery-heavy`. Confirmed/likely evidence is preferred; possible evidence is secondary. Mixed candidates are eligible only when an accuracy/recovery dimension is materially involved. Slow-only, hesitant-only, and unstable-only entities are not normally recommended for this treatment mechanism.
+
+PL12 hierarchy remains authoritative. Higher-order targets strongly explained by lower-level likely/confirmed limiters are de-emphasized rather than declared independent or causal. PL15 Robust/Retained targets are normally excluded from recommendations, and PL16 likely/supported saturation further de-emphasizes candidates. Manual practice remains available after normal target/content feasibility checks, including the saturation warning that recent similar acquisition practice may have low marginal gain.
+
+PL23 never writes limiter severity, impact, hierarchy, mastery, or saturation. Its selection score is transient and mode-specific.

@@ -218,6 +218,17 @@ export function createPracticeSessionEngine({
     return snapshot;
   };
 
+  const processClosedErrorEpisode = (episode) => {
+    const attribution = skillEvidenceTracker?.resolveClosedEpisodeAttribution?.(episode) ?? [];
+    skillEvidenceTracker?.recordClosedEpisode(episode);
+    if (typeof experiment?.onClosedErrorEpisode === "function") {
+      try {
+        const feedback = experiment.onClosedErrorEpisode(freezeDeep({ episode: clonePracticeValue(episode), attribution }));
+        if (feedback) emit("repair-feedback");
+      } catch (cause) { logger?.warn?.("Practice closed-error experiment callback failed", { cause }); }
+    }
+  };
+
   const sessionError = (code, message, operation, recoverable = false, cause = null, details = null) => {
     lastErrorCode = code;
     return practiceSessionError(code, message, {
@@ -445,7 +456,7 @@ export function createPracticeSessionEngine({
         };
         eventBuffer.push(errorEvent);
         errorTracker.consume(errorEvent);
-        for (const episode of errorTracker.drainClosedEpisodes()) skillEvidenceTracker.recordClosedEpisode(episode);
+        for (const episode of errorTracker.drainClosedEpisodes()) processClosedErrorEpisode(episode);
         hasInsertionInTimingSegment = true;
         markDirty(true);
       }
@@ -469,7 +480,7 @@ export function createPracticeSessionEngine({
       };
       eventBuffer.push(errorEvent);
       errorTracker.consume(errorEvent);
-      for (const episode of errorTracker.drainClosedEpisodes()) skillEvidenceTracker.recordClosedEpisode(episode);
+      for (const episode of errorTracker.drainClosedEpisodes()) processClosedErrorEpisode(episode);
     }
     const completionReason = outcome.accepted ? evaluateCompletion() : null;
     const snapshot = emit("input");
@@ -548,7 +559,7 @@ export function createPracticeSessionEngine({
 
   const analyzeFoundation = ({ status, observedAt }) => {
     try {
-      for (const episode of errorTracker.drainClosedEpisodes()) skillEvidenceTracker.recordClosedEpisode(episode);
+      for (const episode of errorTracker.drainClosedEpisodes()) processClosedErrorEpisode(episode);
       const activeEpisode = errorTracker.previewActiveEpisode();
       if (activeEpisode) skillEvidenceTracker.recordClosedEpisode(activeEpisode);
       return buildPracticeFoundationAnalysis({
