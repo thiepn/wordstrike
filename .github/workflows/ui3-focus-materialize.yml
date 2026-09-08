@@ -1,0 +1,35 @@
+name: UI3 focus materialize
+on:
+  push:
+    branches: [feat/ui3-mode-select]
+permissions:
+  contents: write
+jobs:
+  materialize:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/ui3-mode-select
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Apply UI3 focus visibility hardening
+        run: python tools/ui3_focus_visibility_patch.py
+      - name: Run focused Mode Select source contracts
+        run: |
+          node tests/mode-navigation.test.js
+          node tests/mobileModeSelectDensity.test.js
+          node tests/ui3-mode-select.test.js
+      - name: Run canonical tests
+        run: npm test
+      - name: Commit verified focus visibility hardening
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add js/ui.js tests/browser/ui3_mode_select.py
+          git diff --cached --quiet && exit 0
+          git commit -m "UI3: keep keyboard mode selection visible"
+          git push origin HEAD:feat/ui3-mode-select
