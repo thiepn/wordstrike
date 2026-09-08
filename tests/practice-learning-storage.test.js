@@ -56,7 +56,7 @@ function makeDatabase(initialStores = new Map()) {
   };
 }
 
-test("PL16 v4-to-v5 learning-store contract remains intact inside the PL18 DB6 envelope", () => {
+test("PL16 v4-to-v5 learning-store contract remains intact inside the current PL25 DB8 envelope", () => {
   const stores = new Map();
   for (const name of PRACTICE_STORE_NAMES) {
     if (name !== "learningStates") stores.set(name, currentStore(name));
@@ -64,7 +64,7 @@ test("PL16 v4-to-v5 learning-store contract remains intact inside the PL18 DB6 e
   const before = new Map([...stores].map(([name, store]) => [name, JSON.stringify(store.snapshot())]));
   const database = makeDatabase(stores);
   applyPracticeDatabaseUpgrade(database, { objectStore: (name) => database.stores.get(name) });
-  assert.equal(PRACTICE_DATABASE_VERSION, 7);
+  assert.equal(PRACTICE_DATABASE_VERSION, 8);
   assert.deepEqual(database.createdStores, ["learningStates"]);
   for (const [name, snapshot] of before) {
     assert.equal(JSON.stringify(database.stores.get(name).snapshot()), snapshot, `${name} changed during PL16 upgrade`);
@@ -73,7 +73,7 @@ test("PL16 v4-to-v5 learning-store contract remains intact inside the PL18 DB6 e
   assert.ok(database.stores.get("learningStates").snapshot().some((index) => index.name === "profileContextEntity" && index.options?.unique));
 });
 
-test("PL16 historical sessionSummary v8 reaches PL18 v11 with learning, retention and evaluation summaries null and no fabricated curve payload", () => {
+test("PL16 historical sessionSummary v8 reaches the current PL25 v13 wrapper with later summaries/bindings null and no fabricated curve payload", () => {
   const current = createDefaultSessionSummary({
     profileId: "practice-profile_pl16-migration-profile-12345678",
     contextId: "practice-context_pl16-migration-context-12345678",
@@ -83,13 +83,17 @@ test("PL16 historical sessionSummary v8 reaches PL18 v11 with learning, retentio
   delete historical.learningEvidenceSummary;
   delete historical.retentionReviewSummary;
   delete historical.evaluationSummary;
+  delete historical.assessmentBinding;
+  delete historical.coachBinding;
   const migration = migratePracticeRecord("sessionSummary", historical);
   assert.equal(migration.ok, true, JSON.stringify(migration.error));
-  assert.deepEqual(migration.steps, ["sessionSummary:8->9", "sessionSummary:9->10", "sessionSummary:10->11", "sessionSummary:11->12"]);
-  assert.equal(migration.value.recordVersion, 12);
+  assert.deepEqual(migration.steps, ["sessionSummary:8->9", "sessionSummary:9->10", "sessionSummary:10->11", "sessionSummary:11->12", "sessionSummary:12->13"]);
+  assert.equal(migration.value.recordVersion, 13);
   assert.equal(migration.value.learningEvidenceSummary, null);
   assert.equal(migration.value.retentionReviewSummary, null);
   assert.equal(migration.value.evaluationSummary, null);
+  assert.equal(migration.value.assessmentBinding, null);
+  assert.equal(migration.value.coachBinding, null);
   assert.equal("learningObservationDeltas" in migration.value, false);
   assert.equal("learningCurve" in migration.value, false);
 });
@@ -146,12 +150,13 @@ test("PL16 reset clears learningStates with the rest of Practice data", async ()
   assert.equal((await harness.dataStore.list("learningStates")).length, 0);
 });
 
-test("PL16/PL17 record contracts remain intact inside PL18 DB6 / evaluation1 / session11", () => {
-  assert.equal(PRACTICE_DATABASE_VERSION, 7);
+test("PL16/PL17 record contracts remain intact inside the current PL25 DB8 / evaluation1 / coach1 / session13 envelope", () => {
+  assert.equal(PRACTICE_DATABASE_VERSION, 8);
   assert.equal(PRACTICE_RECORD_VERSIONS.learningState, 1);
   assert.equal(PRACTICE_RECORD_VERSIONS.reviewItem, 3);
   assert.equal(PRACTICE_RECORD_VERSIONS.evaluationState, 1);
-  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 12);
+  assert.equal(PRACTICE_RECORD_VERSIONS.coachPlan, 1);
+  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 13);
 });
 
 test("PL16 runtime modules import with zero storage/network/listener/timer side effects", async () => {
