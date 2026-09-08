@@ -28,7 +28,7 @@ test("PL23 manual target family is explicit and delegates canonical entity norma
   assert.deepEqual(normalizePracticeAccuracyRecoveryTarget({ manualType: "key", entityKey: " R ", language: "en" }), { entityType: "key", entityKey: "r" });
   assert.deepEqual(normalizePracticeAccuracyRecoveryTarget({ manualType: "combination", entityKey: " TH ", language: "en" }), { entityType: "bigram", entityKey: "th" });
   assert.deepEqual(normalizePracticeAccuracyRecoveryTarget({ manualType: "combination", entityKey: " THE ", language: "en" }), { entityType: "trigram", entityKey: "the" });
-  assert.deepEqual(normalizePracticeAccuracyRecoveryTarget({ manualType: "word", entityKey: " THE ", language: "en" }), { entityType: "word", entityKey: "the", graphemeCount: 3 });
+  assert.deepEqual(normalizePracticeAccuracyRecoveryTarget({ manualType: "word", entityKey: " THE ", language: "en" }), { entityType: "word", entityKey: "the" });
   assert.equal(normalizePracticeAccuracyRecoveryTarget({ manualType: "combination", entityKey: "four", language: "en" }), null);
   assert.equal(normalizePracticeAccuracyRecoveryTarget({ manualType: "word", entityKey: "can't", language: "en" }), null);
 });
