@@ -1,0 +1,14 @@
+name: PL23 stray branch cleanup
+on:
+  push:
+    branches:
+      - codex/pl23-accuracy-recovery
+permissions:
+  contents: write
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Delete accidental no-op branch
+        run: git push origin --delete tmp-should-not-use || true
