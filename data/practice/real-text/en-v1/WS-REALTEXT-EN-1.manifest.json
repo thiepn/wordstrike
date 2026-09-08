@@ -1,0 +1,32 @@
+{
+  "poolId": "WS-REALTEXT-EN-1",
+  "poolSchemaVersion": 1,
+  "poolVersion": 1,
+  "generatorVersion": 1,
+  "language": "en",
+  "status": "draft",
+  "separator": " ",
+  "corpusBinding": {
+    "corpusId": "practice-en-v1",
+    "corpusVersion": 1,
+    "corpusChecksum": "sha256-28beccf65eed71519da306c129da5040a20f364aed320dc21eea2d16c2a1c404"
+  },
+  "indexBinding": {
+    "indexSchemaVersion": 1,
+    "indexChecksum": "sha256-bb198244a6b6cefcae5cb908bf3dee6e9e52259f9ef41576ec69c429a423ff32"
+  },
+  "typabilityBinding": {
+    "modelVersion": 1,
+    "featureVersion": 1,
+    "referenceVersion": 1,
+    "referenceChecksum": "sha256-ad320fbf7d7f804d7d9febd4a25595fe42f34baf89a016cd94eae538f10a2807",
+    "trainingArtifactChecksum": "sha256-128582dbfb5885b165a78fb9997b99b79d29d2c5869f8137ef32655076c9246c"
+  },
+  "units": [],
+  "releaseReport": {
+    "releaseBlockers": [
+      "minimum-ready-unit-count:0/16"
+    ]
+  },
+  "checksum": "fnv1a32-98b7a6b7"
+}
