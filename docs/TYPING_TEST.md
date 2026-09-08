@@ -12,8 +12,16 @@ The English 200 name and ID are intentional even though the approved ordered arr
 
 There is no English 1k mode, word-set selector, custom vocabulary, punctuation, numbers, language selection, or difficulty selector.
 
-Time configurations remain 15, 30, 60, and 120 seconds. Word configurations remain 25, 50, and 100 words. Generation remains seed-deterministic, avoids immediate duplicates, and extends the queue in shuffled batches. WPM, Raw WPM, CPM, accuracy, error history, spaces, Backspace behavior, and completion timing are unchanged.
+## Current configurations and presentation
 
-English 200 results include the word-set identity in the session configuration, normalized result, record namespace, recent summary, and diagnostics. Records without a word-set ID are interpreted as the preserved `legacy-common-740` benchmark and never compete with English 200 records.
+Timed tests: **15, 30, 60, and 120 seconds**. Word tests: **10, 25, 50, and 100 words**. The default is 60 seconds.
 
-The existing `data/typingTestWords.json` file remains the unchanged 740-word common-vocabulary pool used by other game systems. Campaign, bosses, Endless, and Daily Strike retain their existing vocabulary behavior.
+Timer position can be **Center** or **Top**. Text size can be **Auto, Small, Medium, or Large** and is stored locally. Desktop keeps a three-row reading window; constrained touch/mobile layouts use two rows. Tab restarts the current test and Escape pauses it.
+
+Time/word-count configuration is locked after a test starts. Timer placement and text size can change during an active run without resetting the attempt.
+
+Generation remains seed-deterministic, avoids immediate duplicates, and extends the queue in shuffled batches. WPM, raw WPM, accuracy, error history, spaces, Backspace behavior, word deletion, and completion timing retain their benchmark semantics.
+
+English 200 results include the word-set identity in the session configuration, normalized result, record namespace, recent summary, and diagnostics. Records without a word-set ID are interpreted as preserved `legacy-common-740` data and never compete with English 200 records.
+
+The existing `data/typingTestWords.json` file remains the unchanged common-vocabulary pool used by other game systems. Campaign, bosses, Endless, and Arcade Rush keep their own gameplay vocabulary contracts.
