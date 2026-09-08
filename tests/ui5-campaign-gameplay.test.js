@@ -1,17 +1,20 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
-const [index, presentation, css, renderer, workflow, modes] = await Promise.all([
+const [index, presentation, css, inputCss, renderer, workflow, modes, visualTest] = await Promise.all([
   readFile(new URL("../index.html", import.meta.url), "utf8"),
   readFile(new URL("../js/campaignGameplayPresentation.js", import.meta.url), "utf8"),
   readFile(new URL("../styles/screens/campaign-gameplay.css", import.meta.url), "utf8"),
+  readFile(new URL("../styles/screens/campaign-gameplay-input.css", import.meta.url), "utf8"),
   readFile(new URL("../js/renderer.js", import.meta.url), "utf8"),
   readFile(new URL("../.github/workflows/non-practice-browser.yml", import.meta.url), "utf8"),
   readFile(new URL("../js/modes.js", import.meta.url), "utf8"),
+  readFile(new URL("./browser/ui5_campaign_visual.py", import.meta.url), "utf8"),
 ]);
 
 assert.equal((index.match(/styles\/screens\/campaign-gameplay\.css/g) || []).length, 1);
-assert.match(index, /campaign-progression\.css[\s\S]*campaign-gameplay\.css[\s\S]*practiceLabV20\.css/);
+assert.equal((index.match(/styles\/screens\/campaign-gameplay-input\.css/g) || []).length, 1);
+assert.match(index, /campaign-progression\.css[\s\S]*campaign-gameplay\.css[\s\S]*campaign-gameplay-input\.css[\s\S]*practiceLabV20\.css/);
 assert.equal((index.match(/js\/campaignGameplayPresentation\.js/g) || []).length, 1);
 assert.match(index, /js\/main\.js[\s\S]*js\/campaignGameplayPresentation\.js/);
 
@@ -28,6 +31,10 @@ assert.match(presentation, /Campaign mission progress/);
 assert.match(presentation, /Campaign Core, integrity/);
 assert.match(presentation, /TARGET LOCKED/);
 assert.match(presentation, /CANDIDATES/);
+assert.match(presentation, /\.gameplay-keyboard-trigger/);
+assert.match(presentation, /campaign-keyboard-trigger/);
+assert.match(presentation, /trigger\.textContent = "KEYBOARD"/);
+assert.match(presentation, /Open gameplay keyboard/);
 for (const id of ["hud-level", "hud-wpm", "hud-accuracy", "hud-lives", "hud-score", "hud-combo"]) {
   assert.match(presentation, new RegExp(`#${id}`), `UI5 must preserve #${id}`);
 }
@@ -54,6 +61,13 @@ assert.doesNotMatch(css, /\.endless-screen/);
 assert.doesNotMatch(css, /\.boss-screen/);
 assert.doesNotMatch(css, /practice-lab/i);
 
+assert.match(inputCss, /\.campaign-gameplay-screen \.campaign-keyboard-trigger/);
+assert.match(inputCss, /min-height:\s*44px/);
+assert.match(inputCss, /border:\s*0/);
+assert.match(inputCss, /\.gameplay-input-dock\.keyboard-ready \.campaign-keyboard-trigger/);
+assert.match(inputCss, /prefers-reduced-motion/);
+assert.doesNotMatch(inputCss, /endless-screen|boss-screen|practice-lab/i);
+
 assert.match(renderer, /\["wrong", "campaign-word-error"\]\.includes\(event\.animationName\)/);
 assert.match(renderer, /--campaign-burst-angle/);
 assert.match(renderer, /--campaign-burst-reach/);
@@ -65,10 +79,17 @@ assert.match(renderer, /screenShake && !campaignPrefersReducedMotion\(area\)/);
 
 assert.match(workflow, /Certify UI5 Campaign gameplay/);
 assert.match(workflow, /tests\/browser\/ui5_campaign_gameplay\.py/);
+assert.match(workflow, /tests\/browser\/ui5_campaign_visual\.py/);
 assert.match(workflow, /browser-artifacts\/ui5-campaign-gameplay\//);
+assert.match(visualTest, /\?seed=\{seed\}/);
+assert.doesNotMatch(visualTest, /\?dev=1/);
+assert.match(visualTest, /paceArea/);
+assert.match(visualTest, /accuracyArea/);
+assert.match(visualTest, /keyboardText.*KEYBOARD/s);
+assert.match(visualTest, /390x360/);
 
 // UI5 does not alter the disabled Practice Lab registry boundary.
 assert.match(modes, /PRACTICE: "practice"/);
 assert.match(modes, /id: MODE_IDS\.PRACTICE,[\s\S]*enabled: false,[\s\S]*status: "coming-soon",[\s\S]*route: null/);
 
-console.log("UI5 Campaign gameplay source contracts passed: real Campaign control binding, scoped HUD/Core/word presentation, short-mobile layout, renderer feedback, reduced motion, mode isolation, and Practice exclusion.");
+console.log("UI5 Campaign gameplay source contracts passed: real Campaign control binding, scoped HUD/Core/word/input presentation, clean visual evidence, short-mobile layout, renderer feedback, reduced motion, mode isolation, and Practice exclusion.");
