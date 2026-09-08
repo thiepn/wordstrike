@@ -169,6 +169,38 @@ export function activatePracticeReviewItem(item, {
   });
 }
 
+export function refreshPracticeReviewReferenceAfterDirectPractice(item, {
+  referenceAtUtc,
+  now = () => new Date(),
+  policy = PRACTICE_REVIEW_POLICY_V1,
+} = {}) {
+  if (!item || item.state !== "active" || !item.cycle) throw new TypeError("Practice review reference refresh requires an active item");
+  const referenceIso = iso(referenceAtUtc);
+  if (Date.parse(referenceIso) <= Date.parse(item.cycle.referenceAtUtc)) return item;
+  const stabilityDays = finite(item.stabilityDays) && item.stabilityDays > 0
+    ? item.stabilityDays
+    : finite(item.intervalDays) && item.intervalDays > 0 ? item.intervalDays : item.cycle.initialIntervalDays;
+  if (!finite(stabilityDays) || stabilityDays <= 0) throw new TypeError("Practice review reference refresh requires current stability");
+  const intervalDays = stabilityDays;
+  const maturityDelay = practiceMaturityDelayDays(intervalDays, policy);
+  const dueAtUtc = new Date(Date.parse(referenceIso) + intervalDays * DAY_MS).toISOString();
+  const minimumMatureAtUtc = new Date(Date.parse(referenceIso) + maturityDelay * DAY_MS).toISOString();
+  return freezeDeep({
+    ...item,
+    updatedAt: toPracticeUtcIso(now),
+    dueAtUtc,
+    localDueDayKey: getPracticeTimeContext(new Date(dueAtUtc)).localDayKey,
+    intervalDays,
+    stabilityDays,
+    minimumMatureAtUtc,
+    lastScheduledAt: toPracticeUtcIso(now),
+    cycle: {
+      ...item.cycle,
+      referenceAtUtc: referenceIso,
+    },
+  });
+}
+
 export function suspendPracticeReviewItem(item, reason, { now = () => new Date() } = {}) {
   return freezeDeep({
     ...item,
