@@ -1,0 +1,138 @@
+.practice-coach-screen .practice-lab-header {
+  align-items: flex-start;
+}
+
+.practice-coach-create,
+.practice-coach-plan,
+.practice-coach-suggestions {
+  margin-top: 28px;
+}
+
+.practice-coach-duration {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  max-width: 560px;
+  margin: 18px 0;
+}
+
+.practice-coach-duration button[aria-pressed="true"] {
+  border-color: var(--accent, currentColor);
+  box-shadow: inset 0 0 0 1px currentColor;
+}
+
+.practice-coach-plan-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 18px;
+}
+
+.practice-coach-plan-header h2,
+.practice-coach-block h3,
+.practice-coach-suggestion h3 {
+  margin: 0;
+}
+
+.practice-coach-plan-actions,
+.practice-coach-block-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.practice-coach-blocks {
+  display: grid;
+  gap: 0;
+  border-top: 1px solid var(--panel-border, currentColor);
+}
+
+.practice-coach-block {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--panel-border, currentColor);
+}
+
+.practice-coach-block-index {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.practice-coach-block-title {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.practice-coach-block-copy > p {
+  margin-bottom: 0;
+}
+
+.practice-coach-target {
+  font-family: var(--font-mono, monospace);
+  font-size: .88rem;
+  letter-spacing: .04em;
+  opacity: .78;
+}
+
+.practice-coach-block[data-status="completed"] .practice-coach-block-copy,
+.practice-coach-block[data-status="skipped"] .practice-coach-block-copy,
+.practice-coach-block[data-status="blocked"] .practice-coach-block-copy,
+.practice-coach-block[data-status="invalid"] .practice-coach-block-copy {
+  opacity: .68;
+}
+
+.practice-coach-suggestion-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.practice-coach-suggestion {
+  padding: 18px 0;
+  border-top: 1px solid var(--panel-border, currentColor);
+  border-bottom: 1px solid var(--panel-border, currentColor);
+}
+
+@media (max-width: 720px) {
+  .practice-coach-duration {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .practice-coach-plan-header {
+    display: grid;
+  }
+
+  .practice-coach-block {
+    grid-template-columns: 32px minmax(0, 1fr);
+  }
+
+  .practice-coach-block-actions {
+    grid-column: 2;
+    justify-content: flex-start;
+  }
+
+  .practice-coach-suggestion-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .practice-coach-screen * {
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+    animation-duration: .01ms !important;
+  }
+}
