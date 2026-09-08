@@ -58,7 +58,8 @@ function enhanceHud(screen) {
   const primary = document.createElement("div");
   primary.className = "campaign-hud-primary";
 
-  const identity = document.createElement("div");
+  // Span keeps metric div ordering stable so the mobile CSS maps WPM and ACC deliberately.
+  const identity = document.createElement("span");
   identity.className = "campaign-hud-identity";
   identity.append(createLabel("LEVEL"), level);
 
