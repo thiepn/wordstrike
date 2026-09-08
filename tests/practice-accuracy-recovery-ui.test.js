@@ -22,8 +22,8 @@ test("PL23 detail screen requires explicit Key/Combination/Word family and state
   assert.match(target.innerHTML, />WORD</);
   assert.match(target.innerHTML, /the.*trigram or a word/i);
   assert.match(target.innerHTML, /No errors are injected/);
+  assert.match(target.innerHTML, /no 98% rule is imposed/i);
   assert.match(target.innerHTML, /never blocked until correction/);
-  assert.doesNotMatch(target.innerHTML, /98%/);
 });
 
 test("PL23 active session shows only phase/progress and repair status, never live WPM or aggregate accuracy", () => {
