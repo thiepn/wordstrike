@@ -116,6 +116,7 @@ def inspect_foundation(browser, base, browser_name, evidence):
         modeNavLabel: document.querySelector('.mode-options').getAttribute('aria-label'),
       };
     }""")
+
     assert initial["horizontalOverflow"] <= 1, initial
     assert initial["shellLeft"] >= -1, initial
     assert initial["shellRight"] <= 1441, initial
@@ -218,42 +219,49 @@ def inspect_viewport_matrix(browser, base, browser_name, evidence):
         assert geometry["minActiveHeight"] >= 44, (browser_name, label, geometry)
         assert geometry["homeHeight"] >= 44, (browser_name, label, geometry)
 
-        # Capture the initial production composition before exercising scrolling.
+        # Capture the untouched production composition before exercising scrolling.
         if browser_name == "chromium" and label in {"mobile", "mobile-keyboard-height"}:
             page.screenshot(path=str(ARTIFACTS / f"{browser_name}-ui3-{label}.png"), full_page=True)
 
-        # The screen itself owns vertical scrolling. Drive that actual scroll owner to
-        # the end and prove the sixth keyboard action is reachable without shrinking it.
-        home = page.locator('[data-mode-home-index="5"]')
-        scroll = page.locator(".mode-select-screen").evaluate("""el => {
-          el.scrollTop = el.scrollHeight;
-          return {
-            top: el.scrollTop,
-            scrollHeight: el.scrollHeight,
-            clientHeight: el.clientHeight,
-            overflowY: getComputedStyle(el).overflowY,
-          };
-        }""")
-        page.wait_for_timeout(30)
-        box = home.bounding_box()
-        assert box is not None, (browser_name, label, "missing Main Menu box")
-        assert box["y"] >= -1, (browser_name, label, box)
-        assert box["y"] + box["height"] <= height + 1, (browser_name, label, box)
-        if scroll["scrollHeight"] > scroll["clientHeight"] + 1:
-            assert scroll["top"] > 0, (browser_name, label, scroll)
-            assert scroll["overflowY"] in {"auto", "scroll"}, (browser_name, label, scroll)
-
-        # Keyboard navigation must also keep the sixth item visible automatically on
-        # constrained mobile layouts. Rerender from the initial state, then move down.
+        # On constrained mobile layouts, real keyboard navigation must keep the sixth
+        # selection visible automatically. This is the primary interaction contract.
         if label in {"mobile", "mobile-keyboard-height"}:
-            open_modes(page, base)
             for _ in range(5):
                 page.keyboard.press("ArrowDown")
             assert focused_index(page) == "5", (browser_name, label, focused_index(page))
             keyboard_box = page.locator('[data-mode-home-index="5"]').bounding_box()
             assert keyboard_box is not None, (browser_name, label, "missing focused Main Menu box")
             assert keyboard_box["y"] >= -1, (browser_name, label, keyboard_box)
-            assert keyboard_box["y"] + keyboard_box["height"] <= height + 1, (browser_name, label, keyboard_box)
+            assert keyboard_box["y"] + keyboard_box["height"] <= height + 1, (
+                browser_name, label, keyboard_box
+            )
+            # Reset before independently testing manual/touch reachability.
+            open_modes(page, base)
+
+        # Native scrollIntoView exercises the browser's real nested-scroll behavior and
+        # proves a touch/mouse user can reach Main Menu without shrinking the target.
+        home = page.locator('[data-mode-home-index="5"]')
+        scroll = home.evaluate("""el => {
+          const owner = el.closest('.mode-select-screen');
+          el.scrollIntoView({ block: 'end', inline: 'nearest', behavior: 'auto' });
+          const target = el.getBoundingClientRect();
+          return {
+            top: owner?.scrollTop || 0,
+            scrollHeight: owner?.scrollHeight || 0,
+            clientHeight: owner?.clientHeight || 0,
+            overflowY: owner ? getComputedStyle(owner).overflowY : '',
+            targetTop: target.top,
+            targetBottom: target.bottom,
+          };
+        }""")
+        page.wait_for_timeout(30)
+        box = home.bounding_box()
+        assert box is not None, (browser_name, label, "missing Main Menu box")
+        assert box["y"] >= -1, (browser_name, label, box, scroll)
+        assert box["y"] + box["height"] <= height + 1, (browser_name, label, box, scroll)
+        if scroll["scrollHeight"] > scroll["clientHeight"] + 1:
+            assert scroll["top"] > 0, (browser_name, label, scroll)
+            assert scroll["overflowY"] in {"auto", "scroll"}, (browser_name, label, scroll)
 
         evidence.append({
             "browser": browser_name,
