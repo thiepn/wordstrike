@@ -52,7 +52,8 @@ function blockReason(block) {
   return "This block fits the evidence available when today's plan was created.";
 }
 
-function blockStatusLabel(block) {
+function blockStatusLabel(block, startingBlockId) {
+  if (block?.blockId === startingBlockId) return "Starting";
   if (block?.status === "completed") return "Completed";
   if (block?.status === "skipped") return "Skipped";
   if (block?.status === "blocked") return "Blocked";
@@ -61,7 +62,7 @@ function blockStatusLabel(block) {
   return "Pending";
 }
 
-function blockView(block) {
+function blockView(block, { nextPendingId = null, startingBlockId = null } = {}) {
   const reason = blockReason(block);
   const blockedReason = block?.status === "blocked"
     ? BLOCKED_COPY[block?.blockResult?.reason] ?? "This block is no longer current because the underlying Practice evidence changed after today's plan was created."
@@ -74,10 +75,10 @@ function blockView(block) {
     target: targetLabel(block),
     estimatedMinutes: block.estimatedMinutes,
     status: block.status,
-    statusLabel: blockStatusLabel(block),
+    statusLabel: blockStatusLabel(block, startingBlockId),
     reason,
     blockedReason,
-    canSkip: block.status === "pending",
+    canSkip: block.status === "pending" && block.blockId === nextPendingId && startingBlockId == null,
   });
 }
 
@@ -134,9 +135,9 @@ export function buildPracticeCoachViewModel({ state, preview = true } = {}) {
     plan: null,
     canCreate: normalized.status !== "loading" && normalized.status !== "creating",
   });
-  const blocks = plan.blocks.map(blockView);
   const nextBlock = plan.blocks.find((block) => block.status === "pending") ?? null;
   const activeBlock = plan.blocks.find((block) => block.status === "active") ?? null;
+  const blocks = plan.blocks.map((block) => blockView(block, { nextPendingId: nextBlock?.blockId ?? null, startingBlockId: normalized.startingBlockId }));
   return freezeDeep({
     kind: "daily-training",
     title: "Daily Training",
@@ -158,8 +159,8 @@ export function buildPracticeCoachViewModel({ state, preview = true } = {}) {
       progress: progress(plan),
       nextBlockId: nextBlock?.blockId ?? null,
       activeBlockId: activeBlock?.blockId ?? null,
-      canStartNext: Boolean(nextBlock) && !activeBlock && !["finished", "abandoned", "expired"].includes(plan.status),
-      canEndToday: !activeBlock && !["finished", "abandoned", "expired"].includes(plan.status),
+      canStartNext: Boolean(nextBlock) && !activeBlock && normalized.status !== "starting" && normalized.startingBlockId == null && !["finished", "abandoned", "expired"].includes(plan.status),
+      canEndToday: !activeBlock && normalized.status !== "starting" && normalized.startingBlockId == null && !["finished", "abandoned", "expired"].includes(plan.status),
       rationales: rationales(plan),
       suggestions: plan.suggestions ?? {},
     },
