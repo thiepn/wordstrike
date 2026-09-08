@@ -2,8 +2,8 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { PRACTICE_DATABASE_VERSION, PRACTICE_STORE_DEFINITIONS } from "../js/practiceLab/practiceConstants.js";
 
-test("PL18 DB6 adds evaluationStates with only declared profile-wide indexes", () => {
-  assert.equal(PRACTICE_DATABASE_VERSION, 7);
+test("PL18 evaluationStates remain structurally unchanged inside the PL25 DB8 envelope", () => {
+  assert.equal(PRACTICE_DATABASE_VERSION, 8);
   assert.deepEqual(PRACTICE_STORE_DEFINITIONS.evaluationStates, {
     keyPath: "evaluationStateId",
     indexes: [
