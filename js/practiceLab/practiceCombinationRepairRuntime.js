@@ -1,5 +1,6 @@
 import { createPracticeIndexLoader } from "./practiceIndexLoader.js";
 import { createPracticeTargetIndex } from "./practiceTargetIndex.js";
+import { createPracticeSessionId } from "./practiceIds.js";
 import {
   buildPracticeCombinationRepairContentPlan,
   buildPracticeCombinationRepairTrainingPlan,
@@ -93,7 +94,7 @@ export function createPracticeCombinationRepairRuntime({
       }
     },
 
-    async prepare({ entityType, entityKey, targetSource = "manual" } = {}) {
+    async prepare({ entityType, entityKey, targetSource = "manual", sessionId = createPracticeSessionId() } = {}) {
       const assets = await loadAssets();
       const plan = await buildPracticeCombinationRepairTrainingPlan({
         targetIndex: assets.targetIndex,
@@ -108,7 +109,7 @@ export function createPracticeCombinationRepairRuntime({
         plan,
         contentItems: assets.trainingCorpus.items,
       });
-      return freezeDeep({ plan, contentPlan, availability: "ready" });
+      return freezeDeep({ sessionId, plan, contentPlan, availability: "ready" });
     },
 
     async getDiagnostics() {
