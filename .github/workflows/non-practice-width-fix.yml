@@ -1,0 +1,42 @@
+name: Temporary non-Practice width repair
+on:
+  push:
+    branches: [fix/non-practice-regression-clean]
+    paths: [.github/workflows/non-practice-width-fix.yml]
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/non-practice-regression-clean
+      - name: Replace viewport-relative padded panel widths
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          path = Path('style.css')
+          text = path.read_text()
+          replacements = {
+            'width: min(1040px, 96vw);': 'width: min(1040px, 100%);',
+            'width: min(620px, 92vw);': 'width: min(620px, 100%);',
+            'width: min(920px, 96vw);': 'width: min(920px, 100%);',
+            'width: min(920px, 94vw);': 'width: min(920px, 100%);',
+            'width: min(760px, 94vw);': 'width: min(760px, 100%);',
+            'width: min(860px, 94vw);': 'width: min(860px, 100%);',
+          }
+          for old, new in replacements.items():
+            assert text.count(old) == 1, (old, text.count(old))
+            text = text.replace(old, new)
+          path.write_text(text)
+          PY
+          node tests/padded-panel-width-regressions.test.js
+          git diff --check
+      - name: Commit width repair
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add style.css
+          git commit -m 'Fix padded screen overflow at tablet landscape widths'
+          git push origin HEAD:fix/non-practice-regression-clean
