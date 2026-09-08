@@ -36,12 +36,24 @@ export function createPracticeLabController(options = {}) {
   let loadEpoch = 0;
   let actionEpoch = 0;
   let loadScheduled = false;
+  let coachListenerAttached = false;
 
   const isDailyRoute = () => base?.getSnapshot?.()?.route?.name === DAILY_ROUTE;
   const hasCoachSession = () => Boolean(coachSessionHost);
+  const attachCoachListener = () => {
+    if (coachListenerAttached || !mounted || !isDailyRoute() || hasCoachSession()) return;
+    root?.addEventListener?.("click", click, true);
+    coachListenerAttached = true;
+  };
+  const detachCoachListener = () => {
+    if (!coachListenerAttached) return;
+    root?.removeEventListener?.("click", click, true);
+    coachListenerAttached = false;
+  };
 
   const renderCoach = (focusSelector = null) => {
     if (!mounted || !isDailyRoute() || hasCoachSession()) return false;
+    attachCoachListener();
     const view = buildPracticeCoachViewModel({ state: coachState, preview: true });
     return externalRenderer
       ? externalRenderer(root, view, { focusSelector })
@@ -65,6 +77,7 @@ export function createPracticeLabController(options = {}) {
 
   function renderer(renderRoot, view, rendererOptions = {}) {
     if (isDailyRoute()) {
+      attachCoachListener();
       const coachView = buildPracticeCoachViewModel({ state: coachState, preview: true });
       const rendered = externalRenderer
         ? externalRenderer(renderRoot, coachView, rendererOptions)
@@ -72,6 +85,7 @@ export function createPracticeLabController(options = {}) {
       scheduleDailyLoad();
       return rendered;
     }
+    detachCoachListener();
     return externalRenderer
       ? externalRenderer(renderRoot, view, rendererOptions)
       : renderPracticeLabV25(renderRoot, view, rendererOptions);
@@ -218,6 +232,7 @@ export function createPracticeLabController(options = {}) {
         return false;
       }
       coachState = normalizePracticeCoachUiState({ ...coachState, status: "ready", plan: started.plan, startingBlockId: null, errorCode: null });
+      detachCoachListener();
       coachSessionHost = await mountCoachChild(started);
       return true;
     } catch (error) {
@@ -268,13 +283,9 @@ export function createPracticeLabController(options = {}) {
     const button = event.target?.closest?.("[data-practice-action]");
     if (!button || !root?.contains?.(button) || button.disabled || button.getAttribute?.("aria-disabled") === "true") return;
     const action = button.dataset.practiceAction;
-    if (!["open-daily-training", "set-coach-duration", "create-coach-plan", "start-coach-next", "skip-coach-block", "abandon-coach-plan", "open-coach-assessment", "open-coach-cold-transfer"].includes(action)) return;
+    if (!["set-coach-duration", "create-coach-plan", "start-coach-next", "skip-coach-block", "abandon-coach-plan", "open-coach-assessment", "open-coach-cold-transfer"].includes(action)) return;
     event.preventDefault?.();
     event.stopPropagation?.();
-    if (action === "open-daily-training") {
-      base.navigate(createPracticeLabRoute(DAILY_ROUTE));
-      return;
-    }
     if (!isDailyRoute()) return;
     if (action === "set-coach-duration" && !coachState.plan) setCoachState({ requestedMinutes: Number(button.dataset.coachMinutes), errorCode: null }, `[data-coach-minutes="${button.dataset.coachMinutes}"]`);
     else if (action === "create-coach-plan") void createTodayPlan();
@@ -287,7 +298,10 @@ export function createPracticeLabController(options = {}) {
 
   const routeAfterNavigation = () => {
     if (isDailyRoute()) {
+      attachCoachListener();
       if (coachState.status === "idle" || coachState.status === "error") scheduleDailyLoad();
+    } else {
+      detachCoachListener();
     }
   };
 
@@ -295,7 +309,6 @@ export function createPracticeLabController(options = {}) {
     mount(route) {
       mounted = true;
       const value = base.mount(route);
-      root?.addEventListener?.("click", click, true);
       queueMicrotask(routeAfterNavigation);
       return value;
     },
@@ -332,7 +345,7 @@ export function createPracticeLabController(options = {}) {
       mounted = false;
       loadEpoch += 1;
       actionEpoch += 1;
-      root?.removeEventListener?.("click", click, true);
+      detachCoachListener();
       if (coachSessionHost) {
         void coachSessionHost.exit();
         coachSessionHost = null;

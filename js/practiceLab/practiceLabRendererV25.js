@@ -60,7 +60,8 @@ export function renderPracticeLabV25(root, view, options = {}) {
     if (button) {
       button.disabled = false;
       button.removeAttribute?.("aria-disabled");
-      button.dataset.practiceAction = "open-daily-training";
+      button.dataset.practiceAction = "navigate";
+      button.dataset.route = "daily-training";
       button.textContent = "OPEN DAILY TRAINING";
     }
     const status = card?.querySelector?.("li");
