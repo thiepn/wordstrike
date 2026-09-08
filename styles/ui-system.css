@@ -198,7 +198,6 @@ select {
   text-transform: none;
 }
 
-.mode-panel h1,
 .endless-ready-panel h1,
 .endless-results-panel h1,
 .speed-results-panel h1,
@@ -217,7 +216,6 @@ select {
    ========================================================= */
 
 :is(
-  .mode-panel,
   .results-panel,
   .settings-panel,
   .leaderboards-panel,
@@ -343,7 +341,6 @@ select {
   filter: none;
 }
 
-.mode-card,
 .level-tile {
   border-color: var(--color-border-default);
   border-radius: var(--radius-md);
@@ -356,8 +353,6 @@ select {
     transform var(--motion-fast) var(--ease-standard);
 }
 
-.mode-card.available:hover,
-.mode-card.available:focus-visible,
 .level-tile:hover,
 .level-tile:focus-visible {
   border-color: var(--color-border-strong);
@@ -365,17 +360,10 @@ select {
   box-shadow: var(--shadow-elevation-subtle);
 }
 
-.mode-card.selected,
 .level-tile.selected {
   border-color: rgb(0 255 242 / 48%);
   background: var(--color-accent-soft);
   box-shadow: inset 2px 0 var(--color-accent);
-}
-
-.mode-card.selected {
-  border-color: rgb(255 60 172 / 50%);
-  background: var(--color-special-soft);
-  box-shadow: inset 2px 0 var(--color-special);
 }
 
 .level-tile.boss {
@@ -938,7 +926,6 @@ select {
   .gameplay-pause-button,
   .gameplay-control-button,
   .tutorial-help-button,
-  .mode-card,
   .level-tile {
     transition-duration: 0.001ms;
   }
@@ -950,7 +937,6 @@ select {
   .gameplay-pause-button:hover,
   .gameplay-control-button:hover,
   .tutorial-help-button:hover,
-  .mode-card:hover,
   .level-tile:hover {
     transform: none;
   }
