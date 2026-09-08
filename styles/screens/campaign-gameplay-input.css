@@ -1,0 +1,53 @@
+/* UI5 — Campaign-only mobile input presentation companion. */
+
+.campaign-gameplay-screen .campaign-keyboard-trigger {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: var(--ui-radius-sm);
+  outline: none;
+  background: rgb(16 23 32 / 88%);
+  color: var(--ui-text-muted);
+  box-shadow: var(--ui-shadow-sm);
+  font-family: var(--ui-font);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  transition:
+    color var(--ui-motion-fast) var(--ui-ease-out),
+    background var(--ui-motion-fast) var(--ui-ease-out),
+    box-shadow var(--ui-motion-fast) var(--ui-ease-out);
+}
+
+.campaign-gameplay-screen .campaign-keyboard-trigger:hover,
+.campaign-gameplay-screen .campaign-keyboard-trigger:focus-visible {
+  border: 0;
+  outline: 2px solid var(--ui-accent);
+  outline-offset: 2px;
+  background: rgb(22 33 45 / 94%);
+  color: var(--ui-text);
+  box-shadow: var(--ui-shadow-md), var(--ui-glow-cyan-soft);
+  transform: none;
+}
+
+.campaign-gameplay-screen .gameplay-input-dock.keyboard-ready .campaign-keyboard-trigger {
+  background: rgb(0 255 242 / 8%);
+  color: var(--ui-accent);
+  box-shadow: var(--ui-glow-cyan-soft);
+}
+
+@media (max-width: 520px) {
+  .campaign-gameplay-screen .campaign-keyboard-trigger {
+    min-height: 44px;
+    padding-inline: 12px;
+    font-size: 9px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .campaign-gameplay-screen .campaign-keyboard-trigger {
+    transition-duration: 0.001ms !important;
+  }
+}
