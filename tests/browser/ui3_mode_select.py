@@ -260,8 +260,15 @@ def inspect_viewport_matrix(browser, base, browser_name, evidence):
         assert box["y"] >= -1, (browser_name, label, box, scroll)
         assert box["y"] + box["height"] <= height + 1, (browser_name, label, box, scroll)
         if scroll["scrollHeight"] > scroll["clientHeight"] + 1:
-            assert scroll["top"] > 0, (browser_name, label, scroll)
             assert scroll["overflowY"] in {"auto", "scroll"}, (browser_name, label, scroll)
+            # A small amount of overflow can coexist with a target that is already
+            # fully visible. In that case scrollIntoView correctly leaves scrollTop at
+            # zero; otherwise the nested owner must have scrolled to reveal the target.
+            if scroll["top"] <= 0:
+                assert scroll["targetTop"] >= -1, (browser_name, label, scroll)
+                assert scroll["targetBottom"] <= scroll["clientHeight"] + 1, (
+                    browser_name, label, scroll
+                )
 
         evidence.append({
             "browser": browser_name,
