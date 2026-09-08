@@ -34,7 +34,7 @@ test("PL23 Baseline/Check profiles keep first-pass accuracy, normalized timing, 
   assert.equal(baseline.firstPassAccuracy, 0);
   assert.equal(check.firstPassAccuracy, 1);
   assert.equal(check.timing.fluentResidualMedianMs, -10);
-  assert.equal(baseline.timing.disfluencyRate, 1);
+  assert.equal(baseline.timing.disfluencyRate, null, "Incorrect first attempts do not fabricate timing/disfluency evidence when canonical timing coverage is unavailable");
   assert.equal(check.timing.disfluencyRate, 0);
 });
 
