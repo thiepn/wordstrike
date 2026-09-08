@@ -69,9 +69,9 @@ function opportunity(correct, residual = 0) {
   };
 }
 
-test("PL20 preserves DB7/session12/foundation10 and its fixed policy is exactly one PL16 dose", () => {
-  assert.equal(PRACTICE_DATABASE_VERSION, 7);
-  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 12);
+test("PL20 contracts remain intact inside the PL25 DB8/session13/foundation10 envelope and its fixed policy is exactly one PL16 dose", () => {
+  assert.equal(PRACTICE_DATABASE_VERSION, 8);
+  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 13);
   assert.equal(PRACTICE_FOUNDATION_ANALYSIS_VERSION, 10);
   assert.equal(validatePracticeCombinationRepairPolicy().valid, true);
   assert.equal(getPracticeCombinationRepairDoseUnits("bigram"), 1);
