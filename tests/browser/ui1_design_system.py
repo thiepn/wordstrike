@@ -178,7 +178,7 @@ def inspect_responsive_matrix(browser, base, browser_name, evidence):
         mode_overflow = page.evaluate("document.documentElement.scrollWidth - document.documentElement.clientWidth")
         assert mode_overflow <= 1, (browser_name, label, mode_overflow)
 
-        geometry = page.locator(".mode-panel").evaluate("""el => {
+        geometry = page.locator(".mode-screen > :first-child").evaluate("""el => {
           const r = el.getBoundingClientRect();
           return {left:r.left,right:r.right,width:r.width,viewport:innerWidth};
         }""")
@@ -190,7 +190,7 @@ def inspect_responsive_matrix(browser, base, browser_name, evidence):
 
         # A short viewport may require document or container scrolling. What matters is
         # that the bottom navigation can actually be brought fully into the viewport.
-        bottom_action = page.locator(".mode-menu-action .arcade-button")
+        bottom_action = page.locator('.mode-screen [data-action="mode-title"]').last
         expect(bottom_action).to_be_attached()
         bottom_action.scroll_into_view_if_needed()
         page.wait_for_timeout(30)

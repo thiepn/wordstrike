@@ -182,34 +182,126 @@ export function renderTitle(menuIndex, handlers) {
 }
 
 export function renderModeSelect(modes, selectedIndex, handlers) {
+  const selectedMode = selectedIndex >= 0 && selectedIndex < modes.length
+    ? modes[selectedIndex]
+    : null;
+  const statusLabel = (mode) => mode?.status === "preview"
+    ? "Developer preview"
+    : mode?.enabled
+      ? "Available"
+      : "Coming soon";
+  const toneFor = (mode) => {
+    if (!mode) return "home";
+    if (!mode.enabled) return "neutral";
+    if (mode.id === "campaign") return "campaign";
+    if (mode.id === "speed-test") return "typing";
+    if (mode.id === "endless") return "endless";
+    if (mode.id === "arcade-rush") return "rush";
+    return "neutral";
+  };
+  const motifFor = (mode) => {
+    if (!mode) return '<div class="mode-motif-neutral">EXIT</div>';
+    if (!mode.enabled) return '<div class="mode-motif-neutral">LOCKED</div>';
+    if (mode.id === "campaign") {
+      return `<div class="mode-motif-campaign">
+        <span class="trajectory"></span><span class="trajectory"></span><span class="trajectory"></span>
+        <span class="core-node"></span>
+      </div>`;
+    }
+    if (mode.id === "speed-test") {
+      return `<div class="mode-motif-typing">
+        <div class="word-row"><span>control</span><span>tempo</span><span>focus</span></div>
+        <div class="word-row"><span>signal</span><strong>precision</strong><i class="caret"></i><span>rhythm</span></div>
+        <div class="word-row"><span>velocity</span><span>accuracy</span><span>flow</span></div>
+      </div>`;
+    }
+    if (mode.id === "endless") {
+      return `<div class="mode-motif-endless">
+        <span class="ring"></span><span class="ring"></span><span class="ring"></span><span class="ring"></span>
+        <span class="sweep"></span><span class="center"></span>
+      </div>`;
+    }
+    if (mode.id === "arcade-rush") {
+      return `<div class="mode-motif-rush">
+        <span class="rush-line"></span><span class="rush-line"></span><span class="rush-line"></span>
+        <span class="rush-core"></span>
+      </div>`;
+    }
+    return '<div class="mode-motif-neutral">MODE</div>';
+  };
+  const modeNumber = selectedMode
+    ? String(modes.indexOf(selectedMode) + 1).padStart(2, "0")
+    : "00";
+  const showcaseTitle = selectedMode?.name || "Main Menu";
+  const showcaseLabel = selectedMode?.shortLabel || "Return to title";
+  const showcaseDescription = selectedMode?.description
+    || "Leave Mode Select and return to the WordStrike home screen.";
+  const showcaseCommand = selectedMode?.enabled
+    ? `<kbd>ENTER</kbd><span>Launch ${selectedMode.name}</span>`
+    : selectedMode
+      ? "<span>Not available yet</span>"
+      : "<kbd>ENTER</kbd><span>Return to title</span>";
+  const selectedClass = (index) => index === selectedIndex ? " selected" : "";
+
   app().innerHTML = `
-    <section class="screen mode-screen">
-      <div class="mode-panel">
-        ${screenBackButton("mode-title")}
-        <div class="eyebrow">Select simulation</div>
-        <h1>MODE SELECT</h1>
-        <div class="mode-grid">
-          ${modes.map((mode, index) => mode.enabled
-    ? `<button class="mode-card available ${index === selectedIndex ? "selected" : ""}"
-                data-mode-id="${mode.id}" data-mode-index="${index}">
-              <strong>${mode.name}</strong>
-              <span>${mode.shortLabel}</span>
-              <small>${mode.status === "preview" ? "DEVELOPER PREVIEW" : "AVAILABLE"}</small>
-            </button>`
-    : `<article class="mode-card coming-soon ${index === selectedIndex ? "selected" : ""}"
-                data-mode-id="${mode.id}" data-mode-index="${index}" aria-disabled="true">
-              <strong>${mode.name}</strong>
-              <span>${mode.shortLabel}</span>
-              <small>COMING SOON</small>
-            </article>`).join("")}
+    <section class="screen mode-screen mode-select-screen">
+      <div class="mode-select-shell">
+        <header class="mode-select-topline">
+          ${screenBackButton("mode-title")}
+          <div class="mode-select-context"><strong>WORDSTRIKE</strong><span>MODE / ${String(Math.min(selectedIndex + 1, modes.length + 1)).padStart(2, "0")}</span></div>
+        </header>
+
+        <div class="mode-select-intro">
+          <div>
+            <p class="mode-select-kicker">Choose your challenge</p>
+            <h1>Mode Select</h1>
+          </div>
+          <p class="mode-select-lead">Pick the format that matches what you want to train, prove, or survive. Each mode keeps the same typing fundamentals under a different kind of pressure.</p>
         </div>
-        <p class="mode-description">${modes[selectedIndex]?.description || ""}</p>
-        <div class="mode-menu-action">
-          ${menuButton("MAIN MENU", "mode-title", selectedIndex === modes.length)}
+
+        <div class="mode-select-layout">
+          <section class="mode-showcase mode-tone-${toneFor(selectedMode)}" data-mode-showcase data-mode-enabled="${selectedMode?.enabled === true}">
+            <div class="mode-showcase-visual" aria-hidden="true">
+              <span class="mode-showcase-index">${modeNumber} / ${String(modes.length).padStart(2, "0")}</span>
+              <span class="mode-showcase-signal">${selectedMode ? statusLabel(selectedMode) : "Navigation"}</span>
+              ${motifFor(selectedMode)}
+            </div>
+            <div class="mode-showcase-copy">
+              <div class="mode-showcase-heading">
+                <p>${showcaseLabel}</p>
+                <h2>${showcaseTitle}</h2>
+              </div>
+              <div class="mode-showcase-command">${showcaseCommand}</div>
+              <p class="mode-showcase-description">${showcaseDescription}</p>
+            </div>
+          </section>
+
+          <nav class="mode-options" aria-label="Game modes">
+            <div class="mode-options-heading"><strong>Modes</strong><span>01–${String(modes.length).padStart(2, "0")}</span></div>
+            <div class="mode-options-list">
+              ${modes.map((mode, index) => {
+    const status = statusLabel(mode);
+    const current = index === selectedIndex ? ' aria-current="true"' : "";
+    const copy = `<span class="mode-option-index">${String(index + 1).padStart(2, "0")}</span>
+                  <span class="mode-option-copy"><strong>${mode.name}</strong><span>${mode.shortLabel} · ${mode.description}</span></span>
+                  <small class="mode-option-status">${status}</small>`;
+    return mode.enabled
+      ? `<button type="button" class="mode-option available${selectedClass(index)}" data-mode-id="${mode.id}" data-mode-index="${index}"${current}>${copy}</button>`
+      : `<article class="mode-option coming-soon${selectedClass(index)}" data-mode-id="${mode.id}" data-mode-index="${index}" aria-disabled="true" tabindex="-1"${current}>${copy}</article>`;
+  }).join("")}
+            </div>
+          </nav>
         </div>
-        <p class="footer-hint">↑ ↓ SELECT &nbsp;•&nbsp; ENTER CONFIRM &nbsp;•&nbsp; ESC BACK</p>
+
+        <footer class="mode-select-footer">
+          <p class="mode-select-hint">↑ ↓ ← → navigate &nbsp;·&nbsp; Enter launch &nbsp;·&nbsp; Esc back</p>
+          <button type="button" class="mode-home-action${selectedClass(modes.length)}" data-mode-home-index="${modes.length}" data-action="mode-title">
+            <span class="mode-home-arrow">←</span><span>Main Menu</span>
+          </button>
+        </footer>
       </div>
     </section>`;
+
   app().querySelectorAll("[data-mode-index]").forEach((card) => {
     const index = Number(card.dataset.modeIndex);
     card.onmouseenter = () => handlers.select?.(index);
@@ -217,13 +309,16 @@ export function renderModeSelect(modes, selectedIndex, handlers) {
       card.onclick = () => handlers.activate?.(card.dataset.modeId);
     }
   });
-  app().querySelector(".mode-card.available.selected")?.focus({ preventScroll: true });
   const titleButtons = [...app().querySelectorAll('[data-action="mode-title"]')];
   if (!titleButtons.length) titleButtons.push(app().querySelector('[data-action="mode-title"]'));
   titleButtons.filter(Boolean).forEach((titleButton) => {
     titleButton.onclick = handlers.back;
     titleButton.onmouseenter = () => handlers.select?.(modes.length);
   });
+  const focusTarget = selectedIndex === modes.length
+    ? app().querySelector(`[data-mode-home-index="${modes.length}"]`)
+    : app().querySelector(`[data-mode-index="${selectedIndex}"]`);
+  focusTarget?.focus?.({ preventScroll: true });
 }
 
 export function renderEndlessReady(handlers = {}) {

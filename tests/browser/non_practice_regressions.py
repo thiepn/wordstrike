@@ -72,7 +72,7 @@ def title_and_shell_checks(browser, base, browser_name, checks):
     assert "Arcade Rush" in manifest["description"] and "daily" not in manifest["description"].lower()
     page.locator('[data-action="modes"]').click()
     expect(page.locator(".mode-screen")).to_be_visible()
-    active = page.locator("button.mode-card.available").evaluate_all("els => els.map(e => e.dataset.modeId)")
+    active = page.locator("button.mode-option.available").evaluate_all("els => els.map(e => e.dataset.modeId)")
     assert active == ["campaign", "speed-test", "endless", "arcade-rush"], active
     assert overflow(page) <= 1
     checks.append({"browser": browser_name, "case": "title metadata and active mode navigation"})
