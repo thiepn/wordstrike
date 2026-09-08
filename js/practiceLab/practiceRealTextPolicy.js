@@ -42,5 +42,16 @@ export const PRACTICE_REAL_TEXT_POLICY_V1 = Object.freeze({
 
 export function getPracticeRealTextRequiredGraphemes(durationMs, policy = PRACTICE_REAL_TEXT_POLICY_V1) {
   if (!policy.durationsMs.includes(durationMs)) return null;
-  return Math.ceil((durationMs / 60_000) * policy.capacity.wordsPerMinute * policy.capacity.graphemesPerWord * policy.capacity.bufferMultiplier);
+
+  // Convert the engineering buffer to an exact bounded integer ratio before
+  // applying ceil. This avoids floating-point representations such as
+  // 6600.000000000001 producing a spurious extra grapheme for the canonical
+  // 3 / 5 / 10 minute v1 durations.
+  const bufferPerMille = Math.round(policy.capacity.bufferMultiplier * 1000);
+  const numerator = durationMs
+    * policy.capacity.wordsPerMinute
+    * policy.capacity.graphemesPerWord
+    * bufferPerMille;
+  const denominator = 60_000 * 1000;
+  return Math.ceil(numerator / denominator);
 }
