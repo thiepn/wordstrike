@@ -1,0 +1,43 @@
+name: PL25 envelope alignment
+
+on:
+  push:
+    branches:
+      - codex/pl25-daily-coach-v1
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: codex/pl25-daily-coach-v1
+          fetch-depth: 0
+      - name: Align inherited PL12 envelope assertions
+        shell: python
+        run: |
+          from pathlib import Path
+          path = Path('tests/practice-limiter-service-isolation.test.js')
+          text = path.read_text(encoding='utf-8')
+          replacements = {
+            'test("PL12 model contracts remain unchanged inside the current PL18 storage/session/foundation envelope", () => {': 'test("PL12 model contracts remain unchanged inside the current PL25 storage/session/foundation envelope", () => {',
+            '  assert.equal(PRACTICE_DATABASE_VERSION, 7);': '  assert.equal(PRACTICE_DATABASE_VERSION, 8);',
+            '  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 12);': '  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 13);',
+          }
+          for old, new in replacements.items():
+              if old not in text:
+                  raise SystemExit(f'missing target: {old}')
+              text = text.replace(old, new, 1)
+          path.write_text(text, encoding='utf-8')
+          Path('.github/workflows/pl25-envelope-fix.yml').unlink()
+      - name: Commit permanent regression alignment
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "PL25: align PL12 envelope with DB8/session13"
+          git push origin HEAD:codex/pl25-daily-coach-v1
