@@ -9,37 +9,16 @@ const freezeDeep = (value) => { if (!value || typeof value !== "object" || Objec
 
 function lower(value) { return typeof value === "string" ? value.toLowerCase() : ""; }
 function dimensionCandidate(limiter, name) {
-  const list = [
-    limiter?.dimensions?.[name],
-    limiter?.dimensionEvidence?.[name],
-    limiter?.dimensionScores?.[name],
-    limiter?.[name],
-  ].filter(Boolean);
+  const list = [limiter?.dimensions?.[name], limiter?.dimensionEvidence?.[name], limiter?.dimensionScores?.[name], limiter?.[name]].filter(Boolean);
   const raw = list[0] ?? null;
   if (finite(raw)) return { severity: raw, confidence: null, status: limiter?.status ?? null };
-  return {
-    severity: [raw?.weightedSeverity, raw?.severity, raw?.score, raw?.weightedScore].find(finite) ?? 0,
-    confidence: [raw?.confidenceScore, raw?.evidenceConfidenceScore, raw?.confidence].find(finite) ?? null,
-    status: raw?.status ?? limiter?.status ?? null,
-  };
+  return { severity: [raw?.weightedSeverity, raw?.severity, raw?.score, raw?.weightedScore].find(finite) ?? 0, confidence: [raw?.confidenceScore, raw?.evidenceConfidenceScore, raw?.confidence].find(finite) ?? null, status: raw?.status ?? limiter?.status ?? null };
 }
-function confidenceFor(limiter, inaccurate, recovery) {
-  return [inaccurate.confidence, recovery.confidence, limiter?.evidenceMetadata?.primaryDimensionConfidenceScore, limiter?.evidenceConfidenceScore, limiter?.evidenceMetadata?.generalConfidenceScore].filter(finite).sort((a, b) => b - a)[0] ?? 0;
-}
-function statusFor(limiter, inaccurate, recovery) {
-  const statuses = [inaccurate.status, recovery.status, limiter?.status].filter((value) => STATUS_STRENGTH[value]);
-  return statuses.sort((a, b) => STATUS_STRENGTH[b] - STATUS_STRENGTH[a])[0] ?? limiter?.status ?? "insufficient-data";
-}
-function hierarchyIndependence(limiter) {
-  const explained = Array.isArray(limiter?.hierarchy?.explainedBy) ? limiter.hierarchy.explainedBy.filter((entry) => ["likely", "confirmed"].includes(entry?.status ?? entry?.limiterStatus)) : [];
-  const stronglyExplained = limiter?.hierarchy?.status === "explained" || limiter?.hierarchy?.stronglyExplained === true || explained.length > 0;
-  return { stronglyExplained, explanationCount: explained.length, factor: stronglyExplained ? 0.65 : 1 };
-}
-function saturationFor(learningState, mastery, limiter) {
-  return learningState ? evaluatePracticeSaturation({ learningState, mastery, limiter }) : Object.freeze({ status: "insufficient-data", confidence: "none", type: "unknown", reasons: Object.freeze(["learning-state-unavailable"]) });
-}
+function confidenceFor(limiter, inaccurate, recovery) { return [inaccurate.confidence, recovery.confidence, limiter?.evidenceMetadata?.primaryDimensionConfidenceScore, limiter?.evidenceConfidenceScore, limiter?.evidenceMetadata?.generalConfidenceScore].filter(finite).sort((a, b) => b - a)[0] ?? 0; }
+function statusFor(limiter, inaccurate, recovery) { const statuses = [inaccurate.status, recovery.status, limiter?.status].filter((value) => STATUS_STRENGTH[value]); return statuses.sort((a, b) => STATUS_STRENGTH[b] - STATUS_STRENGTH[a])[0] ?? limiter?.status ?? "insufficient-data"; }
+function hierarchyIndependence(limiter) { const explained = Array.isArray(limiter?.hierarchy?.explainedBy) ? limiter.hierarchy.explainedBy.filter((entry) => ["likely", "confirmed"].includes(entry?.status ?? entry?.limiterStatus)) : []; const stronglyExplained = limiter?.hierarchy?.status === "explained" || limiter?.hierarchy?.stronglyExplained === true || explained.length > 0; return { stronglyExplained, explanationCount: explained.length, factor: stronglyExplained ? 0.65 : 1 }; }
+function saturationFor(learningState, mastery, limiter) { return learningState ? evaluatePracticeSaturation({ learningState, mastery, limiter }) : Object.freeze({ status: "insufficient-data", confidence: "none", type: "unknown", reasons: Object.freeze(["learning-state-unavailable"]) }); }
 function saturationFactor(status, policy) { return policy.recommendations.deemphasizedSaturation.includes(status) ? 0.65 : 1; }
-function masteryFactor(stage, policy) { return policy.recommendations.deemphasizedMasteryStages.map(lower).includes(lower(stage)) ? 0.55 : 1; }
 function compare(a, b) {
   if (b.selectionScore !== a.selectionScore) return b.selectionScore - a.selectionScore;
   if ((STATUS_STRENGTH[b.limiterStatus] ?? 0) !== (STATUS_STRENGTH[a.limiterStatus] ?? 0)) return (STATUS_STRENGTH[b.limiterStatus] ?? 0) - (STATUS_STRENGTH[a.limiterStatus] ?? 0);
@@ -75,31 +54,14 @@ export function buildAccuracyRecoveryCandidates({ profileId, contextId, language
     if (availability && availability.status !== "ready") continue;
     const mastery = masteryByStat.get(stat.statId) ?? null;
     const masteryStage = mastery?.stage ?? "unmeasured";
+    if (policy.recommendations.deemphasizedMasteryStages.map(lower).includes(lower(masteryStage))) continue;
     const saturation = saturationFor(learningByStat.get(stat.statId), mastery, limiter);
     const hierarchy = target.entityType === "key" ? { stronglyExplained: false, explanationCount: 0, factor: 1 } : hierarchyIndependence(limiter);
     const confidence = confidenceFor(limiter, inaccurate, recovery);
     const priority = finite(limiter.priorityScore) ? limiter.priorityScore : finite(limiter.impactScore) ? limiter.impactScore : finite(limiter.weaknessScore) ? limiter.weaknessScore : 0;
     const base = controlSeverity * 1.5 + priority + confidence * 0.25 + (primary ? 20 : 0);
-    const selectionScore = base * hierarchy.factor * masteryFactor(masteryStage, policy) * saturationFactor(saturation.status, policy);
-    candidates.push(freezeDeep({
-      statId: stat.statId,
-      entityType: target.entityType,
-      entityKey: target.entityKey,
-      limiterStatus: status,
-      limiterPhenotype: phenotype,
-      inaccurateSeverity: inaccurate.severity,
-      recoveryHeavySeverity: recovery.severity,
-      priorityScore: finite(limiter.priorityScore) ? limiter.priorityScore : null,
-      impactScore: finite(limiter.impactScore) ? limiter.impactScore : null,
-      evidenceConfidenceScore: confidence,
-      masteryStage,
-      saturationStatus: saturation.status,
-      saturationDeemphasized: policy.recommendations.deemphasizedSaturation.includes(saturation.status),
-      hierarchyDeemphasized: hierarchy.stronglyExplained,
-      hierarchyExplanationCount: hierarchy.explanationCount,
-      selectionScore,
-      targetSource: "recommended",
-    }));
+    const selectionScore = base * hierarchy.factor * saturationFactor(saturation.status, policy);
+    candidates.push(freezeDeep({ statId: stat.statId, entityType: target.entityType, entityKey: target.entityKey, limiterStatus: status, limiterPhenotype: phenotype, inaccurateSeverity: inaccurate.severity, recoveryHeavySeverity: recovery.severity, priorityScore: finite(limiter.priorityScore) ? limiter.priorityScore : null, impactScore: finite(limiter.impactScore) ? limiter.impactScore : null, evidenceConfidenceScore: confidence, masteryStage, saturationStatus: saturation.status, saturationDeemphasized: policy.recommendations.deemphasizedSaturation.includes(saturation.status), hierarchyDeemphasized: hierarchy.stronglyExplained, hierarchyExplanationCount: hierarchy.explanationCount, selectionScore, targetSource: "recommended" }));
   }
   candidates.sort(compare);
   return Object.freeze(candidates.slice(0, Math.max(0, Math.min(policy.recommendations.maximum, Number.isInteger(maxResults) ? maxResults : policy.recommendations.maximum))));
@@ -111,10 +73,7 @@ export function buildAccuracyRecoveryManualWarnings({ statId, limiterSnapshot = 
   const mastery = (masterySnapshot?.entities ?? []).find((entry) => entry.statId === statId) ?? null;
   const learning = (learningStates ?? []).find((entry) => entry.statId === statId) ?? null;
   const warnings = [];
-  if (learning) {
-    const saturation = evaluatePracticeSaturation({ learningState: learning, mastery, limiter });
-    if (policy.recommendations.deemphasizedSaturation.includes(saturation.status)) warnings.push(Object.freeze({ kind: "saturation", message: "Recent similar acquisition practice appears to have low marginal gain." }));
-  }
+  if (learning) { const saturation = evaluatePracticeSaturation({ learningState: learning, mastery, limiter }); if (policy.recommendations.deemphasizedSaturation.includes(saturation.status)) warnings.push(Object.freeze({ kind: "saturation", message: "Recent similar acquisition practice appears to have low marginal gain." })); }
   const hierarchy = limiter ? hierarchyIndependence(limiter) : null;
   if (hierarchy?.stronglyExplained) warnings.push(Object.freeze({ kind: "hierarchy", message: "Some of this target's difficulty may be explained by a lower-level limiter." }));
   return Object.freeze(warnings);
