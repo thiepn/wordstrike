@@ -117,6 +117,7 @@ def inspect_foundation(browser, base, browser_name, evidence):
       host.style.cssText = 'position:fixed;left:16px;bottom:16px;z-index:9999;display:grid;gap:8px';
       host.innerHTML = `
         <button class="ui-button ui-button--primary">Start</button>
+        <button class="ui-button ui-button--secondary">Secondary</button>
         <button class="ui-icon-button" aria-label="Pause"><svg class="ui-icon" viewBox="0 0 24 24"><path d="M8 6v12M16 6v12"/></svg></button>
         <div class="ui-metric ui-metric--accent"><span class="ui-metric-label">WPM</span><strong class="ui-metric-value">87</strong></div>
         <div class="ui-segmented" role="tablist"><button aria-selected="true">15</button><button aria-selected="false">60</button></div>
@@ -142,7 +143,8 @@ def inspect_foundation(browser, base, browser_name, evidence):
     assert fixture["iconWidth"] >= 44, fixture
     assert "JetBrains Mono" in fixture["metricFont"], fixture
 
-    ordinary = page.locator(".menu-list .arcade-button").nth(1)
+    # UI1 owns the primitive interaction contract, not any later screen's legacy markup.
+    ordinary = page.locator("#ui1-browser-fixture .ui-button--secondary")
     ordinary.hover()
     page.wait_for_timeout(180)
     transform = ordinary.evaluate("""el => {

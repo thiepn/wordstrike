@@ -217,7 +217,6 @@ select {
    ========================================================= */
 
 :is(
-  .title-panel,
   .mode-panel,
   .results-panel,
   .settings-panel,

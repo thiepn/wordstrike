@@ -767,7 +767,6 @@ button {
   mix-blend-mode: screen;
 }
 
-.title-panel,
 .mode-panel,
 .results-panel,
 .settings-panel {
@@ -1945,21 +1944,6 @@ body.gameplay-active .speed-test-screen { overflow-y: auto; }
   text-transform: uppercase;
 }
 
-.brand-logo {
-  display: block;
-  width: min(72vw, 360px);
-  max-width: 100%;
-  height: auto;
-  margin: 8px auto 1rem;
-  object-fit: contain;
-  user-select: none;
-  pointer-events: none;
-  -webkit-user-drag: none;
-  filter:
-    drop-shadow(0 0 12px rgb(30 238 255 / 20%))
-    drop-shadow(0 0 18px rgb(255 0 153 / 12%));
-}
-
 .global-submission {
   width: min(100%, 640px);
   margin: 18px auto;
@@ -2001,13 +1985,6 @@ body.gameplay-active .speed-test-screen { overflow-y: auto; }
   color: var(--muted);
   letter-spacing: 0.14em;
   text-transform: uppercase;
-}
-
-.menu-list {
-  display: grid;
-  gap: 10px;
-  width: min(330px, 100%);
-  margin: 0 auto;
 }
 
 .arcade-button {
@@ -2119,20 +2096,6 @@ body.gameplay-active .speed-test-screen { overflow-y: auto; }
   border-color: var(--danger);
   color: var(--danger);
   box-shadow: 0 0 16px rgb(255 71 87 / 18%), inset 3px 0 var(--danger);
-}
-
-.ambient-word {
-  position: absolute;
-  color: rgb(232 240 245 / 6%);
-  font-size: clamp(14px, 2vw, 26px);
-  animation: drift 14s linear infinite;
-  pointer-events: none;
-}
-
-@keyframes drift {
-  from { transform: translate(-20px, 20px); }
-  50% { transform: translate(20px, -15px); }
-  to { transform: translate(-20px, 20px); }
 }
 
 .level-screen {
@@ -2951,7 +2914,6 @@ body.gameplay-active .speed-test-screen { overflow-y: auto; }
     padding-right: max(var(--mobile-screen-gutter), env(safe-area-inset-right));
   }
 
-  .title-panel,
   .mode-panel,
   .results-panel,
   .settings-panel,
@@ -2968,7 +2930,6 @@ body.gameplay-active .speed-test-screen { overflow-y: auto; }
   }
 
   :is(
-    .title-panel,
     .mode-panel,
     .results-panel,
     .settings-panel,
@@ -2982,23 +2943,10 @@ body.gameplay-active .speed-test-screen { overflow-y: auto; }
     min-width: 0;
   }
 
-  .title-panel {
-    padding: 24px 18px;
-  }
-
   .arcade-button:hover,
   .arcade-button.selected,
   .arcade-button:focus-visible {
     transform: none;
-  }
-
-  .brand-logo {
-    width: min(68vw, 300px);
-    margin-bottom: 0.5rem;
-  }
-
-  .title-panel .subtitle {
-    margin: 8px 0 20px;
   }
 
   .leaderboards-screen {
@@ -3529,19 +3477,6 @@ body.gameplay-viewport-short .boss-phrase-size-extreme { font-size: clamp(16px, 
 @media (max-height: 760px) {
   .menu-screen {
     padding: 12px;
-  }
-
-  .title-panel {
-    padding-block: 18px;
-  }
-
-  .brand-logo {
-    width: min(56vw, 260px);
-    margin-block: 4px 0.4rem;
-  }
-
-  .title-panel .subtitle {
-    margin: 6px 0 14px;
   }
 
   .title-panel .footer-hint {

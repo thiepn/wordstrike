@@ -64,7 +64,7 @@ assert.equal(calls.length, 5);
 const ui = await readFile(new URL("../js/ui.js", import.meta.url), "utf8");
 const main = await readFile(new URL("../js/main.js", import.meta.url), "utf8");
 const clickRouting = await readFile(new URL("../js/appClickRouting.js", import.meta.url), "utf8");
-assert.match(ui, /\["LEADERBOARDS", "open-leaderboards"\]/);
+assert.match(ui, /data-title-index="1" data-action="open-leaderboards"/);
 assert.match(main, /function openLeaderboards\(\)/);
 assert.match(main, /Screens\.LEADERBOARDS/);
 assert.match(clickRouting, /"leaderboard-select-arcade-rush"/);
