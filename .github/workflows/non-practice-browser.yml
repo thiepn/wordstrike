@@ -28,6 +28,10 @@ jobs:
         run: python tests/browser/ui3_mode_select.py
       - name: Certify UI4 Campaign progression
         run: python tests/browser/ui4_campaign_progression.py
+      - name: Certify UI5 Campaign gameplay
+        run: |
+          python tests/browser/ui5_campaign_gameplay.py
+          python tests/browser/ui5_campaign_visual.py
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -38,4 +42,5 @@ jobs:
             browser-artifacts/ui2-title-navigation/
             browser-artifacts/ui3-mode-select/
             browser-artifacts/ui4-campaign-progression/
+            browser-artifacts/ui5-campaign-gameplay/
           retention-days: 7

@@ -1,0 +1,748 @@
+/* UI5 — Campaign gameplay HUD, Core and incoming-word presentation.
+   Campaign-only ownership: Endless and Boss remain on their legacy presentation until UI6/UI7. */
+
+.campaign-gameplay-screen {
+  --campaign-hud-height: 88px;
+  grid-template-rows: var(--campaign-hud-height) minmax(0, 1fr);
+  background:
+    radial-gradient(circle at 50% 54%, rgb(0 255 242 / 9%), transparent 22%),
+    radial-gradient(circle at 50% 22%, rgb(0 255 242 / 4%), transparent 32%),
+    linear-gradient(180deg, rgb(13 20 28 / 88%) 0, rgb(10 14 20 / 18%) 110px, transparent 210px),
+    var(--ui-bg, #0a0e14);
+}
+
+.campaign-gameplay-screen .campaign-gameplay-hud {
+  position: relative;
+  z-index: 20;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: center;
+  gap: 7px;
+  min-width: 0;
+  padding: max(9px, env(safe-area-inset-top)) max(18px, env(safe-area-inset-right)) 9px max(18px, env(safe-area-inset-left));
+  border: 0;
+  background:
+    linear-gradient(180deg, rgb(5 10 15 / 88%), rgb(5 10 15 / 52%) 68%, transparent);
+  color: var(--ui-text-soft);
+  font-family: var(--ui-font);
+  font-size: 12px;
+  box-shadow: none;
+}
+
+.campaign-hud-primary {
+  display: grid;
+  grid-template-columns: auto auto minmax(74px, .75fr) auto minmax(78px, .75fr) minmax(84px, .8fr) auto;
+  align-items: center;
+  gap: clamp(12px, 2vw, 28px);
+  min-width: 0;
+}
+
+.campaign-hud-back {
+  min-width: 52px;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: var(--ui-radius-sm);
+  background: transparent;
+  color: var(--ui-text-muted);
+  font-family: var(--ui-font);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  transition:
+    color var(--ui-motion-fast) var(--ui-ease-out),
+    background var(--ui-motion-fast) var(--ui-ease-out);
+}
+
+.campaign-hud-back:hover,
+.campaign-hud-back:focus-visible {
+  background: rgb(255 255 255 / 5%);
+  color: var(--ui-text);
+  transform: none;
+}
+
+.campaign-hud-back:focus-visible {
+  outline: 2px solid var(--ui-accent);
+  outline-offset: 2px;
+}
+
+.campaign-hud-identity,
+.campaign-hud-metric,
+.campaign-hud-integrity {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  min-width: 0;
+}
+
+.campaign-hud-identity {
+  align-items: center;
+}
+
+.campaign-hud-identity #hud-level,
+.campaign-hud-value,
+.campaign-hud-integrity-pips,
+.campaign-hud-threat strong {
+  color: var(--ui-text);
+  font-family: var(--data-font);
+  font-variant-numeric: tabular-nums;
+}
+
+.campaign-hud-identity #hud-level {
+  color: var(--ui-accent);
+  font-size: 17px;
+  font-weight: 700;
+  text-shadow: var(--ui-glow-cyan-soft);
+}
+
+.campaign-hud-label {
+  color: var(--ui-text-muted);
+  font-family: var(--ui-font);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .13em;
+  line-height: 1;
+}
+
+.campaign-hud-metric {
+  justify-content: center;
+}
+
+.campaign-hud-metric .campaign-hud-value {
+  font-size: 14px;
+  font-weight: 650;
+  line-height: 1;
+}
+
+.campaign-hud-pace {
+  justify-content: flex-start;
+}
+
+.campaign-hud-pace #hud-wpm {
+  color: var(--ui-accent);
+  font-size: clamp(22px, 2.1vw, 30px);
+  font-weight: 720;
+  letter-spacing: -.04em;
+  text-shadow: var(--ui-glow-cyan-soft);
+}
+
+.campaign-hud-combo {
+  display: grid;
+  grid-template-columns: auto auto;
+  grid-template-areas:
+    "count label"
+    "mult mult";
+  column-gap: 6px;
+  row-gap: 1px;
+  justify-content: center;
+  align-items: baseline;
+}
+
+.campaign-hud-combo-count { grid-area: count; }
+.campaign-hud-combo .campaign-hud-label { grid-area: label; }
+
+.campaign-hud-combo #hud-combo {
+  grid-area: mult;
+  color: var(--ui-text-soft);
+  font-size: 10px;
+  text-align: right;
+}
+
+.campaign-hud-score {
+  justify-content: flex-end;
+}
+
+.campaign-hud-score #hud-score {
+  color: var(--ui-text-soft);
+}
+
+.campaign-hud-integrity {
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.campaign-hud-integrity-copy {
+  display: inline-flex;
+  align-items: center;
+}
+
+.campaign-hud-integrity-pips,
+.campaign-core-integrity {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.campaign-hud-integrity-pips i {
+  width: 12px;
+  height: 4px;
+  background: var(--ui-accent);
+  box-shadow: 0 0 8px rgb(0 255 242 / 45%);
+  transform: skewX(-18deg);
+  transition:
+    opacity var(--ui-motion-fast) var(--ui-ease-out),
+    background var(--ui-motion-fast) var(--ui-ease-out);
+}
+
+.campaign-hud-integrity-pips i.is-depleted {
+  background: rgb(232 240 245 / 13%);
+  box-shadow: none;
+  opacity: .5;
+}
+
+.campaign-hud-legacy-integrity {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0 0 0 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+.campaign-hud-secondary {
+  display: grid;
+  grid-template-columns: auto minmax(120px, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  padding-left: 64px;
+}
+
+.campaign-hud-threat,
+.campaign-target-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  white-space: nowrap;
+}
+
+.campaign-hud-threat strong {
+  color: var(--ui-text-soft);
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.campaign-target-state {
+  justify-content: flex-end;
+  color: var(--ui-text-muted);
+  font-family: var(--data-font);
+  font-size: 9px;
+  letter-spacing: .08em;
+}
+
+.campaign-mission-progress {
+  position: relative;
+  height: 2px;
+  min-width: 0;
+  overflow: hidden;
+  background: rgb(232 240 245 / 10%);
+}
+
+.campaign-mission-progress-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: var(--campaign-progress, 0%);
+  background: linear-gradient(90deg, rgb(0 255 242 / 44%), var(--ui-accent));
+  box-shadow: 0 0 8px rgb(0 255 242 / 38%);
+  transition: width 150ms linear;
+}
+
+.campaign-gameplay-screen .play-area {
+  isolation: isolate;
+  background:
+    radial-gradient(circle at 50% 50%, rgb(0 255 242 / 5%), transparent 18%),
+    radial-gradient(circle at 50% 50%, transparent 0 34%, rgb(0 255 242 / 1.5%) 34.5%, transparent 35%);
+}
+
+.campaign-gameplay-screen .play-area::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, transparent 49.92%, rgb(0 255 242 / 3%) 50%, transparent 50.08%),
+    linear-gradient(0deg, transparent 49.92%, rgb(0 255 242 / 3%) 50%, transparent 50.08%);
+  mask-image: radial-gradient(circle at center, #000 0 18%, transparent 62%);
+}
+
+/* Campaign Core: retain the 58px logical footprint used by gameplay while extending only its visual field. */
+.campaign-gameplay-screen .campaign-core {
+  width: 58px;
+  height: 58px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  box-shadow: none;
+  animation: none;
+  transform: translate(-50%, -50%);
+  color: var(--ui-accent);
+}
+
+.campaign-gameplay-screen .campaign-core::after {
+  content: none;
+}
+
+.campaign-core-field,
+.campaign-core-orbit,
+.campaign-core-reactor,
+.campaign-core-integrity,
+.campaign-core-label {
+  position: absolute;
+  pointer-events: none;
+}
+
+.campaign-core-field {
+  inset: -28px;
+  border: 1px solid rgb(0 255 242 / 9%);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgb(0 255 242 / 10%), transparent 54%);
+  box-shadow: 0 0 50px rgb(0 255 242 / 12%);
+}
+
+.campaign-core-orbit {
+  left: 50%;
+  top: 50%;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.campaign-core-orbit::before,
+.campaign-core-orbit::after {
+  content: "";
+  position: absolute;
+  background: currentColor;
+  box-shadow: 0 0 8px currentColor;
+}
+
+.campaign-core-orbit-a {
+  width: 78px;
+  height: 78px;
+  border: 1px solid rgb(0 255 242 / 32%);
+  border-top-color: var(--ui-accent);
+  border-right-color: rgb(0 255 242 / 8%);
+  animation: campaign-core-orbit 7s linear infinite;
+}
+
+.campaign-core-orbit-a::before {
+  width: 9px;
+  height: 2px;
+  top: -1px;
+  left: 15px;
+}
+
+.campaign-core-orbit-b {
+  width: 61px;
+  height: 61px;
+  border: 1px dashed rgb(0 255 242 / 35%);
+  animation: campaign-core-orbit-reverse 5.5s linear infinite;
+}
+
+.campaign-core-orbit-b::after {
+  width: 2px;
+  height: 7px;
+  right: -1px;
+  bottom: 15px;
+}
+
+.campaign-core-reactor {
+  inset: 9px;
+  border: 1px solid rgb(0 255 242 / 62%);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, rgb(232 255 253 / 92%) 0 8%, var(--ui-accent) 9% 18%, rgb(0 255 242 / 23%) 20% 52%, transparent 54%);
+  box-shadow:
+    0 0 10px rgb(0 255 242 / 60%),
+    0 0 30px rgb(0 255 242 / 28%),
+    inset 0 0 12px rgb(0 255 242 / 30%);
+  animation: campaign-reactor-breathe 2.4s ease-in-out infinite;
+}
+
+.campaign-core-integrity {
+  left: 50%;
+  top: 50%;
+  width: 94px;
+  height: 94px;
+  transform: translate(-50%, -50%);
+}
+
+.campaign-core-integrity i {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 28px;
+  height: 3px;
+  margin-left: -14px;
+  transform-origin: 50% 47px;
+  background: var(--ui-accent);
+  box-shadow: 0 0 9px rgb(0 255 242 / 72%);
+  transition:
+    opacity var(--ui-motion-fast) var(--ui-ease-out),
+    background var(--ui-motion-fast) var(--ui-ease-out),
+    box-shadow var(--ui-motion-fast) var(--ui-ease-out);
+}
+
+.campaign-core-integrity i:nth-child(1) { transform: translateY(-47px) rotate(0deg); }
+.campaign-core-integrity i:nth-child(2) { transform: translateY(-47px) rotate(120deg); }
+.campaign-core-integrity i:nth-child(3) { transform: translateY(-47px) rotate(240deg); }
+
+.campaign-core-integrity i.is-depleted {
+  background: rgb(232 240 245 / 13%);
+  box-shadow: none;
+  opacity: .35;
+}
+
+.campaign-core-label {
+  left: 50%;
+  top: calc(100% + 25px);
+  transform: translateX(-50%);
+  color: rgb(232 240 245 / 34%);
+  font-family: var(--data-font);
+  font-size: 8px;
+  font-weight: 650;
+  letter-spacing: .18em;
+}
+
+.campaign-gameplay-screen[data-core-integrity="1"] .campaign-core,
+.campaign-gameplay-screen[data-core-integrity="1"] .campaign-hud-integrity {
+  --ui-accent: var(--ui-accent-danger);
+  color: var(--ui-accent-danger);
+}
+
+.campaign-gameplay-screen[data-core-integrity="1"] .campaign-core-field {
+  border-color: rgb(255 71 87 / 18%);
+  background: radial-gradient(circle, rgb(255 71 87 / 10%), transparent 54%);
+  box-shadow: 0 0 46px rgb(255 71 87 / 13%);
+  animation: campaign-core-critical 900ms ease-in-out infinite alternate;
+}
+
+.campaign-gameplay-screen[data-core-integrity="1"] .campaign-core-reactor,
+.campaign-gameplay-screen[data-core-integrity="1"] .campaign-core-integrity i:not(.is-depleted) {
+  border-color: var(--ui-accent-danger);
+  background-color: var(--ui-accent-danger);
+  box-shadow: 0 0 12px rgb(255 71 87 / 65%);
+}
+
+.campaign-gameplay-screen[data-core-integrity="0"] .campaign-core {
+  opacity: .35;
+  filter: grayscale(.3);
+}
+
+@keyframes campaign-core-orbit {
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+@keyframes campaign-core-orbit-reverse {
+  to { transform: translate(-50%, -50%) rotate(-360deg); }
+}
+
+@keyframes campaign-reactor-breathe {
+  50% { filter: brightness(1.18); transform: scale(1.04); }
+}
+
+@keyframes campaign-core-critical {
+  to { opacity: .55; transform: scale(1.05); }
+}
+
+/* Incoming words: state is communicated by text/underline/bloom, never a rectangular target box. */
+.campaign-gameplay-screen .word-visual {
+  padding: 6px 8px 8px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: rgb(232 240 245 / 68%);
+  font-family: var(--data-font);
+  font-size: clamp(22px, 2vw, 30px);
+  font-weight: 650;
+  letter-spacing: -.02em;
+  text-shadow: 0 0 5px rgb(232 240 245 / 18%);
+  box-shadow: none;
+  transition:
+    color var(--ui-motion-fast) var(--ui-ease-out),
+    opacity var(--ui-motion-fast) var(--ui-ease-out),
+    text-shadow var(--ui-motion-fast) var(--ui-ease-out);
+}
+
+.campaign-gameplay-screen .word-visual::after {
+  content: "";
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: 1px;
+  height: 1px;
+  opacity: 0;
+  transform: scaleX(.35);
+  transform-origin: center;
+  transition:
+    opacity var(--ui-motion-fast) var(--ui-ease-out),
+    transform var(--ui-motion-fast) var(--ui-ease-out);
+}
+
+.campaign-gameplay-screen .word-visual.active {
+  border: 0;
+  background: transparent;
+  color: var(--ui-text);
+  text-shadow: 0 0 9px rgb(232 240 245 / 28%);
+  box-shadow: none;
+}
+
+.campaign-gameplay-screen .word-visual.active::after {
+  opacity: .9;
+  transform: scaleX(1);
+  background: var(--ui-accent);
+  box-shadow: 0 0 8px rgb(0 255 242 / 58%);
+}
+
+.campaign-gameplay-screen .word-visual.candidate {
+  border: 0;
+  background: transparent;
+  color: rgb(242 222 235 / 86%);
+  text-shadow: 0 0 7px rgb(255 60 172 / 24%);
+  box-shadow: none;
+}
+
+.campaign-gameplay-screen .word-visual.candidate::after {
+  opacity: .72;
+  transform: scaleX(.72);
+  background: var(--ui-accent-special);
+  box-shadow: 0 0 7px rgb(255 60 172 / 42%);
+}
+
+.campaign-gameplay-screen .word-visual .typed-letter {
+  color: inherit;
+  text-shadow: inherit;
+}
+
+.campaign-gameplay-screen .word-visual.active .typed-letter {
+  color: var(--ui-accent);
+  text-shadow: 0 0 8px rgb(0 255 242 / 58%);
+}
+
+.campaign-gameplay-screen .word-visual.candidate .typed-letter {
+  color: var(--ui-accent-special);
+  text-shadow: 0 0 8px rgb(255 60 172 / 48%);
+}
+
+.campaign-gameplay-screen .word-visual.wrong {
+  border: 0;
+  background: transparent;
+  color: var(--ui-accent-danger);
+  box-shadow: none;
+  text-shadow:
+    -2px 0 rgb(255 71 87 / 55%),
+    2px 0 rgb(255 60 172 / 30%);
+  animation: campaign-word-error 150ms cubic-bezier(.2,.8,.2,1);
+}
+
+.campaign-gameplay-screen .word-visual.wrong::after {
+  opacity: .9;
+  transform: scaleX(.9);
+  background: var(--ui-accent-danger);
+  box-shadow: 0 0 8px rgb(255 71 87 / 52%);
+}
+
+@keyframes campaign-word-error {
+  30% { transform: translateX(-3px) skewX(-2deg); filter: brightness(1.15); }
+  70% { transform: translateX(2px) skewX(1deg); }
+}
+
+/* Completion reads as a short energy return toward the Core. */
+.campaign-gameplay-screen .burst {
+  width: 12px;
+  height: 12px;
+  border: 1px solid var(--ui-accent);
+  border-radius: 50%;
+  background: rgb(0 255 242 / 12%);
+  box-shadow: 0 0 14px rgb(0 255 242 / 46%);
+  transform: translate(-50%, -50%);
+  animation: campaign-burst 330ms var(--ui-ease-out) forwards;
+}
+
+.campaign-gameplay-screen .burst::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(var(--campaign-burst-reach, 80px), 180px);
+  height: 1px;
+  transform: rotate(var(--campaign-burst-angle, 0deg));
+  transform-origin: 0 50%;
+  background: linear-gradient(90deg, rgb(0 255 242 / 68%), transparent);
+  box-shadow: 0 0 7px rgb(0 255 242 / 38%);
+}
+
+@keyframes campaign-burst {
+  to { opacity: 0; transform: translate(-50%, -50%) scale(2.4); }
+}
+
+/* Damage becomes an edge shock and Core impact instead of a permanent rectangular HUD treatment. */
+.campaign-gameplay-screen .play-area.damage-flash::after {
+  inset: 0;
+  border: 0;
+  background:
+    radial-gradient(circle at 50% 50%, transparent 0 34%, rgb(255 71 87 / 12%) 52%, rgb(255 71 87 / 38%) 100%);
+  box-shadow: inset 0 0 100px 18px rgb(255 71 87 / 36%);
+  animation: campaign-damage-edge 230ms ease-out forwards;
+}
+
+.campaign-gameplay-screen .play-area.damage-flash .campaign-core-reactor {
+  animation: campaign-core-impact 220ms ease-out;
+}
+
+@keyframes campaign-damage-edge {
+  to { opacity: 0; }
+}
+
+@keyframes campaign-core-impact {
+  35% { transform: scale(.76); filter: brightness(1.7); }
+  70% { transform: scale(1.12); }
+}
+
+@media (max-width: 760px) {
+  .campaign-gameplay-screen {
+    --campaign-hud-height: 112px;
+  }
+
+  .campaign-gameplay-screen .campaign-gameplay-hud {
+    gap: 8px;
+    padding: max(7px, env(safe-area-inset-top)) max(10px, env(safe-area-inset-right)) 7px max(10px, env(safe-area-inset-left));
+  }
+
+  .campaign-hud-primary {
+    grid-template-columns: auto auto minmax(58px, 1fr) auto auto;
+    grid-template-areas:
+      "back level pace acc core"
+      "back score score combo core";
+    gap: 4px 10px;
+  }
+
+  .campaign-hud-back { grid-area: back; }
+  .campaign-hud-identity { grid-area: level; }
+  .campaign-hud-pace { grid-area: pace; }
+  .campaign-hud-primary > .campaign-hud-metric:nth-of-type(2) { grid-area: acc; }
+  .campaign-hud-combo { grid-area: combo; }
+  .campaign-hud-score { grid-area: score; justify-content: flex-start; }
+  .campaign-hud-integrity { grid-area: core; }
+
+  .campaign-hud-pace #hud-wpm {
+    font-size: 20px;
+  }
+
+  .campaign-hud-secondary {
+    grid-template-columns: auto minmax(60px, 1fr) auto;
+    gap: 8px;
+    padding-left: 0;
+  }
+
+  .campaign-hud-label { font-size: 8px; }
+  .campaign-target-state { font-size: 8px; }
+  .campaign-hud-integrity-copy { display: none; }
+
+  .campaign-gameplay-screen .word-visual {
+    padding-inline: 5px;
+    font-size: clamp(19px, 6vw, 25px);
+  }
+
+  .campaign-gameplay-screen .word-visual::after {
+    left: 5px;
+    right: 5px;
+  }
+}
+
+@media (max-height: 430px) {
+  .campaign-gameplay-screen {
+    --campaign-hud-height: 82px;
+  }
+
+  .campaign-gameplay-screen .campaign-gameplay-hud {
+    gap: 4px;
+    padding-block: 4px;
+  }
+
+  .campaign-hud-primary {
+    grid-template-columns: auto auto minmax(50px, .8fr) auto auto minmax(64px, .7fr) auto;
+    grid-template-areas: none;
+    gap: 6px 10px;
+  }
+
+  .campaign-hud-back,
+  .campaign-hud-identity,
+  .campaign-hud-pace,
+  .campaign-hud-primary > .campaign-hud-metric:nth-of-type(2),
+  .campaign-hud-combo,
+  .campaign-hud-score,
+  .campaign-hud-integrity {
+    grid-area: auto;
+  }
+
+  .campaign-hud-back {
+    min-height: 44px;
+    min-width: 48px;
+    padding-inline: 8px;
+  }
+
+  .campaign-hud-pace #hud-wpm { font-size: 18px; }
+  .campaign-hud-secondary { padding-left: 54px; }
+  .campaign-core-label { display: none; }
+}
+
+@media (max-width: 520px) and (max-height: 430px) {
+  .campaign-gameplay-screen {
+    --campaign-hud-height: 86px;
+  }
+
+  .campaign-hud-primary {
+    grid-template-columns: auto auto minmax(48px, 1fr) auto auto;
+    grid-template-areas:
+      "back level pace acc core"
+      "back score score combo core";
+  }
+
+  .campaign-hud-back { grid-area: back; }
+  .campaign-hud-identity { grid-area: level; }
+  .campaign-hud-pace { grid-area: pace; }
+  .campaign-hud-primary > .campaign-hud-metric:nth-of-type(2) { grid-area: acc; }
+  .campaign-hud-combo { grid-area: combo; }
+  .campaign-hud-score { grid-area: score; }
+  .campaign-hud-integrity { grid-area: core; }
+
+  .campaign-hud-secondary {
+    padding-left: 0;
+  }
+
+  .campaign-target-state {
+    max-width: 92px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .campaign-gameplay-screen *,
+  .campaign-gameplay-screen *::before,
+  .campaign-gameplay-screen *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+
+  .campaign-gameplay-screen .campaign-core-orbit-a,
+  .campaign-gameplay-screen .campaign-core-orbit-b,
+  .campaign-gameplay-screen .campaign-core-reactor,
+  .campaign-gameplay-screen[data-core-integrity="1"] .campaign-core-field {
+    animation: none !important;
+  }
+
+  .campaign-gameplay-screen .word-visual.wrong {
+    transform: none !important;
+    filter: none !important;
+  }
+
+  .campaign-gameplay-screen .burst::before {
+    display: none;
+  }
+}
