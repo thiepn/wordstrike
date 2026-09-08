@@ -25,7 +25,7 @@ async function typeCorrect(engine, harness, count, latencyMs = 100) {
   }
 }
 
-test("PL10 generic normalization remains canonical inside the current PL18 session envelope", async () => {
+test("PL10 generic normalization remains canonical inside the current PL25 session envelope", async () => {
   const harness = await createPracticeSessionHarness({ suffix: "pl10-generic", text: "a".repeat(40) });
   const engine = engineFor(harness);
   await engine.prepare({ experiment: harness.experiment, configuration: {}, contentPlan: harness.contentPlan });
@@ -33,9 +33,11 @@ test("PL10 generic normalization remains canonical inside the current PL18 sessi
   await typeCorrect(engine, harness, 26);
   const metrics = engine.getMetricsSnapshot();
   const result = await engine.complete("manual-stop");
-  assert.equal(result.summary.recordVersion, 12);
+  assert.equal(result.summary.recordVersion, 13);
   assert.equal(result.summary.retentionReviewSummary, null);
   assert.equal(result.summary.evaluationSummary, null);
+  assert.equal(result.summary.assessmentBinding, null);
+  assert.equal(result.summary.coachBinding, null);
   assert.equal(result.summary.wpm, metrics.wpm);
   assert.equal(result.summary.rawWpm, metrics.rawWpm);
   assert.equal(result.summary.accuracy, metrics.accuracy);
@@ -49,7 +51,7 @@ test("PL10 generic normalization remains canonical inside the current PL18 sessi
   assert.equal(Object.hasOwn(result.summary.skillEvidenceSummary, "deltas"), false);
 });
 
-test("PL10 experiment analyzers receive frozen PL18 foundationAnalysis v9 and cannot own normalization or canonical skill evidence", async () => {
+test("PL10 experiment analyzers receive frozen PL25 foundationAnalysis v10 and cannot own normalization or canonical skill evidence", async () => {
   let received = null;
   let mutationThrew = false;
   const harness = await createPracticeSessionHarness({
