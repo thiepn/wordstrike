@@ -71,6 +71,7 @@ def geometry(page):
         accuracyArea: accuracy ? getComputedStyle(accuracy).gridArea : null,
         keyboardText: trigger?.textContent?.trim() || null,
         keyboardHeight: triggerBox?.height || 0,
+        keyboardDisplay: triggerStyle?.display || null,
         keyboardBorder: triggerStyle?.borderTopWidth || null,
         keyboardBackground: triggerStyle?.backgroundColor || null,
         integrity: screen.dataset.coreIntegrity || null
@@ -99,6 +100,9 @@ def main():
                 assert desktop_metrics["docOverflow"] <= 1 and desktop_metrics["screenOverflow"] <= 1, desktop_metrics
                 assert desktop_metrics["playHeight"] > 500, desktop_metrics
                 assert desktop_metrics["integrity"] == "3", desktop_metrics
+                assert desktop_metrics["keyboardText"] == "KEYBOARD", desktop_metrics
+                assert desktop_metrics["keyboardHeight"] == 0, desktop_metrics
+                assert desktop_metrics["keyboardDisplay"] == "none", desktop_metrics
                 desktop.screenshot(path=str(ARTIFACTS / f"{browser_name}-ui5-player-desktop.png"), full_page=True)
                 result["checks"].append({"browser": browser_name, "case": "player desktop", **desktop_metrics})
                 desktop_context.close()
@@ -115,6 +119,7 @@ def main():
                 assert mobile_metrics["paceArea"] == "pace", mobile_metrics
                 assert mobile_metrics["accuracyArea"] == "acc", mobile_metrics
                 assert mobile_metrics["keyboardText"] == "KEYBOARD", mobile_metrics
+                assert mobile_metrics["keyboardDisplay"] != "none", mobile_metrics
                 assert mobile_metrics["keyboardHeight"] >= 44, mobile_metrics
                 assert mobile_metrics["keyboardBorder"] == "0px", mobile_metrics
                 mobile.screenshot(path=str(ARTIFACTS / f"{browser_name}-ui5-player-mobile.png"), full_page=True)
@@ -129,6 +134,7 @@ def main():
                     assert short_metrics["paceArea"] == "pace", short_metrics
                     assert short_metrics["accuracyArea"] == "acc", short_metrics
                     assert short_metrics["keyboardText"] == "KEYBOARD", short_metrics
+                    assert short_metrics["keyboardDisplay"] != "none", short_metrics
                     assert short_metrics["keyboardHeight"] >= 44, short_metrics
                     mobile.screenshot(path=str(ARTIFACTS / "chromium-ui5-player-keyboard-height.png"), full_page=True)
                     result["checks"].append({"browser": browser_name, "case": "player 390x360", **short_metrics})
