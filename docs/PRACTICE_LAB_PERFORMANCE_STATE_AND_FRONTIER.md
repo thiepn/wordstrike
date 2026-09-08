@@ -165,3 +165,12 @@ PL14 modules are local-only and import-side-effect free. No IndexedDB open, loca
 PL14 does not implement Full Assessment, Pace Ladder, Burst Sprints, endurance decay, fatigue/health diagnosis, mastery/automaticity, learning curves, long-term plateau detection, review scheduling, treatment selection, Learning Value, Daily Coach, or public readiness/frontier surfaces.
 
 PL15 mastery remains independent of temporary state. PL16 longer-term learning analysis must not mistake state fluctuations for learning. PL25 may consume readiness/warm-up/frontier/reserve as modifiers. PL26 Pace Ladder must emit PL14 frontier stages rather than invent another frontier. PL27 Burst Sprints updates PL13 burst ability; PL14 only derives reserve.
+
+---
+
+## PL25 Daily Coach addendum
+
+PL14 performance state is a read-only readiness input to Daily Coach. Current readiness may down-weight focused-target utility or change ordering so broad Real Text occurs before focused acquisition. `unknown` or stale readiness is not interpreted as poor performance, and PL25 creates no PL14 measurement merely by planning or running a day.
+
+Daily Coach does not modify the control frontier, warm-up model, burst reserve, or any performance-state policy. Dedicated PL14 measurement protocols remain authoritative.
+

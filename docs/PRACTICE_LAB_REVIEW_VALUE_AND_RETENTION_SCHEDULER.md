@@ -770,3 +770,14 @@ Later Practice Lab phases may tune recommendation strategy, content assembly, or
 ## PL19 Full Assessment integration
 
 PL19 assessment child sessions are never PL17 retention reviews. The parent assessment run is separate from review scheduling; active assessment child summaries receive temporary retention protection only while their parent run is active.
+
+---
+
+## PL25 Daily Coach addendum
+
+PL25 consumes PL17 as the sole owner of retention scheduling and delayed verification. Daily Coach may place the hidden `daily-coach-review` block first when current due/overdue Review Value justifies it, but that block remains a genuine `retentionMeasurementKind = "entity-review"` session using training-partition content and frozen PL17 cycle bindings. It is not an acquisition intervention and emits zero PL16 acquisition observations.
+
+PL25 also hardens the intervening-direct-practice rule. When newer direct practice occurs after an active review cycle's `referenceAtUtc`, PL17 refreshes that reference and recomputes maturity/due timing from current stability while preserving the cycle's verification history. The direct practice itself is not a retention verification. Material reference-quality upgrades and failure/reacquisition retain their existing cycle-reset semantics.
+
+Daily Coach never owns due dates, retention outcomes, stability, verification counts, or Retained-stage eligibility. If a frozen Coach Review binding is stale at block start, the block is blocked rather than silently rebound or replaced.
+

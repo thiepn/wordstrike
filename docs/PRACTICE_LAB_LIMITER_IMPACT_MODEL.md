@@ -1375,3 +1375,12 @@ PL23 consumes existing PL12 limiter evidence only for target recommendation. The
 PL12 hierarchy remains authoritative. Higher-order targets strongly explained by lower-level likely/confirmed limiters are de-emphasized rather than declared independent or causal. PL15 Robust/Retained targets are normally excluded from recommendations, and PL16 likely/supported saturation further de-emphasizes candidates. Manual practice remains available after normal target/content feasibility checks, including the saturation warning that recent similar acquisition practice may have low marginal gain.
 
 PL23 never writes limiter severity, impact, hierarchy, mastery, or saturation. Its selection score is transient and mode-specific.
+
+---
+
+## PL25 Daily Coach addendum
+
+PL12 remains the sole owner of limiter status, phenotype, impact, hierarchy, and priority. PL25 reads a bounded set of likely/confirmed candidates as planning inputs and applies a separate Coach Target Utility for scheduling. This creates no new limiter diagnosis and mutates no PL12 state.
+
+Hierarchy is used defensively so one explained limiter chain is not treated as several independent same-day acquisition targets. A target suppressed or de-emphasized by Daily Coach remains unchanged in PL12 and remains manually trainable through its normal experiment surface.
+

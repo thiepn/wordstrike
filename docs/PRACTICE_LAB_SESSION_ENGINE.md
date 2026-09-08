@@ -538,3 +538,12 @@ PL23 executes one canonical Practice session with exactly one direct target (`ke
 The immutable five-phase protocol is `Baseline → Control → Repair → Mix → Check`. Baseline/Mix/Check are uncued; Control and Repair use subtle target cues. Live aggregate WPM/accuracy, PBs, leaderboard, metronome, rhythm coach, and live repair milliseconds remain off. The only PL23-specific live feedback is a brief target-attributed repair status after a real closed PL9 error episode in the Repair phase; it never pauses input.
 
 PL23 requests no ability, performance-frontier, retention-review, protected-evaluation, or assessment measurement role. Its final Check is target-enriched training evidence, not transfer. The trusted plan binds target, context, corpus/index identity, exact entity dose, phase quotas, cue policy, and repair-feedback policy.
+
+---
+
+## PL25 Daily Coach addendum
+
+PL25 advances `sessionSummary` to v13 solely to add nullable compact `coachBinding`; foundation analysis remains v10. The persisted binding contains `coachPlanId`, `blockId`, `blockOrdinal`, planner version, and plan hash. It is trusted only through object-bound content-plan registration. User/session configuration cannot set `coachBinding`, and `targetSource = "external-plan"` is rejected without trusted Coach binding.
+
+At preparation the engine verifies profile/context identity, frozen plan hash, block ordinal, planned child session ID, experiment identity, and the block-specific target/review/Real-Text contract. Assessment and Coach bindings are mutually exclusive. Child completion reconciles exactly once to the matching active Coach block; stale parent state produces a diagnostic instead of reinterpreting the child.
+

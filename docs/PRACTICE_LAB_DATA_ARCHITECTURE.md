@@ -454,3 +454,14 @@ Completed-session persistence accepts an optional `performanceStateDelta`. The e
 ## PL19 Full Assessment integration
 
 PL19 advances Practice IndexedDB to v7 with `assessmentRuns` (assessmentRun v1), sessionSummary v12 with nullable `assessmentBinding`, and foundationAnalysis v10 with explicit `assessment`. Historical v11 sessions migrate with `assessmentBinding = null` and are never retroactively certified as assessment blocks.
+
+---
+
+## PL25 Daily Coach persistence addendum
+
+PL25 advances the Practice database to v8 and adds one `coachPlans` store. There is at most one canonical plan per `profileId + contextId + localDayKey`, enforced by the unique `profileContextDay` index. Plans are bounded compact decision records; raw traces, mistyped strings, protected text, custom text, and private notes are forbidden.
+
+`sessionSummary` advances from v12 to v13 to add nullable compact `coachBinding` and a `coachPlanId` lookup index for child reconciliation. `skillStat`, `learningState`, `reviewItem`, `evaluationState`, `assessmentRun`, and foundation-analysis versions do not change. Historical ordinary sessions migrate with `coachBinding = null`.
+
+Coach-plan retention is bounded independently of session history. Current-day/active plans and active Coach child summaries are protected from ordinary pruning; old terminal plans may be removed under PL25's retention limits.
+

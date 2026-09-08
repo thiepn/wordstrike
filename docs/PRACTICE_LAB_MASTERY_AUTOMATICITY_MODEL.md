@@ -560,3 +560,12 @@ See `PRACTICE_LAB_WEAK_KEYS.md`.
 Problem Words does **not** assign, promote, or persist mastery. PL15 remains the canonical derived mastery/automaticity owner. PL22 may use the current PL15 word stage to de-emphasize Robust/Retained recommendations, but manual practice remains available after normal target/content validation.
 
 A strong PL22 Check probe is immediate target-enriched training evidence only and cannot by itself produce `Mastered`, `Transferred`, `Robust`, or `Retained` semantics.
+
+---
+
+## PL25 Daily Coach addendum
+
+PL15 remains the sole owner of mastery, automaticity, robustness, transfer interpretation, and Retained-stage progression. Daily Coach may use current mastery stage as a utility modifier when estimating acquisition headroom, but it never assigns, promotes, demotes, or persists a mastery stage.
+
+PL17 retention evidence and PL11/PL18 transfer evidence continue to reach PL15 through their canonical paths. A Coach block being completed, skipped, blocked, or invalid has no mastery meaning by itself.
+

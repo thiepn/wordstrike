@@ -1330,3 +1330,12 @@ The stable treatment identity is `experimentId = accuracy-control`, `experimentV
 For an object-bound trusted PL23 content plan, PL16 uses the immutable `Baseline` and `Check` phase ranges for entry/exit acquisition semantics. Serialized metadata alone cannot claim this privilege. Generic Practice sessions and the existing PL20–PL22 trusted interventions keep their established fallback or `entry-probe` / `exit-probe` semantics.
 
 PL23 does not write learning state, learning rate, saturation, or causal treatment effects. PL16 remains the canonical owner of those longitudinal models.
+
+---
+
+## PL25 Daily Coach addendum
+
+Daily Coach is a read-only orchestration consumer of PL16. It may use current saturation and marginal-gain evidence to de-emphasize low-headroom targets, but it does not rewrite learning curves, observations, dose, or saturation state.
+
+A PL20-PL23 targeted child preserves its canonical direct-target opportunity contract and therefore contributes the same acquisition dose it would contribute when launched manually. Hidden Coach Review is a PL17 retention measurement and contributes zero acquisition observations. PL24 Real Text remains target-blind and contributes zero direct acquisition dose. Merely including a block in a Daily Coach plan never manufactures a PL16 observation.
+
