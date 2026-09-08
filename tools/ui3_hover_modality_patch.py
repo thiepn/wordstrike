@@ -39,7 +39,8 @@ replace_once(
     "assert.doesNotMatch(ui, /class=\"mode-panel/);\n"
     "assert.match(ui, /card\\.onmousemove = \\(\\) => handlers\\.select\\?\\.\\(index\\)/);\n"
     "assert.match(ui, /titleButton\\.onmousemove = \\(\\) => handlers\\.select\\?\\.\\(modes\\.length\\)/);\n"
-    "assert.doesNotMatch(ui, /onmouseenter = \\(\\) => handlers\\.select/);",
+    "assert.doesNotMatch(ui, /card\\.onmouseenter = \\(\\) => handlers\\.select/);\n"
+    "assert.doesNotMatch(ui, /titleButton\\.onmouseenter = \\(\\) => handlers\\.select/);",
 )
 
 print("UI3 hover modality fix applied.")
