@@ -116,10 +116,9 @@ export function createPracticeWeakKeysRuntime({
       }
     },
 
-    async prepare({ entityKey, targetSource = "manual" } = {}) {
+    async prepare({ entityKey, targetSource = "manual", sessionId = createPracticeSessionId() } = {}) {
       const assets = await loadAssets();
       return withContext(async (context) => {
-        const sessionId = createPracticeSessionId();
         const plan = await buildPracticeWeakKeysTrainingPlan({
           sessionId,
           context,
