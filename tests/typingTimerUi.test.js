@@ -74,7 +74,7 @@ assert.deepEqual({
 
 const css = await readFile(new URL("../style.css", import.meta.url), "utf8");
 assert.match(css, /\.speed-config-control\s*\{[^}]*font-size:\s*18px/s);
-assert.match(css, /--speed-test-center-timer-size:\s*clamp\(34px/s);
+assert.match(css, /--speed-test-center-timer-size:\s*clamp\(26px/s);
 assert.match(css, /font-variant-numeric:\s*tabular-nums/);
 assert.match(css, /\.speed-test-word-region\s*\{[^}]*position:\s*absolute;[^}]*top:\s*50%;[^}]*transform:\s*translateY\(-50%\)/s);
 assert.match(css, /\.speed-test-upper-overlay\s*\{[^}]*position:\s*absolute;[^}]*inset:\s*0;[^}]*display:\s*grid;[^}]*grid-template-rows:\s*minmax\(0, 1fr\) var\(--speed-test-word-viewport-height\) minmax\(0, 1fr\);[^}]*overflow:\s*hidden/s);

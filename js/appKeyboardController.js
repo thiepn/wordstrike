@@ -62,6 +62,14 @@ export function createGlobalKeyboardController({
       mode: gameplayInputMode,
       onTypingBackspace: (backspaceEvent) => routeActiveGameplayKey(backspaceEvent),
     })) return;
+    // Text entry remains isolated; only commands from our gameplay input are routed.
+    const isGameplayInput = event.target?.matches?.("textarea.gameplay-input") === true;
+    const isGameplayCommand = event.key === "Escape"
+      || (gameplayInputMode === "typing" && event.key === "Tab");
+    if (gameplayInputMode && isGameplayInput && isGameplayCommand) {
+      routeActiveGameplayKey(event);
+      return;
+    }
     if (isTextEntryTarget(event.target)) return;
     if (["Enter", " "].includes(event.key) && event.target?.matches?.("button, a, [role=tab]")) return;
     if (routeActiveGameplayKey(event)) return;
