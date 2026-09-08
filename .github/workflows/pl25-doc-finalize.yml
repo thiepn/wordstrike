@@ -1,0 +1,30 @@
+name: PL25 documentation finalizer
+
+on:
+  push:
+    branches:
+      - codex/pl25-daily-coach-v1
+
+permissions:
+  contents: write
+
+jobs:
+  finalize:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: codex/pl25-daily-coach-v1
+          fetch-depth: 0
+      - name: Apply documentation addenda
+        run: python scripts/applyPl25DocAddenda.py
+      - name: Remove temporary finalizer
+        run: rm scripts/applyPl25DocAddenda.py .github/workflows/pl25-doc-finalize.yml
+      - name: Commit permanent documentation
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "PL25: document Daily Coach ownership boundaries"
+          git push origin HEAD:codex/pl25-daily-coach-v1
