@@ -42,3 +42,11 @@ test("PL23 likely saturation de-emphasizes recommendation and manual practice re
   assert.equal(warnings.some((warning) => warning.kind === "saturation"), true);
   assert.match(warnings.find((warning) => warning.kind === "saturation").message, /low marginal gain/i);
 });
+
+test("PL23 normally excludes Robust and Retained targets from recommendations", () => {
+  const skillStats = [stat("robust", "key", "r"), stat("retained", "bigram", "th"), stat("learning", "word", "because")];
+  const limiterSnapshot = { profileId, contextId, candidates: [limiter("robust", { inaccurate: 80 }), limiter("retained", { recovery: 80, phenotype: "recovery-heavy" }), limiter("learning", { inaccurate: 50 })] };
+  const masterySnapshot = { profileId, contextId, entities: [mastery("robust", "Robust"), mastery("retained", "Retained"), mastery("learning", "Learning")] };
+  const result = buildAccuracyRecoveryCandidates({ profileId, contextId, skillStats, limiterSnapshot, masterySnapshot });
+  assert.deepEqual(result.map((item) => item.statId), ["learning"]);
+});
