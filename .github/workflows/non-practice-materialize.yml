@@ -42,6 +42,8 @@ jobs:
           replace('style.css', 'body.gameplay-viewport-short .daily-hud {\n  grid-template-columns: auto repeat(4, minmax(0, 1fr));\n  gap: 4px;\n  font-size: 9px;\n}\n\n', '')
           replace('tests/keyboardNavigation.test.js', 'getLeaderboardKeyboardTarget({ selectedBoardKey: LEADERBOARD_BOARDS.DAILY }, "Home")', 'getLeaderboardKeyboardTarget({ selectedBoardKey: "daily-strike-v1" }, "Home")')
           replace('tests/browser/non_practice_regressions.py', "  localStorage.setItem('wordstrike_save', JSON.stringify({", "  if (!localStorage.getItem('wordstrike_save')) localStorage.setItem('wordstrike_save', JSON.stringify({")
+          replace('tests/browser/non_practice_regressions.py', '    page.locator("textarea.gameplay-input").dispatch_event("beforeinput", {"inputType": "insertText", "data": "a"})', '    page.locator("textarea.gameplay-input").evaluate("(el, data) => el.dispatchEvent(new InputEvent(\\\"beforeinput\\\", {bubbles:true,cancelable:true,inputType:\\\"insertText\\\",data}))", "a")')
+          replace('tests/browser/non_practice_regressions.py', '    page.locator("textarea.gameplay-input").dispatch_event("beforeinput", {"inputType": "insertText", "data": text[0]})', '    page.locator("textarea.gameplay-input").evaluate("(el, data) => el.dispatchEvent(new InputEvent(\\\"beforeinput\\\", {bubbles:true,cancelable:true,inputType:\\\"insertText\\\",data}))", text[0])')
           PY
       - name: Run every non-Practice Node regression
         run: |
