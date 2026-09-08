@@ -1,0 +1,17 @@
+name: Typing repair transfer
+on:
+  push:
+    branches: [fix/typing-test-desktop-regressions]
+    paths: [.github/workflows/typing-repair-transfer.yml]
+permissions:
+  contents: read
+jobs:
+  transfer:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/upload-artifact@v4
+        with:
+          name: repair-transfer-check
+          path: .github/workflows/typing-repair-workspace.yml
+          retention-days: 1
