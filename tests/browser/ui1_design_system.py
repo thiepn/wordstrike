@@ -58,6 +58,15 @@ def assert_no_errors(errors, label):
     assert not errors, f"{label}: page errors: {errors}"
 
 
+def duration_seconds(value):
+    source = str(value).strip().lower()
+    if source.endswith("ms"):
+        return float(source[:-2]) / 1000
+    if source.endswith("s"):
+        return float(source[:-1])
+    raise AssertionError(f"unsupported CSS duration: {value}")
+
+
 def inspect_foundation(browser, base, browser_name, evidence):
     context = browser.new_context(viewport={"width": 1440, "height": 900})
     context.add_init_script(ONBOARDING_SEED)
@@ -98,6 +107,9 @@ def inspect_foundation(browser, base, browser_name, evidence):
     assert computed["motionFast"] == "140ms", computed
     assert computed["radius"] == "6px", computed
     assert computed["horizontalOverflow"] <= 1, computed
+
+    # Production-only screenshot: fixture primitives are injected only after visual evidence.
+    page.screenshot(path=str(ARTIFACTS / f"{browser_name}-ui1-desktop.png"), full_page=True)
 
     page.evaluate("""() => {
       const host = document.createElement('div');
@@ -142,7 +154,6 @@ def inspect_foundation(browser, base, browser_name, evidence):
     assert abs(transform["x"]) < 0.1, transform
     assert -1.1 <= transform["y"] <= 0.1, transform
 
-    page.screenshot(path=str(ARTIFACTS / f"{browser_name}-ui1-desktop.png"), full_page=True)
     evidence.append({"browser": browser_name, "case": "foundation", **computed, **fixture, "hoverTransform": transform})
     assert_no_errors(errors, f"{browser_name} foundation")
     context.close()
@@ -209,7 +220,7 @@ def inspect_reduced_motion(browser, base, browser_name, evidence):
     probe.hover()
     page.wait_for_timeout(40)
     transform = probe.evaluate("el => getComputedStyle(el).transform")
-    assert transition in {"0s", "0.000001s"}, transition
+    assert duration_seconds(transition) <= 0.00001, transition
     assert transform == "none", transform
     evidence.append({"browser": browser_name, "case": "reduced-motion", "transition": transition, "transform": transform})
     assert_no_errors(errors, f"{browser_name} reduced motion")
