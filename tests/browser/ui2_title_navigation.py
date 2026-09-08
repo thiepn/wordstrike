@@ -154,7 +154,7 @@ def inspect_keyboard_and_routes(browser, base, browser_name, evidence):
 
     page.locator('[data-action="open-leaderboards"]').click()
     expect(page.locator(".leaderboards-screen")).to_be_visible()
-    page.locator('[data-action="leaderboard-main-menu"]').click()
+    page.get_by_role("button", name="Go back").click()
     assert_title(page)
 
     page.locator('[data-action="modes"]').click()
