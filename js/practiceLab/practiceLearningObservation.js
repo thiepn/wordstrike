@@ -6,6 +6,7 @@ import { buildPracticeDeltaQuality, buildPracticePhaseQuality } from "./practice
 import { getPracticeTrustedCombinationRepairBinding } from "./practiceCombinationRepairTrust.js";
 import { getPracticeTrustedWeakKeysBinding } from "./practiceWeakKeysTrust.js";
 import { getPracticeTrustedProblemWordsBinding } from "./practiceProblemWordsTrust.js";
+import { getPracticeTrustedAccuracyRecoveryBinding } from "./practiceAccuracyRecoveryTrust.js";
 
 const finite = Number.isFinite;
 const identity = (type, key) => `${type}\u0000${key}`;
@@ -107,23 +108,24 @@ function validRange(range) {
 }
 
 function trustedInterventionMetadata(contentPlan) {
-  if (getPracticeTrustedCombinationRepairBinding(contentPlan)) return contentPlan?.metadata?.combinationRepair ?? null;
-  if (getPracticeTrustedWeakKeysBinding(contentPlan)) return contentPlan?.metadata?.weakKeys ?? null;
-  if (getPracticeTrustedProblemWordsBinding(contentPlan)) return contentPlan?.metadata?.problemWords ?? null;
+  if (getPracticeTrustedCombinationRepairBinding(contentPlan)) return { metadata: contentPlan?.metadata?.combinationRepair ?? null, entryId: "entry-probe", exitId: "exit-probe" };
+  if (getPracticeTrustedWeakKeysBinding(contentPlan)) return { metadata: contentPlan?.metadata?.weakKeys ?? null, entryId: "entry-probe", exitId: "exit-probe" };
+  if (getPracticeTrustedProblemWordsBinding(contentPlan)) return { metadata: contentPlan?.metadata?.problemWords ?? null, entryId: "entry-probe", exitId: "exit-probe" };
+  if (getPracticeTrustedAccuracyRecoveryBinding(contentPlan)) return { metadata: contentPlan?.metadata?.accuracyRecovery ?? null, entryId: "baseline", exitId: "check" };
   return null;
 }
 
 export function resolvePracticeTrustedLearningPhaseBounds(contentPlan) {
-  const metadata = trustedInterventionMetadata(contentPlan);
-  if (!metadata) return null;
-  const ranges = Array.isArray(metadata.phaseRanges) ? metadata.phaseRanges : [];
-  const entry = ranges.find((range) => range?.id === "entry-probe") ?? null;
-  const exit = ranges.find((range) => range?.id === "exit-probe") ?? null;
+  const trusted = trustedInterventionMetadata(contentPlan);
+  if (!trusted?.metadata) return null;
+  const ranges = Array.isArray(trusted.metadata.phaseRanges) ? trusted.metadata.phaseRanges : [];
+  const entry = ranges.find((range) => range?.id === trusted.entryId) ?? null;
+  const exit = ranges.find((range) => range?.id === trusted.exitId) ?? null;
   if (!validRange(entry) || !validRange(exit) || entry.endIndex > exit.startIndex) return null;
   return freezeDeep({
     kind: "trusted-intervention",
-    entry: { phaseId: "entry-probe", startIndex: entry.startIndex, endIndex: entry.endIndex },
-    exit: { phaseId: "exit-probe", startIndex: exit.startIndex, endIndex: exit.endIndex },
+    entry: { phaseId: trusted.entryId, startIndex: entry.startIndex, endIndex: entry.endIndex },
+    exit: { phaseId: trusted.exitId, startIndex: exit.startIndex, endIndex: exit.endIndex },
   });
 }
 

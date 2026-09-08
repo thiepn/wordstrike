@@ -5,7 +5,7 @@ import {
 
 const IS_NODE_RUNTIME = Boolean(globalThis.process?.versions?.node);
 const nodeRuntime = IS_NODE_RUNTIME
-  ? await import("./practiceLabControllerRuntimeV22.js")
+  ? await import("./practiceLabControllerRuntimeV23.js")
   : null;
 
 export const PRACTICE_LAB_ONBOARDING_VERSION = 1;
@@ -44,10 +44,12 @@ export function createPracticeLabController(options = {}) {
       import("./practiceExperimentRegistryRuntime.js"),
       import("./practiceLabControllerRuntime.js"),
       import("./practiceLabControllerRuntimeV22.js"),
+      import("./practiceLabControllerRuntimeV23.js"),
       import("./practiceCombinationRepairExperiment.js"),
       import("./practiceWeakKeysExperiment.js"),
       import("./practiceProblemWordsExperiment.js"),
-    ]).then(([registryModule, _canonicalControllerModule, controllerModule, combinationRepairModule, weakKeysModule, problemWordsModule]) => {
+      import("./practiceAccuracyRecoveryExperiment.js"),
+    ]).then(([registryModule, _canonicalControllerModule, _v22ControllerModule, controllerModule, combinationRepairModule, weakKeysModule, problemWordsModule, accuracyRecoveryModule]) => {
       const lazyRegistry = getPracticeRegistryLazyState(experimentRegistry);
       if (lazyRegistry?.destroyed) return null;
 
@@ -60,6 +62,7 @@ export function createPracticeLabController(options = {}) {
       combinationRepairModule.registerPracticeCombinationRepairExperiment(resolvedRegistry);
       weakKeysModule.registerPracticeWeakKeysExperiment(resolvedRegistry);
       problemWordsModule.registerPracticeProblemWordsExperiment(resolvedRegistry);
+      accuracyRecoveryModule.registerPracticeAccuracyRecoveryExperiment(resolvedRegistry);
 
       runtimeController = controllerModule.createPracticeLabController({
         ...options,

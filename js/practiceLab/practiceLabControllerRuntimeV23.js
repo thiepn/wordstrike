@@ -1,6 +1,5 @@
 import { createPracticeLabController as createPracticeLabControllerV22 } from "./practiceLabControllerRuntimeV22.js";
-import { renderPracticeLabV22 } from "./practiceLabRendererV22.js";
-import { renderPracticeAccuracyRecoveryDetail } from "./practiceLabRendererV23.js";
+import { renderPracticeAccuracyRecoveryDetail, renderPracticeLabV23 } from "./practiceLabRendererV23.js";
 import { buildPracticeAccuracyRecoveryDetailViewModel, createDefaultPracticeAccuracyRecoveryUiState, normalizePracticeAccuracyRecoveryManualInput, normalizePracticeAccuracyRecoveryUiState } from "./practiceAccuracyRecoveryUi.js";
 import { registerPracticeAccuracyRecoveryExperiment } from "./practiceAccuracyRecoveryExperiment.js";
 import { PRACTICE_LAB_ROUTES } from "./practiceLabRoutes.js";
@@ -16,7 +15,7 @@ export function createPracticeLabController(options = {}) {
   function isDetail(view) { return view?.kind === "experiment-detail" && view?.title === "Accuracy & Recovery"; }
   function attach() { if (!listeners && mounted) { root?.addEventListener?.("click", click, true); root?.addEventListener?.("input", input, true); listeners = true; } }
   function detach() { if (listeners) { root?.removeEventListener?.("click", click, true); root?.removeEventListener?.("input", input, true); listeners = false; } }
-  function renderer(renderRoot, view, rendererOptions = {}) { lastView = view; if (isDetail(view)) { attach(); const detail = buildPracticeAccuracyRecoveryDetailViewModel({ entry: view, resolved: { runnable: view.runnable }, state }); return externalRenderer ? externalRenderer(renderRoot, detail, rendererOptions) : renderPracticeAccuracyRecoveryDetail(renderRoot, detail, rendererOptions); } detach(); return externalRenderer ? externalRenderer(renderRoot, view, rendererOptions) : renderPracticeLabV22(renderRoot, view, rendererOptions); }
+  function renderer(renderRoot, view, rendererOptions = {}) { lastView = view; if (isDetail(view)) { attach(); const detail = buildPracticeAccuracyRecoveryDetailViewModel({ entry: view, resolved: { runnable: view.runnable }, state }); return externalRenderer ? externalRenderer(renderRoot, detail, rendererOptions) : renderPracticeAccuracyRecoveryDetail(renderRoot, detail, rendererOptions); } detach(); return externalRenderer ? externalRenderer(renderRoot, view, rendererOptions) : renderPracticeLabV23(renderRoot, view, rendererOptions); }
   const base = createPracticeLabControllerV22({ ...options, renderer });
   const isRoute = () => base.getSnapshot()?.route?.name === PRACTICE_LAB_ROUTES.EXPERIMENT_DETAIL && base.getSnapshot()?.route?.params?.experimentId === ID;
   const rerender = (focusSelector = null) => { if (mounted && !sessionHost && isRoute() && lastView) renderer(root, lastView, { focusSelector }); };
