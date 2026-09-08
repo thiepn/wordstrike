@@ -39,7 +39,7 @@ independent words such as `business`, `spring`, and `bring`.
 Difficulty tiering uses 72% source-frequency position and 28% typing complexity after
 manual approval. The output contains five disjoint tiers of exactly 600 words each.
 The generated `data/commonGameplayWords.json` is the shared runtime source for
-Campaign, Daily Strike, Endless, and the short/medium portion of Boss vocabulary.
+Campaign, Arcade Rush, Endless, and the short/medium portion of Boss vocabulary.
 
 ## Rebuild and validation
 
@@ -53,8 +53,7 @@ After a human has inspected every row, regenerate with `--complete`, then valida
 build the runtime artifact:
 
 ```text
-python scripts/buildVocabularyManualReview.py <source-file> data/personalNameExclusions.json data/vocabularyQualityRules.json data/commonGameplayWords.manual-review.json --complete
-node scripts/buildWordPools.mjs <source-file> data/commonGameplayWords.manual-review.json data/vocabularyQualityRules.json data/personalNameExclusions.json data/commonGameplayWords.json
+python scripts/buildVocabularyManualReview.py <source-file> data/personalNameExclusions.json data/vocabularyQualityRules.json data/personalNameExclusions.json data/commonGameplayWords.json
 ```
 
 The JavaScript builder fails closed on source checksum, incomplete review status,
