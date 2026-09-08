@@ -6,6 +6,7 @@ import { buildPracticeEvaluationPlan } from "./practiceEvaluationPlan.js";
 import { loadPracticeEvaluationContent } from "./practiceEvaluationContentLoader.js";
 import { createPracticeContentPlan, validatePracticeExperimentDescriptor } from "./practiceSessionContract.js";
 import { getRealTextColdTransferAvailability } from "./practiceRealTextAvailability.js";
+import { registerPracticeTrustedRealTextColdTransferBinding } from "./practiceRealTextColdTransferTrust.js";
 import {
   PRACTICE_COLD_TRANSFER_LAUNCH_VERSION,
   PRACTICE_REAL_TEXT_COLD_TRANSFER_EXPERIMENT_ID,
@@ -82,6 +83,7 @@ export function createPracticeRealTextColdTransferRuntime({
         const evaluationPlan = buildPracticeEvaluationPlan({ binding: claim.binding, artifact: pool, historyStatus: claim.state?.historyStatus ?? "partial" });
         const rawContent = await loadPracticeEvaluationContent({ plan: evaluationPlan, loadContentItems: loadProtectedContentItems });
         const contentPlan = createPracticeContentPlan(rawContent);
+        registerPracticeTrustedRealTextColdTransferBinding(contentPlan, claim.binding);
         return freezeDeep({
           sessionId,
           experiment: PRACTICE_REAL_TEXT_COLD_TRANSFER_DESCRIPTOR,
