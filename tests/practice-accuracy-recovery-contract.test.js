@@ -66,3 +66,31 @@ test("PL23 repair feedback is transient, target-attributed, precise, and cooldow
   assert.equal(tracker.consume({ episode: { corrected: true, correctCharactersRemoved: 1 }, attribution, target }).code, "repair-extra-deletion");
   assert.equal(tracker.consume({ episode: { corrected: true, correctCharactersRemoved: 0 }, attribution: [{ entityType: "key", entityKey: "x" }], target }), null);
 });
+
+test("PL23 transient repair feedback is emitted only for target-attributed errors in the Repair phase", () => {
+  let now = 1000;
+  const tracker = createPracticeAccuracyRecoveryFeedbackTracker({ clock: () => now });
+  const contentPlan = {
+    metadata: {
+      accuracyRecovery: {
+        target: { entityType: "key", entityKey: "r" },
+        phaseRanges: [
+          { id: "baseline", startIndex: 0, endIndex: 10 },
+          { id: "control", startIndex: 10, endIndex: 20 },
+          { id: "repair", startIndex: 20, endIndex: 30 },
+          { id: "mix", startIndex: 30, endIndex: 40 },
+          { id: "check", startIndex: 40, endIndex: 50 },
+        ],
+      },
+    },
+  };
+  const descriptor = createPracticeAccuracyRecoveryDescriptor({ contentPlan, feedbackTracker: tracker });
+  const attribution = [{ entityType: "key", entityKey: "r" }];
+  assert.equal(descriptor.onClosedErrorEpisode({ episode: { primaryPosition: 5, corrected: true, correctCharactersRemoved: 0 }, attribution }), null);
+  assert.equal(descriptor.onClosedErrorEpisode({ episode: { primaryPosition: 15, corrected: true, correctCharactersRemoved: 0 }, attribution }), null);
+  const repair = descriptor.onClosedErrorEpisode({ episode: { primaryPosition: 25, corrected: true, correctCharactersRemoved: 0 }, attribution });
+  assert.equal(repair.code, "repair-clean");
+  now += 2000;
+  assert.equal(descriptor.onClosedErrorEpisode({ episode: { primaryPosition: 35, corrected: true, correctCharactersRemoved: 0 }, attribution }), null);
+  assert.equal(descriptor.onClosedErrorEpisode({ episode: { primaryPosition: 45, corrected: true, correctCharactersRemoved: 0 }, attribution }), null);
+});
