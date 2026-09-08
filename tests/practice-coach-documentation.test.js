@@ -41,6 +41,7 @@ test("PL25 final tree contains no temporary patch/finalizer workflow or document
     ".github/workflows/pl25-listener-fix.yml",
     ".github/workflows/pl25-doc-addenda.yml",
     ".github/workflows/pl25-doc-finalize.yml",
+    ".github/workflows/pl25-envelope-fix.yml",
     "scripts/applyPl25DocAddenda.py",
   ]) assert.equal(await missing(path), true, path);
 });
