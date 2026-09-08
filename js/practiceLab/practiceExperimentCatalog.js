@@ -25,7 +25,7 @@ const definitions = [
   ["accuracy-control", "Accuracy & Recovery", "Accuracy", "precision", "Practice clean first-pass typing and more precise recovery when errors occur, without chasing an artificially slow perfect score.", "Train one canonical key, combination, or word through Baseline, Control, Repair, Mix, and Check. Natural errors remain optional observations: correction is allowed, never forced, and repair feedback appears only after real target-attributed episodes close.", 4, 5, 6, "adaptive", false, false, 11, 40, "target", "precision", "first-pass control and recovery"],
   ["burst-sprints", "Burst Sprints", "Sprints", "speed", "Practice short, controlled bursts above sustainable speed.", "Brief sprint intervals will develop top-end speed while separating useful acceleration from uncontrolled errors.", 1, 3, 5, "adaptive", false, true, 12, 10, "bolt", "speed", "burst speed"],
   ["common-words", "Common Words", "Common Words", "fluency", "Build automatic rhythm on high-frequency words.", "Repeat and vary common words to reduce hesitation and make everyday typing more fluent.", 2, 5, 8, "all-levels", false, false, 13, 10, "words", "fluency", "common-word fluency"],
-  ["real-text", "Real Text", "Real Text", "real-world", "Practice natural prose and realistic sentence flow.", "Curated passages will transfer isolated typing skills into punctuation, context, and varied word patterns.", 3, 5, 10, "all-levels", false, false, 14, 10, "text", "real-world", "real-text transfer"],
+  ["real-text", "Real Text", "Real Text", "real-world", "Practice broad natural text without target-specific cues, or run a protected Cold Transfer Check to measure generalization on fresh material.", "Natural Practice is repeatable training from an approved target-blind training pool. Cold Transfer Check is a separate scarce 60-second PL18 measurement selected independently of current targets and revealed only after a protected reservation is claimed.", 3, 5, 10, "all-levels", false, false, 14, 10, "text", "real-world", "broad natural-text integration"],
   ["consistency-trainer", "Consistency Trainer", "Consistency", "fluency", "Reduce uneven pacing across longer sequences.", "Timing feedback will help smooth pauses and spikes without demanding a single rigid typing rhythm.", 3, 6, 10, "adaptive", false, true, 25, 20, "wave", "fluency", "pacing consistency"],
   ["metronome-typing", "Metronome Typing", "Metronome", "fluency", "Develop controlled cadence at adjustable tempos.", "A guided pulse will support deliberate rhythm practice while preserving accuracy and correction awareness.", 2, 5, 8, "intermediate", false, false, 26, 30, "metronome", "fluency", "cadence"],
   ["read-ahead", "Read-Ahead", "Read-Ahead", "fluency", "Train visual preparation beyond the current word.", "Progressive text presentation will encourage planning ahead while keeping the active target understandable.", 3, 6, 10, "intermediate", false, true, 27, 40, "eye", "fluency", "visual preparation"],
@@ -45,11 +45,15 @@ const deepFreeze = (value) => {
 
 const buildEntry = ([id, title, shortTitle, category, description, longDescription, minimum, recommended, maximum, difficulty, requiresAssessment, requiresPracticeData, implementationPrompt, displayOrder, iconKey, accentKey, primarySkill]) => deepFreeze({
   id, version: 1, title, shortTitle, category, description, longDescription,
-  status: ["full-assessment", "weak-keys", "combination-repair", "problem-words", "accuracy-control"].includes(id) ? "preview" : "planned",
+  status: ["full-assessment", "weak-keys", "combination-repair", "problem-words", "accuracy-control", "real-text"].includes(id) ? "preview" : "planned",
   estimatedDurationMinutes: { minimum, recommended, maximum }, difficulty,
   requiresAssessment, requiresPracticeData, supportsMobile: true,
   supportsPhysicalKeyboard: true, supportsSoftwareKeyboard: true,
-  capabilities: ["weak-keys", "combination-repair", "problem-words", "accuracy-control"].includes(id) ? ["manual-target", "recommended-target", "fixed-dose", "same-session-check"] : [],
+  capabilities: id === "real-text"
+    ? ["duration-options", "broad-training", "cold-transfer-launch"]
+    : ["weak-keys", "combination-repair", "problem-words", "accuracy-control"].includes(id)
+      ? ["manual-target", "recommended-target", "fixed-dose", "same-session-check"]
+      : [],
   tags: [category, primarySkill], implementationPrompt, displayOrder,
   iconKey, accentKey, primarySkill,
 });
