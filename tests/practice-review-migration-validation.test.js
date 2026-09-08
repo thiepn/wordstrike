@@ -147,10 +147,10 @@ test("PL17 review validation enforces bounded family/probe history and rejects r
   );
   const tooManyFamilies = {
     ...active,
-    recentFamilyIds: Array.from({ length: PRACTICE_LIMITS.reviewRecentFamilyIds + 1 }, (_, index) => `family-${index}`),
+    recentProbeFamilyIds: Array.from({ length: 9 }, (_, index) => `family-${index}`),
   };
   assert.equal(validateReviewItem(tooManyFamilies).valid, false);
-  assert.equal(validateReviewItem({ ...active, rawText: "private" }).valid, false);
+  assert.equal(validateReviewItem({ ...active, customText: "private" }).valid, false);
 });
 
 test("PL17 retention component remains explicit inside PL25 foundation analysis v10", () => {
