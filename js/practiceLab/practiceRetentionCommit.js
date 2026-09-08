@@ -49,6 +49,7 @@ export async function commitCompletedPracticeRetentionSession({
   experimentReviewItemChanges = [],
   updatedProfileSummary = null,
   assessmentBlockDelta = null,
+  coachBlockDelta = null,
   clearCheckpoint = true,
   policy = PRACTICE_REVIEW_POLICY_V1,
 } = {}) {
@@ -57,14 +58,14 @@ export async function commitCompletedPracticeRetentionSession({
   if (existingSession) {
     return repository.commitCompletedPracticeSession({
       sessionSummary, skillEvidenceDeltas, abilityObservation, performanceStateDelta, learningObservationDeltas,
-      reviewItemChanges: experimentReviewItemChanges, updatedProfileSummary, assessmentBlockDelta, clearCheckpoint,
+      reviewItemChanges: experimentReviewItemChanges, updatedProfileSummary, assessmentBlockDelta, coachBlockDelta, clearCheckpoint,
     });
   }
   const prepared = await preparePracticeRetentionReviewChanges({ repository, sessionSummary, reviewDeltas: retentionReviewDeltas, policy });
   const result = await repository.commitCompletedPracticeSession({
     sessionSummary, skillEvidenceDeltas, abilityObservation, performanceStateDelta, learningObservationDeltas,
     reviewItemChanges: [...experimentReviewItemChanges, ...prepared.reviewItemChanges], updatedProfileSummary,
-    assessmentBlockDelta, clearCheckpoint,
+    assessmentBlockDelta, coachBlockDelta, clearCheckpoint,
   });
   return Object.freeze({ ...result, staleReviewDeltaCount: prepared.staleReviewDeltaCount, retentionReviewUpdated: prepared.reviewItemChanges.length });
 }
