@@ -17,6 +17,8 @@ assert.match(index, /js\/main\.js[\s\S]*js\/campaignGameplayPresentation\.js/);
 
 assert.match(presentation, /import \{ appState \} from "\.\/state\.js"/);
 assert.match(presentation, /\.game-screen:not\(\.endless-screen\):not\(\.boss-screen\)/);
+assert.match(presentation, /hud\.querySelector\("\.gameplay-pause-button"\)/);
+assert.doesNotMatch(presentation, /\.game-back-control/);
 assert.match(presentation, /campaign-gameplay-screen/);
 assert.match(presentation, /campaign-gameplay-hud/);
 assert.match(presentation, /campaign-core/);
@@ -46,6 +48,7 @@ assert.match(css, /--campaign-burst-angle/);
 assert.match(css, /--campaign-burst-reach/);
 assert.match(css, /@media \(max-width: 760px\)/);
 assert.match(css, /@media \(max-height: 430px\)/);
+assert.match(css, /@media \(max-width: 520px\) and \(max-height: 430px\)[\s\S]*\.campaign-hud-pace \{ grid-area: pace; \}[\s\S]*\.campaign-hud-primary > \.campaign-hud-metric:nth-of-type\(2\) \{ grid-area: acc; \}/);
 assert.match(css, /@media \(prefers-reduced-motion: reduce\)/);
 assert.doesNotMatch(css, /\.endless-screen/);
 assert.doesNotMatch(css, /\.boss-screen/);
@@ -68,4 +71,4 @@ assert.match(workflow, /browser-artifacts\/ui5-campaign-gameplay\//);
 assert.match(modes, /PRACTICE: "practice"/);
 assert.match(modes, /id: MODE_IDS\.PRACTICE,[\s\S]*enabled: false,[\s\S]*status: "coming-soon",[\s\S]*route: null/);
 
-console.log("UI5 Campaign gameplay source contracts passed: scoped HUD/Core/word presentation, renderer feedback, reduced motion, mode isolation, and Practice exclusion.");
+console.log("UI5 Campaign gameplay source contracts passed: real Campaign control binding, scoped HUD/Core/word presentation, short-mobile layout, renderer feedback, reduced motion, mode isolation, and Practice exclusion.");
