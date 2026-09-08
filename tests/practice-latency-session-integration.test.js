@@ -14,7 +14,7 @@ async function typeCorrect(engine, harness, count, latencyMs = 100) {
   }
 }
 
-test("generic sessions persist canonical fluencySummary inside the current PL18 session v11 envelope", async () => {
+test("generic sessions persist canonical fluencySummary inside the current PL25 session v13 envelope", async () => {
   const harness = await createPracticeSessionHarness({ suffix: "pl8-generic", text: "a".repeat(40) });
   const engine = createPracticeSessionEngine({
     repository: harness.repository,
@@ -29,9 +29,11 @@ test("generic sessions persist canonical fluencySummary inside the current PL18 
   await engine.start();
   await typeCorrect(engine, harness, 26);
   const result = await engine.complete("manual-stop");
-  assert.equal(result.summary.recordVersion, 12);
+  assert.equal(result.summary.recordVersion, 13);
   assert.equal(result.summary.retentionReviewSummary, null);
   assert.equal(result.summary.evaluationSummary, null);
+  assert.equal(result.summary.assessmentBinding, null);
+  assert.equal(result.summary.coachBinding, null);
   assert.equal(result.summary.fluencySummary.calibration.status, "adaptive");
   assert.equal(result.summary.fluencySummary.fluentTransitionCount, 25);
   assert.equal(result.summary.fluencySummary.disfluentTransitionCount, 0);
@@ -41,7 +43,7 @@ test("generic sessions persist canonical fluencySummary inside the current PL18 
   assert.equal(Object.hasOwn(result.summary, "classifiedEventTrace"), false);
 });
 
-test("experiment analyzers receive immutable PL18 foundation v9 analysis but cannot own fluencySummary", async () => {
+test("experiment analyzers receive immutable PL25 foundation v10 analysis but cannot own fluencySummary", async () => {
   let received = null;
   let mutationThrew = false;
   const harness = await createPracticeSessionHarness({
