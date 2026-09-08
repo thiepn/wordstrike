@@ -11,10 +11,11 @@ import { buildPracticeFoundationAnalysis, PRACTICE_FOUNDATION_ANALYSIS_VERSION }
 import { migratePracticeRecord } from "../js/practiceLab/practiceMigrations.js";
 import { validateSessionSummary } from "../js/practiceLab/practiceValidation.js";
 
-test("PL19 version envelope is DB7 assessmentRun1 session12 foundation10", () => {
-  assert.equal(PRACTICE_DATABASE_VERSION, 7);
+test("PL19 contracts remain intact inside the PL25 DB8/session13/foundation10 envelope", () => {
+  assert.equal(PRACTICE_DATABASE_VERSION, 8);
   assert.equal(PRACTICE_RECORD_VERSIONS.assessmentRun, 1);
-  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 12);
+  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 13);
+  assert.equal(PRACTICE_RECORD_VERSIONS.coachPlan, 1);
   assert.equal(PRACTICE_FOUNDATION_ANALYSIS_VERSION, 10);
   assert.equal(PRACTICE_LIMITS.assessmentRunBytes, 128 * 1024);
   assert.equal(PRACTICE_LIMITS.assessmentRuns, 50);
@@ -24,7 +25,7 @@ test("PL19 version envelope is DB7 assessmentRun1 session12 foundation10", () =>
   ]);
 });
 
-test("PL19 historical session v11 migrates to v12 with assessmentBinding null only", () => {
+test("PL19 historical session v11 migrates through assessmentBinding v12 to PL25 coachBinding v13", () => {
   const current = createDefaultSessionSummary({
     profileId: "practice-profile_migration-12345678",
     contextId: "practice-context_migration-12345678",
@@ -33,10 +34,12 @@ test("PL19 historical session v11 migrates to v12 with assessmentBinding null on
   });
   const v11 = { ...current, recordVersion: 11 };
   delete v11.assessmentBinding;
+  delete v11.coachBinding;
   const migrated = migratePracticeRecord("sessionSummary", v11);
   assert.equal(migrated.ok, true, JSON.stringify(migrated.error));
-  assert.deepEqual(migrated.steps, ["sessionSummary:11->12"]);
+  assert.deepEqual(migrated.steps, ["sessionSummary:11->12", "sessionSummary:12->13"]);
   assert.equal(migrated.value.assessmentBinding, null);
+  assert.equal(migrated.value.coachBinding, null);
   assert.equal(migrated.value.evaluationSummary, current.evaluationSummary);
   assert.equal(validateSessionSummary(migrated.value).valid, true);
 });
