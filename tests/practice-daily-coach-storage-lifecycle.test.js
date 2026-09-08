@@ -8,6 +8,7 @@ import {
 import { migratePracticeRecord } from "../js/practiceLab/practiceMigrations.js";
 import { createDefaultSessionSummary } from "../js/practiceLab/practiceDefaults.js";
 import { createPracticeCoachPlanRecord } from "../js/practiceLab/practiceCoachPlan.js";
+import { createPracticeMemoryStore } from "../js/practiceLab/practiceMemoryStore.js";
 import {
   applyPracticeCoachBlockDelta,
   blockPracticeCoachBlockRecord,
@@ -62,6 +63,32 @@ test("PL25 storage envelope is DB8 with coachPlans and sessionSummary v13 coach 
   assert.deepEqual(unique.keyPath, ["profileId", "contextId", "localDayKey"]);
   assert.equal(unique.options.unique, true);
   assert.equal(PRACTICE_STORE_DEFINITIONS.sessionSummaries.indexes.find((index) => index.name === "coachPlanId").keyPath, "coachBinding.coachPlanId");
+});
+
+test("PL25 memory store resolves nested dotted key paths like IndexedDB for coachBinding lookups", async () => {
+  const store = createPracticeMemoryStore();
+  await store.open();
+  const coachPlanId = "practice-coach-plan_nested-index-12345678";
+  const summary = createDefaultSessionSummary({
+    profileId,
+    contextId,
+    sessionId: createPracticeId("session", { uuid: () => "pl25-nested-index-session-12345678" }),
+    now,
+    overrides: {
+      coachBinding: {
+        coachPlanId,
+        blockId: "target-1",
+        blockOrdinal: 1,
+        plannerVersion: 1,
+        planHash: "fnv1a32-12345678",
+      },
+    },
+  });
+  await store.put("sessionSummaries", summary);
+  const matches = await store.query("sessionSummaries", "coachPlanId", coachPlanId);
+  assert.equal(matches.length, 1);
+  assert.equal(matches[0].sessionId, summary.sessionId);
+  assert.equal(matches[0].coachBinding.coachPlanId, coachPlanId);
 });
 
 test("PL25 sessionSummary v12 migrates exactly once to v13 with nullable coachBinding", () => {
