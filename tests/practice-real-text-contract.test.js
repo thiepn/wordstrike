@@ -20,9 +20,9 @@ import { getRealTextPracticeAvailability } from "../js/practiceLab/practiceRealT
 import { PRACTICE_DATABASE_VERSION, PRACTICE_RECORD_VERSIONS } from "../js/practiceLab/practiceConstants.js";
 import { PRACTICE_FOUNDATION_ANALYSIS_VERSION } from "../js/practiceLab/practiceFoundationAnalysis.js";
 
-test("PL24 preserves DB7/session12/foundation10 and all PL24 protocols start at v1", () => {
-  assert.equal(PRACTICE_DATABASE_VERSION, 7);
-  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 12);
+test("PL24 contracts remain intact inside the PL25 DB8/session13/foundation10 envelope and all PL24 protocols stay v1", () => {
+  assert.equal(PRACTICE_DATABASE_VERSION, 8);
+  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 13);
   assert.equal(PRACTICE_FOUNDATION_ANALYSIS_VERSION, 10);
   assert.deepEqual([
     PRACTICE_REAL_TEXT_VERSION,
