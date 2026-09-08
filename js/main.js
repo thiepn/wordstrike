@@ -1407,12 +1407,17 @@ function handleAppInput(event) {
   updateLeaderboardUsernameFeedback(event.target.value);
 }
 
-function moveLevelSelection(key) {
-  const selectionLimit = appState.devMode ? 100 : appState.save.currentFurthestLevel;
+function getCampaignProgressionColumns() {
+  return globalThis.matchMedia?.("(max-width: 720px)")?.matches ? 5 : 10;
+}
+
+function moveLevelSelection(direction) {
+  const maximumLevel = appState.devMode ? 100 : appState.save.currentFurthestLevel;
   appState.levelSelection = moveLevelGridSelection(
     appState.levelSelection,
-    key,
-    Math.min(100, selectionLimit),
+    direction,
+    maximumLevel,
+    getCampaignProgressionColumns(),
   );
   renderCurrentScreen();
 }
