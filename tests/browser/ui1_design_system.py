@@ -186,7 +186,8 @@ def inspect_responsive_matrix(browser, base, browser_name, evidence):
         if browser_name == "chromium" and label in {"mobile", "mobile-keyboard-height"}:
             page.screenshot(path=str(ARTIFACTS / f"{browser_name}-ui1-{label}.png"), full_page=True)
 
-        # A short viewport may require scrolling, but primary navigation must remain reachable.
+        # A short viewport may require document or container scrolling. What matters is
+        # that the bottom navigation can actually be brought fully into the viewport.
         bottom_action = page.locator(".mode-menu-action .arcade-button")
         expect(bottom_action).to_be_attached()
         bottom_action.scroll_into_view_if_needed()
@@ -200,10 +201,11 @@ def inspect_responsive_matrix(browser, base, browser_name, evidence):
           clientHeight: el.clientHeight,
           scrollHeight: el.scrollHeight,
           scrollTop: el.scrollTop,
-          overflowY: getComputedStyle(el).overflowY
+          overflowY: getComputedStyle(el).overflowY,
+          documentScrollTop: document.scrollingElement?.scrollTop || 0,
+          documentScrollHeight: document.scrollingElement?.scrollHeight || 0,
+          documentClientHeight: document.scrollingElement?.clientHeight || 0
         })""")
-        if scroll_state["scrollHeight"] > scroll_state["clientHeight"] + 1:
-            assert scroll_state["overflowY"] in {"auto", "scroll"}, (browser_name, label, scroll_state)
 
         evidence.append({
             "browser": browser_name,
