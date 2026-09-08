@@ -33,6 +33,8 @@ import {
 } from "./practiceAssessmentConstants.js";
 import { getPracticeTrustedAssessmentBinding } from "./practiceAssessmentRegistry.js";
 import { markPracticeAssessmentBlockStarted } from "./practiceAssessmentRun.js";
+import { getPracticeTrustedCoachBinding } from "./practiceCoachBlockBinding.js";
+import { createPracticeCoachReviewContentHash } from "./practiceCoachReviewGenerator.js";
 
 const completionReasonForMode = (mode) => ({ content: "content-complete", duration: "time-complete", "word-count": "word-target-complete", manual: "manual-stop" })[mode] || "manual-stop";
 
@@ -83,6 +85,29 @@ function compactAssessmentBinding(binding) {
   return Object.freeze({ assessmentRunId: binding.assessmentRunId, blockId: binding.blockId, blockOrdinal: binding.blockOrdinal, protocolVersion: PRACTICE_ASSESSMENT_PROTOCOL_VERSION });
 }
 
+function compactCoachBinding(binding) {
+  if (!binding) return null;
+  return Object.freeze({
+    coachPlanId: binding.coachPlanId,
+    blockId: binding.blockId,
+    blockOrdinal: binding.blockOrdinal,
+    plannerVersion: binding.plannerVersion,
+    planHash: binding.planHash,
+  });
+}
+
+function sameReviewBindings(left = [], right = []) {
+  if (left.length !== right.length) return false;
+  return left.every((binding, index) => {
+    const other = right[index];
+    return binding.reviewItemId === other?.reviewItemId
+      && binding.cycleId === other?.cycleId
+      && binding.referenceAtUtc === other?.referenceAtUtc
+      && binding.entityType === other?.entityType
+      && binding.entityKey === other?.entityKey;
+  });
+}
+
 export function createPracticeSessionEngine(options = {}) {
   const { repository, sessionId, profileId, contextId, wallClock = () => new Date(), checkpointPolicy = {}, segmenter = null } = options;
   if (!repository) throw new TypeError("Practice engine requires a repository");
@@ -99,6 +124,9 @@ export function createPracticeSessionEngine(options = {}) {
   let assessmentBlock = null;
   let assessmentAnalysis = null;
   let assessmentRuntime = { pauseObserved: false, contentAppendObserved: false, restoredFromCheckpoint: false };
+  let coachBinding = null;
+  let coachPlan = null;
+  let coachBlock = null;
   let effectiveConfiguration = null;
   let evidenceRole = "unclassified";
   let evaluationRuntime = { pauseObserved: false, contentAppendObserved: false, restoredFromCheckpoint: false };
@@ -109,6 +137,15 @@ export function createPracticeSessionEngine(options = {}) {
     ...repository,
     async commitCompletedPracticeSession(payload) {
       const filtered = filterPracticeCommitForEvaluation({ payload, evaluationAnalysis, evidenceRole, evaluationRequested: Boolean(evaluationPlan) });
+      const coachBlockDelta = coachBinding && coachBlock ? Object.freeze({
+        coachPlanId: coachBinding.coachPlanId,
+        blockId: coachBinding.blockId,
+        plannedSessionId: coachBlock.plannedSessionId,
+        sessionId: filtered.sessionSummary.sessionId,
+        terminalStatus: filtered.sessionSummary.status === "completed" ? "completed" : "invalid",
+        completedAt: filtered.sessionSummary.completedAtUtc,
+        planHash: coachBinding.planHash,
+      }) : null;
       return commitCompletedPracticeRetentionSession({
         repository,
         sessionSummary: filtered.sessionSummary,
@@ -120,6 +157,7 @@ export function createPracticeSessionEngine(options = {}) {
         experimentReviewItemChanges: filtered.reviewItemChanges ?? [],
         updatedProfileSummary: filtered.updatedProfileSummary,
         assessmentBlockDelta: assessmentAnalysis?.assessmentBlockDelta ?? null,
+        coachBlockDelta,
         clearCheckpoint: filtered.clearCheckpoint,
       });
     },
@@ -139,6 +177,9 @@ export function createPracticeSessionEngine(options = {}) {
     evaluationAnalysis = null;
     assessmentAnalysis = null;
     assessmentBinding = getPracticeTrustedAssessmentBinding(contentPlan);
+    coachBinding = getPracticeTrustedCoachBinding(contentPlan);
+    coachPlan = null;
+    coachBlock = null;
     assessmentRun = null;
     assessmentBlock = null;
     assessmentRuntime = { pauseObserved: false, contentAppendObserved: false, restoredFromCheckpoint: false };
@@ -147,7 +188,33 @@ export function createPracticeSessionEngine(options = {}) {
     finalReason = completionReasonForMode(contentPlan?.completion?.mode);
     evidenceRole = resolvePracticeEvidenceRole({ contentPlan });
 
-    if (Object.hasOwn(configuration, "retentionMeasurementKind") || Object.hasOwn(configuration, "evaluationMeasurementKind") || Object.hasOwn(configuration, "assessmentBinding")) throw planError("PRACTICE_EVALUATION_PRIVILEGE_VIOLATION", "Practice configuration cannot set trusted measurement or assessment privileges");
+    if (Object.hasOwn(configuration, "retentionMeasurementKind") || Object.hasOwn(configuration, "evaluationMeasurementKind") || Object.hasOwn(configuration, "assessmentBinding") || Object.hasOwn(configuration, "coachBinding")) throw planError("PRACTICE_EVALUATION_PRIVILEGE_VIOLATION", "Practice configuration cannot set trusted measurement, assessment or Coach privileges");
+    if (configuration?.targetSource === "external-plan" && !coachBinding) throw planError("PRACTICE_COACH_BINDING_REQUIRED", "external-plan targets require a trusted Daily Coach binding", null, "prepare-coach");
+    if (experiment?.internalCoachOnly && !coachBinding) throw planError("PRACTICE_COACH_BINDING_REQUIRED", "Internal Coach Review cannot launch without a trusted Daily Coach binding", null, "prepare-coach");
+    if (assessmentBinding && coachBinding) throw planError("PRACTICE_COACH_ROLE_CONFLICT", "A Practice child cannot belong to Assessment and Daily Coach simultaneously", null, "prepare-coach");
+
+    if (coachBinding) {
+      coachPlan = await repository.getCoachPlan?.(coachBinding.coachPlanId);
+      coachBlock = coachPlan?.blocks?.find((block) => block.blockId === coachBinding.blockId && block.ordinal === coachBinding.blockOrdinal) ?? null;
+      if (!coachPlan || !coachBlock) throw planError("PRACTICE_COACH_PLAN_STALE", "Daily Coach plan or block is missing", null, "prepare-coach");
+      if (coachPlan.profileId !== profileId || coachPlan.contextId !== contextId || coachPlan.planHash !== coachBinding.planHash) throw planError("PRACTICE_COACH_BINDING_MISMATCH", "Daily Coach binding does not match the current profile/context/plan", null, "prepare-coach");
+      if (coachBlock.status !== "active" || coachBlock.childSessionId !== sessionId || coachBlock.plannedSessionId !== sessionId) throw planError("PRACTICE_COACH_BLOCK_MISMATCH", "Daily Coach child does not match the active frozen block", null, "prepare-coach");
+      if (coachBlock.experimentId !== experiment?.id) throw planError("PRACTICE_COACH_BLOCK_MISMATCH", "Daily Coach experiment does not match the frozen block", null, "prepare-coach");
+      if (!["planned", "active", "expired"].includes(coachPlan.status)) throw planError("PRACTICE_COACH_PLAN_STALE", "Daily Coach plan is no longer startable", null, "prepare-coach");
+      if (coachPlan.status === "expired" && coachBlock.status !== "active") throw planError("PRACTICE_COACH_PLAN_STALE", "Expired Daily Coach plan cannot start another block", null, "prepare-coach");
+      if (coachBlock.kind === "targeted-intervention") {
+        if (configuration?.targetSource !== "external-plan") throw planError("PRACTICE_COACH_TARGET_MISMATCH", "Coach target intervention must use external-plan source", null, "prepare-coach");
+        const exact = contentPlan?.targetEntities?.some((target) => target?.entityType === coachBlock.target?.entityType && target?.entityKey === coachBlock.target?.entityKey && target?.directTarget === true);
+        if (!exact) throw planError("PRACTICE_COACH_TARGET_MISMATCH", "Coach child content does not contain the frozen direct target", null, "prepare-coach");
+      } else if (coachBlock.kind === "review") {
+        if (retentionKind !== "entity-review" || !suppliedReviewPlan || !sameReviewBindings(coachBlock.reviewPlan?.bindings ?? [], suppliedReviewPlan.bindings ?? [])) throw planError("PRACTICE_COACH_REVIEW_MISMATCH", "Coach Review bindings do not match the frozen plan", null, "prepare-coach");
+        const rebuiltHash = createPracticeCoachReviewContentHash(contentPlan, suppliedReviewPlan);
+        if (rebuiltHash !== coachBlock.reviewPlan?.reviewContentPlanHash) throw planError("PRACTICE_COACH_REVIEW_HASH_MISMATCH", "Coach Review content hash does not match preflight", null, "prepare-coach");
+      } else if (coachBlock.kind === "real-text") {
+        if ((contentPlan?.targetEntities?.length ?? 0) !== 0 || contentPlan?.completion?.mode !== "duration" || contentPlan?.completion?.value !== coachBlock.realTextDurationMs) throw planError("PRACTICE_COACH_REAL_TEXT_MISMATCH", "Coach Real Text child does not match the frozen target-blind duration", null, "prepare-coach");
+      }
+    }
+
     if (experiment?.internalAssessmentOnly && !assessmentBinding) throw planError("PRACTICE_ASSESSMENT_BINDING_REQUIRED", "Internal Full Assessment child cannot launch without trusted parent binding", null, "prepare-assessment");
     if (assessmentBinding) {
       assessmentRun = await repository.getAssessmentRun?.(assessmentBinding.assessmentRunId);
@@ -266,6 +333,7 @@ export function createPracticeSessionEngine(options = {}) {
           __pl18LearningEvidenceSummary: overrides.learningEvidenceSummary,
           __pl19AssessmentBinding: compactAssessmentBinding(assessmentBinding),
           __pl19AssessmentBlockDelta: assessmentAnalysis?.assessmentBlockDelta ?? null,
+          __pl25CoachBinding: compactCoachBinding(coachBinding),
         };
       },
     });
@@ -317,10 +385,11 @@ export function createPracticeSessionEngine(options = {}) {
     getTrustedRetentionMeasurementKind() { return preparedContentPlan ? getPracticeTrustedRetentionPurpose(preparedContentPlan) : null; },
     getTrustedEvaluationMeasurementKind() { return preparedContentPlan ? getPracticeTrustedEvaluationPurpose(preparedContentPlan) : null; },
     getTrustedAssessmentBinding() { return assessmentBinding; },
+    getTrustedCoachBinding() { return coachBinding; },
   });
 }
 
 export async function restorePracticeSessionEngine(options = {}) {
-  // PL17 retention review, PL18 protected evaluation and PL19 assessment children are deliberately non-resumable.
+  // PL17 retention review, PL18 protected evaluation, PL19 assessment children and PL25 Coach children are deliberately non-resumable.
   return restoreLegacyPracticeSessionEngine(options);
 }
