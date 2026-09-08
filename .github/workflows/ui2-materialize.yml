@@ -20,6 +20,7 @@ jobs:
         run: |
           python tools/apply_ui2.py
           python tools/ui2_branding_contract.py
+          python tools/ui2_legacy_cleanup.py
       - name: Run canonical tests
         run: npm test
       - name: Commit verified UI2 source migration
