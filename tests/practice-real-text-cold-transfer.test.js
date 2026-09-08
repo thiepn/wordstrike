@@ -62,12 +62,12 @@ test("PL24 claim burns the fresh unit before reveal and produces one fixed 60-se
   assert.equal(claim.state.transferPools[0].claimedUnitIds.includes(claim.binding.unitId), true);
   assert.equal(claim.state.activeReservations.length, 0);
   const plan = buildPracticeEvaluationPlan({ binding: claim.binding, artifact: pool, historyStatus: claim.state.historyStatus });
-  assert.equal(plan.protocol.durationMs, 60000);
-  assert.equal(plan.protocol.pauseAllowed, false);
-  assert.equal(plan.protocol.resumable, false);
-  assert.equal(plan.protocol.appendAllowed, false);
-  assert.equal(plan.protocol.targeted, false);
-  assert.equal(plan.targetEntities.length, 0);
+  assert.equal(plan.measurementProtocol.durationMs, 60000);
+  assert.equal(plan.measurementProtocol.pauseAllowed, false);
+  assert.equal(plan.measurementProtocol.resumable, false);
+  assert.equal(plan.measurementProtocol.appendAllowed, false);
+  assert.equal(plan.measurementProtocol.targeted, false);
+  assert.equal(plan.integrityPolicy.targetEntitiesRequiredEmpty, true);
   assert.throws(() => claimPracticeEvaluationReservationState({ evaluationState: claim.state, profileId: PROFILE_ID, contextId: CONTEXT_ID, reservationId: reserved.reservation.reservationId, sessionId: "practice-session_second-cold-fixture-00000001", artifact: pool, now: NOW }));
 });
 
