@@ -18,7 +18,9 @@ export const PRACTICE_REAL_TEXT_POOL_STATUSES = Object.freeze(["draft", "review"
 export const PRACTICE_REAL_TEXT_DURATIONS_MS = Object.freeze([180_000, 300_000, 600_000]);
 export const PRACTICE_REAL_TEXT_DEFAULT_DURATION_MS = 300_000;
 export const PRACTICE_COLD_TRANSFER_DURATION_MS = 60_000;
-export const PRACTICE_REAL_TEXT_SEPARATOR = "\n\n";
+// The current Practice input contract accepts character graphemes and one canonical space input,
+// not an Enter/newline action. Keep the broad-text bundle typable without special input handling.
+export const PRACTICE_REAL_TEXT_SEPARATOR = " ";
 
 export const PRACTICE_REAL_TEXT_ERRORS = Object.freeze({
   UNSUPPORTED_LANGUAGE: "REAL_TEXT_UNSUPPORTED_LANGUAGE",
