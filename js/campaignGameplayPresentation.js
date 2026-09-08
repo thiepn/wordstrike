@@ -149,6 +149,15 @@ function enhanceCore(screen) {
   core.append(field, orbitA, orbitB, reactor, segments, coreLabel);
 }
 
+function enhanceKeyboardTrigger(screen) {
+  const trigger = screen.querySelector(".gameplay-keyboard-trigger");
+  if (!trigger || trigger.dataset.ui5Enhanced === "true") return;
+  trigger.dataset.ui5Enhanced = "true";
+  trigger.classList.add("campaign-keyboard-trigger");
+  trigger.textContent = "KEYBOARD";
+  trigger.setAttribute("aria-label", "Open gameplay keyboard");
+}
+
 function targetingCopy(game) {
   const targeting = game?.targetingState;
   if (targeting?.mode === "locked" || game?.activeTargetId) return "TARGET LOCKED";
@@ -206,6 +215,7 @@ function enhanceCampaignScreen() {
   screen.classList.add("campaign-gameplay-screen");
   enhanceHud(screen);
   enhanceCore(screen);
+  enhanceKeyboardTrigger(screen);
   syncPresentation(screen);
 }
 
