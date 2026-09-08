@@ -27,7 +27,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add js/ui.js index.html style.css styles/ui-system.css .github/workflows/non-practice-browser.yml
+          git add js/ui.js index.html style.css styles/ui-system.css
           git diff --cached --quiet && exit 0
           git commit -m "UI2: migrate Title screen onto cyber-athletic navigation"
           git push origin HEAD:feat/ui2-title-global-navigation
