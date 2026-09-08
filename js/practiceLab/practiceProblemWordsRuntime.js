@@ -41,10 +41,9 @@ export function createPracticeProblemWordsRuntime({ fetchImpl = globalThis.fetch
       try { const assets = await loadAssets(); return withContext((context) => inspectPracticeProblemWordsAvailability({ sessionId: `problem-words-availability:${entityKey ?? ""}`, context, targetIndex: assets.targetIndex, contentItems: assets.trainingCorpus.items, entityKey, language: context?.dataLocale ?? language })); }
       catch (error) { return freezeDeep({ eligible: false, status: "unavailable", entityType: "word", entityKey: null, graphemeCount: 0, trainingEvidence: { contentCount: 0, familyCount: 0, occurrenceCount: 0 }, naturalContextEvidence: { contentCount: 0, familyCount: 0 }, reasons: [error?.code || "TRAINING_CORPUS_NOT_READY"] }); }
     },
-    async prepare({ entityKey, targetSource = "manual" } = {}) {
+    async prepare({ entityKey, targetSource = "manual", sessionId = createPracticeSessionId() } = {}) {
       const assets = await loadAssets();
       return withContext(async (context) => {
-        const sessionId = createPracticeSessionId();
         const plan = await buildPracticeProblemWordsTrainingPlan({ sessionId, context, targetIndex: assets.targetIndex, contentItems: assets.trainingCorpus.items, corpusBinding: assets.corpusBinding, entityKey, targetSource, language: context?.dataLocale ?? language });
         const contentPlan = buildPracticeProblemWordsContentPlan({ plan, contentItems: assets.trainingCorpus.items });
         return freezeDeep({ plan, contentPlan, availability: "ready", context: { contextId: context.contextId, fingerprint: context.fingerprint, keyboardLayout: context.keyboardLayout, inputMethod: context.inputMethod, dataLocale: context.dataLocale, hardwareProfileId: context.hardwareProfileId ?? null } });
