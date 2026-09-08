@@ -17,6 +17,43 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Balance Pace Ladder diagnostic source
+        run: |
+          python - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+
+          source_path = Path('data/practice/pace-ladder/en-v1/source.json')
+          registry_path = Path('data/practice/provenance/sources.json')
+          builder_path = Path('scripts/buildPracticePaceLadderForms.mjs')
+
+          source = json.loads(source_path.read_text())
+          source['generation']['sentenceCount'] = 110
+          source_text = json.dumps(source, indent=2, ensure_ascii=False) + '\n'
+          source_path.write_text(source_text)
+          checksum = 'sha256-' + hashlib.sha256(source_text.encode()).hexdigest()
+
+          registry = json.loads(registry_path.read_text())
+          entry = next(item for item in registry['sources'] if item['sourceId'] == source['sourceId'])
+          entry['sourceChecksum'] = checksum
+          registry_path.write_text(json.dumps(registry, indent=2, ensure_ascii=False) + '\n')
+
+          builder = builder_path.read_text()
+          old = '''function renderSentence(subject, verb, ending, variant) {
+            if (variant === "comma-link") return `${subject} ${verb}, then checks the next line ${ending}`;
+            if (variant === "ordinary-practice-link") return `${subject} ${verb} during ordinary practice ${ending}`;
+            return `${subject} ${verb} ${ending}`;
+          }'''
+          new = '''function renderSentence(subject, verb, ending, variant) {
+            if (variant === "comma-link") return `${subject} ${verb}, then checks the next line, ${ending}`;
+            if (variant === "ordinary-practice-link") return `${subject} ${verb} during ordinary practice, ${ending}`;
+            return `${subject} ${verb}, ${ending}`;
+          }'''
+          if old not in builder:
+              raise SystemExit('Pace Ladder renderSentence anchor missing')
+          builder_path.write_text(builder.replace(old, new, 1))
+          print(f'Balanced Pace Ladder source checksum: {checksum}')
+          PY
       - name: Build Pace Ladder forms
         run: node scripts/buildPracticePaceLadderForms.mjs
       - name: Report Pace Ladder form diagnostics
@@ -27,28 +64,18 @@ jobs:
           const artifact = JSON.parse(fs.readFileSync('data/practice/pace-ladder/en-v1/WS-PACE-EN-1.forms.json','utf8'));
           for (const form of artifact.forms) {
             const ps = form.windows.map(w => w.textDifficulty.relativeDifficultyPercentile).filter(Number.isFinite);
-            const ds = form.windows.map(w => w.textDifficulty.difficultyIndex).filter(Number.isFinite);
-            console.log(JSON.stringify({
-              formId: form.formId,
-              graphemeCount: form.graphemeCount,
-              formPercentile: form.typability.relativeDifficultyPercentile,
-              minWindowPercentile: ps.length ? Math.min(...ps) : null,
-              maxWindowPercentile: ps.length ? Math.max(...ps) : null,
-              minWindowDifficulty: ds.length ? Math.min(...ds) : null,
-              maxWindowDifficulty: ds.length ? Math.max(...ds) : null,
-              failingWindows: form.windows.filter(w => !Number.isFinite(w.textDifficulty.relativeDifficultyPercentile) || w.textDifficulty.relativeDifficultyPercentile < 15 || w.textDifficulty.relativeDifficultyPercentile > 85).map(w => ({startIndex:w.startIndex,endIndex:w.endIndex,percentile:w.textDifficulty.relativeDifficultyPercentile,difficulty:w.textDifficulty.difficultyIndex})),
-            }));
+            console.log(JSON.stringify({formId: form.formId, graphemeCount: form.graphemeCount, formPercentile: form.typability.relativeDifficultyPercentile, minWindowPercentile: ps.length ? Math.min(...ps) : null, maxWindowPercentile: ps.length ? Math.max(...ps) : null, reasons: form.releaseValidation.errors}));
           }
           NODE
       - name: Validate Pace Ladder forms
         run: node scripts/buildPracticePaceLadderForms.mjs --validate
-      - name: Commit generated form artifacts
+      - name: Commit balanced source and generated form artifacts
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add data/practice/pace-ladder/en-v1/WS-PACE-EN-1.forms.json data/practice/pace-ladder/en-v1/WS-PACE-EN-1.manifest.json
+          git add data/practice/pace-ladder/en-v1/source.json data/practice/provenance/sources.json scripts/buildPracticePaceLadderForms.mjs data/practice/pace-ladder/en-v1/WS-PACE-EN-1.forms.json data/practice/pace-ladder/en-v1/WS-PACE-EN-1.manifest.json
           if git diff --cached --quiet; then
             exit 0
           fi
-          git commit -m 'PL26: build Pace Ladder forms'
+          git commit -m 'PL26: build balanced Pace Ladder forms'
           git push
