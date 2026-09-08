@@ -102,42 +102,83 @@ function resultMetricHelp({ grade = false } = {}) {
 }
 
 export function renderTitle(menuIndex, handlers) {
-  const items = [
-    ["START", "modes"],
-    ["LEADERBOARDS", "open-leaderboards"],
-    ["PROFILE & STATS", "profile"],
-    ["SETTINGS", "settings"],
-  ];
+  const icon = (name) => {
+    const paths = {
+      play: '<path d="m9 7 8 5-8 5V7Z"/>',
+      trophy: '<path d="M8 4h8v4a4 4 0 0 1-8 0V4Z"/><path d="M8 6H5v1a4 4 0 0 0 4 4M16 6h3v1a4 4 0 0 1-4 4M12 12v4M9 20h6M10 16h4"/>',
+      profile: '<circle cx="12" cy="8" r="3"/><path d="M5.5 20a6.5 6.5 0 0 1 13 0"/>',
+      settings: '<path d="M4 7h10M18 7h2M4 17h2M10 17h10M14 4v6M6 14v6"/>',
+      arrow: '<path d="m9 6 6 6-6 6"/>',
+    };
+    return `<svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor">${paths[name] || ""}</svg>`;
+  };
+  const selected = (index) => index === menuIndex ? " selected" : "";
+
   app().innerHTML = `
-    <section class="screen menu-screen">
-      <span class="ambient-word" style="left:8%;top:16%">vector</span>
-      <span class="ambient-word" style="right:9%;top:28%;animation-delay:-5s">strike</span>
-      <span class="ambient-word" style="left:17%;bottom:13%;animation-delay:-9s">velocity</span>
-      <span class="ambient-word" style="right:16%;bottom:16%;animation-delay:-2s">precision</span>
-      <div class="title-panel">
-        <div class="eyebrow">System online // defend the core</div>
-        <h1 class="sr-only">WORDSTRIKE</h1>
-        <img
-          class="brand-logo"
-          src="./assets/branding/wordstrike-logo.webp"
-          alt="WORDSTRIKE"
-          width="360"
-          height="360"
-          decoding="async"
-          fetchpriority="high"
-          draggable="false"
-        >
-        <p class="subtitle">Arcade Typing Defense</p>
-        <div class="menu-list">
-          ${items.map(([label, action], index) => menuButton(label, action, index === menuIndex)).join("")}
+    <section class="screen menu-screen title-screen">
+      <div class="title-shell">
+        <header class="title-topline">
+          <span class="title-brand-label">WORDSTRIKE</span>
+          <span class="title-product-note">Competitive typing</span>
+        </header>
+
+        <div class="title-main">
+          <div class="title-hero">
+            <p class="title-kicker">Speed, accuracy, control</p>
+            <h1 class="sr-only">WORDSTRIKE</h1>
+            <img
+              class="brand-logo"
+              src="./assets/branding/wordstrike-logo.webp"
+              alt="WORDSTRIKE"
+              width="360"
+              height="360"
+              decoding="async"
+              fetchpriority="high"
+              draggable="false"
+            >
+            <p class="title-tagline">Precision under pressure.</p>
+            <p class="title-description">Campaign, Typing Test, Endless and Arcade Rush turn clean, controlled typing into competitive play.</p>
+            <button type="button" class="ui-button ui-button--primary title-start-button${selected(0)}" data-title-index="0" data-action="modes">
+              <span class="title-action-icon">${icon("play")}</span>
+              <span class="title-start-copy"><strong>START</strong><small>Choose a mode</small></span>
+              <span class="title-action-arrow">${icon("arrow")}</span>
+            </button>
+            <p class="title-keyboard-hint">↑ ↓ navigate &nbsp;·&nbsp; Enter select</p>
+          </div>
+
+          <nav class="title-global-nav" aria-label="Global navigation">
+            <div class="title-nav-heading"><strong>Explore</strong><span>02–04</span></div>
+            <div class="title-nav-list">
+              <button type="button" class="title-nav-action${selected(1)}" data-title-index="1" data-action="open-leaderboards">
+                <span class="title-action-icon">${icon("trophy")}</span>
+                <span class="title-action-copy"><strong>Leaderboards</strong><span>Global rankings and personal position</span></span>
+                <span class="title-action-arrow">${icon("arrow")}</span>
+              </button>
+              <button type="button" class="title-nav-action${selected(2)}" data-title-index="2" data-action="profile">
+                <span class="title-action-icon">${icon("profile")}</span>
+                <span class="title-action-copy"><strong>Profile &amp; Stats</strong><span>Progress, records and recent runs</span></span>
+                <span class="title-action-arrow">${icon("arrow")}</span>
+              </button>
+              <button type="button" class="title-nav-action${selected(3)}" data-title-index="3" data-action="settings">
+                <span class="title-action-icon">${icon("settings")}</span>
+                <span class="title-action-copy"><strong>Settings</strong><span>Controls, tutorials and account options</span></span>
+                <span class="title-action-arrow">${icon("arrow")}</span>
+              </button>
+            </div>
+          </nav>
         </div>
-        <p class="footer-hint">↑ ↓ SELECT &nbsp;•&nbsp; ENTER CONFIRM</p>
+
+        <footer class="title-footer">
+          <div class="title-footer-meta"><span>Local-first progress</span><span>Optional global leaderboards</span></div>
+          <span class="title-footer-mark">TYPE WITH INTENT</span>
+        </footer>
       </div>
     </section>`;
+
   app().querySelector('[data-action="modes"]').onclick = handlers.modes;
   app().querySelector('[data-action="profile"]').onclick = handlers.profile;
   app().querySelector('[data-action="settings"]').onclick = handlers.settings;
-  app().querySelector(".menu-list .arcade-button.selected")?.focus?.({ preventScroll: true });
+  app().querySelector(`[data-title-index="${menuIndex}"]`)?.focus?.({ preventScroll: true });
 }
 
 export function renderModeSelect(modes, selectedIndex, handlers) {
