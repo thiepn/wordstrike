@@ -17,7 +17,9 @@ jobs:
         with:
           node-version: '22'
       - name: Apply UI2 migration
-        run: python tools/apply_ui2.py
+        run: |
+          python tools/apply_ui2.py
+          python tools/ui2_branding_contract.py
       - name: Run canonical tests
         run: npm test
       - name: Commit verified UI2 source migration
