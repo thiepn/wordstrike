@@ -14,8 +14,8 @@
     "typabilityModelVersion": 1,
     "typabilityFeatureVersion": 1,
     "typabilityReferenceVersion": 1,
-    "typabilityReferenceChecksum": "sha256-ad320fbf7d7f804d7d9febd4a25595fe42f34baf89a016cd94eae538f10a2807",
-    "diagnosticTypabilityChecksum": "sha256-a4cc974230acbdadcd98ced4509a1253e23bf7033b6d62ea5468e6b1686d8f60"
+    "typabilityReferenceChecksum": "sha256-94a6f90c3593ebc089211882e2d9afaf0bf46b66386cdc98dbe60c533e6dd471",
+    "diagnosticTypabilityChecksum": "sha256-a79916a7440b6099c5641d385cd5aa9ba023d2750142582383993f65adc20bef"
   },
   "sourceInventory": {
     "approvedDiagnosticItems": 2,
