@@ -31,11 +31,11 @@ test("UI2 Title uses the new composition and removes terminal-era decorations", 
     'class="title-hero"',
     'class="title-global-nav"',
     'aria-label="Global navigation"',
-    'class="title-start-button',
     'data-title-index="0"',
   ]) {
     assert.ok(titleSource.includes(required), `missing UI2 Title contract: ${required}`);
   }
+  assert.match(titleSource, /class="[^"]*\btitle-start-button\b[^"]*"/);
   for (const retired of ["ambient-word", "title-panel", "menu-list", "System online // defend the core"]) {
     assert.ok(!titleSource.includes(retired), `retired Title treatment remains: ${retired}`);
   }
