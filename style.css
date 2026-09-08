@@ -3443,24 +3443,17 @@ body.gameplay-viewport-short .game-screen {
 }
 
 body.gameplay-viewport-short .hud,
-body.gameplay-viewport-short .daily-hud,
 body.gameplay-viewport-short .endless-hud,
 body.gameplay-viewport-short .boss-hud {
   min-height: 62px;
   padding-block: max(3px, env(safe-area-inset-top)) 3px;
 }
 
-body.gameplay-viewport-short .daily-screen,
 body.gameplay-viewport-short .endless-screen,
 body.gameplay-viewport-short .boss-screen {
   grid-template-rows: 62px minmax(0, 1fr);
 }
 
-body.gameplay-viewport-short .daily-hud {
-  grid-template-columns: auto repeat(4, minmax(0, 1fr));
-  gap: 4px;
-  font-size: 9px;
-}
 
 body.gameplay-viewport-short .endless-hud {
   grid-template-columns: auto repeat(3, minmax(0, 1fr));

@@ -1311,7 +1311,7 @@ export function renderSettings(save, selectedIndex, handlers, accountMarkup = ""
             ${[
     ["general", "GENERAL INTRODUCTION"], ["campaign", "CAMPAIGN GUIDE"],
     ["typing", "TYPING TEST GUIDE"], ["endless", "ENDLESS GUIDE"],
-    ["daily", "DAILY STRIKE GUIDE"], ["boss", "BOSS GUIDE"],
+    ["boss", "BOSS GUIDE"],
     ["leaderboards", "LEADERBOARD GUIDE"],
   ].map(([id, label]) => `<button type="button" class="text-action" data-tutorial-id="${id}">REPLAY ${label}</button>`).join("")}
           </div>
