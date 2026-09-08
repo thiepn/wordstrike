@@ -61,8 +61,12 @@ export function createMobileInputAdapter({
   isEnabled = () => true,
   visualViewport = globalThis.visualViewport,
 } = {}) {
-  const host = root?.querySelector?.(".speed-test-screen, .game-screen, .boss-screen, .endless-screen, .daily-screen");
-  const arena = root?.querySelector?.("#play-area, .speed-test-stage, .boss-arena");
+  const host = root?.querySelector?.(
+    ".speed-test-screen, .game-screen, .boss-screen, .endless-screen, .arcade-rush-gameplay",
+  );
+  const arena = root?.querySelector?.(
+    "#play-area, .speed-test-stage, .boss-arena, .arcade-rush-gameplay",
+  );
   if (!host?.append || typeof onInput !== "function") return () => {};
 
   const dock = root.createElement("div");
@@ -89,6 +93,15 @@ export function createMobileInputAdapter({
   };
   const clearValue = () => { input.value = ""; };
   const focusInput = (event) => {
+    if (!isEnabled()) return;
+    if (event?.target?.closest?.(
+      "button, a, input, select, textarea, [role=button], [role=tab]",
+    )) return;
+    event?.preventDefault?.();
+    focusGameplayInput(input, globalThis.window);
+    dock.classList?.add?.("keyboard-ready");
+  };
+  const focusFromTrigger = (event) => {
     if (!isEnabled()) return;
     event?.preventDefault?.();
     focusGameplayInput(input, globalThis.window);
@@ -146,7 +159,7 @@ export function createMobileInputAdapter({
   input.addEventListener("input", onFallbackInput);
   input.addEventListener("compositionstart", onCompositionStart);
   input.addEventListener("compositionend", onCompositionEnd);
-  trigger?.addEventListener?.("click", focusInput);
+  trigger?.addEventListener?.("click", focusFromTrigger);
   arena?.addEventListener?.("pointerdown", focusInput);
   const cleanup = () => {
     input.blur?.();
@@ -155,7 +168,7 @@ export function createMobileInputAdapter({
     input.removeEventListener?.("input", onFallbackInput);
     input.removeEventListener?.("compositionstart", onCompositionStart);
     input.removeEventListener?.("compositionend", onCompositionEnd);
-    trigger?.removeEventListener?.("click", focusInput);
+    trigger?.removeEventListener?.("click", focusFromTrigger);
     arena?.removeEventListener?.("pointerdown", focusInput);
     viewportController.destroy();
     dock.remove?.();
