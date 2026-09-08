@@ -42,6 +42,10 @@ assert.doesNotMatch(ui, /mode\.id === "practice"/);
 assert.doesNotMatch(ui, /class="mode-card/);
 assert.doesNotMatch(ui, /class="mode-grid/);
 assert.doesNotMatch(ui, /class="mode-panel/);
+assert.match(ui, /card\.onmousemove = \(\) => handlers\.select\?\.\(index\)/);
+assert.match(ui, /titleButton\.onmousemove = \(\) => handlers\.select\?\.\(modes\.length\)/);
+assert.doesNotMatch(ui, /card\.onmouseenter = \(\) => handlers\.select/);
+assert.doesNotMatch(ui, /titleButton\.onmouseenter = \(\) => handlers\.select/);
 
 assert.match(css, /WORDSTRIKE UI3 — MODE SELECT/);
 assert.match(css, /\.mode-showcase/);

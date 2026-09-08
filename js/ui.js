@@ -304,7 +304,10 @@ export function renderModeSelect(modes, selectedIndex, handlers) {
 
   app().querySelectorAll("[data-mode-index]").forEach((card) => {
     const index = Number(card.dataset.modeIndex);
-    card.onmouseenter = () => handlers.select?.(index);
+    // Preview selection follows deliberate mouse movement, not passive DOM reflow.
+    // This prevents stationary-pointer hover events from stealing keyboard selection
+    // when the narrow Mode Select rerenders and scrolls under the cursor.
+    card.onmousemove = () => handlers.select?.(index);
     if (card.matches?.("button")) {
       card.onclick = () => handlers.activate?.(card.dataset.modeId);
     }
@@ -313,7 +316,7 @@ export function renderModeSelect(modes, selectedIndex, handlers) {
   if (!titleButtons.length) titleButtons.push(app().querySelector('[data-action="mode-title"]'));
   titleButtons.filter(Boolean).forEach((titleButton) => {
     titleButton.onclick = handlers.back;
-    titleButton.onmouseenter = () => handlers.select?.(modes.length);
+    titleButton.onmousemove = () => handlers.select?.(modes.length);
   });
   const focusTarget = selectedIndex === modes.length
     ? app().querySelector(`[data-mode-home-index="${modes.length}"]`)
