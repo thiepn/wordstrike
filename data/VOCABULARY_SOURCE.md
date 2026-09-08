@@ -39,7 +39,7 @@ independent words such as `business`, `spring`, and `bring`.
 Difficulty tiering uses 72% source-frequency position and 28% typing complexity after
 manual approval. The output contains five disjoint tiers of exactly 600 words each.
 The generated `data/commonGameplayWords.json` is the shared runtime source for
-Campaign, Daily Strike, Endless, and the short/medium portion of Boss vocabulary.
+Campaign, Arcade Rush, Endless, and the short/medium portion of Boss vocabulary.
 
 ## Rebuild and validation
 
