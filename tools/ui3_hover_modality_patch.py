@@ -24,6 +24,16 @@ replace_once(
     "    titleButton.onmousemove = () => handlers.select?.(modes.length);",
 )
 replace_once(
+    "tests/mode-navigation.test.js",
+    "app.cards[4].onmouseenter();",
+    "app.cards[4].onmousemove();",
+)
+replace_once(
+    "tests/mode-navigation.test.js",
+    "footerHome.onmouseenter();",
+    "footerHome.onmousemove();",
+)
+replace_once(
     "tests/ui3-mode-select.test.js",
     "assert.doesNotMatch(ui, /class=\"mode-panel/);",
     "assert.doesNotMatch(ui, /class=\"mode-panel/);\n"
