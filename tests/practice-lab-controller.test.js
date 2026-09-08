@@ -9,8 +9,22 @@ function fakeRoot() {
   const listeners = new Map();
   return {
     innerHTML: "", listeners,
-    addEventListener(type, listener) { listeners.set(type, listener); },
-    removeEventListener(type, listener) { if (listeners.get(type) === listener) listeners.delete(type); },
+    addEventListener(type, listener) {
+      const bucket = listeners.get(type) ?? [];
+      bucket.push(listener);
+      listeners.set(type, bucket);
+    },
+    removeEventListener(type, listener) {
+      const bucket = listeners.get(type);
+      if (!bucket) return;
+      const next = bucket.filter((candidate) => candidate !== listener);
+      if (next.length) listeners.set(type, next);
+      else listeners.delete(type);
+    },
+    dispatch(type, event) {
+      for (const listener of [...(listeners.get(type) ?? [])]) listener(event);
+    },
+    listenerCount(type) { return (listeners.get(type) ?? []).length; },
     contains: () => true,
   };
 }
@@ -24,6 +38,8 @@ test("controller mounts deterministically, navigates with bounded history, and u
   const controller = createPracticeLabController({ root, featureGate: gate, experimentRegistry: registry, appNavigation: { exit: () => { exits += 1; } }, renderer: (_root, view) => rendered.push(view.kind) });
   controller.mount();
   assert.deepEqual([...root.listeners.keys()].sort(), ["click", "input"]);
+  assert.equal(root.listenerCount("click"), 2);
+  assert.equal(root.listenerCount("input"), 1);
   assert.equal(controller.getSnapshot().route.name, "home");
   controller.navigate(createPracticeLabRoute(PRACTICE_LAB_ROUTES.SKILL_MAP));
   assert.equal(controller.getSnapshot().route.name, "skill-map");
@@ -45,7 +61,7 @@ test("controller delegates native button clicks and registry emits one controlle
   const controller = createPracticeLabController({ root, featureGate: gate, experimentRegistry: registry, renderer: () => { renders += 1; } });
   controller.mount();
   const target = { disabled: false, dataset: { practiceAction: "navigate", route: "progress" }, closest: () => target, getAttribute: () => null };
-  root.listeners.get("click")({ button: 0, target });
+  root.dispatch("click", { button: 0, target });
   assert.equal(controller.getSnapshot().route.name, "progress");
   const descriptorFactory = () => ({ id: "weak-keys", version: 1, title: "Weak Keys", category: "precision", sessionSchemaVersion: 1, defaultCorrectionBehavior: "allow", supportedCompletionModes: ["content"], resumable: true });
   registry.register({ experimentId: "weak-keys", implementationVersion: 1, descriptorFactory });
