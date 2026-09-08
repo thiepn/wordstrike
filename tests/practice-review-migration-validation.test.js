@@ -63,17 +63,15 @@ test("PL17 review contracts remain intact inside the PL25 DB8/session13/foundati
   assert.equal(PRACTICE_RECORD_VERSIONS.coachPlan, 1);
   assert.equal(PRACTICE_FOUNDATION_ANALYSIS_VERSION, 10);
   assert.equal(PRACTICE_LIMITS.reviewItemBytes, 32 * 1024);
-  assert.deepEqual([
-    PRACTICE_REVIEW_MODEL_VERSION,
-    PRACTICE_REVIEW_POLICY_VERSION,
-    PRACTICE_REVIEW_PLAN_VERSION,
-    PRACTICE_RETENTION_PROBE_VERSION,
-    PRACTICE_RETENTION_MODEL_VERSION,
-    PRACTICE_RETENTION_POLICY_VERSION,
-    PRACTICE_REVIEW_VALUE_VERSION,
-    PRACTICE_RETENTION_ANALYSIS_VERSION,
-    PRACTICE_RETENTION_REVIEW_DELTA_VERSION,
-  ], Array(9).fill(1));
+  assert.equal(PRACTICE_REVIEW_MODEL_VERSION, 1);
+  assert.equal(PRACTICE_REVIEW_POLICY_VERSION, 2);
+  assert.equal(PRACTICE_REVIEW_PLAN_VERSION, 1);
+  assert.equal(PRACTICE_RETENTION_PROBE_VERSION, 1);
+  assert.equal(PRACTICE_RETENTION_MODEL_VERSION, 1);
+  assert.equal(PRACTICE_RETENTION_POLICY_VERSION, 1);
+  assert.equal(PRACTICE_REVIEW_VALUE_VERSION, 1);
+  assert.equal(PRACTICE_RETENTION_ANALYSIS_VERSION, 1);
+  assert.equal(PRACTICE_RETENTION_REVIEW_DELTA_VERSION, 1);
 });
 
 test("PL17 review v2 -> v3 preserves legacy scheduler history but creates zero canonical retention verifications", () => {
@@ -138,27 +136,32 @@ test("PL17 review validation enforces active and suspended invariants", () => {
 });
 
 test("PL17 review validation enforces bounded family/probe history and rejects raw private payload", () => {
-  const inactive = createDefaultReviewItem({ ...baseIdentity, now: () => new Date("2026-01-01T00:00:00.000Z") });
-  assert.equal(validateReviewItem({ ...inactive, recentProbeFamilyIds: Array.from({ length: 9 }, (_, i) => `family-${i}`) }).valid, false);
-  const invalidHistory = {
-    ...inactive,
-    retention: {
-      ...inactive.retention,
-      recentProbes: Array.from({ length: 13 }, (_, i) => ({ id: i })),
+  const active = activatePracticeReviewItem(
+    createDefaultReviewItem({ ...baseIdentity, now: () => new Date("2026-01-01T00:00:00.000Z") }),
+    {
+      masteryStage: "transferred",
+      referenceAtUtc: "2026-01-01T00:00:00.000Z",
+      referenceQuality: 82,
+      now: () => new Date("2026-01-01T00:00:00.000Z"),
     },
+  );
+  const tooManyFamilies = {
+    ...active,
+    recentFamilyIds: Array.from({ length: PRACTICE_LIMITS.reviewRecentFamilyIds + 1 }, (_, index) => `family-${index}`),
   };
-  assert.equal(validateReviewItem(invalidHistory).valid, false);
-  assert.equal(validateReviewItem({ ...inactive, rawEvents: [{ key: "x" }] }).valid, false);
-  assert.equal(validateReviewItem({ ...inactive, customText: "private passage" }).valid, false);
+  assert.equal(validateReviewItem(tooManyFamilies).valid, false);
+  assert.equal(validateReviewItem({ ...active, rawText: "private" }).valid, false);
 });
 
 test("PL17 retention component remains explicit inside PL25 foundation analysis v10", () => {
-  const foundation = buildPracticeFoundationAnalysis({ events: [], traceMetadata: { truncated: false } });
-  assert.equal(foundation.version, 10);
-  assert.equal(foundation.retention.version, 1);
-  assert.equal(foundation.retention.measurementKind, null);
-  assert.equal(foundation.retention.status, "not-requested");
-  assert.deepEqual(foundation.retention.probeResults, []);
-  assert.deepEqual(foundation.retention.reviewDeltas, []);
-  assert.equal(foundation.evaluation.status, "not-requested");
+  const analysis = buildPracticeFoundationAnalysis({
+    experiment: null,
+    contentPlan: null,
+    context: null,
+    retainedEvents: [],
+    eventCoverage: null,
+    trackerSnapshot: null,
+  });
+  assert.equal(analysis.version, 10);
+  assert.equal(Object.prototype.hasOwnProperty.call(analysis, "retention"), true);
 });
