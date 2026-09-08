@@ -61,9 +61,10 @@ assert.doesNotMatch(css, /\.endless-screen/);
 assert.doesNotMatch(css, /\.boss-screen/);
 assert.doesNotMatch(css, /practice-lab/i);
 
-assert.match(inputCss, /\.campaign-gameplay-screen \.campaign-keyboard-trigger/);
+assert.match(inputCss, /\.campaign-gameplay-screen \.campaign-keyboard-trigger\s*\{[\s\S]*display:\s*none/);
 assert.match(inputCss, /min-height:\s*44px/);
 assert.match(inputCss, /border:\s*0/);
+assert.match(inputCss, /@media \(max-width: 760px\), \(pointer: coarse\) and \(max-width: 1024px\)[\s\S]*\.campaign-gameplay-screen \.campaign-keyboard-trigger\s*\{[\s\S]*display:\s*block/);
 assert.match(inputCss, /\.gameplay-input-dock\.keyboard-ready \.campaign-keyboard-trigger/);
 assert.match(inputCss, /prefers-reduced-motion/);
 assert.doesNotMatch(inputCss, /endless-screen|boss-screen|practice-lab/i);
@@ -86,10 +87,13 @@ assert.doesNotMatch(visualTest, /\?dev=1/);
 assert.match(visualTest, /paceArea/);
 assert.match(visualTest, /accuracyArea/);
 assert.match(visualTest, /keyboardText.*KEYBOARD/s);
+assert.match(visualTest, /keyboardHeight.*== 0/s);
+assert.match(visualTest, /keyboardDisplay.*== "none"/s);
+assert.match(visualTest, /keyboardHeight.*>= 44/s);
 assert.match(visualTest, /390x360/);
 
 // UI5 does not alter the disabled Practice Lab registry boundary.
 assert.match(modes, /PRACTICE: "practice"/);
 assert.match(modes, /id: MODE_IDS\.PRACTICE,[\s\S]*enabled: false,[\s\S]*status: "coming-soon",[\s\S]*route: null/);
 
-console.log("UI5 Campaign gameplay source contracts passed: real Campaign control binding, scoped HUD/Core/word/input presentation, clean visual evidence, short-mobile layout, renderer feedback, reduced motion, mode isolation, and Practice exclusion.");
+console.log("UI5 Campaign gameplay source contracts passed: real Campaign control binding, scoped HUD/Core/word/input presentation, desktop/mobile keyboard visibility, clean visual evidence, short-mobile layout, renderer feedback, reduced motion, mode isolation, and Practice exclusion.");
