@@ -1,41 +1,43 @@
-# Player Profile and Statistics
+# Player Profile, Statistics, and Global Rankings
 
-WORDSTRIKE exposes a local-only `PROFILE & STATS` screen from the title menu. It is not a gameplay mode and creates no session. The screen opens on Overview and contains Campaign, Typing Test, Endless, Daily, Recent, and Profile tabs.
+WORDSTRIKE exposes `PROFILE & STATS` from the title menu. It is not a gameplay mode and creates no gameplay session. The current tabs are **Overview, Campaign, Typing Test, Endless, Arcade Rush, Recent, and Profile**.
 
 ## Local profile
 
-The profile is stored inside `wordstrike_mode_data_v1` and is created lazily when the statistics screen or public-profile helper first needs it. The immutable player ID uses `crypto.randomUUID()` or `crypto.getRandomValues()` and is never derived from the display name.
+The active profile and mode history are stored in the versioned `wordstrike_mode_data_v2` store. Existing compatible v1 data is migrated forward. The immutable local player ID is generated with browser cryptography and is never derived from the display name.
 
-Display names default to `Player`. Edits trim surrounding whitespace, collapse repeated whitespace, reject control characters, and require 2–20 Unicode code points. `getPublicPlayerProfile()` returns only the player ID, display name, and profile version for future integration.
+Display names default to `Player`. Edits trim surrounding whitespace, collapse repeated whitespace, reject control characters, and require 2–20 Unicode code points. Local gameplay, progress, records, and statistics do not require an online account.
 
 ## Optional global account
 
-The Profile tab offers optional Google authentication through Supabase. Local gameplay, progress, and records do not require an account. Google is the only provider; email OTP, passwords, and anonymous authentication are not implemented. Google names, email addresses, and avatars are never adopted automatically as public WORDSTRIKE identities.
+Google authentication through Supabase is optional. Signed-in players can claim a separate public leaderboard username containing 3–20 ASCII letters, numbers, or underscores. Username uniqueness and cooldown rules are enforced by the protected leaderboard profile backend.
 
-Signed-in players may claim a separate public leaderboard username containing 3–20 ASCII letters, numbers, or underscores. Uniqueness is case-insensitive. The initial claim does not start a cooldown; after the first later change, additional changes require 30 days. Validation, ownership, uniqueness, and cooldown enforcement occur in the protected `leaderboard-profile` Edge Function and database functions rather than through direct browser table writes.
-
-Score submission is not implemented yet.
+Eligible results are submitted through the leaderboard submission service rather than direct browser table writes. If Supabase or the network is unavailable, local gameplay and local records continue to work normally.
 
 ## Public leaderboards
 
-Daily Strike and Endless global leaderboards are publicly viewable without signing in. Each board displays up to 100 ranked players, while a signed-in player with a public username can also see their own rank when it falls outside the top 100. Daily rankings use the canonical UTC challenge date and current challenge version; Endless rankings use the standard rules version.
+The current public boards are:
 
-Global score submission is not implemented yet, so boards may remain empty. Campaign and Typing Test leaderboards remain reserved for a later phase. If Supabase is unavailable, local gameplay, progress, and records continue to work normally.
+- Campaign — highest successfully completed level
+- Typing Test — English 200, 60 seconds
+- Typing Test — English 200, 15 seconds
+- Endless — standard rules
+- Arcade Rush — completed runs, rules v1, all-time
+
+Rankings are viewable without signing in. A signed-in player with a public username can additionally submit eligible results and see their own rank when supported by the board response. Legacy Daily Strike leaderboard return state is normalized to Arcade Rush for backward compatibility; Daily Strike is not an active board or UI tab.
 
 ## Lifetime aggregation
 
-`lifetimeVersion: 1` tracks eligible finalized sessions, successes and failures, active playtime, completed and missed words, character totals, total keystrokes, weighted character accuracy, duration-weighted WPM, and known first/last session timestamps.
+Lifetime statistics track eligible finalized sessions, successes and failures, active playtime, completed and missed words, character totals, total keystrokes, weighted accuracy, duration-weighted WPM, and known first/last session timestamps.
 
-Aggregation occurs once in `recordCompletedSession()`, alongside authoritative mode records and the bounded recent-session summary. Developer sessions, aborted sessions, invalid Typing Test configurations, forced-stage Endless runs, forced-date Daily runs, and duplicate session IDs are excluded.
+Aggregation occurs once through the authoritative mode-recording path alongside bounded recent-session history. Developer sessions, aborted sessions, ineligible configurations, and duplicate session IDs are excluded according to their mode contracts.
 
-Existing trusted root totals are backfilled once when lifetime data is absent. Historical WPM weighting, missed-word totals, per-mode word/character activity, and Typing Test configuration usage were not previously stored, so they begin tracking with this version and display an empty value until reliable. Recent sessions are not treated as complete lifetime history.
+## Mode statistics
 
-## Selectors and records
+- **Campaign:** unlocked/completed levels, grades, bosses, runs, playtime, words, weighted accuracy/WPM.
+- **Typing Test:** English 200 records for every current time/word configuration, usage, playtime, characters, words, best WPM and accuracy. Legacy word-set records remain preserved but do not compete with English 200.
+- **Endless:** highest stage, score, survival, accuracy/WPM, combo/streak and core-breach statistics.
+- **Arcade Rush:** score, completed score, fastest completion, combo, accuracy/WPM, perfect waves, runs, completion rate, bosses defeated, playtime and word activity.
+- **Recent:** at most 30 compact finalized-session summaries across the active modes.
 
-`js/statistics.js` contains pure selectors for Overview, Campaign saves and grades, Typing Test configuration records, Endless personal bests, Daily streak/day records, and the 30-entry recent-session list. Existing mode-specific comparators remain authoritative.
-
-Typing Test statistics display only the current **English 200** (`english-200`) record namespace. Older records without a word-set identity remain preserved as `legacy-common-740` data but do not compete with English 200 personal bests. New recent summaries identify English 200; legacy summaries continue to render safely.
-
-Daily detailed dates remain capped at 90. A separate distinct-completed-day counter survives pruning. Recent filters never mutate storage.
-
-Gameplay and statistics data stay in this browser. Authentication stores only its Supabase session under a separate browser key; public username management does not synchronize local records or submit scores.
+Gameplay and statistics stay local unless an eligible result is explicitly/automatically submitted through the authenticated leaderboard path. Public username management does not synchronize the rest of the local profile or save data.
