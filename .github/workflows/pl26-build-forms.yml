@@ -20,7 +20,26 @@ jobs:
       - name: Build Pace Ladder forms
         run: node scripts/buildPracticePaceLadderForms.mjs
       - name: Report Pace Ladder form diagnostics
-        run: cat data/practice/pace-ladder/en-v1/WS-PACE-EN-1.manifest.json
+        run: |
+          cat data/practice/pace-ladder/en-v1/WS-PACE-EN-1.manifest.json
+          node --input-type=module - <<'NODE'
+          import fs from 'node:fs';
+          const artifact = JSON.parse(fs.readFileSync('data/practice/pace-ladder/en-v1/WS-PACE-EN-1.forms.json','utf8'));
+          for (const form of artifact.forms) {
+            const ps = form.windows.map(w => w.textDifficulty.relativeDifficultyPercentile).filter(Number.isFinite);
+            const ds = form.windows.map(w => w.textDifficulty.difficultyIndex).filter(Number.isFinite);
+            console.log(JSON.stringify({
+              formId: form.formId,
+              graphemeCount: form.graphemeCount,
+              formPercentile: form.typability.relativeDifficultyPercentile,
+              minWindowPercentile: ps.length ? Math.min(...ps) : null,
+              maxWindowPercentile: ps.length ? Math.max(...ps) : null,
+              minWindowDifficulty: ds.length ? Math.min(...ds) : null,
+              maxWindowDifficulty: ds.length ? Math.max(...ds) : null,
+              failingWindows: form.windows.filter(w => !Number.isFinite(w.textDifficulty.relativeDifficultyPercentile) || w.textDifficulty.relativeDifficultyPercentile < 15 || w.textDifficulty.relativeDifficultyPercentile > 85).map(w => ({startIndex:w.startIndex,endIndex:w.endIndex,percentile:w.textDifficulty.relativeDifficultyPercentile,difficulty:w.textDifficulty.difficultyIndex})),
+            }));
+          }
+          NODE
       - name: Validate Pace Ladder forms
         run: node scripts/buildPracticePaceLadderForms.mjs --validate
       - name: Commit generated form artifacts
