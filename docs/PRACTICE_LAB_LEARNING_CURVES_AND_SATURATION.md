@@ -1315,3 +1315,18 @@ PL22 `problem-words` is a direct word-acquisition intervention. Its v1 standard 
 For trusted PL20–PL22 intervention objects, PL16 may consume the immutable explicit `entry-probe` and `exit-probe` phase bounds for entry/exit acquisition semantics. This privilege is object-bound by the intervention trust layer; serialized configuration or metadata alone cannot claim it. Generic Practice sessions continue to use the existing fallback phase semantics.
 
 PL22 itself does not decide long-term learning or saturation. PL16 remains the canonical owner of cumulative acquisition dose, longitudinal curves, marginal gain, saturation, and protected transfer observations.
+
+## PL23 — Accuracy & Recovery acquisition dose
+
+PL23 remains an ordinary direct acquisition intervention for PL16. A completed standard session contributes exactly one direct acquisition dose for its one selected entity:
+
+- key: 80 target opportunities;
+- bigram: 50 target opportunities;
+- trigram: 35 target opportunities;
+- word: 15 target opportunities.
+
+The stable treatment identity is `experimentId = accuracy-control`, `experimentVersion = 1`, `policyVersion = 1`, and `feedbackVersion = 1`. Incidental entities receive no direct PL23 acquisition dose.
+
+For an object-bound trusted PL23 content plan, PL16 uses the immutable `Baseline` and `Check` phase ranges for entry/exit acquisition semantics. Serialized metadata alone cannot claim this privilege. Generic Practice sessions and the existing PL20–PL22 trusted interventions keep their established fallback or `entry-probe` / `exit-probe` semantics.
+
+PL23 does not write learning state, learning rate, saturation, or causal treatment effects. PL16 remains the canonical owner of those longitudinal models.
