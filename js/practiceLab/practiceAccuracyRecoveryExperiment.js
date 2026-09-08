@@ -9,10 +9,17 @@ import {
 import { analyzePracticeAccuracyRecoveryResult } from "./practiceAccuracyRecoveryAnalyzer.js";
 import { createPracticeAccuracyRecoveryFeedbackTracker } from "./practiceAccuracyRecoveryFeedback.js";
 import { createPracticeAccuracyRecoveryRuntime } from "./practiceAccuracyRecoveryRuntime.js";
+import { getPracticePrimaryErrorPosition } from "./practicePrimaryErrorAttribution.js";
 import { trustPracticeAccuracyRecoveryContentPlan } from "./practiceAccuracyRecoveryTrust.js";
 
 export const PRACTICE_ACCURACY_RECOVERY_IMPLEMENTATION_VERSION = 1;
 const freezeDeep = (value) => { if (!value || typeof value !== "object" || Object.isFrozen(value)) return value; Object.values(value).forEach(freezeDeep); return Object.freeze(value); };
+function episodeIsInRepairPhase(contentPlan, episode) {
+  const position = getPracticePrimaryErrorPosition(episode);
+  if (position == null) return false;
+  const repair = contentPlan?.metadata?.accuracyRecovery?.phaseRanges?.find((phase) => phase?.id === "repair") ?? null;
+  return Boolean(repair && position >= repair.startIndex && position < repair.endIndex);
+}
 
 export function createPracticeAccuracyRecoveryDescriptor({ contentPlan = null, feedbackTracker = null } = {}) {
   return freezeDeep({
@@ -50,7 +57,10 @@ export function createPracticeAccuracyRecoveryDescriptor({ contentPlan = null, f
         && plan.targetEntities[0]?.directTarget === true;
     },
     ...(feedbackTracker ? {
-      onClosedErrorEpisode({ episode, attribution }) { return feedbackTracker.consume({ episode, attribution, target: contentPlan?.metadata?.accuracyRecovery?.target }); },
+      onClosedErrorEpisode({ episode, attribution }) {
+        if (!episodeIsInRepairPhase(contentPlan, episode)) return null;
+        return feedbackTracker.consume({ episode, attribution, target: contentPlan?.metadata?.accuracyRecovery?.target });
+      },
       getRepairFeedbackSnapshot() { return feedbackTracker.getSnapshot(); },
     } : {}),
     ...(contentPlan ? { analyzeResult(input) { return analyzePracticeAccuracyRecoveryResult({ ...input, contentPlan }); } } : {}),
