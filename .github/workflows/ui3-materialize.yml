@@ -19,7 +19,13 @@ jobs:
       - name: Apply UI3 migration
         run: |
           python tools/apply_ui3.py
+          python tools/ui3_legacy_cleanup.py
           python tools/ui3_browser_contract_migration.py
+      - name: Run UI3 focused source contracts
+        run: |
+          node tests/mode-navigation.test.js
+          node tests/mobileModeSelectDensity.test.js
+          node tests/ui3-mode-select.test.js
       - name: Run canonical tests
         run: npm test
       - name: Commit verified UI3 source migration
