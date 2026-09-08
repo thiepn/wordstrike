@@ -701,6 +701,14 @@
       "back score score combo core";
   }
 
+  .campaign-hud-back { grid-area: back; }
+  .campaign-hud-identity { grid-area: level; }
+  .campaign-hud-pace { grid-area: pace; }
+  .campaign-hud-primary > .campaign-hud-metric:nth-of-type(2) { grid-area: acc; }
+  .campaign-hud-combo { grid-area: combo; }
+  .campaign-hud-score { grid-area: score; }
+  .campaign-hud-integrity { grid-area: core; }
+
   .campaign-hud-secondary {
     padding-left: 0;
   }
