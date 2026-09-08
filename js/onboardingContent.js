@@ -3,6 +3,7 @@ export const ONBOARDING_VERSIONS = Object.freeze({
   campaign: 1,
   typing: 1,
   endless: 1,
+  "arcade-rush": 1,
   boss: 1,
   leaderboards: 1,
 });
@@ -59,6 +60,14 @@ export const ONBOARDING_TUTORIALS = Object.freeze({
     steps: Object.freeze([
       step("SURVIVE AS LONG AS YOU CAN", "There is no final level. Keep typing and protect the core for as long as possible.", "approaching-word"),
       step("IT KEEPS GETTING HARDER", "Words become faster and more difficult over time. Your final stage and score determine your result.", "difficulty-growth", "START ENDLESS"),
+    ]),
+  }),
+  "arcade-rush": Object.freeze({
+    id: "arcade-rush", version: 1, title: "ARCADE RUSH GUIDE",
+    steps: Object.freeze([
+      step("SIX WAVES. ONE FINAL BOSS.", "Race through six escalating waves while protecting five Core Integrity. Each cleared wave moves you closer to Core Breaker.", "difficulty-growth"),
+      step("BUILD SCORE UNDER PRESSURE", "Type incoming words before they reach the Core. Accuracy, combo, perfect waves, remaining integrity, and the final boss all contribute to your score.", "approaching-word"),
+      step("DEFEAT CORE BREAKER", "After wave six, complete the boss phrase sequences before the Core falls. Finish the run to post your best Arcade Rush score.", "boss-phrase", "START ARCADE RUSH"),
     ]),
   }),
   boss: Object.freeze({

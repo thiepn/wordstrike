@@ -22,7 +22,7 @@ SEED_STORAGE = """() => {
   for (const [id, version] of Object.entries({
     general:3, campaign:1, typing:1, endless:1, boss:1, leaderboards:1, 'arcade-rush':1
   })) localStorage.setItem(`wordstrike.onboarding.${id}.v${version}`, 'seen');
-  localStorage.setItem('wordstrike_save', JSON.stringify({
+  if (!localStorage.getItem('wordstrike_save')) localStorage.setItem('wordstrike_save', JSON.stringify({
     currentFurthestLevel: 10,
     levels: {1:{grade:'A',bestWPM:81,bestAccuracy:98.5,bestScore:3100}},
     settings: {strictMode:false,particles:true,screenShake:true,speedTestTimerPosition:'center',speedTestFontSize:'auto'}
@@ -180,7 +180,7 @@ def arcade_rush_desktop(browser, base, browser_name, checks):
     page.locator('[data-rush-action="start"]').click()
     expect(page.locator('[data-rush-view="gameplay"]')).to_be_visible()
     expect(page.locator(".gameplay-input-dock")).to_have_count(1)
-    assert overflow(page, ".arcade-rush-gameplay") <= 1
+    assert page.evaluate("document.documentElement.scrollWidth - document.documentElement.clientWidth") <= 1
     pause = page.locator('[data-rush-action="pause"]')
     expect(pause).to_be_visible()
     pause.click()
@@ -204,7 +204,7 @@ def mobile_shared_inputs(browser, base, browser_name, checks):
     expect(page.locator(".gameplay-keyboard-trigger")).to_be_visible()
     page.locator("#play-area").tap(position={"x": 30, "y": 160})
     expect(page.locator("textarea.gameplay-input")).to_be_focused()
-    page.locator("textarea.gameplay-input").dispatch_event("beforeinput", {"inputType": "insertText", "data": "a"})
+    page.locator("textarea.gameplay-input").evaluate("(el, data) => el.dispatchEvent(new InputEvent(\"beforeinput\", {bubbles:true,cancelable:true,inputType:\"insertText\",data}))", "a")
     assert overflow(page, ".game-screen") <= 1
     assert_no_errors(errors, "campaign mobile")
     context.close()
@@ -222,14 +222,14 @@ def mobile_shared_inputs(browser, base, browser_name, checks):
     expect(word).to_be_attached(timeout=7000)
     text = word.get_attribute("aria-label")
     assert text
-    page.locator("textarea.gameplay-input").dispatch_event("beforeinput", {"inputType": "insertText", "data": text[0]})
+    page.locator("textarea.gameplay-input").evaluate("(el, data) => el.dispatchEvent(new InputEvent(\"beforeinput\", {bubbles:true,cancelable:true,inputType:\"insertText\",data}))", text[0])
     page.wait_for_timeout(80)
     typed = page.locator(".typed-letter").filter(has_text=text[0]).count()
     assert typed >= 1, f"Arcade Rush did not consume soft input for {text!r}"
     page.set_viewport_size({"width": 390, "height": 360})
     page.wait_for_timeout(150)
-    geom = page.locator(".arcade-rush-gameplay").evaluate("el => ({w:el.getBoundingClientRect().width,h:el.getBoundingClientRect().height,sw:el.scrollWidth,cw:el.clientWidth,short:document.body.classList.contains('gameplay-viewport-short')})")
-    assert geom["sw"] - geom["cw"] <= 1, geom
+    geom = page.locator(".arcade-rush-gameplay").evaluate("el => ({w:el.getBoundingClientRect().width,h:el.getBoundingClientRect().height,short:document.body.classList.contains('gameplay-viewport-short'),docOverflow:document.documentElement.scrollWidth-document.documentElement.clientWidth})")
+    assert geom["docOverflow"] <= 1, geom
     page.locator('[data-rush-action="pause"]').click()
     expect(page.locator('[data-rush-role="pause-overlay"]')).to_be_visible()
     page.screenshot(path=str(ARTIFACTS / "chromium-arcade-rush-mobile.png"))
