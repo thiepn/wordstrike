@@ -81,7 +81,7 @@ assert.match(app.html, /data-mode-id="practice"[^>]*aria-disabled="true"/);
 assert.match(app.html, /data-mode-home-index="5"[^>]*data-action="mode-title"/);
 assert.equal(app.cards[0].focused, true);
 
-app.cards[4].onmouseenter();
+app.cards[4].onmousemove();
 assert.equal(selected.at(-1), 4);
 assert.equal(app.cards[4].onclick, undefined);
 app.cards[0].onclick();
@@ -95,7 +95,7 @@ assert.equal(activated.at(-1), "arcade-rush");
 
 const footerHome = app.titleButtons.find((button) => button.dataset.modeHomeIndex === "5");
 assert.ok(footerHome);
-footerHome.onmouseenter();
+footerHome.onmousemove();
 assert.equal(selected.at(-1), modes.length);
 footerHome.onclick();
 assert.equal(backed, 1);
