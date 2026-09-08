@@ -10,6 +10,7 @@ import {
 import { validatePracticeEvaluationSummary } from "./practiceEvaluationValidation.js";
 import { validatePracticeAssessmentRun } from "./practiceAssessmentRun.js";
 import { PRACTICE_ASSESSMENT_PROTOCOL_VERSION } from "./practiceAssessmentConstants.js";
+import { validatePracticeCoachBlockBinding } from "./practiceCoachBlockBinding.js";
 
 export const validateReviewItem = validatePracticeReviewItemV3;
 export const validateAssessmentRun = validatePracticeAssessmentRun;
@@ -47,6 +48,12 @@ export function validateSessionSummary(summary) {
   } else if (summary.assessmentBinding != null) {
     const assessment = validatePracticeAssessmentBinding(summary.assessmentBinding);
     errors.push(...assessment.errors.map((entry) => ({ ...entry, path: `assessmentBinding.${entry.path}` })));
+  }
+  if (!Object.hasOwn(summary, "coachBinding")) {
+    errors.push({ path: "coachBinding", code: "REQUIRED", message: "coachBinding must be present" });
+  } else if (summary.coachBinding != null) {
+    const coach = validatePracticeCoachBlockBinding(summary.coachBinding);
+    errors.push(...coach.errors.map((entry) => ({ ...entry, path: `coachBinding.${entry.path}` })));
   }
   return { valid: errors.length === 0, errors };
 }
