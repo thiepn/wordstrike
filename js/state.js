@@ -100,11 +100,14 @@ export function canLaunchLevel(devMode, currentFurthestLevel, levelNumber) {
   );
 }
 
-export function moveLevelGridSelection(currentLevel, key, maximumLevel = 100) {
+export function moveLevelGridSelection(currentLevel, key, maximumLevel = 100, columns = 10) {
+  const safeColumns = Number.isFinite(Number(columns))
+    ? Math.max(1, Math.round(Number(columns)))
+    : 10;
   const delta = key === "ArrowLeft" ? -1
     : key === "ArrowRight" ? 1
-      : key === "ArrowUp" ? -10
-        : key === "ArrowDown" ? 10
+      : key === "ArrowUp" ? -safeColumns
+        : key === "ArrowDown" ? safeColumns
           : 0;
   return Math.max(1, Math.min(maximumLevel, currentLevel + delta));
 }

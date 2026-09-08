@@ -341,35 +341,6 @@ select {
   filter: none;
 }
 
-.level-tile {
-  border-color: var(--color-border-default);
-  border-radius: var(--radius-md);
-  background: var(--color-surface-1);
-  box-shadow: none;
-  transition:
-    background-color var(--motion-fast) var(--ease-standard),
-    border-color var(--motion-fast) var(--ease-standard),
-    box-shadow var(--motion-fast) var(--ease-standard),
-    transform var(--motion-fast) var(--ease-standard);
-}
-
-.level-tile:hover,
-.level-tile:focus-visible {
-  border-color: var(--color-border-strong);
-  background: var(--color-surface-hover);
-  box-shadow: var(--shadow-elevation-subtle);
-}
-
-.level-tile.selected {
-  border-color: rgb(0 255 242 / 48%);
-  background: var(--color-accent-soft);
-  box-shadow: inset 2px 0 var(--color-accent);
-}
-
-.level-tile.boss {
-  border-color: rgb(255 60 172 / 42%);
-}
-
 :is(.hud, .endless-hud, .speed-test-topbar) {
   border-bottom-width: 1px;
   border-bottom-color: var(--color-border-default);
@@ -925,8 +896,7 @@ select {
   .screen-back-button,
   .gameplay-pause-button,
   .gameplay-control-button,
-  .tutorial-help-button,
-  .level-tile {
+  .tutorial-help-button {
     transition-duration: 0.001ms;
   }
 
@@ -936,8 +906,7 @@ select {
   .screen-back-button:hover,
   .gameplay-pause-button:hover,
   .gameplay-control-button:hover,
-  .tutorial-help-button:hover,
-  .level-tile:hover {
+  .tutorial-help-button:hover {
     transform: none;
   }
 }
