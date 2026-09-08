@@ -142,6 +142,10 @@ def inspect_foundation(browser, base, browser_name, evidence):
     assert fixture["iconWidth"] >= 44, fixture
     assert "JetBrains Mono" in fixture["metricFont"], fixture
 
+    # Remove the fixed primitive fixture before testing a second interaction probe so
+    # the test harness cannot intercept its own pointer events.
+    page.evaluate("document.querySelector('#ui1-browser-fixture')?.remove()")
+
     # UI1 owns the reusable secondary-button interaction primitive, not any
     # later phase's screen-specific button markup.
     page.evaluate("""() => {
