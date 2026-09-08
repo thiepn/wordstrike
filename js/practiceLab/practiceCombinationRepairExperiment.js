@@ -65,6 +65,8 @@ export function createPracticeCombinationRepairRegistration({
         configuration: {
           correctionBehavior: "allow",
           timingMode: "on-first-input",
+          target: { ...prepared.plan.target },
+          targetSource: prepared.plan.targetSource,
         },
         contentPlan: prepared.contentPlan,
         combinationRepairPlan: prepared.plan,
