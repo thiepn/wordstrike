@@ -1,6 +1,7 @@
 /* UI5 — Campaign-only mobile input presentation companion. */
 
 .campaign-gameplay-screen .campaign-keyboard-trigger {
+  display: none;
   min-width: 44px;
   min-height: 44px;
   padding: 0 14px;
@@ -19,6 +20,17 @@
     color var(--ui-motion-fast) var(--ui-ease-out),
     background var(--ui-motion-fast) var(--ui-ease-out),
     box-shadow var(--ui-motion-fast) var(--ui-ease-out);
+}
+
+/*
+  The shared legacy stylesheet exposes the keyboard trigger for `(hover: none)`.
+  Headless Firefox reports that capability on desktop, so UI5 owns visibility too:
+  normal phone/tablet widths show the CTA; wide desktop surfaces never do.
+*/
+@media (max-width: 760px), (pointer: coarse) and (max-width: 1024px) {
+  .campaign-gameplay-screen .campaign-keyboard-trigger {
+    display: block;
+  }
 }
 
 .campaign-gameplay-screen .campaign-keyboard-trigger:hover,
