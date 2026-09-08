@@ -42,7 +42,7 @@ function enhanceHud(screen) {
   const hud = screen.querySelector(".hud");
   if (!hud || hud.dataset.ui5Enhanced === "true") return;
 
-  const back = hud.querySelector(".game-back-control");
+  const back = hud.querySelector(".gameplay-pause-button");
   const level = hud.querySelector("#hud-level");
   const wpm = hud.querySelector("#hud-wpm");
   const accuracy = hud.querySelector("#hud-accuracy");
