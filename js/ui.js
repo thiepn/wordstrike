@@ -319,6 +319,23 @@ export function renderModeSelect(modes, selectedIndex, handlers) {
     ? app().querySelector(`[data-mode-home-index="${modes.length}"]`)
     : app().querySelector(`[data-mode-index="${selectedIndex}"]`);
   focusTarget?.focus?.({ preventScroll: true });
+
+  // The Mode Select screen owns vertical scrolling on constrained viewports. Keep
+  // keyboard-selected rows visible without forcing the initial Campaign view away
+  // from the top-of-screen showcase.
+  if (focusTarget && selectedIndex > 0) {
+    const scrollOwner = app().querySelector(".mode-select-screen");
+    const ownerRect = scrollOwner?.getBoundingClientRect?.();
+    const targetRect = focusTarget.getBoundingClientRect?.();
+    if (scrollOwner && ownerRect && targetRect) {
+      const inset = 12;
+      if (targetRect.bottom > ownerRect.bottom - inset) {
+        scrollOwner.scrollTop += targetRect.bottom - ownerRect.bottom + inset;
+      } else if (targetRect.top < ownerRect.top + inset) {
+        scrollOwner.scrollTop += targetRect.top - ownerRect.top - inset;
+      }
+    }
+  }
 }
 
 export function renderEndlessReady(handlers = {}) {
