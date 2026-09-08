@@ -186,6 +186,25 @@ def inspect_responsive_matrix(browser, base, browser_name, evidence):
         if browser_name == "chromium" and label in {"mobile", "mobile-keyboard-height"}:
             page.screenshot(path=str(ARTIFACTS / f"{browser_name}-ui1-{label}.png"), full_page=True)
 
+        # A short viewport may require scrolling, but primary navigation must remain reachable.
+        bottom_action = page.locator(".mode-menu-action .arcade-button")
+        expect(bottom_action).to_be_attached()
+        bottom_action.scroll_into_view_if_needed()
+        page.wait_for_timeout(30)
+        bottom_box = bottom_action.bounding_box()
+        assert bottom_box is not None, (browser_name, label, "missing bottom action box")
+        assert bottom_box["y"] >= -1, (browser_name, label, bottom_box)
+        assert bottom_box["y"] + bottom_box["height"] <= height + 1, (browser_name, label, bottom_box)
+
+        scroll_state = page.locator(".mode-screen").evaluate("""el => ({
+          clientHeight: el.clientHeight,
+          scrollHeight: el.scrollHeight,
+          scrollTop: el.scrollTop,
+          overflowY: getComputedStyle(el).overflowY
+        })""")
+        if scroll_state["scrollHeight"] > scroll_state["clientHeight"] + 1:
+            assert scroll_state["overflowY"] in {"auto", "scroll"}, (browser_name, label, scroll_state)
+
         evidence.append({
             "browser": browser_name,
             "case": f"responsive-{label}",
@@ -193,6 +212,7 @@ def inspect_responsive_matrix(browser, base, browser_name, evidence):
             "height": height,
             "menuOverflow": menu_overflow,
             "modeOverflow": mode_overflow,
+            "modeScroll": scroll_state,
         })
         assert_no_errors(errors, f"{browser_name} {label}")
         context.close()
