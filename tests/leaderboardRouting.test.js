@@ -1,76 +1,48 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import { attachAppClickListener } from "../js/appClickRouting.js";
 import { Screens } from "../js/state.js";
+import { attachAppClickListener, resolveAppClickAction } from "../js/appClickRouting.js";
 
 class MouseEvent {
-  constructor(type, options = {}) {
-    this.type = type;
-    this.bubbles = options.bubbles !== false;
-    this.defaultPrevented = false;
-    this.target = null;
-  }
-
-  preventDefault() { this.defaultPrevented = true; }
+  constructor(type, options = {}) { this.type = type; this.bubbles = options.bubbles; this.button = 0; }
+  preventDefault() {}
 }
-
 globalThis.MouseEvent = MouseEvent;
-
-class Button {
-  constructor(action, root) {
-    this.dataset = { action };
-    this.root = root;
-    this.disabled = false;
-    this.hidden = false;
+class Element {
+  constructor({ root, parent = null, action = null, className = "" } = {}) {
+    this.root = root || this; this.parent = parent; this.dataset = action ? { action } : {};
+    this.className = className; this.disabled = false; this.hidden = false; this.attributes = {};
   }
-
+  getAttribute(name) { return this.attributes[name] ?? null; }
   closest(selector) {
-    if (!selector.includes("[data-action]")) return null;
-    return this;
+    let node = this;
+    while (node) {
+      if (selector === "[data-action]" && node.dataset?.action) return node;
+      if (selector === "[hidden]" && node.hidden) return node;
+      if (selector === '[aria-hidden="true"]' && node.attributes?.["aria-hidden"] === "true") return node;
+      if (selector.startsWith(".") && node.className.split(" ").includes(selector.slice(1))) return node;
+      node = node.parent;
+    }
+    return null;
   }
-
-  dispatchEvent(event) {
-    event.target = this;
-    if (event.bubbles) this.root.dispatchEvent(event);
+  dispatchEvent(event) { event.target = this; if (event.bubbles) this.root.listeners.click.forEach((fn) => fn(event)); }
+}
+class Root extends Element {
+  constructor() { super(); this.root = this; this.listeners = { click: [] }; this.current = null; }
+  addEventListener(type, listener) { this.listeners[type].push(listener); }
+  contains(node) { let current = node; while (current) { if (current === this) return true; current = current.parent; } return false; }
+  render(screenClass, actions) {
+    this.current = new Element({ root: this, parent: this, className: screenClass });
+    this.buttons = actions.map((action) => new Element({ root: this, parent: this.current, action }));
   }
 }
-
-class Root {
-  constructor() {
-    this.listeners = { click: [] };
-    this.className = "";
-    this.buttons = [];
-  }
-
-  addEventListener(type, handler) {
-    this.listeners[type] ??= [];
-    this.listeners[type].push(handler);
-  }
-
-  contains(target) { return this.buttons.includes(target); }
-
-  matches(selector) {
-    return selector.split(",").some((part) => part.trim() === `.${this.className}`);
-  }
-
-  dispatchEvent(event) {
-    for (const handler of this.listeners[event.type] || []) handler(event);
-  }
-
-  render(className, actions) {
-    this.className = className;
-    this.buttons = actions.map((action) => new Button(action, this));
-  }
-}
-
+const root = new Root();
 let screen = Screens.TITLE;
 const calls = [];
-const listener = {
-  getScreen: () => screen,
-  isLeaderboardReady: () => true,
-  onAction: (action) => calls.push(action),
+const listener = (event) => {
+  const action = resolveAppClickAction(event, { root, screen });
+  if (action) calls.push(action);
 };
-const root = new Root();
 assert.equal(attachAppClickListener(root, listener), true);
 assert.equal(attachAppClickListener(root, listener), false);
 root.render("menu-screen", ["open-leaderboards"]);
