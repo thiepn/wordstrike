@@ -1,0 +1,92 @@
+name: PL25 route-scoped listener fix
+
+on:
+  push:
+    branches:
+      - codex/pl25-daily-coach-v1
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: codex/pl25-daily-coach-v1
+          fetch-depth: 0
+      - name: Apply route-scoped listener fix
+        shell: python
+        run: |
+          from pathlib import Path
+
+          renderer = Path('js/practiceLab/practiceLabRendererV25.js')
+          text = renderer.read_text()
+          old = '      button.dataset.practiceAction = "open-daily-training";\n      button.textContent = "OPEN DAILY TRAINING";'
+          new = '      button.dataset.practiceAction = "navigate";\n      button.dataset.route = "daily-training";\n      button.textContent = "OPEN DAILY TRAINING";'
+          if old not in text:
+              raise SystemExit('renderer target not found')
+          renderer.write_text(text.replace(old, new, 1))
+
+          controller = Path('js/practiceLab/practiceLabControllerRuntimeV25.js')
+          text = controller.read_text()
+
+          replacements = [
+              (
+                  '  let loadScheduled = false;\n\n  const isDailyRoute = () => base?.getSnapshot?.()?.route?.name === DAILY_ROUTE;\n  const hasCoachSession = () => Boolean(coachSessionHost);',
+                  '  let loadScheduled = false;\n  let coachListenerAttached = false;\n\n  const isDailyRoute = () => base?.getSnapshot?.()?.route?.name === DAILY_ROUTE;\n  const hasCoachSession = () => Boolean(coachSessionHost);\n  const attachCoachListener = () => {\n    if (coachListenerAttached || !mounted || !isDailyRoute() || hasCoachSession()) return;\n    root?.addEventListener?.("click", click, true);\n    coachListenerAttached = true;\n  };\n  const detachCoachListener = () => {\n    if (!coachListenerAttached) return;\n    root?.removeEventListener?.("click", click, true);\n    coachListenerAttached = false;\n  };'
+              ),
+              (
+                  '  const renderCoach = (focusSelector = null) => {\n    if (!mounted || !isDailyRoute() || hasCoachSession()) return false;\n    const view = buildPracticeCoachViewModel({ state: coachState, preview: true });',
+                  '  const renderCoach = (focusSelector = null) => {\n    if (!mounted || !isDailyRoute() || hasCoachSession()) return false;\n    attachCoachListener();\n    const view = buildPracticeCoachViewModel({ state: coachState, preview: true });'
+              ),
+              (
+                  '  function renderer(renderRoot, view, rendererOptions = {}) {\n    if (isDailyRoute()) {\n      const coachView = buildPracticeCoachViewModel({ state: coachState, preview: true });',
+                  '  function renderer(renderRoot, view, rendererOptions = {}) {\n    if (isDailyRoute()) {\n      attachCoachListener();\n      const coachView = buildPracticeCoachViewModel({ state: coachState, preview: true });'
+              ),
+              (
+                  '    }\n    return externalRenderer\n      ? externalRenderer(renderRoot, view, rendererOptions)\n      : renderPracticeLabV25(renderRoot, view, rendererOptions);\n  }',
+                  '    }\n    detachCoachListener();\n    return externalRenderer\n      ? externalRenderer(renderRoot, view, rendererOptions)\n      : renderPracticeLabV25(renderRoot, view, rendererOptions);\n  }'
+              ),
+              (
+                  '      coachState = normalizePracticeCoachUiState({ ...coachState, status: "ready", plan: started.plan, startingBlockId: null, errorCode: null });\n      coachSessionHost = await mountCoachChild(started);',
+                  '      coachState = normalizePracticeCoachUiState({ ...coachState, status: "ready", plan: started.plan, startingBlockId: null, errorCode: null });\n      detachCoachListener();\n      coachSessionHost = await mountCoachChild(started);'
+              ),
+              (
+                  '    if (!["open-daily-training", "set-coach-duration", "create-coach-plan", "start-coach-next", "skip-coach-block", "abandon-coach-plan", "open-coach-assessment", "open-coach-cold-transfer"].includes(action)) return;',
+                  '    if (!["set-coach-duration", "create-coach-plan", "start-coach-next", "skip-coach-block", "abandon-coach-plan", "open-coach-assessment", "open-coach-cold-transfer"].includes(action)) return;'
+              ),
+              (
+                  '    if (action === "open-daily-training") {\n      base.navigate(createPracticeLabRoute(DAILY_ROUTE));\n      return;\n    }\n    if (!isDailyRoute()) return;',
+                  '    if (!isDailyRoute()) return;'
+              ),
+              (
+                  '  const routeAfterNavigation = () => {\n    if (isDailyRoute()) {\n      if (coachState.status === "idle" || coachState.status === "error") scheduleDailyLoad();\n    }\n  };',
+                  '  const routeAfterNavigation = () => {\n    if (isDailyRoute()) {\n      attachCoachListener();\n      if (coachState.status === "idle" || coachState.status === "error") scheduleDailyLoad();\n    } else {\n      detachCoachListener();\n    }\n  };'
+              ),
+              (
+                  '      const value = base.mount(route);\n      root?.addEventListener?.("click", click, true);\n      queueMicrotask(routeAfterNavigation);',
+                  '      const value = base.mount(route);\n      queueMicrotask(routeAfterNavigation);'
+              ),
+              (
+                  '      root?.removeEventListener?.("click", click, true);',
+                  '      detachCoachListener();'
+              ),
+          ]
+          for old, new in replacements:
+              if old not in text:
+                  raise SystemExit(f'controller target not found: {old[:80]!r}')
+              text = text.replace(old, new, 1)
+          controller.write_text(text)
+
+          workflow = Path('.github/workflows/pl25-listener-fix.yml')
+          workflow.unlink()
+      - name: Commit final product patch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "PL25: route-scope Daily Coach listener"
+          git push origin HEAD:codex/pl25-daily-coach-v1
