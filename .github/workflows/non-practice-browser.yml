@@ -24,6 +24,8 @@ jobs:
         run: python tests/browser/ui1_design_system.py
       - name: Certify UI2 Title and global navigation
         run: python tests/browser/ui2_title_navigation.py
+      - name: Certify UI3 Mode Select
+        run: python tests/browser/ui3_mode_select.py
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -32,4 +34,5 @@ jobs:
             browser-artifacts/non-practice/
             browser-artifacts/ui1-design-system/
             browser-artifacts/ui2-title-navigation/
+            browser-artifacts/ui3-mode-select/
           retention-days: 7
