@@ -1,0 +1,48 @@
+name: Temporary non-Practice UI cleanup
+on:
+  push:
+    branches: [fix/non-practice-regression-clean]
+    paths: [.github/workflows/non-practice-large-fix.yml]
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/non-practice-regression-clean
+      - name: Apply exact reviewed replacements
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          ui = Path('js/ui.js')
+          text = ui.read_text()
+          old = '    ["typing", "TYPING TEST GUIDE"], ["endless", "ENDLESS GUIDE"],\n    ["daily", "DAILY STRIKE GUIDE"], ["boss", "BOSS GUIDE"],'
+          new = '    ["typing", "TYPING TEST GUIDE"], ["endless", "ENDLESS GUIDE"],\n    ["boss", "BOSS GUIDE"],'
+          assert text.count(old) == 1
+          ui.write_text(text.replace(old, new))
+
+          css = Path('style.css')
+          text = css.read_text()
+          replacements = [
+            ('body.gameplay-viewport-short .hud,\nbody.gameplay-viewport-short .daily-hud,\nbody.gameplay-viewport-short .endless-hud,',
+             'body.gameplay-viewport-short .hud,\nbody.gameplay-viewport-short .endless-hud,'),
+            ('body.gameplay-viewport-short .daily-screen,\nbody.gameplay-viewport-short .endless-screen,',
+             'body.gameplay-viewport-short .endless-screen,'),
+            ('\nbody.gameplay-viewport-short .daily-hud {\n  grid-template-columns: auto repeat(4, minmax(0, 1fr));\n  gap: 4px;\n  font-size: 9px;\n}\n', '\n'),
+          ]
+          for old, new in replacements:
+            assert text.count(old) == 1, old
+            text = text.replace(old, new)
+          css.write_text(text)
+          PY
+          git diff --check
+      - name: Commit minimal source cleanup
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add js/ui.js style.css
+          git commit -m 'Remove retired Daily Strike UI and responsive selectors'
+          git push origin HEAD:fix/non-practice-regression-clean
