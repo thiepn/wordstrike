@@ -1,0 +1,28 @@
+name: Non-Practice browser regressions
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install browser test dependencies
+        run: |
+          pip install -r tests/browser/requirements.txt
+          python -m playwright install --with-deps chromium firefox
+      - name: Exercise all production surfaces except Practice Lab
+        run: python tests/browser/non_practice_regressions.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: non-practice-browser-evidence
+          path: browser-artifacts/non-practice/
+          retention-days: 7
