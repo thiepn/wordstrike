@@ -28,7 +28,7 @@ jobs:
           builder_path = Path('scripts/buildPracticePaceLadderForms.mjs')
 
           source = json.loads(source_path.read_text())
-          source['generation']['sentenceCount'] = 110
+          source['generation']['sentenceCount'] = 109
           source_text = json.dumps(source, indent=2, ensure_ascii=False) + '\n'
           source_path.write_text(source_text)
           checksum = 'sha256-' + hashlib.sha256(source_text.encode()).hexdigest()
@@ -46,8 +46,8 @@ jobs:
           }'''
           new = '''function renderSentence(subject, verb, ending, variant) {
             if (variant === "comma-link") return `${subject} ${verb}, then checks the next line, ${ending}`;
-            if (variant === "ordinary-practice-link") return `${subject} ${verb} during ordinary practice, ${ending}`;
-            return `${subject} ${verb}, ${ending}`;
+            if (variant === "ordinary-practice-link") return `${subject}, ${verb} during ordinary practice, ${ending}`;
+            return `${subject}, ${verb}, ${ending}`;
           }'''
           if old not in builder:
               raise SystemExit('Pace Ladder renderSentence anchor missing')
