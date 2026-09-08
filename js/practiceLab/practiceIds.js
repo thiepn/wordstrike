@@ -62,6 +62,12 @@ export function createSkillStatId(profileId, contextId, entityType, entityKey) {
   return `practice-stat_${[profileId, contextId, entityType, entityKey].map(encodeIdentityPart).join("|")}`;
 }
 
+export function createPracticeCoachPlanId(profileId, contextId, localDayKey) {
+  if (arguments.length !== 3) throw new TypeError("createPracticeCoachPlanId requires profileId, contextId, and localDayKey");
+  if (!isPracticeId(profileId, "profile") || !isPracticeId(contextId, "context") || !/^\d{4}-\d{2}-\d{2}$/.test(String(localDayKey))) throw new TypeError("Practice Coach plan identity is invalid");
+  return `practice-coach_${[profileId, contextId, localDayKey].map(encodeIdentityPart).join("|")}`;
+}
+
 export function createPracticeAbilityStateId(profileId, contextId, channel) {
   if (arguments.length !== 3) throw new TypeError("createPracticeAbilityStateId requires profileId, contextId, and channel");
   if (!isPracticeId(profileId, "profile") || !isPracticeId(contextId, "context") || typeof channel !== "string" || !channel) throw new TypeError("Practice ability state identity is invalid");
