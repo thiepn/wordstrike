@@ -28,35 +28,37 @@
         "punctuationRatio": 0.014705882352941176,
         "digitRatio": 0,
         "symbolRatio": 0,
-        "lexicalRarityScore": null,
-        "bigramRarityScore": null,
-        "frequencyFeatureCoverage": 0,
+        "lexicalRarityScore": 0.3333333333333333,
+        "bigramRarityScore": 0.3333333333333334,
+        "frequencyFeatureCoverage": 1,
         "frequencyCoverage": {
           "wordEligibleCount": 13,
-          "knownWordCount": 0,
-          "wordFrequencyCoverageRate": 0,
+          "knownWordCount": 13,
+          "wordFrequencyCoverageRate": 1,
           "bigramEligibleCount": 54,
-          "knownBigramCount": 0,
-          "bigramFrequencyCoverageRate": 0,
+          "knownBigramCount": 54,
+          "bigramFrequencyCoverageRate": 1,
           "frequencyEligibleCount": 67,
-          "frequencyKnownCount": 0
+          "frequencyKnownCount": 67
         }
       },
       "textDifficulty": {
-        "status": "partial",
+        "status": "full",
         "modelKind": "heuristic-relative-v1",
         "modelVersion": 1,
         "referenceVersion": 1,
-        "difficultyIndex": -0.4945286653756283,
+        "difficultyIndex": -0.3066077725328898,
         "relativeDifficultyPercentile": 0,
-        "availableModelWeight": 0.62,
+        "availableModelWeight": 1,
         "effectiveWeights": {
-          "meanWordLength": 0.25806451612903225,
-          "p90WordLength": 0.12903225806451613,
-          "uppercaseRatio": 0.16129032258064518,
-          "punctuationRatio": 0.1935483870967742,
-          "digitRatio": 0.12903225806451613,
-          "symbolRatio": 0.12903225806451613
+          "meanWordLength": 0.16,
+          "p90WordLength": 0.08,
+          "uppercaseRatio": 0.1,
+          "punctuationRatio": 0.12,
+          "digitRatio": 0.08,
+          "symbolRatio": 0.08,
+          "lexicalRarityScore": 0.19,
+          "bigramRarityScore": 0.19
         },
         "standardizedFeatures": {
           "meanWordLength": -0.43167408606502006,
@@ -64,15 +66,19 @@
           "uppercaseRatio": -0.13033389585342356,
           "punctuationRatio": -0.7467364773485397,
           "digitRatio": 0,
-          "symbolRatio": 0
+          "symbolRatio": 0,
+          "lexicalRarityScore": 0,
+          "bigramRarityScore": -1.1102230246251565e-15
         },
         "contributions": {
-          "meanWordLength": -0.11139976414581163,
-          "p90WordLength": -0.21757766434728906,
-          "uppercaseRatio": -0.0210215961053909,
-          "punctuationRatio": -0.1445296407771367,
+          "meanWordLength": -0.06906785377040321,
+          "p90WordLength": -0.13489815189531923,
+          "uppercaseRatio": -0.013033389585342357,
+          "punctuationRatio": -0.08960837728182476,
           "digitRatio": 0,
-          "symbolRatio": 0
+          "symbolRatio": 0,
+          "lexicalRarityScore": 0,
+          "bigramRarityScore": -2.1094237467877973e-16
         },
         "referenceItemCount": 2,
         "percentileMethod": "empirical-midrank-v1"
