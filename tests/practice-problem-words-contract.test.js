@@ -33,9 +33,9 @@ function readyIndex() {
   };
 }
 
-test("PL22 preserves the PL19 persistent version envelope", () => {
-  assert.equal(PRACTICE_DATABASE_VERSION, 7);
-  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 12);
+test("PL22 contracts remain intact inside the PL25 DB8/session13/foundation10 envelope", () => {
+  assert.equal(PRACTICE_DATABASE_VERSION, 8);
+  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 13);
   assert.equal(PRACTICE_FOUNDATION_ANALYSIS_VERSION, 10);
 });
 
