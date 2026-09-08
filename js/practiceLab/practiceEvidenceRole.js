@@ -7,6 +7,7 @@ import { getPracticeTrustedWeakKeysBinding } from "./practiceWeakKeysTrust.js";
 import { getPracticeTrustedProblemWordsBinding } from "./practiceProblemWordsTrust.js";
 import { getPracticeTrustedAccuracyRecoveryBinding } from "./practiceAccuracyRecoveryTrust.js";
 import { getPracticeTrustedRealTextBinding } from "./practiceRealTextTrust.js";
+import { getPracticeTrustedRealTextColdTransferBinding } from "./practiceRealTextColdTransferTrust.js";
 
 const PARTITION_TO_ROLE = Object.freeze({ training: "training", transfer: "transfer", benchmark: "benchmark", diagnostic: "diagnostic" });
 const PARTITION_TO_PURPOSE = Object.freeze({ training: "training", transfer: "cold-transfer", benchmark: "benchmark", diagnostic: "diagnostic" });
@@ -18,6 +19,7 @@ function resolveTrustedWeakKeys(contentPlan) { const binding = getPracticeTruste
 function resolveTrustedAccuracyRecovery(contentPlan) { const binding = getPracticeTrustedAccuracyRecoveryBinding(contentPlan); if (!binding || binding.experimentId !== "accuracy-control" || binding.partition !== "training" || binding.evidenceRole !== "training" || !["key", "bigram", "trigram", "word"].includes(binding.target?.entityType) || !binding.target?.entityKey) return null; return "training"; }
 function resolveTrustedProblemWords(contentPlan) { const binding = getPracticeTrustedProblemWordsBinding(contentPlan); if (!binding || binding.experimentId !== "problem-words" || binding.partition !== "training" || binding.evidenceRole !== "training" || binding.target?.entityType !== "word" || !binding.target?.entityKey) return null; return "training"; }
 function resolveTrustedRealText(contentPlan) { const binding = getPracticeTrustedRealTextBinding(contentPlan); if (!binding || binding.experimentId !== "real-text" || binding.partition !== "training" || binding.evidenceRole !== "training" || binding.targetEntities?.length !== 0 || (contentPlan?.targetEntities?.length ?? 0) !== 0) return null; return "training"; }
+function resolveTrustedRealTextColdTransfer(contentPlan) { const binding = getPracticeTrustedRealTextColdTransferBinding(contentPlan); if (!binding || binding.kind !== "cold-transfer" || contentPlan?.metadata?.partition !== "transfer" || contentPlan?.metadata?.evaluationContentBindingHash !== binding.contentBindingHash || (contentPlan?.targetEntities?.length ?? 0) !== 0) return null; return "transfer"; }
 function resolveTrustedStaticPartition(contentPlan, language) {
   const runtime = resolvePracticeTypabilityRuntime({ language }); if (!runtime || !contentPlan) return null;
   const candidate = runtime.staticScoresBySessionContentHash?.[contentPlan.contentHash] ?? null; const metadata = contentPlan.metadata ?? {}; if (!candidate) return null;
@@ -32,6 +34,7 @@ export function resolvePracticeEvidenceRole({ contentPlan, context = null } = {}
   const problemWordsRole = resolveTrustedProblemWords(contentPlan); if (problemWordsRole) return problemWordsRole;
   const accuracyRecoveryRole = resolveTrustedAccuracyRecovery(contentPlan); if (accuracyRecoveryRole) return accuracyRecoveryRole;
   const realTextRole = resolveTrustedRealText(contentPlan); if (realTextRole) return realTextRole;
+  const coldTransferRole = resolveTrustedRealTextColdTransfer(contentPlan); if (coldTransferRole) return coldTransferRole;
   const language = baseLanguage(contentPlan?.metadata?.language ?? context?.dataLocale); const partition = resolveTrustedStaticPartition(contentPlan, language); const role = PARTITION_TO_ROLE[partition] ?? "unclassified";
   if (!PRACTICE_EVIDENCE_ROLES.includes(role)) return "unclassified"; return role;
 }
