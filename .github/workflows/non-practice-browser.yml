@@ -22,6 +22,8 @@ jobs:
         run: python tests/browser/non_practice_regressions.py
       - name: Certify UI1 design-system and responsive contracts
         run: python tests/browser/ui1_design_system.py
+      - name: Certify UI2 Title and global navigation
+        run: python tests/browser/ui2_title_navigation.py
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -29,4 +31,5 @@ jobs:
           path: |
             browser-artifacts/non-practice/
             browser-artifacts/ui1-design-system/
+            browser-artifacts/ui2-title-navigation/
           retention-days: 7
