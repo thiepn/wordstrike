@@ -1,0 +1,37 @@
+name: PL26 refresh PL18 artifacts
+
+on:
+  push:
+    branches:
+      - codex/pl26-pace-ladder-v1
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Rebuild PL18 benchmark and transfer artifacts
+        run: |
+          node scripts/buildPracticeBenchmarkSuite.mjs
+          node scripts/buildPracticeTransferPool.mjs
+      - name: Validate regenerated PL18 artifacts
+        run: |
+          node scripts/buildPracticeBenchmarkSuite.mjs --validate
+          node scripts/buildPracticeTransferPool.mjs --validate
+      - name: Commit generated PL18 artifacts
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add data/practice/evaluation/en-v1/benchmark/WS-BENCH-EN-1.manifest.json data/practice/evaluation/en-v1/transfer/WS-TRANSFER-EN-1.manifest.json
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git commit -m 'PL26: refresh PL18 protected artifacts'
+          git push
