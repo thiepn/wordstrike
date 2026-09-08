@@ -1,6 +1,6 @@
 import { createPracticeRepository as createLegacyPracticeRepository } from "./practiceRepositoryLegacy.js";
 import { derivePracticeReviewDueStatus } from "./practiceReviewItem.js";
-import { toPracticeUtcIso } from "./practiceTime.js";
+import { getPracticeLocalDayKey, toPracticeUtcIso } from "./practiceTime.js";
 import { PRACTICE_LIMITS } from "./practiceConstants.js";
 import { createDefaultSkillStat } from "./practiceDefaults.js";
 import { createDefaultPracticeAbilityState, mergePracticeAbilityObservation } from "./practiceAbilityEstimator.js";
@@ -22,6 +22,8 @@ import {
   validatePracticeAssessmentRun,
 } from "./practiceAssessmentRun.js";
 import { validateSessionSummary } from "./practiceValidation.js";
+import { validatePracticeCoachPlan } from "./practiceCoachPlan.js";
+import { applyPracticeCoachBlockDelta } from "./practiceCoachReconciliation.js";
 import { PRACTICE_STORAGE_ERROR_CODES, practiceStorageError } from "./practiceStorageContract.js";
 
 function canonical(value) {
@@ -31,6 +33,7 @@ function canonical(value) {
 }
 const equivalent = (a, b) => JSON.stringify(canonical(a)) === JSON.stringify(canonical(b));
 const fail = (code, message, details = {}) => practiceStorageError(code, message, { operation: "assessment", recoverable: true, ...details });
+const coachFail = (code, message, details = {}) => practiceStorageError(code, message, { operation: "coach", recoverable: true, ...details });
 
 export function createPracticeRepository(options = {}) {
   const { dataStore, manifestStore, now = Date.now } = options;
@@ -44,6 +47,85 @@ export function createPracticeRepository(options = {}) {
     if (!resolvedProfileId || !resolvedContextId) return [];
     const records = await dataStore.query("reviewItems", "contextId", resolvedContextId);
     return records.filter((record) => record.profileId === resolvedProfileId && record.contextId === resolvedContextId);
+  };
+
+  const getCoachPlan = async (coachPlanId) => {
+    const raw = await dataStore.get("coachPlans", coachPlanId);
+    if (!raw) return null;
+    const migrated = migratePracticeRecord("coachPlan", raw);
+    if (!migrated.ok) throw migrated.error;
+    if (migrated.migrated) await dataStore.put("coachPlans", migrated.value);
+    return migrated.value;
+  };
+
+  const getTodayCoachPlan = async (profileId, contextId, localDayKey = getPracticeLocalDayKey(now)) => {
+    const records = await dataStore.query("coachPlans", "profileContextDay", [profileId, contextId, localDayKey]);
+    const raw = records.find((record) => record.profileId === profileId && record.contextId === contextId && record.localDayKey === localDayKey) ?? null;
+    if (!raw) return null;
+    const migrated = migratePracticeRecord("coachPlan", raw);
+    if (!migrated.ok) throw migrated.error;
+    if (migrated.migrated) await dataStore.put("coachPlans", migrated.value);
+    return migrated.value;
+  };
+
+  const listCoachPlans = async (profileId, { contextId = null } = {}) => {
+    const records = contextId ? await dataStore.query("coachPlans", "contextId", contextId) : await dataStore.query("coachPlans", "profileId", profileId);
+    const output = [];
+    for (const raw of records) {
+      if (raw.profileId !== profileId || (contextId && raw.contextId !== contextId)) continue;
+      const migrated = migratePracticeRecord("coachPlan", raw);
+      if (!migrated.ok) continue;
+      if (migrated.migrated) await dataStore.put("coachPlans", migrated.value);
+      output.push(migrated.value);
+    }
+    return output.sort((a, b) => b.localDayKey.localeCompare(a.localDayKey) || b.createdAt.localeCompare(a.createdAt) || a.coachPlanId.localeCompare(b.coachPlanId));
+  };
+
+  const saveCoachPlan = async (plan) => {
+    const validation = validatePracticeCoachPlan(plan);
+    if (!validation.valid) throw coachFail(PRACTICE_STORAGE_ERROR_CODES.VALIDATION_FAILED, "Practice Coach plan failed validation", { cause: validation.errors, recordId: plan?.coachPlanId ?? null });
+    await dataStore.put("coachPlans", plan);
+    return plan;
+  };
+
+  const createCoachPlan = async (plan) => {
+    const validation = validatePracticeCoachPlan(plan);
+    if (!validation.valid) throw coachFail(PRACTICE_STORAGE_ERROR_CODES.VALIDATION_FAILED, "Practice Coach plan failed validation", { cause: validation.errors, recordId: plan?.coachPlanId ?? null });
+    try {
+      return await dataStore.runTransaction(["coachPlans"], "readwrite", async (transaction) => {
+        const existing = await transaction.query("coachPlans", "profileContextDay", [plan.profileId, plan.contextId, plan.localDayKey]);
+        const canonicalPlan = existing.find((record) => record.profileId === plan.profileId && record.contextId === plan.contextId && record.localDayKey === plan.localDayKey);
+        if (canonicalPlan) return { created: false, plan: canonicalPlan };
+        await transaction.put("coachPlans", plan);
+        return { created: true, plan };
+      });
+    } catch (cause) {
+      const canonicalPlan = await getTodayCoachPlan(plan.profileId, plan.contextId, plan.localDayKey).catch(() => null);
+      if (canonicalPlan) return { created: false, raced: true, plan: canonicalPlan };
+      throw cause;
+    }
+  };
+
+  const listCoachChildSessions = async (coachPlanId) => dataStore.query("sessionSummaries", "coachPlanId", coachPlanId);
+
+  const pruneCoachPlans = async (profileId) => {
+    const plans = await listCoachPlans(profileId);
+    if (!plans.length) return { deleted: [] };
+    const currentDay = getPracticeLocalDayKey(now);
+    const cutoff = new Date(typeof now === "function" ? now() : now).getTime() - PRACTICE_LIMITS.coachPlanDays * 86_400_000;
+    const protectedIds = new Set(plans.filter((plan) => plan.localDayKey === currentDay || plan.status === "active" || plan.blocks?.some((block) => block.status === "active")).map((plan) => plan.coachPlanId));
+    const removable = plans
+      .filter((plan) => !protectedIds.has(plan.coachPlanId) && ["finished", "expired", "abandoned"].includes(plan.status))
+      .sort((a, b) => a.updatedAt.localeCompare(b.updatedAt) || a.coachPlanId.localeCompare(b.coachPlanId));
+    const selected = new Set(removable.filter((plan) => Date.parse(plan.updatedAt) < cutoff).map((plan) => plan.coachPlanId));
+    const remainingCount = plans.length - selected.size;
+    const excess = Math.max(0, remainingCount - PRACTICE_LIMITS.coachPlans);
+    for (const plan of removable) {
+      if (selected.size >= removable.filter((candidate) => Date.parse(candidate.updatedAt) < cutoff).length + excess) break;
+      selected.add(plan.coachPlanId);
+    }
+    for (const id of selected) await dataStore.delete("coachPlans", id);
+    return { deleted: [...selected] };
   };
 
   const getAssessmentRun = async (assessmentRunId) => {
@@ -203,14 +285,44 @@ export function createPracticeRepository(options = {}) {
     });
   };
 
+  const commitCoachChild = async (args) => {
+    const { sessionSummary, coachBlockDelta } = args;
+    const validation = validateSessionSummary(sessionSummary);
+    if (!validation.valid) throw coachFail(PRACTICE_STORAGE_ERROR_CODES.VALIDATION_FAILED, "Coach child session summary failed validation", { cause: validation.errors });
+    const binding = sessionSummary.coachBinding;
+    if (!binding || !coachBlockDelta || binding.coachPlanId !== coachBlockDelta.coachPlanId || binding.blockId !== coachBlockDelta.blockId || sessionSummary.sessionId !== coachBlockDelta.sessionId || binding.planHash !== coachBlockDelta.planHash) throw coachFail(PRACTICE_STORAGE_ERROR_CODES.VALIDATION_FAILED, "Coach child delta does not match the trusted session binding");
+    const plan = await getCoachPlan(binding.coachPlanId).catch(() => null);
+    const block = plan?.blocks?.find((entry) => entry.blockId === binding.blockId && entry.ordinal === binding.blockOrdinal) ?? null;
+    const planMatches = Boolean(plan
+      && plan.profileId === sessionSummary.profileId
+      && plan.contextId === sessionSummary.contextId
+      && plan.planHash === binding.planHash
+      && block?.plannedSessionId === coachBlockDelta.plannedSessionId
+      && block?.childSessionId === sessionSummary.sessionId
+      && block?.status === "active");
+    const { coachBlockDelta: _coachBlockDelta, ...coreArgs } = args;
+    const result = await core.commitCompletedPracticeSession(coreArgs);
+    if (!planMatches) return { ...result, coachUpdated: false, commitDiagnostic: "coach-plan-stale" };
+    const applied = applyPracticeCoachBlockDelta(plan, coachBlockDelta, { now });
+    if (!applied.updated && !applied.idempotent) return { ...result, coachUpdated: false, commitDiagnostic: "coach-plan-stale" };
+    try {
+      if (applied.updated) await saveCoachPlan(applied.plan);
+      return { ...result, coachUpdated: Boolean(applied.updated), coachIdempotent: Boolean(applied.idempotent) };
+    } catch {
+      return { ...result, coachUpdated: false, commitDiagnostic: "coach-plan-stale" };
+    }
+  };
+
   const runAssessmentAwareRetention = async () => {
     const profile = await core.getPracticeProfile();
     const assessmentRuns = profile ? await listAssessmentRuns(profile.profileId) : [];
+    const coachPlans = profile ? await listCoachPlans(profile.profileId) : [];
     const preserveSessionIds = new Set();
     for (const run of assessmentRuns) {
       if (run.status !== "active") continue;
       for (const block of run.blocks ?? []) if (block.childSessionId && ["active", "completed"].includes(block.status)) preserveSessionIds.add(block.childSessionId);
     }
+    for (const coachPlan of coachPlans) for (const block of coachPlan.blocks ?? []) if (block.childSessionId && block.status === "active") preserveSessionIds.add(block.childSessionId);
     const [checkpoints, sessionSummaries, skillStats, learningStates, reviewItems, quarantine] = await Promise.all([
       dataStore.list("activeSessionCheckpoints"),
       dataStore.list("sessionSummaries"),
@@ -244,7 +356,8 @@ export function createPracticeRepository(options = {}) {
       });
     }
     const assessment = profile ? await pruneAssessmentRuns(profile.profileId) : { deleted: [] };
-    return { ...plan, assessmentRuns: assessment.deleted, preserveSessionIds: [...preserveSessionIds] };
+    const coach = profile ? await pruneCoachPlans(profile.profileId) : { deleted: [] };
+    return { ...plan, assessmentRuns: assessment.deleted, coachPlans: coach.deleted, preserveSessionIds: [...preserveSessionIds] };
   };
 
   return Object.freeze({
@@ -260,6 +373,15 @@ export function createPracticeRepository(options = {}) {
         .map(({ item }) => item);
     },
     deleteReviewItem(reviewItemId) { return dataStore.delete("reviewItems", reviewItemId); },
+
+    getCoachPlan,
+    getTodayCoachPlan,
+    listCoachPlans,
+    listCoachChildSessions,
+    createCoachPlan,
+    saveCoachPlan,
+    deleteCoachPlan(coachPlanId) { return dataStore.delete("coachPlans", coachPlanId); },
+    pruneCoachPlans,
 
     getAssessmentRun,
     listAssessmentRuns,
@@ -285,7 +407,9 @@ export function createPracticeRepository(options = {}) {
       return run;
     },
     async commitCompletedPracticeSession(args) {
+      if (args?.assessmentBlockDelta && args?.coachBlockDelta) throw coachFail(PRACTICE_STORAGE_ERROR_CODES.VALIDATION_FAILED, "A Practice child cannot belong to Assessment and Daily Coach simultaneously");
       if (args?.assessmentBlockDelta) return commitAssessmentChild(args);
+      if (args?.coachBlockDelta) return commitCoachChild(args);
       return core.commitCompletedPracticeSession(args);
     },
     async finalizeAssessmentRun({ assessmentRunId, report, completedAt = toPracticeUtcIso(now) }) {
