@@ -33,10 +33,9 @@ export function createPracticeAccuracyRecoveryRuntime({ fetchImpl = globalThis.f
       try { const assets = await loadAssets(); return await withContext((context) => inspectPracticeAccuracyRecoveryAvailability({ sessionId: `accuracy-recovery-availability:${entityType}:${entityKey}`, context, targetIndex: assets.targetIndex, contentItems: assets.trainingCorpus.items, corpusBinding: assets.corpusBinding, entityType, entityKey, manualType, language: context?.dataLocale ?? language })); }
       catch (error) { return freezeDeep({ eligible: false, status: "unavailable", target: null, reasons: [error?.code ?? "TRAINING_CORPUS_NOT_READY"] }); }
     },
-    async prepare({ entityType, entityKey, manualType = null, targetSource = "manual" } = {}) {
+    async prepare({ entityType, entityKey, manualType = null, targetSource = "manual", sessionId = createPracticeSessionId() } = {}) {
       const assets = await loadAssets();
       return withContext(async (context) => {
-        const sessionId = createPracticeSessionId();
         const prepared = await buildPracticeAccuracyRecoveryTrainingPlan({ sessionId, context, targetIndex: assets.targetIndex, contentItems: assets.trainingCorpus.items, corpusBinding: assets.corpusBinding, entityType, entityKey, manualType, targetSource, language: context?.dataLocale ?? language });
         return freezeDeep({ ...prepared, context: { contextId: context.contextId, fingerprint: context.fingerprint, dataLocale: context.dataLocale, keyboardLayout: context.keyboardLayout, inputMethod: context.inputMethod, hardwareProfileId: context.hardwareProfileId ?? null } });
       });
