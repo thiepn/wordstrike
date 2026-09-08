@@ -1,0 +1,155 @@
+name: PL26 core integration
+
+on:
+  push:
+    branches:
+      - codex/pl26-pace-ladder-v1
+
+permissions:
+  contents: write
+
+jobs:
+  integrate:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Apply narrow PL26 integration
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          def replace_once(path, old, new):
+              p = Path(path)
+              text = p.read_text()
+              if old not in text:
+                  raise SystemExit(f'missing patch anchor in {path}: {old[:80]!r}')
+              p.write_text(text.replace(old, new, 1))
+
+          # PL8: expose the exact existing transition-eligibility semantics and make the classifier use it.
+          p = Path('js/practiceLab/practiceLatencyClassifier.js')
+          text = p.read_text()
+          start = text.index('function deriveCandidates(events, policy) {')
+          end = text.index('\nfunction thresholdFromCalibration', start)
+          replacement = r'''export function derivePracticeLatencyTransitionCandidate({ event, priorInsertion = null, correctionSincePrior = false, policy = PRACTICE_LATENCY_POLICY_V1 } = {}) {
+            validatePolicy(policy);
+            if (!event || !INSERTION_TYPES.has(event.type)) return freezeDeep({ latency: null, exclusionReason: "not-insertion", hardInterruption: false, baselineEligible: false });
+            const latency = event?.latencyFromPriorInsertionMs;
+            const segment = timingSegmentId(event);
+            const priorSegment = priorInsertion ? timingSegmentId(priorInsertion) : null;
+            let exclusionReason = null;
+            let hardInterruption = false;
+            if (!priorInsertion) exclusionReason = "segment-start";
+            else if (segment !== priorSegment) exclusionReason = event?.timingSegmentStartReason === "restore" ? "segment-start" : "timing-boundary";
+            else if (correctionSincePrior) exclusionReason = "post-correction";
+            else if (!Number.isFinite(latency) || latency < 0) exclusionReason = "invalid-latency";
+            else if (latency >= policy.hardInterruptionMs) hardInterruption = true;
+            else if (!isCorrectInsertion(event) || !isCorrectInsertion(priorInsertion)) exclusionReason = "correctness";
+            return freezeDeep({ latency, exclusionReason, hardInterruption, baselineEligible: !exclusionReason && !hardInterruption });
+          }
+
+          function deriveCandidates(events, policy) {
+            const candidates = [];
+            const calibrationLatencies = [];
+            let priorInsertion = null;
+            let correctionSincePrior = false;
+            for (const event of events) {
+              if (CORRECTION_TYPES.has(event?.type)) { correctionSincePrior = true; continue; }
+              if (!INSERTION_TYPES.has(event?.type)) continue;
+              const candidate = derivePracticeLatencyTransitionCandidate({ event, priorInsertion, correctionSincePrior, policy });
+              if (candidate.baselineEligible) calibrationLatencies.push(candidate.latency);
+              candidates.push({ event, ...candidate });
+              priorInsertion = event;
+              correctionSincePrior = false;
+            }
+            return { candidates, calibrationLatencies };
+          }
+          '''
+          p.write_text(text[:start] + replacement + text[end:])
+
+          # Session engine: forward only processed canonical input facts to experiment-specific online accumulators.
+          p = Path('js/practiceLab/practiceSessionEngineLegacy.js')
+          text = p.read_text()
+          anchor = '  const sessionError = (code, message, operation, recoverable = false, cause = null, details = null) => {'
+          helper = r'''  const processExperimentInputEvent = (event) => {
+            if (typeof experiment?.onProcessedInput !== "function") return;
+            try { experiment.onProcessedInput(freezeDeep(clonePracticeValue(event))); }
+            catch (cause) { logger?.warn?.("Practice processed-input experiment callback failed", { cause }); }
+          };
+
+          '''
+          if helper.strip() not in text:
+              if anchor not in text: raise SystemExit('missing engine helper anchor')
+              text = text.replace(anchor, helper + anchor, 1)
+          needle = '        for (const episode of errorTracker.drainClosedEpisodes()) processClosedErrorEpisode(episode);'
+          positions = []
+          pos = 0
+          while True:
+              pos = text.find(needle, pos)
+              if pos < 0: break
+              positions.append(pos); pos += len(needle)
+          if len(positions) < 2: raise SystemExit('missing handleInput drain anchors')
+          offset = 0
+          replacement_line = needle + '\n        processExperimentInputEvent(errorEvent);'
+          for original_pos in positions[:2]:
+              actual = original_pos + offset
+              text = text[:actual] + replacement_line + text[actual+len(needle):]
+              offset += len(replacement_line) - len(needle)
+          p.write_text(text)
+
+          # PL14: accept optional PL26 stage-specific adjusted pace, retaining the legacy global difficulty fallback.
+          p = Path('js/practiceLab/practiceControlFrontier.js')
+          text = p.read_text()
+          text = text.replace(
+              'const STAGE_KEYS = new Set(["stageId", "stageOrdinal", "plannedPaceWpm", "observedWpm", "accuracy", "disfluencyRate", "correctionCostRate", "correctionCostMs", "activeDurationMs", "typedCharacterCount", "interrupted", "majorPauseCount"]);',
+              'const STAGE_KEYS = new Set(["stageId", "stageOrdinal", "plannedPaceWpm", "observedWpm", "adjustedWpm", "difficultyAdjustmentLog", "accuracy", "disfluencyRate", "correctionCostRate", "correctionCostMs", "activeDurationMs", "typedCharacterCount", "interrupted", "majorPauseCount"]);'
+          )
+          text = text.replace(
+              'for (const key of ["plannedPaceWpm", "disfluencyRate", "correctionCostRate", "correctionCostMs"]) if (!finiteOrNull(candidate[key])) throw new TypeError(`Frontier stage ${index} ${key} must be finite or null`);',
+              'for (const key of ["plannedPaceWpm", "adjustedWpm", "difficultyAdjustmentLog", "disfluencyRate", "correctionCostRate", "correctionCostMs"]) if (!finiteOrNull(candidate[key])) throw new TypeError(`Frontier stage ${index} ${key} must be finite or null`);\n  if (candidate.adjustedWpm != null && candidate.adjustedWpm <= 0) throw new TypeError(`Frontier stage ${index} adjusted pace must be positive`);'
+          )
+          old = '    const adjustedWpm = Math.exp(Math.log(stage.observedWpm) + difficulty.adjustment);'
+          new = '    const hasStageAdjustment = Number.isFinite(stage.adjustedWpm) && stage.adjustedWpm > 0;\n    const difficultyAdjustmentLog = hasStageAdjustment\n      ? (Number.isFinite(stage.difficultyAdjustmentLog) ? stage.difficultyAdjustmentLog : Math.log(stage.adjustedWpm / stage.observedWpm))\n      : difficulty.adjustment;\n    const adjustedWpm = hasStageAdjustment ? stage.adjustedWpm : Math.exp(Math.log(stage.observedWpm) + difficultyAdjustmentLog);'
+          if old not in text: raise SystemExit('missing PL14 adjusted pace anchor')
+          text = text.replace(old, new, 1)
+          text = text.replace('      difficultyAdjustmentLog: difficulty.adjustment,', '      difficultyAdjustmentLog,', 1)
+          p.write_text(text)
+
+          # Catalog: canonical Pace Ladder entry; no overloading of Burst Sprints/Consistency.
+          p = Path('js/practiceLab/practiceExperimentCatalog.js')
+          text = p.read_text()
+          text = text.replace(
+              '  "burst-sprints", "common-words", "real-text", "consistency-trainer", "metronome-typing",',
+              '  "burst-sprints", "pace-ladder", "common-words", "real-text", "consistency-trainer", "metronome-typing",', 1)
+          burst = '  ["burst-sprints", "Burst Sprints", "Sprints", "speed", "Practice short, controlled bursts above sustainable speed.", "Brief sprint intervals will develop top-end speed while separating useful acceleration from uncontrolled errors.", 1, 3, 5, "adaptive", false, true, 12, 10, "bolt", "speed", "burst speed"],'
+          pace = burst + '\n  ["pace-ladder", "Pace Ladder", "Pace Ladder", "advanced", "Type the same kind of natural text at progressively different paces to find where speed begins to cost control.", "A fixed 30-second natural reference is followed by eight target-blind 20-second pace stages. The protocol measures actual gross forward pace against first-pass control, fluency, and correction burden, then delegates frontier inference to PL14. It is not a maximum-speed test.", 4, 4, 4, "adaptive", false, true, 26, 15, "wave", "speed", "speed-control frontier"],'
+          if burst not in text: raise SystemExit('missing catalog burst anchor')
+          text = text.replace(burst, pace, 1)
+          text = text.replace(
+              '["full-assessment", "weak-keys", "combination-repair", "problem-words", "accuracy-control", "real-text"].includes(id)',
+              '["full-assessment", "weak-keys", "combination-repair", "problem-words", "accuracy-control", "real-text", "pace-ladder"].includes(id)', 1)
+          old_caps = '  capabilities: id === "real-text"\n    ? ["duration-options", "broad-training", "cold-transfer-launch"]\n    : ["weak-keys", "combination-repair", "problem-words", "accuracy-control"].includes(id)'
+          new_caps = '  capabilities: id === "real-text"\n    ? ["duration-options", "broad-training", "cold-transfer-launch"]\n    : id === "pace-ladder"\n      ? ["target-blind", "fixed-protocol", "control-frontier", "pace-guide"]\n      : ["weak-keys", "combination-repair", "problem-words", "accuracy-control"].includes(id)'
+          if old_caps not in text: raise SystemExit('missing catalog capability anchor')
+          text = text.replace(old_caps, new_caps, 1)
+          p.write_text(text)
+          PY
+      - name: Syntax check shared integration
+        run: |
+          node --check js/practiceLab/practiceLatencyClassifier.js
+          node --check js/practiceLab/practiceSessionEngineLegacy.js
+          node --check js/practiceLab/practiceControlFrontier.js
+          node --check js/practiceLab/practiceExperimentCatalog.js
+          node --check js/practiceLab/practicePaceStageAccumulator.js
+      - name: Run full tests
+        run: npm test
+      - name: Commit integration
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add js/practiceLab/practiceLatencyClassifier.js js/practiceLab/practiceSessionEngineLegacy.js js/practiceLab/practiceControlFrontier.js js/practiceLab/practiceExperimentCatalog.js
+          git commit -m 'PL26: integrate Pace Ladder measurement hooks'
+          git push
