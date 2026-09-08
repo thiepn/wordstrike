@@ -20,16 +20,18 @@ const descriptor = Object.freeze({
   supportedCompletionModes: Object.freeze(["content", "manual"]), resumable: true,
 });
 
-test("Phase 0 foundation constants remain intact inside the current PL18 storage envelope", async () => {
+test("Phase 0 foundation constants remain intact inside the current PL25 storage envelope", async () => {
   assert.equal(PRACTICE_MANIFEST_VERSION, 1);
-  assert.equal(PRACTICE_DATABASE_VERSION, 7);
+  assert.equal(PRACTICE_DATABASE_VERSION, 8);
   assert.equal(PRACTICE_RECORD_VERSIONS.profile, 3);
-  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 12);
+  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 13);
   assert.equal(PRACTICE_RECORD_VERSIONS.learningState, 1);
   assert.equal(PRACTICE_RECORD_VERSIONS.reviewItem, 3);
   assert.equal(PRACTICE_RECORD_VERSIONS.evaluationState, 1);
-  assert.equal(PRACTICE_STORE_NAMES.length, 15);
+  assert.equal(PRACTICE_RECORD_VERSIONS.coachPlan, 1);
+  assert.equal(PRACTICE_STORE_NAMES.length, 16);
   assert.equal(PRACTICE_STORE_NAMES.includes("evaluationStates"), true);
+  assert.equal(PRACTICE_STORE_NAMES.includes("coachPlans"), true);
   assert.equal(PRACTICE_LIMITS.checkpointTtlMs, 86_400_000);
   assert.equal(PRACTICE_LIMITS.sessionSummarySoftCap, 1_000);
   const docs = await readFile(new URL("../docs/PRACTICE_LAB_DATA_ARCHITECTURE.md", import.meta.url), "utf8");
@@ -82,7 +84,7 @@ test("controller mount/unmount stress leaves no listeners, subscribers, or stale
   for (let cycle = 0; cycle < 50; cycle += 1) {
     controller.mount();
     for (let index = 0; index < 10; index += 1) controller.navigate(createPracticeLabRoute(index % 2 ? PRACTICE_LAB_ROUTES.SKILL_MAP : PRACTICE_LAB_ROUTES.PROGRESS));
-    assert.equal(listeners.size, 2);
+    assert.equal(listeners.size, 3);
     assert.equal(registry.getDiagnostics().subscriberCount, 1);
     controller.unmount();
     assert.equal(listeners.size, 0);
