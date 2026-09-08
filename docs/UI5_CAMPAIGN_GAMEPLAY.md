@@ -11,12 +11,14 @@ UI5 owns only the ordinary Campaign playfield:
 - ordinary incoming-word visual states;
 - word-completion energy feedback;
 - Campaign damage feedback;
+- Campaign-only mobile keyboard CTA presentation;
 - Campaign responsive and reduced-motion presentation.
 
 UI5 does **not** change:
 
 - Campaign difficulty or level generation;
 - word spawning, movement, trajectory, collision, targeting or input rules;
+- mobile input-adapter behavior or input normalization;
 - scoring, combo math, WPM, accuracy, lives or completion logic;
 - save data, results, grades or leaderboard eligibility;
 - Boss gameplay/cinematics (UI7);
@@ -28,7 +30,7 @@ UI5 does **not** change:
 
 The pre-UI5 ordinary Campaign shell shares `.game-screen`, `.play-area`, `.core` and word rendering primitives with Endless. UI5 therefore does not delete or rewrite the shared legacy rules. Instead `campaignGameplayPresentation.js` adds `.campaign-gameplay-screen` only to normal Campaign gameplay and every UI5 CSS rule is scoped below that class.
 
-This preserves the existing Endless presentation intact for UI6.
+This preserves the existing Endless presentation intact for UI6 and Boss presentation intact for UI7.
 
 The presentation module reads `appState.game` only to derive display state. It does not mutate app state, storage, gameplay configuration or runtime rules.
 
@@ -52,6 +54,8 @@ Mission progress is derived only from already-authoritative runtime counters:
 `completedWordCount + missedWordCount` over `config.wordCount`.
 
 It has no effect on completion.
+
+Mobile and short-height layouts explicitly assign WPM to the `pace` grid area and accuracy to the `acc` grid area so the primary performance hierarchy cannot silently change through browser auto-placement.
 
 ## Core
 
@@ -79,6 +83,18 @@ Campaign words no longer communicate state with rectangular neon boxes.
 
 Renderer mechanics and the word DOM ownership model remain unchanged.
 
+## Mobile keyboard CTA
+
+The shared mobile input adapter remains the sole owner of keyboard behavior. UI5 only gives its existing Campaign trigger a Campaign-scoped presentation hook:
+
+- copy is shortened to `KEYBOARD`;
+- target remains at least 44 px high;
+- the old bright bordered terminal treatment is replaced with a quiet dark surface;
+- keyboard-ready state gets restrained cyan emphasis;
+- focus remains explicit and reduced-motion compatible.
+
+The shared trigger remains unchanged in Endless, Boss, Typing Test and Arcade Rush.
+
 ## Motion and accessibility
 
 UI5 uses motion as event feedback, not constant decoration. Healthy Core motion is slow; wrong input and damage are brief.
@@ -99,6 +115,9 @@ UI5 adds:
 
 - `tests/ui5-campaign-gameplay.test.js`
 - `tests/browser/ui5_campaign_gameplay.py`
+- `tests/browser/ui5_campaign_visual.py`
 - a permanent `Certify UI5 Campaign gameplay` step in the non-Practice Chromium/Firefox workflow.
 
-Certification covers normal Campaign desktop/mobile/short-height presentation, HUD identity, mission progress, Core integrity, active/candidate/wrong words, completion/damage feedback, reduced motion, and explicit Endless/Boss isolation.
+The functional browser suite covers normal Campaign desktop/mobile/short-height presentation, HUD identity, mission progress, Core integrity, active/candidate/wrong words, completion/damage feedback, reduced motion, and explicit Endless/Boss isolation.
+
+The clean visual suite separately launches non-developer Campaign and certifies player-facing Chromium/Firefox desktop and mobile captures, Chromium 390 × 360, zero dev diagnostics, WPM/accuracy grid ownership, keyboard CTA presentation, touch target size, Core healthy state and horizontal containment. This prevents release screenshot review from being polluted by diagnostic overlays or intentionally triggered damage effects.
