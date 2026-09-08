@@ -2,7 +2,7 @@ export const PRACTICE_MANIFEST_KEY = "wordstrike.practice.manifest.v1";
 export const PRACTICE_MANIFEST_BACKUP_KEY = "wordstrike.practice.manifest.backup.v1";
 export const PRACTICE_MANIFEST_TEMP_KEY = "wordstrike.practice.manifest.temp.v1";
 export const PRACTICE_DATABASE_NAME = "wordstrike-practice-lab";
-export const PRACTICE_DATABASE_VERSION = 7;
+export const PRACTICE_DATABASE_VERSION = 8;
 export const PRACTICE_MANIFEST_VERSION = 1;
 export const PRACTICE_CONTEXT_FINGERPRINT_VERSION = 1;
 
@@ -10,13 +10,14 @@ export const PRACTICE_RECORD_VERSIONS = Object.freeze({
   context: 1,
   profile: 3,
   skillStat: 3,
-  sessionSummary: 12,
+  sessionSummary: 13,
   abilityState: 1,
   performanceState: 1,
   learningState: 1,
   reviewItem: 3,
   evaluationState: 1,
   assessmentRun: 1,
+  coachPlan: 1,
   customText: 1,
   preset: 1,
   checkpoint: 3,
@@ -43,6 +44,7 @@ export const PRACTICE_LIMITS = Object.freeze({
   reviewItemBytes: 32 * 1024,
   evaluationStateBytes: 64 * 1024,
   assessmentRunBytes: 128 * 1024,
+  coachPlanBytes: 64 * 1024,
   checkpointBytes: 512 * 1024,
   configurationDepth: 8,
   configurationBytes: 32 * 1024,
@@ -55,6 +57,8 @@ export const PRACTICE_LIMITS = Object.freeze({
   patternStats: 1_000,
   reviewItems: 5_000,
   assessmentRuns: 50,
+  coachPlans: 120,
+  coachPlanDays: 180,
   quarantineRecords: 100,
   checkpointTtlMs: 24 * 60 * 60 * 1000,
   abandonmentCharacters: 20,
@@ -135,6 +139,17 @@ export const PRACTICE_STORE_DEFINITIONS = Object.freeze({
       Object.freeze({ name: "profileStatus", keyPath: ["profileId", "status"] }),
     ],
   }),
+  coachPlans: Object.freeze({
+    keyPath: "coachPlanId",
+    indexes: [
+      Object.freeze({ name: "profileId", keyPath: "profileId" }),
+      Object.freeze({ name: "contextId", keyPath: "contextId" }),
+      Object.freeze({ name: "localDayKey", keyPath: "localDayKey" }),
+      Object.freeze({ name: "status", keyPath: "status" }),
+      Object.freeze({ name: "updatedAt", keyPath: "updatedAt" }),
+      Object.freeze({ name: "profileContextDay", keyPath: ["profileId", "contextId", "localDayKey"], options: { unique: true } }),
+    ],
+  }),
   sessionSummaries: Object.freeze({
     keyPath: "sessionId",
     indexes: [
@@ -145,6 +160,7 @@ export const PRACTICE_STORE_DEFINITIONS = Object.freeze({
       Object.freeze({ name: "completedAtUtc", keyPath: "completedAtUtc" }),
       Object.freeze({ name: "status", keyPath: "status" }),
       Object.freeze({ name: "localDayKey", keyPath: "localDayKey" }),
+      Object.freeze({ name: "coachPlanId", keyPath: "coachBinding.coachPlanId" }),
     ],
   }),
   reviewItems: Object.freeze({
@@ -206,4 +222,4 @@ export const STORAGE_HEALTH_STATES = Object.freeze(["healthy", "degraded", "quot
 export const ASSESSMENT_STATES = Object.freeze(["never-started", "incomplete", "complete", "stale"]);
 export const CHECKPOINT_PHASES = Object.freeze(["created", "ready", "active", "paused", "interrupted"]);
 export const LATENCY_HISTOGRAM_BOUNDS_MS = Object.freeze([50, 80, 120, 180, 260, 400, 650, Infinity]);
-export const QUOTA_RECOVERY_STEPS = Object.freeze(["expired-checkpoints", "excess-session-summaries", "stale-review-items", "low-confidence-skill-stats", "old-quarantine"]);
+export const QUOTA_RECOVERY_STEPS = Object.freeze(["expired-checkpoints", "excess-session-summaries", "stale-review-items", "old-coach-plans", "low-confidence-skill-stats", "old-quarantine"]);
