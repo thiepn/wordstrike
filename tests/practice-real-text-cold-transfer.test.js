@@ -9,6 +9,10 @@ import { getRealTextColdTransferAvailability } from "../js/practiceLab/practiceR
 import { PRACTICE_REAL_TEXT_COLD_TRANSFER_DESCRIPTOR } from "../js/practiceLab/practiceRealTextColdTransfer.js";
 
 const NOW = () => new Date("2026-09-08T00:00:00.000Z");
+const PROFILE_ID = "practice-profile_fixture-00000001";
+const CONTEXT_ID = "practice-context_fixture-00000001";
+const SESSION_ID = "practice-session_cold-fixture-00000001";
+
 function poolFixture() {
   const items = Array.from({ length: 16 }, (_, index) => ({
     contentId: `practice-transfer-${index + 1}`,
@@ -34,25 +38,25 @@ function poolFixture() {
 
 test("PL24 strict Cold Transfer is available only with a ready pool, complete exposure history, and a fresh unit", () => {
   const pool = poolFixture();
-  const complete = createDefaultPracticeEvaluationState({ profileId: "practice-profile-fixture", now: NOW, historyStatus: "complete" });
+  const complete = createDefaultPracticeEvaluationState({ profileId: PROFILE_ID, now: NOW, historyStatus: "complete" });
   assert.equal(getRealTextColdTransferAvailability({ pool, evaluationState: complete, language: "en" }).status, "ready");
-  const partial = createDefaultPracticeEvaluationState({ profileId: "practice-profile-fixture", now: NOW, historyStatus: "partial" });
+  const partial = createDefaultPracticeEvaluationState({ profileId: PROFILE_ID, now: NOW, historyStatus: "partial" });
   assert.equal(getRealTextColdTransferAvailability({ pool, evaluationState: partial, language: "en" }).status, "unavailable");
 });
 
 test("PL24 Cold Transfer reservation is target-blind and extra skill-model inputs are rejected by PL18", () => {
   const pool = poolFixture();
-  const state = createDefaultPracticeEvaluationState({ profileId: "practice-profile-fixture", now: NOW, historyStatus: "complete" });
-  const allowed = reservePracticeColdTransferUnitState({ profileId: "practice-profile-fixture", contextId: "practice-context-fixture", poolId: pool.poolId, pool, evaluationState: state, now: NOW });
+  const state = createDefaultPracticeEvaluationState({ profileId: PROFILE_ID, now: NOW, historyStatus: "complete" });
+  const allowed = reservePracticeColdTransferUnitState({ profileId: PROFILE_ID, contextId: CONTEXT_ID, poolId: pool.poolId, pool, evaluationState: state, now: NOW });
   assert.equal(allowed.reservation.kind, "cold-transfer");
-  assert.throws(() => reservePracticeColdTransferUnitState({ profileId: "practice-profile-fixture", contextId: "practice-context-fixture", poolId: pool.poolId, pool, evaluationState: state, now: NOW, skillStats: [{ entityKey: "br" }] }));
+  assert.throws(() => reservePracticeColdTransferUnitState({ profileId: PROFILE_ID, contextId: CONTEXT_ID, poolId: pool.poolId, pool, evaluationState: state, now: NOW, skillStats: [{ entityKey: "br" }] }));
 });
 
 test("PL24 claim burns the fresh unit before reveal and produces one fixed 60-second untargeted evaluation plan", () => {
   const pool = poolFixture();
-  const initial = createDefaultPracticeEvaluationState({ profileId: "practice-profile-fixture", now: NOW, historyStatus: "complete" });
-  const reserved = reservePracticeColdTransferUnitState({ profileId: "practice-profile-fixture", contextId: "practice-context-fixture", poolId: pool.poolId, pool, evaluationState: initial, now: NOW });
-  const claim = claimPracticeEvaluationReservationState({ evaluationState: reserved.state, profileId: "practice-profile-fixture", contextId: "practice-context-fixture", reservationId: reserved.reservation.reservationId, sessionId: "practice-session-cold-fixture", artifact: pool, now: NOW });
+  const initial = createDefaultPracticeEvaluationState({ profileId: PROFILE_ID, now: NOW, historyStatus: "complete" });
+  const reserved = reservePracticeColdTransferUnitState({ profileId: PROFILE_ID, contextId: CONTEXT_ID, poolId: pool.poolId, pool, evaluationState: initial, now: NOW });
+  const claim = claimPracticeEvaluationReservationState({ evaluationState: reserved.state, profileId: PROFILE_ID, contextId: CONTEXT_ID, reservationId: reserved.reservation.reservationId, sessionId: SESSION_ID, artifact: pool, now: NOW });
   assert.equal(claim.binding.kind, "cold-transfer");
   assert.equal(claim.binding.freshnessStatus, "fresh");
   assert.equal(claim.state.transferPools[0].claimedUnitIds.includes(claim.binding.unitId), true);
@@ -64,12 +68,12 @@ test("PL24 claim burns the fresh unit before reveal and produces one fixed 60-se
   assert.equal(plan.protocol.appendAllowed, false);
   assert.equal(plan.protocol.targeted, false);
   assert.equal(plan.targetEntities.length, 0);
-  assert.throws(() => claimPracticeEvaluationReservationState({ evaluationState: claim.state, profileId: "practice-profile-fixture", contextId: "practice-context-fixture", reservationId: reserved.reservation.reservationId, sessionId: "practice-session-second", artifact: pool, now: NOW }));
+  assert.throws(() => claimPracticeEvaluationReservationState({ evaluationState: claim.state, profileId: PROFILE_ID, contextId: CONTEXT_ID, reservationId: reserved.reservation.reservationId, sessionId: "practice-session_second-cold-fixture-00000001", artifact: pool, now: NOW }));
 });
 
 test("PL24 exhausted protected pool disables Cold Transfer without implying Natural Practice is exhausted", () => {
   const pool = poolFixture();
-  const state = createDefaultPracticeEvaluationState({ profileId: "practice-profile-fixture", now: NOW, historyStatus: "complete" });
+  const state = createDefaultPracticeEvaluationState({ profileId: PROFILE_ID, now: NOW, historyStatus: "complete" });
   const exhausted = { ...state, transferPools: [{ poolId: pool.poolId, poolVersion: pool.poolVersion, claimedUnitIds: pool.units.map((unit) => unit.unitId), claimedCount: pool.units.length, exhaustedAt: NOW().toISOString() }] };
   const availability = getRealTextColdTransferAvailability({ pool, evaluationState: exhausted, language: "en" });
   assert.equal(availability.status, "unavailable");
