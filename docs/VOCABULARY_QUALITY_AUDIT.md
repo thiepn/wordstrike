@@ -63,7 +63,7 @@ Ambiguous proper/common forms are kept only when explicitly documented in
 - Campaign loads `commonGameplayWords.json`; level 83 is covered across 500 seeds.
 - Boss uses the audited common pool plus `bossCommonLongWords.json`; emergency terms
   must belong to one of those two checked sources.
-- Daily Strike receives the audited common words and the audited Campaign tiers.
+- Arcade Rush receives the audited common words and the audited Campaign tiers.
 - Endless receives the same sources plus the separately curated Boss long-word pool.
 - Offline Campaign and short Boss fallbacks share `js/auditedFallbackWords.js`, whose
   entire contents are asserted to be a subset of the approved 3,000 words.
