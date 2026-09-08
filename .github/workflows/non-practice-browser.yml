@@ -8,7 +8,7 @@ permissions:
 jobs:
   browser:
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -20,9 +20,13 @@ jobs:
           python -m playwright install --with-deps chromium firefox
       - name: Exercise active WordStrike surfaces except Practice Lab
         run: python tests/browser/non_practice_regressions.py
+      - name: Certify UI1 design-system and responsive contracts
+        run: python tests/browser/ui1_design_system.py
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: non-practice-browser-evidence
-          path: browser-artifacts/non-practice/
+          path: |
+            browser-artifacts/non-practice/
+            browser-artifacts/ui1-design-system/
           retention-days: 7
