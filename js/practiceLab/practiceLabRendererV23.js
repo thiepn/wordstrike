@@ -1,4 +1,5 @@
-import { renderPracticeLabV22 } from "./practiceLabRendererV22.js";
+import { renderPracticeLabV21 } from "./practiceLabRendererV21.js";
+import { renderPracticeProblemWordsDetail } from "./practiceLabRendererV22.js";
 
 const escapeHtml = (value = "") => String(value).replace(/[&<>'"]/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[character]);
 const typeLabel = (type) => ({ key: "Key", bigram: "Bigram", trigram: "Trigram", word: "Word" })[type] ?? "Target";
@@ -25,4 +26,8 @@ export function renderPracticeAccuracyRecoveryDetail(root, view, { focusSelector
   (root.querySelector?.(focusSelector) ?? root.querySelector?.("[data-accuracy-recovery-target]") ?? root.querySelector?.("button"))?.focus?.({ preventScroll: true });
   return true;
 }
-export function renderPracticeLabV23(root, view, options = {}) { if (view?.kind === "accuracy-recovery-detail") return renderPracticeAccuracyRecoveryDetail(root, view, options); return renderPracticeLabV22(root, view, options); }
+export function renderPracticeLabV23(root, view, options = {}) {
+  if (view?.kind === "accuracy-recovery-detail") return renderPracticeAccuracyRecoveryDetail(root, view, options);
+  if (view?.kind === "problem-words-detail") return renderPracticeProblemWordsDetail(root, view, options);
+  return renderPracticeLabV21(root, view, options);
+}
