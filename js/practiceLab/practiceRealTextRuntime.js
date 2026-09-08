@@ -32,10 +32,9 @@ export function createPracticeRealTextRuntime({ fetchImpl = globalThis.fetch, la
       try { const assets = await loadAssets(); return withContext((context) => getRealTextPracticeAvailability({ pool: assets.pool, language: context?.dataLocale ?? language })); }
       catch (error) { return freezeDeep({ status: "unavailable", poolStatus: null, languageSupported: true, supportedDurationsMs: [], reasons: [error?.code ?? "REAL_TEXT_ASSET_UNAVAILABLE"] }); }
     },
-    async prepare({ durationMs = PRACTICE_REAL_TEXT_DEFAULT_DURATION_MS } = {}) {
+    async prepare({ durationMs = PRACTICE_REAL_TEXT_DEFAULT_DURATION_MS, sessionId = createPracticeSessionId() } = {}) {
       const assets = await loadAssets();
       return withContext((context, profile) => {
-        const sessionId = createPracticeSessionId();
         const plan = buildPracticeRealTextPlan({ sessionId, profileId: profile?.profileId, contextId: context?.contextId, language: context?.dataLocale ?? language, durationMs, pool: assets.pool });
         const contentPlan = buildPracticeRealTextContentPlan({ plan, pool: assets.pool, contentItems: assets.trainingCorpus.items });
         registerPracticeTrustedRealTextBinding(contentPlan, { experimentId: "real-text", partition: "training", evidenceRole: "training", targetEntities: [], planHash: plan.planHash });
