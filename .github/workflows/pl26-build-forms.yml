@@ -19,6 +19,8 @@ jobs:
           node-version: '22'
       - name: Build Pace Ladder forms
         run: node scripts/buildPracticePaceLadderForms.mjs
+      - name: Report Pace Ladder form diagnostics
+        run: cat data/practice/pace-ladder/en-v1/WS-PACE-EN-1.manifest.json
       - name: Validate Pace Ladder forms
         run: node scripts/buildPracticePaceLadderForms.mjs --validate
       - name: Commit generated form artifacts
