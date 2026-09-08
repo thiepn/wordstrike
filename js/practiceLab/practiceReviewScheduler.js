@@ -9,6 +9,7 @@ import { createPracticeRetentionEvidenceMap } from "./practiceRetentionEvidence.
 import {
   activatePracticeReviewItem,
   createInactivePracticeReviewItem,
+  refreshPracticeReviewReferenceAfterDirectPractice,
   suspendPracticeReviewItem,
 } from "./practiceReviewItem.js";
 import { PRACTICE_REVIEW_POLICY_V1 } from "./practiceReviewPolicy.js";
@@ -157,6 +158,22 @@ export async function reconcilePracticeReviewSchedule({
         });
         await repository.saveReviewItem(next);
         changes.push({ action: "cycle-reset", reviewItemId: item.reviewItemId, cycleId: next.cycle.cycleId, reason: "material-reference-upgrade" });
+        continue;
+      }
+      if (laterThan(entry.stat?.lastPractisedAt, item.cycle?.referenceAtUtc)) {
+        const next = refreshPracticeReviewReferenceAfterDirectPractice(item, {
+          referenceAtUtc: entry.stat.lastPractisedAt,
+          now,
+          policy,
+        });
+        await repository.saveReviewItem(next);
+        changes.push({
+          action: "reference-refreshed",
+          reviewItemId: item.reviewItemId,
+          cycleId: next.cycle.cycleId,
+          referenceAtUtc: next.cycle.referenceAtUtc,
+          reason: "intervening-direct-practice",
+        });
       }
     }
   }
