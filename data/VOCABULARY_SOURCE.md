@@ -53,7 +53,8 @@ After a human has inspected every row, regenerate with `--complete`, then valida
 build the runtime artifact:
 
 ```text
-python scripts/buildVocabularyManualReview.py <source-file> data/personalNameExclusions.json data/vocabularyQualityRules.json data/personalNameExclusions.json data/commonGameplayWords.json
+python scripts/buildVocabularyManualReview.py <source-file> data/personalNameExclusions.json data/vocabularyQualityRules.json data/commonGameplayWords.manual-review.json --complete
+node scripts/buildWordPools.mjs <source-file> data/commonGameplayWords.manual-review.json data/vocabularyQualityRules.json data/personalNameExclusions.json data/commonGameplayWords.json
 ```
 
 The JavaScript builder fails closed on source checksum, incomplete review status,
