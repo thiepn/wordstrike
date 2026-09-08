@@ -14,10 +14,15 @@ function serializeKey(key) {
   return JSON.stringify(key);
 }
 
+function keyPathValue(record, keyPath) {
+  if (typeof keyPath !== "string" || !keyPath) return undefined;
+  return keyPath.split(".").reduce((value, segment) => value?.[segment], record);
+}
+
 function indexValue(record, keyPath) {
   return Array.isArray(keyPath)
-    ? keyPath.map((key) => record?.[key])
-    : record?.[keyPath];
+    ? keyPath.map((key) => keyPathValue(record, key))
+    : keyPathValue(record, keyPath);
 }
 
 function sameIndexValue(left, right) {
