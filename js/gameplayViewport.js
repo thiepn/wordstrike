@@ -56,14 +56,35 @@ export function createGameplayViewportController({
 } = {}) {
   const root = documentObject?.documentElement;
   const body = documentObject?.body;
+  let revealFrame = null;
   const update = () => {
     const metrics = getGameplayViewportMetrics({
       visualViewport,
       innerHeight: windowObject?.innerHeight,
       innerWidth: windowObject?.innerWidth,
     });
-    body?.classList?.toggle?.("gameplay-viewport-short", metrics.height < 520);
-    return applyGameplayViewportMetrics(root?.style, metrics);
+    const compactDevice = metrics.width <= 760
+      || windowObject?.matchMedia?.("(pointer: coarse)")?.matches === true;
+    body?.classList?.toggle?.("gameplay-viewport-short", metrics.height < 520 && compactDevice);
+    const applied = applyGameplayViewportMetrics(root?.style, metrics);
+    // When the software keyboard shrinks the viewport, reveal both typing rows.
+    // Configuration remains reachable by scrolling; never hide its controls.
+    if (compactDevice && windowObject?.requestAnimationFrame) {
+      if (revealFrame != null) windowObject.cancelAnimationFrame?.(revealFrame);
+      revealFrame = windowObject.requestAnimationFrame(() => {
+        revealFrame = null;
+        if (!documentObject?.activeElement?.matches?.("textarea.gameplay-input")) return;
+        const words = documentObject.querySelector?.("#speed-test-word-viewport");
+        const screen = documentObject.querySelector?.(".speed-test-screen");
+        if (!words || !screen) return;
+        const bounds = words.getBoundingClientRect();
+        const available = screen.getBoundingClientRect();
+        if (bounds.top < available.top || bounds.bottom > available.bottom) {
+          words.scrollIntoView?.({ block: "nearest", inline: "nearest" });
+        }
+      });
+    }
+    return applied;
   };
 
   body?.classList?.add?.("gameplay-active");
@@ -76,6 +97,8 @@ export function createGameplayViewportController({
   return Object.freeze({
     update,
     destroy() {
+      if (revealFrame != null) windowObject?.cancelAnimationFrame?.(revealFrame);
+      revealFrame = null;
       visualViewport?.removeEventListener?.("resize", update);
       visualViewport?.removeEventListener?.("scroll", update);
       windowObject?.removeEventListener?.("resize", update);

@@ -43,7 +43,7 @@ class EventTarget {
 const viewport = new EventTarget();
 Object.assign(viewport, { height: 390, width: 844, offsetTop: 52, offsetLeft: 4 });
 const windowObject = new EventTarget();
-Object.assign(windowObject, { innerHeight: 768, innerWidth: 1024 });
+Object.assign(windowObject, { innerHeight: 768, innerWidth: 1024, matchMedia: () => ({ matches: true }) });
 const body = { classList: new ClassList() };
 const controller = createGameplayViewportController({
   documentObject: { documentElement: { style }, body },

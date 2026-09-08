@@ -24,12 +24,20 @@ import {
 import { ENDLESS_CONFIG, getEndlessWordsPerStage } from "./endlessConfig.js";
 import { getEndlessDiagnosticText } from "./endlessMode.js";
 
+import { normalizeSpeedTestFontSize, speedTestFontSizeMarkup } from "./speedTestPresentation.js";
+
 const app = () => document.querySelector("#app");
 let speedTestLayoutObserver = null;
+let speedTestLayoutState = null;
 
 function disconnectSpeedTestLayoutObserver() {
   speedTestLayoutObserver?.disconnect?.();
   speedTestLayoutObserver = null;
+  if (speedTestLayoutState?.layoutFrameId != null) {
+    globalThis.cancelAnimationFrame?.(speedTestLayoutState.layoutFrameId);
+    speedTestLayoutState.layoutFrameId = null;
+  }
+  speedTestLayoutState = null;
 }
 
 export function clearSpeedTestLayout() {
@@ -94,87 +102,243 @@ function resultMetricHelp({ grade = false } = {}) {
 }
 
 export function renderTitle(menuIndex, handlers) {
-  const items = [
-    ["START", "modes"],
-    ["LEADERBOARDS", "open-leaderboards"],
-    ["PROFILE & STATS", "profile"],
-    ["SETTINGS", "settings"],
-  ];
+  const icon = (name) => {
+    const paths = {
+      play: '<path d="m9 7 8 5-8 5V7Z"/>',
+      trophy: '<path d="M8 4h8v4a4 4 0 0 1-8 0V4Z"/><path d="M8 6H5v1a4 4 0 0 0 4 4M16 6h3v1a4 4 0 0 1-4 4M12 12v4M9 20h6M10 16h4"/>',
+      profile: '<circle cx="12" cy="8" r="3"/><path d="M5.5 20a6.5 6.5 0 0 1 13 0"/>',
+      settings: '<path d="M4 7h10M18 7h2M4 17h2M10 17h10M14 4v6M6 14v6"/>',
+      arrow: '<path d="m9 6 6 6-6 6"/>',
+    };
+    return `<svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor">${paths[name] || ""}</svg>`;
+  };
+  const selected = (index) => index === menuIndex ? " selected" : "";
+
   app().innerHTML = `
-    <section class="screen menu-screen">
-      <span class="ambient-word" style="left:8%;top:16%">vector</span>
-      <span class="ambient-word" style="right:9%;top:28%;animation-delay:-5s">strike</span>
-      <span class="ambient-word" style="left:17%;bottom:13%;animation-delay:-9s">velocity</span>
-      <span class="ambient-word" style="right:16%;bottom:16%;animation-delay:-2s">precision</span>
-      <div class="title-panel">
-        <div class="eyebrow">System online // defend the core</div>
-        <h1 class="sr-only">WORDSTRIKE</h1>
-        <img
-          class="brand-logo"
-          src="./assets/branding/wordstrike-logo.webp"
-          alt="WORDSTRIKE"
-          width="360"
-          height="360"
-          decoding="async"
-          fetchpriority="high"
-          draggable="false"
-        >
-        <p class="subtitle">Arcade Typing Defense</p>
-        <div class="menu-list">
-          ${items.map(([label, action], index) => menuButton(label, action, index === menuIndex)).join("")}
+    <section class="screen menu-screen title-screen">
+      <div class="title-shell">
+        <header class="title-topline">
+          <span class="title-brand-label">WORDSTRIKE</span>
+          <span class="title-product-note">Competitive typing</span>
+        </header>
+
+        <div class="title-main">
+          <div class="title-hero">
+            <p class="title-kicker">Speed, accuracy, control</p>
+            <h1 class="sr-only">WORDSTRIKE</h1>
+            <img
+              class="brand-logo"
+              src="./assets/branding/wordstrike-logo.webp"
+              alt="WORDSTRIKE"
+              width="360"
+              height="360"
+              decoding="async"
+              fetchpriority="high"
+              draggable="false"
+            >
+            <p class="title-tagline">Precision under pressure.</p>
+            <p class="title-description">Campaign, Typing Test, Endless and Arcade Rush turn clean, controlled typing into competitive play.</p>
+            <button type="button" class="ui-button ui-button--primary title-start-button${selected(0)}" data-title-index="0" data-action="modes">
+              <span class="title-action-icon">${icon("play")}</span>
+              <span class="title-start-copy"><strong>START</strong><small>Choose a mode</small></span>
+              <span class="title-action-arrow">${icon("arrow")}</span>
+            </button>
+            <p class="title-keyboard-hint">↑ ↓ navigate &nbsp;·&nbsp; Enter select</p>
+          </div>
+
+          <nav class="title-global-nav" aria-label="Global navigation">
+            <div class="title-nav-heading"><strong>Explore</strong><span>02–04</span></div>
+            <div class="title-nav-list">
+              <button type="button" class="title-nav-action${selected(1)}" data-title-index="1" data-action="open-leaderboards">
+                <span class="title-action-icon">${icon("trophy")}</span>
+                <span class="title-action-copy"><strong>Leaderboards</strong><span>Global rankings and personal position</span></span>
+                <span class="title-action-arrow">${icon("arrow")}</span>
+              </button>
+              <button type="button" class="title-nav-action${selected(2)}" data-title-index="2" data-action="profile">
+                <span class="title-action-icon">${icon("profile")}</span>
+                <span class="title-action-copy"><strong>Profile &amp; Stats</strong><span>Progress, records and recent runs</span></span>
+                <span class="title-action-arrow">${icon("arrow")}</span>
+              </button>
+              <button type="button" class="title-nav-action${selected(3)}" data-title-index="3" data-action="settings">
+                <span class="title-action-icon">${icon("settings")}</span>
+                <span class="title-action-copy"><strong>Settings</strong><span>Controls, tutorials and account options</span></span>
+                <span class="title-action-arrow">${icon("arrow")}</span>
+              </button>
+            </div>
+          </nav>
         </div>
-        <p class="footer-hint">↑ ↓ SELECT &nbsp;•&nbsp; ENTER CONFIRM</p>
+
+        <footer class="title-footer">
+          <div class="title-footer-meta"><span>Local-first progress</span><span>Optional global leaderboards</span></div>
+          <span class="title-footer-mark">TYPE WITH INTENT</span>
+        </footer>
       </div>
     </section>`;
+
   app().querySelector('[data-action="modes"]').onclick = handlers.modes;
   app().querySelector('[data-action="profile"]').onclick = handlers.profile;
   app().querySelector('[data-action="settings"]').onclick = handlers.settings;
-  app().querySelector(".menu-list .arcade-button.selected")?.focus?.({ preventScroll: true });
+  app().querySelector(`[data-title-index="${menuIndex}"]`)?.focus?.({ preventScroll: true });
 }
 
 export function renderModeSelect(modes, selectedIndex, handlers) {
+  const selectedMode = selectedIndex >= 0 && selectedIndex < modes.length
+    ? modes[selectedIndex]
+    : null;
+  const statusLabel = (mode) => mode?.status === "preview"
+    ? "Developer preview"
+    : mode?.enabled
+      ? "Available"
+      : "Coming soon";
+  const toneFor = (mode) => {
+    if (!mode) return "home";
+    if (!mode.enabled) return "neutral";
+    if (mode.id === "campaign") return "campaign";
+    if (mode.id === "speed-test") return "typing";
+    if (mode.id === "endless") return "endless";
+    if (mode.id === "arcade-rush") return "rush";
+    return "neutral";
+  };
+  const motifFor = (mode) => {
+    if (!mode) return '<div class="mode-motif-neutral">EXIT</div>';
+    if (!mode.enabled) return '<div class="mode-motif-neutral">LOCKED</div>';
+    if (mode.id === "campaign") {
+      return `<div class="mode-motif-campaign">
+        <span class="trajectory"></span><span class="trajectory"></span><span class="trajectory"></span>
+        <span class="core-node"></span>
+      </div>`;
+    }
+    if (mode.id === "speed-test") {
+      return `<div class="mode-motif-typing">
+        <div class="word-row"><span>control</span><span>tempo</span><span>focus</span></div>
+        <div class="word-row"><span>signal</span><strong>precision</strong><i class="caret"></i><span>rhythm</span></div>
+        <div class="word-row"><span>velocity</span><span>accuracy</span><span>flow</span></div>
+      </div>`;
+    }
+    if (mode.id === "endless") {
+      return `<div class="mode-motif-endless">
+        <span class="ring"></span><span class="ring"></span><span class="ring"></span><span class="ring"></span>
+        <span class="sweep"></span><span class="center"></span>
+      </div>`;
+    }
+    if (mode.id === "arcade-rush") {
+      return `<div class="mode-motif-rush">
+        <span class="rush-line"></span><span class="rush-line"></span><span class="rush-line"></span>
+        <span class="rush-core"></span>
+      </div>`;
+    }
+    return '<div class="mode-motif-neutral">MODE</div>';
+  };
+  const modeNumber = selectedMode
+    ? String(modes.indexOf(selectedMode) + 1).padStart(2, "0")
+    : "00";
+  const showcaseTitle = selectedMode?.name || "Main Menu";
+  const showcaseLabel = selectedMode?.shortLabel || "Return to title";
+  const showcaseDescription = selectedMode?.description
+    || "Leave Mode Select and return to the WordStrike home screen.";
+  const showcaseCommand = selectedMode?.enabled
+    ? `<kbd>ENTER</kbd><span>Launch ${selectedMode.name}</span>`
+    : selectedMode
+      ? "<span>Not available yet</span>"
+      : "<kbd>ENTER</kbd><span>Return to title</span>";
+  const selectedClass = (index) => index === selectedIndex ? " selected" : "";
+
   app().innerHTML = `
-    <section class="screen mode-screen">
-      <div class="mode-panel">
-        ${screenBackButton("mode-title")}
-        <div class="eyebrow">Select simulation</div>
-        <h1>MODE SELECT</h1>
-        <div class="mode-grid">
-          ${modes.map((mode, index) => mode.enabled
-    ? `<button class="mode-card available ${index === selectedIndex ? "selected" : ""}"
-                data-mode-id="${mode.id}" data-mode-index="${index}">
-              <strong>${mode.name}</strong>
-              <span>${mode.shortLabel}</span>
-              <small>${mode.status === "preview" ? "DEVELOPER PREVIEW" : "AVAILABLE"}</small>
-            </button>`
-    : `<article class="mode-card coming-soon ${index === selectedIndex ? "selected" : ""}"
-                data-mode-id="${mode.id}" data-mode-index="${index}" aria-disabled="true">
-              <strong>${mode.name}</strong>
-              <span>${mode.shortLabel}</span>
-              <small>COMING SOON</small>
-            </article>`).join("")}
+    <section class="screen mode-screen mode-select-screen">
+      <div class="mode-select-shell">
+        <header class="mode-select-topline">
+          ${screenBackButton("mode-title")}
+          <div class="mode-select-context"><strong>WORDSTRIKE</strong><span>MODE / ${String(Math.min(selectedIndex + 1, modes.length + 1)).padStart(2, "0")}</span></div>
+        </header>
+
+        <div class="mode-select-intro">
+          <div>
+            <p class="mode-select-kicker">Choose your challenge</p>
+            <h1>Mode Select</h1>
+          </div>
+          <p class="mode-select-lead">Pick the format that matches what you want to train, prove, or survive. Each mode keeps the same typing fundamentals under a different kind of pressure.</p>
         </div>
-        <p class="mode-description">${modes[selectedIndex]?.description || ""}</p>
-        <div class="mode-menu-action">
-          ${menuButton("MAIN MENU", "mode-title", selectedIndex === modes.length)}
+
+        <div class="mode-select-layout">
+          <section class="mode-showcase mode-tone-${toneFor(selectedMode)}" data-mode-showcase data-mode-enabled="${selectedMode?.enabled === true}">
+            <div class="mode-showcase-visual" aria-hidden="true">
+              <span class="mode-showcase-index">${modeNumber} / ${String(modes.length).padStart(2, "0")}</span>
+              <span class="mode-showcase-signal">${selectedMode ? statusLabel(selectedMode) : "Navigation"}</span>
+              ${motifFor(selectedMode)}
+            </div>
+            <div class="mode-showcase-copy">
+              <div class="mode-showcase-heading">
+                <p>${showcaseLabel}</p>
+                <h2>${showcaseTitle}</h2>
+              </div>
+              <div class="mode-showcase-command">${showcaseCommand}</div>
+              <p class="mode-showcase-description">${showcaseDescription}</p>
+            </div>
+          </section>
+
+          <nav class="mode-options" aria-label="Game modes">
+            <div class="mode-options-heading"><strong>Modes</strong><span>01–${String(modes.length).padStart(2, "0")}</span></div>
+            <div class="mode-options-list">
+              ${modes.map((mode, index) => {
+    const status = statusLabel(mode);
+    const current = index === selectedIndex ? ' aria-current="true"' : "";
+    const copy = `<span class="mode-option-index">${String(index + 1).padStart(2, "0")}</span>
+                  <span class="mode-option-copy"><strong>${mode.name}</strong><span>${mode.shortLabel} · ${mode.description}</span></span>
+                  <small class="mode-option-status">${status}</small>`;
+    return mode.enabled
+      ? `<button type="button" class="mode-option available${selectedClass(index)}" data-mode-id="${mode.id}" data-mode-index="${index}"${current}>${copy}</button>`
+      : `<article class="mode-option coming-soon${selectedClass(index)}" data-mode-id="${mode.id}" data-mode-index="${index}" aria-disabled="true" tabindex="-1"${current}>${copy}</article>`;
+  }).join("")}
+            </div>
+          </nav>
         </div>
-        <p class="footer-hint">↑ ↓ SELECT &nbsp;•&nbsp; ENTER CONFIRM &nbsp;•&nbsp; ESC BACK</p>
+
+        <footer class="mode-select-footer">
+          <p class="mode-select-hint">↑ ↓ ← → navigate &nbsp;·&nbsp; Enter launch &nbsp;·&nbsp; Esc back</p>
+          <button type="button" class="mode-home-action${selectedClass(modes.length)}" data-mode-home-index="${modes.length}" data-action="mode-title">
+            <span class="mode-home-arrow">←</span><span>Main Menu</span>
+          </button>
+        </footer>
       </div>
     </section>`;
+
   app().querySelectorAll("[data-mode-index]").forEach((card) => {
     const index = Number(card.dataset.modeIndex);
-    card.onmouseenter = () => handlers.select?.(index);
+    // Preview selection follows deliberate mouse movement, not passive DOM reflow.
+    // This prevents stationary-pointer hover events from stealing keyboard selection
+    // when the narrow Mode Select rerenders and scrolls under the cursor.
+    card.onmousemove = () => handlers.select?.(index);
     if (card.matches?.("button")) {
       card.onclick = () => handlers.activate?.(card.dataset.modeId);
     }
   });
-  app().querySelector(".mode-card.available.selected")?.focus({ preventScroll: true });
   const titleButtons = [...app().querySelectorAll('[data-action="mode-title"]')];
   if (!titleButtons.length) titleButtons.push(app().querySelector('[data-action="mode-title"]'));
   titleButtons.filter(Boolean).forEach((titleButton) => {
     titleButton.onclick = handlers.back;
-    titleButton.onmouseenter = () => handlers.select?.(modes.length);
+    titleButton.onmousemove = () => handlers.select?.(modes.length);
   });
+  const focusTarget = selectedIndex === modes.length
+    ? app().querySelector(`[data-mode-home-index="${modes.length}"]`)
+    : app().querySelector(`[data-mode-index="${selectedIndex}"]`);
+  focusTarget?.focus?.({ preventScroll: true });
+
+  // The Mode Select screen owns vertical scrolling on constrained viewports. Keep
+  // keyboard-selected rows visible without forcing the initial Campaign view away
+  // from the top-of-screen showcase.
+  if (focusTarget && selectedIndex > 0) {
+    const scrollOwner = app().querySelector(".mode-select-screen");
+    const ownerRect = scrollOwner?.getBoundingClientRect?.();
+    const targetRect = focusTarget.getBoundingClientRect?.();
+    if (scrollOwner && ownerRect && targetRect) {
+      const inset = 12;
+      if (targetRect.bottom > ownerRect.bottom - inset) {
+        scrollOwner.scrollTop += targetRect.bottom - ownerRect.bottom + inset;
+      } else if (targetRect.top < ownerRect.top + inset) {
+        scrollOwner.scrollTop += targetRect.top - ownerRect.top - inset;
+      }
+    }
+  }
 }
 
 export function renderEndlessReady(handlers = {}) {
@@ -296,6 +460,13 @@ function speedTestConfigMarkup(config, disabled) {
     </nav>`;
 }
 
+export function applySpeedTestFontSize(state) {
+  const screen = document.querySelector(".speed-test-screen");
+  if (screen) screen.dataset.speedFontSize = normalizeSpeedTestFontSize(state.fontSize);
+  state.layoutDirty = true;
+  scheduleSpeedTestLayout(state);
+}
+
 export function renderSpeedTestRun(state, devMode = false, handlers = {}) {
   disconnectSpeedTestLayoutObserver();
   const isTime = state.config.testType === SPEED_TEST_TYPES.TIME;
@@ -303,7 +474,7 @@ export function renderSpeedTestRun(state, devMode = false, handlers = {}) {
   const timerPosition = state.timerPosition === "top" ? "top" : "center";
   const primaryValue = isTime ? state.config.durationSeconds.toFixed(1) : `0 / ${state.config.wordCount}`;
   app().innerHTML = `
-    <section class="screen speed-test-screen">
+    <section class="screen speed-test-screen" data-speed-font-size="${normalizeSpeedTestFontSize(state.fontSize)}">
       <header class="speed-test-topbar">
         <div class="speed-test-topbar-primary">
           ${gameplayPauseButton()}
@@ -322,6 +493,7 @@ export function renderSpeedTestRun(state, devMode = false, handlers = {}) {
               <button type="button" data-speed-timer-position="center" aria-pressed="${timerPosition === "center"}" class="${timerPosition === "center" ? "active" : ""}">CENTER</button>
               <button type="button" data-speed-timer-position="top" aria-pressed="${timerPosition === "top"}" class="${timerPosition === "top" ? "active" : ""}">TOP</button>
             </nav>
+            ${speedTestFontSizeMarkup(state.fontSize)}
           </div>
           <div class="speed-test-hud">
             ${timerPosition === "top" ? `<strong id="speed-test-primary">${primaryValue}</strong>` : ""}
@@ -359,6 +531,8 @@ export function renderSpeedTestRun(state, devMode = false, handlers = {}) {
   app().querySelectorAll("[data-speed-config]").forEach((button) => {
     button.onclick = () => handlers.selectConfig?.(button.dataset.speedConfig);
   });
+  const fontControl = app().querySelector("select[data-speed-font-size]");
+  if (fontControl) fontControl.onchange = () => handlers.setFontSize?.(fontControl.value);
   const typingHelp = app().querySelector('[data-tutorial-help="typing"]');
   if (typingHelp) typingHelp.onclick = handlers.help;
   wireGameplayAction(app(), "restart", handlers.restart);
@@ -435,6 +609,7 @@ export function measureSpeedTestLayout(state, { constrained = isConstrainedSpeed
 
 export function scheduleSpeedTestLayout(state) {
   if (!state || state.layoutFrameId != null) return;
+  speedTestLayoutState = state;
   const schedule = globalThis.requestAnimationFrame || ((callback) => callback());
   state.layoutFrameId = schedule(() => {
     state.layoutFrameId = null;
@@ -1292,7 +1467,7 @@ export function renderSettings(save, selectedIndex, handlers, accountMarkup = ""
             ${[
     ["general", "GENERAL INTRODUCTION"], ["campaign", "CAMPAIGN GUIDE"],
     ["typing", "TYPING TEST GUIDE"], ["endless", "ENDLESS GUIDE"],
-    ["daily", "DAILY STRIKE GUIDE"], ["boss", "BOSS GUIDE"],
+    ["arcade-rush", "ARCADE RUSH GUIDE"], ["boss", "BOSS GUIDE"],
     ["leaderboards", "LEADERBOARD GUIDE"],
   ].map(([id, label]) => `<button type="button" class="text-action" data-tutorial-id="${id}">REPLAY ${label}</button>`).join("")}
           </div>

@@ -1,4 +1,5 @@
 import { calculateGrade } from "./scoring.js";
+import { normalizeSpeedTestFontSize } from "./speedTestPresentation.js";
 
 const STORAGE_KEY = "wordstrike_save";
 
@@ -11,6 +12,7 @@ export function createDefaultSave() {
       particles: true,
       strictMode: false,
       speedTestTimerPosition: "center",
+      speedTestFontSize: "auto",
     },
   };
 }
@@ -36,6 +38,7 @@ function validateSave(value) {
       particles: value.settings?.particles !== false,
       strictMode: value.settings?.strictMode === true,
       speedTestTimerPosition: value.settings?.speedTestTimerPosition === "top" ? "top" : "center",
+      speedTestFontSize: normalizeSpeedTestFontSize(value.settings?.speedTestFontSize),
     },
   };
 }
@@ -100,6 +103,12 @@ export function updateSpeedTestTimerPosition(save, position) {
   save.settings.speedTestTimerPosition = position === "top" ? "top" : "center";
   saveGame(save);
   return save.settings.speedTestTimerPosition;
+}
+
+export function updateSpeedTestFontSize(save, value) {
+  save.settings.speedTestFontSize = normalizeSpeedTestFontSize(value);
+  saveGame(save);
+  return save.settings.speedTestFontSize;
 }
 
 export function resetProgress(save) {

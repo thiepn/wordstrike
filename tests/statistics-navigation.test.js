@@ -12,7 +12,8 @@ const [main, keyboard, ui] = await Promise.all([
   readFile(new URL("../js/appKeyboardController.js", import.meta.url), "utf8"),
   readFile(new URL("../js/ui.js", import.meta.url), "utf8"),
 ]);
-assert.match(ui, /PROFILE & STATS/);
+assert.match(ui, /data-title-index="2" data-action="profile"/);
+assert.match(ui, /<strong>Profile &amp; Stats<\/strong>/);
 assert.match(ui, /data-action="profile"/);
 assert.match(main, /function openProfileStatistics\(\)/);
 assert.match(main, /cleanupCampaignAttempt\("profile-stats"\)/);

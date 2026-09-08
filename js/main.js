@@ -21,6 +21,7 @@ import {
   updateLevelResult,
   updateSetting,
   updateSpeedTestTimerPosition,
+  updateSpeedTestFontSize,
 } from "./storage.js";
 import {
   loadBossWordBank,
@@ -49,6 +50,7 @@ import {
 import { createAttemptSeed, parseDeveloperSeed } from "./random.js";
 import {
   clearSpeedTestLayout,
+  applySpeedTestFontSize,
   hidePauseOverlay,
   renderBossShell,
   renderEndlessReady,
@@ -357,22 +359,28 @@ function discardActiveAttempt() {
 function routeActiveGameplayKey(event) {
   if (appState.screen === Screens.SPEED_TEST_RUN) {
     const speedState = getCurrentSpeedTest();
+    if (event.isComposing || event.keyCode === 229) return true;
+    const modified = event.ctrlKey || event.metaKey || event.altKey;
+    if (event.key === "Escape") {
+      if (modified) return false;
+      event.preventDefault();
+      if (!event.repeat) pauseTypingTest();
+      return true;
+    }
+    if (event.key === "Tab") {
+      // Keep native focus navigation available on real controls and with Shift+Tab.
+      const onControl = event.target?.closest?.("button, a, input, select, [role=tab]");
+      if (modified || event.shiftKey || onControl) return false;
+      event.preventDefault();
+      if (!event.repeat) resetSpeedTestAttempt("tab-reset");
+      return true;
+    }
     if (event.target?.dataset?.speedTimerPosition) return true;
     if (speedState?.phase === "PREPARING" && [
       "ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End",
     ].includes(event.key)) {
       event.preventDefault();
       changeSpeedTestConfig(moveSpeedTestConfiguration(appState.speedTestConfigId, event.key));
-      return true;
-    }
-    if (event.key === "Escape") {
-      event.preventDefault();
-      pauseTypingTest();
-      return true;
-    }
-    if (event.key === "Tab") {
-      event.preventDefault();
-      resetSpeedTestAttempt("tab-reset");
       return true;
     }
     const beforeWords = speedState?.metrics?.wordsCompleted || 0;
@@ -662,6 +670,7 @@ function finishSpeedTest(state, result) {
 }
 
 function resetSpeedTestAttempt(source = "mode-select") {
+  const hadTypingFocus = document.activeElement?.matches?.("textarea.gameplay-input") === true;
   const config = getSpeedTestConfig(appState.speedTestConfigId)
     || getSpeedTestConfig(DEFAULT_SPEED_TEST_CONFIG_ID);
   cleanupCampaignAttempt(source === "retry" ? "retry" : "new-session");
@@ -686,6 +695,7 @@ function resetSpeedTestAttempt(source = "mode-select") {
     return;
   }
   state.timerPosition = appState.save.settings.speedTestTimerPosition;
+  state.fontSize = appState.save.settings.speedTestFontSize;
   changeScreen(Screens.SPEED_TEST_RUN);
   renderSpeedTestRun(state, appState.devMode, {
     selectConfig: changeSpeedTestConfig,
@@ -695,12 +705,21 @@ function resetSpeedTestAttempt(source = "mode-select") {
       if (getCurrentSpeedTest()?.phase === "PREPARING") openTutorial("typing");
     },
     setTimerPosition: changeSpeedTestTimerPosition,
+    setFontSize: changeSpeedTestFontSize,
   });
   mountGameplayInput();
+  if (hadTypingFocus) deactivateGameplayInput.focus?.();
   updateSpeedTestRun(state, currentTimeMs());
   if (!appState.devMode && source === "mode-select") {
     beginContextualHints("typing", "START TYPING TO BEGIN", 0);
   }
+}
+
+function changeSpeedTestFontSize(value) {
+  const state = getCurrentSpeedTest();
+  if (!state) return;
+  state.fontSize = updateSpeedTestFontSize(appState.save, value);
+  applySpeedTestFontSize(state);
 }
 
 function changeSpeedTestTimerPosition(position) {
@@ -1142,6 +1161,9 @@ function renderCurrentScreen() {
   } else if (appState.screen === Screens.SPEED_TEST_RUN) {
     const state = getCurrentSpeedTest();
     if (state) {
+      const typingFocused = document.activeElement?.matches?.("textarea.gameplay-input") === true;
+      const timerFocus = document.activeElement?.dataset?.speedTimerPosition;
+      unmountGameplayInput();
       renderSpeedTestRun(state, appState.devMode, {
         selectConfig: changeSpeedTestConfig,
         restart: () => resetSpeedTestAttempt("topbar-restart"),
@@ -1150,8 +1172,14 @@ function renderCurrentScreen() {
           if (getCurrentSpeedTest()?.phase === "PREPARING") openTutorial("typing");
         },
         setTimerPosition: changeSpeedTestTimerPosition,
+        setFontSize: changeSpeedTestFontSize,
       });
+      mountGameplayInput();
       updateSpeedTestRun(state, currentTimeMs());
+      if (typingFocused) deactivateGameplayInput.focus?.();
+      else if (timerFocus === "top" || timerFocus === "center") {
+        document.querySelector(`[data-speed-timer-position="${timerFocus}"]`)?.focus();
+      }
     }
   } else if (appState.screen === Screens.SPEED_TEST_RESULTS) {
     renderSpeedTestResults(

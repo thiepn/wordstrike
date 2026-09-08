@@ -1,0 +1,28 @@
+name: Typing browser regressions
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install browser test dependencies
+        run: |
+          pip install -r tests/browser/requirements.txt
+          python -m playwright install --with-deps chromium firefox
+      - name: Exercise real Typing Test UI in Chromium and Firefox
+        run: python tests/browser/typing_regressions.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: typing-browser-evidence
+          path: browser-artifacts/
+          retention-days: 7

@@ -61,8 +61,8 @@ export function createMobileInputAdapter({
   isEnabled = () => true,
   visualViewport = globalThis.visualViewport,
 } = {}) {
-  const host = root?.querySelector?.(".speed-test-screen, .game-screen, .boss-screen, .endless-screen, .daily-screen");
-  const arena = root?.querySelector?.("#play-area, .speed-test-stage, .boss-arena");
+  const host = root?.querySelector?.(".speed-test-screen, .game-screen, .boss-screen, .endless-screen, .arcade-rush-gameplay");
+  const arena = root?.querySelector?.("#play-area, .speed-test-stage, .boss-arena, .arcade-rush-word-layer");
   if (!host?.append || typeof onInput !== "function") return () => {};
 
   const dock = root.createElement("div");
