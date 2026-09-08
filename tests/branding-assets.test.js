@@ -29,8 +29,8 @@ assert.match(app.html, /fetchpriority="high"/);
 assert.match(app.html, /draggable="false"/);
 assert.match(app.html, /<h1 class="sr-only">WORDSTRIKE<\/h1>/);
 assert.doesNotMatch(app.html, /class="game-title"/);
-for (const label of ["START", "LEADERBOARDS", "PROFILE & STATS", "SETTINGS"]) {
-  assert.ok(app.html.includes(label));
+for (const label of ["START", "Leaderboards", "Profile &amp; Stats", "Settings"]) {
+  assert.ok(app.html.includes(label), `Title navigation label missing: ${label}`);
 }
 
 const ui = await readFile(new URL("../js/ui.js", import.meta.url), "utf8");
@@ -39,11 +39,15 @@ assert.doesNotMatch(ui, /src="\/assets\//);
 
 const css = await readFile(new URL("../style.css", import.meta.url), "utf8");
 assert.match(css, /\.sr-only\s*\{[\s\S]*clip:\s*rect\(0, 0, 0, 0\)/);
-assert.match(css, /\.brand-logo\s*\{[\s\S]*pointer-events:\s*none/);
-assert.match(css, /\.brand-logo\s*\{[\s\S]*user-select:\s*none/);
-assert.match(css, /\.brand-logo\s*\{[\s\S]*-webkit-user-drag:\s*none/);
-assert.match(css, /@media \(max-height:\s*760px\)[\s\S]*\.brand-logo/);
-assert.match(css, /@media \(max-width:\s*760px\)[\s\S]*\.brand-logo/);
+assert.doesNotMatch(css, /\.brand-logo\s*\{/);
+
+const titleCss = await readFile(new URL("../styles/screens/title.css", import.meta.url), "utf8");
+assert.match(titleCss, /\.title-screen \.brand-logo\s*\{[\s\S]*pointer-events:\s*none/);
+assert.match(titleCss, /\.title-screen \.brand-logo\s*\{[\s\S]*user-select:\s*none/);
+assert.match(titleCss, /\.title-screen \.brand-logo\s*\{[\s\S]*-webkit-user-drag:\s*none/);
+assert.match(titleCss, /@media \(max-height:\s*650px\) and \(min-width:\s*821px\)[\s\S]*\.title-screen \.brand-logo/);
+assert.match(titleCss, /@media \(max-width:\s*820px\)[\s\S]*\.title-screen \.brand-logo/);
+assert.match(titleCss, /@media \(max-width:\s*520px\)[\s\S]*\.title-screen \.brand-logo/);
 
 const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
 assert.match(html, /rel="canonical" href="https:\/\/thiepn\.dev\/wordstrike\/"/);
@@ -78,4 +82,4 @@ for (const path of [
   await access(new URL(path, import.meta.url));
 }
 
-console.log("Main-menu branding, canonical metadata, favicons, manifest identity, responsive CSS, and relative assets passed.");
+console.log("Main-menu branding, canonical metadata, favicons, manifest identity, responsive Title CSS, and relative assets passed.");
