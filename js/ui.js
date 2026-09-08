@@ -24,12 +24,20 @@ import {
 import { ENDLESS_CONFIG, getEndlessWordsPerStage } from "./endlessConfig.js";
 import { getEndlessDiagnosticText } from "./endlessMode.js";
 
+import { normalizeSpeedTestFontSize, speedTestFontSizeMarkup } from "./speedTestPresentation.js";
+
 const app = () => document.querySelector("#app");
 let speedTestLayoutObserver = null;
+let speedTestLayoutState = null;
 
 function disconnectSpeedTestLayoutObserver() {
   speedTestLayoutObserver?.disconnect?.();
   speedTestLayoutObserver = null;
+  if (speedTestLayoutState?.layoutFrameId != null) {
+    globalThis.cancelAnimationFrame?.(speedTestLayoutState.layoutFrameId);
+    speedTestLayoutState.layoutFrameId = null;
+  }
+  speedTestLayoutState = null;
 }
 
 export function clearSpeedTestLayout() {
@@ -296,6 +304,13 @@ function speedTestConfigMarkup(config, disabled) {
     </nav>`;
 }
 
+export function applySpeedTestFontSize(state) {
+  const screen = document.querySelector(".speed-test-screen");
+  if (screen) screen.dataset.speedFontSize = normalizeSpeedTestFontSize(state.fontSize);
+  state.layoutDirty = true;
+  scheduleSpeedTestLayout(state);
+}
+
 export function renderSpeedTestRun(state, devMode = false, handlers = {}) {
   disconnectSpeedTestLayoutObserver();
   const isTime = state.config.testType === SPEED_TEST_TYPES.TIME;
@@ -303,7 +318,7 @@ export function renderSpeedTestRun(state, devMode = false, handlers = {}) {
   const timerPosition = state.timerPosition === "top" ? "top" : "center";
   const primaryValue = isTime ? state.config.durationSeconds.toFixed(1) : `0 / ${state.config.wordCount}`;
   app().innerHTML = `
-    <section class="screen speed-test-screen">
+    <section class="screen speed-test-screen" data-speed-font-size="${normalizeSpeedTestFontSize(state.fontSize)}">
       <header class="speed-test-topbar">
         <div class="speed-test-topbar-primary">
           ${gameplayPauseButton()}
@@ -322,6 +337,7 @@ export function renderSpeedTestRun(state, devMode = false, handlers = {}) {
               <button type="button" data-speed-timer-position="center" aria-pressed="${timerPosition === "center"}" class="${timerPosition === "center" ? "active" : ""}">CENTER</button>
               <button type="button" data-speed-timer-position="top" aria-pressed="${timerPosition === "top"}" class="${timerPosition === "top" ? "active" : ""}">TOP</button>
             </nav>
+            ${speedTestFontSizeMarkup(state.fontSize)}
           </div>
           <div class="speed-test-hud">
             ${timerPosition === "top" ? `<strong id="speed-test-primary">${primaryValue}</strong>` : ""}
@@ -359,6 +375,8 @@ export function renderSpeedTestRun(state, devMode = false, handlers = {}) {
   app().querySelectorAll("[data-speed-config]").forEach((button) => {
     button.onclick = () => handlers.selectConfig?.(button.dataset.speedConfig);
   });
+  const fontControl = app().querySelector("select[data-speed-font-size]");
+  if (fontControl) fontControl.onchange = () => handlers.setFontSize?.(fontControl.value);
   const typingHelp = app().querySelector('[data-tutorial-help="typing"]');
   if (typingHelp) typingHelp.onclick = handlers.help;
   wireGameplayAction(app(), "restart", handlers.restart);
@@ -435,6 +453,7 @@ export function measureSpeedTestLayout(state, { constrained = isConstrainedSpeed
 
 export function scheduleSpeedTestLayout(state) {
   if (!state || state.layoutFrameId != null) return;
+  speedTestLayoutState = state;
   const schedule = globalThis.requestAnimationFrame || ((callback) => callback());
   state.layoutFrameId = schedule(() => {
     state.layoutFrameId = null;
