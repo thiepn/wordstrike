@@ -131,6 +131,18 @@ Desktop uses showcase + rail. Tablet collapses to a stacked showcase followed by
 - selected state uses a structural accent rail in addition to color;
 - `prefers-reduced-motion` collapses all UI3 animation/transition durations.
 
+## Input-modality hardening
+
+The responsive audit exposed a narrow-layout race between keyboard navigation and hover preview. Mode Select rerenders after each arrow-key selection; when that rerender also scrolls the screen, a stationary pointer can end up above a different newly-created row. Browser `mouseenter` delivery could then overwrite the keyboard-owned selection even though the user never moved the mouse.
+
+UI3 therefore treats preview selection as deliberate pointer movement rather than passive reflow:
+
+- Mode Select rows and Main Menu preview on `mousemove`, not `mouseenter`;
+- actual mouse movement still updates the selected showcase immediately;
+- stationary pointers cannot steal a keyboard selection while the screen rerenders or self-scrolls;
+- constrained-height keyboard navigation keeps the selected row/Main Menu visible;
+- this change is scoped to Mode Select and does not alter shared menu behavior elsewhere in WordStrike.
+
 ## Certification
 
 UI3 adds a dedicated source contract and Chromium/Firefox browser certification. The browser gate checks:
@@ -145,6 +157,7 @@ UI3 adds a dedicated source contract and Chromium/Firefox browser certification.
 - no horizontal overflow;
 - minimum target size;
 - constrained-height reachability;
+- keyboard selection stability during narrow-layout self-scroll;
 - reduced motion;
 - production screenshots.
 
