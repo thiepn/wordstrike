@@ -196,12 +196,17 @@ def certify_real_runtime(browser, browser_name, base, checks):
 def mount_synthetic_ui(page, base):
     page.goto(base)
     page.evaluate("""async () => {
-      const {createArcadeRushDomUiController} = await import('./js/arcadeRush/arcadeRushUi.js');
+      const [{createArcadeRushDomUiController}, presentation] = await Promise.all([
+        import('./js/arcadeRush/arcadeRushUi.js'),
+        import('./js/arcadeRushGameplayPresentation.js'),
+      ]);
       const root = document.querySelector('#app');
       window.__ui9Rush = createArcadeRushDomUiController({root, actions:{}});
+      window.__ui9Enhance = presentation.enhanceCurrentArcadeRushView;
       window.__ui9Rush.renderHud({
         runState:'active', phase:'WAVE_3', currentWave:3, score:24850, combo:18, integrity:4
       });
+      window.__ui9Enhance();
     }""")
     expect(page.locator('[data-rush-view="gameplay"]')).to_be_visible()
     expect(page.locator('.arcade-rush-core-integrity i')).to_have_count(5, timeout=3000)
@@ -214,12 +219,14 @@ def certify_transition_and_boss(browser, browser_name, base, checks):
     page.on("pageerror", lambda error: errors.append(str(error)))
     mount_synthetic_ui(page, base)
 
-    page.evaluate("""() => window.__ui9Rush.renderWaveTransition({
-      runState:'transitioning', phase:'WAVE_TRANSITION', currentWave:3, wavesCompleted:3,
-      score:40200, combo:27, integrity:4, transitionRemainingMs:1800
-    }, {clearedWave:3,nextWave:4,perfect:true})""")
+    page.evaluate("""() => {
+      window.__ui9Rush.renderWaveTransition({
+        runState:'transitioning', phase:'WAVE_TRANSITION', currentWave:3, wavesCompleted:3,
+        score:40200, combo:27, integrity:4, transitionRemainingMs:1800
+      }, {clearedWave:3,nextWave:4,perfect:true});
+      window.__ui9Enhance();
+    }""")
     expect(page.locator('[data-rush-role="transition-overlay"]')).to_be_visible()
-    page.wait_for_timeout(80)
     transition = page.evaluate("""() => {
       const root = document.querySelector('[data-rush-view="gameplay"]');
       const card = root.querySelector('[data-rush-role="transition-overlay"] .arcade-rush-overlay-card');
@@ -236,20 +243,25 @@ def certify_transition_and_boss(browser, browser_name, base, checks):
     assert transition["cardBackground"] in {"rgba(0, 0, 0, 0)", "transparent"}, transition
     assert transition["title"] == "PERFECT WAVE", transition
 
-    page.evaluate("""() => window.__ui9Rush.renderBossIntro({
-      runState:'boss-intro', phase:'BOSS_INTRO', currentWave:6, wavesCompleted:6,
-      score:73500, combo:42, integrity:3, bossIntroRemainingMs:1900
-    })""")
+    page.evaluate("""() => {
+      window.__ui9Rush.renderBossIntro({
+        runState:'boss-intro', phase:'BOSS_INTRO', currentWave:6, wavesCompleted:6,
+        score:73500, combo:42, integrity:3, bossIntroRemainingMs:1900
+      });
+      window.__ui9Enhance();
+    }""")
     expect(page.locator('[data-rush-role="transition-overlay"]')).to_be_visible()
     expect(page.locator('[data-rush-role="transition-overlay"] h2')).to_have_text("CORE BREAKER")
 
-    page.evaluate("""() => window.__ui9Rush.renderHud({
-      runState:'boss-active', phase:'BOSS', currentWave:6, wavesCompleted:6,
-      score:81250, combo:51, integrity:3,
-      boss:{maxHp:8,hp:5,durationRemainingMs:27800,attackRemainingMs:6400,currentPhrase:'precision over pressure',typedIndex:9}
-    })""")
+    page.evaluate("""() => {
+      window.__ui9Rush.renderHud({
+        runState:'boss-active', phase:'BOSS', currentWave:6, wavesCompleted:6,
+        score:81250, combo:51, integrity:3,
+        boss:{maxHp:8,hp:5,durationRemainingMs:27800,attackRemainingMs:6400,currentPhrase:'precision over pressure',typedIndex:9}
+      });
+      window.__ui9Enhance();
+    }""")
     expect(page.locator('[data-rush-role="boss-panel"]')).to_be_visible()
-    page.wait_for_timeout(80)
     boss = page.evaluate("""() => {
       const root = document.querySelector('[data-rush-view="gameplay"]');
       const panel = root.querySelector('[data-rush-role="boss-panel"]');
