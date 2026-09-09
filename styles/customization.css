@@ -68,7 +68,7 @@ html[data-customization-active="true"][data-effective-effects="reduced"] :is(
   .mode-showcase-visual *,
   .boss-threat-sigil, .boss-threat-sigil *,
   .campaign-core-orbit, .campaign-core-reactor,
-  .endless-core-orbit, .endless-core-reactor,
+  .endless-core-radar, .endless-core-sweep, .endless-core-reactor,
   .arcade-rush-countdown
 ) { animation: none !important; }
 html[data-customization-active="true"][data-effective-effects="reduced"] .burst { display: none; }
@@ -93,7 +93,7 @@ html[data-customization-active="true"][data-effective-effects="cinematic"] {
 @media (prefers-reduced-motion: reduce) {
   /* Also safe if media changes before the JS preference listener runs. */
   html[data-customization-active="true"] .arcade-rush-core::before { animation: none !important; }
-  html[data-customization-active="true"] :is(.mode-showcase-visual *, .boss-threat-sigil *, .campaign-core-orbit, .endless-core-orbit) {
+  html[data-customization-active="true"] :is(.mode-showcase-visual *, .boss-threat-sigil *, .campaign-core-orbit, .endless-core-radar, .endless-core-sweep) {
     animation: none !important;
   }
   html[data-customization-active="true"] :is(.mode-motif-campaign, .mode-motif-typing, .mode-motif-endless, .mode-motif-rush, .boss-threat-sigil) { filter: none; }
