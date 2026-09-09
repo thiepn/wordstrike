@@ -120,7 +120,9 @@ function enhanceHud(screen) {
 
   const sequence = document.createElement("span");
   sequence.className = "boss-hud-sequence";
-  sequence.append(label("SEQUENCE"), phraseCount);
+  // The authoritative phrase-count node already includes the SEQUENCE label.
+  // Reuse it directly so the presentation layer never produces "SEQUENCE SEQUENCE".
+  sequence.append(phraseCount);
 
   const words = document.createElement("span");
   words.className = "boss-hud-words";
