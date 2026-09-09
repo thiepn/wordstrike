@@ -14,6 +14,9 @@ jobs:
       # Keep this version aligned with tests/browser/requirements.txt.
       image: mcr.microsoft.com/playwright/python:v1.57.0-noble
       options: --ipc=host
+    env:
+      # Firefox requires HOME to be owned by the container's current user.
+      HOME: /root
     steps:
       - uses: actions/checkout@v4
       - name: Install browser test dependencies
