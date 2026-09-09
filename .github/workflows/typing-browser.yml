@@ -2,24 +2,24 @@ name: Typing browser regressions
 on:
   pull_request:
   push:
-    branches: [main]
+    branches: [main, codex/pl28-common-words-v1]
+  workflow_dispatch:
 permissions:
   contents: read
 jobs:
   browser:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    container:
+      # Keep this version aligned with tests/browser/requirements.txt.
+      image: mcr.microsoft.com/playwright/python:v1.57.0-noble
+      options: --ipc=host
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
       - name: Install browser test dependencies
-        run: |
-          pip install -r tests/browser/requirements.txt
-          python -m playwright install --with-deps chromium firefox
+        run: python3 -m pip install -r tests/browser/requirements.txt
       - name: Exercise real Typing Test UI in Chromium and Firefox
-        run: python tests/browser/typing_regressions.py
+        run: python3 tests/browser/typing_regressions.py
       - uses: actions/upload-artifact@v4
         if: always()
         with:
