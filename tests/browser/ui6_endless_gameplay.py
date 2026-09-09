@@ -123,7 +123,7 @@ def snapshot(page):
         wpm: document.querySelector('[data-endless-wpm]')?.textContent,
         combo: document.querySelector('[data-endless-combo]')?.textContent,
         survival: document.querySelector('[data-endless-survival]')?.textContent,
-        pressure: document.querySelector('[data-endless-pressure]')?.textContent,
+        pressure: document.querySelector('[data-endless-pressure-value]')?.textContent,
         target: document.querySelector('[data-endless-target-state]')?.textContent,
         progressNow: progress?.getAttribute('aria-valuenow'),
         progressText: progress?.getAttribute('aria-valuetext'),
