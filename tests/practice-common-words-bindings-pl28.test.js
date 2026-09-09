@@ -49,33 +49,47 @@ test("PL28 common-word reference is bound to the exact PL4/PL7/PL10 foundation a
   assert.equal(loaded.typabilityManifest.frequencyReferenceChecksum, loaded.frequencyReference.checksum);
 });
 
-test("PL28 statistical and display sources are separately governed by canonical PL6 approval", async () => {
+test("PL28 statistical, training, and diagnostic sources are separately governed by canonical PL6 approval", async () => {
   const loaded = await loadAll();
   const index = createPracticeSourceIndex(loaded.sourceRegistry);
   const statistical = resolvePracticeCorpusSource(loaded.reference.bindings.statisticalSourceId, index);
-  const display = resolvePracticeCorpusSource(loaded.practice.bindings.displaySourceId, index);
+  const training = resolvePracticeCorpusSource(loaded.practice.bindings.displaySourceId, index);
+  const diagnostic = resolvePracticeCorpusSource(loaded.check.bindings.displaySourceId, index);
   assert.ok(statistical);
-  assert.ok(display);
+  assert.ok(training);
+  assert.ok(diagnostic);
+  assert.notEqual(training.sourceId, diagnostic.sourceId);
   assert.equal(getPracticeSourceUsageEligibility(statistical, "statistical-reference").allowed, true);
   assert.equal(getPracticeSourceUsageEligibility(statistical, "production-display").allowed, false);
-  assert.equal(getPracticeSourceUsageEligibility(display, "production-display").allowed, true);
+  assert.equal(getPracticeSourceUsageEligibility(training, "production-display").allowed, true);
+  assert.equal(getPracticeSourceUsageEligibility(diagnostic, "production-display").allowed, true);
   assert.equal(statistical.usageApproval, "statistical-only");
-  assert.equal(display.usageApproval, "practice-display-approved");
+  assert.equal(training.usageApproval, "practice-display-approved");
+  assert.equal(diagnostic.usageApproval, "practice-display-approved");
   assert.equal(statistical.sourceChecksum, loaded.reference.bindings.statisticalSourceChecksum);
-  assert.equal(display.sourceChecksum, loaded.practice.bindings.displaySourceChecksum);
-  const governedSubsetChecksum = sha({ registryVersion: loaded.sourceRegistry.registryVersion, statisticalSource: statistical, displaySource: display });
+  assert.equal(training.sourceChecksum, loaded.practice.bindings.displaySourceChecksum);
+  assert.equal(diagnostic.sourceChecksum, loaded.check.bindings.displaySourceChecksum);
+  const governedSubsetChecksum = sha({
+    registryVersion: loaded.sourceRegistry.registryVersion,
+    statisticalSource: statistical,
+    trainingSource: training,
+    diagnosticSource: diagnostic,
+  });
   assert.equal(governedSubsetChecksum, loaded.reference.bindings.sourceRegistryChecksum);
   assert.equal(governedSubsetChecksum, loaded.practice.bindings.sourceRegistryChecksum);
   assert.equal(governedSubsetChecksum, loaded.check.bindings.sourceRegistryChecksum);
 });
 
-test("PL28 governed source snapshot binds the reviewed upstream words to canonical PL7 word identity", async () => {
+test("PL28 governed source snapshot binds reviewed upstream words and both display roles to canonical PL7 word identity", async () => {
   const loaded = await loadAll();
   assert.equal(loaded.sourceSnapshot.words.length, 1200);
   assert.equal(loaded.sourceSnapshot.checksum, loaded.reference.bindings.sourceSnapshotChecksum);
   assert.equal(loaded.sourceSnapshot.sourceRegistryVersion, loaded.sourceRegistry.registryVersion);
   assert.equal(loaded.sourceSnapshot.statisticalSourceId, loaded.reference.bindings.statisticalSourceId);
-  assert.equal(loaded.sourceSnapshot.displaySourceId, loaded.practice.bindings.displaySourceId);
+  assert.equal(loaded.sourceSnapshot.trainingSourceId, loaded.practice.bindings.displaySourceId);
+  assert.equal(loaded.sourceSnapshot.trainingSourceChecksum, loaded.practice.bindings.displaySourceChecksum);
+  assert.equal(loaded.sourceSnapshot.diagnosticSourceId, loaded.check.bindings.displaySourceId);
+  assert.equal(loaded.sourceSnapshot.diagnosticSourceChecksum, loaded.check.bindings.displaySourceChecksum);
   const referenceByKey = new Map(loaded.reference.words.map((word) => [word.lexicalKey, word]));
   for (const word of loaded.sourceSnapshot.words) {
     assert.equal(word.wordId, `word:${word.lexicalKey}`);
@@ -100,7 +114,7 @@ test("PL28 Practice and Check artifacts bind to the same canonical reference and
   }
 });
 
-test("PL28 Practice and Check preserve independent display partitions while sharing only canonical lexical identity", async () => {
+test("PL28 Practice and Check preserve independent display partitions and source identities while sharing canonical lexical identity", async () => {
   const loaded = await loadAll();
   assert.equal(loaded.reference.rankingSource.usageApproval, "statistical-only");
   assert.equal(loaded.practice.partition, "training");
@@ -113,4 +127,5 @@ test("PL28 Practice and Check preserve independent display partitions while shar
   assert.notEqual(loaded.check.displayProvenance.sourceType, "statistical-reference");
   assert.equal(loaded.practice.displayProvenance.sourceId, loaded.practice.bindings.displaySourceId);
   assert.equal(loaded.check.displayProvenance.sourceId, loaded.check.bindings.displaySourceId);
+  assert.notEqual(loaded.practice.bindings.displaySourceId, loaded.check.bindings.displaySourceId);
 });
