@@ -19,7 +19,8 @@ assert.match(ui12Presentation, /class="ui12-sound-toggle/);
 assert.doesNotMatch(ui12Presentation, /class="toggle ui12-sound-toggle/);
 assert.match(ui12Presentation, /data-ui12-sound-toggle role="switch"/);
 assert.doesNotMatch(ui12Presentation, /ui12-sound-toggle-track/);
-assert.match(ui12Css, /\.settings-screen \.ui12-sound-toggle\[role="switch"\][\s\S]*min-width:\s*4\.25rem[\s\S]*min-height:\s*44px[\s\S]*border-radius:\s*999px/);
+assert.match(ui12Css, /\.settings-screen \.settings-list \.toggle\[role="switch"\],[\s\S]*\.settings-screen \.ui12-sound-toggle\[role="switch"\]\s*\{[\s\S]*min-height:\s*44px/);
+assert.match(ui12Css, /\.settings-screen \.ui12-sound-toggle\[role="switch"\][\s\S]*min-width:\s*4\.25rem[\s\S]*border-radius:\s*999px/);
 
 // Mobile/touch cleanup must remove desktop keyboard legends without deleting desktop markup.
 assert.match(uiSource, /title-keyboard-hint/);
@@ -38,4 +39,4 @@ assert.match(modes, /id: MODE_IDS\.PRACTICE,[\s\S]*enabled: false,[\s\S]*status:
 assert.match(ui12Css, /#app > \.screen:not\(\.practice-lab-screen\)/);
 assert.doesNotMatch(ui12Css, /(^|\n)\s*\.practice-lab-screen\s*\{/);
 
-console.log("Forensic visual QA source contracts passed: Boss label uniqueness, Settings switch grammar, mobile/touch hint cleanup, disabled-mode legibility, and Practice isolation.");
+console.log("Forensic visual QA source contracts passed: Boss label uniqueness, 44px Settings switch grammar, mobile/touch hint cleanup, disabled-mode legibility, and Practice isolation.");
