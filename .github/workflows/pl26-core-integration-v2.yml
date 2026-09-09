@@ -22,7 +22,6 @@ jobs:
           python - <<'PY'
           from pathlib import Path
 
-          # PL8: expose the exact transition-eligibility logic and route the existing classifier through it.
           p = Path('js/practiceLab/practiceLatencyClassifier.js')
           text = p.read_text()
           start = text.index('function deriveCandidates(events, policy) {')
@@ -63,7 +62,6 @@ jobs:
           '''
           p.write_text(text[:start] + replacement + text[end:])
 
-          # Session engine: forward processed canonical event facts only.
           p = Path('js/practiceLab/practiceSessionEngineLegacy.js')
           text = p.read_text()
           anchor = '  const sessionError = (code, message, operation, recoverable = false, cause = null, details = null) => {'
@@ -86,7 +84,6 @@ jobs:
           text = text.replace(correction, correction_new, 1)
           p.write_text(text)
 
-          # PL14: optional per-stage adjusted pace from PL26, legacy global adjustment retained as fallback.
           p = Path('js/practiceLab/practiceControlFrontier.js')
           text = p.read_text()
           old_keys = 'const STAGE_KEYS = new Set(["stageId", "stageOrdinal", "plannedPaceWpm", "observedWpm", "accuracy", "disfluencyRate", "correctionCostRate", "correctionCostMs", "activeDurationMs", "typedCharacterCount", "interrupted", "majorPauseCount"]);'
@@ -106,7 +103,6 @@ jobs:
           text = text.replace(old_log, '      difficultyAdjustmentLog,', 1)
           p.write_text(text)
 
-          # Catalog: dedicated Pace Ladder experiment using the frozen PL26 protocol.
           p = Path('js/practiceLab/practiceExperimentCatalog.js')
           text = p.read_text()
           ids_old = '  "burst-sprints", "common-words", "real-text", "consistency-trainer", "metronome-typing",'
@@ -140,6 +136,7 @@ jobs:
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add js/practiceLab/practiceLatencyClassifier.js js/practiceLab/practiceSessionEngineLegacy.js js/practiceLab/practiceControlFrontier.js js/practiceLab/practiceExperimentCatalog.js data/practice/real-text/en-v1/real-text-pool-v1.json
+          git add js/practiceLab/practiceLatencyClassifier.js js/practiceLab/practiceSessionEngineLegacy.js js/practiceLab/practiceControlFrontier.js js/practiceLab/practiceExperimentCatalog.js
+          git add -A data/practice/real-text || true
           git commit -m 'PL26: integrate Pace Ladder measurement hooks'
           git push
