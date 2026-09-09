@@ -168,6 +168,28 @@ def certify_interaction_consistency(browser, browser_name, base, evidence):
     context.close()
 
 
+def certify_selection_isolation(browser, browser_name, base, evidence):
+    context = new_context(browser, base)
+    page = context.new_page()
+    open_title(page, base)
+
+    selection = page.evaluate("""() => {
+      const migrated = document.querySelector('.title-screen');
+      const migratedStyle = getComputedStyle(migrated, '::selection');
+      document.querySelector('#app').innerHTML = '<section class="screen practice-lab-screen"><p id="ui12-practice-selection">Practice text</p></section>';
+      const practice = document.querySelector('#ui12-practice-selection');
+      const practiceStyle = getComputedStyle(practice, '::selection');
+      return {
+        migratedBackground: migratedStyle.backgroundColor,
+        practiceBackground: practiceStyle.backgroundColor,
+      };
+    }""")
+    assert "0, 255, 242" in selection["migratedBackground"], selection
+    assert "0, 255, 242" not in selection["practiceBackground"], selection
+    evidence.append({"browser": browser_name, "case": "selection styling respects Practice boundary", **selection})
+    context.close()
+
+
 def certify_mobile(browser, browser_name, base, evidence):
     context = new_context(browser, base, width=390, height=360)
     page = context.new_page()
@@ -220,6 +242,7 @@ def main():
                 browser = getattr(playwright, browser_name).launch(headless=True)
                 certify_audio(browser, browser_name, base, result["checks"])
                 certify_interaction_consistency(browser, browser_name, base, result["checks"])
+                certify_selection_isolation(browser, browser_name, base, result["checks"])
                 certify_mobile(browser, browser_name, base, result["checks"])
                 certify_reduced_motion(browser, browser_name, base, result["checks"])
                 browser.close()
