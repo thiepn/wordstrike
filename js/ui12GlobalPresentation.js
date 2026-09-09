@@ -28,7 +28,7 @@ function audioSettingMarkup(enabled) {
       <h2 id="ui12-audio-setting-heading">Interface sound effects</h2>
       <p>Short confirmation tones for navigation and controls. Typing itself stays silent.</p>
     </div>
-    <button type="button" class="toggle ui12-sound-toggle ${enabled ? "on" : ""}"
+    <button type="button" class="ui12-sound-toggle ${enabled ? "on" : ""}"
       data-ui12-sound-toggle role="switch" aria-checked="${enabled}" aria-label="Interface sound effects">${enabled ? "ON" : "OFF"}</button>
   </section>`;
 }
