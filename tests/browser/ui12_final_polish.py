@@ -59,9 +59,12 @@ def new_context(browser, base, width=1440, height=900, reduced=False, legacy_sav
     context.add_init_script(ONBOARDING_SEED)
     context.add_init_script(AUDIO_STUB)
     if legacy_save:
-        context.add_init_script("""(() => localStorage.setItem('wordstrike_save', JSON.stringify({
-          currentFurthestLevel: 1, levels: {}, settings: {screenShake:true,particles:true,strictMode:false,speedTestTimerPosition:'center',speedTestFontSize:'auto'}
-        })))();""")
+        context.add_init_script("""(() => {
+          if (localStorage.getItem('wordstrike_save') != null) return;
+          localStorage.setItem('wordstrike_save', JSON.stringify({
+            currentFurthestLevel: 1, levels: {}, settings: {screenShake:true,particles:true,strictMode:false,speedTestTimerPosition:'center',speedTestFontSize:'auto'}
+          }));
+        })();""")
     local_only(context, base)
     return context
 
