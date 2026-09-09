@@ -7,7 +7,8 @@ import {
 
 test("canonical Practice catalog contains every stable experiment exactly once", () => {
   assert.deepEqual(PRACTICE_EXPERIMENT_CATALOG.map(({ id }) => id), PRACTICE_EXPERIMENT_IDS);
-  assert.equal(new Set(PRACTICE_EXPERIMENT_IDS).size, 15);
+  assert.equal(new Set(PRACTICE_EXPERIMENT_IDS).size, 16);
+  assert.equal(PRACTICE_EXPERIMENT_IDS.includes("pace-ladder"), true);
   assert.equal(validatePracticeExperimentCatalog(PRACTICE_EXPERIMENT_CATALOG).valid, true);
   assert.equal(PRACTICE_EXPERIMENT_CATALOG.every(({ status }) => ["planned", "preview"].includes(status)), true);
 });

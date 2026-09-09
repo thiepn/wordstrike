@@ -18,6 +18,42 @@
       "snapshotPath": "authoring/en-v1.source.json",
       "usageApproval": "practice-display-approved",
       "notes": "Small PL6 foundation corpus only; not production-complete coverage."
+    },
+    {
+      "sourceId": "ws-original-en-pace-ladder-v1",
+      "title": "WordStrike Pace Ladder English Diagnostic Template Source v1",
+      "sourceType": "wordstrike-original",
+      "upstream": null,
+      "license": {
+        "name": "WordStrike-authored original corpus material",
+        "spdx": null,
+        "url": null,
+        "attributionRequired": false,
+        "notes": "Original diagnostic natural-text material authored for the Pace Ladder protocol."
+      },
+      "retrievedAt": null,
+      "sourceChecksum": "sha256-77c30534ae24da1a34bf45b285caf9efa91519041dab328dd04553b3867be0bf",
+      "snapshotPath": "pace-ladder/en-v1/source.json",
+      "usageApproval": "practice-display-approved",
+      "notes": "Diagnostic-only source material for PL26 Pace Ladder forms; not part of protected evaluation pools."
+    },
+    {
+      "sourceId": "ws-original-en-frequency-v1",
+      "title": "WordStrike English Typability Frequency Bands v1",
+      "sourceType": "wordstrike-original",
+      "upstream": null,
+      "license": {
+        "name": "WordStrike-authored statistical reference",
+        "spdx": null,
+        "url": null,
+        "attributionRequired": false,
+        "notes": "Curated frequency-band reference used only for Practice typability statistics."
+      },
+      "retrievedAt": null,
+      "sourceChecksum": "sha256-f6e9613d84a62b21df8a61a12b2b9c001190cfacefdc99ba808623063493b018",
+      "snapshotPath": "provenance/frequency/en-v1.frequency.json",
+      "usageApproval": "statistical-only",
+      "notes": "Governed statistical reference for PL10 typability coverage; it is not user-facing corpus content."
     }
   ]
 }
