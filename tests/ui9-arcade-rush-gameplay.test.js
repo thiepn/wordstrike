@@ -30,9 +30,14 @@ assert.match(presentation, /data\.ui9Integrity/);
 assert.match(presentation, /data\.ui9ComboTier/);
 assert.match(presentation, /data\.ui9Phase/);
 assert.match(presentation, /attributeFilter:\s*\["hidden"\]/);
+assert.match(presentation, /dev-mode-indicator/);
+assert.match(presentation, /pointerEvents = "none"/);
 assert.doesNotMatch(presentation, /localStorage|sessionStorage|fetch\(|Supabase|leaderboard/i);
 assert.doesNotMatch(presentation, /arcadeRushRuntime|arcadeRushScoring|buildArcadeRushSessionResult/);
-assert.doesNotMatch(presentation, /practice/i);
+assert.doesNotMatch(
+  presentation,
+  /practiceLab|MODE_IDS\.PRACTICE|data-mode-id=["']practice|renderPractice|practiceRoute/i,
+);
 
 assert.match(css, /UI9/);
 assert.match(css, /\.arcade-rush-ui\.arcade-rush-ready \.arcade-rush-ready-card[\s\S]*border:\s*0[\s\S]*background:\s*transparent/);
