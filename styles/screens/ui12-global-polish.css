@@ -1,0 +1,269 @@
+/* UI12 — Final motion / audio / global consistency pass.
+   Scoped to active non-Practice product surfaces. No screen composition ownership moves here. */
+
+:root {
+  --ui12-focus-outline: 2px solid var(--color-accent, #00fff2);
+  --ui12-focus-offset: 2px;
+}
+
+/* Keep selection readable and consistent with the player/accent semantic. */
+::selection {
+  background: rgb(0 255 242 / 0.24);
+  color: var(--color-text-primary, #edf4f7);
+}
+
+/* All active-product controls share the same practical interaction baseline. */
+#app > .screen:not(.practice-lab-screen) :is(
+  button,
+  a[href],
+  [role="button"],
+  [role="tab"],
+  [role="switch"]
+),
+.onboarding-root :is(button, a[href], [role="button"], [role="tab"], [role="switch"]) {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+#app > .screen:not(.practice-lab-screen) :is(
+  button,
+  a[href],
+  [role="button"],
+  [role="tab"],
+  [role="switch"]
+):focus-visible,
+.onboarding-root :is(button, a[href], [role="button"], [role="tab"], [role="switch"]):focus-visible {
+  outline: var(--ui12-focus-outline);
+  outline-offset: var(--ui12-focus-offset);
+}
+
+#app > .screen:not(.practice-lab-screen) :is(
+  button,
+  [role="button"],
+  [role="tab"],
+  [role="switch"]
+):disabled,
+#app > .screen:not(.practice-lab-screen) :is(
+  button,
+  [role="button"],
+  [role="tab"],
+  [role="switch"]
+)[aria-disabled="true"] {
+  cursor: default;
+  transform: none;
+}
+
+/* Finalize common utility action rhythm without overriding gameplay/cinematic transforms. */
+#app > .screen:not(.practice-lab-screen) :is(
+  .screen-back-button,
+  .tutorial-help-button,
+  .text-action,
+  .profile-tabs button,
+  .recent-filters button,
+  .leaderboard-tabs button,
+  .leaderboard-duration-tabs button,
+  .leaderboard-actions button,
+  .settings-tutorial-grid button,
+  .settings-tutorial-resets button,
+  .toggle,
+  .ui12-sound-toggle
+) {
+  transition:
+    background-color var(--motion-fast, 140ms) var(--ease-standard, ease),
+    border-color var(--motion-fast, 140ms) var(--ease-standard, ease),
+    color var(--motion-fast, 140ms) var(--ease-standard, ease),
+    opacity var(--motion-fast, 140ms) var(--ease-standard, ease),
+    transform var(--motion-fast, 140ms) var(--ease-standard, ease),
+    box-shadow var(--motion-fast, 140ms) var(--ease-standard, ease);
+}
+
+#app > .screen:not(.practice-lab-screen) :is(
+  .profile-tabs button,
+  .recent-filters button,
+  .leaderboard-tabs button,
+  .leaderboard-duration-tabs button,
+  .text-action,
+  .toggle,
+  .ui12-sound-toggle
+):active {
+  transform: translateY(0);
+}
+
+/* ================================================================
+   AUDIO SETTING — separate from the three gameplay behavior toggles.
+   It remains native-focusable and explicitly documented by the Settings hint.
+   ================================================================ */
+
+.settings-screen .ui12-audio-setting {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 1rem;
+  margin: clamp(1.25rem, 3vw, 2rem) 0;
+  padding: 1rem 0;
+  border-top: 1px solid var(--color-border-subtle, rgb(142 160 174 / 0.16));
+  border-bottom: 1px solid var(--color-border-subtle, rgb(142 160 174 / 0.16));
+}
+
+.settings-screen .ui12-audio-copy {
+  min-width: 0;
+}
+
+.settings-screen .ui12-section-label {
+  display: block;
+  margin-bottom: 0.35rem;
+  color: var(--color-text-muted, #8f9ba5);
+  font-size: var(--text-micro, 0.6875rem);
+  font-weight: 700;
+  letter-spacing: var(--tracking-micro, 0.11em);
+}
+
+.settings-screen .ui12-audio-setting h2 {
+  margin: 0;
+  color: var(--color-text-primary, #edf4f7);
+  font-size: clamp(1rem, 2vw, 1.2rem);
+  line-height: 1.25;
+  letter-spacing: -0.015em;
+}
+
+.settings-screen .ui12-audio-setting p {
+  max-width: 46rem;
+  margin: 0.4rem 0 0;
+  color: var(--color-text-secondary, #c1cbd2);
+  font-size: 0.78rem;
+  line-height: 1.55;
+}
+
+.settings-screen .ui12-sound-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  min-width: 7.5rem;
+  min-height: 44px;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--color-border-default, rgb(142 160 174 / 0.28));
+  border-radius: var(--radius-md, 6px);
+  background: var(--color-surface-1, #101720);
+  color: var(--color-text-secondary, #c1cbd2);
+  cursor: pointer;
+}
+
+.settings-screen .ui12-sound-toggle:hover,
+.settings-screen .ui12-sound-toggle:focus-visible {
+  border-color: var(--color-border-strong, rgb(176 193 205 / 0.44));
+  background: var(--color-surface-hover, #1b2835);
+  color: var(--color-text-primary, #edf4f7);
+}
+
+.settings-screen .ui12-sound-toggle.on {
+  border-color: rgb(0 255 242 / 0.42);
+  color: var(--color-accent, #00fff2);
+}
+
+.settings-screen .ui12-sound-toggle-track {
+  position: relative;
+  display: inline-block;
+  width: 2rem;
+  height: 1rem;
+  border: 1px solid var(--color-border-strong, rgb(176 193 205 / 0.44));
+  border-radius: 999px;
+  background: var(--color-bg, #0a0e14);
+}
+
+.settings-screen .ui12-sound-toggle-track i {
+  position: absolute;
+  top: 50%;
+  left: 0.16rem;
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  background: var(--color-text-muted, #8f9ba5);
+  transform: translateY(-50%);
+  transition:
+    left var(--motion-fast, 140ms) var(--ease-standard, ease),
+    background-color var(--motion-fast, 140ms) var(--ease-standard, ease);
+}
+
+.settings-screen .ui12-sound-toggle.on .ui12-sound-toggle-track i {
+  left: 1.08rem;
+  background: var(--color-accent, #00fff2);
+}
+
+.settings-screen .ui12-sound-toggle strong {
+  min-width: 2.2rem;
+  font-family: var(--font-game, monospace);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+}
+
+/* Touch devices should not inherit desktop hover lift from earlier phases. */
+@media (hover: none), (pointer: coarse) {
+  #app > .screen:not(.practice-lab-screen) :is(
+    .arcade-button,
+    .ui-button,
+    .title-nav-action,
+    .mode-option,
+    .mode-home-action,
+    .screen-back-button,
+    .gameplay-pause-button,
+    .gameplay-control-button,
+    .tutorial-help-button,
+    .text-action,
+    .profile-tabs button,
+    .recent-filters button,
+    .leaderboard-tabs button,
+    .leaderboard-duration-tabs button,
+    .toggle,
+    .ui12-sound-toggle
+  ):hover {
+    transform: none;
+  }
+}
+
+@media (max-width: 680px) {
+  .settings-screen .ui12-audio-setting {
+    grid-template-columns: 1fr;
+  }
+
+  .settings-screen .ui12-sound-toggle {
+    width: 100%;
+  }
+}
+
+/* One final reduced-motion safety net for every migrated surface. It deliberately
+   excludes Practice Lab and does not remove static geometry transforms. */
+@media (prefers-reduced-motion: reduce) {
+  #app > .screen:not(.practice-lab-screen) *,
+  #app > .screen:not(.practice-lab-screen) *::before,
+  #app > .screen:not(.practice-lab-screen) *::after,
+  .onboarding-root *,
+  .onboarding-root *::before,
+  .onboarding-root *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  #app > .screen:not(.practice-lab-screen) :is(
+    .arcade-button,
+    .ui-button,
+    .title-nav-action,
+    .mode-option,
+    .mode-home-action,
+    .screen-back-button,
+    .gameplay-pause-button,
+    .gameplay-control-button,
+    .tutorial-help-button,
+    .text-action,
+    .profile-tabs button,
+    .recent-filters button,
+    .leaderboard-tabs button,
+    .leaderboard-duration-tabs button,
+    .toggle,
+    .ui12-sound-toggle
+  ):hover {
+    transform: none !important;
+  }
+}
