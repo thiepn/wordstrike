@@ -229,6 +229,12 @@ export function createPracticeSessionEngine({
     }
   };
 
+  const processExperimentInputEvent = (event) => {
+  if (typeof experiment?.onProcessedInput !== "function") return;
+  try { experiment.onProcessedInput(freezeDeep(clonePracticeValue(event))); }
+  catch (cause) { logger?.warn?.("Practice processed-input experiment callback failed", { cause }); }
+};
+
   const sessionError = (code, message, operation, recoverable = false, cause = null, details = null) => {
     lastErrorCode = code;
     return practiceSessionError(code, message, {
@@ -457,6 +463,7 @@ export function createPracticeSessionEngine({
         eventBuffer.push(errorEvent);
         errorTracker.consume(errorEvent);
         for (const episode of errorTracker.drainClosedEpisodes()) processClosedErrorEpisode(episode);
+        processExperimentInputEvent(errorEvent);
         hasInsertionInTimingSegment = true;
         markDirty(true);
       }
@@ -481,6 +488,7 @@ export function createPracticeSessionEngine({
       eventBuffer.push(errorEvent);
       errorTracker.consume(errorEvent);
       for (const episode of errorTracker.drainClosedEpisodes()) processClosedErrorEpisode(episode);
+      processExperimentInputEvent(errorEvent);
     }
     const completionReason = outcome.accepted ? evaluateCompletion() : null;
     const snapshot = emit("input");
