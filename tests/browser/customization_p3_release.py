@@ -167,8 +167,9 @@ def certify_typing_views(browser, engine, base, checks):
         page.goto(base + "?dev=1&mode=speed-test&seed=904")
         expect(page.locator(".speed-test-screen")).to_be_visible()
         panel = open_panel(page, "typing")
-        select_mode(panel, "typingTest.hudLayout", hud)
+        # Set the saved live-stat choice before Focus disables that selector.
         select_mode(panel, "typingTest.liveStats", True)
+        select_mode(panel, "typingTest.hudLayout", hud)
         panel.locator("summary").click()
         expect(page.locator(".speed-test-screen")).to_have_attribute("data-typing-hud", hud)
         expect(page.locator("#speed-test-primary")).to_be_visible()
