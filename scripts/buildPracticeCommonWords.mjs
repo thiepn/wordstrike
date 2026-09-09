@@ -135,13 +135,9 @@ if (unique.length !== 1200) throw new Error("Common-word statistical source does
 const words = unique.map((entry, index) => ({ wordId: wordIdFor(entry.word), lexicalKey: entry.word, rank: index + 1, sourceRank: entry.frequencyRank, band: bandFor(index + 1) }));
 if (new Set(words.map((word) => word.lexicalKey)).size !== 1200 || new Set(words.map((word) => word.wordId)).size !== 1200) throw new Error("Duplicate common-word canonical identity");
 
-const sourceRegistryBinding = {
-  registryVersion: sourceRegistry.registryVersion,
-  statisticalSource,
-  trainingSource,
-  diagnosticSource,
-};
-const sourceRegistryChecksum = sha(sourceRegistryBinding);
+const statisticalRegistryChecksum = sha({ registryVersion: sourceRegistry.registryVersion, statisticalSource });
+const trainingRegistryChecksum = sha({ registryVersion: sourceRegistry.registryVersion, displaySource: trainingSource });
+const diagnosticRegistryChecksum = sha({ registryVersion: sourceRegistry.registryVersion, displaySource: diagnosticSource });
 const sourceBinding = {
   sourcePath: "data/commonGameplayWords.json",
   sourceSchemaVersion: source.schemaVersion,
@@ -156,13 +152,15 @@ const sourceSnapshotCore = {
   schemaVersion: 1,
   language: "en",
   sourceRegistryVersion: sourceRegistry.registryVersion,
-  sourceRegistryChecksum,
+  sourceRegistryChecksum: statisticalRegistryChecksum,
   statisticalSourceId: statisticalSource.sourceId,
   statisticalSourceChecksum: statisticalSource.sourceChecksum,
   trainingSourceId: trainingSource.sourceId,
   trainingSourceChecksum: trainingSource.sourceChecksum,
+  trainingSourceRegistryChecksum: trainingRegistryChecksum,
   diagnosticSourceId: diagnosticSource.sourceId,
   diagnosticSourceChecksum: diagnosticSource.sourceChecksum,
+  diagnosticSourceRegistryChecksum: diagnosticRegistryChecksum,
   upstream: sourceBinding,
   lexicalPolicy: { entityType: "word", identity: "PL7 entityType + lexicalKey", lowercaseOnly: true, punctuation: false, contractions: false },
   words: words.map(({ wordId, lexicalKey, sourceRank }) => ({ wordId, lexicalKey, sourceRank })),
@@ -185,7 +183,7 @@ const foundationBindings = {
 const referenceBindings = {
   ...foundationBindings,
   sourceRegistryVersion: sourceRegistry.registryVersion,
-  sourceRegistryChecksum,
+  sourceRegistryChecksum: statisticalRegistryChecksum,
   statisticalSourceId: statisticalSource.sourceId,
   statisticalSourceChecksum: statisticalSource.sourceChecksum,
   sourceSnapshotChecksum: sourceSnapshot.checksum,
@@ -212,15 +210,16 @@ const commonReferenceBindings = {
   sourceChecksum: reference.checksum,
 };
 const displayWords = words.map(({ wordId, lexicalKey, rank, band }) => ({ wordId, lexicalKey, rank, band }));
-const flowBindings = (displaySource) => ({
+const flowBindings = (displaySource, displayRegistryChecksum) => ({
   ...commonReferenceBindings,
   displaySourceId: displaySource.sourceId,
   displaySourceChecksum: displaySource.sourceChecksum,
+  displaySourceRegistryChecksum: displayRegistryChecksum,
 });
-const displayProvenance = (displaySource, partition) => ({
+const displayProvenance = (displaySource, displayRegistryChecksum, partition) => ({
   sourceId: displaySource.sourceId,
   sourceRegistryVersion: sourceRegistry.registryVersion,
-  sourceRegistryChecksum,
+  sourceRegistryChecksum: displayRegistryChecksum,
   sourceType: displaySource.sourceType,
   usageApproval: displaySource.usageApproval,
   sourceChecksum: displaySource.sourceChecksum,
@@ -231,8 +230,8 @@ const displayProvenance = (displaySource, partition) => ({
 const practiceCore = {
   bankId: "WS-COMMON-PRACTICE-EN-1", bankVersion: 1, referenceId: reference.referenceId, referenceVersion: reference.referenceVersion,
   language: "en", status: "ready", partition: "training",
-  displayProvenance: displayProvenance(trainingSource, "training"),
-  bindings: flowBindings(trainingSource),
+  displayProvenance: displayProvenance(trainingSource, trainingRegistryChecksum, "training"),
+  bindings: flowBindings(trainingSource, trainingRegistryChecksum),
   words: displayWords,
 };
 const practice = { ...practiceCore, checksum: sha(practiceCore) };
@@ -243,8 +242,8 @@ const typabilityMatching = assertPracticeCommonWordCheckTypability({ forms, typa
 const checkCore = {
   bankId: "WS-COMMON-CHECK-EN-1", formSetId: "WS-COMMON-CHECK-EN-1", bankVersion: 1, schemaVersion: 1, generatorVersion: 1,
   referenceId: reference.referenceId, referenceVersion: reference.referenceVersion, language: "en", status: "ready", partition: "diagnostic",
-  displayProvenance: displayProvenance(diagnosticSource, "diagnostic"),
-  bindings: flowBindings(diagnosticSource),
+  displayProvenance: displayProvenance(diagnosticSource, diagnosticRegistryChecksum, "diagnostic"),
+  bindings: flowBindings(diagnosticSource, diagnosticRegistryChecksum),
   diagnosticPool: displayWords,
   matching: { engineeringMatched: true, empiricalEquating: false, maximumPairwiseLexicalOverlapRatio, note: "Length distributions are matched deterministically by band; canonical PL10 difficulty is rechecked at runtime/foundation analysis." },
   forms,
@@ -265,7 +264,7 @@ console.log(JSON.stringify({
   difficultySpread: typabilityMatching.difficultySpread,
   maximumFeatureRmsDistance: typabilityMatching.maximumWeightedRmsDistance,
   relativePercentileSpread: typabilityMatching.relativePercentileSpread,
-  sourceRegistryChecksum,
+  sourceRegistryChecksums: { statistical: statisticalRegistryChecksum, training: trainingRegistryChecksum, diagnostic: diagnosticRegistryChecksum },
   sourceSnapshotChecksum: sourceSnapshot.checksum,
   bindings: { practice: practice.bindings, check: check.bindings },
   referenceChecksum: reference.checksum,
