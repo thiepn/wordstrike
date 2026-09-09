@@ -109,6 +109,8 @@ def snapshot(page):
       const core = document.querySelector('.endless-core');
       const progress = document.querySelector('[data-endless-stage-progress]');
       const trigger = document.querySelector('.endless-keyboard-trigger');
+      const survivalMetric = document.querySelector('.endless-hud-survival');
+      const pressureMetric = document.querySelector('.endless-hud-pressure');
       const triggerStyle = trigger ? getComputedStyle(trigger) : null;
       const triggerBox = trigger?.getBoundingClientRect();
       return {
@@ -130,6 +132,10 @@ def snapshot(page):
         imminent: document.querySelectorAll('.endless-word-imminent').length,
         activeBoxes: getComputedStyle(document.querySelector('.word-visual.active')).borderTopWidth,
         bannerText: document.querySelector('#endless-stage-banner')?.textContent,
+        survivalMetricHeight: survivalMetric?.getBoundingClientRect().height || 0,
+        pressureMetricHeight: pressureMetric?.getBoundingClientRect().height || 0,
+        survivalCompactCue: survivalMetric ? getComputedStyle(survivalMetric, '::before').content : null,
+        pressureCompactCue: pressureMetric ? getComputedStyle(pressureMetric, '::before').content : null,
         keyboardText: trigger?.textContent?.trim() || null,
         keyboardDisplay: triggerStyle?.display || null,
         keyboardHeight: triggerBox?.height || 0,
@@ -203,6 +209,10 @@ def certify_mobile(browser, browser_name, base, evidence):
         assert short["playHeight"] >= 180, short
         assert short["keyboardDisplay"] != "none", short
         assert short["keyboardHeight"] >= 44, short
+        assert short["survivalMetricHeight"] <= 18, short
+        assert short["pressureMetricHeight"] <= 18, short
+        assert "TIME" in (short["survivalCompactCue"] or ""), short
+        assert "LOAD" in (short["pressureCompactCue"] or ""), short
         evidence.append({"browser": browser_name, "case": "390x360", **short})
 
     evidence.append({"browser": browser_name, "case": "mobile", **state})
