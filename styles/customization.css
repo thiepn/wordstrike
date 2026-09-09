@@ -65,18 +65,21 @@ html[data-customization-active="true"][data-effective-effects="reduced"] :is(
   .mode-showcase-visual, .boss-threat-sigil, .campaign-core-field, .endless-core-field
 ) { filter: none; }
 html[data-customization-active="true"][data-effective-effects="reduced"] :is(
-  .mode-showcase-visual *, .mode-showcase-visual *::before,
+  .mode-showcase-visual *,
   .boss-threat-sigil, .boss-threat-sigil *,
   .campaign-core-orbit, .campaign-core-reactor,
   .endless-core-orbit, .endless-core-reactor,
-  .arcade-rush-core::before, .arcade-rush-countdown
+  .arcade-rush-countdown
 ) { animation: none !important; }
-html[data-customization-active="true"][data-effective-effects="reduced"] :is(
-  .mode-showcase::after, .burst
-) { display: none; }
+html[data-customization-active="true"][data-effective-effects="reduced"] .burst { display: none; }
 html[data-customization-active="true"][data-effective-effects="reduced"] :is(
   .title-nav-action, .mode-option, .screen-back-button, .text-action, .appearance-row select
 ) { transition-duration: 0s; }
+
+/* Pseudo-elements must be standalone selectors, not arguments of :is(). */
+html[data-customization-active="true"][data-effective-effects="reduced"] .mode-showcase-visual *::before,
+html[data-customization-active="true"][data-effective-effects="reduced"] .arcade-rush-core::before { animation: none !important; }
+html[data-customization-active="true"][data-effective-effects="reduced"] .mode-showcase::after { display: none; }
 
 /* Cinematic adds a bounded bloom to decorative objects only; never blur text. */
 html[data-customization-active="true"][data-effective-effects="cinematic"] :is(
@@ -89,7 +92,8 @@ html[data-customization-active="true"][data-effective-effects="cinematic"] {
 }
 @media (prefers-reduced-motion: reduce) {
   /* Also safe if media changes before the JS preference listener runs. */
-  html[data-customization-active="true"] :is(.mode-showcase-visual *, .boss-threat-sigil *, .campaign-core-orbit, .endless-core-orbit, .arcade-rush-core::before) {
+  html[data-customization-active="true"] .arcade-rush-core::before { animation: none !important; }
+  html[data-customization-active="true"] :is(.mode-showcase-visual *, .boss-threat-sigil *, .campaign-core-orbit, .endless-core-orbit) {
     animation: none !important;
   }
   html[data-customization-active="true"] :is(.mode-motif-campaign, .mode-motif-typing, .mode-motif-endless, .mode-motif-rush, .boss-threat-sigil) { filter: none; }
