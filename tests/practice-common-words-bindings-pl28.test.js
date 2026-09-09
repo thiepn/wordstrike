@@ -1,21 +1,26 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs/promises";
+import crypto from "node:crypto";
+import { createPracticeSourceIndex, getPracticeSourceUsageEligibility, resolvePracticeCorpusSource } from "../js/practiceLab/practiceCorpusProvenance.js";
 
 const read = async (relative) => JSON.parse(await fs.readFile(new URL(`../${relative}`, import.meta.url), "utf8"));
+const sha = (value) => `sha256-${crypto.createHash("sha256").update(JSON.stringify(value)).digest("hex")}`;
 
 async function loadAll() {
-  const [reference, practice, check, corpus, index, typabilityManifest, typabilityReference, frequencyReference] = await Promise.all([
+  const [reference, practice, check, sourceSnapshot, sourceRegistry, corpus, index, typabilityManifest, typabilityReference, frequencyReference] = await Promise.all([
     read("data/practice/common-words/en-v1/WS-COMMON-EN-1.reference.json"),
     read("data/practice/common-words/en-v1/WS-COMMON-PRACTICE-EN-1.manifest.json"),
     read("data/practice/common-words/en-v1/WS-COMMON-CHECK-EN-1.manifest.json"),
+    read("data/practice/common-words/en-v1/WS-COMMON-SOURCE-EN-1.snapshot.json"),
+    read("data/practice/provenance/sources.json"),
     read("data/practice/manifests/en-v1.manifest.json"),
     read("data/practice/indexes/en-v1/manifest.json"),
     read("data/practice/models/en-v1/manifest.json"),
     read("data/practice/models/en-v1/typability-v1.reference.json"),
     read("data/practice/provenance/frequency/en-v1.frequency.json"),
   ]);
-  return { reference, practice, check, corpus, index, typabilityManifest, typabilityReference, frequencyReference };
+  return { reference, practice, check, sourceSnapshot, sourceRegistry, corpus, index, typabilityManifest, typabilityReference, frequencyReference };
 }
 
 function assertFoundationBindings(bindings, loaded) {
@@ -44,6 +49,43 @@ test("PL28 common-word reference is bound to the exact PL4/PL7/PL10 foundation a
   assert.equal(loaded.typabilityManifest.frequencyReferenceChecksum, loaded.frequencyReference.checksum);
 });
 
+test("PL28 statistical and display sources are separately governed by canonical PL6 approval", async () => {
+  const loaded = await loadAll();
+  const index = createPracticeSourceIndex(loaded.sourceRegistry);
+  const statistical = resolvePracticeCorpusSource(loaded.reference.bindings.statisticalSourceId, index);
+  const display = resolvePracticeCorpusSource(loaded.practice.bindings.displaySourceId, index);
+  assert.ok(statistical);
+  assert.ok(display);
+  assert.equal(getPracticeSourceUsageEligibility(statistical, "statistical-reference").allowed, true);
+  assert.equal(getPracticeSourceUsageEligibility(statistical, "production-display").allowed, false);
+  assert.equal(getPracticeSourceUsageEligibility(display, "production-display").allowed, true);
+  assert.equal(statistical.usageApproval, "statistical-only");
+  assert.equal(display.usageApproval, "practice-display-approved");
+  assert.equal(statistical.sourceChecksum, loaded.reference.bindings.statisticalSourceChecksum);
+  assert.equal(display.sourceChecksum, loaded.practice.bindings.displaySourceChecksum);
+  const governedSubsetChecksum = sha({ registryVersion: loaded.sourceRegistry.registryVersion, statisticalSource: statistical, displaySource: display });
+  assert.equal(governedSubsetChecksum, loaded.reference.bindings.sourceRegistryChecksum);
+  assert.equal(governedSubsetChecksum, loaded.practice.bindings.sourceRegistryChecksum);
+  assert.equal(governedSubsetChecksum, loaded.check.bindings.sourceRegistryChecksum);
+});
+
+test("PL28 governed source snapshot binds the reviewed upstream words to canonical PL7 word identity", async () => {
+  const loaded = await loadAll();
+  assert.equal(loaded.sourceSnapshot.words.length, 1200);
+  assert.equal(loaded.sourceSnapshot.checksum, loaded.reference.bindings.sourceSnapshotChecksum);
+  assert.equal(loaded.sourceSnapshot.sourceRegistryVersion, loaded.sourceRegistry.registryVersion);
+  assert.equal(loaded.sourceSnapshot.statisticalSourceId, loaded.reference.bindings.statisticalSourceId);
+  assert.equal(loaded.sourceSnapshot.displaySourceId, loaded.practice.bindings.displaySourceId);
+  const referenceByKey = new Map(loaded.reference.words.map((word) => [word.lexicalKey, word]));
+  for (const word of loaded.sourceSnapshot.words) {
+    assert.equal(word.wordId, `word:${word.lexicalKey}`);
+    const canonical = referenceByKey.get(word.lexicalKey);
+    assert.ok(canonical);
+    assert.equal(canonical.wordId, word.wordId);
+    assert.equal(canonical.sourceRank, word.sourceRank);
+  }
+});
+
 test("PL28 Practice and Check artifacts bind to the same canonical reference and foundation snapshot", async () => {
   const loaded = await loadAll();
   for (const artifact of [loaded.practice, loaded.check]) {
@@ -52,6 +94,7 @@ test("PL28 Practice and Check artifacts bind to the same canonical reference and
     assert.equal(artifact.bindings.commonWordReferenceVersion, loaded.reference.referenceVersion);
     assert.equal(artifact.bindings.commonWordReferenceChecksum, loaded.reference.checksum);
     assert.equal(artifact.bindings.sourceChecksum, loaded.reference.checksum);
+    assert.equal(artifact.bindings.sourceSnapshotChecksum, loaded.sourceSnapshot.checksum);
     assert.equal(artifact.referenceId, loaded.reference.referenceId);
     assert.equal(artifact.referenceVersion, loaded.reference.referenceVersion);
   }
@@ -68,4 +111,6 @@ test("PL28 Practice and Check preserve independent display partitions while shar
   assert.equal(loaded.check.displayProvenance.usageApproval, "practice-display-approved");
   assert.notEqual(loaded.practice.displayProvenance.sourceType, "statistical-reference");
   assert.notEqual(loaded.check.displayProvenance.sourceType, "statistical-reference");
+  assert.equal(loaded.practice.displayProvenance.sourceId, loaded.practice.bindings.displaySourceId);
+  assert.equal(loaded.check.displayProvenance.sourceId, loaded.check.bindings.displaySourceId);
 });
