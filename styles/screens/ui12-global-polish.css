@@ -93,7 +93,7 @@
 }
 
 /* ================================================================
-   AUDIO SETTING — separate category, shared Settings switch grammar.
+   AUDIO SETTING — separate category, visually aligned with UI11 switches.
    ================================================================ */
 
 .settings-screen .ui12-audio-setting {
@@ -136,12 +136,45 @@
   line-height: 1.55;
 }
 
-/* UI11 owns the switch appearance. UI12 only raises the audio target to the
-   final 44px interaction baseline while keeping the same compact pill grammar. */
-.settings-screen .toggle.ui12-sound-toggle[role="switch"] {
+/* Match the UI11 compact pill exactly while keeping the audio switch outside
+   UI11's authoritative .settings-list toggle set. */
+.settings-screen .ui12-sound-toggle[role="switch"] {
+  position: relative;
   min-width: 4.25rem;
   min-height: 44px;
-  align-self: center;
+  padding: 0 0.7rem 0 1.8rem;
+  border: 1px solid var(--ui11-line-strong, rgb(129 144 158 / 0.28));
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.025);
+  color: var(--ui11-muted, var(--color-text-muted, #8f9ba5));
+  box-shadow: none;
+  cursor: pointer;
+  font-size: 0.6rem;
+  font-weight: 720;
+  letter-spacing: 0.07em;
+  text-align: right;
+}
+
+.settings-screen .ui12-sound-toggle[role="switch"]::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0.42rem;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  background: var(--ui11-muted, var(--color-text-muted, #8f9ba5));
+  transform: translateY(-50%);
+}
+
+.settings-screen .ui12-sound-toggle[role="switch"].on {
+  border-color: rgb(0 255 242 / 0.55);
+  background: rgb(0 255 242 / 0.065);
+  color: var(--ui11-cyan, var(--color-accent, #00fff2));
+}
+
+.settings-screen .ui12-sound-toggle[role="switch"].on::before {
+  background: var(--ui11-cyan, var(--color-accent, #00fff2));
 }
 
 /* The unavailable Mode Select entry must remain clearly legible even though it
