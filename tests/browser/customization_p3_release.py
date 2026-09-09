@@ -243,7 +243,10 @@ def certify_campaign_endless(browser, engine, base, checks):
                 page.locator('[data-level="1"]').click()
                 screen = page.locator(".campaign-gameplay-screen")
             else:
-                page.goto(base + "?mode=endless&seed=906")
+                open_title(page, base)
+                page.locator('[data-action="modes"]').click()
+                page.locator('[data-mode-id="endless"]').click()
+                expect(page.locator(".endless-ready-screen")).to_be_visible()
                 panel = open_panel(page, "endless")
                 select_mode(panel, "gameplayHud", hud)
                 page.locator('[data-action="endless-start"]').click()
@@ -282,7 +285,10 @@ def certify_action_modes(browser, engine, base, checks):
 
         context = context_for(browser, base)
         page = context.new_page()
-        page.goto(base + "?mode=arcade-rush&seed=907")
+        open_title(page, base)
+        page.locator('[data-action="modes"]').click()
+        page.locator('[data-mode-id="arcade-rush"]').click()
+        expect(page.locator('[data-rush-view="ready"]')).to_be_visible()
         panel = open_panel(page, "arcade-rush")
         select_mode(panel, "actionModeIntensity", intensity)
         page.locator('[data-rush-action="start"]').click()
