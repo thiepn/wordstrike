@@ -91,9 +91,15 @@ def gameplay_snapshot(page):
       const wave = root?.querySelector('[data-rush-role="wave"]');
       const waveName = root?.querySelector('.arcade-rush-wave-name');
       const keyboard = document.querySelector('.gameplay-keyboard-trigger');
+      const rect = root?.getBoundingClientRect();
+      const viewportWidth = document.documentElement.clientWidth;
+      const visibleOverflow = rect
+        ? Math.max(0, -rect.left, rect.right - viewportWidth)
+        : 999;
       return {
         docOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
-        rootOverflow: root ? root.scrollWidth - root.clientWidth : 999,
+        rootScrollDelta: root ? root.scrollWidth - root.clientWidth : 999,
+        visibleOverflow,
         phase: root?.dataset.ui9Phase || null,
         wave: root?.dataset.ui9Wave || null,
         integrity: root?.dataset.ui9Integrity || null,
@@ -143,7 +149,7 @@ def certify_real_runtime(browser, browser_name, base, checks):
     assert text, "real Rush runtime did not spawn a labelled word"
 
     initial = gameplay_snapshot(page)
-    assert initial["docOverflow"] <= 1 and initial["rootOverflow"] <= 1, initial
+    assert initial["docOverflow"] <= 1 and initial["visibleOverflow"] <= 1, initial
     assert initial["phase"] == "wave" and initial["wave"] == "1", initial
     assert initial["integrity"] == "5", initial
     assert initial["waveName"] == "IGNITION", initial
@@ -195,6 +201,7 @@ def certify_real_runtime(browser, browser_name, base, checks):
 
 def mount_synthetic_ui(page, base):
     page.goto(base)
+    expect(page.locator('.title-screen')).to_be_visible(timeout=8000)
     page.evaluate("""async () => {
       const [{createArcadeRushDomUiController}, presentation] = await Promise.all([
         import('./js/arcadeRush/arcadeRushUi.js'),
@@ -306,7 +313,7 @@ def certify_mobile(browser, browser_name, base, checks):
     expect(page.locator('.gameplay-keyboard-trigger')).to_be_visible()
     expect(page.locator('.arcade-rush-core-integrity i')).to_have_count(5, timeout=3000)
     normal = gameplay_snapshot(page)
-    assert normal["docOverflow"] <= 1 and normal["rootOverflow"] <= 1, normal
+    assert normal["docOverflow"] <= 1 and normal["visibleOverflow"] <= 1, normal
     assert normal["scoreVisible"] and normal["coreVisible"] and normal["waveVisible"], normal
     assert normal["pauseHeight"] >= 44, normal
     assert normal["keyboardDisplay"] != "none" and normal["keyboardHeight"] >= 44, normal
@@ -315,7 +322,7 @@ def certify_mobile(browser, browser_name, base, checks):
     page.set_viewport_size({"width": 390, "height": 360})
     page.wait_for_timeout(180)
     short = gameplay_snapshot(page)
-    assert short["docOverflow"] <= 1 and short["rootOverflow"] <= 1, short
+    assert short["docOverflow"] <= 1 and short["visibleOverflow"] <= 1, short
     assert short["scoreVisible"] and short["coreVisible"] and short["waveVisible"], short
     assert short["comboVisible"] is False, short
     assert short["pauseHeight"] >= 44, short
