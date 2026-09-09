@@ -1,0 +1,19 @@
+/* UI11 narrow-screen visual contract.
+   Keep the Global Leaderboards wordmark legible without orphaning letters. */
+
+@media (max-width: 680px) {
+  .leaderboards-screen[data-ui11-surface="leaderboards"] .leaderboards-panel > h1 {
+    max-width: 100%;
+    font-size: clamp(2.05rem, 10vw, 3rem);
+    letter-spacing: -0.045em;
+    overflow-wrap: normal;
+    word-break: normal;
+    hyphens: none;
+  }
+}
+
+@media (max-width: 430px) {
+  .leaderboards-screen[data-ui11-surface="leaderboards"] .leaderboards-panel > h1 {
+    font-size: clamp(1.95rem, 10vw, 2.75rem);
+  }
+}
