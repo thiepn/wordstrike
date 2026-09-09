@@ -110,7 +110,7 @@ function enhanceHud(screen) {
   pressure.className = "endless-hud-pressure";
   pressure.append(createLabel("PRESSURE"));
   const pressureValue = document.createElement("strong");
-  pressureValue.dataset.endlessPressure = "";
+  pressureValue.dataset.endlessPressureValue = "";
   pressure.append(pressureValue);
 
   const target = document.createElement("span");
@@ -255,7 +255,7 @@ function syncPresentation(screen, game) {
   setText(screen.querySelector("[data-endless-wpm]"), rollingWpm);
   setText(screen.querySelector("[data-endless-combo]"), combo);
   setText(screen.querySelector("[data-endless-survival]"), formatSurvival(game.elapsedMs));
-  setText(screen.querySelector("[data-endless-pressure]"), `${activeWords} / ${activeCap}`);
+  setText(screen.querySelector("[data-endless-pressure-value]"), `${activeWords} / ${activeCap}`);
   setText(screen.querySelector("[data-endless-target-state]"), targetingCopy(game));
 
   const progress = screen.querySelector("[data-endless-stage-progress]");
