@@ -253,7 +253,8 @@ def certify_responsive(browser, name, base, checks):
         select(details, "typingTest.hudLayout", "data")
         for select_box in details.locator("select").all():
             rect = select_box.bounding_box()
-            assert rect and rect["height"] >= 44, rect
+            # Browser device-pixel rounding can report 43.99999 for a CSS 44px box.
+            assert rect and rect["height"] >= 43.99, rect
         no_overflow(page)
         screenshot(page, f"{name}-typing-controls-{width}x{height}")
         details.locator("summary").click()
