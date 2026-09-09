@@ -51,10 +51,12 @@ def local_only(context, base):
     context.route("**/*", lambda route: route.continue_() if route.request.url.startswith(base) else route.abort())
 
 
-def new_context(browser, base, width=1440, height=900, reduced=False, legacy_save=False):
+def new_context(browser, base, width=1440, height=900, reduced=False, legacy_save=False, has_touch=False):
     options = {"viewport": {"width": width, "height": height}}
     if reduced:
         options["reduced_motion"] = "reduce"
+    if has_touch:
+        options["has_touch"] = True
     context = browser.new_context(**options)
     context.add_init_script(ONBOARDING_SEED)
     context.add_init_script(AUDIO_STUB)
@@ -103,7 +105,7 @@ def certify_audio(browser, browser_name, base, evidence):
 
     sound.click()
     expect(sound).to_have_attribute("aria-checked", "true")
-    expect(sound.locator("strong")).to_have_text("ON")
+    expect(sound).to_have_text("ON")
     persisted = page.evaluate("JSON.parse(localStorage.getItem('wordstrike_save')).settings.soundEffects")
     assert persisted is True
     after_enable = audio_stats(page)
@@ -208,18 +210,83 @@ def certify_mobile(browser, browser_name, base, evidence):
     expect(page.locator(".settings-screen")).to_be_visible()
     sound = page.locator("[data-ui12-sound-toggle]")
     sound.scroll_into_view_if_needed()
-    box = sound.bounding_box()
+    sound_box = sound.bounding_box()
+    core_toggle = page.locator('.settings-list .toggle[role="switch"]').first
+    core_box = core_toggle.bounding_box()
     mobile = page.evaluate("""() => ({
       overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth,
       scrollHeight:document.scrollingElement.scrollHeight,
-      clientHeight:document.scrollingElement.clientHeight
+      clientHeight:document.scrollingElement.clientHeight,
+      soundRadius:getComputedStyle(document.querySelector('[data-ui12-sound-toggle]')).borderRadius,
+      coreRadius:getComputedStyle(document.querySelector('.settings-list .toggle[role="switch"]')).borderRadius
     })""")
     assert mobile["overflow"] <= 1, mobile
-    assert box is not None and box["height"] >= 44, box
-    assert box["x"] >= -1 and box["x"] + box["width"] <= 391, box
+    assert sound_box is not None and sound_box["height"] >= 44, sound_box
+    assert sound_box["width"] <= 120, sound_box
+    assert sound_box["x"] >= -1 and sound_box["x"] + sound_box["width"] <= 391, sound_box
+    assert core_box is not None and abs(sound_box["width"] - core_box["width"]) <= 24, (sound_box, core_box)
+    assert mobile["soundRadius"] == mobile["coreRadius"], mobile
     if browser_name == "chromium":
         page.screenshot(path=str(ARTIFACTS / "chromium-ui12-settings-390x360.png"), full_page=True)
-    evidence.append({"browser": browser_name, "case": "390x360 settings audio", **mobile, "sound": box})
+    evidence.append({"browser": browser_name, "case": "390x360 shared settings-switch geometry", **mobile, "sound": sound_box, "coreToggle": core_box})
+    context.close()
+
+
+def certify_touch_hint_cleanup(browser, browser_name, base, evidence):
+    context = new_context(browser, base, width=390, height=844, has_touch=True)
+    page = context.new_page()
+    open_title(page, base)
+
+    title_state = page.evaluate("""() => ({
+      hintDisplay:getComputedStyle(document.querySelector('.title-keyboard-hint')).display,
+      overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth
+    })""")
+    assert title_state["hintDisplay"] == "none", title_state
+    assert title_state["overflow"] <= 1, title_state
+    if browser_name == "chromium":
+        page.screenshot(path=str(ARTIFACTS / "chromium-forensic-title-mobile.png"), full_page=True)
+
+    page.locator('[data-action="modes"]').click()
+    expect(page.locator('.mode-select-screen')).to_be_visible()
+    mode_state = page.evaluate("""() => {
+      const practice = document.querySelector('.mode-option.coming-soon');
+      const commandKey = document.querySelector('.mode-showcase-command kbd');
+      return {
+        hintDisplay:getComputedStyle(document.querySelector('.mode-select-hint')).display,
+        commandKeyDisplay:commandKey ? getComputedStyle(commandKey).display : null,
+        practiceOpacity:practice ? Number(getComputedStyle(practice).opacity) : 0,
+        overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth
+      };
+    }""")
+    assert mode_state["hintDisplay"] == "none", mode_state
+    assert mode_state["commandKeyDisplay"] in {None, "none"}, mode_state
+    assert mode_state["practiceOpacity"] >= 0.8, mode_state
+    assert mode_state["overflow"] <= 1, mode_state
+    if browser_name == "chromium":
+        page.screenshot(path=str(ARTIFACTS / "chromium-forensic-mode-select-mobile.png"), full_page=True)
+
+    page.locator('[data-mode-id="campaign"]').click()
+    expect(page.locator('.campaign-progress-screen')).to_be_visible()
+    campaign_state = page.evaluate("""() => ({
+      footerHintDisplay:getComputedStyle(document.querySelector('.campaign-progress-footer > span:first-child')).display,
+      commandKeyDisplay:getComputedStyle(document.querySelector('.campaign-mission-command kbd')).display,
+      footerJustify:getComputedStyle(document.querySelector('.campaign-progress-footer')).justifyContent,
+      overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth
+    })""")
+    assert campaign_state["footerHintDisplay"] == "none", campaign_state
+    assert campaign_state["commandKeyDisplay"] == "none", campaign_state
+    assert campaign_state["footerJustify"] == "flex-end", campaign_state
+    assert campaign_state["overflow"] <= 1, campaign_state
+    if browser_name == "chromium":
+        page.screenshot(path=str(ARTIFACTS / "chromium-forensic-campaign-mobile.png"), full_page=True)
+
+    evidence.append({
+        "browser": browser_name,
+        "case": "touch-only desktop-hint cleanup + disabled mode legibility",
+        "title": title_state,
+        "modeSelect": mode_state,
+        "campaign": campaign_state,
+    })
     context.close()
 
 
@@ -254,6 +321,7 @@ def main():
                 certify_interaction_consistency(browser, browser_name, base, result["checks"])
                 certify_selection_isolation(browser, browser_name, base, result["checks"])
                 certify_mobile(browser, browser_name, base, result["checks"])
+                certify_touch_hint_cleanup(browser, browser_name, base, result["checks"])
                 certify_reduced_motion(browser, browser_name, base, result["checks"])
                 browser.close()
         result["success"] = True
