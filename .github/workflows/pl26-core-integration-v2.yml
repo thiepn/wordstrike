@@ -106,14 +106,14 @@ jobs:
           text = text.replace(old_log, '      difficultyAdjustmentLog,', 1)
           p.write_text(text)
 
-          # Catalog: dedicated Pace Ladder experiment.
+          # Catalog: dedicated Pace Ladder experiment using the frozen PL26 protocol.
           p = Path('js/practiceLab/practiceExperimentCatalog.js')
           text = p.read_text()
           ids_old = '  "burst-sprints", "common-words", "real-text", "consistency-trainer", "metronome-typing",'
           if ids_old not in text: raise SystemExit('missing catalog ID anchor')
           text = text.replace(ids_old, '  "burst-sprints", "pace-ladder", "common-words", "real-text", "consistency-trainer", "metronome-typing",', 1)
           burst = '  ["burst-sprints", "Burst Sprints", "Sprints", "speed", "Practice short, controlled bursts above sustainable speed.", "Brief sprint intervals will develop top-end speed while separating useful acceleration from uncontrolled errors.", 1, 3, 5, "adaptive", false, true, 12, 10, "bolt", "speed", "burst speed"],'
-          pace = burst + '\n  ["pace-ladder", "Pace Ladder", "Pace Ladder", "advanced", "Type the same kind of natural text at progressively different paces to find where speed begins to cost control.", "A fixed 30-second natural reference is followed by eight target-blind 20-second pace stages. The protocol measures actual gross forward pace against first-pass control, fluency, and correction burden, then delegates frontier inference to PL14. It is not a maximum-speed test.", 4, 4, 4, "adaptive", false, true, 26, 15, "wave", "speed", "speed-control frontier"],'
+          pace = burst + '\n  ["pace-ladder", "Pace Ladder", "Pace Ladder", "advanced", "Find the short-form pace where accuracy and control begin to degrade under one fixed diagnostic protocol.", "A 25-second comfortable calibration is followed by five target-blind 25-second stages at 85%, 95%, 105%, 115%, and 125% of the anchor, then a 40-second validation stage. PL14 owns frontier inference. This does not estimate true maximum speed or endurance.", 4, 4, 4, "adaptive", false, true, 26, 15, "wave", "speed", "speed-control frontier"],'
           if burst not in text: raise SystemExit('missing catalog burst anchor')
           text = text.replace(burst, pace, 1)
           statuses_old = '["full-assessment", "weak-keys", "combination-repair", "problem-words", "accuracy-control", "real-text"].includes(id)'
@@ -125,6 +125,8 @@ jobs:
           text = text.replace(caps_old, caps_new, 1)
           p.write_text(text)
           PY
+      - name: Refresh deterministic PL24 Real Text artifact
+        run: node scripts/buildPracticeRealTextPool.mjs --write
       - name: Syntax check
         run: |
           node --check js/practiceLab/practiceLatencyClassifier.js
@@ -138,6 +140,6 @@ jobs:
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add js/practiceLab/practiceLatencyClassifier.js js/practiceLab/practiceSessionEngineLegacy.js js/practiceLab/practiceControlFrontier.js js/practiceLab/practiceExperimentCatalog.js
+          git add js/practiceLab/practiceLatencyClassifier.js js/practiceLab/practiceSessionEngineLegacy.js js/practiceLab/practiceControlFrontier.js js/practiceLab/practiceExperimentCatalog.js data/practice/real-text/en-v1/real-text-pool-v1.json
           git commit -m 'PL26: integrate Pace Ladder measurement hooks'
           git push
