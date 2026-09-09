@@ -5,7 +5,7 @@ import {
 
 const IS_NODE_RUNTIME = Boolean(globalThis.process?.versions?.node);
 const nodeRuntime = IS_NODE_RUNTIME
-  ? await import("./practiceLabControllerRuntimeV25.js")
+  ? await import("./practiceLabControllerRuntimeV26.js")
   : null;
 
 export const PRACTICE_LAB_ONBOARDING_VERSION = 1;
@@ -47,12 +47,14 @@ export function createPracticeLabController(options = {}) {
       import("./practiceLabControllerRuntimeV23.js"),
       import("./practiceLabControllerRuntimeV24.js"),
       import("./practiceLabControllerRuntimeV25.js"),
+      import("./practiceLabControllerRuntimeV26.js"),
       import("./practiceCombinationRepairExperiment.js"),
       import("./practiceWeakKeysExperiment.js"),
       import("./practiceProblemWordsExperiment.js"),
       import("./practiceAccuracyRecoveryExperiment.js"),
       import("./practiceRealTextExperiment.js"),
-    ]).then(([registryModule, _canonicalControllerModule, _v22ControllerModule, _v23ControllerModule, _v24ControllerModule, controllerModule, combinationRepairModule, weakKeysModule, problemWordsModule, accuracyRecoveryModule, realTextModule]) => {
+      import("./practicePaceLadderExperiment.js"),
+    ]).then(([registryModule, _canonicalControllerModule, _v22ControllerModule, _v23ControllerModule, _v24ControllerModule, _v25ControllerModule, controllerModule, combinationRepairModule, weakKeysModule, problemWordsModule, accuracyRecoveryModule, realTextModule, paceLadderModule]) => {
       const lazyRegistry = getPracticeRegistryLazyState(experimentRegistry);
       if (lazyRegistry?.destroyed) return null;
 
@@ -67,6 +69,7 @@ export function createPracticeLabController(options = {}) {
       problemWordsModule.registerPracticeProblemWordsExperiment(resolvedRegistry);
       accuracyRecoveryModule.registerPracticeAccuracyRecoveryExperiment(resolvedRegistry);
       realTextModule.registerPracticeRealTextExperiment(resolvedRegistry);
+      paceLadderModule.registerPracticePaceLadderExperiment(resolvedRegistry);
 
       runtimeController = controllerModule.createPracticeLabController({
         ...options,
