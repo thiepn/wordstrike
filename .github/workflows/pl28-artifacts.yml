@@ -1,0 +1,24 @@
+name: PL28 Common Words artifacts
+on:
+  push:
+    branches:
+      - codex/pl28-common-words-v1
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Build PL28 static artifacts
+        run: node scripts/buildPracticeCommonWords.mjs
+      - name: Upload PL28 static artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: pl28-common-word-artifacts
+          path: data/practice/common-words/en-v1/*.json
+          if-no-files-found: error
