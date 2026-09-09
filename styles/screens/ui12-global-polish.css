@@ -6,8 +6,11 @@
   --ui12-focus-offset: 2px;
 }
 
-/* Keep selection readable and consistent with the player/accent semantic. */
-::selection {
+/* Keep selection readable and consistent with the player/accent semantic without crossing the Practice boundary. */
+#app > .screen:not(.practice-lab-screen)::selection,
+#app > .screen:not(.practice-lab-screen) ::selection,
+.onboarding-root::selection,
+.onboarding-root ::selection {
   background: rgb(0 255 242 / 0.24);
   color: var(--color-text-primary, #edf4f7);
 }
