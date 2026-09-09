@@ -19,6 +19,8 @@ jobs:
           node-version: 22
       - name: Build PL28 static artifacts
         run: node scripts/buildPracticeCommonWords.mjs
+      - name: Run PL28 targeted certification
+        run: node --test tests/practice-common-words*.test.js
       - name: Commit generated artifacts
         run: |
           git config user.name "github-actions[bot]"
