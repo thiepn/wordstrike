@@ -97,4 +97,4 @@ test("PL28 Practice result does not expose a PL13 common-words ability update", 
   assert.match(root.innerHTML, /Common Words Practice/);
   assert.match(root.innerHTML, /Newly measured common words/);
   assert.doesNotMatch(root.innerHTML, /Common-word typing ability|95% model interval/);
-}
+});
