@@ -5,7 +5,7 @@ import fs from "node:fs/promises";
 const read = async (relative) => fs.readFile(new URL(`../${relative}`, import.meta.url), "utf8");
 
 test("PL28 primary documentation covers the required architecture and reporting contracts", async () => {
-  const doc = await read("docs/practice-lab/PL28-COMMON-WORDS.md");
+  const doc = await read("docs/PRACTICE_LAB_COMMON_WORDS_AND_BREADTH.md");
   for (const required of [
     "Typing breadth measures WordStrike's typing evidence across the common-word reference. It does not estimate how many English words the user knows.",
     "WS-COMMON-EN-1",
