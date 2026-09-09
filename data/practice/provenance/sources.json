@@ -54,6 +54,42 @@
       "snapshotPath": "provenance/frequency/en-v1.frequency.json",
       "usageApproval": "statistical-only",
       "notes": "Governed statistical reference for PL10 typability coverage; it is not user-facing corpus content."
+    },
+    {
+      "sourceId": "ws-common-words-en-statistical-v1",
+      "title": "Google 10000 English common-word statistical reference for PL28",
+      "sourceType": "statistical-reference",
+      "upstream": "https://github.com/first20hours/google-10000-english/blob/master/google-10000-english-usa-no-swears.txt",
+      "license": {
+        "name": "MIT License",
+        "spdx": "MIT",
+        "url": "https://github.com/first20hours/google-10000-english/blob/master/LICENSE.md",
+        "attributionRequired": true,
+        "notes": "Frequency-ranked lexical source. PL28 statistical approval does not itself authorize display."
+      },
+      "retrievedAt": "2026-06-30T00:00:00.000Z",
+      "sourceChecksum": "sha256-ee2d83651fbb91642bbed2bd30ead404c2cfbdfece01dacf284af6ea47795811",
+      "snapshotPath": "common-words/en-v1/WS-COMMON-SOURCE-EN-1.snapshot.json",
+      "usageApproval": "statistical-only",
+      "notes": "PL6-governed ranking source for the PL28 1,200-word reference. Kept separate from display approval even though both governance records derive from the same manually reviewed MIT-licensed upstream snapshot."
+    },
+    {
+      "sourceId": "ws-common-words-en-display-v1",
+      "title": "WordStrike reviewed common-word display source for PL28",
+      "sourceType": "permissive-import",
+      "upstream": "https://github.com/first20hours/google-10000-english/blob/master/google-10000-english-usa-no-swears.txt",
+      "license": {
+        "name": "MIT License",
+        "spdx": "MIT",
+        "url": "https://github.com/first20hours/google-10000-english/blob/master/LICENSE.md",
+        "attributionRequired": true,
+        "notes": "Display approval applies only to the reviewed lowercase lexical snapshot represented by data/commonGameplayWords.json and its manual-review artifact."
+      },
+      "retrievedAt": "2026-06-30T00:00:00.000Z",
+      "sourceChecksum": "sha256-ee2d83651fbb91642bbed2bd30ead404c2cfbdfece01dacf284af6ea47795811",
+      "snapshotPath": "common-words/en-v1/WS-COMMON-SOURCE-EN-1.snapshot.json",
+      "usageApproval": "practice-display-approved",
+      "notes": "Independent PL6 display approval for the manually reviewed common-word lexical snapshot. PL28 still records training versus diagnostic partition on the derived Practice/Check artifacts; protected partitions are never sourced here."
     }
   ]
 }
