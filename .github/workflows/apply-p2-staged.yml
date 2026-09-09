@@ -1,0 +1,36 @@
+name: Apply staged P2 customization patch
+
+on:
+  push:
+    branches: [feat/customization-p2]
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/customization-p2
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Assemble and verify P2 patch
+        run: |
+          cat .p2/part-*.patch > "$RUNNER_TEMP/p2.patch"
+          git apply --check "$RUNNER_TEMP/p2.patch"
+          git apply "$RUNNER_TEMP/p2.patch"
+          node tests/customization-p2.test.js
+      - name: Commit P2 implementation
+        run: |
+          rm -rf .p2 .github/workflows/apply-p2-staged.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Customization P2 — mode-specific presentation controls"
+          git push origin HEAD:feat/customization-p2
