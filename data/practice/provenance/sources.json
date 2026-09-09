@@ -68,10 +68,10 @@
         "notes": "Frequency-ranked lexical source. PL28 statistical approval does not itself authorize display."
       },
       "retrievedAt": "2026-06-30T00:00:00.000Z",
-      "sourceChecksum": "sha256-ee2d83651fbb91642bbed2bd30ead404c2cfbdfece01dacf284af6ea47795811",
-      "snapshotPath": "common-words/en-v1/WS-COMMON-SOURCE-EN-1.snapshot.json",
+      "sourceChecksum": "sha256-9db3a3ed1a30fbd603890b0a7a7b29f736f8ca925f541f822b932e1fb8e6045e",
+      "snapshotPath": "common-words/en-v1/PL6-COMMON-WORD-SOURCE-EN-1.json",
       "usageApproval": "statistical-only",
-      "notes": "PL6-governed ranking source for the PL28 1,200-word reference. Statistical approval is separate from both training and diagnostic display governance."
+      "notes": "PL6-governed ranking approval for PL28. The source checksum binds the immutable PL6 governance snapshot; that snapshot separately binds the reviewed upstream Google-text checksum and manual-review contract."
     },
     {
       "sourceId": "ws-common-words-en-training-v1",
@@ -83,11 +83,11 @@
         "spdx": "MIT",
         "url": "https://github.com/first20hours/google-10000-english/blob/master/LICENSE.md",
         "attributionRequired": true,
-        "notes": "Display approval applies only to the reviewed lowercase lexical snapshot represented by data/commonGameplayWords.json and its manual-review artifact."
+        "notes": "Display approval applies only to the reviewed lowercase lexical dataset and its manual-review artifact."
       },
       "retrievedAt": "2026-06-30T00:00:00.000Z",
-      "sourceChecksum": "sha256-ee2d83651fbb91642bbed2bd30ead404c2cfbdfece01dacf284af6ea47795811",
-      "snapshotPath": "common-words/en-v1/WS-COMMON-SOURCE-EN-1.snapshot.json",
+      "sourceChecksum": "sha256-9db3a3ed1a30fbd603890b0a7a7b29f736f8ca925f541f822b932e1fb8e6045e",
+      "snapshotPath": "common-words/en-v1/PL6-COMMON-WORD-SOURCE-EN-1.json",
       "usageApproval": "practice-display-approved",
       "notes": "Independent PL6 production-display approval for the PL28 training bank. The derived Practice artifact is partitioned training and never sources protected evaluation partitions."
     },
@@ -101,11 +101,11 @@
         "spdx": "MIT",
         "url": "https://github.com/first20hours/google-10000-english/blob/master/LICENSE.md",
         "attributionRequired": true,
-        "notes": "Display approval applies only to the reviewed lowercase lexical snapshot represented by data/commonGameplayWords.json and its manual-review artifact."
+        "notes": "Display approval applies only to the reviewed lowercase lexical dataset and its manual-review artifact."
       },
       "retrievedAt": "2026-06-30T00:00:00.000Z",
-      "sourceChecksum": "sha256-ee2d83651fbb91642bbed2bd30ead404c2cfbdfece01dacf284af6ea47795811",
-      "snapshotPath": "common-words/en-v1/WS-COMMON-SOURCE-EN-1.snapshot.json",
+      "sourceChecksum": "sha256-9db3a3ed1a30fbd603890b0a7a7b29f736f8ca925f541f822b932e1fb8e6045e",
+      "snapshotPath": "common-words/en-v1/PL6-COMMON-WORD-SOURCE-EN-1.json",
       "usageApproval": "practice-display-approved",
       "notes": "Independent PL6 production-display approval for the PL28 diagnostic form pool. The derived Check artifact is partitioned diagnostic and never sources training, transfer, benchmark, or research-holdout records as measurement material."
     }
