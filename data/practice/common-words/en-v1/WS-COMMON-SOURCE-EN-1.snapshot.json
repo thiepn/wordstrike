@@ -1,20 +1,17 @@
 {
-  "bankId": "WS-COMMON-PRACTICE-EN-1",
-  "bankVersion": 1,
-  "referenceId": "WS-COMMON-EN-1",
-  "referenceVersion": 1,
+  "schemaVersion": 1,
   "language": "en",
-  "status": "ready",
-  "partition": "training",
-  "displayProvenance": {
-    "sourceId": "ws-common-words-en-training-v1",
-    "sourceRegistryVersion": 1,
-    "sourceRegistryChecksum": "sha256-6ee9f069cfafc471b2c0a9ff1d68c74ba6f892addf9bd2395933d2cf5fdf04e0",
-    "sourceType": "permissive-import",
-    "usageApproval": "practice-display-approved",
-    "sourceChecksum": "sha256-ee2d83651fbb91642bbed2bd30ead404c2cfbdfece01dacf284af6ea47795811",
-    "sourceSnapshotChecksum": "sha256-0dff0dd147cc3933a5547627f3740e5ad777d94f90db4cdb199c47eab466eb57",
-    "partition": "training",
+  "sourceRegistryVersion": 1,
+  "sourceRegistryChecksum": "sha256-19642bd11ecb562f02fb364a4afd3ce5d81bc59696115f404f71e85129386852",
+  "statisticalSourceId": "ws-common-words-en-statistical-v1",
+  "statisticalSourceChecksum": "sha256-ee2d83651fbb91642bbed2bd30ead404c2cfbdfece01dacf284af6ea47795811",
+  "trainingSourceId": "ws-common-words-en-training-v1",
+  "trainingSourceChecksum": "sha256-ee2d83651fbb91642bbed2bd30ead404c2cfbdfece01dacf284af6ea47795811",
+  "trainingSourceRegistryChecksum": "sha256-6ee9f069cfafc471b2c0a9ff1d68c74ba6f892addf9bd2395933d2cf5fdf04e0",
+  "diagnosticSourceId": "ws-common-words-en-diagnostic-v1",
+  "diagnosticSourceChecksum": "sha256-ee2d83651fbb91642bbed2bd30ead404c2cfbdfece01dacf284af6ea47795811",
+  "diagnosticSourceRegistryChecksum": "sha256-77e9c367306d7eb10d22117fa4e835b720c7d980fdc6ff407f7820b06e33b853",
+  "upstream": {
     "sourcePath": "data/commonGameplayWords.json",
     "sourceSchemaVersion": 2,
     "sourceName": "google-10000-english (US no-swears)",
@@ -24,7233 +21,6014 @@
     "reviewStatement": "Frequency-ranked from Google's Trillion Word Corpus; every selected word is manually approved.",
     "manualReviewArtifact": "data/commonGameplayWords.manual-review.json"
   },
-  "bindings": {
-    "corpusId": "practice-en-v1",
-    "corpusVersion": 1,
-    "corpusChecksum": "sha256-28beccf65eed71519da306c129da5040a20f364aed320dc21eea2d16c2a1c404",
-    "indexSchemaVersion": 1,
-    "indexGeneratorVersion": 1,
-    "indexChecksum": "sha256-bb198244a6b6cefcae5cb908bf3dee6e9e52259f9ef41576ec69c429a423ff32",
-    "typabilityModelVersion": 1,
-    "typabilityReferenceVersion": 1,
-    "typabilityReferenceChecksum": "sha256-94a6f90c3593ebc089211882e2d9afaf0bf46b66386cdc98dbe60c533e6dd471",
-    "frequencyReferenceVersion": 1,
-    "frequencyReferenceChecksum": "sha256-b9bc8dde064335c2258844919c6dd62537f95ac4a2d5920fdd7213a9cb5d45ad",
-    "builderVersion": 1,
-    "sourceRegistryVersion": 1,
-    "sourceRegistryChecksum": "sha256-19642bd11ecb562f02fb364a4afd3ce5d81bc59696115f404f71e85129386852",
-    "statisticalSourceId": "ws-common-words-en-statistical-v1",
-    "statisticalSourceChecksum": "sha256-ee2d83651fbb91642bbed2bd30ead404c2cfbdfece01dacf284af6ea47795811",
-    "sourceSnapshotChecksum": "sha256-0dff0dd147cc3933a5547627f3740e5ad777d94f90db4cdb199c47eab466eb57",
-    "commonWordReferenceId": "WS-COMMON-EN-1",
-    "commonWordReferenceVersion": 1,
-    "commonWordReferenceChecksum": "sha256-ab3b30b89d7dd6e564f53dc7ecf061d914a82518335de258794cad5c3aaaaa87",
-    "sourceChecksum": "sha256-ab3b30b89d7dd6e564f53dc7ecf061d914a82518335de258794cad5c3aaaaa87",
-    "displaySourceId": "ws-common-words-en-training-v1",
-    "displaySourceChecksum": "sha256-ee2d83651fbb91642bbed2bd30ead404c2cfbdfece01dacf284af6ea47795811",
-    "displaySourceRegistryChecksum": "sha256-6ee9f069cfafc471b2c0a9ff1d68c74ba6f892addf9bd2395933d2cf5fdf04e0"
+  "lexicalPolicy": {
+    "entityType": "word",
+    "identity": "PL7 entityType + lexicalKey",
+    "lowercaseOnly": true,
+    "punctuation": false,
+    "contractions": false
   },
   "words": [
     {
       "wordId": "word:the",
       "lexicalKey": "the",
-      "rank": 1,
-      "band": "core"
+      "sourceRank": 1
     },
     {
       "wordId": "word:of",
       "lexicalKey": "of",
-      "rank": 2,
-      "band": "core"
+      "sourceRank": 2
     },
     {
       "wordId": "word:and",
       "lexicalKey": "and",
-      "rank": 3,
-      "band": "core"
+      "sourceRank": 3
     },
     {
       "wordId": "word:to",
       "lexicalKey": "to",
-      "rank": 4,
-      "band": "core"
+      "sourceRank": 4
     },
     {
       "wordId": "word:in",
       "lexicalKey": "in",
-      "rank": 5,
-      "band": "core"
+      "sourceRank": 6
     },
     {
       "wordId": "word:for",
       "lexicalKey": "for",
-      "rank": 6,
-      "band": "core"
+      "sourceRank": 7
     },
     {
       "wordId": "word:is",
       "lexicalKey": "is",
-      "rank": 7,
-      "band": "core"
+      "sourceRank": 8
     },
     {
       "wordId": "word:on",
       "lexicalKey": "on",
-      "rank": 8,
-      "band": "core"
+      "sourceRank": 9
     },
     {
       "wordId": "word:that",
       "lexicalKey": "that",
-      "rank": 9,
-      "band": "core"
+      "sourceRank": 10
     },
     {
       "wordId": "word:by",
       "lexicalKey": "by",
-      "rank": 10,
-      "band": "core"
+      "sourceRank": 11
     },
     {
       "wordId": "word:this",
       "lexicalKey": "this",
-      "rank": 11,
-      "band": "core"
+      "sourceRank": 12
     },
     {
       "wordId": "word:with",
       "lexicalKey": "with",
-      "rank": 12,
-      "band": "core"
+      "sourceRank": 13
     },
     {
       "wordId": "word:you",
       "lexicalKey": "you",
-      "rank": 13,
-      "band": "core"
+      "sourceRank": 15
     },
     {
       "wordId": "word:it",
       "lexicalKey": "it",
-      "rank": 14,
-      "band": "core"
+      "sourceRank": 16
     },
     {
       "wordId": "word:not",
       "lexicalKey": "not",
-      "rank": 15,
-      "band": "core"
+      "sourceRank": 17
     },
     {
       "wordId": "word:or",
       "lexicalKey": "or",
-      "rank": 16,
-      "band": "core"
+      "sourceRank": 18
     },
     {
       "wordId": "word:be",
       "lexicalKey": "be",
-      "rank": 17,
-      "band": "core"
+      "sourceRank": 19
     },
     {
       "wordId": "word:from",
       "lexicalKey": "from",
-      "rank": 18,
-      "band": "core"
+      "sourceRank": 21
     },
     {
       "wordId": "word:at",
       "lexicalKey": "at",
-      "rank": 19,
-      "band": "core"
+      "sourceRank": 22
     },
     {
       "wordId": "word:as",
       "lexicalKey": "as",
-      "rank": 20,
-      "band": "core"
+      "sourceRank": 23
     },
     {
       "wordId": "word:your",
       "lexicalKey": "your",
-      "rank": 21,
-      "band": "core"
+      "sourceRank": 24
     },
     {
       "wordId": "word:all",
       "lexicalKey": "all",
-      "rank": 22,
-      "band": "core"
+      "sourceRank": 25
     },
     {
       "wordId": "word:have",
       "lexicalKey": "have",
-      "rank": 23,
-      "band": "core"
+      "sourceRank": 26
     },
     {
       "wordId": "word:new",
       "lexicalKey": "new",
-      "rank": 24,
-      "band": "core"
+      "sourceRank": 27
     },
     {
       "wordId": "word:more",
       "lexicalKey": "more",
-      "rank": 25,
-      "band": "core"
+      "sourceRank": 28
     },
     {
       "wordId": "word:an",
       "lexicalKey": "an",
-      "rank": 26,
-      "band": "core"
+      "sourceRank": 29
     },
     {
       "wordId": "word:was",
       "lexicalKey": "was",
-      "rank": 27,
-      "band": "core"
+      "sourceRank": 30
     },
     {
       "wordId": "word:we",
       "lexicalKey": "we",
-      "rank": 28,
-      "band": "core"
+      "sourceRank": 31
     },
     {
       "wordId": "word:will",
       "lexicalKey": "will",
-      "rank": 29,
-      "band": "core"
+      "sourceRank": 32
     },
     {
       "wordId": "word:home",
       "lexicalKey": "home",
-      "rank": 30,
-      "band": "core"
+      "sourceRank": 33
     },
     {
       "wordId": "word:can",
       "lexicalKey": "can",
-      "rank": 31,
-      "band": "core"
+      "sourceRank": 34
     },
     {
       "wordId": "word:us",
       "lexicalKey": "us",
-      "rank": 32,
-      "band": "core"
+      "sourceRank": 35
     },
     {
       "wordId": "word:about",
       "lexicalKey": "about",
-      "rank": 33,
-      "band": "core"
+      "sourceRank": 36
     },
     {
       "wordId": "word:if",
       "lexicalKey": "if",
-      "rank": 34,
-      "band": "core"
+      "sourceRank": 37
     },
     {
       "wordId": "word:page",
       "lexicalKey": "page",
-      "rank": 35,
-      "band": "core"
+      "sourceRank": 38
     },
     {
       "wordId": "word:my",
       "lexicalKey": "my",
-      "rank": 36,
-      "band": "core"
+      "sourceRank": 39
     },
     {
       "wordId": "word:has",
       "lexicalKey": "has",
-      "rank": 37,
-      "band": "core"
+      "sourceRank": 40
     },
     {
       "wordId": "word:search",
       "lexicalKey": "search",
-      "rank": 38,
-      "band": "core"
+      "sourceRank": 41
     },
     {
       "wordId": "word:free",
       "lexicalKey": "free",
-      "rank": 39,
-      "band": "core"
+      "sourceRank": 42
     },
     {
       "wordId": "word:our",
       "lexicalKey": "our",
-      "rank": 40,
-      "band": "core"
+      "sourceRank": 44
     },
     {
       "wordId": "word:one",
       "lexicalKey": "one",
-      "rank": 41,
-      "band": "core"
+      "sourceRank": 45
     },
     {
       "wordId": "word:other",
       "lexicalKey": "other",
-      "rank": 42,
-      "band": "core"
+      "sourceRank": 46
     },
     {
       "wordId": "word:do",
       "lexicalKey": "do",
-      "rank": 43,
-      "band": "core"
+      "sourceRank": 47
     },
     {
       "wordId": "word:no",
       "lexicalKey": "no",
-      "rank": 44,
-      "band": "core"
+      "sourceRank": 48
     },
     {
       "wordId": "word:information",
       "lexicalKey": "information",
-      "rank": 45,
-      "band": "core"
+      "sourceRank": 49
     },
     {
       "wordId": "word:time",
       "lexicalKey": "time",
-      "rank": 46,
-      "band": "core"
+      "sourceRank": 50
     },
     {
       "wordId": "word:they",
       "lexicalKey": "they",
-      "rank": 47,
-      "band": "core"
+      "sourceRank": 51
     },
     {
       "wordId": "word:he",
       "lexicalKey": "he",
-      "rank": 48,
-      "band": "core"
+      "sourceRank": 53
     },
     {
       "wordId": "word:up",
       "lexicalKey": "up",
-      "rank": 49,
-      "band": "core"
+      "sourceRank": 54
     },
     {
       "wordId": "word:may",
       "lexicalKey": "may",
-      "rank": 50,
-      "band": "core"
+      "sourceRank": 55
     },
     {
       "wordId": "word:what",
       "lexicalKey": "what",
-      "rank": 51,
-      "band": "core"
+      "sourceRank": 56
     },
     {
       "wordId": "word:which",
       "lexicalKey": "which",
-      "rank": 52,
-      "band": "core"
+      "sourceRank": 57
     },
     {
       "wordId": "word:their",
       "lexicalKey": "their",
-      "rank": 53,
-      "band": "core"
+      "sourceRank": 58
     },
     {
       "wordId": "word:news",
       "lexicalKey": "news",
-      "rank": 54,
-      "band": "core"
+      "sourceRank": 59
     },
     {
       "wordId": "word:out",
       "lexicalKey": "out",
-      "rank": 55,
-      "band": "core"
+      "sourceRank": 60
     },
     {
       "wordId": "word:use",
       "lexicalKey": "use",
-      "rank": 56,
-      "band": "core"
+      "sourceRank": 61
     },
     {
       "wordId": "word:any",
       "lexicalKey": "any",
-      "rank": 57,
-      "band": "core"
+      "sourceRank": 62
     },
     {
       "wordId": "word:there",
       "lexicalKey": "there",
-      "rank": 58,
-      "band": "core"
+      "sourceRank": 63
     },
     {
       "wordId": "word:see",
       "lexicalKey": "see",
-      "rank": 59,
-      "band": "core"
+      "sourceRank": 64
     },
     {
       "wordId": "word:only",
       "lexicalKey": "only",
-      "rank": 60,
-      "band": "core"
+      "sourceRank": 65
     },
     {
       "wordId": "word:so",
       "lexicalKey": "so",
-      "rank": 61,
-      "band": "core"
+      "sourceRank": 66
     },
     {
       "wordId": "word:his",
       "lexicalKey": "his",
-      "rank": 62,
-      "band": "core"
+      "sourceRank": 67
     },
     {
       "wordId": "word:when",
       "lexicalKey": "when",
-      "rank": 63,
-      "band": "core"
+      "sourceRank": 68
     },
     {
       "wordId": "word:contact",
       "lexicalKey": "contact",
-      "rank": 64,
-      "band": "core"
+      "sourceRank": 69
     },
     {
       "wordId": "word:here",
       "lexicalKey": "here",
-      "rank": 65,
-      "band": "core"
+      "sourceRank": 70
     },
     {
       "wordId": "word:business",
       "lexicalKey": "business",
-      "rank": 66,
-      "band": "core"
+      "sourceRank": 71
     },
     {
       "wordId": "word:who",
       "lexicalKey": "who",
-      "rank": 67,
-      "band": "core"
+      "sourceRank": 72
     },
     {
       "wordId": "word:also",
       "lexicalKey": "also",
-      "rank": 68,
-      "band": "core"
+      "sourceRank": 74
     },
     {
       "wordId": "word:now",
       "lexicalKey": "now",
-      "rank": 69,
-      "band": "core"
+      "sourceRank": 75
     },
     {
       "wordId": "word:help",
       "lexicalKey": "help",
-      "rank": 70,
-      "band": "core"
+      "sourceRank": 76
     },
     {
       "wordId": "word:get",
       "lexicalKey": "get",
-      "rank": 71,
-      "band": "core"
+      "sourceRank": 77
     },
     {
       "wordId": "word:view",
       "lexicalKey": "view",
-      "rank": 72,
-      "band": "core"
+      "sourceRank": 79
     },
     {
       "wordId": "word:online",
       "lexicalKey": "online",
-      "rank": 73,
-      "band": "core"
+      "sourceRank": 80
     },
     {
       "wordId": "word:first",
       "lexicalKey": "first",
-      "rank": 74,
-      "band": "core"
+      "sourceRank": 83
     },
     {
       "wordId": "word:am",
       "lexicalKey": "am",
-      "rank": 75,
-      "band": "core"
+      "sourceRank": 84
     },
     {
       "wordId": "word:been",
       "lexicalKey": "been",
-      "rank": 76,
-      "band": "core"
+      "sourceRank": 85
     },
     {
       "wordId": "word:would",
       "lexicalKey": "would",
-      "rank": 77,
-      "band": "core"
+      "sourceRank": 86
     },
     {
       "wordId": "word:how",
       "lexicalKey": "how",
-      "rank": 78,
-      "band": "core"
+      "sourceRank": 87
     },
     {
       "wordId": "word:were",
       "lexicalKey": "were",
-      "rank": 79,
-      "band": "core"
+      "sourceRank": 88
     },
     {
       "wordId": "word:me",
       "lexicalKey": "me",
-      "rank": 80,
-      "band": "core"
+      "sourceRank": 89
     },
     {
       "wordId": "word:some",
       "lexicalKey": "some",
-      "rank": 81,
-      "band": "core"
+      "sourceRank": 92
     },
     {
       "wordId": "word:these",
       "lexicalKey": "these",
-      "rank": 82,
-      "band": "core"
+      "sourceRank": 93
     },
     {
       "wordId": "word:click",
       "lexicalKey": "click",
-      "rank": 83,
-      "band": "core"
+      "sourceRank": 94
     },
     {
       "wordId": "word:its",
       "lexicalKey": "its",
-      "rank": 84,
-      "band": "core"
+      "sourceRank": 95
     },
     {
       "wordId": "word:like",
       "lexicalKey": "like",
-      "rank": 85,
-      "band": "core"
+      "sourceRank": 96
     },
     {
       "wordId": "word:service",
       "lexicalKey": "service",
-      "rank": 86,
-      "band": "core"
+      "sourceRank": 97
     },
     {
       "wordId": "word:than",
       "lexicalKey": "than",
-      "rank": 87,
-      "band": "core"
+      "sourceRank": 99
     },
     {
       "wordId": "word:find",
       "lexicalKey": "find",
-      "rank": 88,
-      "band": "core"
+      "sourceRank": 100
     },
     {
       "wordId": "word:price",
       "lexicalKey": "price",
-      "rank": 89,
-      "band": "core"
+      "sourceRank": 101
     },
     {
       "wordId": "word:date",
       "lexicalKey": "date",
-      "rank": 90,
-      "band": "core"
+      "sourceRank": 102
     },
     {
       "wordId": "word:back",
       "lexicalKey": "back",
-      "rank": 91,
-      "band": "core"
+      "sourceRank": 103
     },
     {
       "wordId": "word:top",
       "lexicalKey": "top",
-      "rank": 92,
-      "band": "core"
+      "sourceRank": 104
     },
     {
       "wordId": "word:people",
       "lexicalKey": "people",
-      "rank": 93,
-      "band": "core"
+      "sourceRank": 105
     },
     {
       "wordId": "word:had",
       "lexicalKey": "had",
-      "rank": 94,
-      "band": "core"
+      "sourceRank": 106
     },
     {
       "wordId": "word:list",
       "lexicalKey": "list",
-      "rank": 95,
-      "band": "core"
+      "sourceRank": 107
     },
     {
       "wordId": "word:name",
       "lexicalKey": "name",
-      "rank": 96,
-      "band": "core"
+      "sourceRank": 108
     },
     {
       "wordId": "word:just",
       "lexicalKey": "just",
-      "rank": 97,
-      "band": "core"
+      "sourceRank": 109
     },
     {
       "wordId": "word:over",
       "lexicalKey": "over",
-      "rank": 98,
-      "band": "core"
+      "sourceRank": 110
     },
     {
       "wordId": "word:state",
       "lexicalKey": "state",
-      "rank": 99,
-      "band": "core"
+      "sourceRank": 111
     },
     {
       "wordId": "word:year",
       "lexicalKey": "year",
-      "rank": 100,
-      "band": "core"
+      "sourceRank": 112
     },
     {
       "wordId": "word:day",
       "lexicalKey": "day",
-      "rank": 101,
-      "band": "frequent"
+      "sourceRank": 113
     },
     {
       "wordId": "word:into",
       "lexicalKey": "into",
-      "rank": 102,
-      "band": "frequent"
+      "sourceRank": 114
     },
     {
       "wordId": "word:email",
       "lexicalKey": "email",
-      "rank": 103,
-      "band": "frequent"
+      "sourceRank": 115
     },
     {
       "wordId": "word:two",
       "lexicalKey": "two",
-      "rank": 104,
-      "band": "frequent"
+      "sourceRank": 116
     },
     {
       "wordId": "word:health",
       "lexicalKey": "health",
-      "rank": 105,
-      "band": "frequent"
+      "sourceRank": 117
     },
     {
       "wordId": "word:world",
       "lexicalKey": "world",
-      "rank": 106,
-      "band": "frequent"
+      "sourceRank": 119
     },
     {
       "wordId": "word:next",
       "lexicalKey": "next",
-      "rank": 107,
-      "band": "frequent"
+      "sourceRank": 121
     },
     {
       "wordId": "word:go",
       "lexicalKey": "go",
-      "rank": 108,
-      "band": "frequent"
+      "sourceRank": 123
     },
     {
       "wordId": "word:work",
       "lexicalKey": "work",
-      "rank": 109,
-      "band": "frequent"
+      "sourceRank": 125
     },
     {
       "wordId": "word:last",
       "lexicalKey": "last",
-      "rank": 110,
-      "band": "frequent"
+      "sourceRank": 126
     },
     {
       "wordId": "word:most",
       "lexicalKey": "most",
-      "rank": 111,
-      "band": "frequent"
+      "sourceRank": 127
     },
     {
       "wordId": "word:music",
       "lexicalKey": "music",
-      "rank": 112,
-      "band": "frequent"
+      "sourceRank": 129
     },
     {
       "wordId": "word:buy",
       "lexicalKey": "buy",
-      "rank": 113,
-      "band": "frequent"
+      "sourceRank": 130
     },
     {
       "wordId": "word:data",
       "lexicalKey": "data",
-      "rank": 114,
-      "band": "frequent"
+      "sourceRank": 131
     },
     {
       "wordId": "word:make",
       "lexicalKey": "make",
-      "rank": 115,
-      "band": "frequent"
+      "sourceRank": 132
     },
     {
       "wordId": "word:them",
       "lexicalKey": "them",
-      "rank": 116,
-      "band": "frequent"
+      "sourceRank": 133
     },
     {
       "wordId": "word:should",
       "lexicalKey": "should",
-      "rank": 117,
-      "band": "frequent"
+      "sourceRank": 134
     },
     {
       "wordId": "word:product",
       "lexicalKey": "product",
-      "rank": 118,
-      "band": "frequent"
+      "sourceRank": 135
     },
     {
       "wordId": "word:system",
       "lexicalKey": "system",
-      "rank": 119,
-      "band": "frequent"
+      "sourceRank": 136
     },
     {
       "wordId": "word:post",
       "lexicalKey": "post",
-      "rank": 120,
-      "band": "frequent"
+      "sourceRank": 137
     },
     {
       "wordId": "word:her",
       "lexicalKey": "her",
-      "rank": 121,
-      "band": "frequent"
+      "sourceRank": 138
     },
     {
       "wordId": "word:city",
       "lexicalKey": "city",
-      "rank": 122,
-      "band": "frequent"
+      "sourceRank": 139
     },
     {
       "wordId": "word:add",
       "lexicalKey": "add",
-      "rank": 123,
-      "band": "frequent"
+      "sourceRank": 141
     },
     {
       "wordId": "word:policy",
       "lexicalKey": "policy",
-      "rank": 124,
-      "band": "frequent"
+      "sourceRank": 142
     },
     {
       "wordId": "word:number",
       "lexicalKey": "number",
-      "rank": 125,
-      "band": "frequent"
+      "sourceRank": 143
     },
     {
       "wordId": "word:such",
       "lexicalKey": "such",
-      "rank": 126,
-      "band": "frequent"
+      "sourceRank": 144
     },
     {
       "wordId": "word:please",
       "lexicalKey": "please",
-      "rank": 127,
-      "band": "frequent"
+      "sourceRank": 145
     },
     {
       "wordId": "word:available",
       "lexicalKey": "available",
-      "rank": 128,
-      "band": "frequent"
+      "sourceRank": 146
     },
     {
       "wordId": "word:copyright",
       "lexicalKey": "copyright",
-      "rank": 129,
-      "band": "frequent"
+      "sourceRank": 147
     },
     {
       "wordId": "word:support",
       "lexicalKey": "support",
-      "rank": 130,
-      "band": "frequent"
+      "sourceRank": 148
     },
     {
       "wordId": "word:message",
       "lexicalKey": "message",
-      "rank": 131,
-      "band": "frequent"
+      "sourceRank": 149
     },
     {
       "wordId": "word:after",
       "lexicalKey": "after",
-      "rank": 132,
-      "band": "frequent"
+      "sourceRank": 150
     },
     {
       "wordId": "word:best",
       "lexicalKey": "best",
-      "rank": 133,
-      "band": "frequent"
+      "sourceRank": 151
     },
     {
       "wordId": "word:then",
       "lexicalKey": "then",
-      "rank": 134,
-      "band": "frequent"
+      "sourceRank": 153
     },
     {
       "wordId": "word:good",
       "lexicalKey": "good",
-      "rank": 135,
-      "band": "frequent"
+      "sourceRank": 155
     },
     {
       "wordId": "word:video",
       "lexicalKey": "video",
-      "rank": 136,
-      "band": "frequent"
+      "sourceRank": 156
     },
     {
       "wordId": "word:well",
       "lexicalKey": "well",
-      "rank": 137,
-      "band": "frequent"
+      "sourceRank": 157
     },
     {
       "wordId": "word:where",
       "lexicalKey": "where",
-      "rank": 138,
-      "band": "frequent"
+      "sourceRank": 159
     },
     {
       "wordId": "word:public",
       "lexicalKey": "public",
-      "rank": 139,
-      "band": "frequent"
+      "sourceRank": 162
     },
     {
       "wordId": "word:high",
       "lexicalKey": "high",
-      "rank": 140,
-      "band": "frequent"
+      "sourceRank": 164
     },
     {
       "wordId": "word:school",
       "lexicalKey": "school",
-      "rank": 141,
-      "band": "frequent"
+      "sourceRank": 165
     },
     {
       "wordId": "word:through",
       "lexicalKey": "through",
-      "rank": 142,
-      "band": "frequent"
+      "sourceRank": 166
     },
     {
       "wordId": "word:each",
       "lexicalKey": "each",
-      "rank": 143,
-      "band": "frequent"
+      "sourceRank": 168
     },
     {
       "wordId": "word:she",
       "lexicalKey": "she",
-      "rank": 144,
-      "band": "frequent"
+      "sourceRank": 170
     },
     {
       "wordId": "word:review",
       "lexicalKey": "review",
-      "rank": 145,
-      "band": "frequent"
+      "sourceRank": 171
     },
     {
       "wordId": "word:order",
       "lexicalKey": "order",
-      "rank": 146,
-      "band": "frequent"
+      "sourceRank": 173
     },
     {
       "wordId": "word:very",
       "lexicalKey": "very",
-      "rank": 147,
-      "band": "frequent"
+      "sourceRank": 174
     },
     {
       "wordId": "word:privacy",
       "lexicalKey": "privacy",
-      "rank": 148,
-      "band": "frequent"
+      "sourceRank": 175
     },
     {
       "wordId": "word:book",
       "lexicalKey": "book",
-      "rank": 149,
-      "band": "frequent"
+      "sourceRank": 176
     },
     {
       "wordId": "word:company",
       "lexicalKey": "company",
-      "rank": 150,
-      "band": "frequent"
+      "sourceRank": 178
     },
     {
       "wordId": "word:read",
       "lexicalKey": "read",
-      "rank": 151,
-      "band": "frequent"
+      "sourceRank": 180
     },
     {
       "wordId": "word:group",
       "lexicalKey": "group",
-      "rank": 152,
-      "band": "frequent"
+      "sourceRank": 181
     },
     {
       "wordId": "word:many",
       "lexicalKey": "many",
-      "rank": 153,
-      "band": "frequent"
+      "sourceRank": 183
     },
     {
       "wordId": "word:user",
       "lexicalKey": "user",
-      "rank": 154,
-      "band": "frequent"
+      "sourceRank": 184
     },
     {
       "wordId": "word:said",
       "lexicalKey": "said",
-      "rank": 155,
-      "band": "frequent"
+      "sourceRank": 185
     },
     {
       "wordId": "word:does",
       "lexicalKey": "does",
-      "rank": 156,
-      "band": "frequent"
+      "sourceRank": 187
     },
     {
       "wordId": "word:set",
       "lexicalKey": "set",
-      "rank": 157,
-      "band": "frequent"
+      "sourceRank": 188
     },
     {
       "wordId": "word:under",
       "lexicalKey": "under",
-      "rank": 158,
-      "band": "frequent"
+      "sourceRank": 189
     },
     {
       "wordId": "word:general",
       "lexicalKey": "general",
-      "rank": 159,
-      "band": "frequent"
+      "sourceRank": 190
     },
     {
       "wordId": "word:research",
       "lexicalKey": "research",
-      "rank": 160,
-      "band": "frequent"
+      "sourceRank": 191
     },
     {
       "wordId": "word:january",
       "lexicalKey": "january",
-      "rank": 161,
-      "band": "frequent"
+      "sourceRank": 193
     },
     {
       "wordId": "word:mail",
       "lexicalKey": "mail",
-      "rank": 162,
-      "band": "frequent"
+      "sourceRank": 194
     },
     {
       "wordId": "word:full",
       "lexicalKey": "full",
-      "rank": 163,
-      "band": "frequent"
+      "sourceRank": 195
     },
     {
       "wordId": "word:map",
       "lexicalKey": "map",
-      "rank": 164,
-      "band": "frequent"
+      "sourceRank": 196
     },
     {
       "wordId": "word:program",
       "lexicalKey": "program",
-      "rank": 165,
-      "band": "frequent"
+      "sourceRank": 198
     },
     {
       "wordId": "word:life",
       "lexicalKey": "life",
-      "rank": 166,
-      "band": "frequent"
+      "sourceRank": 199
     },
     {
       "wordId": "word:know",
       "lexicalKey": "know",
-      "rank": 167,
-      "band": "frequent"
+      "sourceRank": 200
     },
     {
       "wordId": "word:way",
       "lexicalKey": "way",
-      "rank": 168,
-      "band": "frequent"
+      "sourceRank": 202
     },
     {
       "wordId": "word:management",
       "lexicalKey": "management",
-      "rank": 169,
-      "band": "frequent"
+      "sourceRank": 204
     },
     {
       "wordId": "word:part",
       "lexicalKey": "part",
-      "rank": 170,
-      "band": "frequent"
+      "sourceRank": 206
     },
     {
       "wordId": "word:could",
       "lexicalKey": "could",
-      "rank": 171,
-      "band": "frequent"
+      "sourceRank": 207
     },
     {
       "wordId": "word:great",
       "lexicalKey": "great",
-      "rank": 172,
-      "band": "frequent"
+      "sourceRank": 208
     },
     {
       "wordId": "word:hotel",
       "lexicalKey": "hotel",
-      "rank": 173,
-      "band": "frequent"
+      "sourceRank": 210
     },
     {
       "wordId": "word:real",
       "lexicalKey": "real",
-      "rank": 174,
-      "band": "frequent"
+      "sourceRank": 211
     },
     {
       "wordId": "word:item",
       "lexicalKey": "item",
-      "rank": 175,
-      "band": "frequent"
+      "sourceRank": 213
     },
     {
       "wordId": "word:center",
       "lexicalKey": "center",
-      "rank": 176,
-      "band": "frequent"
+      "sourceRank": 215
     },
     {
       "wordId": "word:must",
       "lexicalKey": "must",
-      "rank": 177,
-      "band": "frequent"
+      "sourceRank": 217
     },
     {
       "wordId": "word:store",
       "lexicalKey": "store",
-      "rank": 178,
-      "band": "frequent"
+      "sourceRank": 218
     },
     {
       "wordId": "word:travel",
       "lexicalKey": "travel",
-      "rank": 179,
-      "band": "frequent"
+      "sourceRank": 219
     },
     {
       "wordId": "word:made",
       "lexicalKey": "made",
-      "rank": 180,
-      "band": "frequent"
+      "sourceRank": 221
     },
     {
       "wordId": "word:development",
       "lexicalKey": "development",
-      "rank": 181,
-      "band": "frequent"
+      "sourceRank": 222
     },
     {
       "wordId": "word:report",
       "lexicalKey": "report",
-      "rank": 182,
-      "band": "frequent"
+      "sourceRank": 223
     },
     {
       "wordId": "word:off",
       "lexicalKey": "off",
-      "rank": 183,
-      "band": "frequent"
+      "sourceRank": 224
     },
     {
       "wordId": "word:member",
       "lexicalKey": "member",
-      "rank": 184,
-      "band": "frequent"
+      "sourceRank": 225
     },
     {
       "wordId": "word:line",
       "lexicalKey": "line",
-      "rank": 185,
-      "band": "frequent"
+      "sourceRank": 227
     },
     {
       "wordId": "word:before",
       "lexicalKey": "before",
-      "rank": 186,
-      "band": "frequent"
+      "sourceRank": 229
     },
     {
       "wordId": "word:did",
       "lexicalKey": "did",
-      "rank": 187,
-      "band": "frequent"
+      "sourceRank": 231
     },
     {
       "wordId": "word:send",
       "lexicalKey": "send",
-      "rank": 188,
-      "band": "frequent"
+      "sourceRank": 232
     },
     {
       "wordId": "word:right",
       "lexicalKey": "right",
-      "rank": 189,
-      "band": "frequent"
+      "sourceRank": 233
     },
     {
       "wordId": "word:type",
       "lexicalKey": "type",
-      "rank": 190,
-      "band": "frequent"
+      "sourceRank": 234
     },
     {
       "wordId": "word:because",
       "lexicalKey": "because",
-      "rank": 191,
-      "band": "frequent"
+      "sourceRank": 235
     },
     {
       "wordId": "word:local",
       "lexicalKey": "local",
-      "rank": 192,
-      "band": "frequent"
+      "sourceRank": 236
     },
     {
       "wordId": "word:those",
       "lexicalKey": "those",
-      "rank": 193,
-      "band": "frequent"
+      "sourceRank": 237
     },
     {
       "wordId": "word:office",
       "lexicalKey": "office",
-      "rank": 194,
-      "band": "frequent"
+      "sourceRank": 240
     },
     {
       "wordId": "word:education",
       "lexicalKey": "education",
-      "rank": 195,
-      "band": "frequent"
+      "sourceRank": 241
     },
     {
       "wordId": "word:national",
       "lexicalKey": "national",
-      "rank": 196,
-      "band": "frequent"
+      "sourceRank": 242
     },
     {
       "wordId": "word:car",
       "lexicalKey": "car",
-      "rank": 197,
-      "band": "frequent"
+      "sourceRank": 243
     },
     {
       "wordId": "word:design",
       "lexicalKey": "design",
-      "rank": 198,
-      "band": "frequent"
+      "sourceRank": 244
     },
     {
       "wordId": "word:take",
       "lexicalKey": "take",
-      "rank": 199,
-      "band": "frequent"
+      "sourceRank": 245
     },
     {
       "wordId": "word:internet",
       "lexicalKey": "internet",
-      "rank": 200,
-      "band": "frequent"
+      "sourceRank": 247
     },
     {
       "wordId": "word:address",
       "lexicalKey": "address",
-      "rank": 201,
-      "band": "frequent"
+      "sourceRank": 248
     },
     {
       "wordId": "word:community",
       "lexicalKey": "community",
-      "rank": 202,
-      "band": "frequent"
+      "sourceRank": 249
     },
     {
       "wordId": "word:within",
       "lexicalKey": "within",
-      "rank": 203,
-      "band": "frequent"
+      "sourceRank": 250
     },
     {
       "wordId": "word:area",
       "lexicalKey": "area",
-      "rank": 204,
-      "band": "frequent"
+      "sourceRank": 252
     },
     {
       "wordId": "word:want",
       "lexicalKey": "want",
-      "rank": 205,
-      "band": "frequent"
+      "sourceRank": 253
     },
     {
       "wordId": "word:phone",
       "lexicalKey": "phone",
-      "rank": 206,
-      "band": "frequent"
+      "sourceRank": 254
     },
     {
       "wordId": "word:subject",
       "lexicalKey": "subject",
-      "rank": 207,
-      "band": "frequent"
+      "sourceRank": 258
     },
     {
       "wordId": "word:between",
       "lexicalKey": "between",
-      "rank": 208,
-      "band": "frequent"
+      "sourceRank": 259
     },
     {
       "wordId": "word:forum",
       "lexicalKey": "forum",
-      "rank": 209,
-      "band": "frequent"
+      "sourceRank": 260
     },
     {
       "wordId": "word:family",
       "lexicalKey": "family",
-      "rank": 210,
-      "band": "frequent"
+      "sourceRank": 261
     },
     {
       "wordId": "word:long",
       "lexicalKey": "long",
-      "rank": 211,
-      "band": "frequent"
+      "sourceRank": 263
     },
     {
       "wordId": "word:code",
       "lexicalKey": "code",
-      "rank": 212,
-      "band": "frequent"
+      "sourceRank": 266
     },
     {
       "wordId": "word:show",
       "lexicalKey": "show",
-      "rank": 213,
-      "band": "frequent"
+      "sourceRank": 267
     },
     {
       "wordId": "word:even",
       "lexicalKey": "even",
-      "rank": 214,
-      "band": "frequent"
+      "sourceRank": 269
     },
     {
       "wordId": "word:black",
       "lexicalKey": "black",
-      "rank": 215,
-      "band": "frequent"
+      "sourceRank": 270
     },
     {
       "wordId": "word:check",
       "lexicalKey": "check",
-      "rank": 216,
-      "band": "frequent"
+      "sourceRank": 271
     },
     {
       "wordId": "word:special",
       "lexicalKey": "special",
-      "rank": 217,
-      "band": "frequent"
+      "sourceRank": 272
     },
     {
       "wordId": "word:index",
       "lexicalKey": "index",
-      "rank": 218,
-      "band": "frequent"
+      "sourceRank": 275
     },
     {
       "wordId": "word:women",
       "lexicalKey": "women",
-      "rank": 219,
-      "band": "frequent"
+      "sourceRank": 277
     },
     {
       "wordId": "word:much",
       "lexicalKey": "much",
-      "rank": 220,
-      "band": "frequent"
+      "sourceRank": 278
     },
     {
       "wordId": "word:sign",
       "lexicalKey": "sign",
-      "rank": 221,
-      "band": "frequent"
+      "sourceRank": 279
     },
     {
       "wordId": "word:file",
       "lexicalKey": "file",
-      "rank": 222,
-      "band": "frequent"
+      "sourceRank": 280
     },
     {
       "wordId": "word:link",
       "lexicalKey": "link",
-      "rank": 223,
-      "band": "frequent"
+      "sourceRank": 281
     },
     {
       "wordId": "word:open",
       "lexicalKey": "open",
-      "rank": 224,
-      "band": "frequent"
+      "sourceRank": 282
     },
     {
       "wordId": "word:today",
       "lexicalKey": "today",
-      "rank": 225,
-      "band": "frequent"
+      "sourceRank": 283
     },
     {
       "wordId": "word:technology",
       "lexicalKey": "technology",
-      "rank": 226,
-      "band": "frequent"
+      "sourceRank": 284
     },
     {
       "wordId": "word:south",
       "lexicalKey": "south",
-      "rank": 227,
-      "band": "frequent"
+      "sourceRank": 285
     },
     {
       "wordId": "word:case",
       "lexicalKey": "case",
-      "rank": 228,
-      "band": "frequent"
+      "sourceRank": 286
     },
     {
       "wordId": "word:project",
       "lexicalKey": "project",
-      "rank": 229,
-      "band": "frequent"
+      "sourceRank": 287
     },
     {
       "wordId": "word:same",
       "lexicalKey": "same",
-      "rank": 230,
-      "band": "frequent"
+      "sourceRank": 288
     },
     {
       "wordId": "word:version",
       "lexicalKey": "version",
-      "rank": 231,
-      "band": "frequent"
+      "sourceRank": 291
     },
     {
       "wordId": "word:section",
       "lexicalKey": "section",
-      "rank": 232,
-      "band": "frequent"
+      "sourceRank": 292
     },
     {
       "wordId": "word:own",
       "lexicalKey": "own",
-      "rank": 233,
-      "band": "frequent"
+      "sourceRank": 293
     },
     {
       "wordId": "word:found",
       "lexicalKey": "found",
-      "rank": 234,
-      "band": "frequent"
+      "sourceRank": 294
     },
     {
       "wordId": "word:house",
       "lexicalKey": "house",
-      "rank": 235,
-      "band": "frequent"
+      "sourceRank": 296
     },
     {
       "wordId": "word:security",
       "lexicalKey": "security",
-      "rank": 236,
-      "band": "frequent"
+      "sourceRank": 298
     },
     {
       "wordId": "word:both",
       "lexicalKey": "both",
-      "rank": 237,
-      "band": "frequent"
+      "sourceRank": 299
     },
     {
       "wordId": "word:county",
       "lexicalKey": "county",
-      "rank": 238,
-      "band": "frequent"
+      "sourceRank": 301
     },
     {
       "wordId": "word:photo",
       "lexicalKey": "photo",
-      "rank": 239,
-      "band": "frequent"
+      "sourceRank": 303
     },
     {
       "wordId": "word:game",
       "lexicalKey": "game",
-      "rank": 240,
-      "band": "frequent"
+      "sourceRank": 304
     },
     {
       "wordId": "word:power",
       "lexicalKey": "power",
-      "rank": 241,
-      "band": "frequent"
+      "sourceRank": 306
     },
     {
       "wordId": "word:while",
       "lexicalKey": "while",
-      "rank": 242,
-      "band": "frequent"
+      "sourceRank": 307
     },
     {
       "wordId": "word:care",
       "lexicalKey": "care",
-      "rank": 243,
-      "band": "frequent"
+      "sourceRank": 308
     },
     {
       "wordId": "word:network",
       "lexicalKey": "network",
-      "rank": 244,
-      "band": "frequent"
+      "sourceRank": 309
     },
     {
       "wordId": "word:down",
       "lexicalKey": "down",
-      "rank": 245,
-      "band": "frequent"
+      "sourceRank": 310
     },
     {
       "wordId": "word:computer",
       "lexicalKey": "computer",
-      "rank": 246,
-      "band": "frequent"
+      "sourceRank": 311
     },
     {
       "wordId": "word:three",
       "lexicalKey": "three",
-      "rank": 247,
-      "band": "frequent"
+      "sourceRank": 313
     },
     {
       "wordId": "word:total",
       "lexicalKey": "total",
-      "rank": 248,
-      "band": "frequent"
+      "sourceRank": 314
     },
     {
       "wordId": "word:place",
       "lexicalKey": "place",
-      "rank": 249,
-      "band": "frequent"
+      "sourceRank": 315
     },
     {
       "wordId": "word:end",
       "lexicalKey": "end",
-      "rank": 250,
-      "band": "frequent"
+      "sourceRank": 316
     },
     {
       "wordId": "word:him",
       "lexicalKey": "him",
-      "rank": 251,
-      "band": "frequent"
+      "sourceRank": 320
     },
     {
       "wordId": "word:without",
       "lexicalKey": "without",
-      "rank": 252,
-      "band": "frequent"
+      "sourceRank": 321
     },
     {
       "wordId": "word:access",
       "lexicalKey": "access",
-      "rank": 253,
-      "band": "frequent"
+      "sourceRank": 323
     },
     {
       "wordId": "word:think",
       "lexicalKey": "think",
-      "rank": 254,
-      "band": "frequent"
+      "sourceRank": 324
     },
     {
       "wordId": "word:north",
       "lexicalKey": "north",
-      "rank": 255,
-      "band": "frequent"
+      "sourceRank": 325
     },
     {
       "wordId": "word:current",
       "lexicalKey": "current",
-      "rank": 256,
-      "band": "frequent"
+      "sourceRank": 327
     },
     {
       "wordId": "word:big",
       "lexicalKey": "big",
-      "rank": 257,
-      "band": "frequent"
+      "sourceRank": 329
     },
     {
       "wordId": "word:media",
       "lexicalKey": "media",
-      "rank": 258,
-      "band": "frequent"
+      "sourceRank": 330
     },
     {
       "wordId": "word:law",
       "lexicalKey": "law",
-      "rank": 259,
-      "band": "frequent"
+      "sourceRank": 331
     },
     {
       "wordId": "word:control",
       "lexicalKey": "control",
-      "rank": 260,
-      "band": "frequent"
+      "sourceRank": 332
     },
     {
       "wordId": "word:water",
       "lexicalKey": "water",
-      "rank": 261,
-      "band": "frequent"
+      "sourceRank": 333
     },
     {
       "wordId": "word:history",
       "lexicalKey": "history",
-      "rank": 262,
-      "band": "frequent"
+      "sourceRank": 334
     },
     {
       "wordId": "word:size",
       "lexicalKey": "size",
-      "rank": 263,
-      "band": "frequent"
+      "sourceRank": 336
     },
     {
       "wordId": "word:art",
       "lexicalKey": "art",
-      "rank": 264,
-      "band": "frequent"
+      "sourceRank": 337
     },
     {
       "wordId": "word:personal",
       "lexicalKey": "personal",
-      "rank": 265,
-      "band": "frequent"
+      "sourceRank": 338
     },
     {
       "wordId": "word:since",
       "lexicalKey": "since",
-      "rank": 266,
-      "band": "frequent"
+      "sourceRank": 339
     },
     {
       "wordId": "word:guide",
       "lexicalKey": "guide",
-      "rank": 267,
-      "band": "frequent"
+      "sourceRank": 341
     },
     {
       "wordId": "word:shop",
       "lexicalKey": "shop",
-      "rank": 268,
-      "band": "frequent"
+      "sourceRank": 342
     },
     {
       "wordId": "word:board",
       "lexicalKey": "board",
-      "rank": 269,
-      "band": "frequent"
+      "sourceRank": 344
     },
     {
       "wordId": "word:location",
       "lexicalKey": "location",
-      "rank": 270,
-      "band": "frequent"
+      "sourceRank": 345
     },
     {
       "wordId": "word:change",
       "lexicalKey": "change",
-      "rank": 271,
-      "band": "frequent"
+      "sourceRank": 346
     },
     {
       "wordId": "word:white",
       "lexicalKey": "white",
-      "rank": 272,
-      "band": "frequent"
+      "sourceRank": 347
     },
     {
       "wordId": "word:text",
       "lexicalKey": "text",
-      "rank": 273,
-      "band": "frequent"
+      "sourceRank": 348
     },
     {
       "wordId": "word:small",
       "lexicalKey": "small",
-      "rank": 274,
-      "band": "frequent"
+      "sourceRank": 349
     },
     {
       "wordId": "word:rate",
       "lexicalKey": "rate",
-      "rank": 275,
-      "band": "frequent"
+      "sourceRank": 351
     },
     {
       "wordId": "word:government",
       "lexicalKey": "government",
-      "rank": 276,
-      "band": "frequent"
+      "sourceRank": 352
     },
     {
       "wordId": "word:children",
       "lexicalKey": "children",
-      "rank": 277,
-      "band": "frequent"
+      "sourceRank": 353
     },
     {
       "wordId": "word:during",
       "lexicalKey": "during",
-      "rank": 278,
-      "band": "frequent"
+      "sourceRank": 354
     },
     {
       "wordId": "word:return",
       "lexicalKey": "return",
-      "rank": 279,
-      "band": "frequent"
+      "sourceRank": 356
     },
     {
       "wordId": "word:account",
       "lexicalKey": "account",
-      "rank": 280,
-      "band": "frequent"
+      "sourceRank": 360
     },
     {
       "wordId": "word:level",
       "lexicalKey": "level",
-      "rank": 281,
-      "band": "frequent"
+      "sourceRank": 363
     },
     {
       "wordId": "word:digital",
       "lexicalKey": "digital",
-      "rank": 282,
-      "band": "frequent"
+      "sourceRank": 364
     },
     {
       "wordId": "word:profile",
       "lexicalKey": "profile",
-      "rank": 283,
-      "band": "frequent"
+      "sourceRank": 365
     },
     {
       "wordId": "word:previous",
       "lexicalKey": "previous",
-      "rank": 284,
-      "band": "frequent"
+      "sourceRank": 366
     },
     {
       "wordId": "word:form",
       "lexicalKey": "form",
-      "rank": 285,
-      "band": "frequent"
+      "sourceRank": 367
     },
     {
       "wordId": "word:love",
       "lexicalKey": "love",
-      "rank": 286,
-      "band": "frequent"
+      "sourceRank": 369
     },
     {
       "wordId": "word:old",
       "lexicalKey": "old",
-      "rank": 287,
-      "band": "frequent"
+      "sourceRank": 370
     },
     {
       "wordId": "word:main",
       "lexicalKey": "main",
-      "rank": 288,
-      "band": "frequent"
+      "sourceRank": 372
     },
     {
       "wordId": "word:call",
       "lexicalKey": "call",
-      "rank": 289,
-      "band": "frequent"
+      "sourceRank": 373
     },
     {
       "wordId": "word:image",
       "lexicalKey": "image",
-      "rank": 290,
-      "band": "frequent"
+      "sourceRank": 375
     },
     {
       "wordId": "word:department",
       "lexicalKey": "department",
-      "rank": 291,
-      "band": "frequent"
+      "sourceRank": 376
     },
     {
       "wordId": "word:title",
       "lexicalKey": "title",
-      "rank": 292,
-      "band": "frequent"
+      "sourceRank": 377
     },
     {
       "wordId": "word:description",
       "lexicalKey": "description",
-      "rank": 293,
-      "band": "frequent"
+      "sourceRank": 378
     },
     {
       "wordId": "word:insurance",
       "lexicalKey": "insurance",
-      "rank": 294,
-      "band": "frequent"
+      "sourceRank": 382
     },
     {
       "wordId": "word:another",
       "lexicalKey": "another",
-      "rank": 295,
-      "band": "frequent"
+      "sourceRank": 383
     },
     {
       "wordId": "word:why",
       "lexicalKey": "why",
-      "rank": 296,
-      "band": "frequent"
+      "sourceRank": 384
     },
     {
       "wordId": "word:shall",
       "lexicalKey": "shall",
-      "rank": 297,
-      "band": "frequent"
+      "sourceRank": 385
     },
     {
       "wordId": "word:property",
       "lexicalKey": "property",
-      "rank": 298,
-      "band": "frequent"
+      "sourceRank": 386
     },
     {
       "wordId": "word:class",
       "lexicalKey": "class",
-      "rank": 299,
-      "band": "frequent"
+      "sourceRank": 387
     },
     {
       "wordId": "word:still",
       "lexicalKey": "still",
-      "rank": 300,
-      "band": "frequent"
+      "sourceRank": 389
     },
     {
       "wordId": "word:money",
       "lexicalKey": "money",
-      "rank": 301,
-      "band": "common"
+      "sourceRank": 390
     },
     {
       "wordId": "word:quality",
       "lexicalKey": "quality",
-      "rank": 302,
-      "band": "common"
+      "sourceRank": 391
     },
     {
       "wordId": "word:every",
       "lexicalKey": "every",
-      "rank": 303,
-      "band": "common"
+      "sourceRank": 392
     },
     {
       "wordId": "word:content",
       "lexicalKey": "content",
-      "rank": 304,
-      "band": "common"
+      "sourceRank": 394
     },
     {
       "wordId": "word:country",
       "lexicalKey": "country",
-      "rank": 305,
-      "band": "common"
+      "sourceRank": 395
     },
     {
       "wordId": "word:private",
       "lexicalKey": "private",
-      "rank": 306,
-      "band": "common"
+      "sourceRank": 396
     },
     {
       "wordId": "word:little",
       "lexicalKey": "little",
-      "rank": 307,
-      "band": "common"
+      "sourceRank": 397
     },
     {
       "wordId": "word:visit",
       "lexicalKey": "visit",
-      "rank": 308,
-      "band": "common"
+      "sourceRank": 398
     },
     {
       "wordId": "word:save",
       "lexicalKey": "save",
-      "rank": 309,
-      "band": "common"
+      "sourceRank": 399
     },
     {
       "wordId": "word:low",
       "lexicalKey": "low",
-      "rank": 310,
-      "band": "common"
+      "sourceRank": 401
     },
     {
       "wordId": "word:reply",
       "lexicalKey": "reply",
-      "rank": 311,
-      "band": "common"
+      "sourceRank": 402
     },
     {
       "wordId": "word:customer",
       "lexicalKey": "customer",
-      "rank": 312,
-      "band": "common"
+      "sourceRank": 403
     },
     {
       "wordId": "word:december",
       "lexicalKey": "december",
-      "rank": 313,
-      "band": "common"
+      "sourceRank": 404
     },
     {
       "wordId": "word:compare",
       "lexicalKey": "compare",
-      "rank": 314,
-      "band": "common"
+      "sourceRank": 405
     },
     {
       "wordId": "word:include",
       "lexicalKey": "include",
-      "rank": 315,
-      "band": "common"
+      "sourceRank": 407
     },
     {
       "wordId": "word:college",
       "lexicalKey": "college",
-      "rank": 316,
-      "band": "common"
+      "sourceRank": 408
     },
     {
       "wordId": "word:value",
       "lexicalKey": "value",
-      "rank": 317,
-      "band": "common"
+      "sourceRank": 409
     },
     {
       "wordId": "word:article",
       "lexicalKey": "article",
-      "rank": 318,
-      "band": "common"
+      "sourceRank": 410
     },
     {
       "wordId": "word:man",
       "lexicalKey": "man",
-      "rank": 319,
-      "band": "common"
+      "sourceRank": 412
     },
     {
       "wordId": "word:card",
       "lexicalKey": "card",
-      "rank": 320,
-      "band": "common"
+      "sourceRank": 413
     },
     {
       "wordId": "word:provide",
       "lexicalKey": "provide",
-      "rank": 321,
-      "band": "common"
+      "sourceRank": 415
     },
     {
       "wordId": "word:food",
       "lexicalKey": "food",
-      "rank": 322,
-      "band": "common"
+      "sourceRank": 417
     },
     {
       "wordId": "word:source",
       "lexicalKey": "source",
-      "rank": 323,
-      "band": "common"
+      "sourceRank": 418
     },
     {
       "wordId": "word:author",
       "lexicalKey": "author",
-      "rank": 324,
-      "band": "common"
+      "sourceRank": 419
     },
     {
       "wordId": "word:different",
       "lexicalKey": "different",
-      "rank": 325,
-      "band": "common"
+      "sourceRank": 420
     },
     {
       "wordId": "word:press",
       "lexicalKey": "press",
-      "rank": 326,
-      "band": "common"
+      "sourceRank": 421
     },
     {
       "wordId": "word:learn",
       "lexicalKey": "learn",
-      "rank": 327,
-      "band": "common"
+      "sourceRank": 423
     },
     {
       "wordId": "word:sale",
       "lexicalKey": "sale",
-      "rank": 328,
-      "band": "common"
+      "sourceRank": 424
     },
     {
       "wordId": "word:around",
       "lexicalKey": "around",
-      "rank": 329,
-      "band": "common"
+      "sourceRank": 425
     },
     {
       "wordId": "word:print",
       "lexicalKey": "print",
-      "rank": 330,
-      "band": "common"
+      "sourceRank": 426
     },
     {
       "wordId": "word:course",
       "lexicalKey": "course",
-      "rank": 331,
-      "band": "common"
+      "sourceRank": 427
     },
     {
       "wordId": "word:job",
       "lexicalKey": "job",
-      "rank": 332,
-      "band": "common"
+      "sourceRank": 428
     },
     {
       "wordId": "word:process",
       "lexicalKey": "process",
-      "rank": 333,
-      "band": "common"
+      "sourceRank": 430
     },
     {
       "wordId": "word:teen",
       "lexicalKey": "teen",
-      "rank": 334,
-      "band": "common"
+      "sourceRank": 431
     },
     {
       "wordId": "word:room",
       "lexicalKey": "room",
-      "rank": 335,
-      "band": "common"
+      "sourceRank": 432
     },
     {
       "wordId": "word:stock",
       "lexicalKey": "stock",
-      "rank": 336,
-      "band": "common"
+      "sourceRank": 433
     },
     {
       "wordId": "word:too",
       "lexicalKey": "too",
-      "rank": 337,
-      "band": "common"
+      "sourceRank": 435
     },
     {
       "wordId": "word:credit",
       "lexicalKey": "credit",
-      "rank": 338,
-      "band": "common"
+      "sourceRank": 436
     },
     {
       "wordId": "word:point",
       "lexicalKey": "point",
-      "rank": 339,
-      "band": "common"
+      "sourceRank": 437
     },
     {
       "wordId": "word:join",
       "lexicalKey": "join",
-      "rank": 340,
-      "band": "common"
+      "sourceRank": 438
     },
     {
       "wordId": "word:science",
       "lexicalKey": "science",
-      "rank": 341,
-      "band": "common"
+      "sourceRank": 439
     },
     {
       "wordId": "word:men",
       "lexicalKey": "men",
-      "rank": 342,
-      "band": "common"
+      "sourceRank": 440
     },
     {
       "wordId": "word:west",
       "lexicalKey": "west",
-      "rank": 343,
-      "band": "common"
+      "sourceRank": 443
     },
     {
       "wordId": "word:look",
       "lexicalKey": "look",
-      "rank": 344,
-      "band": "common"
+      "sourceRank": 445
     },
     {
       "wordId": "word:left",
       "lexicalKey": "left",
-      "rank": 345,
-      "band": "common"
+      "sourceRank": 447
     },
     {
       "wordId": "word:team",
       "lexicalKey": "team",
-      "rank": 346,
-      "band": "common"
+      "sourceRank": 448
     },
     {
       "wordId": "word:estate",
       "lexicalKey": "estate",
-      "rank": 347,
-      "band": "common"
+      "sourceRank": 449
     },
     {
       "wordId": "word:box",
       "lexicalKey": "box",
-      "rank": 348,
-      "band": "common"
+      "sourceRank": 450
     },
     {
       "wordId": "word:select",
       "lexicalKey": "select",
-      "rank": 349,
-      "band": "common"
+      "sourceRank": 452
     },
     {
       "wordId": "word:thread",
       "lexicalKey": "thread",
-      "rank": 350,
-      "band": "common"
+      "sourceRank": 456
     },
     {
       "wordId": "word:week",
       "lexicalKey": "week",
-      "rank": 351,
-      "band": "common"
+      "sourceRank": 457
     },
     {
       "wordId": "word:category",
       "lexicalKey": "category",
-      "rank": 352,
-      "band": "common"
+      "sourceRank": 458
     },
     {
       "wordId": "word:note",
       "lexicalKey": "note",
-      "rank": 353,
-      "band": "common"
+      "sourceRank": 459
     },
     {
       "wordId": "word:live",
       "lexicalKey": "live",
-      "rank": 354,
-      "band": "common"
+      "sourceRank": 460
     },
     {
       "wordId": "word:large",
       "lexicalKey": "large",
-      "rank": 355,
-      "band": "common"
+      "sourceRank": 461
     },
     {
       "wordId": "word:gallery",
       "lexicalKey": "gallery",
-      "rank": 356,
-      "band": "common"
+      "sourceRank": 462
     },
     {
       "wordId": "word:table",
       "lexicalKey": "table",
-      "rank": 357,
-      "band": "common"
+      "sourceRank": 463
     },
     {
       "wordId": "word:register",
       "lexicalKey": "register",
-      "rank": 358,
-      "band": "common"
+      "sourceRank": 464
     },
     {
       "wordId": "word:however",
       "lexicalKey": "however",
-      "rank": 359,
-      "band": "common"
+      "sourceRank": 465
     },
     {
       "wordId": "word:october",
       "lexicalKey": "october",
-      "rank": 360,
-      "band": "common"
+      "sourceRank": 467
     },
     {
       "wordId": "word:november",
       "lexicalKey": "november",
-      "rank": 361,
-      "band": "common"
+      "sourceRank": 468
     },
     {
       "wordId": "word:market",
       "lexicalKey": "market",
-      "rank": 362,
-      "band": "common"
+      "sourceRank": 469
     },
     {
       "wordId": "word:library",
       "lexicalKey": "library",
-      "rank": 363,
-      "band": "common"
+      "sourceRank": 470
     },
     {
       "wordId": "word:really",
       "lexicalKey": "really",
-      "rank": 364,
-      "band": "common"
+      "sourceRank": 471
     },
     {
       "wordId": "word:action",
       "lexicalKey": "action",
-      "rank": 365,
-      "band": "common"
+      "sourceRank": 472
     },
     {
       "wordId": "word:start",
       "lexicalKey": "start",
-      "rank": 366,
-      "band": "common"
+      "sourceRank": 473
     },
     {
       "wordId": "word:series",
       "lexicalKey": "series",
-      "rank": 367,
-      "band": "common"
+      "sourceRank": 474
     },
     {
       "wordId": "word:model",
       "lexicalKey": "model",
-      "rank": 368,
-      "band": "common"
+      "sourceRank": 475
     },
     {
       "wordId": "word:air",
       "lexicalKey": "air",
-      "rank": 369,
-      "band": "common"
+      "sourceRank": 477
     },
     {
       "wordId": "word:industry",
       "lexicalKey": "industry",
-      "rank": 370,
-      "band": "common"
+      "sourceRank": 478
     },
     {
       "wordId": "word:plan",
       "lexicalKey": "plan",
-      "rank": 371,
-      "band": "common"
+      "sourceRank": 479
     },
     {
       "wordId": "word:human",
       "lexicalKey": "human",
-      "rank": 372,
-      "band": "common"
+      "sourceRank": 480
     },
     {
       "wordId": "word:yes",
       "lexicalKey": "yes",
-      "rank": 373,
-      "band": "common"
+      "sourceRank": 483
     },
     {
       "wordId": "word:second",
       "lexicalKey": "second",
-      "rank": 374,
-      "band": "common"
+      "sourceRank": 485
     },
     {
       "wordId": "word:hot",
       "lexicalKey": "hot",
-      "rank": 375,
-      "band": "common"
+      "sourceRank": 486
     },
     {
       "wordId": "word:cost",
       "lexicalKey": "cost",
-      "rank": 376,
-      "band": "common"
+      "sourceRank": 488
     },
     {
       "wordId": "word:movie",
       "lexicalKey": "movie",
-      "rank": 377,
-      "band": "common"
+      "sourceRank": 489
     },
     {
       "wordId": "word:march",
       "lexicalKey": "march",
-      "rank": 378,
-      "band": "common"
+      "sourceRank": 491
     },
     {
       "wordId": "word:september",
       "lexicalKey": "september",
-      "rank": 379,
-      "band": "common"
+      "sourceRank": 493
     },
     {
       "wordId": "word:better",
       "lexicalKey": "better",
-      "rank": 380,
-      "band": "common"
+      "sourceRank": 494
     },
     {
       "wordId": "word:say",
       "lexicalKey": "say",
-      "rank": 381,
-      "band": "common"
+      "sourceRank": 495
     },
     {
       "wordId": "word:july",
       "lexicalKey": "july",
-      "rank": 382,
-      "band": "common"
+      "sourceRank": 497
     },
     {
       "wordId": "word:medical",
       "lexicalKey": "medical",
-      "rank": 383,
-      "band": "common"
+      "sourceRank": 500
     },
     {
       "wordId": "word:test",
       "lexicalKey": "test",
-      "rank": 384,
-      "band": "common"
+      "sourceRank": 501
     },
     {
       "wordId": "word:friend",
       "lexicalKey": "friend",
-      "rank": 385,
-      "band": "common"
+      "sourceRank": 502
     },
     {
       "wordId": "word:come",
       "lexicalKey": "come",
-      "rank": 386,
-      "band": "common"
+      "sourceRank": 503
     },
     {
       "wordId": "word:study",
       "lexicalKey": "study",
-      "rank": 387,
-      "band": "common"
+      "sourceRank": 507
     },
     {
       "wordId": "word:application",
       "lexicalKey": "application",
-      "rank": 388,
-      "band": "common"
+      "sourceRank": 508
     },
     {
       "wordId": "word:staff",
       "lexicalKey": "staff",
-      "rank": 389,
-      "band": "common"
+      "sourceRank": 510
     },
     {
       "wordId": "word:feedback",
       "lexicalKey": "feedback",
-      "rank": 390,
-      "band": "common"
+      "sourceRank": 513
     },
     {
       "wordId": "word:again",
       "lexicalKey": "again",
-      "rank": 391,
-      "band": "common"
+      "sourceRank": 514
     },
     {
       "wordId": "word:play",
       "lexicalKey": "play",
-      "rank": 392,
-      "band": "common"
+      "sourceRank": 515
     },
     {
       "wordId": "word:april",
       "lexicalKey": "april",
-      "rank": 393,
-      "band": "common"
+      "sourceRank": 518
     },
     {
       "wordId": "word:never",
       "lexicalKey": "never",
-      "rank": 394,
-      "band": "common"
+      "sourceRank": 519
     },
     {
       "wordId": "word:complete",
       "lexicalKey": "complete",
-      "rank": 395,
-      "band": "common"
+      "sourceRank": 521
     },
     {
       "wordId": "word:street",
       "lexicalKey": "street",
-      "rank": 396,
-      "band": "common"
+      "sourceRank": 522
     },
     {
       "wordId": "word:topic",
       "lexicalKey": "topic",
-      "rank": 397,
-      "band": "common"
+      "sourceRank": 523
     },
     {
       "wordId": "word:comment",
       "lexicalKey": "comment",
-      "rank": 398,
-      "band": "common"
+      "sourceRank": 524
     },
     {
       "wordId": "word:financial",
       "lexicalKey": "financial",
-      "rank": 399,
-      "band": "common"
+      "sourceRank": 525
     },
     {
       "wordId": "word:against",
       "lexicalKey": "against",
-      "rank": 400,
-      "band": "common"
+      "sourceRank": 528
     },
     {
       "wordId": "word:standard",
       "lexicalKey": "standard",
-      "rank": 401,
-      "band": "common"
+      "sourceRank": 529
     },
     {
       "wordId": "word:tax",
       "lexicalKey": "tax",
-      "rank": 402,
-      "band": "common"
+      "sourceRank": 530
     },
     {
       "wordId": "word:person",
       "lexicalKey": "person",
-      "rank": 403,
-      "band": "common"
+      "sourceRank": 531
     },
     {
       "wordId": "word:below",
       "lexicalKey": "below",
-      "rank": 404,
-      "band": "common"
+      "sourceRank": 532
     },
     {
       "wordId": "word:mobile",
       "lexicalKey": "mobile",
-      "rank": 405,
-      "band": "common"
+      "sourceRank": 533
     },
     {
       "wordId": "word:less",
       "lexicalKey": "less",
-      "rank": 406,
-      "band": "common"
+      "sourceRank": 534
     },
     {
       "wordId": "word:got",
       "lexicalKey": "got",
-      "rank": 407,
-      "band": "common"
+      "sourceRank": 535
     },
     {
       "wordId": "word:blog",
       "lexicalKey": "blog",
-      "rank": 408,
-      "band": "common"
+      "sourceRank": 536
     },
     {
       "wordId": "word:party",
       "lexicalKey": "party",
-      "rank": 409,
-      "band": "common"
+      "sourceRank": 537
     },
     {
       "wordId": "word:payment",
       "lexicalKey": "payment",
-      "rank": 410,
-      "band": "common"
+      "sourceRank": 538
     },
     {
       "wordId": "word:equipment",
       "lexicalKey": "equipment",
-      "rank": 411,
-      "band": "common"
+      "sourceRank": 539
     },
     {
       "wordId": "word:student",
       "lexicalKey": "student",
-      "rank": 412,
-      "band": "common"
+      "sourceRank": 541
     },
     {
       "wordId": "word:let",
       "lexicalKey": "let",
-      "rank": 413,
-      "band": "common"
+      "sourceRank": 542
     },
     {
       "wordId": "word:legal",
       "lexicalKey": "legal",
-      "rank": 414,
-      "band": "common"
+      "sourceRank": 545
     },
     {
       "wordId": "word:above",
       "lexicalKey": "above",
-      "rank": 415,
-      "band": "common"
+      "sourceRank": 546
     },
     {
       "wordId": "word:recent",
       "lexicalKey": "recent",
-      "rank": 416,
-      "band": "common"
+      "sourceRank": 547
     },
     {
       "wordId": "word:park",
       "lexicalKey": "park",
-      "rank": 417,
-      "band": "common"
+      "sourceRank": 548
     },
     {
       "wordId": "word:side",
       "lexicalKey": "side",
-      "rank": 418,
-      "band": "common"
+      "sourceRank": 550
     },
     {
       "wordId": "word:act",
       "lexicalKey": "act",
-      "rank": 419,
-      "band": "common"
+      "sourceRank": 551
     },
     {
       "wordId": "word:problem",
       "lexicalKey": "problem",
-      "rank": 420,
-      "band": "common"
+      "sourceRank": 552
     },
     {
       "wordId": "word:red",
       "lexicalKey": "red",
-      "rank": 421,
-      "band": "common"
+      "sourceRank": 553
     },
     {
       "wordId": "word:give",
       "lexicalKey": "give",
-      "rank": 422,
-      "band": "common"
+      "sourceRank": 554
     },
     {
       "wordId": "word:memory",
       "lexicalKey": "memory",
-      "rank": 423,
-      "band": "common"
+      "sourceRank": 555
     },
     {
       "wordId": "word:performance",
       "lexicalKey": "performance",
-      "rank": 424,
-      "band": "common"
+      "sourceRank": 556
     },
     {
       "wordId": "word:social",
       "lexicalKey": "social",
-      "rank": 425,
-      "band": "common"
+      "sourceRank": 557
     },
     {
       "wordId": "word:august",
       "lexicalKey": "august",
-      "rank": 426,
-      "band": "common"
+      "sourceRank": 559
     },
     {
       "wordId": "word:quote",
       "lexicalKey": "quote",
-      "rank": 427,
-      "band": "common"
+      "sourceRank": 560
     },
     {
       "wordId": "word:language",
       "lexicalKey": "language",
-      "rank": 428,
-      "band": "common"
+      "sourceRank": 561
     },
     {
       "wordId": "word:story",
       "lexicalKey": "story",
-      "rank": 429,
-      "band": "common"
+      "sourceRank": 562
     },
     {
       "wordId": "word:sell",
       "lexicalKey": "sell",
-      "rank": 430,
-      "band": "common"
+      "sourceRank": 563
     },
     {
       "wordId": "word:experience",
       "lexicalKey": "experience",
-      "rank": 431,
-      "band": "common"
+      "sourceRank": 565
     },
     {
       "wordId": "word:create",
       "lexicalKey": "create",
-      "rank": 432,
-      "band": "common"
+      "sourceRank": 567
     },
     {
       "wordId": "word:key",
       "lexicalKey": "key",
-      "rank": 433,
-      "band": "common"
+      "sourceRank": 568
     },
     {
       "wordId": "word:body",
       "lexicalKey": "body",
-      "rank": 434,
-      "band": "common"
+      "sourceRank": 569
     },
     {
       "wordId": "word:young",
       "lexicalKey": "young",
-      "rank": 435,
-      "band": "common"
+      "sourceRank": 570
     },
     {
       "wordId": "word:important",
       "lexicalKey": "important",
-      "rank": 436,
-      "band": "common"
+      "sourceRank": 572
     },
     {
       "wordId": "word:field",
       "lexicalKey": "field",
-      "rank": 437,
-      "band": "common"
+      "sourceRank": 573
     },
     {
       "wordId": "word:few",
       "lexicalKey": "few",
-      "rank": 438,
-      "band": "common"
+      "sourceRank": 574
     },
     {
       "wordId": "word:east",
       "lexicalKey": "east",
-      "rank": 439,
-      "band": "common"
+      "sourceRank": 575
     },
     {
       "wordId": "word:paper",
       "lexicalKey": "paper",
-      "rank": 440,
-      "band": "common"
+      "sourceRank": 576
     },
     {
       "wordId": "word:single",
       "lexicalKey": "single",
-      "rank": 441,
-      "band": "common"
+      "sourceRank": 577
     },
     {
       "wordId": "word:age",
       "lexicalKey": "age",
-      "rank": 442,
-      "band": "common"
+      "sourceRank": 579
     },
     {
       "wordId": "word:club",
       "lexicalKey": "club",
-      "rank": 443,
-      "band": "common"
+      "sourceRank": 581
     },
     {
       "wordId": "word:example",
       "lexicalKey": "example",
-      "rank": 444,
-      "band": "common"
+      "sourceRank": 582
     },
     {
       "wordId": "word:additional",
       "lexicalKey": "additional",
-      "rank": 445,
-      "band": "common"
+      "sourceRank": 584
     },
     {
       "wordId": "word:latest",
       "lexicalKey": "latest",
-      "rank": 446,
-      "band": "common"
+      "sourceRank": 587
     },
     {
       "wordId": "word:something",
       "lexicalKey": "something",
-      "rank": 447,
-      "band": "common"
+      "sourceRank": 588
     },
     {
       "wordId": "word:road",
       "lexicalKey": "road",
-      "rank": 448,
-      "band": "common"
+      "sourceRank": 589
     },
     {
       "wordId": "word:gift",
       "lexicalKey": "gift",
-      "rank": 449,
-      "band": "common"
+      "sourceRank": 590
     },
     {
       "wordId": "word:question",
       "lexicalKey": "question",
-      "rank": 450,
-      "band": "common"
+      "sourceRank": 591
     },
     {
       "wordId": "word:night",
       "lexicalKey": "night",
-      "rank": 451,
-      "band": "common"
+      "sourceRank": 593
     },
     {
       "wordId": "word:hard",
       "lexicalKey": "hard",
-      "rank": 452,
-      "band": "common"
+      "sourceRank": 595
     },
     {
       "wordId": "word:pay",
       "lexicalKey": "pay",
-      "rank": 453,
-      "band": "common"
+      "sourceRank": 598
     },
     {
       "wordId": "word:four",
       "lexicalKey": "four",
-      "rank": 454,
-      "band": "common"
+      "sourceRank": 599
     },
     {
       "wordId": "word:status",
       "lexicalKey": "status",
-      "rank": 455,
-      "band": "common"
+      "sourceRank": 601
     },
     {
       "wordId": "word:issue",
       "lexicalKey": "issue",
-      "rank": 456,
-      "band": "common"
+      "sourceRank": 603
     },
     {
       "wordId": "word:range",
       "lexicalKey": "range",
-      "rank": 457,
-      "band": "common"
+      "sourceRank": 604
     },
     {
       "wordId": "word:court",
       "lexicalKey": "court",
-      "rank": 458,
-      "band": "common"
+      "sourceRank": 607
     },
     {
       "wordId": "word:february",
       "lexicalKey": "february",
-      "rank": 459,
-      "band": "common"
+      "sourceRank": 608
     },
     {
       "wordId": "word:always",
       "lexicalKey": "always",
-      "rank": 460,
-      "band": "common"
+      "sourceRank": 609
     },
     {
       "wordId": "word:result",
       "lexicalKey": "result",
-      "rank": 461,
-      "band": "common"
+      "sourceRank": 610
     },
     {
       "wordId": "word:audio",
       "lexicalKey": "audio",
-      "rank": 462,
-      "band": "common"
+      "sourceRank": 611
     },
     {
       "wordId": "word:light",
       "lexicalKey": "light",
-      "rank": 463,
-      "band": "common"
+      "sourceRank": 612
     },
     {
       "wordId": "word:write",
       "lexicalKey": "write",
-      "rank": 464,
-      "band": "common"
+      "sourceRank": 613
     },
     {
       "wordId": "word:offer",
       "lexicalKey": "offer",
-      "rank": 465,
-      "band": "common"
+      "sourceRank": 616
     },
     {
       "wordId": "word:blue",
       "lexicalKey": "blue",
-      "rank": 466,
-      "band": "common"
+      "sourceRank": 617
     },
     {
       "wordId": "word:easy",
       "lexicalKey": "easy",
-      "rank": 467,
-      "band": "common"
+      "sourceRank": 620
     },
     {
       "wordId": "word:given",
       "lexicalKey": "given",
-      "rank": 468,
-      "band": "common"
+      "sourceRank": 621
     },
     {
       "wordId": "word:event",
       "lexicalKey": "event",
-      "rank": 469,
-      "band": "common"
+      "sourceRank": 623
     },
     {
       "wordId": "word:release",
       "lexicalKey": "release",
-      "rank": 470,
-      "band": "common"
+      "sourceRank": 624
     },
     {
       "wordId": "word:analysis",
       "lexicalKey": "analysis",
-      "rank": 471,
-      "band": "common"
+      "sourceRank": 625
     },
     {
       "wordId": "word:request",
       "lexicalKey": "request",
-      "rank": 472,
-      "band": "common"
+      "sourceRank": 626
     },
     {
       "wordId": "word:china",
       "lexicalKey": "china",
-      "rank": 473,
-      "band": "common"
+      "sourceRank": 628
     },
     {
       "wordId": "word:picture",
       "lexicalKey": "picture",
-      "rank": 474,
-      "band": "common"
+      "sourceRank": 630
     },
     {
       "wordId": "word:possible",
       "lexicalKey": "possible",
-      "rank": 475,
-      "band": "common"
+      "sourceRank": 632
     },
     {
       "wordId": "word:might",
       "lexicalKey": "might",
-      "rank": 476,
-      "band": "common"
+      "sourceRank": 633
     },
     {
       "wordId": "word:professional",
       "lexicalKey": "professional",
-      "rank": 477,
-      "band": "common"
+      "sourceRank": 634
     },
     {
       "wordId": "word:yet",
       "lexicalKey": "yet",
-      "rank": 478,
-      "band": "common"
+      "sourceRank": 635
     },
     {
       "wordId": "word:month",
       "lexicalKey": "month",
-      "rank": 479,
-      "band": "common"
+      "sourceRank": 636
     },
     {
       "wordId": "word:star",
       "lexicalKey": "star",
-      "rank": 480,
-      "band": "common"
+      "sourceRank": 638
     },
     {
       "wordId": "word:future",
       "lexicalKey": "future",
-      "rank": 481,
-      "band": "common"
+      "sourceRank": 640
     },
     {
       "wordId": "word:space",
       "lexicalKey": "space",
-      "rank": 482,
-      "band": "common"
+      "sourceRank": 641
     },
     {
       "wordId": "word:committee",
       "lexicalKey": "committee",
-      "rank": 483,
-      "band": "common"
+      "sourceRank": 642
     },
     {
       "wordId": "word:hand",
       "lexicalKey": "hand",
-      "rank": 484,
-      "band": "common"
+      "sourceRank": 643
     },
     {
       "wordId": "word:sun",
       "lexicalKey": "sun",
-      "rank": 485,
-      "band": "common"
+      "sourceRank": 644
     },
     {
       "wordId": "word:london",
       "lexicalKey": "london",
-      "rank": 486,
-      "band": "common"
+      "sourceRank": 647
     },
     {
       "wordId": "word:become",
       "lexicalKey": "become",
-      "rank": 487,
-      "band": "common"
+      "sourceRank": 651
     },
     {
       "wordId": "word:interest",
       "lexicalKey": "interest",
-      "rank": 488,
-      "band": "common"
+      "sourceRank": 652
     },
     {
       "wordId": "word:child",
       "lexicalKey": "child",
-      "rank": 489,
-      "band": "common"
+      "sourceRank": 654
     },
     {
       "wordId": "word:keep",
       "lexicalKey": "keep",
-      "rank": 490,
-      "band": "common"
+      "sourceRank": 655
     },
     {
       "wordId": "word:enter",
       "lexicalKey": "enter",
-      "rank": 491,
-      "band": "common"
+      "sourceRank": 656
     },
     {
       "wordId": "word:share",
       "lexicalKey": "share",
-      "rank": 492,
-      "band": "common"
+      "sourceRank": 658
     },
     {
       "wordId": "word:similar",
       "lexicalKey": "similar",
-      "rank": 493,
-      "band": "common"
+      "sourceRank": 659
     },
     {
       "wordId": "word:garden",
       "lexicalKey": "garden",
-      "rank": 494,
-      "band": "common"
+      "sourceRank": 660
     },
     {
       "wordId": "word:million",
       "lexicalKey": "million",
-      "rank": 495,
-      "band": "common"
+      "sourceRank": 662
     },
     {
       "wordId": "word:reference",
       "lexicalKey": "reference",
-      "rank": 496,
-      "band": "common"
+      "sourceRank": 664
     },
     {
       "wordId": "word:baby",
       "lexicalKey": "baby",
-      "rank": 497,
-      "band": "common"
+      "sourceRank": 667
     },
     {
       "wordId": "word:energy",
       "lexicalKey": "energy",
-      "rank": 498,
-      "band": "common"
+      "sourceRank": 669
     },
     {
       "wordId": "word:run",
       "lexicalKey": "run",
-      "rank": 499,
-      "band": "common"
+      "sourceRank": 670
     },
     {
       "wordId": "word:delivery",
       "lexicalKey": "delivery",
-      "rank": 500,
-      "band": "common"
+      "sourceRank": 671
     },
     {
       "wordId": "word:net",
       "lexicalKey": "net",
-      "rank": 501,
-      "band": "common"
+      "sourceRank": 672
     },
     {
       "wordId": "word:popular",
       "lexicalKey": "popular",
-      "rank": 502,
-      "band": "common"
+      "sourceRank": 673
     },
     {
       "wordId": "word:term",
       "lexicalKey": "term",
-      "rank": 503,
-      "band": "common"
+      "sourceRank": 674
     },
     {
       "wordId": "word:film",
       "lexicalKey": "film",
-      "rank": 504,
-      "band": "common"
+      "sourceRank": 675
     },
     {
       "wordId": "word:put",
       "lexicalKey": "put",
-      "rank": 505,
-      "band": "common"
+      "sourceRank": 677
     },
     {
       "wordId": "word:journal",
       "lexicalKey": "journal",
-      "rank": 506,
-      "band": "common"
+      "sourceRank": 679
     },
     {
       "wordId": "word:try",
       "lexicalKey": "try",
-      "rank": 507,
-      "band": "common"
+      "sourceRank": 682
     },
     {
       "wordId": "word:welcome",
       "lexicalKey": "welcome",
-      "rank": 508,
-      "band": "common"
+      "sourceRank": 683
     },
     {
       "wordId": "word:central",
       "lexicalKey": "central",
-      "rank": 509,
-      "band": "common"
+      "sourceRank": 684
     },
     {
       "wordId": "word:president",
       "lexicalKey": "president",
-      "rank": 510,
-      "band": "common"
+      "sourceRank": 686
     },
     {
       "wordId": "word:notice",
       "lexicalKey": "notice",
-      "rank": 511,
-      "band": "common"
+      "sourceRank": 687
     },
     {
       "wordId": "word:original",
       "lexicalKey": "original",
-      "rank": 512,
-      "band": "common"
+      "sourceRank": 688
     },
     {
       "wordId": "word:head",
       "lexicalKey": "head",
-      "rank": 513,
-      "band": "common"
+      "sourceRank": 689
     },
     {
       "wordId": "word:radio",
       "lexicalKey": "radio",
-      "rank": 514,
-      "band": "common"
+      "sourceRank": 690
     },
     {
       "wordId": "word:until",
       "lexicalKey": "until",
-      "rank": 515,
-      "band": "common"
+      "sourceRank": 691
     },
     {
       "wordId": "word:cell",
       "lexicalKey": "cell",
-      "rank": 516,
-      "band": "common"
+      "sourceRank": 692
     },
     {
       "wordId": "word:color",
       "lexicalKey": "color",
-      "rank": 517,
-      "band": "common"
+      "sourceRank": 693
     },
     {
       "wordId": "word:self",
       "lexicalKey": "self",
-      "rank": 518,
-      "band": "common"
+      "sourceRank": 694
     },
     {
       "wordId": "word:council",
       "lexicalKey": "council",
-      "rank": 519,
-      "band": "common"
+      "sourceRank": 695
     },
     {
       "wordId": "word:away",
       "lexicalKey": "away",
-      "rank": 520,
-      "band": "common"
+      "sourceRank": 696
     },
     {
       "wordId": "word:track",
       "lexicalKey": "track",
-      "rank": 521,
-      "band": "common"
+      "sourceRank": 698
     },
     {
       "wordId": "word:discussion",
       "lexicalKey": "discussion",
-      "rank": 522,
-      "band": "common"
+      "sourceRank": 700
     },
     {
       "wordId": "word:once",
       "lexicalKey": "once",
-      "rank": 523,
-      "band": "common"
+      "sourceRank": 702
     },
     {
       "wordId": "word:agreement",
       "lexicalKey": "agreement",
-      "rank": 524,
-      "band": "common"
+      "sourceRank": 705
     },
     {
       "wordId": "word:format",
       "lexicalKey": "format",
-      "rank": 525,
-      "band": "common"
+      "sourceRank": 706
     },
     {
       "wordId": "word:least",
       "lexicalKey": "least",
-      "rank": 526,
-      "band": "common"
+      "sourceRank": 707
     },
     {
       "wordId": "word:society",
       "lexicalKey": "society",
-      "rank": 527,
-      "band": "common"
+      "sourceRank": 708
     },
     {
       "wordId": "word:safety",
       "lexicalKey": "safety",
-      "rank": 528,
-      "band": "common"
+      "sourceRank": 711
     },
     {
       "wordId": "word:sure",
       "lexicalKey": "sure",
-      "rank": 529,
-      "band": "common"
+      "sourceRank": 713
     },
     {
       "wordId": "word:trade",
       "lexicalKey": "trade",
-      "rank": 530,
-      "band": "common"
+      "sourceRank": 715
     },
     {
       "wordId": "word:edition",
       "lexicalKey": "edition",
-      "rank": 531,
-      "band": "common"
+      "sourceRank": 716
     },
     {
       "wordId": "word:tell",
       "lexicalKey": "tell",
-      "rank": 532,
-      "band": "common"
+      "sourceRank": 720
     },
     {
       "wordId": "word:further",
       "lexicalKey": "further",
-      "rank": 533,
-      "band": "common"
+      "sourceRank": 721
     },
     {
       "wordId": "word:association",
       "lexicalKey": "association",
-      "rank": 534,
-      "band": "common"
+      "sourceRank": 723
     },
     {
       "wordId": "word:able",
       "lexicalKey": "able",
-      "rank": 535,
-      "band": "common"
+      "sourceRank": 724
     },
     {
       "wordId": "word:fun",
       "lexicalKey": "fun",
-      "rank": 536,
-      "band": "common"
+      "sourceRank": 728
     },
     {
       "wordId": "word:already",
       "lexicalKey": "already",
-      "rank": 537,
-      "band": "common"
+      "sourceRank": 729
     },
     {
       "wordId": "word:green",
       "lexicalKey": "green",
-      "rank": 538,
-      "band": "common"
+      "sourceRank": 730
     },
     {
       "wordId": "word:close",
       "lexicalKey": "close",
-      "rank": 539,
-      "band": "common"
+      "sourceRank": 732
     },
     {
       "wordId": "word:common",
       "lexicalKey": "common",
-      "rank": 540,
-      "band": "common"
+      "sourceRank": 733
     },
     {
       "wordId": "word:drive",
       "lexicalKey": "drive",
-      "rank": 541,
-      "band": "common"
+      "sourceRank": 734
     },
     {
       "wordId": "word:specific",
       "lexicalKey": "specific",
-      "rank": 542,
-      "band": "common"
+      "sourceRank": 735
     },
     {
       "wordId": "word:several",
       "lexicalKey": "several",
-      "rank": 543,
-      "band": "common"
+      "sourceRank": 736
     },
     {
       "wordId": "word:gold",
       "lexicalKey": "gold",
-      "rank": 544,
-      "band": "common"
+      "sourceRank": 737
     },
     {
       "wordId": "word:collection",
       "lexicalKey": "collection",
-      "rank": 545,
-      "band": "common"
+      "sourceRank": 741
     },
     {
       "wordId": "word:short",
       "lexicalKey": "short",
-      "rank": 546,
-      "band": "common"
+      "sourceRank": 743
     },
     {
       "wordId": "word:lot",
       "lexicalKey": "lot",
-      "rank": 547,
-      "band": "common"
+      "sourceRank": 745
     },
     {
       "wordId": "word:ask",
       "lexicalKey": "ask",
-      "rank": 548,
-      "band": "common"
+      "sourceRank": 746
     },
     {
       "wordId": "word:display",
       "lexicalKey": "display",
-      "rank": 549,
-      "band": "common"
+      "sourceRank": 747
     },
     {
       "wordId": "word:means",
       "lexicalKey": "means",
-      "rank": 550,
-      "band": "common"
+      "sourceRank": 751
     },
     {
       "wordId": "word:director",
       "lexicalKey": "director",
-      "rank": 551,
-      "band": "common"
+      "sourceRank": 752
     },
     {
       "wordId": "word:daily",
       "lexicalKey": "daily",
-      "rank": 552,
-      "band": "common"
+      "sourceRank": 753
     },
     {
       "wordId": "word:beach",
       "lexicalKey": "beach",
-      "rank": 553,
-      "band": "common"
+      "sourceRank": 754
     },
     {
       "wordId": "word:past",
       "lexicalKey": "past",
-      "rank": 554,
-      "band": "common"
+      "sourceRank": 755
     },
     {
       "wordId": "word:natural",
       "lexicalKey": "natural",
-      "rank": 555,
-      "band": "common"
+      "sourceRank": 756
     },
     {
       "wordId": "word:whether",
       "lexicalKey": "whether",
-      "rank": 556,
-      "band": "common"
+      "sourceRank": 757
     },
     {
       "wordId": "word:due",
       "lexicalKey": "due",
-      "rank": 557,
-      "band": "common"
+      "sourceRank": 758
     },
     {
       "wordId": "word:five",
       "lexicalKey": "five",
-      "rank": 558,
-      "band": "common"
+      "sourceRank": 761
     },
     {
       "wordId": "word:upon",
       "lexicalKey": "upon",
-      "rank": 559,
-      "band": "common"
+      "sourceRank": 762
     },
     {
       "wordId": "word:period",
       "lexicalKey": "period",
-      "rank": 560,
-      "band": "common"
+      "sourceRank": 763
     },
     {
       "wordId": "word:database",
       "lexicalKey": "database",
-      "rank": 561,
-      "band": "common"
+      "sourceRank": 765
     },
     {
       "wordId": "word:official",
       "lexicalKey": "official",
-      "rank": 562,
-      "band": "common"
+      "sourceRank": 767
     },
     {
       "wordId": "word:weather",
       "lexicalKey": "weather",
-      "rank": 563,
-      "band": "common"
+      "sourceRank": 768
     },
     {
       "wordId": "word:land",
       "lexicalKey": "land",
-      "rank": 564,
-      "band": "common"
+      "sourceRank": 770
     },
     {
       "wordId": "word:average",
       "lexicalKey": "average",
-      "rank": 565,
-      "band": "common"
+      "sourceRank": 771
     },
     {
       "wordId": "word:done",
       "lexicalKey": "done",
-      "rank": 566,
-      "band": "common"
+      "sourceRank": 772
     },
     {
       "wordId": "word:window",
       "lexicalKey": "window",
-      "rank": 567,
-      "band": "common"
+      "sourceRank": 774
     },
     {
       "wordId": "word:france",
       "lexicalKey": "france",
-      "rank": 568,
-      "band": "common"
+      "sourceRank": 775
     },
     {
       "wordId": "word:region",
       "lexicalKey": "region",
-      "rank": 569,
-      "band": "common"
+      "sourceRank": 777
     },
     {
       "wordId": "word:island",
       "lexicalKey": "island",
-      "rank": 570,
-      "band": "common"
+      "sourceRank": 778
     },
     {
       "wordId": "word:record",
       "lexicalKey": "record",
-      "rank": 571,
-      "band": "common"
+      "sourceRank": 779
     },
     {
       "wordId": "word:direct",
       "lexicalKey": "direct",
-      "rank": 572,
-      "band": "common"
+      "sourceRank": 780
     },
     {
       "wordId": "word:conference",
       "lexicalKey": "conference",
-      "rank": 573,
-      "band": "common"
+      "sourceRank": 782
     },
     {
       "wordId": "word:environment",
       "lexicalKey": "environment",
-      "rank": 574,
-      "band": "common"
+      "sourceRank": 783
     },
     {
       "wordId": "word:district",
       "lexicalKey": "district",
-      "rank": 575,
-      "band": "common"
+      "sourceRank": 786
     },
     {
       "wordId": "word:calendar",
       "lexicalKey": "calendar",
-      "rank": 576,
-      "band": "common"
+      "sourceRank": 787
     },
     {
       "wordId": "word:style",
       "lexicalKey": "style",
-      "rank": 577,
-      "band": "common"
+      "sourceRank": 789
     },
     {
       "wordId": "word:front",
       "lexicalKey": "front",
-      "rank": 578,
-      "band": "common"
+      "sourceRank": 791
     },
     {
       "wordId": "word:statement",
       "lexicalKey": "statement",
-      "rank": 579,
-      "band": "common"
+      "sourceRank": 792
     },
     {
       "wordId": "word:update",
       "lexicalKey": "update",
-      "rank": 580,
-      "band": "common"
+      "sourceRank": 793
     },
     {
       "wordId": "word:ever",
       "lexicalKey": "ever",
-      "rank": 581,
-      "band": "common"
+      "sourceRank": 796
     },
     {
       "wordId": "word:early",
       "lexicalKey": "early",
-      "rank": 582,
-      "band": "common"
+      "sourceRank": 798
     },
     {
       "wordId": "word:sound",
       "lexicalKey": "sound",
-      "rank": 583,
-      "band": "common"
+      "sourceRank": 800
     },
     {
       "wordId": "word:resource",
       "lexicalKey": "resource",
-      "rank": 584,
-      "band": "common"
+      "sourceRank": 801
     },
     {
       "wordId": "word:present",
       "lexicalKey": "present",
-      "rank": 585,
-      "band": "common"
+      "sourceRank": 802
     },
     {
       "wordId": "word:either",
       "lexicalKey": "either",
-      "rank": 586,
-      "band": "common"
+      "sourceRank": 804
     },
     {
       "wordId": "word:ago",
       "lexicalKey": "ago",
-      "rank": 587,
-      "band": "common"
+      "sourceRank": 805
     },
     {
       "wordId": "word:document",
       "lexicalKey": "document",
-      "rank": 588,
-      "band": "common"
+      "sourceRank": 806
     },
     {
       "wordId": "word:word",
       "lexicalKey": "word",
-      "rank": 589,
-      "band": "common"
+      "sourceRank": 807
     },
     {
       "wordId": "word:material",
       "lexicalKey": "material",
-      "rank": 590,
-      "band": "common"
+      "sourceRank": 809
     },
     {
       "wordId": "word:bill",
       "lexicalKey": "bill",
-      "rank": 591,
-      "band": "common"
+      "sourceRank": 810
     },
     {
       "wordId": "word:written",
       "lexicalKey": "written",
-      "rank": 592,
-      "band": "common"
+      "sourceRank": 812
     },
     {
       "wordId": "word:talk",
       "lexicalKey": "talk",
-      "rank": 593,
-      "band": "common"
+      "sourceRank": 813
     },
     {
       "wordId": "word:federal",
       "lexicalKey": "federal",
-      "rank": 594,
-      "band": "common"
+      "sourceRank": 814
     },
     {
       "wordId": "word:final",
       "lexicalKey": "final",
-      "rank": 595,
-      "band": "common"
+      "sourceRank": 817
     },
     {
       "wordId": "word:adult",
       "lexicalKey": "adult",
-      "rank": 596,
-      "band": "common"
+      "sourceRank": 818
     },
     {
       "wordId": "word:thing",
       "lexicalKey": "thing",
-      "rank": 597,
-      "band": "common"
+      "sourceRank": 820
     },
     {
       "wordId": "word:centre",
       "lexicalKey": "centre",
-      "rank": 598,
-      "band": "common"
+      "sourceRank": 821
     },
     {
       "wordId": "word:cheap",
       "lexicalKey": "cheap",
-      "rank": 599,
-      "band": "common"
+      "sourceRank": 824
     },
     {
       "wordId": "word:finance",
       "lexicalKey": "finance",
-      "rank": 600,
-      "band": "common"
+      "sourceRank": 826
     },
     {
       "wordId": "word:true",
       "lexicalKey": "true",
-      "rank": 601,
-      "band": "common"
+      "sourceRank": 827
     },
     {
       "wordId": "word:else",
       "lexicalKey": "else",
-      "rank": 602,
-      "band": "common"
+      "sourceRank": 829
     },
     {
       "wordId": "word:mark",
       "lexicalKey": "mark",
-      "rank": 603,
-      "band": "common"
+      "sourceRank": 830
     },
     {
       "wordId": "word:third",
       "lexicalKey": "third",
-      "rank": 604,
-      "band": "common"
+      "sourceRank": 831
     },
     {
       "wordId": "word:rock",
       "lexicalKey": "rock",
-      "rank": 605,
-      "band": "common"
+      "sourceRank": 832
     },
     {
       "wordId": "word:bad",
       "lexicalKey": "bad",
-      "rank": 606,
-      "band": "common"
+      "sourceRank": 837
     },
     {
       "wordId": "word:individual",
       "lexicalKey": "individual",
-      "rank": 607,
-      "band": "common"
+      "sourceRank": 838
     },
     {
       "wordId": "word:plus",
       "lexicalKey": "plus",
-      "rank": 608,
-      "band": "common"
+      "sourceRank": 840
     },
     {
       "wordId": "word:cover",
       "lexicalKey": "cover",
-      "rank": 609,
-      "band": "common"
+      "sourceRank": 842
     },
     {
       "wordId": "word:usually",
       "lexicalKey": "usually",
-      "rank": 610,
-      "band": "common"
+      "sourceRank": 843
     },
     {
       "wordId": "word:edit",
       "lexicalKey": "edit",
-      "rank": 611,
-      "band": "common"
+      "sourceRank": 844
     },
     {
       "wordId": "word:together",
       "lexicalKey": "together",
-      "rank": 612,
-      "band": "common"
+      "sourceRank": 845
     },
     {
       "wordId": "word:percent",
       "lexicalKey": "percent",
-      "rank": 613,
-      "band": "common"
+      "sourceRank": 847
     },
     {
       "wordId": "word:fast",
       "lexicalKey": "fast",
-      "rank": 614,
-      "band": "common"
+      "sourceRank": 848
     },
     {
       "wordId": "word:function",
       "lexicalKey": "function",
-      "rank": 615,
-      "band": "common"
+      "sourceRank": 849
     },
     {
       "wordId": "word:fact",
       "lexicalKey": "fact",
-      "rank": 616,
-      "band": "common"
+      "sourceRank": 850
     },
     {
       "wordId": "word:unit",
       "lexicalKey": "unit",
-      "rank": 617,
-      "band": "common"
+      "sourceRank": 851
     },
     {
       "wordId": "word:global",
       "lexicalKey": "global",
-      "rank": 618,
-      "band": "common"
+      "sourceRank": 853
     },
     {
       "wordId": "word:meet",
       "lexicalKey": "meet",
-      "rank": 619,
-      "band": "common"
+      "sourceRank": 855
     },
     {
       "wordId": "word:far",
       "lexicalKey": "far",
-      "rank": 620,
-      "band": "common"
+      "sourceRank": 856
     },
     {
       "wordId": "word:economic",
       "lexicalKey": "economic",
-      "rank": 621,
-      "band": "common"
+      "sourceRank": 857
     },
     {
       "wordId": "word:player",
       "lexicalKey": "player",
-      "rank": 622,
-      "band": "common"
+      "sourceRank": 859
     },
     {
       "wordId": "word:often",
       "lexicalKey": "often",
-      "rank": 623,
-      "band": "common"
+      "sourceRank": 862
     },
     {
       "wordId": "word:submit",
       "lexicalKey": "submit",
-      "rank": 624,
-      "band": "common"
+      "sourceRank": 864
     },
     {
       "wordId": "word:germany",
       "lexicalKey": "germany",
-      "rank": 625,
-      "band": "common"
+      "sourceRank": 865
     },
     {
       "wordId": "word:amount",
       "lexicalKey": "amount",
-      "rank": 626,
-      "band": "common"
+      "sourceRank": 866
     },
     {
       "wordId": "word:watch",
       "lexicalKey": "watch",
-      "rank": 627,
-      "band": "common"
+      "sourceRank": 867
     },
     {
       "wordId": "word:feel",
       "lexicalKey": "feel",
-      "rank": 628,
-      "band": "common"
+      "sourceRank": 869
     },
     {
       "wordId": "word:though",
       "lexicalKey": "though",
-      "rank": 629,
-      "band": "common"
+      "sourceRank": 870
     },
     {
       "wordId": "word:bank",
       "lexicalKey": "bank",
-      "rank": 630,
-      "band": "common"
+      "sourceRank": 871
     },
     {
       "wordId": "word:risk",
       "lexicalKey": "risk",
-      "rank": 631,
-      "band": "common"
+      "sourceRank": 872
     },
     {
       "wordId": "word:everything",
       "lexicalKey": "everything",
-      "rank": 632,
-      "band": "common"
+      "sourceRank": 874
     },
     {
       "wordId": "word:various",
       "lexicalKey": "various",
-      "rank": 633,
-      "band": "common"
+      "sourceRank": 876
     },
     {
       "wordId": "word:production",
       "lexicalKey": "production",
-      "rank": 634,
-      "band": "common"
+      "sourceRank": 880
     },
     {
       "wordId": "word:commercial",
       "lexicalKey": "commercial",
-      "rank": 635,
-      "band": "common"
+      "sourceRank": 881
     },
     {
       "wordId": "word:weight",
       "lexicalKey": "weight",
-      "rank": 636,
-      "band": "common"
+      "sourceRank": 883
     },
     {
       "wordId": "word:town",
       "lexicalKey": "town",
-      "rank": 637,
-      "band": "common"
+      "sourceRank": 884
     },
     {
       "wordId": "word:heart",
       "lexicalKey": "heart",
-      "rank": 638,
-      "band": "common"
+      "sourceRank": 885
     },
     {
       "wordId": "word:choose",
       "lexicalKey": "choose",
-      "rank": 639,
-      "band": "common"
+      "sourceRank": 888
     },
     {
       "wordId": "word:treatment",
       "lexicalKey": "treatment",
-      "rank": 640,
-      "band": "common"
+      "sourceRank": 889
     },
     {
       "wordId": "word:knowledge",
       "lexicalKey": "knowledge",
-      "rank": 641,
-      "band": "common"
+      "sourceRank": 893
     },
     {
       "wordId": "word:magazine",
       "lexicalKey": "magazine",
-      "rank": 642,
-      "band": "common"
+      "sourceRank": 894
     },
     {
       "wordId": "word:error",
       "lexicalKey": "error",
-      "rank": 643,
-      "band": "common"
+      "sourceRank": 895
     },
     {
       "wordId": "word:camera",
       "lexicalKey": "camera",
-      "rank": 644,
-      "band": "common"
+      "sourceRank": 896
     },
     {
       "wordId": "word:girl",
       "lexicalKey": "girl",
-      "rank": 645,
-      "band": "common"
+      "sourceRank": 898
     },
     {
       "wordId": "word:currently",
       "lexicalKey": "currently",
-      "rank": 646,
-      "band": "common"
+      "sourceRank": 899
     },
     {
       "wordId": "word:construction",
       "lexicalKey": "construction",
-      "rank": 647,
-      "band": "common"
+      "sourceRank": 900
     },
     {
       "wordId": "word:clear",
       "lexicalKey": "clear",
-      "rank": 648,
-      "band": "common"
+      "sourceRank": 903
     },
     {
       "wordId": "word:golf",
       "lexicalKey": "golf",
-      "rank": 649,
-      "band": "common"
+      "sourceRank": 904
     },
     {
       "wordId": "word:receive",
       "lexicalKey": "receive",
-      "rank": 650,
-      "band": "common"
+      "sourceRank": 905
     },
     {
       "wordId": "word:chapter",
       "lexicalKey": "chapter",
-      "rank": 651,
-      "band": "common"
+      "sourceRank": 908
     },
     {
       "wordId": "word:protection",
       "lexicalKey": "protection",
-      "rank": 652,
-      "band": "common"
+      "sourceRank": 910
     },
     {
       "wordId": "word:loan",
       "lexicalKey": "loan",
-      "rank": 653,
-      "band": "common"
+      "sourceRank": 912
     },
     {
       "wordId": "word:wide",
       "lexicalKey": "wide",
-      "rank": 654,
-      "band": "common"
+      "sourceRank": 913
     },
     {
       "wordId": "word:beauty",
       "lexicalKey": "beauty",
-      "rank": 655,
-      "band": "common"
+      "sourceRank": 914
     },
     {
       "wordId": "word:manager",
       "lexicalKey": "manager",
-      "rank": 656,
-      "band": "common"
+      "sourceRank": 915
     },
     {
       "wordId": "word:india",
       "lexicalKey": "india",
-      "rank": 657,
-      "band": "common"
+      "sourceRank": 916
     },
     {
       "wordId": "word:position",
       "lexicalKey": "position",
-      "rank": 658,
-      "band": "common"
+      "sourceRank": 917
     },
     {
       "wordId": "word:taken",
       "lexicalKey": "taken",
-      "rank": 659,
-      "band": "common"
+      "sourceRank": 918
     },
     {
       "wordId": "word:sort",
       "lexicalKey": "sort",
-      "rank": 660,
-      "band": "common"
+      "sourceRank": 919
     },
     {
       "wordId": "word:known",
       "lexicalKey": "known",
-      "rank": 661,
-      "band": "common"
+      "sourceRank": 923
     },
     {
       "wordId": "word:half",
       "lexicalKey": "half",
-      "rank": 662,
-      "band": "common"
+      "sourceRank": 924
     },
     {
       "wordId": "word:step",
       "lexicalKey": "step",
-      "rank": 663,
-      "band": "common"
+      "sourceRank": 926
     },
     {
       "wordId": "word:simple",
       "lexicalKey": "simple",
-      "rank": 664,
-      "band": "common"
+      "sourceRank": 929
     },
     {
       "wordId": "word:quick",
       "lexicalKey": "quick",
-      "rank": 665,
-      "band": "common"
+      "sourceRank": 930
     },
     {
       "wordId": "word:none",
       "lexicalKey": "none",
-      "rank": 666,
-      "band": "common"
+      "sourceRank": 931
     },
     {
       "wordId": "word:license",
       "lexicalKey": "license",
-      "rank": 667,
-      "band": "common"
+      "sourceRank": 933
     },
     {
       "wordId": "word:friday",
       "lexicalKey": "friday",
-      "rank": 668,
-      "band": "common"
+      "sourceRank": 935
     },
     {
       "wordId": "word:lake",
       "lexicalKey": "lake",
-      "rank": 669,
-      "band": "common"
+      "sourceRank": 936
     },
     {
       "wordId": "word:whole",
       "lexicalKey": "whole",
-      "rank": 670,
-      "band": "common"
+      "sourceRank": 937
     },
     {
       "wordId": "word:annual",
       "lexicalKey": "annual",
-      "rank": 671,
-      "band": "common"
+      "sourceRank": 938
     },
     {
       "wordId": "word:later",
       "lexicalKey": "later",
-      "rank": 672,
-      "band": "common"
+      "sourceRank": 940
     },
     {
       "wordId": "word:basic",
       "lexicalKey": "basic",
-      "rank": 673,
-      "band": "common"
+      "sourceRank": 941
     },
     {
       "wordId": "word:corporate",
       "lexicalKey": "corporate",
-      "rank": 674,
-      "band": "common"
+      "sourceRank": 944
     },
     {
       "wordId": "word:church",
       "lexicalKey": "church",
-      "rank": 675,
-      "band": "common"
+      "sourceRank": 946
     },
     {
       "wordId": "word:method",
       "lexicalKey": "method",
-      "rank": 676,
-      "band": "common"
+      "sourceRank": 947
     },
     {
       "wordId": "word:purchase",
       "lexicalKey": "purchase",
-      "rank": 677,
-      "band": "common"
+      "sourceRank": 948
     },
     {
       "wordId": "word:active",
       "lexicalKey": "active",
-      "rank": 678,
-      "band": "common"
+      "sourceRank": 950
     },
     {
       "wordId": "word:response",
       "lexicalKey": "response",
-      "rank": 679,
-      "band": "common"
+      "sourceRank": 951
     },
     {
       "wordId": "word:practice",
       "lexicalKey": "practice",
-      "rank": 680,
-      "band": "common"
+      "sourceRank": 952
     },
     {
       "wordId": "word:figure",
       "lexicalKey": "figure",
-      "rank": 681,
-      "band": "common"
+      "sourceRank": 954
     },
     {
       "wordId": "word:fire",
       "lexicalKey": "fire",
-      "rank": 682,
-      "band": "common"
+      "sourceRank": 956
     },
     {
       "wordId": "word:holiday",
       "lexicalKey": "holiday",
-      "rank": 683,
-      "band": "common"
+      "sourceRank": 957
     },
     {
       "wordId": "word:chat",
       "lexicalKey": "chat",
-      "rank": 684,
-      "band": "common"
+      "sourceRank": 958
     },
     {
       "wordId": "word:enough",
       "lexicalKey": "enough",
-      "rank": 685,
-      "band": "common"
+      "sourceRank": 959
     },
     {
       "wordId": "word:along",
       "lexicalKey": "along",
-      "rank": 686,
-      "band": "common"
+      "sourceRank": 961
     },
     {
       "wordId": "word:among",
       "lexicalKey": "among",
-      "rank": 687,
-      "band": "common"
+      "sourceRank": 962
     },
     {
       "wordId": "word:death",
       "lexicalKey": "death",
-      "rank": 688,
-      "band": "common"
+      "sourceRank": 963
     },
     {
       "wordId": "word:speed",
       "lexicalKey": "speed",
-      "rank": 689,
-      "band": "common"
+      "sourceRank": 965
     },
     {
       "wordId": "word:loss",
       "lexicalKey": "loss",
-      "rank": 690,
-      "band": "common"
+      "sourceRank": 968
     },
     {
       "wordId": "word:face",
       "lexicalKey": "face",
-      "rank": 691,
-      "band": "common"
+      "sourceRank": 969
     },
     {
       "wordId": "word:brand",
       "lexicalKey": "brand",
-      "rank": 692,
-      "band": "common"
+      "sourceRank": 970
     },
     {
       "wordId": "word:discount",
       "lexicalKey": "discount",
-      "rank": 693,
-      "band": "common"
+      "sourceRank": 971
     },
     {
       "wordId": "word:remember",
       "lexicalKey": "remember",
-      "rank": 694,
-      "band": "common"
+      "sourceRank": 975
     },
     {
       "wordId": "word:bit",
       "lexicalKey": "bit",
-      "rank": 695,
-      "band": "common"
+      "sourceRank": 978
     },
     {
       "wordId": "word:yellow",
       "lexicalKey": "yellow",
-      "rank": 696,
-      "band": "common"
+      "sourceRank": 979
     },
     {
       "wordId": "word:political",
       "lexicalKey": "political",
-      "rank": 697,
-      "band": "common"
+      "sourceRank": 980
     },
     {
       "wordId": "word:increase",
       "lexicalKey": "increase",
-      "rank": 698,
-      "band": "common"
+      "sourceRank": 981
     },
     {
       "wordId": "word:kingdom",
       "lexicalKey": "kingdom",
-      "rank": 699,
-      "band": "common"
+      "sourceRank": 983
     },
     {
       "wordId": "word:base",
       "lexicalKey": "base",
-      "rank": 700,
-      "band": "common"
+      "sourceRank": 984
     },
     {
       "wordId": "word:near",
       "lexicalKey": "near",
-      "rank": 701,
-      "band": "broad"
+      "sourceRank": 985
     },
     {
       "wordId": "word:thought",
       "lexicalKey": "thought",
-      "rank": 702,
-      "band": "broad"
+      "sourceRank": 987
     },
     {
       "wordId": "word:stuff",
       "lexicalKey": "stuff",
-      "rank": 703,
-      "band": "broad"
+      "sourceRank": 988
     },
     {
       "wordId": "word:storage",
       "lexicalKey": "storage",
-      "rank": 704,
-      "band": "broad"
+      "sourceRank": 990
     },
     {
       "wordId": "word:oh",
       "lexicalKey": "oh",
-      "rank": 705,
-      "band": "broad"
+      "sourceRank": 991
     },
     {
       "wordId": "word:japan",
       "lexicalKey": "japan",
-      "rank": 706,
-      "band": "broad"
+      "sourceRank": 992
     },
     {
       "wordId": "word:entry",
       "lexicalKey": "entry",
-      "rank": 707,
-      "band": "broad"
+      "sourceRank": 996
     },
     {
       "wordId": "word:stay",
       "lexicalKey": "stay",
-      "rank": 708,
-      "band": "broad"
+      "sourceRank": 997
     },
     {
       "wordId": "word:nature",
       "lexicalKey": "nature",
-      "rank": 709,
-      "band": "broad"
+      "sourceRank": 998
     },
     {
       "wordId": "word:availability",
       "lexicalKey": "availability",
-      "rank": 710,
-      "band": "broad"
+      "sourceRank": 1000
     },
     {
       "wordId": "word:summary",
       "lexicalKey": "summary",
-      "rank": 711,
-      "band": "broad"
+      "sourceRank": 1002
     },
     {
       "wordId": "word:turn",
       "lexicalKey": "turn",
-      "rank": 712,
-      "band": "broad"
+      "sourceRank": 1003
     },
     {
       "wordId": "word:mean",
       "lexicalKey": "mean",
-      "rank": 713,
-      "band": "broad"
+      "sourceRank": 1004
     },
     {
       "wordId": "word:growth",
       "lexicalKey": "growth",
-      "rank": 714,
-      "band": "broad"
+      "sourceRank": 1005
     },
     {
       "wordId": "word:agency",
       "lexicalKey": "agency",
-      "rank": 715,
-      "band": "broad"
+      "sourceRank": 1007
     },
     {
       "wordId": "word:king",
       "lexicalKey": "king",
-      "rank": 716,
-      "band": "broad"
+      "sourceRank": 1008
     },
     {
       "wordId": "word:monday",
       "lexicalKey": "monday",
-      "rank": 717,
-      "band": "broad"
+      "sourceRank": 1009
     },
     {
       "wordId": "word:activity",
       "lexicalKey": "activity",
-      "rank": 718,
-      "band": "broad"
+      "sourceRank": 1011
     },
     {
       "wordId": "word:copy",
       "lexicalKey": "copy",
-      "rank": 719,
-      "band": "broad"
+      "sourceRank": 1012
     },
     {
       "wordId": "word:although",
       "lexicalKey": "although",
-      "rank": 720,
-      "band": "broad"
+      "sourceRank": 1013
     },
     {
       "wordId": "word:drug",
       "lexicalKey": "drug",
-      "rank": 721,
-      "band": "broad"
+      "sourceRank": 1014
     },
     {
       "wordId": "word:western",
       "lexicalKey": "western",
-      "rank": 722,
-      "band": "broad"
+      "sourceRank": 1016
     },
     {
       "wordId": "word:income",
       "lexicalKey": "income",
-      "rank": 723,
-      "band": "broad"
+      "sourceRank": 1017
     },
     {
       "wordId": "word:force",
       "lexicalKey": "force",
-      "rank": 724,
-      "band": "broad"
+      "sourceRank": 1018
     },
     {
       "wordId": "word:employment",
       "lexicalKey": "employment",
-      "rank": 725,
-      "band": "broad"
+      "sourceRank": 1020
     },
     {
       "wordId": "word:overall",
       "lexicalKey": "overall",
-      "rank": 726,
-      "band": "broad"
+      "sourceRank": 1021
     },
     {
       "wordId": "word:commission",
       "lexicalKey": "commission",
-      "rank": 727,
-      "band": "broad"
+      "sourceRank": 1024
     },
     {
       "wordId": "word:package",
       "lexicalKey": "package",
-      "rank": 728,
-      "band": "broad"
+      "sourceRank": 1026
     },
     {
       "wordId": "word:seen",
       "lexicalKey": "seen",
-      "rank": 729,
-      "band": "broad"
+      "sourceRank": 1028
     },
     {
       "wordId": "word:engine",
       "lexicalKey": "engine",
-      "rank": 730,
-      "band": "broad"
+      "sourceRank": 1030
     },
     {
       "wordId": "word:port",
       "lexicalKey": "port",
-      "rank": 731,
-      "band": "broad"
+      "sourceRank": 1031
     },
     {
       "wordId": "word:album",
       "lexicalKey": "album",
-      "rank": 732,
-      "band": "broad"
+      "sourceRank": 1032
     },
     {
       "wordId": "word:regional",
       "lexicalKey": "regional",
-      "rank": 733,
-      "band": "broad"
+      "sourceRank": 1033
     },
     {
       "wordId": "word:stop",
       "lexicalKey": "stop",
-      "rank": 734,
-      "band": "broad"
+      "sourceRank": 1034
     },
     {
       "wordId": "word:bar",
       "lexicalKey": "bar",
-      "rank": 735,
-      "band": "broad"
+      "sourceRank": 1038
     },
     {
       "wordId": "word:institute",
       "lexicalKey": "institute",
-      "rank": 736,
-      "band": "broad"
+      "sourceRank": 1039
     },
     {
       "wordId": "word:double",
       "lexicalKey": "double",
-      "rank": 737,
-      "band": "broad"
+      "sourceRank": 1042
     },
     {
       "wordId": "word:dog",
       "lexicalKey": "dog",
-      "rank": 738,
-      "band": "broad"
+      "sourceRank": 1043
     },
     {
       "wordId": "word:build",
       "lexicalKey": "build",
-      "rank": 739,
-      "band": "broad"
+      "sourceRank": 1044
     },
     {
       "wordId": "word:screen",
       "lexicalKey": "screen",
-      "rank": 740,
-      "band": "broad"
+      "sourceRank": 1045
     },
     {
       "wordId": "word:exchange",
       "lexicalKey": "exchange",
-      "rank": 741,
-      "band": "broad"
+      "sourceRank": 1046
     },
     {
       "wordId": "word:soon",
       "lexicalKey": "soon",
-      "rank": 742,
-      "band": "broad"
+      "sourceRank": 1048
     },
     {
       "wordId": "word:electronic",
       "lexicalKey": "electronic",
-      "rank": 743,
-      "band": "broad"
+      "sourceRank": 1051
     },
     {
       "wordId": "word:continue",
       "lexicalKey": "continue",
-      "rank": 744,
-      "band": "broad"
+      "sourceRank": 1052
     },
     {
       "wordId": "word:across",
       "lexicalKey": "across",
-      "rank": 745,
-      "band": "broad"
+      "sourceRank": 1053
     },
     {
       "wordId": "word:season",
       "lexicalKey": "season",
-      "rank": 746,
-      "band": "broad"
+      "sourceRank": 1056
     },
     {
       "wordId": "word:apply",
       "lexicalKey": "apply",
-      "rank": 747,
-      "band": "broad"
+      "sourceRank": 1057
     },
     {
       "wordId": "word:someone",
       "lexicalKey": "someone",
-      "rank": 748,
-      "band": "broad"
+      "sourceRank": 1058
     },
     {
       "wordId": "word:held",
       "lexicalKey": "held",
-      "rank": 749,
-      "band": "broad"
+      "sourceRank": 1059
     },
     {
       "wordId": "word:anything",
       "lexicalKey": "anything",
-      "rank": 750,
-      "band": "broad"
+      "sourceRank": 1061
     },
     {
       "wordId": "word:condition",
       "lexicalKey": "condition",
-      "rank": 751,
-      "band": "broad"
+      "sourceRank": 1063
     },
     {
       "wordId": "word:effective",
       "lexicalKey": "effective",
-      "rank": 752,
-      "band": "broad"
+      "sourceRank": 1064
     },
     {
       "wordId": "word:believe",
       "lexicalKey": "believe",
-      "rank": 753,
-      "band": "broad"
+      "sourceRank": 1065
     },
     {
       "wordId": "word:organization",
       "lexicalKey": "organization",
-      "rank": 754,
-      "band": "broad"
+      "sourceRank": 1066
     },
     {
       "wordId": "word:effect",
       "lexicalKey": "effect",
-      "rank": 755,
-      "band": "broad"
+      "sourceRank": 1067
     },
     {
       "wordId": "word:mind",
       "lexicalKey": "mind",
-      "rank": 756,
-      "band": "broad"
+      "sourceRank": 1070
     },
     {
       "wordId": "word:sunday",
       "lexicalKey": "sunday",
-      "rank": 757,
-      "band": "broad"
+      "sourceRank": 1071
     },
     {
       "wordId": "word:selection",
       "lexicalKey": "selection",
-      "rank": 758,
-      "band": "broad"
+      "sourceRank": 1072
     },
     {
       "wordId": "word:lost",
       "lexicalKey": "lost",
-      "rank": 759,
-      "band": "broad"
+      "sourceRank": 1075
     },
     {
       "wordId": "word:tour",
       "lexicalKey": "tour",
-      "rank": 760,
-      "band": "broad"
+      "sourceRank": 1076
     },
     {
       "wordId": "word:menu",
       "lexicalKey": "menu",
-      "rank": 761,
-      "band": "broad"
+      "sourceRank": 1077
     },
     {
       "wordId": "word:volume",
       "lexicalKey": "volume",
-      "rank": 762,
-      "band": "broad"
+      "sourceRank": 1078
     },
     {
       "wordId": "word:cross",
       "lexicalKey": "cross",
-      "rank": 763,
-      "band": "broad"
+      "sourceRank": 1079
     },
     {
       "wordId": "word:anyone",
       "lexicalKey": "anyone",
-      "rank": 764,
-      "band": "broad"
+      "sourceRank": 1080
     },
     {
       "wordId": "word:mortgage",
       "lexicalKey": "mortgage",
-      "rank": 765,
-      "band": "broad"
+      "sourceRank": 1081
     },
     {
       "wordId": "word:hope",
       "lexicalKey": "hope",
-      "rank": 766,
-      "band": "broad"
+      "sourceRank": 1082
     },
     {
       "wordId": "word:silver",
       "lexicalKey": "silver",
-      "rank": 767,
-      "band": "broad"
+      "sourceRank": 1083
     },
     {
       "wordId": "word:corporation",
       "lexicalKey": "corporation",
-      "rank": 768,
-      "band": "broad"
+      "sourceRank": 1084
     },
     {
       "wordId": "word:wish",
       "lexicalKey": "wish",
-      "rank": 769,
-      "band": "broad"
+      "sourceRank": 1085
     },
     {
       "wordId": "word:inside",
       "lexicalKey": "inside",
-      "rank": 770,
-      "band": "broad"
+      "sourceRank": 1086
     },
     {
       "wordId": "word:solution",
       "lexicalKey": "solution",
-      "rank": 771,
-      "band": "broad"
+      "sourceRank": 1087
     },
     {
       "wordId": "word:mature",
       "lexicalKey": "mature",
-      "rank": 772,
-      "band": "broad"
+      "sourceRank": 1088
     },
     {
       "wordId": "word:role",
       "lexicalKey": "role",
-      "rank": 773,
-      "band": "broad"
+      "sourceRank": 1089
     },
     {
       "wordId": "word:rather",
       "lexicalKey": "rather",
-      "rank": 774,
-      "band": "broad"
+      "sourceRank": 1090
     },
     {
       "wordId": "word:addition",
       "lexicalKey": "addition",
-      "rank": 775,
-      "band": "broad"
+      "sourceRank": 1092
     },
     {
       "wordId": "word:came",
       "lexicalKey": "came",
-      "rank": 776,
-      "band": "broad"
+      "sourceRank": 1093
     },
     {
       "wordId": "word:supply",
       "lexicalKey": "supply",
-      "rank": 777,
-      "band": "broad"
+      "sourceRank": 1094
     },
     {
       "wordId": "word:nothing",
       "lexicalKey": "nothing",
-      "rank": 778,
-      "band": "broad"
+      "sourceRank": 1095
     },
     {
       "wordId": "word:certain",
       "lexicalKey": "certain",
-      "rank": 779,
-      "band": "broad"
+      "sourceRank": 1096
     },
     {
       "wordId": "word:executive",
       "lexicalKey": "executive",
-      "rank": 780,
-      "band": "broad"
+      "sourceRank": 1098
     },
     {
       "wordId": "word:lower",
       "lexicalKey": "lower",
-      "rank": 781,
-      "band": "broad"
+      "sourceRank": 1100
     },
     {
       "wordId": "word:necessary",
       "lexicalKey": "necessary",
-      "rank": 782,
-      "band": "broad"
+      "sourceRank": 1101
     },
     {
       "wordId": "word:union",
       "lexicalKey": "union",
-      "rank": 783,
-      "band": "broad"
+      "sourceRank": 1102
     },
     {
       "wordId": "word:jewelry",
       "lexicalKey": "jewelry",
-      "rank": 784,
-      "band": "broad"
+      "sourceRank": 1103
     },
     {
       "wordId": "word:according",
       "lexicalKey": "according",
-      "rank": 785,
-      "band": "broad"
+      "sourceRank": 1104
     },
     {
       "wordId": "word:particular",
       "lexicalKey": "particular",
-      "rank": 786,
-      "band": "broad"
+      "sourceRank": 1109
     },
     {
       "wordId": "word:fine",
       "lexicalKey": "fine",
-      "rank": 787,
-      "band": "broad"
+      "sourceRank": 1110
     },
     {
       "wordId": "word:hour",
       "lexicalKey": "hour",
-      "rank": 788,
-      "band": "broad"
+      "sourceRank": 1114
     },
     {
       "wordId": "word:gas",
       "lexicalKey": "gas",
-      "rank": 789,
-      "band": "broad"
+      "sourceRank": 1115
     },
     {
       "wordId": "word:six",
       "lexicalKey": "six",
-      "rank": 790,
-      "band": "broad"
+      "sourceRank": 1117
     },
     {
       "wordId": "word:bush",
       "lexicalKey": "bush",
-      "rank": 791,
-      "band": "broad"
+      "sourceRank": 1118
     },
     {
       "wordId": "word:advice",
       "lexicalKey": "advice",
-      "rank": 792,
-      "band": "broad"
+      "sourceRank": 1120
     },
     {
       "wordId": "word:career",
       "lexicalKey": "career",
-      "rank": 793,
-      "band": "broad"
+      "sourceRank": 1121
     },
     {
       "wordId": "word:military",
       "lexicalKey": "military",
-      "rank": 794,
-      "band": "broad"
+      "sourceRank": 1122
     },
     {
       "wordId": "word:rental",
       "lexicalKey": "rental",
-      "rank": 795,
-      "band": "broad"
+      "sourceRank": 1123
     },
     {
       "wordId": "word:decision",
       "lexicalKey": "decision",
-      "rank": 796,
-      "band": "broad"
+      "sourceRank": 1124
     },
     {
       "wordId": "word:leave",
       "lexicalKey": "leave",
-      "rank": 797,
-      "band": "broad"
+      "sourceRank": 1125
     },
     {
       "wordId": "word:huge",
       "lexicalKey": "huge",
-      "rank": 798,
-      "band": "broad"
+      "sourceRank": 1129
     },
     {
       "wordId": "word:sat",
       "lexicalKey": "sat",
-      "rank": 799,
-      "band": "broad"
+      "sourceRank": 1130
     },
     {
       "wordId": "word:woman",
       "lexicalKey": "woman",
-      "rank": 800,
-      "band": "broad"
+      "sourceRank": 1131
     },
     {
       "wordId": "word:kind",
       "lexicalKey": "kind",
-      "rank": 801,
-      "band": "broad"
+      "sourceRank": 1135
     },
     {
       "wordId": "word:middle",
       "lexicalKey": "middle",
-      "rank": 802,
-      "band": "broad"
+      "sourceRank": 1137
     },
     {
       "wordId": "word:move",
       "lexicalKey": "move",
-      "rank": 803,
-      "band": "broad"
+      "sourceRank": 1138
     },
     {
       "wordId": "word:cable",
       "lexicalKey": "cable",
-      "rank": 804,
-      "band": "broad"
+      "sourceRank": 1139
     },
     {
       "wordId": "word:division",
       "lexicalKey": "division",
-      "rank": 805,
-      "band": "broad"
+      "sourceRank": 1143
     },
     {
       "wordId": "word:tuesday",
       "lexicalKey": "tuesday",
-      "rank": 806,
-      "band": "broad"
+      "sourceRank": 1145
     },
     {
       "wordId": "word:object",
       "lexicalKey": "object",
-      "rank": 807,
-      "band": "broad"
+      "sourceRank": 1146
     },
     {
       "wordId": "word:appropriate",
       "lexicalKey": "appropriate",
-      "rank": 808,
-      "band": "broad"
+      "sourceRank": 1148
     },
     {
       "wordId": "word:machine",
       "lexicalKey": "machine",
-      "rank": 809,
-      "band": "broad"
+      "sourceRank": 1149
     },
     {
       "wordId": "word:logo",
       "lexicalKey": "logo",
-      "rank": 810,
-      "band": "broad"
+      "sourceRank": 1150
     },
     {
       "wordId": "word:length",
       "lexicalKey": "length",
-      "rank": 811,
-      "band": "broad"
+      "sourceRank": 1151
     },
     {
       "wordId": "word:actually",
       "lexicalKey": "actually",
-      "rank": 812,
-      "band": "broad"
+      "sourceRank": 1152
     },
     {
       "wordId": "word:nice",
       "lexicalKey": "nice",
-      "rank": 813,
-      "band": "broad"
+      "sourceRank": 1153
     },
     {
       "wordId": "word:score",
       "lexicalKey": "score",
-      "rank": 814,
-      "band": "broad"
+      "sourceRank": 1154
     },
     {
       "wordId": "word:statistics",
       "lexicalKey": "statistics",
-      "rank": 815,
-      "band": "broad"
+      "sourceRank": 1155
     },
     {
       "wordId": "word:client",
       "lexicalKey": "client",
-      "rank": 816,
-      "band": "broad"
+      "sourceRank": 1156
     },
     {
       "wordId": "word:capital",
       "lexicalKey": "capital",
-      "rank": 817,
-      "band": "broad"
+      "sourceRank": 1159
     },
     {
       "wordId": "word:follow",
       "lexicalKey": "follow",
-      "rank": 818,
-      "band": "broad"
+      "sourceRank": 1160
     },
     {
       "wordId": "word:sample",
       "lexicalKey": "sample",
-      "rank": 819,
-      "band": "broad"
+      "sourceRank": 1161
     },
     {
       "wordId": "word:investment",
       "lexicalKey": "investment",
-      "rank": 820,
-      "band": "broad"
+      "sourceRank": 1162
     },
     {
       "wordId": "word:sent",
       "lexicalKey": "sent",
-      "rank": 821,
-      "band": "broad"
+      "sourceRank": 1163
     },
     {
       "wordId": "word:shown",
       "lexicalKey": "shown",
-      "rank": 822,
-      "band": "broad"
+      "sourceRank": 1164
     },
     {
       "wordId": "word:saturday",
       "lexicalKey": "saturday",
-      "rank": 823,
-      "band": "broad"
+      "sourceRank": 1165
     },
     {
       "wordId": "word:england",
       "lexicalKey": "england",
-      "rank": 824,
-      "band": "broad"
+      "sourceRank": 1167
     },
     {
       "wordId": "word:culture",
       "lexicalKey": "culture",
-      "rank": 825,
-      "band": "broad"
+      "sourceRank": 1168
     },
     {
       "wordId": "word:band",
       "lexicalKey": "band",
-      "rank": 826,
-      "band": "broad"
+      "sourceRank": 1169
     },
     {
       "wordId": "word:flash",
       "lexicalKey": "flash",
-      "rank": 827,
-      "band": "broad"
+      "sourceRank": 1170
     },
     {
       "wordId": "word:lead",
       "lexicalKey": "lead",
-      "rank": 828,
-      "band": "broad"
+      "sourceRank": 1172
     },
     {
       "wordId": "word:choice",
       "lexicalKey": "choice",
-      "rank": 829,
-      "band": "broad"
+      "sourceRank": 1174
     },
     {
       "wordId": "word:went",
       "lexicalKey": "went",
-      "rank": 830,
-      "band": "broad"
+      "sourceRank": 1175
     },
     {
       "wordId": "word:registration",
       "lexicalKey": "registration",
-      "rank": 831,
-      "band": "broad"
+      "sourceRank": 1177
     },
     {
       "wordId": "word:thursday",
       "lexicalKey": "thursday",
-      "rank": 832,
-      "band": "broad"
+      "sourceRank": 1179
     },
     {
       "wordId": "word:consumer",
       "lexicalKey": "consumer",
-      "rank": 833,
-      "band": "broad"
+      "sourceRank": 1181
     },
     {
       "wordId": "word:airport",
       "lexicalKey": "airport",
-      "rank": 834,
-      "band": "broad"
+      "sourceRank": 1183
     },
     {
       "wordId": "word:foreign",
       "lexicalKey": "foreign",
-      "rank": 835,
-      "band": "broad"
+      "sourceRank": 1184
     },
     {
       "wordId": "word:artist",
       "lexicalKey": "artist",
-      "rank": 836,
-      "band": "broad"
+      "sourceRank": 1185
     },
     {
       "wordId": "word:outside",
       "lexicalKey": "outside",
-      "rank": 837,
-      "band": "broad"
+      "sourceRank": 1186
     },
     {
       "wordId": "word:furniture",
       "lexicalKey": "furniture",
-      "rank": 838,
-      "band": "broad"
+      "sourceRank": 1187
     },
     {
       "wordId": "word:channel",
       "lexicalKey": "channel",
-      "rank": 839,
-      "band": "broad"
+      "sourceRank": 1189
     },
     {
       "wordId": "word:letter",
       "lexicalKey": "letter",
-      "rank": 840,
-      "band": "broad"
+      "sourceRank": 1190
     },
     {
       "wordId": "word:mode",
       "lexicalKey": "mode",
-      "rank": 841,
-      "band": "broad"
+      "sourceRank": 1191
     },
     {
       "wordId": "word:wednesday",
       "lexicalKey": "wednesday",
-      "rank": 842,
-      "band": "broad"
+      "sourceRank": 1194
     },
     {
       "wordId": "word:structure",
       "lexicalKey": "structure",
-      "rank": 843,
-      "band": "broad"
+      "sourceRank": 1195
     },
     {
       "wordId": "word:fund",
       "lexicalKey": "fund",
-      "rank": 844,
-      "band": "broad"
+      "sourceRank": 1196
     },
     {
       "wordId": "word:summer",
       "lexicalKey": "summer",
-      "rank": 845,
-      "band": "broad"
+      "sourceRank": 1197
     },
     {
       "wordId": "word:allow",
       "lexicalKey": "allow",
-      "rank": 846,
-      "band": "broad"
+      "sourceRank": 1198
     },
     {
       "wordId": "word:degree",
       "lexicalKey": "degree",
-      "rank": 847,
-      "band": "broad"
+      "sourceRank": 1199
     },
     {
       "wordId": "word:contract",
       "lexicalKey": "contract",
-      "rank": 848,
-      "band": "broad"
+      "sourceRank": 1200
     },
     {
       "wordId": "word:button",
       "lexicalKey": "button",
-      "rank": 849,
-      "band": "broad"
+      "sourceRank": 1201
     },
     {
       "wordId": "word:super",
       "lexicalKey": "super",
-      "rank": 850,
-      "band": "broad"
+      "sourceRank": 1205
     },
     {
       "wordId": "word:male",
       "lexicalKey": "male",
-      "rank": 851,
-      "band": "broad"
+      "sourceRank": 1206
     },
     {
       "wordId": "word:matter",
       "lexicalKey": "matter",
-      "rank": 852,
-      "band": "broad"
+      "sourceRank": 1207
     },
     {
       "wordId": "word:custom",
       "lexicalKey": "custom",
-      "rank": 853,
-      "band": "broad"
+      "sourceRank": 1208
     },
     {
       "wordId": "word:almost",
       "lexicalKey": "almost",
-      "rank": 854,
-      "band": "broad"
+      "sourceRank": 1210
     },
     {
       "wordId": "word:took",
       "lexicalKey": "took",
-      "rank": 855,
-      "band": "broad"
+      "sourceRank": 1211
     },
     {
       "wordId": "word:multiple",
       "lexicalKey": "multiple",
-      "rank": 856,
-      "band": "broad"
+      "sourceRank": 1213
     },
     {
       "wordId": "word:distribution",
       "lexicalKey": "distribution",
-      "rank": 857,
-      "band": "broad"
+      "sourceRank": 1215
     },
     {
       "wordId": "word:editor",
       "lexicalKey": "editor",
-      "rank": 858,
-      "band": "broad"
+      "sourceRank": 1216
     },
     {
       "wordId": "word:industrial",
       "lexicalKey": "industrial",
-      "rank": 859,
-      "band": "broad"
+      "sourceRank": 1218
     },
     {
       "wordId": "word:cause",
       "lexicalKey": "cause",
-      "rank": 860,
-      "band": "broad"
+      "sourceRank": 1219
     },
     {
       "wordId": "word:potential",
       "lexicalKey": "potential",
-      "rank": 861,
-      "band": "broad"
+      "sourceRank": 1220
     },
     {
       "wordId": "word:song",
       "lexicalKey": "song",
-      "rank": 862,
-      "band": "broad"
+      "sourceRank": 1221
     },
     {
       "wordId": "word:focus",
       "lexicalKey": "focus",
-      "rank": 863,
-      "band": "broad"
+      "sourceRank": 1226
     },
     {
       "wordId": "word:late",
       "lexicalKey": "late",
-      "rank": 864,
-      "band": "broad"
+      "sourceRank": 1227
     },
     {
       "wordId": "word:fall",
       "lexicalKey": "fall",
-      "rank": 865,
-      "band": "broad"
+      "sourceRank": 1228
     },
     {
       "wordId": "word:idea",
       "lexicalKey": "idea",
-      "rank": 866,
-      "band": "broad"
+      "sourceRank": 1230
     },
     {
       "wordId": "word:female",
       "lexicalKey": "female",
-      "rank": 867,
-      "band": "broad"
+      "sourceRank": 1232
     },
     {
       "wordId": "word:responsible",
       "lexicalKey": "responsible",
-      "rank": 868,
-      "band": "broad"
+      "sourceRank": 1233
     },
     {
       "wordId": "word:win",
       "lexicalKey": "win",
-      "rank": 869,
-      "band": "broad"
+      "sourceRank": 1236
     },
     {
       "wordId": "word:primary",
       "lexicalKey": "primary",
-      "rank": 870,
-      "band": "broad"
+      "sourceRank": 1239
     },
     {
       "wordId": "word:cancer",
       "lexicalKey": "cancer",
-      "rank": 871,
-      "band": "broad"
+      "sourceRank": 1240
     },
     {
       "wordId": "word:reason",
       "lexicalKey": "reason",
-      "rank": 872,
-      "band": "broad"
+      "sourceRank": 1242
     },
     {
       "wordId": "word:tool",
       "lexicalKey": "tool",
-      "rank": 873,
-      "band": "broad"
+      "sourceRank": 1243
     },
     {
       "wordId": "word:spring",
       "lexicalKey": "spring",
-      "rank": 874,
-      "band": "broad"
+      "sourceRank": 1245
     },
     {
       "wordId": "word:foundation",
       "lexicalKey": "foundation",
-      "rank": 875,
-      "band": "broad"
+      "sourceRank": 1246
     },
     {
       "wordId": "word:answer",
       "lexicalKey": "answer",
-      "rank": 876,
-      "band": "broad"
+      "sourceRank": 1247
     },
     {
       "wordId": "word:voice",
       "lexicalKey": "voice",
-      "rank": 877,
-      "band": "broad"
+      "sourceRank": 1248
     },
     {
       "wordId": "word:friendly",
       "lexicalKey": "friendly",
-      "rank": 878,
-      "band": "broad"
+      "sourceRank": 1250
     },
     {
       "wordId": "word:schedule",
       "lexicalKey": "schedule",
-      "rank": 879,
-      "band": "broad"
+      "sourceRank": 1251
     },
     {
       "wordId": "word:purpose",
       "lexicalKey": "purpose",
-      "rank": 880,
-      "band": "broad"
+      "sourceRank": 1254
     },
     {
       "wordId": "word:feature",
       "lexicalKey": "feature",
-      "rank": 881,
-      "band": "broad"
+      "sourceRank": 1255
     },
     {
       "wordId": "word:bed",
       "lexicalKey": "bed",
-      "rank": 882,
-      "band": "broad"
+      "sourceRank": 1256
     },
     {
       "wordId": "word:police",
       "lexicalKey": "police",
-      "rank": 883,
-      "band": "broad"
+      "sourceRank": 1258
     },
     {
       "wordId": "word:everyone",
       "lexicalKey": "everyone",
-      "rank": 884,
-      "band": "broad"
+      "sourceRank": 1259
     },
     {
       "wordId": "word:independent",
       "lexicalKey": "independent",
-      "rank": 885,
-      "band": "broad"
+      "sourceRank": 1260
     },
     {
       "wordId": "word:approach",
       "lexicalKey": "approach",
-      "rank": 886,
-      "band": "broad"
+      "sourceRank": 1262
     },
     {
       "wordId": "word:brown",
       "lexicalKey": "brown",
-      "rank": 887,
-      "band": "broad"
+      "sourceRank": 1264
     },
     {
       "wordId": "word:physical",
       "lexicalKey": "physical",
-      "rank": 888,
-      "band": "broad"
+      "sourceRank": 1265
     },
     {
       "wordId": "word:hill",
       "lexicalKey": "hill",
-      "rank": 889,
-      "band": "broad"
+      "sourceRank": 1267
     },
     {
       "wordId": "word:medicine",
       "lexicalKey": "medicine",
-      "rank": 890,
-      "band": "broad"
+      "sourceRank": 1269
     },
     {
       "wordId": "word:deal",
       "lexicalKey": "deal",
-      "rank": 891,
-      "band": "broad"
+      "sourceRank": 1270
     },
     {
       "wordId": "word:hold",
       "lexicalKey": "hold",
-      "rank": 892,
-      "band": "broad"
+      "sourceRank": 1271
     },
     {
       "wordId": "word:glass",
       "lexicalKey": "glass",
-      "rank": 893,
-      "band": "broad"
+      "sourceRank": 1275
     },
     {
       "wordId": "word:happy",
       "lexicalKey": "happy",
-      "rank": 894,
-      "band": "broad"
+      "sourceRank": 1276
     },
     {
       "wordId": "word:thank",
       "lexicalKey": "thank",
-      "rank": 895,
-      "band": "broad"
+      "sourceRank": 1281
     },
     {
       "wordId": "word:safe",
       "lexicalKey": "safe",
-      "rank": 896,
-      "band": "broad"
+      "sourceRank": 1282
     },
     {
       "wordId": "word:unique",
       "lexicalKey": "unique",
-      "rank": 897,
-      "band": "broad"
+      "sourceRank": 1283
     },
     {
       "wordId": "word:survey",
       "lexicalKey": "survey",
-      "rank": 898,
-      "band": "broad"
+      "sourceRank": 1284
     },
     {
       "wordId": "word:prior",
       "lexicalKey": "prior",
-      "rank": 899,
-      "band": "broad"
+      "sourceRank": 1285
     },
     {
       "wordId": "word:telephone",
       "lexicalKey": "telephone",
-      "rank": 900,
-      "band": "broad"
+      "sourceRank": 1286
     },
     {
       "wordId": "word:sport",
       "lexicalKey": "sport",
-      "rank": 901,
-      "band": "broad"
+      "sourceRank": 1287
     },
     {
       "wordId": "word:ready",
       "lexicalKey": "ready",
-      "rank": 902,
-      "band": "broad"
+      "sourceRank": 1288
     },
     {
       "wordId": "word:animal",
       "lexicalKey": "animal",
-      "rank": 903,
-      "band": "broad"
+      "sourceRank": 1290
     },
     {
       "wordId": "word:population",
       "lexicalKey": "population",
-      "rank": 904,
-      "band": "broad"
+      "sourceRank": 1293
     },
     {
       "wordId": "word:regular",
       "lexicalKey": "regular",
-      "rank": 905,
-      "band": "broad"
+      "sourceRank": 1295
     },
     {
       "wordId": "word:secure",
       "lexicalKey": "secure",
-      "rank": 906,
-      "band": "broad"
+      "sourceRank": 1296
     },
     {
       "wordId": "word:therefore",
       "lexicalKey": "therefore",
-      "rank": 907,
-      "band": "broad"
+      "sourceRank": 1299
     },
     {
       "wordId": "word:simply",
       "lexicalKey": "simply",
-      "rank": 908,
-      "band": "broad"
+      "sourceRank": 1300
     },
     {
       "wordId": "word:evidence",
       "lexicalKey": "evidence",
-      "rank": 909,
-      "band": "broad"
+      "sourceRank": 1301
     },
     {
       "wordId": "word:station",
       "lexicalKey": "station",
-      "rank": 910,
-      "band": "broad"
+      "sourceRank": 1302
     },
     {
       "wordId": "word:round",
       "lexicalKey": "round",
-      "rank": 911,
-      "band": "broad"
+      "sourceRank": 1304
     },
     {
       "wordId": "word:favorite",
       "lexicalKey": "favorite",
-      "rank": 912,
-      "band": "broad"
+      "sourceRank": 1306
     },
     {
       "wordId": "word:understand",
       "lexicalKey": "understand",
-      "rank": 913,
-      "band": "broad"
+      "sourceRank": 1307
     },
     {
       "wordId": "word:option",
       "lexicalKey": "option",
-      "rank": 914,
-      "band": "broad"
+      "sourceRank": 1308
     },
     {
       "wordId": "word:master",
       "lexicalKey": "master",
-      "rank": 915,
-      "band": "broad"
+      "sourceRank": 1309
     },
     {
       "wordId": "word:valley",
       "lexicalKey": "valley",
-      "rank": 916,
-      "band": "broad"
+      "sourceRank": 1310
     },
     {
       "wordId": "word:recently",
       "lexicalKey": "recently",
-      "rank": 917,
-      "band": "broad"
+      "sourceRank": 1311
     },
     {
       "wordId": "word:probably",
       "lexicalKey": "probably",
-      "rank": 918,
-      "band": "broad"
+      "sourceRank": 1312
     },
     {
       "wordId": "word:sea",
       "lexicalKey": "sea",
-      "rank": 919,
-      "band": "broad"
+      "sourceRank": 1315
     },
     {
       "wordId": "word:built",
       "lexicalKey": "built",
-      "rank": 920,
-      "band": "broad"
+      "sourceRank": 1316
     },
     {
       "wordId": "word:blood",
       "lexicalKey": "blood",
-      "rank": 921,
-      "band": "broad"
+      "sourceRank": 1318
     },
     {
       "wordId": "word:cut",
       "lexicalKey": "cut",
-      "rank": 922,
-      "band": "broad"
+      "sourceRank": 1319
     },
     {
       "wordId": "word:worldwide",
       "lexicalKey": "worldwide",
-      "rank": 923,
-      "band": "broad"
+      "sourceRank": 1320
     },
     {
       "wordId": "word:improve",
       "lexicalKey": "improve",
-      "rank": 924,
-      "band": "broad"
+      "sourceRank": 1321
     },
     {
       "wordId": "word:connection",
       "lexicalKey": "connection",
-      "rank": 925,
-      "band": "broad"
+      "sourceRank": 1322
     },
     {
       "wordId": "word:publisher",
       "lexicalKey": "publisher",
-      "rank": 926,
-      "band": "broad"
+      "sourceRank": 1323
     },
     {
       "wordId": "word:hall",
       "lexicalKey": "hall",
-      "rank": 927,
-      "band": "broad"
+      "sourceRank": 1324
     },
     {
       "wordId": "word:earth",
       "lexicalKey": "earth",
-      "rank": 928,
-      "band": "broad"
+      "sourceRank": 1328
     },
     {
       "wordId": "word:impact",
       "lexicalKey": "impact",
-      "rank": 929,
-      "band": "broad"
+      "sourceRank": 1331
     },
     {
       "wordId": "word:transfer",
       "lexicalKey": "transfer",
-      "rank": 930,
-      "band": "broad"
+      "sourceRank": 1332
     },
     {
       "wordId": "word:introduction",
       "lexicalKey": "introduction",
-      "rank": 931,
-      "band": "broad"
+      "sourceRank": 1333
     },
     {
       "wordId": "word:kitchen",
       "lexicalKey": "kitchen",
-      "rank": 932,
-      "band": "broad"
+      "sourceRank": 1334
     },
     {
       "wordId": "word:strong",
       "lexicalKey": "strong",
-      "rank": 933,
-      "band": "broad"
+      "sourceRank": 1335
     },
     {
       "wordId": "word:hospital",
       "lexicalKey": "hospital",
-      "rank": 934,
-      "band": "broad"
+      "sourceRank": 1340
     },
     {
       "wordId": "word:ground",
       "lexicalKey": "ground",
-      "rank": 935,
-      "band": "broad"
+      "sourceRank": 1341
     },
     {
       "wordId": "word:overview",
       "lexicalKey": "overview",
-      "rank": 936,
-      "band": "broad"
+      "sourceRank": 1342
     },
     {
       "wordId": "word:ship",
       "lexicalKey": "ship",
-      "rank": 937,
-      "band": "broad"
+      "sourceRank": 1343
     },
     {
       "wordId": "word:disease",
       "lexicalKey": "disease",
-      "rank": 938,
-      "band": "broad"
+      "sourceRank": 1346
     },
     {
       "wordId": "word:excellent",
       "lexicalKey": "excellent",
-      "rank": 939,
-      "band": "broad"
+      "sourceRank": 1348
     },
     {
       "wordId": "word:paid",
       "lexicalKey": "paid",
-      "rank": 940,
-      "band": "broad"
+      "sourceRank": 1349
     },
     {
       "wordId": "word:perfect",
       "lexicalKey": "perfect",
-      "rank": 941,
-      "band": "broad"
+      "sourceRank": 1351
     },
     {
       "wordId": "word:hair",
       "lexicalKey": "hair",
-      "rank": 942,
-      "band": "broad"
+      "sourceRank": 1352
     },
     {
       "wordId": "word:opportunity",
       "lexicalKey": "opportunity",
-      "rank": 943,
-      "band": "broad"
+      "sourceRank": 1353
     },
     {
       "wordId": "word:classic",
       "lexicalKey": "classic",
-      "rank": 944,
-      "band": "broad"
+      "sourceRank": 1355
     },
     {
       "wordId": "word:basis",
       "lexicalKey": "basis",
-      "rank": 945,
-      "band": "broad"
+      "sourceRank": 1356
     },
     {
       "wordId": "word:command",
       "lexicalKey": "command",
-      "rank": 946,
-      "band": "broad"
+      "sourceRank": 1357
     },
     {
       "wordId": "word:express",
       "lexicalKey": "express",
-      "rank": 947,
-      "band": "broad"
+      "sourceRank": 1360
     },
     {
       "wordId": "word:award",
       "lexicalKey": "award",
-      "rank": 948,
-      "band": "broad"
+      "sourceRank": 1361
     },
     {
       "wordId": "word:distance",
       "lexicalKey": "distance",
-      "rank": 949,
-      "band": "broad"
+      "sourceRank": 1362
     },
     {
       "wordId": "word:tree",
       "lexicalKey": "tree",
-      "rank": 950,
-      "band": "broad"
+      "sourceRank": 1363
     },
     {
       "wordId": "word:assessment",
       "lexicalKey": "assessment",
-      "rank": 951,
-      "band": "broad"
+      "sourceRank": 1365
     },
     {
       "wordId": "word:ensure",
       "lexicalKey": "ensure",
-      "rank": 952,
-      "band": "broad"
+      "sourceRank": 1366
     },
     {
       "wordId": "word:wall",
       "lexicalKey": "wall",
-      "rank": 953,
-      "band": "broad"
+      "sourceRank": 1368
     },
     {
       "wordId": "word:extra",
       "lexicalKey": "extra",
-      "rank": 954,
-      "band": "broad"
+      "sourceRank": 1372
     },
     {
       "wordId": "word:especially",
       "lexicalKey": "especially",
-      "rank": 955,
-      "band": "broad"
+      "sourceRank": 1373
     },
     {
       "wordId": "word:budget",
       "lexicalKey": "budget",
-      "rank": 956,
-      "band": "broad"
+      "sourceRank": 1376
     },
     {
       "wordId": "word:success",
       "lexicalKey": "success",
-      "rank": 957,
-      "band": "broad"
+      "sourceRank": 1379
     },
     {
       "wordId": "word:maximum",
       "lexicalKey": "maximum",
-      "rank": 958,
-      "band": "broad"
+      "sourceRank": 1380
     },
     {
       "wordId": "word:operation",
       "lexicalKey": "operation",
-      "rank": 959,
-      "band": "broad"
+      "sourceRank": 1382
     },
     {
       "wordId": "word:quite",
       "lexicalKey": "quite",
-      "rank": 960,
-      "band": "broad"
+      "sourceRank": 1384
     },
     {
       "wordId": "word:boy",
       "lexicalKey": "boy",
-      "rank": 961,
-      "band": "broad"
+      "sourceRank": 1386
     },
     {
       "wordId": "word:beautiful",
       "lexicalKey": "beautiful",
-      "rank": 962,
-      "band": "broad"
+      "sourceRank": 1390
     },
     {
       "wordId": "word:wine",
       "lexicalKey": "wine",
-      "rank": 963,
-      "band": "broad"
+      "sourceRank": 1392
     },
     {
       "wordId": "word:horse",
       "lexicalKey": "horse",
-      "rank": 964,
-      "band": "broad"
+      "sourceRank": 1394
     },
     {
       "wordId": "word:vote",
       "lexicalKey": "vote",
-      "rank": 965,
-      "band": "broad"
+      "sourceRank": 1395
     },
     {
       "wordId": "word:forward",
       "lexicalKey": "forward",
-      "rank": 966,
-      "band": "broad"
+      "sourceRank": 1396
     },
     {
       "wordId": "word:significant",
       "lexicalKey": "significant",
-      "rank": 967,
-      "band": "broad"
+      "sourceRank": 1399
     },
     {
       "wordId": "word:owner",
       "lexicalKey": "owner",
-      "rank": 968,
-      "band": "broad"
+      "sourceRank": 1402
     },
     {
       "wordId": "word:retail",
       "lexicalKey": "retail",
-      "rank": 969,
-      "band": "broad"
+      "sourceRank": 1403
     },
     {
       "wordId": "word:useful",
       "lexicalKey": "useful",
-      "rank": 970,
-      "band": "broad"
+      "sourceRank": 1405
     },
     {
       "wordId": "word:directly",
       "lexicalKey": "directly",
-      "rank": 971,
-      "band": "broad"
+      "sourceRank": 1406
     },
     {
       "wordId": "word:manufacturer",
       "lexicalKey": "manufacturer",
-      "rank": 972,
-      "band": "broad"
+      "sourceRank": 1407
     },
     {
       "wordId": "word:son",
       "lexicalKey": "son",
-      "rank": 973,
-      "band": "broad"
+      "sourceRank": 1410
     },
     {
       "wordId": "word:rule",
       "lexicalKey": "rule",
-      "rank": 974,
-      "band": "broad"
+      "sourceRank": 1412
     },
     {
       "wordId": "word:bring",
       "lexicalKey": "bring",
-      "rank": 975,
-      "band": "broad"
+      "sourceRank": 1418
     },
     {
       "wordId": "word:mother",
       "lexicalKey": "mother",
-      "rank": 976,
-      "band": "broad"
+      "sourceRank": 1423
     },
     {
       "wordId": "word:authority",
       "lexicalKey": "authority",
-      "rank": 977,
-      "band": "broad"
+      "sourceRank": 1424
     },
     {
       "wordId": "word:told",
       "lexicalKey": "told",
-      "rank": 978,
-      "band": "broad"
+      "sourceRank": 1426
     },
     {
       "wordId": "word:traffic",
       "lexicalKey": "traffic",
-      "rank": 979,
-      "band": "broad"
+      "sourceRank": 1428
     },
     {
       "wordId": "word:input",
       "lexicalKey": "input",
-      "rank": 980,
-      "band": "broad"
+      "sourceRank": 1431
     },
     {
       "wordId": "word:strategy",
       "lexicalKey": "strategy",
-      "rank": 981,
-      "band": "broad"
+      "sourceRank": 1432
     },
     {
       "wordId": "word:feet",
       "lexicalKey": "feet",
-      "rank": 982,
-      "band": "broad"
+      "sourceRank": 1433
     },
     {
       "wordId": "word:agent",
       "lexicalKey": "agent",
-      "rank": 983,
-      "band": "broad"
+      "sourceRank": 1434
     },
     {
       "wordId": "word:valid",
       "lexicalKey": "valid",
-      "rank": 984,
-      "band": "broad"
+      "sourceRank": 1435
     },
     {
       "wordId": "word:modern",
       "lexicalKey": "modern",
-      "rank": 985,
-      "band": "broad"
+      "sourceRank": 1437
     },
     {
       "wordId": "word:senior",
       "lexicalKey": "senior",
-      "rank": 986,
-      "band": "broad"
+      "sourceRank": 1438
     },
     {
       "wordId": "word:door",
       "lexicalKey": "door",
-      "rank": 987,
-      "band": "broad"
+      "sourceRank": 1441
     },
     {
       "wordId": "word:grand",
       "lexicalKey": "grand",
-      "rank": 988,
-      "band": "broad"
+      "sourceRank": 1442
     },
     {
       "wordId": "word:trial",
       "lexicalKey": "trial",
-      "rank": 989,
-      "band": "broad"
+      "sourceRank": 1444
     },
     {
       "wordId": "word:charge",
       "lexicalKey": "charge",
-      "rank": 990,
-      "band": "broad"
+      "sourceRank": 1445
     },
     {
       "wordId": "word:instead",
       "lexicalKey": "instead",
-      "rank": 991,
-      "band": "broad"
+      "sourceRank": 1447
     },
     {
       "wordId": "word:cool",
       "lexicalKey": "cool",
-      "rank": 992,
-      "band": "broad"
+      "sourceRank": 1449
     },
     {
       "wordId": "word:normal",
       "lexicalKey": "normal",
-      "rank": 993,
-      "band": "broad"
+      "sourceRank": 1450
     },
     {
       "wordId": "word:wrote",
       "lexicalKey": "wrote",
-      "rank": 994,
-      "band": "broad"
+      "sourceRank": 1451
     },
     {
       "wordId": "word:enterprise",
       "lexicalKey": "enterprise",
-      "rank": 995,
-      "band": "broad"
+      "sourceRank": 1452
     },
     {
       "wordId": "word:entire",
       "lexicalKey": "entire",
-      "rank": 996,
-      "band": "broad"
+      "sourceRank": 1454
     },
     {
       "wordId": "word:educational",
       "lexicalKey": "educational",
-      "rank": 997,
-      "band": "broad"
+      "sourceRank": 1455
     },
     {
       "wordId": "word:metal",
       "lexicalKey": "metal",
-      "rank": 998,
-      "band": "broad"
+      "sourceRank": 1458
     },
     {
       "wordId": "word:positive",
       "lexicalKey": "positive",
-      "rank": 999,
-      "band": "broad"
+      "sourceRank": 1459
     },
     {
       "wordId": "word:fitness",
       "lexicalKey": "fitness",
-      "rank": 1000,
-      "band": "broad"
+      "sourceRank": 1461
     },
     {
       "wordId": "word:opinion",
       "lexicalKey": "opinion",
-      "rank": 1001,
-      "band": "broad"
+      "sourceRank": 1463
     },
     {
       "wordId": "word:football",
       "lexicalKey": "football",
-      "rank": 1002,
-      "band": "broad"
+      "sourceRank": 1466
     },
     {
       "wordId": "word:abstract",
       "lexicalKey": "abstract",
-      "rank": 1003,
-      "band": "broad"
+      "sourceRank": 1467
     },
     {
       "wordId": "word:output",
       "lexicalKey": "output",
-      "rank": 1004,
-      "band": "broad"
+      "sourceRank": 1469
     },
     {
       "wordId": "word:likely",
       "lexicalKey": "likely",
-      "rank": 1005,
-      "band": "broad"
+      "sourceRank": 1473
     },
     {
       "wordId": "word:develop",
       "lexicalKey": "develop",
-      "rank": 1006,
-      "band": "broad"
+      "sourceRank": 1474
     },
     {
       "wordId": "word:alternative",
       "lexicalKey": "alternative",
-      "rank": 1007,
-      "band": "broad"
+      "sourceRank": 1477
     },
     {
       "wordId": "word:resolution",
       "lexicalKey": "resolution",
-      "rank": 1008,
-      "band": "broad"
+      "sourceRank": 1480
     },
     {
       "wordId": "word:guest",
       "lexicalKey": "guest",
-      "rank": 1009,
-      "band": "broad"
+      "sourceRank": 1482
     },
     {
       "wordId": "word:publication",
       "lexicalKey": "publication",
-      "rank": 1010,
-      "band": "broad"
+      "sourceRank": 1484
     },
     {
       "wordId": "word:pass",
       "lexicalKey": "pass",
-      "rank": 1011,
-      "band": "broad"
+      "sourceRank": 1485
     },
     {
       "wordId": "word:trust",
       "lexicalKey": "trust",
-      "rank": 1012,
-      "band": "broad"
+      "sourceRank": 1487
     },
     {
       "wordId": "word:van",
       "lexicalKey": "van",
-      "rank": 1013,
-      "band": "broad"
+      "sourceRank": 1488
     },
     {
       "wordId": "word:session",
       "lexicalKey": "session",
-      "rank": 1014,
-      "band": "broad"
+      "sourceRank": 1490
     },
     {
       "wordId": "word:photography",
       "lexicalKey": "photography",
-      "rank": 1015,
-      "band": "broad"
+      "sourceRank": 1492
     },
     {
       "wordId": "word:republic",
       "lexicalKey": "republic",
-      "rank": 1016,
-      "band": "broad"
+      "sourceRank": 1493
     },
     {
       "wordId": "word:vacation",
       "lexicalKey": "vacation",
-      "rank": 1017,
-      "band": "broad"
+      "sourceRank": 1496
     },
     {
       "wordId": "word:century",
       "lexicalKey": "century",
-      "rank": 1018,
-      "band": "broad"
+      "sourceRank": 1497
     },
     {
       "wordId": "word:academic",
       "lexicalKey": "academic",
-      "rank": 1019,
-      "band": "broad"
+      "sourceRank": 1498
     },
     {
       "wordId": "word:assistance",
       "lexicalKey": "assistance",
-      "rank": 1020,
-      "band": "broad"
+      "sourceRank": 1499
     },
     {
       "wordId": "word:skin",
       "lexicalKey": "skin",
-      "rank": 1021,
-      "band": "broad"
+      "sourceRank": 1501
     },
     {
       "wordId": "word:ring",
       "lexicalKey": "ring",
-      "rank": 1022,
-      "band": "broad"
+      "sourceRank": 1509
     },
     {
       "wordId": "word:grade",
       "lexicalKey": "grade",
-      "rank": 1023,
-      "band": "broad"
+      "sourceRank": 1510
     },
     {
       "wordId": "word:mountain",
       "lexicalKey": "mountain",
-      "rank": 1024,
-      "band": "broad"
+      "sourceRank": 1513
     },
     {
       "wordId": "word:pop",
       "lexicalKey": "pop",
-      "rank": 1025,
-      "band": "broad"
+      "sourceRank": 1515
     },
     {
       "wordId": "word:filter",
       "lexicalKey": "filter",
-      "rank": 1026,
-      "band": "broad"
+      "sourceRank": 1516
     },
     {
       "wordId": "word:vehicle",
       "lexicalKey": "vehicle",
-      "rank": 1027,
-      "band": "broad"
+      "sourceRank": 1518
     },
     {
       "wordId": "word:consider",
       "lexicalKey": "consider",
-      "rank": 1028,
-      "band": "broad"
+      "sourceRank": 1520
     },
     {
       "wordId": "word:northern",
       "lexicalKey": "northern",
-      "rank": 1029,
-      "band": "broad"
+      "sourceRank": 1522
     },
     {
       "wordId": "word:behind",
       "lexicalKey": "behind",
-      "rank": 1030,
-      "band": "broad"
+      "sourceRank": 1523
     },
     {
       "wordId": "word:panel",
       "lexicalKey": "panel",
-      "rank": 1031,
-      "band": "broad"
+      "sourceRank": 1524
     },
     {
       "wordId": "word:floor",
       "lexicalKey": "floor",
-      "rank": 1032,
-      "band": "broad"
+      "sourceRank": 1525
     },
     {
       "wordId": "word:german",
       "lexicalKey": "german",
-      "rank": 1033,
-      "band": "broad"
+      "sourceRank": 1526
     },
     {
       "wordId": "word:match",
       "lexicalKey": "match",
-      "rank": 1034,
-      "band": "broad"
+      "sourceRank": 1528
     },
     {
       "wordId": "word:default",
       "lexicalKey": "default",
-      "rank": 1035,
-      "band": "broad"
+      "sourceRank": 1530
     },
     {
       "wordId": "word:require",
       "lexicalKey": "require",
-      "rank": 1036,
-      "band": "broad"
+      "sourceRank": 1531
     },
     {
       "wordId": "word:outdoor",
       "lexicalKey": "outdoor",
-      "rank": 1037,
-      "band": "broad"
+      "sourceRank": 1534
     },
     {
       "wordId": "word:deep",
       "lexicalKey": "deep",
-      "rank": 1038,
-      "band": "broad"
+      "sourceRank": 1535
     },
     {
       "wordId": "word:morning",
       "lexicalKey": "morning",
-      "rank": 1039,
-      "band": "broad"
+      "sourceRank": 1536
     },
     {
       "wordId": "word:otherwise",
       "lexicalKey": "otherwise",
-      "rank": 1040,
-      "band": "broad"
+      "sourceRank": 1537
     },
     {
       "wordId": "word:rest",
       "lexicalKey": "rest",
-      "rank": 1041,
-      "band": "broad"
+      "sourceRank": 1539
     },
     {
       "wordId": "word:protein",
       "lexicalKey": "protein",
-      "rank": 1042,
-      "band": "broad"
+      "sourceRank": 1540
     },
     {
       "wordId": "word:plant",
       "lexicalKey": "plant",
-      "rank": 1043,
-      "band": "broad"
+      "sourceRank": 1541
     },
     {
       "wordId": "word:hit",
       "lexicalKey": "hit",
-      "rank": 1044,
-      "band": "broad"
+      "sourceRank": 1543
     },
     {
       "wordId": "word:pool",
       "lexicalKey": "pool",
-      "rank": 1045,
-      "band": "broad"
+      "sourceRank": 1546
     },
     {
       "wordId": "word:mini",
       "lexicalKey": "mini",
-      "rank": 1046,
-      "band": "broad"
+      "sourceRank": 1547
     },
     {
       "wordId": "word:politics",
       "lexicalKey": "politics",
-      "rank": 1047,
-      "band": "broad"
+      "sourceRank": 1548
     },
     {
       "wordId": "word:partner",
       "lexicalKey": "partner",
-      "rank": 1048,
-      "band": "broad"
+      "sourceRank": 1549
     },
     {
       "wordId": "word:faculty",
       "lexicalKey": "faculty",
-      "rank": 1049,
-      "band": "broad"
+      "sourceRank": 1553
     },
     {
       "wordId": "word:fish",
       "lexicalKey": "fish",
-      "rank": 1050,
-      "band": "broad"
+      "sourceRank": 1555
     },
     {
       "wordId": "word:membership",
       "lexicalKey": "membership",
-      "rank": 1051,
-      "band": "broad"
+      "sourceRank": 1556
     },
     {
       "wordId": "word:mission",
       "lexicalKey": "mission",
-      "rank": 1052,
-      "band": "broad"
+      "sourceRank": 1557
     },
     {
       "wordId": "word:eye",
       "lexicalKey": "eye",
-      "rank": 1053,
-      "band": "broad"
+      "sourceRank": 1558
     },
     {
       "wordId": "word:sense",
       "lexicalKey": "sense",
-      "rank": 1054,
-      "band": "broad"
+      "sourceRank": 1560
     },
     {
       "wordId": "word:pack",
       "lexicalKey": "pack",
-      "rank": 1055,
-      "band": "broad"
+      "sourceRank": 1562
     },
     {
       "wordId": "word:stage",
       "lexicalKey": "stage",
-      "rank": 1056,
-      "band": "broad"
+      "sourceRank": 1564
     },
     {
       "wordId": "word:internal",
       "lexicalKey": "internal",
-      "rank": 1057,
-      "band": "broad"
+      "sourceRank": 1565
     },
     {
       "wordId": "word:born",
       "lexicalKey": "born",
-      "rank": 1058,
-      "band": "broad"
+      "sourceRank": 1568
     },
     {
       "wordId": "word:unless",
       "lexicalKey": "unless",
-      "rank": 1059,
-      "band": "broad"
+      "sourceRank": 1569
     },
     {
       "wordId": "word:race",
       "lexicalKey": "race",
-      "rank": 1060,
-      "band": "broad"
+      "sourceRank": 1573
     },
     {
       "wordId": "word:background",
       "lexicalKey": "background",
-      "rank": 1061,
-      "band": "broad"
+      "sourceRank": 1575
     },
     {
       "wordId": "word:target",
       "lexicalKey": "target",
-      "rank": 1062,
-      "band": "broad"
+      "sourceRank": 1576
     },
     {
       "wordId": "word:except",
       "lexicalKey": "except",
-      "rank": 1063,
-      "band": "broad"
+      "sourceRank": 1577
     },
     {
       "wordId": "word:character",
       "lexicalKey": "character",
-      "rank": 1064,
-      "band": "broad"
+      "sourceRank": 1578
     },
     {
       "wordId": "word:maintenance",
       "lexicalKey": "maintenance",
-      "rank": 1065,
-      "band": "broad"
+      "sourceRank": 1580
     },
     {
       "wordId": "word:ability",
       "lexicalKey": "ability",
-      "rank": 1066,
-      "band": "broad"
+      "sourceRank": 1581
     },
     {
       "wordId": "word:maybe",
       "lexicalKey": "maybe",
-      "rank": 1067,
-      "band": "broad"
+      "sourceRank": 1582
     },
     {
       "wordId": "word:pretty",
       "lexicalKey": "pretty",
-      "rank": 1068,
-      "band": "broad"
+      "sourceRank": 1589
     },
     {
       "wordId": "word:southern",
       "lexicalKey": "southern",
-      "rank": 1069,
-      "band": "broad"
+      "sourceRank": 1593
     },
     {
       "wordId": "word:yourself",
       "lexicalKey": "yourself",
-      "rank": 1070,
-      "band": "broad"
+      "sourceRank": 1594
     },
     {
       "wordId": "word:winter",
       "lexicalKey": "winter",
-      "rank": 1071,
-      "band": "broad"
+      "sourceRank": 1596
     },
     {
       "wordId": "word:battery",
       "lexicalKey": "battery",
-      "rank": 1072,
-      "band": "broad"
+      "sourceRank": 1597
     },
     {
       "wordId": "word:youth",
       "lexicalKey": "youth",
-      "rank": 1073,
-      "band": "broad"
+      "sourceRank": 1598
     },
     {
       "wordId": "word:pressure",
       "lexicalKey": "pressure",
-      "rank": 1074,
-      "band": "broad"
+      "sourceRank": 1599
     },
     {
       "wordId": "word:debt",
       "lexicalKey": "debt",
-      "rank": 1075,
-      "band": "broad"
+      "sourceRank": 1602
     },
     {
       "wordId": "word:medium",
       "lexicalKey": "medium",
-      "rank": 1076,
-      "band": "broad"
+      "sourceRank": 1604
     },
     {
       "wordId": "word:television",
       "lexicalKey": "television",
-      "rank": 1077,
-      "band": "broad"
+      "sourceRank": 1605
     },
     {
       "wordId": "word:core",
       "lexicalKey": "core",
-      "rank": 1078,
-      "band": "broad"
+      "sourceRank": 1607
     },
     {
       "wordId": "word:break",
       "lexicalKey": "break",
-      "rank": 1079,
-      "band": "broad"
+      "sourceRank": 1608
     },
     {
       "wordId": "word:throughout",
       "lexicalKey": "throughout",
-      "rank": 1080,
-      "band": "broad"
+      "sourceRank": 1610
     },
     {
       "wordId": "word:dance",
       "lexicalKey": "dance",
-      "rank": 1081,
-      "band": "broad"
+      "sourceRank": 1612
     },
     {
       "wordId": "word:wood",
       "lexicalKey": "wood",
-      "rank": 1082,
-      "band": "broad"
+      "sourceRank": 1613
     },
     {
       "wordId": "word:itself",
       "lexicalKey": "itself",
-      "rank": 1083,
-      "band": "broad"
+      "sourceRank": 1615
     },
     {
       "wordId": "word:fee",
       "lexicalKey": "fee",
-      "rank": 1084,
-      "band": "broad"
+      "sourceRank": 1620
     },
     {
       "wordId": "word:studio",
       "lexicalKey": "studio",
-      "rank": 1085,
-      "band": "broad"
+      "sourceRank": 1621
     },
     {
       "wordId": "word:reader",
       "lexicalKey": "reader",
-      "rank": 1086,
-      "band": "broad"
+      "sourceRank": 1622
     },
     {
       "wordId": "word:virtual",
       "lexicalKey": "virtual",
-      "rank": 1087,
-      "band": "broad"
+      "sourceRank": 1623
     },
     {
       "wordId": "word:device",
       "lexicalKey": "device",
-      "rank": 1088,
-      "band": "broad"
+      "sourceRank": 1624
     },
     {
       "wordId": "word:rent",
       "lexicalKey": "rent",
-      "rank": 1089,
-      "band": "broad"
+      "sourceRank": 1627
     },
     {
       "wordId": "word:remote",
       "lexicalKey": "remote",
-      "rank": 1090,
-      "band": "broad"
+      "sourceRank": 1629
     },
     {
       "wordId": "word:dark",
       "lexicalKey": "dark",
-      "rank": 1091,
-      "band": "broad"
+      "sourceRank": 1630
     },
     {
       "wordId": "word:external",
       "lexicalKey": "external",
-      "rank": 1092,
-      "band": "broad"
+      "sourceRank": 1632
     },
     {
       "wordId": "word:apple",
       "lexicalKey": "apple",
-      "rank": 1093,
-      "band": "broad"
+      "sourceRank": 1633
     },
     {
       "wordId": "word:theory",
       "lexicalKey": "theory",
-      "rank": 1094,
-      "band": "broad"
+      "sourceRank": 1639
     },
     {
       "wordId": "word:enjoy",
       "lexicalKey": "enjoy",
-      "rank": 1095,
-      "band": "broad"
+      "sourceRank": 1640
     },
     {
       "wordId": "word:remove",
       "lexicalKey": "remove",
-      "rank": 1096,
-      "band": "broad"
+      "sourceRank": 1641
     },
     {
       "wordId": "word:aid",
       "lexicalKey": "aid",
-      "rank": 1097,
-      "band": "broad"
+      "sourceRank": 1642
     },
     {
       "wordId": "word:surface",
       "lexicalKey": "surface",
-      "rank": 1098,
-      "band": "broad"
+      "sourceRank": 1643
     },
     {
       "wordId": "word:minimum",
       "lexicalKey": "minimum",
-      "rank": 1099,
-      "band": "broad"
+      "sourceRank": 1644
     },
     {
       "wordId": "word:visual",
       "lexicalKey": "visual",
-      "rank": 1100,
-      "band": "broad"
+      "sourceRank": 1645
     },
     {
       "wordId": "word:host",
       "lexicalKey": "host",
-      "rank": 1101,
-      "band": "broad"
+      "sourceRank": 1646
     },
     {
       "wordId": "word:variety",
       "lexicalKey": "variety",
-      "rank": 1102,
-      "band": "broad"
+      "sourceRank": 1647
     },
     {
       "wordId": "word:manual",
       "lexicalKey": "manual",
-      "rank": 1103,
-      "band": "broad"
+      "sourceRank": 1651
     },
     {
       "wordId": "word:block",
       "lexicalKey": "block",
-      "rank": 1104,
-      "band": "broad"
+      "sourceRank": 1652
     },
     {
       "wordId": "word:repair",
       "lexicalKey": "repair",
-      "rank": 1105,
-      "band": "broad"
+      "sourceRank": 1656
     },
     {
       "wordId": "word:fair",
       "lexicalKey": "fair",
-      "rank": 1106,
-      "band": "broad"
+      "sourceRank": 1657
     },
     {
       "wordId": "word:civil",
       "lexicalKey": "civil",
-      "rank": 1107,
-      "band": "broad"
+      "sourceRank": 1658
     },
     {
       "wordId": "word:steel",
       "lexicalKey": "steel",
-      "rank": 1108,
-      "band": "broad"
+      "sourceRank": 1659
     },
     {
       "wordId": "word:wrong",
       "lexicalKey": "wrong",
-      "rank": 1109,
-      "band": "broad"
+      "sourceRank": 1663
     },
     {
       "wordId": "word:finally",
       "lexicalKey": "finally",
-      "rank": 1110,
-      "band": "broad"
+      "sourceRank": 1667
     },
     {
       "wordId": "word:paris",
       "lexicalKey": "paris",
-      "rank": 1111,
-      "band": "broad"
+      "sourceRank": 1672
     },
     {
       "wordId": "word:sector",
       "lexicalKey": "sector",
-      "rank": 1112,
-      "band": "broad"
+      "sourceRank": 1675
     },
     {
       "wordId": "word:capacity",
       "lexicalKey": "capacity",
-      "rank": 1113,
-      "band": "broad"
+      "sourceRank": 1676
     },
     {
       "wordId": "word:fat",
       "lexicalKey": "fat",
-      "rank": 1114,
-      "band": "broad"
+      "sourceRank": 1680
     },
     {
       "wordId": "word:fully",
       "lexicalKey": "fully",
-      "rank": 1115,
-      "band": "broad"
+      "sourceRank": 1681
     },
     {
       "wordId": "word:father",
       "lexicalKey": "father",
-      "rank": 1116,
-      "band": "broad"
+      "sourceRank": 1682
     },
     {
       "wordId": "word:electric",
       "lexicalKey": "electric",
-      "rank": 1117,
-      "band": "broad"
+      "sourceRank": 1683
     },
     {
       "wordId": "word:saw",
       "lexicalKey": "saw",
-      "rank": 1118,
-      "band": "broad"
+      "sourceRank": 1684
     },
     {
       "wordId": "word:officer",
       "lexicalKey": "officer",
-      "rank": 1119,
-      "band": "broad"
+      "sourceRank": 1687
     },
     {
       "wordId": "word:driver",
       "lexicalKey": "driver",
-      "rank": 1120,
-      "band": "broad"
+      "sourceRank": 1688
     },
     {
       "wordId": "word:dead",
       "lexicalKey": "dead",
-      "rank": 1121,
-      "band": "broad"
+      "sourceRank": 1690
     },
     {
       "wordId": "word:respect",
       "lexicalKey": "respect",
-      "rank": 1122,
-      "band": "broad"
+      "sourceRank": 1691
     },
     {
       "wordId": "word:unknown",
       "lexicalKey": "unknown",
-      "rank": 1123,
-      "band": "broad"
+      "sourceRank": 1692
     },
     {
       "wordId": "word:restaurant",
       "lexicalKey": "restaurant",
-      "rank": 1124,
-      "band": "broad"
+      "sourceRank": 1694
     },
     {
       "wordId": "word:trip",
       "lexicalKey": "trip",
-      "rank": 1125,
-      "band": "broad"
+      "sourceRank": 1696
     },
     {
       "wordId": "word:worth",
       "lexicalKey": "worth",
-      "rank": 1126,
-      "band": "broad"
+      "sourceRank": 1698
     },
     {
       "wordId": "word:poor",
       "lexicalKey": "poor",
-      "rank": 1127,
-      "band": "broad"
+      "sourceRank": 1701
     },
     {
       "wordId": "word:teacher",
       "lexicalKey": "teacher",
-      "rank": 1128,
-      "band": "broad"
+      "sourceRank": 1702
     },
     {
       "wordId": "word:relationship",
       "lexicalKey": "relationship",
-      "rank": 1129,
-      "band": "broad"
+      "sourceRank": 1704
     },
     {
       "wordId": "word:farm",
       "lexicalKey": "farm",
-      "rank": 1130,
-      "band": "broad"
+      "sourceRank": 1706
     },
     {
       "wordId": "word:peace",
       "lexicalKey": "peace",
-      "rank": 1131,
-      "band": "broad"
+      "sourceRank": 1708
     },
     {
       "wordId": "word:traditional",
       "lexicalKey": "traditional",
-      "rank": 1132,
-      "band": "broad"
+      "sourceRank": 1709
     },
     {
       "wordId": "word:campus",
       "lexicalKey": "campus",
-      "rank": 1133,
-      "band": "broad"
+      "sourceRank": 1710
     },
     {
       "wordId": "word:creative",
       "lexicalKey": "creative",
-      "rank": 1134,
-      "band": "broad"
+      "sourceRank": 1713
     },
     {
       "wordId": "word:coast",
       "lexicalKey": "coast",
-      "rank": 1135,
-      "band": "broad"
+      "sourceRank": 1714
     },
     {
       "wordId": "word:benefit",
       "lexicalKey": "benefit",
-      "rank": 1136,
-      "band": "broad"
+      "sourceRank": 1715
     },
     {
       "wordId": "word:progress",
       "lexicalKey": "progress",
-      "rank": 1137,
-      "band": "broad"
+      "sourceRank": 1716
     },
     {
       "wordId": "word:lord",
       "lexicalKey": "lord",
-      "rank": 1138,
-      "band": "broad"
+      "sourceRank": 1719
     },
     {
       "wordId": "word:agree",
       "lexicalKey": "agree",
-      "rank": 1139,
-      "band": "broad"
+      "sourceRank": 1722
     },
     {
       "wordId": "word:fiction",
       "lexicalKey": "fiction",
-      "rank": 1140,
-      "band": "broad"
+      "sourceRank": 1723
     },
     {
       "wordId": "word:hear",
       "lexicalKey": "hear",
-      "rank": 1141,
-      "band": "broad"
+      "sourceRank": 1724
     },
     {
       "wordId": "word:sometimes",
       "lexicalKey": "sometimes",
-      "rank": 1142,
-      "band": "broad"
+      "sourceRank": 1725
     },
     {
       "wordId": "word:beyond",
       "lexicalKey": "beyond",
-      "rank": 1143,
-      "band": "broad"
+      "sourceRank": 1728
     },
     {
       "wordId": "word:museum",
       "lexicalKey": "museum",
-      "rank": 1144,
-      "band": "broad"
+      "sourceRank": 1732
     },
     {
       "wordId": "word:themselves",
       "lexicalKey": "themselves",
-      "rank": 1145,
-      "band": "broad"
+      "sourceRank": 1733
     },
     {
       "wordId": "word:fan",
       "lexicalKey": "fan",
-      "rank": 1146,
-      "band": "broad"
+      "sourceRank": 1734
     },
     {
       "wordId": "word:transport",
       "lexicalKey": "transport",
-      "rank": 1147,
-      "band": "broad"
+      "sourceRank": 1735
     },
     {
       "wordId": "word:wife",
       "lexicalKey": "wife",
-      "rank": 1148,
-      "band": "broad"
+      "sourceRank": 1738
     },
     {
       "wordId": "word:evaluation",
       "lexicalKey": "evaluation",
-      "rank": 1149,
-      "band": "broad"
+      "sourceRank": 1739
     },
     {
       "wordId": "word:former",
       "lexicalKey": "former",
-      "rank": 1150,
-      "band": "broad"
+      "sourceRank": 1741
     },
     {
       "wordId": "word:ten",
       "lexicalKey": "ten",
-      "rank": 1151,
-      "band": "broad"
+      "sourceRank": 1743
     },
     {
       "wordId": "word:zone",
       "lexicalKey": "zone",
-      "rank": 1152,
-      "band": "broad"
+      "sourceRank": 1745
     },
     {
       "wordId": "word:complex",
       "lexicalKey": "complex",
-      "rank": 1153,
-      "band": "broad"
+      "sourceRank": 1746
     },
     {
       "wordId": "word:cat",
       "lexicalKey": "cat",
-      "rank": 1154,
-      "band": "broad"
+      "sourceRank": 1748
     },
     {
       "wordId": "word:die",
       "lexicalKey": "die",
-      "rank": 1155,
-      "band": "broad"
+      "sourceRank": 1751
     },
     {
       "wordId": "word:flat",
       "lexicalKey": "flat",
-      "rank": 1156,
-      "band": "broad"
+      "sourceRank": 1754
     },
     {
       "wordId": "word:flow",
       "lexicalKey": "flow",
-      "rank": 1157,
-      "band": "broad"
+      "sourceRank": 1755
     },
     {
       "wordId": "word:literature",
       "lexicalKey": "literature",
-      "rank": 1158,
-      "band": "broad"
+      "sourceRank": 1757
     },
     {
       "wordId": "word:respective",
       "lexicalKey": "respective",
-      "rank": 1159,
-      "band": "broad"
+      "sourceRank": 1758
     },
     {
       "wordId": "word:parent",
       "lexicalKey": "parent",
-      "rank": 1160,
-      "band": "broad"
+      "sourceRank": 1759
     },
     {
       "wordId": "word:scale",
       "lexicalKey": "scale",
-      "rank": 1161,
-      "band": "broad"
+      "sourceRank": 1765
     },
     {
       "wordId": "word:stand",
       "lexicalKey": "stand",
-      "rank": 1162,
-      "band": "broad"
+      "sourceRank": 1766
     },
     {
       "wordId": "word:economy",
       "lexicalKey": "economy",
-      "rank": 1163,
-      "band": "broad"
+      "sourceRank": 1767
     },
     {
       "wordId": "word:helpful",
       "lexicalKey": "helpful",
-      "rank": 1164,
-      "band": "broad"
+      "sourceRank": 1769
     },
     {
       "wordId": "word:monthly",
       "lexicalKey": "monthly",
-      "rank": 1165,
-      "band": "broad"
+      "sourceRank": 1770
     },
     {
       "wordId": "word:critical",
       "lexicalKey": "critical",
-      "rank": 1166,
-      "band": "broad"
+      "sourceRank": 1771
     },
     {
       "wordId": "word:frame",
       "lexicalKey": "frame",
-      "rank": 1167,
-      "band": "broad"
+      "sourceRank": 1772
     },
     {
       "wordId": "word:musical",
       "lexicalKey": "musical",
-      "rank": 1168,
-      "band": "broad"
+      "sourceRank": 1773
     },
     {
       "wordId": "word:definition",
       "lexicalKey": "definition",
-      "rank": 1169,
-      "band": "broad"
+      "sourceRank": 1774
     },
     {
       "wordId": "word:secretary",
       "lexicalKey": "secretary",
-      "rank": 1170,
-      "band": "broad"
+      "sourceRank": 1775
     },
     {
       "wordId": "word:path",
       "lexicalKey": "path",
-      "rank": 1171,
-      "band": "broad"
+      "sourceRank": 1778
     },
     {
       "wordId": "word:employee",
       "lexicalKey": "employee",
-      "rank": 1172,
-      "band": "broad"
+      "sourceRank": 1780
     },
     {
       "wordId": "word:chief",
       "lexicalKey": "chief",
-      "rank": 1173,
-      "band": "broad"
+      "sourceRank": 1781
     },
     {
       "wordId": "word:bottom",
       "lexicalKey": "bottom",
-      "rank": 1174,
-      "band": "broad"
+      "sourceRank": 1784
     },
     {
       "wordId": "word:detail",
       "lexicalKey": "detail",
-      "rank": 1175,
-      "band": "broad"
+      "sourceRank": 1787
     },
     {
       "wordId": "word:pet",
       "lexicalKey": "pet",
-      "rank": 1176,
-      "band": "broad"
+      "sourceRank": 1791
     },
     {
       "wordId": "word:heard",
       "lexicalKey": "heard",
-      "rank": 1177,
-      "band": "broad"
+      "sourceRank": 1792
     },
     {
       "wordId": "word:begin",
       "lexicalKey": "begin",
-      "rank": 1178,
-      "band": "broad"
+      "sourceRank": 1793
     },
     {
       "wordId": "word:royal",
       "lexicalKey": "royal",
-      "rank": 1179,
-      "band": "broad"
+      "sourceRank": 1796
     },
     {
       "wordId": "word:clean",
       "lexicalKey": "clean",
-      "rank": 1180,
-      "band": "broad"
+      "sourceRank": 1797
     },
     {
       "wordId": "word:switch",
       "lexicalKey": "switch",
-      "rank": 1181,
-      "band": "broad"
+      "sourceRank": 1798
     },
     {
       "wordId": "word:relevant",
       "lexicalKey": "relevant",
-      "rank": 1182,
-      "band": "broad"
+      "sourceRank": 1804
     },
     {
       "wordId": "word:connect",
       "lexicalKey": "connect",
-      "rank": 1183,
-      "band": "broad"
+      "sourceRank": 1807
     },
     {
       "wordId": "word:bible",
       "lexicalKey": "bible",
-      "rank": 1184,
-      "band": "broad"
+      "sourceRank": 1808
     },
     {
       "wordId": "word:cup",
       "lexicalKey": "cup",
-      "rank": 1185,
-      "band": "broad"
+      "sourceRank": 1810
     },
     {
       "wordId": "word:weekly",
       "lexicalKey": "weekly",
-      "rank": 1186,
-      "band": "broad"
+      "sourceRank": 1813
     },
     {
       "wordId": "word:installation",
       "lexicalKey": "installation",
-      "rank": 1187,
-      "band": "broad"
+      "sourceRank": 1815
     },
     {
       "wordId": "word:demand",
       "lexicalKey": "demand",
-      "rank": 1188,
-      "band": "broad"
+      "sourceRank": 1817
     },
     {
       "wordId": "word:suite",
       "lexicalKey": "suite",
-      "rank": 1189,
-      "band": "broad"
+      "sourceRank": 1819
     },
     {
       "wordId": "word:square",
       "lexicalKey": "square",
-      "rank": 1190,
-      "band": "broad"
+      "sourceRank": 1822
     },
     {
       "wordId": "word:attention",
       "lexicalKey": "attention",
-      "rank": 1191,
-      "band": "broad"
+      "sourceRank": 1824
     },
     {
       "wordId": "word:advance",
       "lexicalKey": "advance",
-      "rank": 1192,
-      "band": "broad"
+      "sourceRank": 1825
     },
     {
       "wordId": "word:skip",
       "lexicalKey": "skip",
-      "rank": 1193,
-      "band": "broad"
+      "sourceRank": 1826
     },
     {
       "wordId": "word:diet",
       "lexicalKey": "diet",
-      "rank": 1194,
-      "band": "broad"
+      "sourceRank": 1827
     },
     {
       "wordId": "word:army",
       "lexicalKey": "army",
-      "rank": 1195,
-      "band": "broad"
+      "sourceRank": 1828
     },
     {
       "wordId": "word:auction",
       "lexicalKey": "auction",
-      "rank": 1196,
-      "band": "broad"
+      "sourceRank": 1829
     },
     {
       "wordId": "word:gear",
       "lexicalKey": "gear",
-      "rank": 1197,
-      "band": "broad"
+      "sourceRank": 1830
     },
     {
       "wordId": "word:difference",
       "lexicalKey": "difference",
-      "rank": 1198,
-      "band": "broad"
+      "sourceRank": 1833
     },
     {
       "wordId": "word:correct",
       "lexicalKey": "correct",
-      "rank": 1199,
-      "band": "broad"
+      "sourceRank": 1835
     },
     {
       "wordId": "word:nation",
       "lexicalKey": "nation",
-      "rank": 1200,
-      "band": "broad"
+      "sourceRank": 1837
     }
   ],
-  "checksum": "sha256-be881b000a0c6329344f2ad1e0ef81d74bb04638441f52d4630c77225cf8c5c1"
+  "checksum": "sha256-0dff0dd147cc3933a5547627f3740e5ad777d94f90db4cdb199c47eab466eb57"
 }
