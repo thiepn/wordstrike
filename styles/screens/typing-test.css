@@ -1,0 +1,985 @@
+/* UI8 — Typing Test Visual Refinement
+   The Typing Test is intentionally calmer than combat modes: the words are the interface. */
+
+.speed-test-screen {
+  --speed-test-font-size: clamp(1.7rem, 2.7vw, 2.45rem);
+  --speed-test-line-height: calc(var(--speed-test-font-size) * 1.56);
+  --speed-test-row-gap: clamp(0.55rem, 1.2vh, 0.9rem);
+  --speed-test-stage-inline: clamp(1rem, 6vw, 6rem);
+  --speed-test-max-width: 84rem;
+  --speed-test-control-height: 2.5rem;
+  min-height: 100dvh;
+  overflow-x: clip;
+  background:
+    radial-gradient(circle at 50% 44%, rgb(0 255 242 / 0.035), transparent 34rem),
+    var(--background, #0a0e14);
+}
+
+.speed-test-screen[data-speed-font-size="small"] { --speed-test-font-size: clamp(1.45rem, 2.2vw, 1.9rem); }
+.speed-test-screen[data-speed-font-size="medium"] { --speed-test-font-size: clamp(1.7rem, 2.7vw, 2.45rem); }
+.speed-test-screen[data-speed-font-size="large"] { --speed-test-font-size: clamp(2rem, 3.2vw, 2.8rem); }
+
+body.gameplay-active .speed-test-screen {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* ---------- Header / configuration ---------- */
+
+.speed-test-topbar {
+  position: relative;
+  z-index: 4;
+  display: grid;
+  min-height: 0;
+  padding-top: max(0.35rem, env(safe-area-inset-top));
+  border-bottom: 1px solid rgb(129 144 158 / 0.13);
+  background: linear-gradient(180deg, rgb(10 14 20 / 0.97), rgb(10 14 20 / 0.88));
+  box-shadow: none;
+  backdrop-filter: blur(12px);
+}
+
+.speed-test-topbar-primary,
+.speed-test-topbar-secondary {
+  width: min(100%, 96rem);
+  margin-inline: auto;
+  padding-inline: clamp(0.85rem, 3.4vw, 3.4rem);
+}
+
+.speed-test-topbar-primary {
+  min-height: 3.2rem;
+  padding-block: 0.42rem;
+  border-bottom: 1px solid rgb(129 144 158 / 0.09);
+}
+
+.speed-test-topbar-secondary {
+  min-height: 3.25rem;
+  padding-block: 0.38rem 0.48rem;
+  gap: clamp(0.8rem, 2vw, 1.6rem);
+  transition: opacity 140ms ease;
+}
+
+.speed-test-mode-title {
+  gap: 0.6rem;
+}
+
+.speed-test-mode-title strong {
+  color: var(--text-primary, var(--text));
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-shadow: none;
+}
+
+.speed-test-mode-title span {
+  color: var(--text-muted, var(--muted));
+  font-size: 0.61rem;
+  letter-spacing: 0.09em;
+}
+
+.speed-test-top-actions {
+  gap: 0.35rem;
+}
+
+.speed-test-topbar .gameplay-control-button {
+  min-height: 2.25rem;
+  padding: 0.42rem 0.65rem;
+  border-color: rgb(129 144 158 / 0.16);
+  background: transparent;
+  color: var(--text-secondary, var(--muted));
+  box-shadow: none;
+  font-size: 0.65rem;
+}
+
+.speed-test-topbar .gameplay-control-button:hover,
+.speed-test-topbar .gameplay-control-button:focus-visible {
+  border-color: rgb(0 255 242 / 0.52);
+  color: var(--primary);
+  background: rgb(0 255 242 / 0.035);
+}
+
+.speed-test-topbar .gameplay-control-button kbd {
+  opacity: 0.55;
+}
+
+.speed-test-controls-wrap {
+  min-width: 0;
+  gap: clamp(0.5rem, 1.25vw, 0.9rem);
+  flex-wrap: wrap;
+}
+
+.speed-test-word-set {
+  color: var(--text-muted, var(--muted));
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  opacity: 0.66;
+}
+
+.speed-test-config {
+  gap: 0.7rem;
+}
+
+.speed-test-categories,
+.speed-test-values {
+  gap: 0.18rem;
+}
+
+.speed-config-divider {
+  width: 1px;
+  height: 1.15rem;
+  background: rgb(129 144 158 / 0.2);
+}
+
+.speed-config-control {
+  position: relative;
+  min-width: 2.55rem;
+  min-height: var(--speed-test-control-height);
+  padding: 0.4rem 0.58rem;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--text-muted, var(--muted));
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-shadow: none;
+  transition: color 120ms ease, background-color 120ms ease, opacity 120ms ease;
+}
+
+.speed-config-control::after {
+  content: "";
+  position: absolute;
+  right: 0.55rem;
+  bottom: 0.26rem;
+  left: 0.55rem;
+  height: 1px;
+  background: transparent;
+  transform: scaleX(0.35);
+  transition: background-color 120ms ease, transform 120ms ease;
+}
+
+.speed-config-control:hover {
+  outline: none;
+  color: var(--text-primary, var(--text));
+  border-color: transparent;
+  background: rgb(255 255 255 / 0.025);
+  text-shadow: none;
+}
+
+.speed-config-control:focus-visible {
+  outline: 2px solid rgb(0 255 242 / 0.8);
+  outline-offset: -2px;
+  color: var(--text-primary, var(--text));
+  border-color: transparent;
+  text-shadow: none;
+}
+
+.speed-config-control.active {
+  color: var(--primary);
+  border-color: transparent;
+  background: rgb(0 255 242 / 0.035);
+  text-shadow: none;
+}
+
+.speed-config-control.active::after {
+  background: var(--primary);
+  transform: scaleX(1);
+}
+
+.speed-config-control:disabled {
+  cursor: default;
+  opacity: 0.44;
+}
+
+.speed-timer-position {
+  gap: 0.18rem;
+  color: var(--text-muted, var(--muted));
+  font-size: 0.52rem;
+  letter-spacing: 0.08em;
+}
+
+.speed-timer-position > span {
+  margin-right: 0.24rem;
+  opacity: 0.62;
+}
+
+.speed-timer-position button {
+  min-height: var(--speed-test-control-height);
+  padding: 0.4rem 0.5rem;
+  border: 0;
+  border-bottom: 1px solid transparent;
+  background: transparent;
+  color: var(--text-muted, var(--muted));
+  box-shadow: none;
+  font-size: 0.58rem;
+  letter-spacing: 0.07em;
+}
+
+.speed-timer-position button.active {
+  border-color: rgb(255 60 172 / 0.7);
+  color: var(--secondary);
+  background: transparent;
+  box-shadow: none;
+}
+
+.speed-timer-position button:hover {
+  border-color: rgb(255 60 172 / 0.36);
+  color: var(--text-primary, var(--text));
+  background: transparent;
+  box-shadow: none;
+}
+
+.speed-timer-position button:focus-visible {
+  outline: 2px solid rgb(0 255 242 / 0.8);
+  outline-offset: -2px;
+  border-color: transparent;
+  color: var(--text-primary, var(--text));
+  box-shadow: none;
+}
+
+.speed-font-size {
+  gap: 0.35rem;
+  color: var(--text-muted, var(--muted));
+  font-size: 0.52rem;
+  letter-spacing: 0.07em;
+}
+
+.speed-font-size select {
+  min-height: var(--speed-test-control-height);
+  padding: 0.35rem 1.55rem 0.35rem 0.48rem;
+  border: 0;
+  border-bottom: 1px solid rgb(129 144 158 / 0.2);
+  border-radius: 0;
+  background-color: transparent;
+  color: var(--text-secondary, var(--muted));
+  font-size: 0.62rem;
+}
+
+.speed-font-size select:hover {
+  border-bottom-color: rgb(0 255 242 / 0.42);
+  color: var(--text-primary, var(--text));
+}
+
+.speed-font-size select:focus-visible {
+  outline: 2px solid rgb(0 255 242 / 0.8);
+  outline-offset: 2px;
+}
+
+/* ---------- Live metrics ---------- */
+
+.speed-test-hud {
+  flex: 0 0 auto;
+  justify-content: flex-end;
+  gap: clamp(0.75rem, 1.7vw, 1.25rem);
+  min-width: max-content;
+  color: var(--text-muted, var(--muted));
+  font-size: 0.58rem;
+  letter-spacing: 0.09em;
+  font-variant-numeric: tabular-nums;
+}
+
+.speed-test-hud span {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.34rem;
+  white-space: nowrap;
+}
+
+.speed-test-hud b,
+.speed-test-hud strong {
+  color: var(--text-primary, var(--text));
+  text-shadow: none;
+  font-variant-numeric: tabular-nums;
+}
+
+#speed-test-wpm {
+  color: var(--primary);
+  font-size: clamp(1.35rem, 2.2vw, 1.8rem);
+  line-height: 1;
+}
+
+#speed-test-accuracy {
+  font-size: 0.88rem;
+}
+
+#speed-test-raw {
+  color: var(--text-secondary, var(--muted));
+  font-size: 0.76rem;
+}
+
+.speed-test-hud > strong#speed-test-primary {
+  min-width: 4.2ch;
+  color: var(--text-secondary, var(--muted));
+  font-size: 1rem;
+  font-weight: 650;
+}
+
+#speed-test-elapsed {
+  color: var(--text-muted, var(--muted));
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Focus stage ---------- */
+
+.speed-test-stage {
+  --speed-test-center-timer-size: clamp(2.15rem, min(6vw, 6vh), 4.35rem);
+  --speed-test-center-timer-half-size: calc(var(--speed-test-center-timer-size) / 2);
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: calc(var(--speed-test-word-viewport-height) + clamp(9rem, 25vh, 15rem));
+  padding: clamp(1.1rem, 3vh, 2.2rem) var(--speed-test-stage-inline) max(3rem, env(safe-area-inset-bottom));
+  overflow: hidden;
+}
+
+.speed-test-upper-overlay {
+  inset: 0 var(--speed-test-stage-inline);
+  grid-template-rows: minmax(0, 1fr) var(--speed-test-word-viewport-height) minmax(0, 1fr);
+  width: min(calc(100% - (2 * var(--speed-test-stage-inline))), var(--speed-test-max-width));
+  margin-inline: auto;
+}
+
+.speed-test-upper-overlay-content {
+  display: grid;
+  place-items: end center;
+  padding-bottom: clamp(1.2rem, 3vh, 2.4rem);
+}
+
+.speed-test-status {
+  position: static;
+  width: auto;
+  max-width: 100%;
+  margin-bottom: clamp(0.5rem, 1.2vh, 0.85rem);
+  color: var(--text-muted, var(--muted));
+  font-size: 0.64rem;
+  font-weight: 650;
+  letter-spacing: 0.16em;
+  text-shadow: none;
+  transform: none;
+  white-space: normal;
+  transition: opacity 100ms linear;
+}
+
+.speed-test-status[hidden] {
+  display: block;
+  visibility: hidden;
+  opacity: 0;
+}
+
+.speed-test-center-timer {
+  color: var(--text-muted, var(--muted));
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.speed-test-center-timer strong {
+  display: block;
+  color: var(--text-secondary, var(--muted));
+  font-size: var(--speed-test-center-timer-size);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.035em;
+  text-shadow: none;
+}
+
+.speed-test-center-timer span {
+  display: block;
+  margin-top: 0.35rem;
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+}
+
+.speed-test-prompt-actions {
+  top: clamp(0.85rem, 2vh, 1.5rem);
+  right: var(--speed-test-stage-inline);
+  opacity: 0.6;
+  transition: opacity 120ms ease;
+}
+
+.speed-test-prompt-actions:hover,
+.speed-test-prompt-actions:focus-within {
+  opacity: 1;
+}
+
+.speed-test-word-region {
+  width: min(100%, var(--speed-test-max-width));
+  margin-inline: auto;
+}
+
+.speed-test-word-viewport {
+  width: 100%;
+  height: var(--speed-test-word-viewport-height);
+  overflow: hidden;
+  border: 0;
+  scroll-behavior: auto;
+  contain: layout paint;
+}
+
+.speed-test-word-flow {
+  gap: var(--speed-test-row-gap) clamp(0.6rem, 1.45vw, 1.15rem);
+  padding-inline: 0.35rem;
+  color: rgb(199 210 220 / 0.58);
+  font-family: "JetBrains Mono", "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-size: var(--speed-test-font-size);
+  font-weight: 520;
+  line-height: var(--speed-test-line-height);
+  letter-spacing: -0.018em;
+  font-variant-ligatures: none;
+  font-feature-settings: "liga" 0, "calt" 0;
+  transform: translateY(0);
+  transition: transform 90ms cubic-bezier(0.2, 0.72, 0.24, 1);
+  will-change: transform;
+}
+
+.speed-test-word {
+  position: relative;
+  min-height: 1.45em;
+  color: inherit;
+  opacity: 1;
+}
+
+.speed-test-word-current {
+  color: var(--text-primary, #f2f7fb);
+}
+
+.speed-test-word-current::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: 0.04em;
+  left: 0;
+  height: 1px;
+  background: linear-gradient(90deg, rgb(0 255 242 / 0.68), rgb(0 255 242 / 0.12));
+  pointer-events: none;
+}
+
+.speed-test-word-complete {
+  color: rgb(161 174 186 / 0.54);
+  opacity: 1;
+}
+
+.speed-test-word-complete.speed-test-word-error {
+  color: rgb(255 135 145 / 0.83);
+  text-decoration: underline;
+  text-decoration-color: rgb(255 71 87 / 0.5);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.16em;
+}
+
+.speed-test-char-pending {
+  color: inherit;
+}
+
+.speed-test-word-current .speed-test-char-pending {
+  color: rgb(211 221 230 / 0.74);
+}
+
+.speed-test-char-correct {
+  color: var(--text-primary, #f2f7fb);
+}
+
+.speed-test-char-incorrect,
+.speed-test-extra {
+  color: var(--danger, #ff4757);
+  background: transparent;
+  text-decoration: underline;
+  text-decoration-color: currentColor;
+  text-decoration-thickness: max(1px, 0.055em);
+  text-underline-offset: 0.13em;
+}
+
+.speed-test-extra {
+  max-width: 12ch;
+  overflow: hidden;
+  background: rgb(255 71 87 / 0.055);
+}
+
+.speed-test-caret {
+  position: relative;
+  display: inline-block;
+  width: 0;
+  height: 1em;
+  vertical-align: -0.08em;
+}
+
+.speed-test-caret::after {
+  left: -1px;
+  top: -0.03em;
+  width: 2px;
+  height: 1.08em;
+  border-radius: 1px;
+  background: var(--primary);
+  box-shadow: 0 0 0.4rem rgb(0 255 242 / 0.32);
+  animation: speed-ui8-caret-idle 1s steps(1, end) infinite;
+}
+
+.speed-test-screen.typing-active .speed-test-caret::after {
+  opacity: 1;
+  animation: none;
+}
+
+.speed-test-screen.paused .speed-test-caret::after {
+  opacity: 0.45;
+  animation-play-state: paused;
+}
+
+@keyframes speed-ui8-caret-idle {
+  0%, 48% { opacity: 1; }
+  49%, 100% { opacity: 0.28; }
+}
+
+/* Active typing removes configuration noise without removing controls from the DOM. */
+.speed-test-screen.typing-active .speed-test-topbar-secondary {
+  opacity: 0.82;
+}
+
+.speed-test-screen.typing-active .speed-test-controls-wrap {
+  opacity: 0.38;
+  transition: opacity 120ms ease;
+}
+
+.speed-test-screen.typing-active .speed-test-controls-wrap:hover,
+.speed-test-screen.typing-active .speed-test-controls-wrap:focus-within {
+  opacity: 0.72;
+}
+
+.speed-test-screen.typing-active .speed-test-prompt-actions {
+  opacity: 0.18;
+  pointer-events: none;
+}
+
+.speed-test-screen.typing-active .speed-test-center-timer strong {
+  color: rgb(199 210 220 / 0.58);
+}
+
+/* ---------- Results: execution -> analysis ---------- */
+
+.speed-results-screen {
+  min-height: 100dvh;
+  place-items: center;
+  padding: clamp(1rem, 4vw, 2.5rem);
+  overflow-x: clip;
+  background:
+    radial-gradient(circle at 50% 32%, rgb(0 255 242 / 0.045), transparent 31rem),
+    var(--background, #0a0e14);
+}
+
+.speed-results-panel {
+  position: relative;
+  width: min(100%, 58rem);
+  padding: clamp(1.25rem, 4vw, 3rem);
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  text-align: center;
+}
+
+.speed-results-panel .screen-back-button {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.speed-results-panel .eyebrow {
+  color: var(--text-muted, var(--muted));
+  font-size: 0.62rem;
+  letter-spacing: 0.17em;
+}
+
+.speed-results-panel h1 {
+  margin: 0.55rem 0 clamp(1.3rem, 3vw, 2rem);
+  color: var(--text-secondary, var(--muted));
+  font-size: clamp(0.78rem, 1.3vw, 0.95rem);
+  font-weight: 650;
+  letter-spacing: 0.19em;
+}
+
+.speed-result-headline {
+  display: grid;
+  grid-template-columns: minmax(0, 1.65fr) repeat(2, minmax(0, 1fr));
+  align-items: end;
+  gap: clamp(0.75rem, 3vw, 2rem);
+  margin: 0 auto clamp(1rem, 2.5vw, 1.65rem);
+  padding: clamp(0.8rem, 2vw, 1.2rem) 0 clamp(1.15rem, 2.5vw, 1.6rem);
+  border-block: 1px solid rgb(129 144 158 / 0.12);
+}
+
+.speed-result-headline > div {
+  min-width: 0;
+  padding: 0;
+  border: 0;
+}
+
+.speed-result-headline span {
+  margin-bottom: 0.25rem;
+  color: var(--text-muted, var(--muted));
+  font-size: 0.58rem;
+  font-weight: 650;
+  letter-spacing: 0.14em;
+}
+
+.speed-result-headline strong {
+  margin: 0;
+  color: var(--text-primary, var(--text));
+  font-size: clamp(1.65rem, 4vw, 2.8rem);
+  font-weight: 620;
+  line-height: 1;
+  letter-spacing: -0.035em;
+  font-variant-numeric: tabular-nums;
+  text-shadow: none;
+}
+
+.speed-result-headline > div:first-child strong {
+  color: var(--primary);
+  font-size: clamp(3.25rem, 8vw, 6rem);
+  font-weight: 620;
+}
+
+.speed-records {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.45rem;
+  margin: 0.35rem 0 1rem;
+  color: var(--primary);
+  font-size: 0.62rem;
+  font-weight: 750;
+  letter-spacing: 0.13em;
+}
+
+.speed-records span {
+  padding: 0.32rem 0.55rem;
+  border-block: 1px solid rgb(0 255 242 / 0.34);
+  background: rgb(0 255 242 / 0.035);
+}
+
+.speed-result-details {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 clamp(1.5rem, 5vw, 3.5rem);
+  margin: 0 auto clamp(1.3rem, 3vw, 2rem);
+  text-align: left;
+}
+
+.speed-result-details > div {
+  min-width: 0;
+  padding: 0.58rem 0;
+  border-bottom: 1px solid rgb(129 144 158 / 0.1);
+}
+
+.speed-result-details span {
+  color: var(--text-muted, var(--muted));
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
+}
+
+.speed-result-details strong {
+  min-width: 0;
+  color: var(--text-secondary, var(--text));
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.speed-results-panel .menu-list {
+  width: min(100%, 28rem);
+  margin: clamp(1.1rem, 3vw, 2rem) auto 0;
+}
+
+.speed-results-panel .menu-list .arcade-button:first-child {
+  border-color: rgb(0 255 242 / 0.62);
+  background: rgb(0 255 242 / 0.055);
+  color: var(--primary);
+}
+
+.speed-results-panel .menu-list .arcade-button:first-child:hover,
+.speed-results-panel .menu-list .arcade-button:first-child:focus-visible,
+.speed-results-panel .menu-list .arcade-button:first-child.selected {
+  border-color: var(--primary);
+  background: rgb(0 255 242 / 0.1);
+  box-shadow: 0 0 1rem rgb(0 255 242 / 0.08);
+}
+
+/* ---------- Responsive / constrained viewports ---------- */
+
+@media (max-width: 900px) {
+  .speed-test-screen {
+    --speed-test-stage-inline: clamp(0.8rem, 3vw, 1.5rem);
+  }
+
+  .speed-test-topbar-primary,
+  .speed-test-topbar-secondary {
+    padding-inline: clamp(0.75rem, 2.6vw, 1.4rem);
+  }
+
+  .speed-test-topbar-secondary {
+    align-items: flex-start;
+  }
+
+  .speed-test-controls-wrap {
+    gap: 0.35rem 0.55rem;
+  }
+
+  .speed-test-config {
+    gap: 0.42rem;
+  }
+
+  .speed-test-hud {
+    gap: 0.65rem;
+  }
+
+  .speed-timer-position > span,
+  .speed-font-size > span,
+  .speed-test-word-set {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .speed-test-screen {
+    --speed-test-font-size: clamp(1.4rem, 6.1vw, 2rem);
+    --speed-test-line-height: calc(var(--speed-test-font-size) * 1.56);
+    --speed-test-row-gap: 0.55rem;
+  }
+
+  .speed-test-screen[data-speed-font-size="small"] { --speed-test-font-size: clamp(1.25rem, 5.2vw, 1.65rem); }
+  .speed-test-screen[data-speed-font-size="medium"] { --speed-test-font-size: clamp(1.4rem, 6.1vw, 2rem); }
+  .speed-test-screen[data-speed-font-size="large"] { --speed-test-font-size: clamp(1.65rem, 7vw, 2.25rem); }
+
+  .speed-test-topbar-primary {
+    min-height: 2.9rem;
+  }
+
+  .speed-test-mode-title span,
+  .speed-test-top-actions kbd {
+    display: none;
+  }
+
+  .speed-test-topbar-secondary {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    min-height: 0;
+    padding-block: 0.3rem 0.42rem;
+  }
+
+  .speed-test-controls-wrap {
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scrollbar-width: none;
+    flex-wrap: nowrap;
+  }
+
+  .speed-test-controls-wrap::-webkit-scrollbar { display: none; }
+
+  .speed-test-config,
+  .speed-test-categories,
+  .speed-test-values,
+  .speed-timer-position,
+  .speed-font-size {
+    flex: 0 0 auto;
+  }
+
+  .speed-config-control,
+  .speed-timer-position button,
+  .speed-font-size select {
+    min-height: 2.7rem;
+  }
+
+  .speed-config-control {
+    min-width: 2.65rem;
+  }
+
+  .speed-test-hud {
+    align-self: center;
+    padding-left: 0.55rem;
+    background: linear-gradient(90deg, transparent, rgb(10 14 20 / 0.96) 14%);
+  }
+
+  .speed-test-hud > span:has(#speed-test-raw) {
+    display: none;
+  }
+
+  #speed-test-wpm {
+    font-size: 1.35rem;
+  }
+
+  .speed-test-stage {
+    min-height: calc(var(--speed-test-word-viewport-height) + clamp(7rem, 21vh, 11rem));
+    padding-top: 0.8rem;
+  }
+
+  .speed-test-prompt-actions {
+    right: 0.85rem;
+  }
+
+  .speed-test-word-flow {
+    gap: var(--speed-test-row-gap) 0.62rem;
+    padding-inline: 0.1rem;
+    letter-spacing: -0.022em;
+  }
+
+  .speed-result-headline {
+    grid-template-columns: minmax(0, 1.5fr) repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+  }
+
+  .speed-result-details {
+    gap: 0 1.2rem;
+  }
+}
+
+@media (max-width: 520px) {
+  .speed-test-topbar-primary {
+    gap: 0.35rem;
+    padding-inline: 0.65rem;
+  }
+
+  .speed-test-mode-title {
+    order: -1;
+  }
+
+  .speed-test-top-actions .gameplay-control-button {
+    min-width: 2.4rem;
+    padding-inline: 0.45rem;
+    font-size: 0.58rem;
+  }
+
+  .speed-test-topbar-secondary {
+    grid-template-columns: minmax(0, 1fr) auto;
+    padding-inline: 0.55rem;
+  }
+
+  .speed-test-categories {
+    gap: 0.08rem;
+  }
+
+  .speed-config-divider {
+    height: 1rem;
+  }
+
+  .speed-test-hud {
+    gap: 0.45rem;
+    font-size: 0.5rem;
+  }
+
+  .speed-test-hud > span:has(#speed-test-accuracy) {
+    display: none;
+  }
+
+  #speed-test-wpm {
+    font-size: 1.2rem;
+  }
+
+  .speed-test-stage {
+    padding-inline: 0.7rem;
+    padding-bottom: max(2.5rem, env(safe-area-inset-bottom));
+  }
+
+  .speed-test-upper-overlay {
+    inset-inline: 0.7rem;
+    width: calc(100% - 1.4rem);
+  }
+
+  .speed-test-status {
+    font-size: 0.58rem;
+  }
+
+  .speed-test-center-timer strong {
+    font-size: clamp(1.9rem, 10vw, 2.8rem);
+  }
+
+  .speed-result-headline {
+    grid-template-columns: 1fr 1fr;
+    align-items: end;
+  }
+
+  .speed-result-headline > div:first-child {
+    grid-column: 1 / -1;
+    padding-bottom: 0.75rem;
+  }
+
+  .speed-result-headline > div:first-child strong {
+    font-size: clamp(3.6rem, 20vw, 5.2rem);
+  }
+
+  .speed-result-details {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .speed-results-panel {
+    padding-inline: 0.35rem;
+  }
+}
+
+@media (max-width: 380px) {
+  .speed-test-mode-title strong { font-size: 0.64rem; }
+  .speed-test-top-actions .gameplay-control-button { font-size: 0.54rem; }
+  .speed-config-control { min-width: 2.5rem; padding-inline: 0.46rem; }
+  .speed-test-stage { padding-inline: 0.5rem; }
+  .speed-test-upper-overlay { inset-inline: 0.5rem; width: calc(100% - 1rem); }
+  .speed-test-word-flow { gap-inline: 0.48rem; }
+}
+
+@media (max-height: 700px) {
+  .speed-test-topbar-primary { min-height: 2.65rem; padding-block: 0.25rem; }
+  .speed-test-topbar-secondary { min-height: 2.8rem; padding-block: 0.2rem 0.3rem; }
+  .speed-test-stage {
+    min-height: calc(var(--speed-test-word-viewport-height) + 5.8rem);
+    padding-top: 0.45rem;
+    padding-bottom: max(1.25rem, env(safe-area-inset-bottom));
+  }
+  .speed-test-upper-overlay-content { padding-bottom: 0.65rem; }
+  .speed-test-status { margin-bottom: 0.32rem; }
+  .speed-test-center-timer strong { font-size: clamp(1.7rem, 6vh, 2.45rem); }
+  .speed-test-center-timer span { margin-top: 0.18rem; }
+}
+
+@media (max-height: 600px) {
+  .speed-test-screen {
+    --speed-test-row-gap: 0.42rem;
+  }
+
+  .speed-test-topbar-secondary {
+    min-height: 2.45rem;
+  }
+
+  .speed-config-control,
+  .speed-timer-position button,
+  .speed-font-size select {
+    min-height: 2.25rem;
+  }
+
+  .speed-test-stage {
+    min-height: calc(var(--speed-test-word-viewport-height) + 4.4rem);
+  }
+
+  .speed-test-status {
+    display: none;
+  }
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .speed-config-control,
+  .speed-timer-position button,
+  .speed-font-size select,
+  .speed-test-topbar .gameplay-control-button {
+    min-height: 44px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .speed-test-topbar-secondary,
+  .speed-config-control,
+  .speed-config-control::after,
+  .speed-test-prompt-actions,
+  .speed-test-word-flow,
+  .speed-test-controls-wrap {
+    transition: none !important;
+  }
+
+  .speed-test-caret::after,
+  .speed-test-screen.typing-active .speed-test-caret::after {
+    animation: none !important;
+    opacity: 1;
+  }
+}
