@@ -163,15 +163,19 @@ def certify_desktop(browser, browser_name, base, evidence):
     assert state["bannerText"] == "STAGE 7", state
     assert state["keyboardDisplay"] == "none", state
 
-    page.evaluate("window.__ui6.renderer.flashWrong(9002)")
-    expect(page.locator('[data-word-id="9002"] .word-visual')).to_have_class(/wrong/)
-    animation_name = page.locator('[data-word-id="9002"] .word-visual').evaluate("el => getComputedStyle(el).animationName")
-    assert "endless-word-error" in animation_name, animation_name
+    transient = page.evaluate("""() => {
+      const visual = document.querySelector('[data-word-id="9002"] .word-visual');
+      window.__ui6.renderer.flashWrong(9002);
+      const wrong = {hasClass: visual.classList.contains('wrong'), animationName: getComputedStyle(visual).animationName};
+      const area = document.querySelector('#play-area');
+      window.__ui6.renderer.flashDamage(false);
+      return {wrong, damageClass: area.classList.contains('damage-flash')};
+    }""")
+    assert transient["wrong"]["hasClass"] is True, transient
+    assert "endless-word-error" in transient["wrong"]["animationName"], transient
+    assert transient["damageClass"] is True, transient
 
-    page.evaluate("window.__ui6.renderer.flashDamage(false)")
-    expect(page.locator('#play-area')).to_have_class(/damage-flash/)
-
-    evidence.append({"browser": browser_name, "case": "desktop deterministic", **state, "wrongAnimation": animation_name})
+    evidence.append({"browser": browser_name, "case": "desktop deterministic", **state, "transient": transient})
     context.close()
 
 
@@ -220,13 +224,15 @@ def certify_reduced_motion(browser, browser_name, base, evidence):
     }""")
     calls = page.evaluate("window.__ui6AnimateCalls")
     radar_animation = page.locator('.endless-core-radar-a').evaluate("el => getComputedStyle(el).animationName")
-    wrong = page.locator('[data-word-id="9002"] .word-visual')
-    page.evaluate("window.__ui6.renderer.flashWrong(9002)")
-    transform = wrong.evaluate("el => getComputedStyle(el).transform")
+    wrong_state = page.evaluate("""() => {
+      const el = document.querySelector('[data-word-id="9002"] .word-visual');
+      window.__ui6.renderer.flashWrong(9002);
+      return {transform:getComputedStyle(el).transform, animation:getComputedStyle(el).animationName};
+    }""")
     assert calls == 0, calls
     assert radar_animation == "none", radar_animation
-    assert transform == "none", transform
-    evidence.append({"browser": browser_name, "case": "reduced motion", "animateCalls": calls, "radarAnimation": radar_animation, "wrongTransform": transform})
+    assert wrong_state["transform"] == "none", wrong_state
+    evidence.append({"browser": browser_name, "case": "reduced motion", "animateCalls": calls, "radarAnimation": radar_animation, "wrong": wrong_state})
     context.close()
 
 
