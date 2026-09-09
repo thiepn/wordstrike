@@ -10,6 +10,7 @@ import {
 import { selectPracticeCommonWords } from "./practiceCommonWordsSelection.js";
 
 const freezeDeep = (value) => { if (!value || typeof value !== "object" || Object.isFrozen(value)) return value; Object.values(value).forEach(freezeDeep); return Object.freeze(value); };
+const canonicalWordId = (word) => word?.wordId ?? `word:${word?.lexicalKey ?? ""}`;
 
 function buildWordUnits(words) {
   let cursor = 0;
@@ -24,7 +25,7 @@ function buildWordUnits(words) {
       startIndex,
       endIndex,
       text: word.lexicalKey,
-      metadata: { commonWords: { lexicalKey: word.lexicalKey, rank: word.rank, band: word.band, ordinal: index + 1 } },
+      metadata: { commonWords: { wordId: canonicalWordId(word), lexicalKey: word.lexicalKey, rank: word.rank, band: word.band, ordinal: index + 1 } },
     };
   });
 }
@@ -36,6 +37,9 @@ export function createPracticeCommonWordsPlan({ sessionId, profileId, contextId,
   const text = words.map((word) => word.lexicalKey).join(" ");
   const units = buildWordUnits(words);
   const bandCounts = Object.fromEntries(PRACTICE_COMMON_WORD_BANDS.map((band) => [band, words.filter((word) => word.band === band).length]));
+  const wordIds = words.map(canonicalWordId);
+  const lexicalKeys = words.map((word) => word.lexicalKey);
+  const exactOrder = words.map((word) => ({ wordId: canonicalWordId(word), lexicalKey: word.lexicalKey, rank: word.rank, band: word.band }));
   const planBinding = {
     commonWordsVersion: PRACTICE_COMMON_WORDS_VERSION,
     referenceVersion: PRACTICE_COMMON_WORD_REFERENCE_VERSION,
@@ -43,7 +47,9 @@ export function createPracticeCommonWordsPlan({ sessionId, profileId, contextId,
     generatorVersion: PRACTICE_COMMON_WORD_PRACTICE_GENERATOR_VERSION,
     sessionId,
     wordCount,
-    lexicalKeys: words.map((word) => word.lexicalKey),
+    wordIds,
+    lexicalKeys,
+    exactOrder,
     separator: " ",
   };
   const planHash = hashPracticeContent(JSON.stringify(planBinding));
@@ -60,7 +66,8 @@ export function createPracticeCommonWordsPlan({ sessionId, profileId, contextId,
     generatorVersion: PRACTICE_COMMON_WORD_PRACTICE_GENERATOR_VERSION,
     wordCount,
     bandCounts,
-    wordIds: words.map((word) => word.lexicalKey),
+    wordIds,
+    lexicalKeys,
     planHash,
     preSessionExposure: selection.preSession,
   });
