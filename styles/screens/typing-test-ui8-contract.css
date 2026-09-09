@@ -1,0 +1,66 @@
+/* UI8 contract corrections.
+   Keep established Typing Test geometry/selection sizes while retaining the UI8 hierarchy. */
+
+.speed-test-screen {
+  --speed-test-max-width: 66.25rem;
+}
+
+.speed-test-upper-overlay {
+  width: min(
+    calc(100% - var(--speed-test-stage-inline) - var(--speed-test-stage-inline)),
+    var(--speed-test-max-width)
+  );
+}
+
+/* Typing feedback takes priority over decorative fades. */
+.speed-test-screen.typing-active .speed-test-controls-wrap {
+  transition: none;
+}
+
+@media (min-width: 769px) {
+  .speed-test-screen {
+    --speed-test-font-size: clamp(28px, 2.7vw, 39.2px);
+  }
+}
+
+.speed-test-screen[data-speed-font-size="small"] {
+  --speed-test-font-size: 28px;
+}
+
+.speed-test-screen[data-speed-font-size="medium"] {
+  --speed-test-font-size: 34px;
+}
+
+.speed-test-screen[data-speed-font-size="large"] {
+  --speed-test-font-size: 42px;
+}
+
+@media (max-width: 768px) {
+  .speed-test-screen[data-speed-font-size="small"] {
+    --speed-test-font-size: clamp(1.25rem, 5.2vw, 28px);
+  }
+
+  .speed-test-screen[data-speed-font-size="medium"] {
+    --speed-test-font-size: clamp(1.4rem, 6.1vw, 34px);
+  }
+
+  .speed-test-screen[data-speed-font-size="large"] {
+    --speed-test-font-size: clamp(1.65rem, 7vw, 42px);
+  }
+}
+
+/* Accuracy is part of the active-test contract even on narrow phones. */
+@media (max-width: 520px) {
+  .speed-test-hud > span:has(#speed-test-accuracy) {
+    display: inline-flex;
+  }
+
+  .speed-test-hud {
+    gap: 0.32rem;
+    letter-spacing: 0.055em;
+  }
+
+  #speed-test-accuracy {
+    font-size: 0.72rem;
+  }
+}
