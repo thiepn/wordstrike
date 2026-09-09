@@ -30,7 +30,7 @@ assert.match(presentation, /TARGET LOCKED/);
 assert.match(presentation, /CANDIDATES/);
 assert.match(presentation, /formatSurvival/);
 assert.match(presentation, /pressureTier/);
-assert.match(presentation, /activeWords \/ activeCap/);
+assert.match(presentation, /pressureTier\(activeWords, activeCap\)/);
 assert.match(presentation, /endless-word-imminent/);
 assert.match(presentation, /Math\.hypot/);
 assert.match(presentation, /\.gameplay-keyboard-trigger/);
