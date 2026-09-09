@@ -1,62 +1,70 @@
-import { PRACTICE_PACE_LADDER_RESULT_VERSION } from "./practicePaceLadderConstants.js";
+import { PRACTICE_PACE_LADDER_ARTIFACT_VERSION, PRACTICE_PACE_LADDER_EVIDENCE_BOUNDARY, PRACTICE_PACE_LADDER_EXPERIMENT_ID, PRACTICE_PACE_LADDER_MAIN_STAGE_IDS } from "./practicePaceLadderConstants.js";
+import { resolvePracticePaceLadderCalibration } from "./practicePaceLadderAnchor.js";
+import { PRACTICE_PACE_LADDER_POLICY_V1 } from "./practicePaceLadderPolicy.js";
 
-const freezeDeep = (value) => {
-  if (!value || typeof value !== "object" || Object.isFrozen(value)) return value;
-  Object.values(value).forEach(freezeDeep);
-  return Object.freeze(value);
-};
+const freezeDeep = (value) => { if (!value || typeof value !== "object" || Object.isFrozen(value)) return value; Object.values(value).forEach(freezeDeep); return Object.freeze(value); };
+const growth = (value, baseline) => Number.isFinite(value) && Number.isFinite(baseline) && baseline > 0 ? 100 * (value / baseline - 1) : null;
 
-function compactStage(stage) {
-  return {
-    stageVersion: stage.stageVersion,
-    stageId: stage.stageId,
-    stageOrdinal: stage.stageOrdinal,
-    durationMs: stage.durationMs,
-    plannedPaceWpm: stage.plannedPaceWpm,
-    observedPaceWpm: stage.observedPaceWpm,
-    adjustedPaceWpm: stage.adjustedPaceWpm,
-    firstPassAccuracy: stage.firstPassAccuracy,
-    timingEligibleCount: stage.timingEligibleCount,
-    disfluencyRate: stage.disfluencyRate,
-    correctionCostRate: stage.correctionCostRate,
-    correctionCoverage: stage.correctionCoverage,
-    difficultyAdjustmentLog: stage.difficultyAdjustmentLog,
-    difficultyStatus: stage.difficultyStatus,
-    paceAdherence: stage.paceAdherence,
-    typedCharacterCount: stage.typedCharacterCount,
-    valid: stage.valid,
-    invalidReasons: [...(stage.invalidReasons ?? [])],
-  };
+function controlled(stage, baseline, policy) {
+  if (!stage?.valid || stage.coverage !== "complete" || !Number.isFinite(stage.correctedWpm) || !Number.isFinite(stage.strictAccuracy)) return false;
+  const paceRatio = stage.targetWpm > 0 ? stage.correctedWpm / stage.targetWpm : 0;
+  const accuracyOk = stage.strictAccuracy >= policy.minimumAbsoluteAccuracy && (!Number.isFinite(baseline?.strictAccuracy) || baseline.strictAccuracy - stage.strictAccuracy <= policy.maximumAccuracyDropPp);
+  const correctionOk = !Number.isFinite(baseline?.correctionOverheadRate) || stage.correctionOverheadRate - baseline.correctionOverheadRate <= policy.maximumCorrectionGrowth;
+  const pauseOk = !Number.isFinite(baseline?.longPauseRate) || !Number.isFinite(stage.longPauseRate) || stage.longPauseRate - baseline.longPauseRate <= policy.maximumPauseGrowth;
+  const rhythmOk = !Number.isFinite(baseline?.ikiCv) || !Number.isFinite(stage.ikiCv) || stage.ikiCv <= baseline.ikiCv * (1 + policy.maximumRhythmGrowthRatio);
+  return paceRatio >= policy.paceLowerRatio && paceRatio <= policy.paceUpperRatio && accuracyOk && correctionOk && pauseOk && rhythmOk;
 }
 
-export function analyzePracticePaceLadderResult({ paceResult, plan, foundationAnalysis } = {}) {
+export function analyzePracticePaceLadderResult({ paceResult, plan, foundationAnalysis, startedAt = null, completedAt = null, policy = PRACTICE_PACE_LADDER_POLICY_V1 } = {}) {
   if (!paceResult || !plan) return freezeDeep({ trainingQuality: null, recommendationIds: [] });
-  const observed = paceResult.stages.map((stage) => stage.observedPaceWpm).filter(Number.isFinite);
-  const performance = foundationAnalysis?.performance ?? null;
-  return freezeDeep({
-    trainingQuality: {
-      resultVersion: PRACTICE_PACE_LADDER_RESULT_VERSION,
-      formSetId: plan.formSetId,
-      formSetVersion: plan.formSetVersion,
-      formId: plan.formId,
-      formHash: plan.formHash,
-      planHash: plan.planHash,
-      anchorSource: plan.anchor.source,
-      rawAnchorWpm: plan.anchor.rawReferenceWpm,
-      validStageCount: paceResult.validStageCount,
-      stageCount: paceResult.stageCount,
-      paceRangeObserved: observed.length ? { minimumWpm: Math.min(...observed), maximumWpm: Math.max(...observed) } : null,
-      paceRangeClipped: Boolean(plan.paceRangeClipped),
-      performanceMeasurementStatus: performance?.status ?? "not-requested",
-      frontier: performance?.sessionSummary ? {
-        status: performance.sessionSummary.frontierStatus,
-        confidence: performance.sessionSummary.frontierConfidence,
-        frontierWpm: performance.sessionSummary.frontierWpm,
-        frontierLowerWpm: performance.sessionSummary.frontierLowerWpm,
-        frontierUpperWpm: performance.sessionSummary.frontierUpperWpm,
-      } : null,
-      stages: paceResult.stages.slice(0, 9).map(compactStage),
+  const calibrationStage = paceResult.stages.find((stage) => stage.stageId === "calibration") ?? null;
+  const calibration = resolvePracticePaceLadderCalibration({ ...calibrationStage, interrupted: paceResult.status === "interrupted", policy });
+  const main = PRACTICE_PACE_LADDER_MAIN_STAGE_IDS.map((id) => paceResult.stages.find((stage) => stage.stageId === id)).filter(Boolean);
+  const controlledStages = calibration.eligible ? main.filter((stage) => controlled(stage, calibrationStage, policy)) : [];
+  const sustainableStage = controlledStages.length ? controlledStages.reduce((best, stage) => stage.targetWpm > best.targetWpm ? stage : best) : null;
+  const sustainableIndex = sustainableStage ? main.indexOf(sustainableStage) : -1;
+  const stretchStage = sustainableIndex >= 0 ? main[sustainableIndex + 1] ?? null : null;
+  const overLimitStage = main.find((stage, index) => index > sustainableIndex && !controlled(stage, calibrationStage, policy)) ?? null;
+  const allMainValid = paceResult.status === "complete" && main.length === 5 && main.every((stage) => stage.valid && stage.coverage === "complete");
+  const performance = foundationAnalysis?.performance?.sessionSummary ?? null;
+  const localStatus = paceResult.status === "interrupted" ? "interrupted" : allMainValid && calibration.eligible ? "complete" : "insufficient-measurement";
+  const frontierStatus = allMainValid && performance?.status === "measured" ? performance.frontierStatus : "insufficient-measurement";
+  const observedControlled = controlledStages.map((stage) => stage.targetWpm).filter(Number.isFinite);
+  const sustainableWpm = sustainableStage?.targetWpm ?? null;
+  const low = sustainableWpm == null ? null : Math.max(Math.min(...observedControlled), sustainableWpm * policy.practiceBandLowRatio);
+  const high = sustainableWpm == null ? null : Math.min(Math.max(...observedControlled), sustainableWpm * policy.practiceBandHighRatio);
+  const artifact = {
+    artifactVersion: PRACTICE_PACE_LADDER_ARTIFACT_VERSION,
+    experimentId: PRACTICE_PACE_LADDER_EXPERIMENT_ID,
+    profileId: plan.profileId,
+    contextId: plan.contextId,
+    startedAt,
+    completedAt,
+    formId: plan.formId,
+    formFamilyId: plan.formFamilyId,
+    formOrdinal: plan.formOrdinal,
+    anchor: { ...plan.anchor, calibrationWpm: calibration.calibrationWpm, calibrationEligible: calibration.eligible },
+    stages: paceResult.stages,
+    summary: {
+      status: localStatus,
+      sustainableWpm,
+      stretchWpm: stretchStage?.targetWpm ?? null,
+      overLimitWpm: overLimitStage?.targetWpm ?? null,
+      frontierWpm: frontierStatus === "insufficient-measurement" ? null : performance?.frontierWpm ?? null,
+      frontierStatus,
+      accuracyLossPct: sustainableStage && calibrationStage ? calibrationStage.strictAccuracy - sustainableStage.strictAccuracy : null,
+      correctionGrowthPct: sustainableStage ? growth(sustainableStage.correctionOverheadRate, calibrationStage?.correctionOverheadRate) : null,
+      pauseGrowthPct: sustainableStage ? growth(sustainableStage.longPauseRate, calibrationStage?.longPauseRate) : null,
+      rhythmGrowthPct: sustainableStage ? growth(sustainableStage.ikiCv, calibrationStage?.ikiCv) : null,
+      recommendedPracticePaceWpm: sustainableWpm,
+      recommendedPracticeBandWpm: low == null || high == null ? null : [low, high],
     },
-    recommendationIds: [],
-  });
+    evidenceBoundary: { ...PRACTICE_PACE_LADDER_EVIDENCE_BOUNDARY },
+    guidance: [
+      "This is the fastest pace you sustained under this protocol.",
+      "This does not estimate your true maximum speed.",
+      "For accuracy-focused practice, this band is a reasonable starting point.",
+    ],
+  };
+  return freezeDeep({ trainingQuality: artifact, recommendationIds: [] });
 }
