@@ -15,7 +15,7 @@ function fakeRoot() {
 }
 
 const breadth = {
-  overall: { repeatedEvidencePercent: 25 },
+  overall: { observedCount: 240, repeatedEvidencePercent: 25 },
   bands: {
     core: { totalWords: 100, observedCount: 50, observedPercent: 50, repeatedEvidenceCount: 30, repeatedEvidencePercent: 30, automaticCount: 10, automaticPercent: 10 },
     frequent: { totalWords: 200, observedCount: 60, observedPercent: 30, repeatedEvidenceCount: 40, repeatedEvidencePercent: 20, automaticCount: 20, automaticPercent: 10 },
@@ -44,6 +44,18 @@ test("PL28 detail exposes one Common Words surface with keyboard-accessible Prac
   assert.match(root.innerHTML, /<th scope="row">Core<\/th>/);
   assert.match(root.innerHTML, /Typing breadth measures WordStrike's typing evidence across the common-word reference\. It does not estimate how many English words you know\./);
   assert.ok(root.focusCalls.length >= 1);
+});
+
+test("PL28 zero-evidence breadth state uses typing-evidence language rather than a vocabulary claim", () => {
+  const root = fakeRoot();
+  renderPracticeCommonWordsDetail(root, {
+    availability: { practiceAvailable: true, practiceSizes: [80, 160, 240], checkAvailable: true },
+    breadthSnapshot: { overall: { observedCount: 0, repeatedEvidencePercent: 0 }, bands: breadth.bands },
+    wordCount: 160,
+    starting: null,
+  });
+  assert.match(root.innerHTML, /WordStrike has only limited typing evidence across the common-word reference so far\./);
+  assert.doesNotMatch(root.innerHTML, /Your vocabulary is limited/i);
 });
 
 test("PL28 Check result presents canonical PL13 estimate, 95% model interval, confidence, semantic band tables, and no vocabulary-score claim", () => {
@@ -75,6 +87,7 @@ test("PL28 Check result presents canonical PL13 estimate, 95% model interval, co
     },
   };
   renderPracticeCommonWordsResult(root, session, finalResult, breadth, abilityState);
+  assert.match(root.innerHTML, /<h2>Common-Word Ability<\/h2>/);
   assert.match(root.innerHTML, /<dt>Common-word typing ability<\/dt><dd>81\.2 WPM<\/dd>/);
   assert.match(root.innerHTML, /<dt>95% model interval<\/dt><dd>72\.5–90\.9 WPM<\/dd>/);
   assert.match(root.innerHTML, /<dt>Confidence<\/dt><dd>medium<\/dd>/);
