@@ -6,15 +6,18 @@ import { getPracticeCommonWordsAvailability } from "../js/practiceLab/practiceCo
 
 const base = new URL("../data/practice/common-words/en-v1/", import.meta.url);
 const read = async (name) => JSON.parse(await fs.readFile(new URL(name, base), "utf8"));
+const readRelative = async (relative) => JSON.parse(await fs.readFile(new URL(`../${relative}`, import.meta.url), "utf8"));
 const clone = (value) => JSON.parse(JSON.stringify(value));
 
 async function artifacts() {
-  const [reference, practiceBank, checkFormSet] = await Promise.all([
+  const [reference, practiceBank, checkFormSet, sourceSnapshot, sourceRegistry] = await Promise.all([
     read("WS-COMMON-EN-1.reference.json"),
     read("WS-COMMON-PRACTICE-EN-1.manifest.json"),
     read("WS-COMMON-CHECK-EN-1.manifest.json"),
+    read("WS-COMMON-SOURCE-EN-1.snapshot.json"),
+    readRelative("data/practice/provenance/sources.json"),
   ]);
-  return { reference, practiceBank, checkFormSet };
+  return { reference, practiceBank, checkFormSet, sourceSnapshot, sourceRegistry };
 }
 
 const availability = (loaded, integrity) => getPracticeCommonWordsAvailability({
@@ -22,7 +25,7 @@ const availability = (loaded, integrity) => getPracticeCommonWordsAvailability({
   artifacts: { ...loaded, integrity },
 });
 
-test("PL28 generated artifacts pass runtime SHA-256, binding, rank/band, and form-hash integrity", async () => {
+test("PL28 generated artifacts pass runtime PL6 provenance, SHA-256, canonical identity, binding, rank/band, and form-hash integrity", async () => {
   const loaded = await artifacts();
   const integrity = await verifyPracticeCommonWordArtifactIntegrity(loaded);
   assert.deepEqual(integrity.reference.reasons, []);
@@ -46,6 +49,7 @@ test("PL28 stale Practice artifact disables Practice without disabling Check", a
   assert.equal(integrity.check.valid, true);
   assert.ok(integrity.practice.reasons.includes("checksum-mismatch"));
   assert.ok(integrity.practice.reasons.includes("practice-unknown-word"));
+  assert.ok(integrity.practice.reasons.includes("practice-word-id-mismatch") || integrity.practice.reasons.includes("display-word-invalid-word-id"));
   const state = availability(loaded, integrity);
   assert.equal(state.practiceAvailable, false);
   assert.deepEqual(state.practiceSizes, []);
@@ -76,6 +80,47 @@ test("PL28 stale statistical reference disables both Practice and Check", async 
   const integrity = await verifyPracticeCommonWordArtifactIntegrity(loaded);
   assert.equal(integrity.reference.valid, false);
   assert.ok(integrity.reference.reasons.includes("checksum-mismatch"));
+  const state = availability(loaded, integrity);
+  assert.equal(state.practiceAvailable, false);
+  assert.equal(state.checkAvailable, false);
+});
+
+test("PL28 stale PL6 statistical approval disables the shared reference and both flows", async () => {
+  const loaded = await artifacts();
+  loaded.sourceRegistry = clone(loaded.sourceRegistry);
+  const source = loaded.sourceRegistry.sources.find((entry) => entry.sourceId === loaded.reference.bindings.statisticalSourceId);
+  source.usageApproval = "excluded";
+  const integrity = await verifyPracticeCommonWordArtifactIntegrity(loaded);
+  assert.equal(integrity.reference.valid, false);
+  assert.ok(integrity.reference.reasons.includes("statistical-source-not-approved"));
+  const state = availability(loaded, integrity);
+  assert.equal(state.practiceAvailable, false);
+  assert.equal(state.checkAvailable, false);
+});
+
+test("PL28 stale PL6 display approval disables Practice and Check while leaving statistical reference structurally valid", async () => {
+  const loaded = await artifacts();
+  loaded.sourceRegistry = clone(loaded.sourceRegistry);
+  const source = loaded.sourceRegistry.sources.find((entry) => entry.sourceId === loaded.practiceBank.bindings.displaySourceId);
+  source.usageApproval = "statistical-only";
+  const integrity = await verifyPracticeCommonWordArtifactIntegrity(loaded);
+  assert.equal(integrity.practice.valid, false);
+  assert.equal(integrity.check.valid, false);
+  assert.ok(integrity.practice.reasons.includes("display-source-not-approved"));
+  assert.ok(integrity.check.reasons.includes("display-source-not-approved"));
+  const state = availability(loaded, integrity);
+  assert.equal(state.practiceAvailable, false);
+  assert.equal(state.checkAvailable, false);
+});
+
+test("PL28 stale governed source snapshot disables both flows", async () => {
+  const loaded = await artifacts();
+  loaded.sourceSnapshot = clone(loaded.sourceSnapshot);
+  loaded.sourceSnapshot.words[0].sourceRank += 1;
+  const integrity = await verifyPracticeCommonWordArtifactIntegrity(loaded);
+  assert.equal(integrity.reference.valid, false);
+  assert.ok(integrity.reference.reasons.includes("source-snapshot-checksum-mismatch"));
+  assert.ok(integrity.reference.reasons.includes("source-snapshot-reference-mismatch"));
   const state = availability(loaded, integrity);
   assert.equal(state.practiceAvailable, false);
   assert.equal(state.checkAvailable, false);
