@@ -1,3 +1,4 @@
+import { createPracticeSessionPulse } from "./practiceSessionPulse.js";
 import { createPracticeIndexedDbStore } from "./practiceIndexedDbStore.js";
 import { createPracticeManifestStore } from "./practiceManifestStore.js";
 import { createPracticeRepository } from "./practiceRepository.js";
@@ -75,17 +76,22 @@ export async function mountPracticeBurstSprintsSession({ root, session, onExit =
   let finalResult = null;
   let closed = false;
   let unsubscribe = null;
-  let pulseTimer = null;
+  let pulseLoop = null;
+  let interrupted = false;
+  let completing = false;
   let phase = "sprint";
   let sprintOrdinal = 1;
   let recoveryEndsAt = null;
   let transitionPromise = null;
 
-  const focus = () => queueMicrotask(() => root.querySelector?.("[data-burst-input]")?.focus?.({ preventScroll: true }));
-  const cleanup = async () => {
+  const running = () => !closed && !interrupted && !completing && !finalResult;
+  const focus = () => queueMicrotask(() => {
+    if (running() && phase === "sprint") root.querySelector?.("[data-burst-input]")?.focus?.({ preventScroll: true });
+  });
+  const cleanup = async (notify = true) => {
     if (closed) return;
     closed = true;
-    if (pulseTimer) clearInterval(pulseTimer);
+    pulseLoop?.stop();
     unsubscribe?.();
     root.removeEventListener("beforeinput", beforeInput);
     root.removeEventListener("keydown", keyDown);
@@ -93,7 +99,7 @@ export async function mountPracticeBurstSprintsSession({ root, session, onExit =
     globalThis.document?.removeEventListener?.("visibilitychange", visibilityChange);
     try { await engine.destroy(); } catch {}
     try { dataStore.close?.(); } catch {}
-    onExit(finalResult);
+    if (notify) onExit(finalResult);
   };
 
   const buildInterruptedArtifact = async () => {
@@ -104,17 +110,22 @@ export async function mountPracticeBurstSprintsSession({ root, session, onExit =
   };
 
   const interrupt = async (reason = "manual-stop") => {
-    if (closed || finalResult) return;
+    if (!running()) return;
+    interrupted = true;
+    pulseLoop?.stop();
+    phase = "interrupted";
     session.experiment.burstAccumulator?.markInterrupted(reason);
     try { await engine.interrupt(reason); } catch {}
+    if (closed) return;
     const artifact = await buildInterruptedArtifact();
+    if (closed) return;
     finalResult = { interrupted: true, artifact };
     renderResult(root, artifact, true);
   };
 
   const beforeInput = (event) => {
     const target = event.target?.closest?.("[data-burst-input]");
-    if (!target || closed || finalResult || phase !== "sprint" || !root.contains?.(target)) return;
+    if (!target || !running() || phase !== "sprint" || !root.contains?.(target)) return;
     event.preventDefault();
     const activeMs = engine.getSnapshot().timing?.activeDurationMs ?? 0;
     const sprintEnd = sprintOrdinal * PRACTICE_BURST_SPRINT_DURATION_MS;
@@ -141,13 +152,14 @@ export async function mountPracticeBurstSprintsSession({ root, session, onExit =
   };
 
   const visibilityChange = () => {
-    if (globalThis.document?.visibilityState === "hidden" && !closed && !finalResult) void interrupt("visibility-hidden");
+    if (globalThis.document?.visibilityState === "hidden" && running()) void interrupt("visibility-hidden");
   };
 
   async function beginRecovery() {
-    if (transitionPromise || sprintOrdinal >= PRACTICE_BURST_SPRINT_COUNT || finalResult || closed) return;
+    if (transitionPromise || sprintOrdinal >= PRACTICE_BURST_SPRINT_COUNT || !running()) return;
     phase = "transition";
     transitionPromise = engine.pause("burst-recovery").then(() => {
+      if (!running()) return;
       recoveryEndsAt = Date.now() + PRACTICE_BURST_RECOVERY_DURATION_MS;
       phase = "recovery";
       renderRecovery(root, sprintOrdinal, PRACTICE_BURST_RECOVERY_DURATION_MS);
@@ -159,9 +171,10 @@ export async function mountPracticeBurstSprintsSession({ root, session, onExit =
   }
 
   async function endRecovery() {
-    if (transitionPromise || phase !== "recovery" || finalResult || closed) return;
+    if (transitionPromise || phase !== "recovery" || !running()) return;
     phase = "transition";
     transitionPromise = engine.resume().then((snapshot) => {
+      if (!running()) return;
       sprintOrdinal += 1;
       recoveryEndsAt = null;
       phase = "sprint";
@@ -175,7 +188,7 @@ export async function mountPracticeBurstSprintsSession({ root, session, onExit =
   }
 
   async function pulse() {
-    if (closed || finalResult || transitionPromise) return;
+    if (!running() || transitionPromise) return;
     if (phase === "recovery") {
       const remaining = Math.max(0, (recoveryEndsAt ?? Date.now()) - Date.now());
       renderRecovery(root, sprintOrdinal, remaining);
@@ -201,34 +214,52 @@ export async function mountPracticeBurstSprintsSession({ root, session, onExit =
     focus();
   }
 
-  root.addEventListener("beforeinput", beforeInput);
-  root.addEventListener("keydown", keyDown);
-  root.addEventListener("click", click);
-  globalThis.document?.addEventListener?.("visibilitychange", visibilityChange);
-
-  await engine.prepare({ experiment: session.experiment, configuration: session.configuration, contentPlan: session.contentPlan });
-  unsubscribe = engine.subscribe((snapshot, event) => {
-    if (event === "completed") {
-      void engine.complete().then((result) => {
-        finalResult = result;
-        phase = "result";
-        renderResult(root, result.summary?.trainingQuality, false);
-      }).catch((error) => {
-        logger?.warn?.("Burst Sprints completion retrieval failed", error);
-        void interrupt("measurement-corruption");
-      });
-      return;
-    }
-    if (!finalResult && phase === "sprint" && snapshot.lifecycleState === "active") {
-      renderSprint(root, session, snapshot, sprintOrdinal);
-      focus();
-    }
-  });
-
-  const startSnapshot = await engine.start();
-  renderSprint(root, session, startSnapshot, sprintOrdinal);
-  focus();
-  pulseTimer = setInterval(() => { void pulse(); }, 50);
+  try {
+    await engine.prepare({ experiment: session.experiment, configuration: session.configuration, contentPlan: session.contentPlan });
+    unsubscribe = engine.subscribe((snapshot, event) => {
+      if (!running()) return;
+      if (event === "completed") {
+        completing = true;
+        pulseLoop?.stop();
+        void engine.complete().then((result) => {
+          if (closed || interrupted) return;
+          finalResult = result;
+          phase = "result";
+          renderResult(root, result.summary?.trainingQuality, false);
+        }).catch((error) => {
+          completing = false;
+          logger?.warn?.("Burst Sprints completion retrieval failed", error);
+          void interrupt("measurement-corruption");
+        });
+        return;
+      }
+      if (phase === "sprint" && snapshot.lifecycleState === "active") {
+        renderSprint(root, session, snapshot, sprintOrdinal);
+        focus();
+      }
+    });
+    root.addEventListener("beforeinput", beforeInput);
+    root.addEventListener("keydown", keyDown);
+    root.addEventListener("click", click);
+    globalThis.document?.addEventListener?.("visibilitychange", visibilityChange);
+    const startSnapshot = await engine.start();
+    if (running()) { renderSprint(root, session, startSnapshot, sprintOrdinal); focus(); }
+    pulseLoop = createPracticeSessionPulse({
+      ...dependencies.pulseTimers,
+      intervalMs: 50,
+      isActive: running,
+      run: pulse,
+      onError: async (error) => {
+        logger?.warn?.("Burst Sprints timer failed", error);
+        await interrupt("measurement-corruption");
+      },
+    });
+    pulseLoop.start();
+    visibilityChange();
+  } catch (error) {
+    await cleanup(false);
+    throw error;
+  }
 
   return Object.freeze({
     getSnapshot: () => Object.freeze({

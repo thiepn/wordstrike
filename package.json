@@ -10,6 +10,8 @@
     "build:practice-indexes": "node scripts/buildPracticeIndexes.mjs",
     "validate:practice-indexes": "node scripts/buildPracticeIndexes.mjs --validate",
     "build:practice-typability": "node scripts/buildPracticeTypability.mjs",
-    "validate:practice-typability": "node scripts/buildPracticeTypability.mjs --validate"
+    "validate:practice-typability": "node scripts/buildPracticeTypability.mjs --validate",
+    "build:practice-common-words": "node scripts/buildPracticeCommonWords.mjs",
+    "test:pl28-common-words": "node --test tests/practice-common-words*.test.js"
   }
 }

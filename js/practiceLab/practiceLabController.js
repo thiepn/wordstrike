@@ -5,7 +5,7 @@ import {
 
 const IS_NODE_RUNTIME = Boolean(globalThis.process?.versions?.node);
 const nodeRuntime = IS_NODE_RUNTIME
-  ? await import("./practiceLabControllerRuntimeV27.js")
+  ? await import("./practiceLabControllerRuntimeV28.js")
   : null;
 
 export const PRACTICE_LAB_ONBOARDING_VERSION = 1;
@@ -49,6 +49,7 @@ export function createPracticeLabController(options = {}) {
       import("./practiceLabControllerRuntimeV25.js"),
       import("./practiceLabControllerRuntimeV26.js"),
       import("./practiceLabControllerRuntimeV27.js"),
+      import("./practiceLabControllerRuntimeV28.js"),
       import("./practiceCombinationRepairExperiment.js"),
       import("./practiceWeakKeysExperiment.js"),
       import("./practiceProblemWordsExperiment.js"),
@@ -56,7 +57,8 @@ export function createPracticeLabController(options = {}) {
       import("./practiceRealTextExperiment.js"),
       import("./practicePaceLadderExperiment.js"),
       import("./practiceBurstSprintsExperiment.js"),
-    ]).then(([registryModule, _canonicalControllerModule, _v22ControllerModule, _v23ControllerModule, _v24ControllerModule, _v25ControllerModule, _v26ControllerModule, controllerModule, combinationRepairModule, weakKeysModule, problemWordsModule, accuracyRecoveryModule, realTextModule, paceLadderModule, burstSprintsModule]) => {
+      import("./practiceCommonWordsExperiment.js"),
+    ]).then(([registryModule, _canonicalControllerModule, _v22ControllerModule, _v23ControllerModule, _v24ControllerModule, _v25ControllerModule, _v26ControllerModule, _v27ControllerModule, controllerModule, combinationRepairModule, weakKeysModule, problemWordsModule, accuracyRecoveryModule, realTextModule, paceLadderModule, burstSprintsModule, commonWordsModule]) => {
       const lazyRegistry = getPracticeRegistryLazyState(experimentRegistry);
       if (lazyRegistry?.destroyed) return null;
 
@@ -73,6 +75,7 @@ export function createPracticeLabController(options = {}) {
       realTextModule.registerPracticeRealTextExperiment(resolvedRegistry);
       paceLadderModule.registerPracticePaceLadderExperiment(resolvedRegistry);
       burstSprintsModule.registerPracticeBurstSprintsExperiment(resolvedRegistry);
+      commonWordsModule.registerPracticeCommonWordsExperiment(resolvedRegistry);
 
       runtimeController = controllerModule.createPracticeLabController({
         ...options,

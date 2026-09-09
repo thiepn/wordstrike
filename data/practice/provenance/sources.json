@@ -54,6 +54,60 @@
       "snapshotPath": "provenance/frequency/en-v1.frequency.json",
       "usageApproval": "statistical-only",
       "notes": "Governed statistical reference for PL10 typability coverage; it is not user-facing corpus content."
+    },
+    {
+      "sourceId": "ws-common-words-en-statistical-v1",
+      "title": "Google 10000 English common-word statistical reference for PL28",
+      "sourceType": "statistical-reference",
+      "upstream": "https://github.com/first20hours/google-10000-english/blob/master/google-10000-english-usa-no-swears.txt",
+      "license": {
+        "name": "MIT License",
+        "spdx": "MIT",
+        "url": "https://github.com/first20hours/google-10000-english/blob/master/LICENSE.md",
+        "attributionRequired": true,
+        "notes": "Frequency-ranked lexical source. PL28 statistical approval does not itself authorize display."
+      },
+      "retrievedAt": "2026-06-30T00:00:00.000Z",
+      "sourceChecksum": "sha256-9db3a3ed1a30fbd603890b0a7a7b29f736f8ca925f541f822b932e1fb8e6045e",
+      "snapshotPath": "common-words/en-v1/PL6-COMMON-WORD-SOURCE-EN-1.json",
+      "usageApproval": "statistical-only",
+      "notes": "PL6-governed ranking approval for PL28. The source checksum binds the immutable PL6 governance snapshot; that snapshot separately binds the reviewed upstream Google-text checksum and manual-review contract."
+    },
+    {
+      "sourceId": "ws-common-words-en-training-v1",
+      "title": "WordStrike reviewed common-word training display source for PL28",
+      "sourceType": "permissive-import",
+      "upstream": "https://github.com/first20hours/google-10000-english/blob/master/google-10000-english-usa-no-swears.txt",
+      "license": {
+        "name": "MIT License",
+        "spdx": "MIT",
+        "url": "https://github.com/first20hours/google-10000-english/blob/master/LICENSE.md",
+        "attributionRequired": true,
+        "notes": "Display approval applies only to the reviewed lowercase lexical dataset and its manual-review artifact."
+      },
+      "retrievedAt": "2026-06-30T00:00:00.000Z",
+      "sourceChecksum": "sha256-9db3a3ed1a30fbd603890b0a7a7b29f736f8ca925f541f822b932e1fb8e6045e",
+      "snapshotPath": "common-words/en-v1/PL6-COMMON-WORD-SOURCE-EN-1.json",
+      "usageApproval": "practice-display-approved",
+      "notes": "Independent PL6 production-display approval for the PL28 training bank. The derived Practice artifact is partitioned training and never sources protected evaluation partitions."
+    },
+    {
+      "sourceId": "ws-common-words-en-diagnostic-v1",
+      "title": "WordStrike reviewed common-word diagnostic display source for PL28",
+      "sourceType": "permissive-import",
+      "upstream": "https://github.com/first20hours/google-10000-english/blob/master/google-10000-english-usa-no-swears.txt",
+      "license": {
+        "name": "MIT License",
+        "spdx": "MIT",
+        "url": "https://github.com/first20hours/google-10000-english/blob/master/LICENSE.md",
+        "attributionRequired": true,
+        "notes": "Display approval applies only to the reviewed lowercase lexical dataset and its manual-review artifact."
+      },
+      "retrievedAt": "2026-06-30T00:00:00.000Z",
+      "sourceChecksum": "sha256-9db3a3ed1a30fbd603890b0a7a7b29f736f8ca925f541f822b932e1fb8e6045e",
+      "snapshotPath": "common-words/en-v1/PL6-COMMON-WORD-SOURCE-EN-1.json",
+      "usageApproval": "practice-display-approved",
+      "notes": "Independent PL6 production-display approval for the PL28 diagnostic form pool. The derived Check artifact is partitioned diagnostic and never sources training, transfer, benchmark, or research-holdout records as measurement material."
     }
   ]
 }

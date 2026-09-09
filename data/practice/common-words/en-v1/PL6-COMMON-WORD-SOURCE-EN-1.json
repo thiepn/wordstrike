@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "governanceId": "WS-COMMON-PL6-SOURCE-EN-1",
+  "language": "en",
+  "reviewedDatasetPath": "data/commonGameplayWords.json",
+  "manualReviewArtifact": "data/commonGameplayWords.manual-review.json",
+  "statisticalUpstream": {
+    "name": "google-10000-english (US no-swears)",
+    "url": "https://github.com/first20hours/google-10000-english",
+    "file": "google-10000-english-usa-no-swears.txt",
+    "license": "MIT",
+    "retrieved": "2026-06-30",
+    "sha256": "sha256-ee2d83651fbb91642bbed2bd30ead404c2cfbdfece01dacf284af6ea47795811"
+  },
+  "reviewContract": {
+    "requiredSourceSchemaVersion": 2,
+    "requiredOutputCount": 3000,
+    "requiredManuallyApprovedCount": 3000,
+    "requiredManualReviewArtifact": "data/commonGameplayWords.manual-review.json",
+    "lexicalDisplayReview": "manual-approval-required",
+    "statisticalUse": "approved",
+    "trainingDisplayUse": "approved",
+    "diagnosticDisplayUse": "approved"
+  },
+  "notes": "Immutable PL6 governance snapshot for PL28. The statistical, training-display, and diagnostic-display permissions are represented by separate source registry records that reference this same reviewed source snapshot."
+}
