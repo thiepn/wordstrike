@@ -9,6 +9,8 @@ import { normalizePracticeTarget } from "../js/practiceLab/practiceTextAnalysis.
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const SOURCE = path.join(ROOT, "data", "commonGameplayWords.json");
 const SOURCE_REGISTRY = path.join(ROOT, "data", "practice", "provenance", "sources.json");
+const PL6_SOURCE_GOVERNANCE = path.join(ROOT, "data", "practice", "common-words", "en-v1", "PL6-COMMON-WORD-SOURCE-EN-1.json");
+const PL6_SOURCE_GOVERNANCE_RELATIVE = "common-words/en-v1/PL6-COMMON-WORD-SOURCE-EN-1.json";
 const OUT = path.join(ROOT, "data", "practice", "common-words", "en-v1");
 const CORPUS_MANIFEST = path.join(ROOT, "data", "practice", "manifests", "en-v1.manifest.json");
 const INDEX_MANIFEST = path.join(ROOT, "data", "practice", "indexes", "en-v1", "manifest.json");
@@ -21,7 +23,7 @@ const DIAGNOSTIC_SOURCE_ID = "ws-common-words-en-diagnostic-v1";
 const BANDS = ["core", "frequent", "common", "broad"];
 const RANGE = { core: [1, 100], frequent: [101, 300], common: [301, 700], broad: [701, 1200] };
 const bandFor = (rank) => BANDS.find((band) => rank >= RANGE[band][0] && rank <= RANGE[band][1]);
-const sha = (value) => `sha256-${crypto.createHash("sha256").update(typeof value === "string" ? value : JSON.stringify(value)).digest("hex")}`;
+const sha = (value) => `sha256-${crypto.createHash("sha256").update(typeof value === "string" || Buffer.isBuffer(value) ? value : JSON.stringify(value)).digest("hex")}`;
 const hash = (value) => crypto.createHash("sha256").update(String(value)).digest("hex");
 const graphemes = (word) => Array.from(word.normalize("NFC")).length;
 const readJson = async (file) => JSON.parse(await fs.readFile(file, "utf8"));
@@ -29,6 +31,7 @@ const wordIdFor = (lexicalKey) => `word:${lexicalKey}`;
 
 function validateLexical(word) {
   if (!(typeof word === "string" && word === word.normalize("NFC") && word === word.toLowerCase() && /^[a-z]+$/.test(word) && graphemes(word) >= 1 && graphemes(word) <= 15)) return false;
+  if (graphemes(word) === 1 && !["a", "i"].includes(word)) return false;
   try {
     return normalizePracticeTarget({ entityType: "word", entityKey: word, language: "en" }) === word;
   } catch {
@@ -101,9 +104,11 @@ function validateOverlap(forms) {
   return maximum;
 }
 
-const [source, sourceRegistry, corpusManifest, indexManifest, typabilityManifest, typabilityReference, frequencyReference] = await Promise.all([
+const [source, sourceRegistry, pl6Governance, pl6GovernanceBytes, corpusManifest, indexManifest, typabilityManifest, typabilityReference, frequencyReference] = await Promise.all([
   readJson(SOURCE),
   readJson(SOURCE_REGISTRY),
+  readJson(PL6_SOURCE_GOVERNANCE),
+  fs.readFile(PL6_SOURCE_GOVERNANCE),
   readJson(CORPUS_MANIFEST),
   readJson(INDEX_MANIFEST),
   readJson(TYPOABILITY_MANIFEST),
@@ -114,8 +119,15 @@ const sourceIndex = createPracticeSourceIndex(sourceRegistry);
 const statisticalSource = assertPracticeSourceUsage({ sourceId: STATISTICAL_SOURCE_ID, registry: sourceRegistry, index: sourceIndex, requestedUse: "statistical-reference" });
 const trainingSource = assertPracticeSourceUsage({ sourceId: TRAINING_SOURCE_ID, registry: sourceRegistry, index: sourceIndex, requestedUse: "production-display" });
 const diagnosticSource = assertPracticeSourceUsage({ sourceId: DIAGNOSTIC_SOURCE_ID, registry: sourceRegistry, index: sourceIndex, requestedUse: "production-display" });
+const governanceChecksum = sha(pl6GovernanceBytes);
+if ([statisticalSource, trainingSource, diagnosticSource].some((entry) => entry.snapshotPath !== PL6_SOURCE_GOVERNANCE_RELATIVE || entry.sourceChecksum !== governanceChecksum)) throw new Error("Common-word PL6 source records do not bind the immutable governance snapshot");
 const expectedUpstreamChecksum = `sha256-${source.source?.sourceSha256}`;
-if ([statisticalSource, trainingSource, diagnosticSource].some((entry) => entry.sourceChecksum !== expectedUpstreamChecksum)) throw new Error("Common-word PL6 source checksum does not match reviewed upstream snapshot");
+if (pl6Governance?.schemaVersion !== 1 || pl6Governance?.governanceId !== "WS-COMMON-PL6-SOURCE-EN-1" || pl6Governance?.language !== "en") throw new Error("Common-word PL6 governance snapshot identity is invalid");
+if (pl6Governance?.reviewedDatasetPath !== "data/commonGameplayWords.json") throw new Error("Common-word PL6 governance snapshot does not bind the reviewed dataset path");
+if (pl6Governance?.manualReviewArtifact !== source.filtering?.manualReviewArtifact || pl6Governance?.reviewContract?.requiredManualReviewArtifact !== source.filtering?.manualReviewArtifact) throw new Error("Common-word PL6 manual-review binding mismatch");
+if (pl6Governance?.statisticalUpstream?.sha256 !== expectedUpstreamChecksum || pl6Governance?.statisticalUpstream?.name !== source.source?.name || pl6Governance?.statisticalUpstream?.url !== source.source?.url || pl6Governance?.statisticalUpstream?.file !== source.source?.file || pl6Governance?.statisticalUpstream?.license !== source.source?.license || pl6Governance?.statisticalUpstream?.retrieved !== source.source?.retrieved) throw new Error("Common-word PL6 upstream-source binding mismatch");
+if (pl6Governance?.reviewContract?.requiredSourceSchemaVersion !== source.schemaVersion || pl6Governance?.reviewContract?.requiredOutputCount !== source.filtering?.outputCount || pl6Governance?.reviewContract?.requiredManuallyApprovedCount !== source.statistics?.manuallyApprovedCount) throw new Error("Common-word PL6 review-contract mismatch");
+if (pl6Governance?.reviewContract?.statisticalUse !== "approved" || pl6Governance?.reviewContract?.trainingDisplayUse !== "approved" || pl6Governance?.reviewContract?.diagnosticDisplayUse !== "approved" || pl6Governance?.reviewContract?.lexicalDisplayReview !== "manual-approval-required") throw new Error("Common-word PL6 approval contract is incomplete");
 if (corpusManifest.buildChecksum !== indexManifest.corpusChecksum || corpusManifest.buildChecksum !== typabilityManifest.corpusChecksum) throw new Error("Common-word build upstream corpus binding mismatch");
 if (indexManifest.indexChecksum !== typabilityManifest.indexChecksum) throw new Error("Common-word build upstream index binding mismatch");
 if (typabilityManifest.referenceVersion !== typabilityReference.referenceVersion) throw new Error("Common-word build PL10 reference binding mismatch");
@@ -145,6 +157,10 @@ const sourceBinding = {
   sourceUrl: source.source?.url,
   sourceLicense: source.source?.license,
   sourceSha256: source.source?.sourceSha256,
+  upstreamSourceChecksum: expectedUpstreamChecksum,
+  pl6GovernanceId: pl6Governance.governanceId,
+  pl6GovernancePath: `data/practice/${PL6_SOURCE_GOVERNANCE_RELATIVE}`,
+  pl6GovernanceChecksum: governanceChecksum,
   reviewStatement: source.source?.description,
   manualReviewArtifact: source.filtering?.manualReviewArtifact ?? null,
 };
@@ -186,6 +202,8 @@ const referenceBindings = {
   sourceRegistryChecksum: statisticalRegistryChecksum,
   statisticalSourceId: statisticalSource.sourceId,
   statisticalSourceChecksum: statisticalSource.sourceChecksum,
+  upstreamSourceChecksum: expectedUpstreamChecksum,
+  pl6GovernanceChecksum: governanceChecksum,
   sourceSnapshotChecksum: sourceSnapshot.checksum,
 };
 const referenceCore = {
@@ -264,6 +282,8 @@ console.log(JSON.stringify({
   difficultySpread: typabilityMatching.difficultySpread,
   maximumFeatureRmsDistance: typabilityMatching.maximumWeightedRmsDistance,
   relativePercentileSpread: typabilityMatching.relativePercentileSpread,
+  pl6GovernanceChecksum: governanceChecksum,
+  upstreamSourceChecksum: expectedUpstreamChecksum,
   sourceRegistryChecksums: { statistical: statisticalRegistryChecksum, training: trainingRegistryChecksum, diagnostic: diagnosticRegistryChecksum },
   sourceSnapshotChecksum: sourceSnapshot.checksum,
   bindings: { practice: practice.bindings, check: check.bindings },
