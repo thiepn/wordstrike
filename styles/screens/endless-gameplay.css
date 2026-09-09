@@ -784,11 +784,31 @@
     --endless-hud-height: 88px;
   }
 
+  .endless-gameplay-screen .endless-gameplay-hud {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+    padding-inline: 8px;
+  }
+
+  .endless-hud-primary,
+  .endless-hud-secondary {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .endless-hud-primary > *,
+  .endless-hud-secondary > * {
+    min-width: 0;
+  }
+
   .endless-hud-primary {
-    grid-template-columns: auto auto minmax(46px, 1fr) auto auto;
+    grid-template-columns: minmax(48px, auto) auto minmax(40px, 1fr) auto auto;
     grid-template-areas:
       "back stage pace combo core"
       "back score score score core";
+    column-gap: 6px;
   }
 
   .endless-hud-back { grid-area: back; }
@@ -799,8 +819,9 @@
   .endless-hud-integrity { grid-area: core; }
 
   .endless-hud-secondary {
-    grid-template-columns: auto minmax(45px, 1fr) auto;
+    grid-template-columns: auto minmax(36px, 1fr) auto;
     grid-template-areas: "survival progress pressure";
+    column-gap: 5px;
     padding-left: 0;
   }
 
