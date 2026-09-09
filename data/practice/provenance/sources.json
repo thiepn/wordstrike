@@ -71,11 +71,11 @@
       "sourceChecksum": "sha256-ee2d83651fbb91642bbed2bd30ead404c2cfbdfece01dacf284af6ea47795811",
       "snapshotPath": "common-words/en-v1/WS-COMMON-SOURCE-EN-1.snapshot.json",
       "usageApproval": "statistical-only",
-      "notes": "PL6-governed ranking source for the PL28 1,200-word reference. Kept separate from display approval even though both governance records derive from the same manually reviewed MIT-licensed upstream snapshot."
+      "notes": "PL6-governed ranking source for the PL28 1,200-word reference. Statistical approval is separate from both training and diagnostic display governance."
     },
     {
-      "sourceId": "ws-common-words-en-display-v1",
-      "title": "WordStrike reviewed common-word display source for PL28",
+      "sourceId": "ws-common-words-en-training-v1",
+      "title": "WordStrike reviewed common-word training display source for PL28",
       "sourceType": "permissive-import",
       "upstream": "https://github.com/first20hours/google-10000-english/blob/master/google-10000-english-usa-no-swears.txt",
       "license": {
@@ -89,7 +89,25 @@
       "sourceChecksum": "sha256-ee2d83651fbb91642bbed2bd30ead404c2cfbdfece01dacf284af6ea47795811",
       "snapshotPath": "common-words/en-v1/WS-COMMON-SOURCE-EN-1.snapshot.json",
       "usageApproval": "practice-display-approved",
-      "notes": "Independent PL6 display approval for the manually reviewed common-word lexical snapshot. PL28 still records training versus diagnostic partition on the derived Practice/Check artifacts; protected partitions are never sourced here."
+      "notes": "Independent PL6 production-display approval for the PL28 training bank. The derived Practice artifact is partitioned training and never sources protected evaluation partitions."
+    },
+    {
+      "sourceId": "ws-common-words-en-diagnostic-v1",
+      "title": "WordStrike reviewed common-word diagnostic display source for PL28",
+      "sourceType": "permissive-import",
+      "upstream": "https://github.com/first20hours/google-10000-english/blob/master/google-10000-english-usa-no-swears.txt",
+      "license": {
+        "name": "MIT License",
+        "spdx": "MIT",
+        "url": "https://github.com/first20hours/google-10000-english/blob/master/LICENSE.md",
+        "attributionRequired": true,
+        "notes": "Display approval applies only to the reviewed lowercase lexical snapshot represented by data/commonGameplayWords.json and its manual-review artifact."
+      },
+      "retrievedAt": "2026-06-30T00:00:00.000Z",
+      "sourceChecksum": "sha256-ee2d83651fbb91642bbed2bd30ead404c2cfbdfece01dacf284af6ea47795811",
+      "snapshotPath": "common-words/en-v1/WS-COMMON-SOURCE-EN-1.snapshot.json",
+      "usageApproval": "practice-display-approved",
+      "notes": "Independent PL6 production-display approval for the PL28 diagnostic form pool. The derived Check artifact is partitioned diagnostic and never sources training, transfer, benchmark, or research-holdout records as measurement material."
     }
   ]
 }
