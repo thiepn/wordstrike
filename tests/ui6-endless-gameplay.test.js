@@ -41,7 +41,20 @@ assert.match(presentation, /aria-live", "polite"/);
 for (const id of ["endless-stage", "endless-progress", "endless-score", "endless-integrity"]) {
   assert.match(presentation, new RegExp(`#${id}`), `UI6 must preserve #${id}`);
 }
-assert.doesNotMatch(presentation, /appState|localStorage|sessionStorage|fetch\(|recordCompletedSession|calculateEndlessScore/);
+for (const forbidden of [
+  "appState",
+  "localStorage",
+  "sessionStorage",
+  "fetch(",
+  "recordCompletedSession",
+  "calculateEndlessScore",
+]) {
+  assert.equal(
+    presentation.includes(forbidden),
+    false,
+    `Endless presentation must not depend on ${forbidden}`,
+  );
+}
 assert.doesNotMatch(presentation, /practice/i);
 
 assert.match(css, /UI6/);
