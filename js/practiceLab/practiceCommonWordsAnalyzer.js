@@ -4,9 +4,9 @@ import { buildPracticeCommonWordBandMetrics } from "./practiceCommonWordBandAccu
 const freezeDeep = (value) => { if (!value || typeof value !== "object" || Object.isFrozen(value)) return value; Object.values(value).forEach(freezeDeep); return Object.freeze(value); };
 const finite = Number.isFinite;
 const sessionMetrics = (input) => ({
-  wpm: input?.sessionSnapshot?.wpm ?? input?.session?.wpm ?? input?.summary?.wpm ?? null,
-  rawWpm: input?.sessionSnapshot?.rawWpm ?? input?.session?.rawWpm ?? input?.summary?.rawWpm ?? null,
-  accuracy: input?.sessionSnapshot?.accuracy ?? input?.session?.accuracy ?? input?.summary?.accuracy ?? null,
+  wpm: input?.metricsSnapshot?.wpm ?? input?.sessionSnapshot?.wpm ?? input?.session?.wpm ?? input?.summary?.wpm ?? null,
+  rawWpm: input?.metricsSnapshot?.rawWpm ?? input?.sessionSnapshot?.rawWpm ?? input?.session?.rawWpm ?? input?.summary?.rawWpm ?? null,
+  accuracy: input?.metricsSnapshot?.accuracy ?? input?.sessionSnapshot?.accuracy ?? input?.session?.accuracy ?? input?.summary?.accuracy ?? null,
 });
 
 export function analyzePracticeCommonWordsPracticeResult(input = {}) {
