@@ -66,7 +66,10 @@ assert.doesNotMatch(css, /practice-lab/i);
 
 assert.match(renderer, /"endless-word-error"/);
 assert.match(renderer, /gameplayPresentationPrefersReducedMotion/);
-assert.match(renderer, /\.campaign-gameplay-screen, \.endless-gameplay-screen/);
+assert.ok(
+  renderer.includes('".campaign-gameplay-screen, .endless-gameplay-screen"'),
+  "reduced-motion renderer boundary must include Campaign and Endless screens",
+);
 assert.match(renderer, /screenShake && !gameplayPresentationPrefersReducedMotion\(area\)/);
 
 // UI6 is presentation-only: core Endless mechanics/config remain untouched and authoritative.
