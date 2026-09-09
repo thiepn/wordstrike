@@ -200,7 +200,7 @@ def certify_reduced_motion(browser, browser_name, base, evidence):
       transition:getComputedStyle(el).transitionDuration,
       scroll:getComputedStyle(el).scrollBehavior
     })""")
-    accepted = {"0s", "0.001ms", "1e-06s"}
+    accepted = {"0s", "0.001ms", "1e-06s", "0.000001s"}
     assert motion["animation"] in accepted, motion
     assert all(part.strip() in accepted for part in motion["transition"].split(",")), motion
     assert motion["scroll"] == "auto", motion
