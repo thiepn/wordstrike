@@ -99,10 +99,12 @@ test("PL27 descriptor is catalog-compatible and delegates canonical estimation t
   assert.equal(catalog.capabilities.includes("robust-top-three"), true);
 
   const registry = createPracticeExperimentRegistry();
-  registerPracticeBurstSprintsExperiment(registry, { runtime: { prepare() {}, getAvailability() {} } });
+  const runtime = { prepare() {}, getAvailability() {} };
+  registerPracticeBurstSprintsExperiment(registry, { runtime });
   const resolved = registry.getResolvedExperiment("burst-sprints");
   assert.equal(resolved.runnable, true);
   assert.equal(resolved.registration.descriptor.abilityChannel, "burst");
+  assert.equal(resolved.registration.runtime, runtime, "the registry must retain the runtime used by the PL27 controller");
 });
 
 test("PL27 composite measurement produces at most one PL13 burst observation", () => {
