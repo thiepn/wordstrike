@@ -96,9 +96,8 @@ export async function mountPracticeBurstSprintsSession({ root, session, onExit =
     onExit(finalResult);
   };
 
-  const buildInterruptedArtifact = async (reason) => {
+  const buildInterruptedArtifact = async () => {
     const snapshot = engine.getSnapshot();
-    session.experiment.burstAccumulator?.markInterrupted(reason);
     const result = session.experiment.burstAccumulator?.finalize({ finalActiveDurationMs: snapshot.timing?.activeDurationMs ?? 0 });
     const { analyzePracticeBurstSprintsResult } = await import("./practiceBurstSprintsAnalyzer.js");
     return analyzePracticeBurstSprintsResult({ burstResult: result, plan: session.plan, foundationAnalysis: null }).trainingQuality;
@@ -106,8 +105,9 @@ export async function mountPracticeBurstSprintsSession({ root, session, onExit =
 
   const interrupt = async (reason = "manual-stop") => {
     if (closed || finalResult) return;
+    session.experiment.burstAccumulator?.markInterrupted(reason);
     try { await engine.interrupt(reason); } catch {}
-    const artifact = await buildInterruptedArtifact(reason);
+    const artifact = await buildInterruptedArtifact();
     finalResult = { interrupted: true, artifact };
     renderResult(root, artifact, true);
   };
