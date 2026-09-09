@@ -98,6 +98,7 @@ assert.match(modes, /id: MODE_IDS\.PRACTICE,[\s\S]*enabled: false,[\s\S]*status:
 
 assert.match(workflow, /Certify UI11 Profile, Leaderboards, and Settings/);
 assert.match(workflow, /tests\/browser\/ui11_profile_leaderboards_settings\.py/);
+assert.match(workflow, /tests\/browser\/ui11_mobile_heading_contract\.py/);
 assert.match(workflow, /browser-artifacts\/ui11-profile-leaderboards-settings\//);
 
 console.log("UI11 source contracts passed: Profile/Stats, Leaderboards and Settings share one low-chrome presentation layer while existing data, auth, routing, persistence and mode boundaries remain authoritative.");
