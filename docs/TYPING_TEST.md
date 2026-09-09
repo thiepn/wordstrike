@@ -12,8 +12,8 @@ The English 200 name and ID are intentional even though the approved ordered arr
 
 There is no English 1k mode, word-set selector, custom vocabulary, punctuation, numbers, language selection, or difficulty selector.
 
-Time configurations remain 15, 30, 60, and 120 seconds. Word configurations remain 25, 50, and 100 words. Generation remains seed-deterministic, avoids immediate duplicates, and extends the queue in shuffled batches. WPM, Raw WPM, CPM, accuracy, error history, spaces, Backspace behavior, and completion timing are unchanged.
+Time configurations are 15, 30, 60, and 120 seconds. Word configurations are 10, 25, 50, and 100 words. Generation is seed-deterministic, avoids immediate duplicates, and extends the queue in shuffled batches. WPM, Raw WPM, CPM, accuracy, error history, spaces, Backspace behavior, and completion timing use the current Typing Test runtime contracts.
 
 English 200 results include the word-set identity in the session configuration, normalized result, record namespace, recent summary, and diagnostics. Records without a word-set ID are interpreted as the preserved `legacy-common-740` benchmark and never compete with English 200 records.
 
-The existing `data/typingTestWords.json` file remains the unchanged 740-word common-vocabulary pool used by other game systems. Campaign, bosses, Endless, and Daily Strike retain their existing vocabulary behavior.
+The historical `data/typingTestWords.json` file remains in the repository as legacy data/provenance; current Typing Test generation uses `data/english200.json`. Typing Test vocabulary is isolated from the current normal-gameplay vocabulary paths. Daily Strike is retired and has no current production mode or Typing Test vocabulary path.

@@ -67,7 +67,7 @@ Campaign grades:
 
 - **English 200** curated vocabulary (`199` approved unique entries)
 - timed tests: **15 / 30 / 60 / 120 seconds**
-- word-count tests: **25 / 50 / 100 words**
+- word-count tests: **10 / 25 / 50 / 100 words**
 - WPM and raw WPM
 - accuracy and character-level error metrics
 - backspace and word-delete tracking

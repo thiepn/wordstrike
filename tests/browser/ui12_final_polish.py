@@ -168,6 +168,38 @@ def certify_interaction_consistency(browser, browser_name, base, evidence):
     context.close()
 
 
+def certify_selection_isolation(browser, browser_name, base, evidence):
+    context = new_context(browser, base)
+    page = context.new_page()
+    open_title(page, base)
+
+    scope = page.evaluate("""() => {
+      const sheet = [...document.styleSheets].find((candidate) => candidate.href?.endsWith('/styles/screens/ui12-global-polish.css'));
+      const selectors = [...(sheet?.cssRules || [])]
+        .filter((rule) => rule.selectorText?.includes('::selection'))
+        .flatMap((rule) => rule.selectorText.split(',').map((selector) => selector.trim()));
+      const migrated = document.querySelector('.title-screen');
+      const migratedMatchesScope = migrated.matches('#app > .screen:not(.practice-lab-screen)');
+      document.querySelector('#app').innerHTML = '<section class="screen practice-lab-screen"><p id="ui12-practice-selection">Practice text</p></section>';
+      const practice = document.querySelector('.practice-lab-screen');
+      return {
+        selectors,
+        migratedMatchesScope,
+        practiceMatchesScope: practice.matches('#app > .screen:not(.practice-lab-screen)'),
+      };
+    }""")
+    assert len(scope["selectors"]) == 4, scope
+    assert all(selector != "::selection" for selector in scope["selectors"]), scope
+    assert all(
+        selector.startswith("#app > .screen:not(.practice-lab-screen)") or selector.startswith(".onboarding-root")
+        for selector in scope["selectors"]
+    ), scope
+    assert scope["migratedMatchesScope"] is True, scope
+    assert scope["practiceMatchesScope"] is False, scope
+    evidence.append({"browser": browser_name, "case": "selection CSSOM respects Practice boundary", **scope})
+    context.close()
+
+
 def certify_mobile(browser, browser_name, base, evidence):
     context = new_context(browser, base, width=390, height=360)
     page = context.new_page()
@@ -220,6 +252,7 @@ def main():
                 browser = getattr(playwright, browser_name).launch(headless=True)
                 certify_audio(browser, browser_name, base, result["checks"])
                 certify_interaction_consistency(browser, browser_name, base, result["checks"])
+                certify_selection_isolation(browser, browser_name, base, result["checks"])
                 certify_mobile(browser, browser_name, base, result["checks"])
                 certify_reduced_motion(browser, browser_name, base, result["checks"])
                 browser.close()

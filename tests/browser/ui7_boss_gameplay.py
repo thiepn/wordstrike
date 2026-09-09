@@ -194,17 +194,25 @@ def certify_intro_and_active(browser, browser_name, base, evidence):
     assert transient["wrong"] is True, transient
     assert "boss-ui-wrong" in transient["animation"], transient
 
-    page.evaluate("""() => {
-      const game = window.__ui7.game;
+    transition = page.evaluate("""async () => {
+      const {bossLoop, game, ui} = window.__ui7;
+      bossLoop.stopBossLoop();
       game.phase = 'TRANSITION';
-      game.transitionElapsedMs = 100;
-      window.__ui7.ui.updateBossHud(game);
+      game.transitionElapsedMs = 0;
+      ui.updateBossHud(game);
+      await new Promise((resolve) => requestAnimationFrame(() => resolve()));
+      await new Promise((resolve) => requestAnimationFrame(() => resolve()));
+      bossLoop.stopBossLoop();
+      const screen = document.querySelector('.boss-gameplay-screen');
+      return {
+        phase: screen?.dataset.bossPhase || null,
+        framePhase: document.querySelector('[data-boss-frame-phase]')?.textContent || null,
+        transitionCount: document.querySelectorAll('.boss-combat-frame.transition').length,
+      };
     }""")
-    page.wait_for_timeout(40)
-    transition = snapshot(page)
     assert transition["phase"] == "transition", transition
     assert transition["framePhase"] == "SEQUENCE BREACHED", transition
-    assert page.locator('.boss-combat-frame.transition').count() == 1
+    assert transition["transitionCount"] == 1, transition
 
     evidence.append({"browser": browser_name, "case": "intro + active + critical + transition", "introSteps": intro_steps, **state, "wrong": transient})
     context.close()

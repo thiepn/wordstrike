@@ -44,6 +44,9 @@ assert.doesNotMatch(presentation, /leaderboardService|statistics\.js|gameLoop|bo
 
 assert.match(css, /UI12 — Final motion \/ audio \/ global consistency pass/);
 assert.match(css, /#app > \.screen:not\(\.practice-lab-screen\)/);
+assert.doesNotMatch(css, /(^|\n)\s*::selection\s*\{/);
+assert.match(css, /#app > \.screen:not\(\.practice-lab-screen\)::selection/);
+assert.match(css, /\.onboarding-root::selection/);
 assert.match(css, /\.ui12-audio-setting/);
 assert.match(css, /\.ui12-sound-toggle/);
 assert.match(css, /min-height:\s*44px/);
