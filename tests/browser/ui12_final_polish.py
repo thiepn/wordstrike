@@ -179,11 +179,12 @@ def certify_selection_isolation(browser, browser_name, base, evidence):
         .filter((rule) => rule.selectorText?.includes('::selection'))
         .flatMap((rule) => rule.selectorText.split(',').map((selector) => selector.trim()));
       const migrated = document.querySelector('.title-screen');
+      const migratedMatchesScope = migrated.matches('#app > .screen:not(.practice-lab-screen)');
       document.querySelector('#app').innerHTML = '<section class="screen practice-lab-screen"><p id="ui12-practice-selection">Practice text</p></section>';
       const practice = document.querySelector('.practice-lab-screen');
       return {
         selectors,
-        migratedMatchesScope: migrated.matches('#app > .screen:not(.practice-lab-screen)'),
+        migratedMatchesScope,
         practiceMatchesScope: practice.matches('#app > .screen:not(.practice-lab-screen)'),
       };
     }""")
