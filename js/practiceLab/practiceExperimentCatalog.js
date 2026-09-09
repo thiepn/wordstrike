@@ -23,7 +23,7 @@ const definitions = [
   ["combination-repair", "Combination Repair", "Combinations", "precision", "Train slow or inaccurate key combinations.", "Targeted bigram and trigram practice will smooth transitions that repeatedly slow you down or cause mistakes.", 1, 3, 5, "adaptive", false, false, 9, 20, "combination", "precision", "combination timing"],
   ["problem-words", "Problem Words", "Problem Words", "precision", "Focused practice for difficult words, separating how you start the word from how you execute it internally.", "Train one canonical lexical target across Baseline, Focus, Context, Mix, and Check. The mode keeps whole-word first-pass accuracy, starting-the-word execution, and inside-the-word execution distinct while avoiding spelling recall and rote adjacent repetition.", 4, 5, 6, "adaptive", false, false, 10, 30, "word", "precision", "lexical execution"],
   ["accuracy-control", "Accuracy & Recovery", "Accuracy", "precision", "Practice clean first-pass typing and more precise recovery when errors occur, without chasing an artificially slow perfect score.", "Train one canonical key, combination, or word through Baseline, Control, Repair, Mix, and Check. Natural errors remain optional observations: correction is allowed, never forced, and repair feedback appears only after real target-attributed episodes close.", 4, 5, 6, "adaptive", false, false, 11, 40, "target", "precision", "first-pass control and recovery"],
-  ["burst-sprints", "Burst Sprints", "Sprints", "speed", "Practice short, controlled bursts above sustainable speed.", "Brief sprint intervals will develop top-end speed while separating useful acceleration from uncontrolled errors.", 1, 3, 5, "adaptive", false, true, 12, 10, "bolt", "speed", "burst speed"],
+  ["burst-sprints", "Burst Sprints", "Sprints", "speed", "Practice short, controlled bursts above sustainable speed.", "Six 10-second controlled sprints separated by 15-second recovery intervals estimate short-form burst ability without treating one lucky spike as a personal best. The median of the three fastest eligible bouts supplies at most one PL13 burst observation.", 1, 3, 5, "adaptive", false, true, 12, 10, "bolt", "speed", "burst speed"],
   ["pace-ladder", "Pace Ladder", "Pace Ladder", "advanced", "Find the short-form pace where accuracy and control begin to degrade under one fixed diagnostic protocol.", "A 25-second comfortable calibration is followed by five target-blind 25-second stages at 85%, 95%, 105%, 115%, and 125% of the anchor, then a 40-second validation stage. PL14 owns frontier inference. This does not estimate true maximum speed or endurance.", 4, 4, 4, "adaptive", false, true, 26, 15, "wave", "speed", "speed-control frontier"],
   ["common-words", "Common Words", "Common Words", "fluency", "Build automatic rhythm on high-frequency words.", "Repeat and vary common words to reduce hesitation and make everyday typing more fluent.", 2, 5, 8, "all-levels", false, false, 13, 10, "words", "fluency", "common-word fluency"],
   ["real-text", "Real Text", "Real Text", "real-world", "Practice broad natural text without target-specific cues, or run a protected Cold Transfer Check to measure generalization on fresh material.", "Natural Practice is repeatable training from an approved target-blind training pool. Cold Transfer Check is a separate scarce 60-second PL18 measurement selected independently of current targets and revealed only after a protected reservation is claimed.", 3, 5, 10, "all-levels", false, false, 14, 10, "text", "real-world", "broad natural-text integration"],
@@ -46,7 +46,7 @@ const deepFreeze = (value) => {
 
 const buildEntry = ([id, title, shortTitle, category, description, longDescription, minimum, recommended, maximum, difficulty, requiresAssessment, requiresPracticeData, implementationPrompt, displayOrder, iconKey, accentKey, primarySkill]) => deepFreeze({
   id, version: 1, title, shortTitle, category, description, longDescription,
-  status: ["full-assessment", "weak-keys", "combination-repair", "problem-words", "accuracy-control", "real-text", "pace-ladder"].includes(id) ? "preview" : "planned",
+  status: ["full-assessment", "weak-keys", "combination-repair", "problem-words", "accuracy-control", "burst-sprints", "real-text", "pace-ladder"].includes(id) ? "preview" : "planned",
   estimatedDurationMinutes: { minimum, recommended, maximum }, difficulty,
   requiresAssessment, requiresPracticeData, supportsMobile: true,
   supportsPhysicalKeyboard: true, supportsSoftwareKeyboard: true,
@@ -54,9 +54,11 @@ const buildEntry = ([id, title, shortTitle, category, description, longDescripti
     ? ["duration-options", "broad-training", "cold-transfer-launch"]
     : id === "pace-ladder"
       ? ["target-blind", "fixed-protocol", "control-frontier", "pace-guide"]
-      : ["weak-keys", "combination-repair", "problem-words", "accuracy-control"].includes(id)
-      ? ["manual-target", "recommended-target", "fixed-dose", "same-session-check"]
-      : [],
+      : id === "burst-sprints"
+        ? ["target-blind", "six-sprint-protocol", "recovery-intervals", "burst-ability", "robust-top-three"]
+        : ["weak-keys", "combination-repair", "problem-words", "accuracy-control"].includes(id)
+          ? ["manual-target", "recommended-target", "fixed-dose", "same-session-check"]
+          : [],
   tags: [category, primarySkill], implementationPrompt, displayOrder,
   iconKey, accentKey, primarySkill,
 });
@@ -79,7 +81,7 @@ export function validatePracticeExperimentCatalog(catalog) {
     if (!Number.isInteger(entry.displayOrder)) errors.push({ path: `${path}.displayOrder`, code: "INVALID_ORDER" });
     if (!Number.isInteger(entry.implementationPrompt) || entry.implementationPrompt < 1) errors.push({ path: `${path}.implementationPrompt`, code: "INVALID_PROMPT" });
     const duration = entry.estimatedDurationMinutes || {};
-    if (![duration.minimum, duration.recommended, duration.maximum].every((n) => Number.isFinite(n) && n >= 0) || duration.minimum > duration.recommended || duration.recommended > duration.maximum) errors.push({ path: `${path}.estimatedDurationMinutes`, code: "INVALID_DURATION" });
+    if (![duration.minimum, duration.recommended, duration.maximum].every((number) => Number.isFinite(number) && number >= 0) || duration.minimum > duration.recommended || duration.recommended > duration.maximum) errors.push({ path: `${path}.estimatedDurationMinutes`, code: "INVALID_DURATION" });
     if (!PRACTICE_ICON_KEYS.includes(entry.iconKey) || !PRACTICE_ACCENT_KEYS.includes(entry.accentKey)) errors.push({ path, code: "INVALID_VISUAL_KEY" });
     for (const key of ["requiresAssessment", "requiresPracticeData", "supportsMobile", "supportsPhysicalKeyboard", "supportsSoftwareKeyboard"]) if (typeof entry[key] !== "boolean") errors.push({ path: `${path}.${key}`, code: "INVALID_BOOLEAN" });
     for (const key of ["capabilities", "tags"]) if (!Array.isArray(entry[key]) || entry[key].length > 32 || entry[key].some((value) => typeof value !== "string" || value.length > 100)) errors.push({ path: `${path}.${key}`, code: "INVALID_ARRAY" });
