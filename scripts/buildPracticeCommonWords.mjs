@@ -2,14 +2,16 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import crypto from "node:crypto";
 import { fileURLToPath } from "node:url";
+import { assertPracticeCommonWordCheckTypability } from "./lib/practiceCommonWordsMatching.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const SOURCE = path.join(ROOT, "data", "commonGameplayWords.json");
 const OUT = path.join(ROOT, "data", "practice", "common-words", "en-v1");
+const TYPOABILITY_REFERENCE = path.join(ROOT, "data", "practice", "models", "en-v1", "typability-v1.reference.json");
+const FREQUENCY_REFERENCE = path.join(ROOT, "data", "practice", "provenance", "frequency", "en-v1.frequency.json");
 const BANDS = ["core", "frequent", "common", "broad"];
 const RANGE = { core: [1, 100], frequent: [101, 300], common: [301, 700], broad: [701, 1200] };
 const bandFor = (rank) => BANDS.find((band) => rank >= RANGE[band][0] && rank <= RANGE[band][1]);
-const stable = (value) => JSON.stringify(value, Object.keys(value).sort());
 const sha = (value) => `sha256-${crypto.createHash("sha256").update(typeof value === "string" ? value : JSON.stringify(value)).digest("hex")}`;
 const hash = (value) => crypto.createHash("sha256").update(String(value)).digest("hex");
 const graphemes = (word) => Array.from(word.normalize("NFC")).length;
@@ -126,6 +128,11 @@ const practice = { ...practiceCore, checksum: sha(practiceCore) };
 const forms = buildForms(words);
 const maximumPairwiseLexicalOverlapRatio = validateOverlap(forms);
 if (maximumPairwiseLexicalOverlapRatio > 0.30) throw new Error(`Common-word check overlap ${maximumPairwiseLexicalOverlapRatio.toFixed(3)} exceeds 0.30`);
+const [typabilityReference, frequencyReference] = await Promise.all([
+  fs.readFile(TYPOABILITY_REFERENCE, "utf8").then(JSON.parse),
+  fs.readFile(FREQUENCY_REFERENCE, "utf8").then(JSON.parse),
+]);
+const typabilityMatching = assertPracticeCommonWordCheckTypability({ forms, typabilityReference, frequencyReference });
 const checkCore = {
   bankId: "WS-COMMON-CHECK-EN-1", formSetId: "WS-COMMON-CHECK-EN-1", bankVersion: 1, schemaVersion: 1, generatorVersion: 1,
   referenceId: reference.referenceId, referenceVersion: reference.referenceVersion, language: "en", status: "ready", partition: "diagnostic",
@@ -142,4 +149,15 @@ for (const [name, value] of [
   ["WS-COMMON-PRACTICE-EN-1.manifest.json", practice],
   ["WS-COMMON-CHECK-EN-1.manifest.json", check],
 ]) await fs.writeFile(path.join(OUT, name), `${JSON.stringify(value, null, 2)}\n`, "utf8");
-console.log(JSON.stringify({ referenceWords: words.length, forms: forms.length, maximumPairwiseLexicalOverlapRatio, referenceChecksum: reference.checksum, practiceChecksum: practice.checksum, checkChecksum: check.checksum }, null, 2));
+console.log(JSON.stringify({
+  referenceWords: words.length,
+  forms: forms.length,
+  maximumPairwiseLexicalOverlapRatio,
+  minimumTypabilityCoverage: typabilityMatching.minimumAvailableModelWeight,
+  difficultySpread: typabilityMatching.difficultySpread,
+  maximumFeatureRmsDistance: typabilityMatching.maximumWeightedRmsDistance,
+  relativePercentileSpread: typabilityMatching.relativePercentileSpread,
+  referenceChecksum: reference.checksum,
+  practiceChecksum: practice.checksum,
+  checkChecksum: check.checksum,
+}, null, 2));
