@@ -187,12 +187,14 @@ function sharedBindingReasons(bindings, referenceBindings, prefix) {
   return reasons;
 }
 
-function validateSourceSnapshotShape(sourceSnapshot, reference) {
+function validateSourceSnapshotShape(sourceSnapshot, reference, practiceBank, checkFormSet) {
   const reasons = [];
   if (sourceSnapshot?.language !== "en" || sourceSnapshot?.schemaVersion !== 1) reasons.push("source-snapshot-identity");
   if (sourceSnapshot?.sourceRegistryVersion !== reference?.bindings?.sourceRegistryVersion) reasons.push("source-snapshot-registry-version");
   if (sourceSnapshot?.sourceRegistryChecksum !== reference?.bindings?.sourceRegistryChecksum) reasons.push("source-snapshot-registry-checksum");
   if (sourceSnapshot?.statisticalSourceId !== reference?.bindings?.statisticalSourceId || sourceSnapshot?.statisticalSourceChecksum !== reference?.bindings?.statisticalSourceChecksum) reasons.push("source-snapshot-statistical-source");
+  if (sourceSnapshot?.trainingSourceId !== practiceBank?.bindings?.displaySourceId || sourceSnapshot?.trainingSourceChecksum !== practiceBank?.bindings?.displaySourceChecksum) reasons.push("source-snapshot-training-source");
+  if (sourceSnapshot?.diagnosticSourceId !== checkFormSet?.bindings?.displaySourceId || sourceSnapshot?.diagnosticSourceChecksum !== checkFormSet?.bindings?.displaySourceChecksum) reasons.push("source-snapshot-diagnostic-source");
   if (!Array.isArray(sourceSnapshot?.words) || sourceSnapshot.words.length !== PRACTICE_COMMON_WORD_REFERENCE_SIZE) reasons.push("source-snapshot-size");
   const referenceWords = referenceWordMap(reference);
   const seen = new Set();
@@ -217,17 +219,23 @@ function sourceRegistryReasons({ sourceRegistry, reference, practiceBank, checkF
   const statisticalEligibility = statistical ? getPracticeSourceUsageEligibility(statistical, "statistical-reference") : { allowed: false };
   if (!statistical || !statisticalEligibility.allowed) referenceReasons.push("statistical-source-not-approved");
   else if (statistical.sourceChecksum !== reference?.bindings?.statisticalSourceChecksum || statistical.sourceChecksum !== reference?.rankingSource?.sourceChecksum) referenceReasons.push("statistical-source-checksum");
-  const displayId = practiceBank?.bindings?.displaySourceId;
-  const display = resolvePracticeCorpusSource(displayId, index);
-  const displayEligibility = display ? getPracticeSourceUsageEligibility(display, "production-display") : { allowed: false };
-  if (!display || !displayEligibility.allowed) { practiceReasons.push("display-source-not-approved"); checkReasons.push("display-source-not-approved"); }
-  else {
-    if (display.sourceChecksum !== practiceBank?.bindings?.displaySourceChecksum || display.sourceChecksum !== practiceBank?.displayProvenance?.sourceChecksum) practiceReasons.push("display-source-checksum");
-    if (displayId !== checkFormSet?.bindings?.displaySourceId || display.sourceChecksum !== checkFormSet?.bindings?.displaySourceChecksum || display.sourceChecksum !== checkFormSet?.displayProvenance?.sourceChecksum) checkReasons.push("display-source-checksum");
-  }
-  if (practiceBank?.displayProvenance?.sourceId !== displayId) practiceReasons.push("display-source-id");
-  if (checkFormSet?.displayProvenance?.sourceId !== checkFormSet?.bindings?.displaySourceId) checkReasons.push("display-source-id");
-  return { referenceReasons, practiceReasons, checkReasons, index, statistical, display };
+
+  const trainingId = practiceBank?.bindings?.displaySourceId;
+  const training = resolvePracticeCorpusSource(trainingId, index);
+  const trainingEligibility = training ? getPracticeSourceUsageEligibility(training, "production-display") : { allowed: false };
+  if (!training || !trainingEligibility.allowed) practiceReasons.push("display-source-not-approved");
+  else if (training.sourceChecksum !== practiceBank?.bindings?.displaySourceChecksum || training.sourceChecksum !== practiceBank?.displayProvenance?.sourceChecksum) practiceReasons.push("display-source-checksum");
+  if (practiceBank?.displayProvenance?.sourceId !== trainingId) practiceReasons.push("display-source-id");
+
+  const diagnosticId = checkFormSet?.bindings?.displaySourceId;
+  const diagnostic = resolvePracticeCorpusSource(diagnosticId, index);
+  const diagnosticEligibility = diagnostic ? getPracticeSourceUsageEligibility(diagnostic, "production-display") : { allowed: false };
+  if (!diagnostic || !diagnosticEligibility.allowed) checkReasons.push("display-source-not-approved");
+  else if (diagnostic.sourceChecksum !== checkFormSet?.bindings?.displaySourceChecksum || diagnostic.sourceChecksum !== checkFormSet?.displayProvenance?.sourceChecksum) checkReasons.push("display-source-checksum");
+  if (checkFormSet?.displayProvenance?.sourceId !== diagnosticId) checkReasons.push("display-source-id");
+  if (trainingId && diagnosticId && trainingId === diagnosticId) { practiceReasons.push("display-source-not-independent"); checkReasons.push("display-source-not-independent"); }
+
+  return { referenceReasons, practiceReasons, checkReasons, index, statistical, training, diagnostic };
 }
 
 export async function verifyPracticeCommonWordArtifactIntegrity({
@@ -256,7 +264,12 @@ export async function verifyPracticeCommonWordArtifactIntegrity({
       sha256(withoutChecksum(practiceBank), cryptoObject),
       sha256(withoutChecksum(checkFormSet), cryptoObject),
       sha256(withoutChecksum(sourceSnapshot), cryptoObject),
-      registry.statistical && registry.display ? sha256({ registryVersion: sourceRegistry?.registryVersion, statisticalSource: registry.statistical, displaySource: registry.display }, cryptoObject) : null,
+      registry.statistical && registry.training && registry.diagnostic ? sha256({
+        registryVersion: sourceRegistry?.registryVersion,
+        statisticalSource: registry.statistical,
+        trainingSource: registry.training,
+        diagnosticSource: registry.diagnostic,
+      }, cryptoObject) : null,
     ]);
     if (referenceChecksum !== reference?.checksum) referenceReasons.push("checksum-mismatch");
     if (practiceChecksum !== practiceBank?.checksum) practiceReasons.push("checksum-mismatch");
@@ -283,7 +296,7 @@ export async function verifyPracticeCommonWordArtifactIntegrity({
     }
   }
 
-  referenceReasons.push(...validateSourceSnapshotShape(sourceSnapshot, reference));
+  referenceReasons.push(...validateSourceSnapshotShape(sourceSnapshot, reference, practiceBank, checkFormSet));
   const referenceWords = referenceWordMap(reference);
   practiceReasons.push(...sharedBindingReasons(practiceBank?.bindings, reference?.bindings, "reference"));
   checkReasons.push(...sharedBindingReasons(checkFormSet?.bindings, reference?.bindings, "reference"));
