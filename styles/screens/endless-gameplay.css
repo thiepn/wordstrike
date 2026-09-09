@@ -1,0 +1,838 @@
+/* UI6 — Endless gameplay presentation.
+   Endless-only ownership. Campaign and Boss keep their dedicated UI5/UI7 boundaries. */
+
+.endless-gameplay-screen {
+  --endless-hud-height: 94px;
+  --endless-accent: var(--ui-accent);
+  --endless-pressure-color: var(--ui-text-muted);
+  grid-template-rows: var(--endless-hud-height) minmax(0, 1fr);
+  background:
+    radial-gradient(circle at 50% 52%, rgb(0 255 242 / 8%), transparent 22%),
+    radial-gradient(circle at 50% 52%, transparent 0 31%, rgb(0 255 242 / 1.8%) 31.5%, transparent 32%),
+    linear-gradient(180deg, rgb(6 11 17 / 94%) 0, rgb(8 13 19 / 38%) 130px, transparent 230px),
+    var(--ui-bg, #0a0e14);
+}
+
+.endless-gameplay-screen[data-endless-stage-tier="mid"] {
+  --endless-pressure-color: rgb(255 60 172 / 72%);
+}
+
+.endless-gameplay-screen[data-endless-stage-tier="late"] {
+  --endless-pressure-color: var(--ui-accent-special);
+}
+
+.endless-gameplay-screen[data-endless-pressure="high"] {
+  --endless-pressure-color: var(--ui-accent-danger);
+}
+
+.endless-gameplay-screen .endless-gameplay-hud {
+  position: relative;
+  z-index: 20;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: center;
+  gap: 7px;
+  min-width: 0;
+  min-height: 0;
+  padding: max(8px, env(safe-area-inset-top)) max(18px, env(safe-area-inset-right)) 8px max(18px, env(safe-area-inset-left));
+  border: 0;
+  background: linear-gradient(180deg, rgb(5 9 14 / 91%), rgb(5 9 14 / 57%) 68%, transparent);
+  color: var(--ui-text-soft);
+  font-family: var(--ui-font);
+  font-size: 12px;
+  box-shadow: none;
+}
+
+.endless-hud-primary {
+  display: grid;
+  grid-template-columns: auto auto minmax(82px, .8fr) minmax(70px, .55fr) minmax(88px, .72fr) auto;
+  align-items: center;
+  gap: clamp(12px, 2vw, 28px);
+  min-width: 0;
+}
+
+.endless-hud-back {
+  min-width: 52px;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: var(--ui-radius-sm);
+  background: transparent;
+  color: var(--ui-text-muted);
+  font-family: var(--ui-font);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  transition:
+    color var(--ui-motion-fast) var(--ui-ease-out),
+    background var(--ui-motion-fast) var(--ui-ease-out);
+}
+
+.endless-hud-back:hover,
+.endless-hud-back:focus-visible {
+  background: rgb(255 255 255 / 5%);
+  color: var(--ui-text);
+  transform: none;
+}
+
+.endless-hud-back:focus-visible {
+  outline: 2px solid var(--ui-accent);
+  outline-offset: 2px;
+}
+
+.endless-hud-identity,
+.endless-hud-metric,
+.endless-hud-integrity,
+.endless-hud-survival,
+.endless-hud-pressure {
+  display: flex;
+  min-width: 0;
+  align-items: baseline;
+  gap: 7px;
+}
+
+.endless-hud-identity {
+  align-items: center;
+}
+
+.endless-hud-label {
+  color: var(--ui-text-muted);
+  font-family: var(--ui-font);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .13em;
+  line-height: 1;
+}
+
+.endless-hud-identity #endless-stage,
+.endless-hud-value,
+.endless-hud-survival strong,
+.endless-hud-pressure strong,
+.endless-hud-integrity-segments {
+  color: var(--ui-text);
+  font-family: var(--data-font);
+  font-variant-numeric: tabular-nums;
+}
+
+.endless-hud-identity #endless-stage {
+  color: var(--ui-accent);
+  font-size: 19px;
+  font-weight: 730;
+  text-shadow: var(--ui-glow-cyan-soft);
+}
+
+.endless-hud-metric {
+  justify-content: center;
+}
+
+.endless-hud-metric .endless-hud-value {
+  font-size: 14px;
+  font-weight: 650;
+  line-height: 1;
+}
+
+.endless-hud-pace {
+  justify-content: flex-start;
+}
+
+.endless-hud-pace [data-endless-wpm] {
+  color: var(--ui-accent);
+  font-size: clamp(22px, 2.1vw, 30px);
+  font-weight: 740;
+  letter-spacing: -.04em;
+  text-shadow: var(--ui-glow-cyan-soft);
+}
+
+.endless-hud-combo [data-endless-combo] {
+  color: var(--ui-text-soft);
+}
+
+.endless-hud-score {
+  justify-content: flex-end;
+}
+
+.endless-hud-score #endless-score {
+  color: var(--ui-text-soft);
+}
+
+.endless-hud-integrity {
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.endless-hud-integrity-copy {
+  display: inline-flex;
+  align-items: center;
+}
+
+.endless-hud-integrity-segments,
+.endless-core-integrity {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.endless-hud-integrity-segments i {
+  width: 12px;
+  height: 4px;
+  background: var(--ui-accent);
+  box-shadow: 0 0 8px rgb(0 255 242 / 45%);
+  transform: skewX(-18deg);
+  transition:
+    opacity var(--ui-motion-fast) var(--ui-ease-out),
+    background var(--ui-motion-fast) var(--ui-ease-out),
+    box-shadow var(--ui-motion-fast) var(--ui-ease-out);
+}
+
+.endless-hud-integrity-segments i.is-depleted {
+  background: rgb(232 240 245 / 13%);
+  box-shadow: none;
+  opacity: .45;
+}
+
+.endless-hud-legacy-integrity,
+.endless-hud-legacy-progress {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0 0 0 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+.endless-hud-secondary {
+  display: grid;
+  grid-template-columns: auto minmax(130px, 1fr) auto auto;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  padding-left: 64px;
+}
+
+.endless-hud-survival strong,
+.endless-hud-pressure strong {
+  color: var(--ui-text-soft);
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.endless-hud-pressure strong {
+  color: var(--endless-pressure-color);
+}
+
+.endless-target-state {
+  justify-self: end;
+  color: var(--ui-text-muted);
+  font-family: var(--data-font);
+  font-size: 9px;
+  letter-spacing: .08em;
+  white-space: nowrap;
+}
+
+.endless-stage-progress {
+  position: relative;
+  height: 2px;
+  min-width: 0;
+  overflow: hidden;
+  background: rgb(232 240 245 / 10%);
+}
+
+.endless-stage-progress-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: var(--endless-stage-progress, 0%);
+  background: linear-gradient(90deg, rgb(0 255 242 / 34%), var(--ui-accent));
+  box-shadow: 0 0 8px rgb(0 255 242 / 36%);
+  transition: width 130ms linear;
+}
+
+.endless-gameplay-screen[data-endless-pressure="high"] .endless-stage-progress-fill {
+  background: linear-gradient(90deg, var(--ui-accent), var(--ui-accent-danger));
+}
+
+.endless-gameplay-screen .play-area {
+  isolation: isolate;
+  background:
+    radial-gradient(circle at 50% 50%, rgb(0 255 242 / 5%), transparent 17%),
+    repeating-radial-gradient(circle at center, transparent 0 82px, rgb(0 255 242 / 1.8%) 83px 84px, transparent 85px 165px);
+}
+
+.endless-gameplay-screen .play-area::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, transparent 49.94%, rgb(0 255 242 / 2.5%) 50%, transparent 50.06%),
+    linear-gradient(0deg, transparent 49.94%, rgb(0 255 242 / 2.5%) 50%, transparent 50.06%);
+  mask-image: radial-gradient(circle at center, #000 0 14%, transparent 68%);
+}
+
+.endless-gameplay-screen[data-endless-pressure="high"] .play-area {
+  background:
+    radial-gradient(circle at 50% 50%, rgb(255 71 87 / 5%), transparent 19%),
+    repeating-radial-gradient(circle at center, transparent 0 82px, rgb(255 60 172 / 2.6%) 83px 84px, transparent 85px 165px);
+}
+
+/* Endless Core: radar/pulse survival identity, preserving the shared 58px gameplay footprint. */
+.endless-gameplay-screen .endless-core {
+  width: 58px;
+  height: 58px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  box-shadow: none;
+  animation: none;
+  transform: translate(-50%, -50%);
+  color: var(--ui-accent);
+}
+
+.endless-gameplay-screen .endless-core::after {
+  content: none;
+}
+
+.endless-core-field,
+.endless-core-radar,
+.endless-core-sweep,
+.endless-core-reactor,
+.endless-core-integrity,
+.endless-core-label {
+  position: absolute;
+  pointer-events: none;
+}
+
+.endless-core-field {
+  inset: -34px;
+  border: 1px solid rgb(0 255 242 / 9%);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgb(0 255 242 / 8%), transparent 56%);
+  box-shadow: 0 0 48px rgb(0 255 242 / 10%);
+}
+
+.endless-core-radar {
+  left: 50%;
+  top: 50%;
+  border: 1px solid rgb(0 255 242 / 18%);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.endless-core-radar-a {
+  width: 76px;
+  height: 76px;
+  animation: endless-radar-pulse 2.7s ease-out infinite;
+}
+
+.endless-core-radar-b {
+  width: 100px;
+  height: 100px;
+  opacity: .45;
+  animation: endless-radar-pulse 2.7s 1.35s ease-out infinite;
+}
+
+.endless-core-sweep {
+  left: 50%;
+  top: 50%;
+  width: 46px;
+  height: 1px;
+  transform-origin: 0 50%;
+  background: linear-gradient(90deg, var(--ui-accent), transparent);
+  box-shadow: 0 0 7px rgb(0 255 242 / 55%);
+  animation: endless-radar-sweep 4.8s linear infinite;
+}
+
+.endless-core-reactor {
+  inset: 10px;
+  border: 1px solid rgb(0 255 242 / 56%);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, rgb(235 255 254 / 90%) 0 7%, var(--ui-accent) 8% 17%, rgb(0 255 242 / 20%) 19% 50%, transparent 52%);
+  box-shadow:
+    0 0 9px rgb(0 255 242 / 52%),
+    0 0 28px rgb(0 255 242 / 22%),
+    inset 0 0 11px rgb(0 255 242 / 26%);
+  animation: endless-reactor-breathe 2.1s ease-in-out infinite;
+}
+
+.endless-core-integrity {
+  left: 50%;
+  top: 50%;
+  width: 98px;
+  height: 98px;
+  transform: translate(-50%, -50%);
+}
+
+.endless-core-integrity i {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 25px;
+  height: 3px;
+  margin-left: -12.5px;
+  transform-origin: 50% 49px;
+  background: var(--ui-accent);
+  box-shadow: 0 0 8px rgb(0 255 242 / 66%);
+}
+
+.endless-core-integrity i:nth-child(1) { transform: translateY(-49px) rotate(0deg); }
+.endless-core-integrity i:nth-child(2) { transform: translateY(-49px) rotate(120deg); }
+.endless-core-integrity i:nth-child(3) { transform: translateY(-49px) rotate(240deg); }
+.endless-core-integrity i.is-depleted {
+  background: rgb(232 240 245 / 12%);
+  box-shadow: none;
+  opacity: .32;
+}
+
+.endless-core-label {
+  left: 50%;
+  top: calc(100% + 29px);
+  transform: translateX(-50%);
+  color: rgb(232 240 245 / 32%);
+  font-family: var(--data-font);
+  font-size: 8px;
+  font-weight: 650;
+  letter-spacing: .17em;
+}
+
+.endless-gameplay-screen[data-endless-integrity="1"] .endless-core,
+.endless-gameplay-screen[data-endless-integrity="1"] .endless-hud-integrity {
+  --ui-accent: var(--ui-accent-danger);
+  color: var(--ui-accent-danger);
+}
+
+.endless-gameplay-screen[data-endless-integrity="1"] .endless-core-field {
+  border-color: rgb(255 71 87 / 20%);
+  background: radial-gradient(circle, rgb(255 71 87 / 10%), transparent 56%);
+  box-shadow: 0 0 48px rgb(255 71 87 / 14%);
+  animation: endless-core-critical 820ms ease-in-out infinite alternate;
+}
+
+.endless-gameplay-screen[data-endless-integrity="1"] .endless-core-reactor,
+.endless-gameplay-screen[data-endless-integrity="1"] .endless-core-integrity i:not(.is-depleted) {
+  border-color: var(--ui-accent-danger);
+  background-color: var(--ui-accent-danger);
+  box-shadow: 0 0 12px rgb(255 71 87 / 60%);
+}
+
+.endless-gameplay-screen[data-endless-integrity="0"] .endless-core {
+  opacity: .3;
+  filter: grayscale(.35);
+}
+
+.endless-gameplay-screen[data-endless-pressure="high"] .endless-core-sweep {
+  background: linear-gradient(90deg, var(--ui-accent-danger), transparent);
+  box-shadow: 0 0 8px rgb(255 71 87 / 55%);
+}
+
+@keyframes endless-radar-pulse {
+  0% { opacity: .52; transform: translate(-50%, -50%) scale(.76); }
+  75%, 100% { opacity: 0; transform: translate(-50%, -50%) scale(1.16); }
+}
+
+@keyframes endless-radar-sweep {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes endless-reactor-breathe {
+  50% { filter: brightness(1.15); transform: scale(1.035); }
+}
+
+@keyframes endless-core-critical {
+  to { opacity: .56; transform: scale(1.045); }
+}
+
+/* Endless incoming words: typography/state first, never box-first. */
+.endless-gameplay-screen .word-visual {
+  padding: 4px 7px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: rgb(232 240 245 / 86%);
+  box-shadow: none;
+  text-shadow: 0 0 5px rgb(232 240 245 / 18%);
+}
+
+.endless-gameplay-screen .word-visual::after {
+  content: "";
+  position: absolute;
+  right: 7px;
+  bottom: -3px;
+  left: 7px;
+  height: 2px;
+  background: transparent;
+  transform: scaleX(.28);
+  opacity: 0;
+  transition:
+    opacity var(--ui-motion-fast) var(--ui-ease-out),
+    transform var(--ui-motion-fast) var(--ui-ease-out),
+    background var(--ui-motion-fast) var(--ui-ease-out);
+}
+
+.endless-gameplay-screen .word-visual.active {
+  border: 0;
+  background: transparent;
+  color: var(--ui-text);
+  box-shadow: none;
+  text-shadow: 0 0 8px rgb(0 255 242 / 28%);
+}
+
+.endless-gameplay-screen .word-visual.active::after {
+  background: var(--ui-accent);
+  box-shadow: 0 0 8px rgb(0 255 242 / 62%);
+  opacity: 1;
+  transform: scaleX(1);
+}
+
+.endless-gameplay-screen .word-visual.candidate {
+  border: 0;
+  background: transparent;
+  color: var(--ui-text);
+  box-shadow: none;
+  text-shadow: 0 0 7px rgb(255 60 172 / 20%);
+}
+
+.endless-gameplay-screen .word-visual.candidate::after {
+  background: var(--ui-accent-special);
+  box-shadow: 0 0 7px rgb(255 60 172 / 48%);
+  opacity: .82;
+  transform: scaleX(.82);
+}
+
+.endless-gameplay-screen .word-visual.active .typed-letter {
+  color: var(--ui-accent);
+  text-shadow: 0 0 8px rgb(0 255 242 / 74%);
+}
+
+.endless-gameplay-screen .word-visual.candidate .typed-letter {
+  color: var(--ui-accent-special);
+  text-shadow: 0 0 7px rgb(255 60 172 / 56%);
+}
+
+.endless-gameplay-screen .word-visual.wrong {
+  border: 0;
+  background: transparent;
+  color: var(--ui-accent-danger);
+  box-shadow: none;
+  animation: endless-word-error 150ms linear;
+}
+
+.endless-gameplay-screen .word-visual.wrong::after {
+  background: var(--ui-accent-danger);
+  box-shadow: 0 0 8px rgb(255 71 87 / 58%);
+  opacity: 1;
+  transform: scaleX(1);
+}
+
+.endless-gameplay-screen .endless-word-imminent .word-visual:not(.active):not(.candidate) {
+  color: rgb(255 194 201 / 90%);
+  text-shadow: 0 0 7px rgb(255 71 87 / 22%);
+}
+
+.endless-gameplay-screen .endless-word-imminent .word-visual:not(.active):not(.candidate)::after {
+  background: rgb(255 71 87 / 70%);
+  opacity: .55;
+  transform: scaleX(.56);
+}
+
+@keyframes endless-word-error {
+  35% { transform: translateX(-3px); filter: brightness(1.45); }
+  70% { transform: translateX(2px); }
+}
+
+/* Completion energy: reuse renderer's directional geometry without changing removal mechanics. */
+.endless-gameplay-screen .burst {
+  width: 10px;
+  height: 10px;
+  border: 1px solid var(--ui-accent);
+  border-radius: 50%;
+  box-shadow: 0 0 12px rgb(0 255 242 / 55%);
+  transform: translate(-50%, -50%);
+  animation: endless-burst-collapse 300ms var(--ui-ease-out) forwards;
+}
+
+.endless-gameplay-screen .burst::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(var(--campaign-burst-reach, 120px), 220px);
+  height: 1px;
+  transform: rotate(var(--campaign-burst-angle, 0deg));
+  transform-origin: 0 50%;
+  background: linear-gradient(90deg, rgb(0 255 242 / 75%), transparent);
+  box-shadow: 0 0 7px rgb(0 255 242 / 45%);
+}
+
+@keyframes endless-burst-collapse {
+  to { opacity: 0; transform: translate(-50%, -50%) scale(.45); }
+}
+
+.endless-gameplay-screen .play-area.damage-flash::after {
+  box-shadow:
+    inset 0 0 90px 24px rgb(255 71 87 / 48%),
+    inset 0 0 180px 50px rgb(255 60 172 / 10%);
+  animation: endless-damage-edge 240ms ease-out forwards;
+}
+
+.endless-gameplay-screen .play-area.damage-flash .endless-core-field {
+  animation: endless-core-hit 230ms ease-out;
+}
+
+@keyframes endless-damage-edge {
+  to { opacity: 0; }
+}
+
+@keyframes endless-core-hit {
+  35% { transform: scale(.77); filter: brightness(1.7); }
+  72% { transform: scale(1.12); }
+}
+
+/* Stage transitions are rare, so they may carry a stronger pulse than ordinary HUD updates. */
+.endless-gameplay-screen .endless-stage-transition {
+  z-index: 28;
+  right: auto;
+  top: 50%;
+  left: 50%;
+  min-width: min(420px, 78vw);
+  padding: 16px 28px;
+  border: 0;
+  border-block: 1px solid rgb(0 255 242 / 32%);
+  background: linear-gradient(90deg, transparent, rgb(7 15 22 / 86%) 18% 82%, transparent);
+  color: var(--ui-accent);
+  font-family: var(--data-font);
+  font-size: clamp(18px, 3vw, 28px);
+  font-weight: 740;
+  letter-spacing: .16em;
+  text-align: center;
+  box-shadow: none;
+  transform: translate(-50%, -50%);
+  animation: endless-stage-arrival 620ms var(--ui-ease-out);
+}
+
+.endless-gameplay-screen .endless-stage-transition[hidden] {
+  display: none;
+}
+
+.endless-gameplay-screen .endless-stage-transition::before,
+.endless-gameplay-screen .endless-stage-transition::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 64px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--ui-accent));
+}
+
+.endless-gameplay-screen .endless-stage-transition::before {
+  right: 100%;
+}
+
+.endless-gameplay-screen .endless-stage-transition::after {
+  left: 100%;
+  transform: scaleX(-1);
+}
+
+@keyframes endless-stage-arrival {
+  from { opacity: 0; transform: translate(-50%, -50%) scale(.92); letter-spacing: .28em; }
+}
+
+/* Mobile input stays visible only where it is useful. */
+.endless-gameplay-screen .endless-keyboard-trigger {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: var(--ui-radius-sm);
+  outline: none;
+  background: rgb(16 23 32 / 88%);
+  color: var(--ui-text-muted);
+  box-shadow: var(--ui-shadow-sm);
+  font-family: var(--ui-font);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  transition:
+    color var(--ui-motion-fast) var(--ui-ease-out),
+    background var(--ui-motion-fast) var(--ui-ease-out),
+    box-shadow var(--ui-motion-fast) var(--ui-ease-out);
+}
+
+.endless-gameplay-screen .endless-keyboard-trigger:hover,
+.endless-gameplay-screen .endless-keyboard-trigger:focus-visible {
+  outline: 2px solid var(--ui-accent);
+  outline-offset: 2px;
+  background: rgb(22 33 45 / 94%);
+  color: var(--ui-text);
+  box-shadow: var(--ui-shadow-md), var(--ui-glow-cyan-soft);
+  transform: none;
+}
+
+.endless-gameplay-screen .gameplay-input-dock.keyboard-ready .endless-keyboard-trigger {
+  background: rgb(0 255 242 / 8%);
+  color: var(--ui-accent);
+  box-shadow: var(--ui-glow-cyan-soft);
+}
+
+@media (min-width: 761px) {
+  .endless-gameplay-screen .endless-keyboard-trigger {
+    display: none !important;
+  }
+}
+
+@media (max-width: 760px) {
+  .endless-gameplay-screen {
+    --endless-hud-height: 116px;
+  }
+
+  .endless-gameplay-screen .endless-gameplay-hud {
+    gap: 8px;
+    padding: max(7px, env(safe-area-inset-top)) max(10px, env(safe-area-inset-right)) 7px max(10px, env(safe-area-inset-left));
+  }
+
+  .endless-hud-primary {
+    grid-template-columns: auto auto minmax(54px, 1fr) auto auto;
+    grid-template-areas:
+      "back stage pace combo core"
+      "back score score score core";
+    gap: 4px 10px;
+  }
+
+  .endless-hud-back { grid-area: back; }
+  .endless-hud-identity { grid-area: stage; }
+  .endless-hud-pace { grid-area: pace; }
+  .endless-hud-combo { grid-area: combo; }
+  .endless-hud-score { grid-area: score; justify-content: flex-start; }
+  .endless-hud-integrity { grid-area: core; }
+  .endless-hud-pace [data-endless-wpm] { font-size: 20px; }
+
+  .endless-hud-secondary {
+    grid-template-columns: auto minmax(54px, 1fr) auto;
+    grid-template-areas:
+      "survival progress pressure"
+      "target target target";
+    gap: 5px 8px;
+    padding-left: 0;
+  }
+
+  .endless-hud-survival { grid-area: survival; }
+  .endless-stage-progress { grid-area: progress; }
+  .endless-hud-pressure { grid-area: pressure; justify-content: flex-end; }
+  .endless-target-state { grid-area: target; justify-self: end; }
+  .endless-hud-integrity-copy { display: none; }
+  .endless-hud-label { font-size: 8px; }
+  .endless-target-state { font-size: 8px; }
+
+  .endless-gameplay-screen .word-visual {
+    padding-inline: 5px;
+    font-size: clamp(19px, 6vw, 25px);
+  }
+
+  .endless-gameplay-screen .word-visual::after {
+    left: 5px;
+    right: 5px;
+  }
+
+  .endless-gameplay-screen .endless-keyboard-trigger {
+    min-height: 44px;
+    padding-inline: 12px;
+    font-size: 9px;
+  }
+}
+
+@media (max-height: 430px) {
+  .endless-gameplay-screen {
+    --endless-hud-height: 84px;
+  }
+
+  .endless-gameplay-screen .endless-gameplay-hud {
+    gap: 4px;
+    padding-block: 4px;
+  }
+
+  .endless-hud-primary {
+    grid-template-columns: auto auto minmax(50px, .8fr) minmax(48px, .6fr) minmax(64px, .7fr) auto;
+    grid-template-areas: none;
+    gap: 6px 10px;
+  }
+
+  .endless-hud-back,
+  .endless-hud-identity,
+  .endless-hud-pace,
+  .endless-hud-combo,
+  .endless-hud-score,
+  .endless-hud-integrity {
+    grid-area: auto;
+  }
+
+  .endless-hud-back {
+    min-height: 44px;
+    min-width: 48px;
+    padding-inline: 8px;
+  }
+
+  .endless-hud-pace [data-endless-wpm] { font-size: 18px; }
+  .endless-hud-secondary { padding-left: 54px; }
+  .endless-core-label { display: none; }
+}
+
+@media (max-width: 520px) and (max-height: 430px) {
+  .endless-gameplay-screen {
+    --endless-hud-height: 88px;
+  }
+
+  .endless-hud-primary {
+    grid-template-columns: auto auto minmax(46px, 1fr) auto auto;
+    grid-template-areas:
+      "back stage pace combo core"
+      "back score score score core";
+  }
+
+  .endless-hud-back { grid-area: back; }
+  .endless-hud-identity { grid-area: stage; }
+  .endless-hud-pace { grid-area: pace; }
+  .endless-hud-combo { grid-area: combo; }
+  .endless-hud-score { grid-area: score; }
+  .endless-hud-integrity { grid-area: core; }
+
+  .endless-hud-secondary {
+    grid-template-columns: auto minmax(45px, 1fr) auto;
+    grid-template-areas: "survival progress pressure";
+    padding-left: 0;
+  }
+
+  .endless-hud-survival { grid-area: survival; }
+  .endless-stage-progress { grid-area: progress; }
+  .endless-hud-pressure { grid-area: pressure; }
+  .endless-target-state { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .endless-gameplay-screen *,
+  .endless-gameplay-screen *::before,
+  .endless-gameplay-screen *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+  }
+
+  .endless-gameplay-screen .endless-core-radar,
+  .endless-gameplay-screen .endless-core-sweep,
+  .endless-gameplay-screen .endless-core-reactor,
+  .endless-gameplay-screen[data-endless-integrity="1"] .endless-core-field {
+    animation: none !important;
+  }
+
+  .endless-gameplay-screen .word-visual.wrong {
+    transform: none !important;
+    filter: none !important;
+  }
+
+  .endless-gameplay-screen .burst::before {
+    display: none;
+  }
+}
