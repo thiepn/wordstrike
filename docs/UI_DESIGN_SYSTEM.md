@@ -2,7 +2,7 @@
 
 **Phase:** UI1 — Design System Foundation & Visual Grammar  
 **Direction:** Cyber-athletic minimalism  
-**Status:** Source of truth for UI2–UI12
+**Status:** Finalized source of truth for the completed UI1–UI12 redesign
 
 ## 1. Design intent
 
@@ -29,7 +29,7 @@ Normal UI is predominantly neutral. Cyan, magenta, red, and green are spent on m
 
 ## 3. Architecture
 
-`style.css` remains the legacy screen stylesheet during the staged UI2–UI12 migration.
+`style.css` remains the legacy screen stylesheet alongside the completed UI2–UI12 migration.
 
 `styles/ui-system.css` is the UI1 foundation and loads after `style.css`. It contains:
 
@@ -40,9 +40,9 @@ Normal UI is predominantly neutral. Cyan, magenta, red, and green are spent on m
 - responsive/accessibility behavior;
 - a narrow Practice Lab compatibility scope.
 
-This is intentional coexistence, not an uncontrolled override file. New phases should build from the UI1 primitives and progressively retire legacy declarations when a screen receives its dedicated redesign.
+This is intentional coexistence, not an uncontrolled override file. The completed screen phases build from the UI1 primitives and use dedicated screen styles for migrated compositions. Future changes should extend this grammar rather than create a parallel visual system.
 
-Do not append unrelated screen-specific redesigns to `styles/ui-system.css`. Dedicated phases may extend primitives here only when the addition is genuinely reusable.
+Do not append unrelated screen-specific redesigns to `styles/ui-system.css`. Dedicated screen work may extend primitives here only when the addition is genuinely reusable.
 
 ## 4. Typography
 
@@ -189,7 +189,7 @@ Radii are intentionally restrained:
 - `--radius-lg: 8px`
 - `--radius-overlay: 10px`
 
-Do not normalize the product into 16–24px rounded SaaS cards or pill controls. A later phase may add a restrained chamfer/clipped-corner motif if it proves useful, but it must remain exceptional rather than universal.
+Do not normalize the product into 16–24px rounded SaaS cards or pill controls. Additional work may add a restrained chamfer/clipped-corner motif if it proves useful, but it must remain exceptional rather than universal.
 
 Permanent cyan borders are not a default component state.
 
@@ -276,11 +276,11 @@ SVG conventions:
 
 Icons support important text labels rather than replacing labels when comprehension could suffer.
 
-Expected later icons include Play, Restart, Pause, Settings, Profile, Leaderboard, Back, Close, Info, Keyboard, Volume, Trophy, Timer, and Target.
+The icon language includes Play, Restart, Pause, Settings, Profile, Leaderboard, Back, Close, Info, Keyboard, Volume, Trophy, Timer, and Target where those concepts are needed.
 
 ## 13. Inputs
 
-Use `.ui-field`, `.ui-input`, and `.ui-select` for future migrations.
+Use `.ui-field`, `.ui-input`, and `.ui-select` for migrated and future input surfaces.
 
 Default inputs use neutral surfaces and borders. Focus gets a clear cyan ring without a large glow. Error and valid states have semantic borders. Minimum height is 44px.
 
@@ -298,7 +298,7 @@ Rules:
 - keyboard focus remains visible;
 - the container may scroll horizontally on constrained widths.
 
-UI8 will perform the actual Typing Test migration.
+UI8 owns the Typing Test migration.
 
 ## 15. Tabs
 
@@ -306,7 +306,7 @@ Use `.ui-tabs` for Profile/Leaderboard-style navigation.
 
 The active state is communicated by label contrast plus a cyan underline, not a collection of outlined neon buttons. Tabs remain keyboard focusable and horizontally scrollable on constrained widths.
 
-UI11 will perform the full Profile, Leaderboards, and Settings restructuring.
+UI11 owns the Profile, Leaderboards, and Settings restructuring.
 
 ## 16. Metrics
 
@@ -337,7 +337,7 @@ Suitable states include PB, Complete, Locked, Ranked, Online, Offline, Boss, and
 - strong separation without neon construction borders;
 - shared header/body/action structure.
 
-Existing focus-trap logic remains authoritative. UI10 will migrate Pause, onboarding, and results composition.
+Existing focus-trap logic remains authoritative. UI10 owns Pause, onboarding, and results composition.
 
 ## 19. Hints/tooltips
 
@@ -345,7 +345,7 @@ Existing focus-trap logic remains authoritative. UI10 will migrate Pause, onboar
 
 ## 20. HUD foundation
 
-`.ui-hud`, `.ui-hud-group`, and `.ui-hud-surface` define the future low-chrome HUD language:
+`.ui-hud`, `.ui-hud-group`, and `.ui-hud-surface` define the shared low-chrome HUD language:
 
 - floating groups;
 - neutral/translucent backing only when necessary;
@@ -425,7 +425,7 @@ Do not introduce:
 
 ## 27. Phase ownership
 
-UI1 deliberately does **not** complete these compositions:
+The UI1 foundation intentionally delegated the following compositions. UI2–UI12 have now completed them:
 
 - UI2 — Title + global navigation
 - UI3 — Mode Select
@@ -439,4 +439,4 @@ UI1 deliberately does **not** complete these compositions:
 - UI11 — Profile/Leaderboards/Settings
 - UI12 — final motion/audio/responsive/accessibility polish
 
-Future phases should consume the primitives defined here rather than inventing another visual grammar.
+The completed phases consume the primitives defined here. Future UI work should extend this grammar rather than inventing another visual system.
