@@ -1,6 +1,6 @@
 # PL27 — Burst Sprints
 
-Status: implementation candidate
+Status: implementation closed
 
 ## Purpose
 
