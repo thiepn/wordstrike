@@ -136,12 +136,18 @@
   line-height: 1.55;
 }
 
+/* UI12 is the final accessibility/consistency layer: every Settings switch gets
+   the same 44px interaction target, including the three UI11 core toggles. */
+.settings-screen .settings-list .toggle[role="switch"],
+.settings-screen .ui12-sound-toggle[role="switch"] {
+  min-height: 44px;
+}
+
 /* Match the UI11 compact pill exactly while keeping the audio switch outside
    UI11's authoritative .settings-list toggle set. */
 .settings-screen .ui12-sound-toggle[role="switch"] {
   position: relative;
   min-width: 4.25rem;
-  min-height: 44px;
   padding: 0 0.7rem 0 1.8rem;
   border: 1px solid var(--ui11-line-strong, rgb(129 144 158 / 0.28));
   border-radius: 999px;
