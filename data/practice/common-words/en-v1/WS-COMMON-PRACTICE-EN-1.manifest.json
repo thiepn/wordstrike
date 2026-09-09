@@ -19,10 +19,22 @@
     "reviewStatement": "Frequency-ranked from Google's Trillion Word Corpus; every selected word is manually approved."
   },
   "bindings": {
-    "sourceChecksum": "sha256-2f9a11129713bbb96b45419ede5f849cf961835ad555e7c5ed9297c0d3afa5c8",
-    "lexicalIndexVersion": 1,
+    "corpusId": "practice-en-v1",
+    "corpusVersion": 1,
+    "corpusChecksum": "sha256-28beccf65eed71519da306c129da5040a20f364aed320dc21eea2d16c2a1c404",
+    "indexSchemaVersion": 1,
+    "indexGeneratorVersion": 1,
+    "indexChecksum": "sha256-bb198244a6b6cefcae5cb908bf3dee6e9e52259f9ef41576ec69c429a423ff32",
+    "typabilityModelVersion": 1,
     "typabilityReferenceVersion": 1,
-    "builderVersion": 1
+    "typabilityReferenceChecksum": "sha256-94a6f90c3593ebc089211882e2d9afaf0bf46b66386cdc98dbe60c533e6dd471",
+    "frequencyReferenceVersion": 1,
+    "frequencyReferenceChecksum": "sha256-b9bc8dde064335c2258844919c6dd62537f95ac4a2d5920fdd7213a9cb5d45ad",
+    "builderVersion": 1,
+    "commonWordReferenceId": "WS-COMMON-EN-1",
+    "commonWordReferenceVersion": 1,
+    "commonWordReferenceChecksum": "sha256-961a2211c1de9459fe5c7de35b08a2d75fda21e7f907d070d2f9de918b00109d",
+    "sourceChecksum": "sha256-961a2211c1de9459fe5c7de35b08a2d75fda21e7f907d070d2f9de918b00109d"
   },
   "words": [
     {
@@ -6026,5 +6038,5 @@
       "band": "broad"
     }
   ],
-  "checksum": "sha256-8ed48db1f982e8a9544481b8a133128b50bf0fe57315e998be1cc9adbc23f6c5"
+  "checksum": "sha256-ece5662cffb60b3162e61760730ab179a3be619653349ecfb20f1d1593e6ea89"
 }
