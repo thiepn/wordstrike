@@ -28,11 +28,8 @@ function audioSettingMarkup(enabled) {
       <h2 id="ui12-audio-setting-heading">Interface sound effects</h2>
       <p>Short confirmation tones for navigation and controls. Typing itself stays silent.</p>
     </div>
-    <button type="button" class="ui12-sound-toggle ${enabled ? "on" : ""}"
-      data-ui12-sound-toggle role="switch" aria-checked="${enabled}" aria-label="Interface sound effects">
-      <span aria-hidden="true" class="ui12-sound-toggle-track"><i></i></span>
-      <strong>${enabled ? "ON" : "OFF"}</strong>
-    </button>
+    <button type="button" class="toggle ui12-sound-toggle ${enabled ? "on" : ""}"
+      data-ui12-sound-toggle role="switch" aria-checked="${enabled}" aria-label="Interface sound effects">${enabled ? "ON" : "OFF"}</button>
   </section>`;
 }
 
@@ -42,9 +39,8 @@ function updateAudioSetting(section, enabled) {
   button.classList.toggle("on", enabled);
   const checked = String(enabled);
   if (button.getAttribute("aria-checked") !== checked) button.setAttribute("aria-checked", checked);
-  const label = button.querySelector("strong");
   const nextLabel = enabled ? "ON" : "OFF";
-  if (label && label.textContent !== nextLabel) label.textContent = nextLabel;
+  if (button.textContent !== nextLabel) button.textContent = nextLabel;
 }
 
 function enhanceSettings(screen) {
