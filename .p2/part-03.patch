@@ -1,0 +1,223 @@
++.mode-presentation-panel { width: min(30rem, 100%); padding: .8rem; border: 1px solid var(--color-border-default); border-top: 0; background: var(--color-surface-1); border-radius: 0 0 var(--radius-sm) var(--radius-sm); }
++.mode-presentation-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(7.5rem, 45%); align-items: center; gap: .6rem; margin-block: .35rem; }
++.mode-presentation-row label { font-size: .8rem; color: var(--color-text-primary); font-weight: 600; line-height: 1.4; }
++.mode-presentation-row select { width: 100%; min-width: 0; min-height: 44px; padding: .4rem .55rem; background: var(--color-bg); color: var(--color-text-primary); border: 1px solid var(--color-border-default); border-radius: var(--radius-sm); font: inherit; font-size: .85rem; cursor: pointer; }
++.mode-presentation-row select:disabled { color: var(--color-text-muted); cursor: default; opacity: .8; }
++.mode-presentation :is(.mode-presentation-help, .mode-presentation-note, .mode-presentation-status) { margin: .6rem 0 0; color: var(--color-text-secondary); font-size: .75rem; line-height: 1.55; letter-spacing: normal; text-transform: none; }
++.mode-presentation-status:empty { display: none; }
++.mode-presentation-preview { margin-top: .75rem; padding: .7rem; background: var(--color-bg); border-left: 2px solid var(--color-accent); }
++.mode-preview-caption { display: block; color: var(--color-text-muted); font-size: .6rem; letter-spacing: .06em; }
++.mode-preview-hud { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: .5rem; margin-block: .7rem; font-family: var(--font-game); font-size: .7rem; }
++.mode-preview-hud strong { color: var(--color-accent); font-size: 1.2rem; }
++.mode-presentation-preview p { margin: 0; color: var(--color-text-primary); font-family: var(--font-game); font-size: 1rem; line-height: 1.6; overflow-wrap: anywhere; }
++.mode-presentation-preview[data-size="small"] p { font-size: .9rem; }
++.mode-presentation-preview[data-size="large"] p { font-size: 1.15rem; }
++.mode-presentation-preview [data-preview-data],
++.mode-presentation-preview[data-live="false"] [data-preview-live] { display: none; }
++.mode-presentation-preview[data-layout="data"][data-live="true"] [data-preview-data] { display: block; flex-basis: 100%; }
++.mode-presentation-preview[data-live="false"] .mode-preview-hud { justify-content: center; }
++
++/* Configuration expands in normal flow before typing; never covers a live target. */
++.speed-test-controls-wrap > .mode-presentation { flex: 0 1 auto; }
++.speed-test-controls-wrap > .mode-presentation[open] { flex-basis: 100%; }
++.speed-test-controls-wrap > .mode-presentation[open] > summary { width: min(30rem, 100%); }
++.speed-test-controls-wrap .mode-presentation-panel { max-height: min(23rem, 50dvh); overflow-y: auto; overscroll-behavior: contain; }
++.speed-test-screen.typing-active .speed-test-topbar .mode-presentation { visibility: hidden; }
++
++/* Hidden live counters do not affect collection, results, PBs, or record eligibility. */
++.speed-test-screen .speed-test-hud > .speed-test-data-metric { display: none; }
++.speed-test-screen[data-typing-hud="data"][data-live-stats="true"] .speed-test-hud > .speed-test-data-metric { display: inline-flex; }
++.speed-test-screen[data-typing-hud="data"] .speed-test-hud { min-width: 0; flex-wrap: wrap; row-gap: .4rem; }
++.speed-test-screen[data-live-stats="false"] .speed-test-hud > span:has(:is(#speed-test-wpm, #speed-test-accuracy, #speed-test-raw, #speed-test-words, #speed-test-errors)) { display: none; }
++
++/* Keep the original fixed HUD row/arena size: hiding telemetry never changes trajectories. */
++.campaign-gameplay-screen[data-gameplay-hud="minimal"] .campaign-hud-metric,
++.endless-gameplay-screen[data-gameplay-hud="minimal"] .endless-hud-metric { display: none; }
++.campaign-gameplay-screen[data-gameplay-hud="minimal"] .campaign-hud-primary,
++.endless-gameplay-screen[data-gameplay-hud="minimal"] .endless-hud-primary { grid-template-columns: auto minmax(0, 1fr) auto; grid-template-rows: minmax(44px, auto); }
++.campaign-gameplay-screen[data-gameplay-hud="minimal"] .campaign-hud-primary { grid-template-areas: "back level core"; }
++.endless-gameplay-screen[data-gameplay-hud="minimal"] .endless-hud-primary { grid-template-areas: "back stage core"; }
++.campaign-gameplay-screen[data-gameplay-hud="minimal"] .campaign-hud-back,
++.endless-gameplay-screen[data-gameplay-hud="minimal"] .endless-hud-back { grid-area: back; }
++.campaign-gameplay-screen[data-gameplay-hud="minimal"] .campaign-hud-identity { grid-area: level; }
++.endless-gameplay-screen[data-gameplay-hud="minimal"] .endless-hud-identity { grid-area: stage; }
++.campaign-gameplay-screen[data-gameplay-hud="minimal"] .campaign-hud-integrity,
++.endless-gameplay-screen[data-gameplay-hud="minimal"] .endless-hud-integrity { grid-area: core; }
++
++/* Calm Boss/Rush decoration, not state indicators, phrase feedback, countdowns or phase timing. */
++:is(.boss-screen, .arcade-rush-gameplay)[data-action-intensity="focused"] { --bloom-accent-sm: none; --bloom-accent-lg: none; --bloom-special: none; }
++html[data-customization-active="true"] .boss-screen[data-action-intensity="focused"] .boss-threat-sigil { filter: none; }
++.boss-screen[data-action-intensity="focused"] :is(.boss-threat-sigil, .boss-threat-sigil *),
++.arcade-rush-gameplay[data-action-intensity="focused"] .arcade-rush-countdown { animation: none !important; }
++.arcade-rush-gameplay[data-action-intensity="focused"] .arcade-rush-core::before { animation: none !important; box-shadow: none; }
++.arcade-rush-gameplay[data-action-intensity="focused"] .arcade-rush-core::after { box-shadow: none; }
++:is(.boss-screen, .arcade-rush-gameplay)[data-action-intensity="focused"] .burst { display: none; }
++
++.campaign-progress-tools { flex-wrap: wrap; }
++.campaign-progress-tools > .mode-presentation[open] { flex-basis: 100%; }
++.endless-ready-panel > .mode-presentation { width: min(30rem, 100%); margin: 1rem auto; }
++.arcade-rush-ui.arcade-rush-ready .arcade-rush-ready-card { grid-template-areas: "kicker rules" "title rules" "subtitle rules" "route rules" "pb actions" "presentation presentation"; }
++.arcade-rush-ready-card > .mode-presentation { grid-area: presentation; width: min(30rem, 100%); margin-top: .75rem; }
++:is(.pause-panel, .arcade-rush-overlay-card) > .mode-presentation { margin: .75rem 0 1rem; }
++@media (max-width: 900px) {
++  .arcade-rush-ui.arcade-rush-ready .arcade-rush-ready-card { grid-template-areas: "kicker" "title" "subtitle" "route" "rules" "pb" "actions" "presentation"; }
++}
++@media (max-width: 768px) {
++  .mode-presentation-row select { font-size: 1rem; }
++  .speed-test-screen[data-typing-hud="data"] .speed-test-hud { flex-basis: 100%; justify-content: center; }
++}
++@media (max-height: 520px) {
++  .speed-test-controls-wrap .mode-presentation-panel { max-height: 45dvh; }
++}
++@media (prefers-reduced-motion: reduce) {
++  .mode-presentation *, .mode-presentation *::before, .mode-presentation *::after { animation: none !important; transition: none !important; scroll-behavior: auto; }
++}
++@media (forced-colors: active) {
++  .mode-presentation :is(summary, select), .mode-presentation-preview { border: 1px solid CanvasText; }
++}
+diff --git a/tests/browser/customization_p1.py b/tests/browser/customization_p1.py
+index de7ec89..2ae3b90 100644
+--- a/tests/browser/customization_p1.py
++++ b/tests/browser/customization_p1.py
+@@ -207,7 +207,9 @@ def default_equivalence(browser,name,base,baseline_base,checks):
+  outputs=[]
+  for origin in [baseline_base,base]:
+   context=context_for(browser,origin);page=context.new_page();open_title(page,origin)
+-  # The new preference feature deliberately adds no pixels outside Settings by default.
++  # P1 palette equivalence remains exact. P2's explicitly requested mode controls
++  # are certified separately; hide only those additions on both comparison pages.
++  page.add_style_tag(content='[data-mode-presentation] { display: none !important; }')
+   title=page.screenshot(animations='disabled',caret='hide')
+   page.locator('[data-action="modes"]').click();expect(page.locator('.mode-select-screen')).to_be_visible()
+   modes=page.screenshot(animations='disabled',caret='hide')
+diff --git a/tests/browser/customization_p2.py b/tests/browser/customization_p2.py
+new file mode 100644
+index 0000000..ba43144
+--- /dev/null
++++ b/tests/browser/customization_p2.py
+@@ -0,0 +1,329 @@
++"""P2: real mode controls, keyboard isolation, HUD geometry, and screenshot evidence.
++
++This suite is a release gate, not a substitute for physical-device testing. It must
++pass alongside the existing P1, Typing/UI8, and full non-Practice browser workflows.
++"""
++from functools import partial
++from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
++from pathlib import Path
++from threading import Thread
++import json
++import os
++import traceback
++from playwright.sync_api import sync_playwright, expect
++
++ROOT = Path(__file__).resolve().parents[2]
++ARTIFACTS = ROOT / "browser-artifacts" / "customization-p2"
++SEED = """(() => {
++  for (const [id,v] of Object.entries({general:3,campaign:1,typing:1,endless:1,boss:1,leaderboards:1,'arcade-rush':1}))
++    localStorage.setItem(`wordstrike.onboarding.${id}.v${v}`,'seen');
++})();"""
++
++
++class QuietHandler(SimpleHTTPRequestHandler):
++    def log_message(self, *_args):
++        pass
++
++
++def context_for(browser, base, width=1440, height=900, touch=False):
++    context = browser.new_context(viewport={"width": width, "height": height}, has_touch=touch)
++    context.add_init_script(SEED)
++    context.route("**/*", lambda route: route.continue_() if route.request.url.startswith(base) else route.abort())
++    return context
++
++
++def no_overflow(page):
++    state = page.evaluate("""() => ({
++      document:document.documentElement.scrollWidth-document.documentElement.clientWidth,
++      screen:(()=>{const s=document.querySelector('#app > .screen');return s ? s.scrollWidth-s.clientWidth : 0})()
++    })""")
++    assert max(state.values()) <= 1, state
++    return state
++
++
++def controls(page, mode, location="ready"):
++    return page.locator(f'[data-mode-presentation="{mode}"][data-presentation-location="{location}"]')
++
++
++def open_controls(page, mode, location="ready"):
++    details = controls(page, mode, location)
++    expect(details).to_be_attached()
++    if details.get_attribute("open") is None:
++        details.locator("summary").click()
++    return details
++
++
++def select(details, field, value):
++    details.locator(f'[data-mode-setting="{field}"]').select_option(str(value).lower() if isinstance(value, bool) else value)
++
++
++def screenshot(page, name):
++    page.screenshot(path=str(ARTIFACTS / f"{name}.png"), full_page=True, animations="disabled", caret="hide")
++
++
++def typing_state(page):
++    return page.evaluate("""async () => {
++      const {getCurrentSpeedTest,getSpeedTestActiveDuration}=await import('./js/speedTest.js');
++      const s=getCurrentSpeedTest();
++      return {config:JSON.stringify(s.config), seed:s.attemptSeed, words:s.words.slice(),
++        phase:s.phase, started:s.activeStartedAtMs, buffer:s.typedBuffer,
++        errors:s.metrics.incorrectKeystrokes, completed:s.metrics.wordsCompleted,
++        duration:getSpeedTestActiveDuration(s,performance.now())};
++    }""")
++
++
++def certify_typing(browser, name, base, checks):
++    context = context_for(browser, base)
++    page = context.new_page()
++    errors = []
++    page.on("pageerror", lambda error: errors.append(str(error)))
++    page.goto(base + "?dev=1&mode=speed-test&seed=171")
++    details = open_controls(page, "typing")
++    original = typing_state(page)
++    details.locator("summary").focus()
++    page.keyboard.press("ArrowRight")
++    assert typing_state(page)["config"] == original["config"]
++    assert typing_state(page)["started"] is None
++    # Escape closes the panel without pausing the test.
++    page.keyboard.press("Escape")
++    assert details.get_attribute("open") is None
++    assert typing_state(page)["phase"] == "PREPARING"
++
++    for hud in ("focus", "balanced", "data"):
++        for live in (True, False):
++            details = open_controls(page, "typing")
++            select(details, "typingTest.hudLayout", "balanced")
++            select(details, "typingTest.liveStats", live)
++            select(details, "typingTest.hudLayout", hud)
++            expect(page.locator(".speed-test-screen")).to_have_attribute("data-live-stats", str(live and hud != "focus").lower())
++            expect(details.locator('[data-mode-setting="typingTest.liveStats"]')).to_be_disabled() if hud == "focus" else expect(details.locator('[data-mode-setting="typingTest.liveStats"]')).to_be_enabled()
++            details.locator("summary").click()
++            for size, px in (("auto", None), ("small", 28), ("medium", 34), ("large", 42)):
++                page.locator("select[data-speed-font-size]").select_option(size)
++                if px:
++                    actual = page.locator("#speed-test-word-flow").evaluate("el => parseFloat(getComputedStyle(el).fontSize)")
++                    assert actual == px, (size, actual)
++                current = typing_state(page)
++                assert current["started"] is None and current["config"] == original["config"] and current["words"] == original["words"]
++                assert page.locator("#speed-test-primary").is_visible()
++                assert page.locator("#speed-test-wpm").is_visible() == (live and hud != "focus")
++                assert page.locator("#speed-test-accuracy").is_visible() == (live and hud != "focus")
++                assert page.locator("#speed-test-words").is_visible() == (live and hud == "data")
++                no_overflow(page)
++            if live:
++                screenshot(page, f"{name}-typing-{hud}")
++    details = open_controls(page, "typing")
++    select(details, "typingTest.hudLayout", "data")
++    select(details, "typingTest.liveStats", True)
++    details.locator("summary").click()
++    page.locator("#speed-test-word-viewport").click(position={"x": 15, "y": 15})
++    wrong = "x" if original["words"][0].startswith("z") else "z"
++    page.keyboard.type(wrong)
++    expect(page.locator(".speed-test-screen")).to_have_class(__import__('re').compile("typing-active"))
++    state = typing_state(page)
++    assert page.locator("#speed-test-errors").inner_text() == str(state["errors"])
++    assert not details.is_visible()
