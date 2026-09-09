@@ -157,7 +157,7 @@ test("PL28 duplicate completed Check session is exactly-once in canonical PL13 r
       startedAtUtc: "2026-09-09T11:58:30.000Z",
       completedAtUtc: session.completedAtUtc,
       localDayKey: session.localDayKey,
-      plannedDurationMs: null,
+      plannedDurationMs: 0,
       activeDurationMs: session.activeDurationMs,
       wallDurationMs: session.activeDurationMs,
       configuration: { correctionBehavior: "allow" },
