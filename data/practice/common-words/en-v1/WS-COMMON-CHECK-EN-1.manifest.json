@@ -12,11 +12,11 @@
   "displayProvenance": {
     "sourceId": "ws-common-words-en-diagnostic-v1",
     "sourceRegistryVersion": 1,
-    "sourceRegistryChecksum": "sha256-77e9c367306d7eb10d22117fa4e835b720c7d980fdc6ff407f7820b06e33b853",
+    "sourceRegistryChecksum": "sha256-0612d1bd11805f91c735497eed250624fd89e447828bd479d07f933d8ee1762b",
     "sourceType": "permissive-import",
     "usageApproval": "practice-display-approved",
-    "sourceChecksum": "sha256-ee2d83651fbb91642bbed2bd30ead404c2cfbdfece01dacf284af6ea47795811",
-    "sourceSnapshotChecksum": "sha256-0dff0dd147cc3933a5547627f3740e5ad777d94f90db4cdb199c47eab466eb57",
+    "sourceChecksum": "sha256-9db3a3ed1a30fbd603890b0a7a7b29f736f8ca925f541f822b932e1fb8e6045e",
+    "sourceSnapshotChecksum": "sha256-b21f765a7b059fa5401d1dbe29af28050a7ec8b5c72af976b4203e28ac53fccb",
     "partition": "diagnostic",
     "sourcePath": "data/commonGameplayWords.json",
     "sourceSchemaVersion": 2,
@@ -24,6 +24,10 @@
     "sourceUrl": "https://github.com/first20hours/google-10000-english",
     "sourceLicense": "MIT",
     "sourceSha256": "ee2d83651fbb91642bbed2bd30ead404c2cfbdfece01dacf284af6ea47795811",
+    "upstreamSourceChecksum": "sha256-ee2d83651fbb91642bbed2bd30ead404c2cfbdfece01dacf284af6ea47795811",
+    "pl6GovernanceId": "WS-COMMON-PL6-SOURCE-EN-1",
+    "pl6GovernancePath": "data/practice/common-words/en-v1/PL6-COMMON-WORD-SOURCE-EN-1.json",
+    "pl6GovernanceChecksum": "sha256-9db3a3ed1a30fbd603890b0a7a7b29f736f8ca925f541f822b932e1fb8e6045e",
     "reviewStatement": "Frequency-ranked from Google's Trillion Word Corpus; every selected word is manually approved.",
     "manualReviewArtifact": "data/commonGameplayWords.manual-review.json"
   },
@@ -41,17 +45,19 @@
     "frequencyReferenceChecksum": "sha256-b9bc8dde064335c2258844919c6dd62537f95ac4a2d5920fdd7213a9cb5d45ad",
     "builderVersion": 1,
     "sourceRegistryVersion": 1,
-    "sourceRegistryChecksum": "sha256-19642bd11ecb562f02fb364a4afd3ce5d81bc59696115f404f71e85129386852",
+    "sourceRegistryChecksum": "sha256-a8ad1d28ca9d813daf2d37117be6483276c641ae73d8a226934bd448b37465b5",
     "statisticalSourceId": "ws-common-words-en-statistical-v1",
-    "statisticalSourceChecksum": "sha256-ee2d83651fbb91642bbed2bd30ead404c2cfbdfece01dacf284af6ea47795811",
-    "sourceSnapshotChecksum": "sha256-0dff0dd147cc3933a5547627f3740e5ad777d94f90db4cdb199c47eab466eb57",
+    "statisticalSourceChecksum": "sha256-9db3a3ed1a30fbd603890b0a7a7b29f736f8ca925f541f822b932e1fb8e6045e",
+    "upstreamSourceChecksum": "sha256-ee2d83651fbb91642bbed2bd30ead404c2cfbdfece01dacf284af6ea47795811",
+    "pl6GovernanceChecksum": "sha256-9db3a3ed1a30fbd603890b0a7a7b29f736f8ca925f541f822b932e1fb8e6045e",
+    "sourceSnapshotChecksum": "sha256-b21f765a7b059fa5401d1dbe29af28050a7ec8b5c72af976b4203e28ac53fccb",
     "commonWordReferenceId": "WS-COMMON-EN-1",
     "commonWordReferenceVersion": 1,
-    "commonWordReferenceChecksum": "sha256-ab3b30b89d7dd6e564f53dc7ecf061d914a82518335de258794cad5c3aaaaa87",
-    "sourceChecksum": "sha256-ab3b30b89d7dd6e564f53dc7ecf061d914a82518335de258794cad5c3aaaaa87",
+    "commonWordReferenceChecksum": "sha256-7d20bd63e451df4d78cabfb622d5214b8e8921bdb35a47155f69f966308a0880",
+    "sourceChecksum": "sha256-7d20bd63e451df4d78cabfb622d5214b8e8921bdb35a47155f69f966308a0880",
     "displaySourceId": "ws-common-words-en-diagnostic-v1",
-    "displaySourceChecksum": "sha256-ee2d83651fbb91642bbed2bd30ead404c2cfbdfece01dacf284af6ea47795811",
-    "displaySourceRegistryChecksum": "sha256-77e9c367306d7eb10d22117fa4e835b720c7d980fdc6ff407f7820b06e33b853"
+    "displaySourceChecksum": "sha256-9db3a3ed1a30fbd603890b0a7a7b29f736f8ca925f541f822b932e1fb8e6045e",
+    "displaySourceRegistryChecksum": "sha256-0612d1bd11805f91c735497eed250624fd89e447828bd479d07f933d8ee1762b"
   },
   "diagnosticPool": [
     {
@@ -17031,5 +17037,5 @@
       "textHash": "sha256-f70be8fe3072fb0729516d6831940ae802142552e7e6c233eb1a8ab14e690fbd"
     }
   ],
-  "checksum": "sha256-f22e101ec7b895d6519fa51f9d0b90ae55ed59e74af0dd44a7831a65a22de5a3"
+  "checksum": "sha256-e4a6801b85fb2df324985125ac6c25cdb95dfbce89e7374f15aa04f2f77d9b4c"
 }

@@ -7,13 +7,17 @@
     "sourceId": "ws-common-words-en-statistical-v1",
     "sourceType": "statistical-reference",
     "usageApproval": "statistical-only",
-    "sourceChecksum": "sha256-ee2d83651fbb91642bbed2bd30ead404c2cfbdfece01dacf284af6ea47795811",
+    "sourceChecksum": "sha256-9db3a3ed1a30fbd603890b0a7a7b29f736f8ca925f541f822b932e1fb8e6045e",
     "sourcePath": "data/commonGameplayWords.json",
     "sourceSchemaVersion": 2,
     "sourceName": "google-10000-english (US no-swears)",
     "sourceUrl": "https://github.com/first20hours/google-10000-english",
     "sourceLicense": "MIT",
     "sourceSha256": "ee2d83651fbb91642bbed2bd30ead404c2cfbdfece01dacf284af6ea47795811",
+    "upstreamSourceChecksum": "sha256-ee2d83651fbb91642bbed2bd30ead404c2cfbdfece01dacf284af6ea47795811",
+    "pl6GovernanceId": "WS-COMMON-PL6-SOURCE-EN-1",
+    "pl6GovernancePath": "data/practice/common-words/en-v1/PL6-COMMON-WORD-SOURCE-EN-1.json",
+    "pl6GovernanceChecksum": "sha256-9db3a3ed1a30fbd603890b0a7a7b29f736f8ca925f541f822b932e1fb8e6045e",
     "reviewStatement": "Frequency-ranked from Google's Trillion Word Corpus; every selected word is manually approved.",
     "manualReviewArtifact": "data/commonGameplayWords.manual-review.json"
   },
@@ -31,10 +35,12 @@
     "frequencyReferenceChecksum": "sha256-b9bc8dde064335c2258844919c6dd62537f95ac4a2d5920fdd7213a9cb5d45ad",
     "builderVersion": 1,
     "sourceRegistryVersion": 1,
-    "sourceRegistryChecksum": "sha256-19642bd11ecb562f02fb364a4afd3ce5d81bc59696115f404f71e85129386852",
+    "sourceRegistryChecksum": "sha256-a8ad1d28ca9d813daf2d37117be6483276c641ae73d8a226934bd448b37465b5",
     "statisticalSourceId": "ws-common-words-en-statistical-v1",
-    "statisticalSourceChecksum": "sha256-ee2d83651fbb91642bbed2bd30ead404c2cfbdfece01dacf284af6ea47795811",
-    "sourceSnapshotChecksum": "sha256-0dff0dd147cc3933a5547627f3740e5ad777d94f90db4cdb199c47eab466eb57"
+    "statisticalSourceChecksum": "sha256-9db3a3ed1a30fbd603890b0a7a7b29f736f8ca925f541f822b932e1fb8e6045e",
+    "upstreamSourceChecksum": "sha256-ee2d83651fbb91642bbed2bd30ead404c2cfbdfece01dacf284af6ea47795811",
+    "pl6GovernanceChecksum": "sha256-9db3a3ed1a30fbd603890b0a7a7b29f736f8ca925f541f822b932e1fb8e6045e",
+    "sourceSnapshotChecksum": "sha256-b21f765a7b059fa5401d1dbe29af28050a7ec8b5c72af976b4203e28ac53fccb"
   },
   "bandRanges": {
     "core": [
@@ -8456,5 +8462,5 @@
       "band": "broad"
     }
   ],
-  "checksum": "sha256-ab3b30b89d7dd6e564f53dc7ecf061d914a82518335de258794cad5c3aaaaa87"
+  "checksum": "sha256-7d20bd63e451df4d78cabfb622d5214b8e8921bdb35a47155f69f966308a0880"
 }

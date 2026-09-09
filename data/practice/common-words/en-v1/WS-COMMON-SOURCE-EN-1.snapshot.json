@@ -2,15 +2,15 @@
   "schemaVersion": 1,
   "language": "en",
   "sourceRegistryVersion": 1,
-  "sourceRegistryChecksum": "sha256-19642bd11ecb562f02fb364a4afd3ce5d81bc59696115f404f71e85129386852",
+  "sourceRegistryChecksum": "sha256-a8ad1d28ca9d813daf2d37117be6483276c641ae73d8a226934bd448b37465b5",
   "statisticalSourceId": "ws-common-words-en-statistical-v1",
-  "statisticalSourceChecksum": "sha256-ee2d83651fbb91642bbed2bd30ead404c2cfbdfece01dacf284af6ea47795811",
+  "statisticalSourceChecksum": "sha256-9db3a3ed1a30fbd603890b0a7a7b29f736f8ca925f541f822b932e1fb8e6045e",
   "trainingSourceId": "ws-common-words-en-training-v1",
-  "trainingSourceChecksum": "sha256-ee2d83651fbb91642bbed2bd30ead404c2cfbdfece01dacf284af6ea47795811",
-  "trainingSourceRegistryChecksum": "sha256-6ee9f069cfafc471b2c0a9ff1d68c74ba6f892addf9bd2395933d2cf5fdf04e0",
+  "trainingSourceChecksum": "sha256-9db3a3ed1a30fbd603890b0a7a7b29f736f8ca925f541f822b932e1fb8e6045e",
+  "trainingSourceRegistryChecksum": "sha256-7e12bb5815f4d59c615e6fda947415010ff5a19e4b8fa35d8e4685ddaa932bc2",
   "diagnosticSourceId": "ws-common-words-en-diagnostic-v1",
-  "diagnosticSourceChecksum": "sha256-ee2d83651fbb91642bbed2bd30ead404c2cfbdfece01dacf284af6ea47795811",
-  "diagnosticSourceRegistryChecksum": "sha256-77e9c367306d7eb10d22117fa4e835b720c7d980fdc6ff407f7820b06e33b853",
+  "diagnosticSourceChecksum": "sha256-9db3a3ed1a30fbd603890b0a7a7b29f736f8ca925f541f822b932e1fb8e6045e",
+  "diagnosticSourceRegistryChecksum": "sha256-0612d1bd11805f91c735497eed250624fd89e447828bd479d07f933d8ee1762b",
   "upstream": {
     "sourcePath": "data/commonGameplayWords.json",
     "sourceSchemaVersion": 2,
@@ -18,6 +18,10 @@
     "sourceUrl": "https://github.com/first20hours/google-10000-english",
     "sourceLicense": "MIT",
     "sourceSha256": "ee2d83651fbb91642bbed2bd30ead404c2cfbdfece01dacf284af6ea47795811",
+    "upstreamSourceChecksum": "sha256-ee2d83651fbb91642bbed2bd30ead404c2cfbdfece01dacf284af6ea47795811",
+    "pl6GovernanceId": "WS-COMMON-PL6-SOURCE-EN-1",
+    "pl6GovernancePath": "data/practice/common-words/en-v1/PL6-COMMON-WORD-SOURCE-EN-1.json",
+    "pl6GovernanceChecksum": "sha256-9db3a3ed1a30fbd603890b0a7a7b29f736f8ca925f541f822b932e1fb8e6045e",
     "reviewStatement": "Frequency-ranked from Google's Trillion Word Corpus; every selected word is manually approved.",
     "manualReviewArtifact": "data/commonGameplayWords.manual-review.json"
   },
@@ -6030,5 +6034,5 @@
       "sourceRank": 1837
     }
   ],
-  "checksum": "sha256-0dff0dd147cc3933a5547627f3740e5ad777d94f90db4cdb199c47eab466eb57"
+  "checksum": "sha256-b21f765a7b059fa5401d1dbe29af28050a7ec8b5c72af976b4203e28ac53fccb"
 }
