@@ -63,6 +63,7 @@ export function createPracticeExperimentRegistry({
       if (!Number.isInteger(implementationVersion) || implementationVersion < 1) throw registryError(PRACTICE_REGISTRY_ERROR_CODES.INVALID_REGISTRATION, "implementationVersion must be a positive integer", { experimentId });
       if (typeof descriptorFactory !== "function") throw registryError(PRACTICE_REGISTRY_ERROR_CODES.INVALID_REGISTRATION, "descriptorFactory must be a function", { experimentId });
       optionalFactories.forEach((key) => { if (registration[key] != null && typeof registration[key] !== "function") throw registryError(PRACTICE_REGISTRY_ERROR_CODES.INVALID_REGISTRATION, `${key} must be a function`, { experimentId }); });
+      if (registration.runtime != null && (typeof registration.runtime !== "object" || Array.isArray(registration.runtime))) throw registryError(PRACTICE_REGISTRY_ERROR_CODES.INVALID_REGISTRATION, "runtime must be an object", { experimentId });
       let descriptor;
       try { descriptor = descriptorFactory(); } catch (cause) {
         throw registryError(PRACTICE_REGISTRY_ERROR_CODES.INVALID_DESCRIPTOR, "Practice descriptor factory failed", { experimentId, cause });
@@ -79,7 +80,14 @@ export function createPracticeExperimentRegistry({
         performanceReferenceChannel: descriptor.performanceReferenceChannel ?? null,
         supportedCompletionModes: Object.freeze([...descriptor.supportedCompletionModes]),
       });
-      const stored = Object.freeze({ experimentId, implementationVersion, descriptor: validatedDescriptor, descriptorFactory, ...Object.fromEntries(optionalFactories.filter((key) => registration[key]).map((key) => [key, registration[key]])) });
+      const stored = Object.freeze({
+        experimentId,
+        implementationVersion,
+        descriptor: validatedDescriptor,
+        descriptorFactory,
+        ...Object.fromEntries(optionalFactories.filter((key) => registration[key]).map((key) => [key, registration[key]])),
+        ...(registration.runtime ? { runtime: registration.runtime } : {}),
+      });
       registrations.set(experimentId, stored);
       emit("registered", experimentId);
       return stored;
