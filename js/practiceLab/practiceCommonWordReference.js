@@ -21,6 +21,37 @@ const freezeDeep = (value) => {
   return Object.freeze(value);
 };
 const countBands = (words) => Object.fromEntries(PRACTICE_COMMON_WORD_BANDS.map((band) => [band, words.filter((word) => word.band === band).length]));
+const SHA256_PATTERN = /^sha256-[a-f0-9]{64}$/;
+const REQUIRED_BINDING_VERSION_KEYS = Object.freeze([
+  "corpusVersion",
+  "indexSchemaVersion",
+  "indexGeneratorVersion",
+  "typabilityModelVersion",
+  "typabilityReferenceVersion",
+  "frequencyReferenceVersion",
+  "builderVersion",
+]);
+const REQUIRED_BINDING_CHECKSUM_KEYS = Object.freeze([
+  "corpusChecksum",
+  "indexChecksum",
+  "typabilityReferenceChecksum",
+  "frequencyReferenceChecksum",
+]);
+
+function validateBindingShape(bindings, { requireCommonReference = false } = {}) {
+  const reasons = [];
+  if (!bindings || typeof bindings !== "object" || Array.isArray(bindings)) return ["bindings-missing"];
+  if (typeof bindings.corpusId !== "string" || !bindings.corpusId) reasons.push("binding-corpus-id");
+  for (const key of REQUIRED_BINDING_VERSION_KEYS) if (!Number.isInteger(bindings[key]) || bindings[key] < 1) reasons.push(`binding-${key}`);
+  for (const key of REQUIRED_BINDING_CHECKSUM_KEYS) if (!SHA256_PATTERN.test(bindings[key] ?? "")) reasons.push(`binding-${key}`);
+  if (requireCommonReference) {
+    if (bindings.commonWordReferenceId !== PRACTICE_COMMON_WORD_REFERENCE_ID) reasons.push("binding-common-reference-id");
+    if (bindings.commonWordReferenceVersion !== PRACTICE_COMMON_WORD_REFERENCE_VERSION) reasons.push("binding-common-reference-version");
+    if (!SHA256_PATTERN.test(bindings.commonWordReferenceChecksum ?? "")) reasons.push("binding-common-reference-checksum");
+    if (!SHA256_PATTERN.test(bindings.sourceChecksum ?? "")) reasons.push("binding-source-checksum");
+  }
+  return reasons;
+}
 
 export function validatePracticeCommonWordReference(reference) {
   const reasons = [];
@@ -39,7 +70,7 @@ export function validatePracticeCommonWordReference(reference) {
   for (let rank = 1; rank <= PRACTICE_COMMON_WORD_REFERENCE_SIZE; rank += 1) if (!ranks.has(rank)) reasons.push("rank-sequence");
   for (const band of PRACTICE_COMMON_WORD_BANDS) if (countBands(reference?.words ?? [])[band] !== PRACTICE_COMMON_WORD_BAND_RANGES[band].size) reasons.push(`band-size-${band}`);
   if (reference?.rankingSource?.sourceType !== "statistical-reference" || reference?.rankingSource?.usageApproval !== "statistical-only") reasons.push("ranking-provenance");
-  if (typeof reference?.checksum !== "string" || !reference.checksum.startsWith("sha256-")) reasons.push("reference-checksum");
+  if (!SHA256_PATTERN.test(reference?.checksum ?? "")) reasons.push("reference-checksum");
   return Object.freeze({ valid: reasons.length === 0, reasons: [...new Set(reasons)] });
 }
 
@@ -58,7 +89,7 @@ function validateDisplayBank(manifest, { id, partition, minimums }) {
   }
   const counts = countBands(words);
   for (const band of PRACTICE_COMMON_WORD_BANDS) if (counts[band] < minimums[band]) reasons.push(`coverage-${band}`);
-  if (typeof manifest?.checksum !== "string" || !manifest.checksum.startsWith("sha256-")) reasons.push("bank-checksum");
+  if (!SHA256_PATTERN.test(manifest?.checksum ?? "")) reasons.push("bank-checksum");
   return Object.freeze({ valid: reasons.length === 0, reasons: [...new Set(reasons)], counts: Object.freeze(counts) });
 }
 
@@ -80,6 +111,8 @@ export function validatePracticeCommonWordCheckFormSet(manifest) {
     if (!Array.isArray(form.words) || form.words.length !== PRACTICE_COMMON_WORD_CHECK_WORD_COUNT) reasons.push("form-size");
     const keys = new Set(form.words?.map((word) => word.lexicalKey));
     if (keys.size !== PRACTICE_COMMON_WORD_CHECK_WORD_COUNT) reasons.push("form-duplicate");
+    if (!SHA256_PATTERN.test(form?.formHash ?? "")) reasons.push("form-hash");
+    if (!SHA256_PATTERN.test(form?.textHash ?? "")) reasons.push("text-hash");
     const counts = countBands(form.words ?? []);
     if (PRACTICE_COMMON_WORD_BANDS.some((band) => counts[band] !== PRACTICE_COMMON_WORD_CHECK_WORDS_PER_BAND)) reasons.push("form-band-balance");
     for (let offset = 0; offset < (form.words?.length ?? 0); offset += 20) {
@@ -92,13 +125,98 @@ export function validatePracticeCommonWordCheckFormSet(manifest) {
   return Object.freeze({ valid: reasons.length === 0, reasons: [...new Set(reasons)], readyFormCount: readyForms.length, counts: base.counts });
 }
 
+function withoutChecksum(value) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return value;
+  const copy = { ...value };
+  delete copy.checksum;
+  return copy;
+}
+
+async function sha256(value, cryptoObject = globalThis.crypto) {
+  if (!cryptoObject?.subtle?.digest) return null;
+  const bytes = new TextEncoder().encode(typeof value === "string" ? value : JSON.stringify(value));
+  const digest = await cryptoObject.subtle.digest("SHA-256", bytes);
+  return `sha256-${Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("")}`;
+}
+
+function referenceWordMap(reference) {
+  return new Map((reference?.words ?? []).map((word) => [word.lexicalKey, word]));
+}
+
+function validateWordsAgainstReference(words, referenceWords, prefix) {
+  const reasons = [];
+  for (const word of words ?? []) {
+    const canonical = referenceWords.get(word?.lexicalKey);
+    if (!canonical) reasons.push(`${prefix}-unknown-word`);
+    else if (canonical.rank !== word.rank || canonical.band !== word.band) reasons.push(`${prefix}-rank-band-mismatch`);
+  }
+  return reasons;
+}
+
+function sharedBindingReasons(bindings, referenceBindings, prefix) {
+  const reasons = [];
+  const keys = ["corpusId", ...REQUIRED_BINDING_VERSION_KEYS, ...REQUIRED_BINDING_CHECKSUM_KEYS];
+  for (const key of keys) if (bindings?.[key] !== referenceBindings?.[key]) reasons.push(`${prefix}-binding-${key}`);
+  return reasons;
+}
+
+export async function verifyPracticeCommonWordArtifactIntegrity({
+  reference,
+  practiceBank,
+  checkFormSet,
+  cryptoObject = globalThis.crypto,
+} = {}) {
+  const referenceReasons = [...validateBindingShape(reference?.bindings)];
+  const practiceReasons = [...validateBindingShape(practiceBank?.bindings, { requireCommonReference: true })];
+  const checkReasons = [...validateBindingShape(checkFormSet?.bindings, { requireCommonReference: true })];
+  const cryptoAvailable = Boolean(cryptoObject?.subtle?.digest);
+  if (!cryptoAvailable) {
+    referenceReasons.push("checksum-verification-unavailable");
+    practiceReasons.push("checksum-verification-unavailable");
+    checkReasons.push("checksum-verification-unavailable");
+  } else {
+    const [referenceChecksum, practiceChecksum, checkChecksum] = await Promise.all([
+      sha256(withoutChecksum(reference), cryptoObject),
+      sha256(withoutChecksum(practiceBank), cryptoObject),
+      sha256(withoutChecksum(checkFormSet), cryptoObject),
+    ]);
+    if (referenceChecksum !== reference?.checksum) referenceReasons.push("checksum-mismatch");
+    if (practiceChecksum !== practiceBank?.checksum) practiceReasons.push("checksum-mismatch");
+    if (checkChecksum !== checkFormSet?.checksum) checkReasons.push("checksum-mismatch");
+
+    const readyForms = (checkFormSet?.forms ?? []).filter((form) => form?.status === "ready");
+    for (const form of readyForms) {
+      const formHash = await sha256({ words: form.words, separator: form.separator ?? " ", formVersion: form.formVersion, referenceVersion: checkFormSet?.referenceVersion }, cryptoObject);
+      const textHash = await sha256((form.words ?? []).map((word) => word.lexicalKey).join(form.separator ?? " "), cryptoObject);
+      if (formHash !== form.formHash) checkReasons.push("form-hash-mismatch");
+      if (textHash !== form.textHash) checkReasons.push("text-hash-mismatch");
+    }
+  }
+
+  const referenceWords = referenceWordMap(reference);
+  practiceReasons.push(...sharedBindingReasons(practiceBank?.bindings, reference?.bindings, "reference"));
+  checkReasons.push(...sharedBindingReasons(checkFormSet?.bindings, reference?.bindings, "reference"));
+  if (practiceBank?.bindings?.commonWordReferenceId !== reference?.referenceId || practiceBank?.bindings?.commonWordReferenceVersion !== reference?.referenceVersion || practiceBank?.bindings?.commonWordReferenceChecksum !== reference?.checksum || practiceBank?.bindings?.sourceChecksum !== reference?.checksum) practiceReasons.push("common-reference-binding");
+  if (checkFormSet?.bindings?.commonWordReferenceId !== reference?.referenceId || checkFormSet?.bindings?.commonWordReferenceVersion !== reference?.referenceVersion || checkFormSet?.bindings?.commonWordReferenceChecksum !== reference?.checksum || checkFormSet?.bindings?.sourceChecksum !== reference?.checksum) checkReasons.push("common-reference-binding");
+  practiceReasons.push(...validateWordsAgainstReference(practiceBank?.words, referenceWords, "practice"));
+  checkReasons.push(...validateWordsAgainstReference(checkFormSet?.diagnosticPool, referenceWords, "diagnostic-pool"));
+  for (const form of checkFormSet?.forms ?? []) checkReasons.push(...validateWordsAgainstReference(form?.words, referenceWords, "form"));
+
+  const pack = (reasons) => freezeDeep({ valid: reasons.length === 0, reasons: [...new Set(reasons)] });
+  return freezeDeep({
+    reference: pack(referenceReasons),
+    practice: pack(practiceReasons),
+    check: pack(checkReasons),
+  });
+}
+
 async function loadJson(url, fetchImpl) {
   const response = await fetchImpl(url, { cache: "no-store" });
   if (!response?.ok) throw Object.assign(new Error(`Common Words artifact load failed: ${response?.status ?? "unknown"}`), { code: "COMMON_WORDS_ARTIFACT_LOAD_FAILED" });
   return response.json();
 }
 
-export async function loadPracticeCommonWordArtifacts({ fetchImpl = globalThis.fetch } = {}) {
+export async function loadPracticeCommonWordArtifacts({ fetchImpl = globalThis.fetch, cryptoObject = globalThis.crypto } = {}) {
   if (typeof fetchImpl !== "function") throw new TypeError("Common Words artifact loader requires fetch");
   const root = new URL("../../data/practice/common-words/en-v1/", import.meta.url);
   const [reference, practiceBank, checkFormSet] = await Promise.all([
@@ -106,5 +224,6 @@ export async function loadPracticeCommonWordArtifacts({ fetchImpl = globalThis.f
     loadJson(new URL("WS-COMMON-PRACTICE-EN-1.manifest.json", root), fetchImpl),
     loadJson(new URL("WS-COMMON-CHECK-EN-1.manifest.json", root), fetchImpl),
   ]);
-  return freezeDeep({ reference, practiceBank, checkFormSet });
+  const integrity = await verifyPracticeCommonWordArtifactIntegrity({ reference, practiceBank, checkFormSet, cryptoObject });
+  return freezeDeep({ reference, practiceBank, checkFormSet, integrity });
 }
