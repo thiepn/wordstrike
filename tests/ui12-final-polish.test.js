@@ -27,7 +27,9 @@ assert.match(audio, /createGain\(\)/);
 assert.match(audio, /if \(!enabled\) return false/);
 assert.match(audio, /export function setUiAudioEnabled/);
 assert.match(audio, /export function playUiAudio/);
-assert.doesNotMatch(audio, /fetch\(|new Audio\(|\.mp3|\.wav|\.ogg|autoplay/i);
+assert.doesNotMatch(audio, /fetch\(|new Audio\(|\.mp3|\.wav|\.ogg/i);
+assert.doesNotMatch(audio, /autoplay\s*=/i);
+assert.doesNotMatch(audio, /\.play\s*\(/);
 
 assert.match(presentation, /import \{ appState \} from "\.\/state\.js"/);
 assert.match(presentation, /import \{ updateSetting \} from "\.\/storage\.js"/);
