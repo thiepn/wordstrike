@@ -20,15 +20,16 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Assemble and verify P2 patch
+      - name: Assemble product-only P2 patch
         run: |
-          cat .p2/part-*.patch > "$RUNNER_TEMP/p2.patch"
-          git apply --check "$RUNNER_TEMP/p2.patch"
-          git apply "$RUNNER_TEMP/p2.patch"
+          cat .p2/part-*.patch > "$RUNNER_TEMP/p2-full.patch"
+          awk '/^diff --git / { skip = ($0 ~ /a\/\.github\/workflows\/customization-p2-browser\.yml/) } !skip { print }' "$RUNNER_TEMP/p2-full.patch" > "$RUNNER_TEMP/p2-product.patch"
+          git apply --check "$RUNNER_TEMP/p2-product.patch"
+          git apply "$RUNNER_TEMP/p2-product.patch"
           node tests/customization-p2.test.js
-      - name: Commit P2 implementation
+      - name: Commit P2 product implementation
         run: |
-          rm -rf .p2 .github/workflows/apply-p2-staged.yml
+          rm -rf .p2
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
