@@ -1,0 +1,138 @@
+/* P1 — shared appearance tokens and compact Settings controls.
+   No default palette override. No filters on screens, words, HUDs, or hitboxes.
+   The active flag removes customization entirely while Practice Lab owns the app. */
+
+html[data-customization-active="true"][data-theme="oled"] {
+  --custom-bg: #000000; --custom-bg-rgb: 0 0 0;
+  --custom-elevated: #07090b; --custom-elevated-rgb: 7 9 11;
+  --custom-surface-1: #101214; --custom-surface-1-rgb: 16 18 20;
+  --custom-surface-2: #181c20; --custom-surface-2-rgb: 24 28 32;
+  --custom-hover: #22282e; --custom-hover-rgb: 34 40 46;
+  --custom-active: #263038; --custom-active-rgb: 38 48 56;
+  --custom-overlay-rgb: 0 0 0;
+  --custom-border-rgb: 165 175 186; --custom-border-strong-rgb: 192 202 212;
+}
+html[data-customization-active="true"][data-theme="midnight"] {
+  --custom-bg: #080e20; --custom-bg-rgb: 8 14 32;
+  --custom-elevated: #0c152c; --custom-elevated-rgb: 12 21 44;
+  --custom-surface-1: #111d36; --custom-surface-1-rgb: 17 29 54;
+  --custom-surface-2: #172641; --custom-surface-2-rgb: 23 38 65;
+  --custom-hover: #21344f; --custom-hover-rgb: 33 52 79;
+  --custom-active: #243953; --custom-active-rgb: 36 57 83;
+  --custom-overlay-rgb: 3 7 20;
+  --custom-border-rgb: 136 157 191; --custom-border-strong-rgb: 179 199 228;
+}
+html[data-customization-active="true"][data-theme="monochrome"] {
+  --custom-bg: #111111; --custom-bg-rgb: 17 17 17;
+  --custom-elevated: #161616; --custom-elevated-rgb: 22 22 22;
+  --custom-surface-1: #1b1b1b; --custom-surface-1-rgb: 27 27 27;
+  --custom-surface-2: #242424; --custom-surface-2-rgb: 36 36 36;
+  --custom-hover: #2d2d2d; --custom-hover-rgb: 45 45 45;
+  --custom-active: #303030; --custom-active-rgb: 48 48 48;
+  --custom-overlay-rgb: 4 4 4;
+  --custom-border-rgb: 166 166 166; --custom-border-strong-rgb: 205 205 205;
+  --color-text-primary: #f1f1f1; --color-text-secondary: #cccccc;
+  --color-text-muted: #a0a0a0; --color-text-disabled: #767676;
+}
+html[data-customization-active="true"][data-accent="blue"] { --custom-accent: #70a7ff; --custom-accent-rgb: 112 167 255; }
+html[data-customization-active="true"][data-accent="violet"] { --custom-accent: #b2a0ff; --custom-accent-rgb: 178 160 255; }
+html[data-customization-active="true"][data-accent="magenta"] { --custom-accent: #ff80cf; --custom-accent-rgb: 255 128 207; }
+html[data-customization-active="true"][data-accent="orange"] { --custom-accent: #ffb470; --custom-accent-rgb: 255 180 112; }
+html[data-customization-active="true"][data-accent="green"] { --custom-accent: #70e1b2; --custom-accent-rgb: 112 225 178; }
+
+/* Grades are outcome semantics, not player-accent decoration. */
+html[data-customization-active="true"] :is(.grade, .level-grade, .campaign-node-grade) {
+  --primary: #00fff2;
+  --color-accent: #00fff2;
+  --ui10-cyan: #00fff2;
+  --custom-accent: #00fff2;
+  --custom-accent-rgb: 0 255 242;
+}
+
+/* OLED and Monochrome reduce environmental tint without recoloring danger or
+   boss signals. The underlying palette still styles all surfaces and controls. */
+html[data-customization-active="true"]:is([data-theme="oled"], [data-theme="monochrome"]) body {
+  background: var(--color-bg);
+}
+
+/* Effects never change engine-owned intro, attack, spawn, or completion clocks. */
+html[data-customization-active="true"][data-effective-effects="reduced"] {
+  --bloom-accent-sm: none;
+  --bloom-accent-lg: none;
+  --bloom-special: none;
+}
+html[data-customization-active="true"][data-effective-effects="reduced"] :is(
+  .mode-showcase-visual, .boss-threat-sigil, .campaign-core-field, .endless-core-field
+) { filter: none; }
+html[data-customization-active="true"][data-effective-effects="reduced"] :is(
+  .mode-showcase-visual *,
+  .boss-threat-sigil, .boss-threat-sigil *,
+  .campaign-core-orbit, .campaign-core-reactor,
+  .endless-core-radar, .endless-core-sweep, .endless-core-reactor,
+  .arcade-rush-countdown
+) { animation: none !important; }
+html[data-customization-active="true"][data-effective-effects="reduced"] .burst { display: none; }
+html[data-customization-active="true"][data-effective-effects="reduced"] :is(
+  .title-nav-action, .mode-option, .screen-back-button, .text-action, .appearance-row select
+) { transition-duration: 0s; }
+
+/* Pseudo-elements must be standalone selectors, not arguments of :is(). */
+html[data-customization-active="true"][data-effective-effects="reduced"] .mode-showcase-visual *::before,
+html[data-customization-active="true"][data-effective-effects="reduced"] .arcade-rush-core::before { animation: none !important; }
+html[data-customization-active="true"][data-effective-effects="reduced"] .mode-showcase::after { display: none; }
+
+/* Cinematic adds a bounded bloom to decorative objects only; never blur text. */
+html[data-customization-active="true"][data-effective-effects="cinematic"] :is(
+  .mode-motif-campaign, .mode-motif-typing, .mode-motif-endless, .mode-motif-rush,
+  .boss-threat-sigil, .campaign-core-field, .endless-core-field
+) { filter: drop-shadow(0 0 14px rgb(var(--custom-accent-rgb, 0 255 242) / 0.2)); }
+html[data-customization-active="true"][data-effective-effects="cinematic"] {
+  --bloom-accent-sm: 0 0 18px rgb(var(--custom-accent-rgb, 0 255 242) / 0.23);
+  --bloom-accent-lg: 0 0 40px rgb(var(--custom-accent-rgb, 0 255 242) / 0.3);
+}
+@media (prefers-reduced-motion: reduce) {
+  /* Also safe if media changes before the JS preference listener runs. */
+  html[data-customization-active="true"] .arcade-rush-core::before { animation: none !important; }
+  html[data-customization-active="true"] :is(.mode-showcase-visual *, .boss-threat-sigil *, .campaign-core-orbit, .endless-core-radar, .endless-core-sweep) {
+    animation: none !important;
+  }
+  html[data-customization-active="true"] :is(.mode-motif-campaign, .mode-motif-typing, .mode-motif-endless, .mode-motif-rush, .boss-threat-sigil) { filter: none; }
+}
+
+/* Local appearance controls do not join the existing arrow-key core toggle list. */
+.settings-screen .appearance-settings {
+  margin: 1.5rem 0 2.25rem;
+  border-block: 1px solid var(--color-border-default);
+}
+.appearance-heading { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding-block: 1.1rem; }
+.appearance-heading .micro-label { color: var(--color-text-muted); }
+.appearance-heading h2 { margin: 0.2rem 0 0; color: var(--color-text-primary); font-size: 1.25rem; font-weight: 650; letter-spacing: -0.02em; }
+.settings-screen .appearance-reset { min-height: 44px; color: var(--color-text-secondary); font-size: 0.78rem; white-space: normal; }
+.appearance-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(9rem, 12rem); gap: 0.2rem 1rem; padding-block: 0.75rem; border-top: 1px solid var(--color-border-subtle); align-items: center; }
+.appearance-row label { color: var(--color-text-primary); font-size: 0.9rem; font-weight: 600; }
+.appearance-row p { grid-column: 1; grid-row: 2; margin: 0; color: var(--color-text-secondary); font-size: 0.78rem; line-height: 1.5; max-width: 42rem; }
+.appearance-row select { grid-column: 2; grid-row: 1 / 3; width: 100%; min-width: 0; min-height: 44px; padding: 0.5rem 0.6rem; border: 1px solid var(--color-border-default); border-radius: var(--radius-sm); background: var(--color-surface-1); color: var(--color-text-primary); font: inherit; font-size: 0.85rem; cursor: pointer; }
+.appearance-row select:hover { border-color: var(--color-accent); }
+.appearance-row select:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+.appearance-preview { display: flex; align-items: center; gap: 0.8rem; padding: 1rem; margin-top: 0.75rem; background: var(--color-surface-1); border-left: 2px solid var(--color-accent); }
+.appearance-preview-marker { flex: 0 0 0.65rem; height: 0.65rem; background: var(--color-accent); transform: rotate(45deg); }
+.appearance-preview > div { min-width: 0; flex: 1; }
+.appearance-preview strong { display: block; font-size: 0.85rem; color: var(--color-text-primary); }
+.appearance-preview div span { display: block; margin-top: 0.25rem; color: var(--color-text-secondary); font-size: 0.75rem; line-height: 1.5; }
+.appearance-preview-state { color: var(--color-accent); font-family: var(--font-game); font-size: 0.65rem; letter-spacing: 0.06em; }
+.appearance-note, .appearance-status { color: var(--color-text-secondary); font-size: 0.75rem; line-height: 1.55; }
+.appearance-note { margin: 0.85rem 0 0; }
+.appearance-status { min-height: 1.55em; margin: 0.45rem 0 0.9rem; }
+@media (max-width: 520px) {
+  .appearance-heading { align-items: start; gap: 0.5rem; }
+  .appearance-heading h2 { font-size: 1.125rem; }
+  .settings-screen .appearance-reset { max-width: 7.5rem; }
+  .appearance-row { grid-template-columns: minmax(0, 1fr) minmax(8rem, 42%); }
+  .appearance-row p { grid-column: 1 / -1; grid-row: 2; margin-top: 0.25rem; }
+  .appearance-row select { grid-row: 1; font-size: 1rem; }
+  .appearance-preview-state { display: none; }
+}
+@media (forced-colors: active) {
+  .appearance-row select, .appearance-preview { border: 1px solid CanvasText; }
+  .appearance-preview-marker { forced-color-adjust: none; background: Highlight; }
+}

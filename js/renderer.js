@@ -1,3 +1,5 @@
+import { presentationEffectsReduced } from "./customization.js";
+
 const wordElements = new Map();
 let bossPhraseElement = null;
 
@@ -94,7 +96,7 @@ export function updateWordElement(word, isActive, candidateState = null) {
 export function removeWordElement(word, completed = false, particlesEnabled = true) {
   const elements = wordElements.get(word.id);
   if (!elements) return;
-  if (completed && particlesEnabled) {
+  if (completed && particlesEnabled && !presentationEffectsReduced(playArea())) {
     const area = playArea();
     const burst = document.createElement("div");
     burst.className = "burst";
@@ -133,7 +135,7 @@ export function flashDamage(screenShake = true) {
   area.classList.remove("damage-flash");
   void area.offsetWidth;
   area.classList.add("damage-flash");
-  if (screenShake && !gameplayPresentationPrefersReducedMotion(area)) {
+  if (screenShake && !gameplayPresentationPrefersReducedMotion(area) && !presentationEffectsReduced(area)) {
     area.animate(
       [
         { transform: "translate(0, 0)" },

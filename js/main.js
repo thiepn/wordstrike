@@ -1,3 +1,4 @@
+import { startCustomizationPresentation } from "./customizationPresentation.js";
 import {
   appState,
   canLaunchLevel,
@@ -1540,6 +1541,7 @@ async function bootstrap() {
     ? Math.max(1, Number.parseInt(search.get("stage"), 10) || 1)
     : 1;
   appState.save = loadSave();
+  startCustomizationPresentation({ getSave: () => appState.save });
   [
     appState.wordBank,
     appState.bossWordBank,

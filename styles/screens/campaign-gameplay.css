@@ -1,3 +1,4 @@
+/* P1: palette-aware color values; literal fallbacks preserve the certified default. */
 /* UI5 — Campaign gameplay HUD, Core and incoming-word presentation.
    Campaign-only ownership: Endless and Boss remain on their legacy presentation until UI6/UI7. */
 
@@ -5,10 +6,10 @@
   --campaign-hud-height: 88px;
   grid-template-rows: var(--campaign-hud-height) minmax(0, 1fr);
   background:
-    radial-gradient(circle at 50% 54%, rgb(0 255 242 / 9%), transparent 22%),
-    radial-gradient(circle at 50% 22%, rgb(0 255 242 / 4%), transparent 32%),
-    linear-gradient(180deg, rgb(13 20 28 / 88%) 0, rgb(10 14 20 / 18%) 110px, transparent 210px),
-    var(--ui-bg, #0a0e14);
+    radial-gradient(circle at 50% 54%, rgb(var(--custom-accent-rgb, 0 255 242) / 9%), transparent 22%),
+    radial-gradient(circle at 50% 22%, rgb(var(--custom-accent-rgb, 0 255 242) / 4%), transparent 32%),
+    linear-gradient(180deg, rgb(13 20 28 / 88%) 0, rgb(var(--custom-bg-rgb, 10 14 20) / 18%) 110px, transparent 210px),
+    var(--ui-bg, var(--custom-bg, #0a0e14));
 }
 
 .campaign-gameplay-screen .campaign-gameplay-hud {
@@ -176,7 +177,7 @@
   width: 12px;
   height: 4px;
   background: var(--ui-accent);
-  box-shadow: 0 0 8px rgb(0 255 242 / 45%);
+  box-shadow: 0 0 8px rgb(var(--custom-accent-rgb, 0 255 242) / 45%);
   transform: skewX(-18deg);
   transition:
     opacity var(--ui-motion-fast) var(--ui-ease-out),
@@ -245,16 +246,16 @@
   position: absolute;
   inset: 0 auto 0 0;
   width: var(--campaign-progress, 0%);
-  background: linear-gradient(90deg, rgb(0 255 242 / 44%), var(--ui-accent));
-  box-shadow: 0 0 8px rgb(0 255 242 / 38%);
+  background: linear-gradient(90deg, rgb(var(--custom-accent-rgb, 0 255 242) / 44%), var(--ui-accent));
+  box-shadow: 0 0 8px rgb(var(--custom-accent-rgb, 0 255 242) / 38%);
   transition: width 150ms linear;
 }
 
 .campaign-gameplay-screen .play-area {
   isolation: isolate;
   background:
-    radial-gradient(circle at 50% 50%, rgb(0 255 242 / 5%), transparent 18%),
-    radial-gradient(circle at 50% 50%, transparent 0 34%, rgb(0 255 242 / 1.5%) 34.5%, transparent 35%);
+    radial-gradient(circle at 50% 50%, rgb(var(--custom-accent-rgb, 0 255 242) / 5%), transparent 18%),
+    radial-gradient(circle at 50% 50%, transparent 0 34%, rgb(var(--custom-accent-rgb, 0 255 242) / 1.5%) 34.5%, transparent 35%);
 }
 
 .campaign-gameplay-screen .play-area::before {
@@ -264,8 +265,8 @@
   inset: 0;
   pointer-events: none;
   background:
-    linear-gradient(90deg, transparent 49.92%, rgb(0 255 242 / 3%) 50%, transparent 50.08%),
-    linear-gradient(0deg, transparent 49.92%, rgb(0 255 242 / 3%) 50%, transparent 50.08%);
+    linear-gradient(90deg, transparent 49.92%, rgb(var(--custom-accent-rgb, 0 255 242) / 3%) 50%, transparent 50.08%),
+    linear-gradient(0deg, transparent 49.92%, rgb(var(--custom-accent-rgb, 0 255 242) / 3%) 50%, transparent 50.08%);
   mask-image: radial-gradient(circle at center, #000 0 18%, transparent 62%);
 }
 
@@ -297,10 +298,10 @@
 
 .campaign-core-field {
   inset: -28px;
-  border: 1px solid rgb(0 255 242 / 9%);
+  border: 1px solid rgb(var(--custom-accent-rgb, 0 255 242) / 9%);
   border-radius: 50%;
-  background: radial-gradient(circle, rgb(0 255 242 / 10%), transparent 54%);
-  box-shadow: 0 0 50px rgb(0 255 242 / 12%);
+  background: radial-gradient(circle, rgb(var(--custom-accent-rgb, 0 255 242) / 10%), transparent 54%);
+  box-shadow: 0 0 50px rgb(var(--custom-accent-rgb, 0 255 242) / 12%);
 }
 
 .campaign-core-orbit {
@@ -321,9 +322,9 @@
 .campaign-core-orbit-a {
   width: 78px;
   height: 78px;
-  border: 1px solid rgb(0 255 242 / 32%);
+  border: 1px solid rgb(var(--custom-accent-rgb, 0 255 242) / 32%);
   border-top-color: var(--ui-accent);
-  border-right-color: rgb(0 255 242 / 8%);
+  border-right-color: rgb(var(--custom-accent-rgb, 0 255 242) / 8%);
   animation: campaign-core-orbit 7s linear infinite;
 }
 
@@ -337,7 +338,7 @@
 .campaign-core-orbit-b {
   width: 61px;
   height: 61px;
-  border: 1px dashed rgb(0 255 242 / 35%);
+  border: 1px dashed rgb(var(--custom-accent-rgb, 0 255 242) / 35%);
   animation: campaign-core-orbit-reverse 5.5s linear infinite;
 }
 
@@ -350,14 +351,14 @@
 
 .campaign-core-reactor {
   inset: 9px;
-  border: 1px solid rgb(0 255 242 / 62%);
+  border: 1px solid rgb(var(--custom-accent-rgb, 0 255 242) / 62%);
   border-radius: 50%;
   background:
-    radial-gradient(circle, rgb(232 255 253 / 92%) 0 8%, var(--ui-accent) 9% 18%, rgb(0 255 242 / 23%) 20% 52%, transparent 54%);
+    radial-gradient(circle, rgb(232 255 253 / 92%) 0 8%, var(--ui-accent) 9% 18%, rgb(var(--custom-accent-rgb, 0 255 242) / 23%) 20% 52%, transparent 54%);
   box-shadow:
-    0 0 10px rgb(0 255 242 / 60%),
-    0 0 30px rgb(0 255 242 / 28%),
-    inset 0 0 12px rgb(0 255 242 / 30%);
+    0 0 10px rgb(var(--custom-accent-rgb, 0 255 242) / 60%),
+    0 0 30px rgb(var(--custom-accent-rgb, 0 255 242) / 28%),
+    inset 0 0 12px rgb(var(--custom-accent-rgb, 0 255 242) / 30%);
   animation: campaign-reactor-breathe 2.4s ease-in-out infinite;
 }
 
@@ -378,7 +379,7 @@
   margin-left: -14px;
   transform-origin: 50% 47px;
   background: var(--ui-accent);
-  box-shadow: 0 0 9px rgb(0 255 242 / 72%);
+  box-shadow: 0 0 9px rgb(var(--custom-accent-rgb, 0 255 242) / 72%);
   transition:
     opacity var(--ui-motion-fast) var(--ui-ease-out),
     background var(--ui-motion-fast) var(--ui-ease-out),
@@ -493,7 +494,7 @@
   opacity: .9;
   transform: scaleX(1);
   background: var(--ui-accent);
-  box-shadow: 0 0 8px rgb(0 255 242 / 58%);
+  box-shadow: 0 0 8px rgb(var(--custom-accent-rgb, 0 255 242) / 58%);
 }
 
 .campaign-gameplay-screen .word-visual.candidate {
@@ -518,7 +519,7 @@
 
 .campaign-gameplay-screen .word-visual.active .typed-letter {
   color: var(--ui-accent);
-  text-shadow: 0 0 8px rgb(0 255 242 / 58%);
+  text-shadow: 0 0 8px rgb(var(--custom-accent-rgb, 0 255 242) / 58%);
 }
 
 .campaign-gameplay-screen .word-visual.candidate .typed-letter {
@@ -555,8 +556,8 @@
   height: 12px;
   border: 1px solid var(--ui-accent);
   border-radius: 50%;
-  background: rgb(0 255 242 / 12%);
-  box-shadow: 0 0 14px rgb(0 255 242 / 46%);
+  background: rgb(var(--custom-accent-rgb, 0 255 242) / 12%);
+  box-shadow: 0 0 14px rgb(var(--custom-accent-rgb, 0 255 242) / 46%);
   transform: translate(-50%, -50%);
   animation: campaign-burst 330ms var(--ui-ease-out) forwards;
 }
@@ -570,8 +571,8 @@
   height: 1px;
   transform: rotate(var(--campaign-burst-angle, 0deg));
   transform-origin: 0 50%;
-  background: linear-gradient(90deg, rgb(0 255 242 / 68%), transparent);
-  box-shadow: 0 0 7px rgb(0 255 242 / 38%);
+  background: linear-gradient(90deg, rgb(var(--custom-accent-rgb, 0 255 242) / 68%), transparent);
+  box-shadow: 0 0 7px rgb(var(--custom-accent-rgb, 0 255 242) / 38%);
 }
 
 @keyframes campaign-burst {
