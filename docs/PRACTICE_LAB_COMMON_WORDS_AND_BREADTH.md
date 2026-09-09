@@ -37,28 +37,43 @@ Canonical English v1 reference:
 - ID: `WS-COMMON-EN-1`
 - version: `1`
 - lexical keys: exactly `1,200`
-- checksum: `sha256-961a2211c1de9459fe5c7de35b08a2d75fda21e7f907d070d2f9de918b00109d`
+- canonical identity: PL7 word identity, represented as `word:<lexicalKey>` plus the normalized lexical key
+- checksum: `sha256-ab3b30b89d7dd6e564f53dc7ecf061d914a82518335de258794cad5c3aaaaa87`
 
 The reference is global static data; breadth snapshots remain profile + context specific.
 
 ## 7. Statistical-reference provenance
 
-Rank/frequency metadata comes from `data/commonGameplayWords.json`, whose underlying statistical source is `google-10000-english (US no-swears)`, MIT licensed, frequency-ranked from Google's Trillion Word Corpus. The reference records this as:
+Rank/frequency metadata comes from the reviewed `data/commonGameplayWords.json` source, whose underlying statistical source is `google-10000-english (US no-swears)`, MIT licensed and frequency-ranked from Google's Trillion Word Corpus.
 
-- `sourceType: statistical-reference`
-- `usageApproval: statistical-only`
+PL28 does not self-declare this source as trusted. The canonical PL6 source registry contains three separate governed records:
 
-The statistical reference can rank lexical keys but is not by itself permission to display them.
+- `ws-common-words-en-statistical-v1` — `sourceType: statistical-reference`, `usageApproval: statistical-only`;
+- `ws-common-words-en-training-v1` — `sourceType: permissive-import`, `usageApproval: practice-display-approved`, training role only;
+- `ws-common-words-en-diagnostic-v1` — `sourceType: permissive-import`, `usageApproval: practice-display-approved`, diagnostic role only.
+
+All three records bind the reviewed upstream snapshot checksum `sha256-ee2d83651fbb91642bbed2bd30ead404c2cfbdfece01dacf284af6ea47795811`, but their **permissions are independent**. Statistical approval can rank lexical keys but is not permission to display them.
+
+The governed PL28 source snapshot is `WS-COMMON-SOURCE-EN-1.snapshot.json`, checksum `sha256-0dff0dd147cc3933a5547627f3740e5ad777d94f90db4cdb199c47eab466eb57`. It binds the reviewed upstream lexical snapshot to canonical PL7 word IDs.
+
+Registry bindings are deliberately isolated:
+
+- shared statistical registry checksum: `sha256-19642bd11ecb562f02fb364a4afd3ce5d81bc59696115f404f71e85129386852`;
+- Practice training registry checksum: `sha256-6ee9f069cfafc471b2c0a9ff1d68c74ba6f892addf9bd2395933d2cf5fdf04e0`;
+- Check diagnostic registry checksum: `sha256-77e9c367306d7eb10d22117fa4e835b720c7d980fdc6ff407f7820b06e33b853`.
+
+This separation is what allows a stale or revoked training approval to disable Practice without disabling Check, while a stale shared statistical reference still disables both.
 
 ## 8. Display-safety boundary
 
-Practice and Check use independently display-approved artifacts:
+Practice and Check use independently governed display approval:
 
-- Practice: `partition: training`
-- Check: `partition: diagnostic`
-- both: `usageApproval: practice-display-approved`
+- Practice: `partition: training`, source `ws-common-words-en-training-v1`;
+- Check: `partition: diagnostic`, source `ws-common-words-en-diagnostic-v1`;
+- both display records: `usageApproval: practice-display-approved`;
+- the statistical source remains `statistical-only` and cannot pass production-display eligibility.
 
-A statistical-only source is never silently promoted into display content.
+A statistical-only source is never silently promoted into display content. Training and diagnostic source identities are also distinct, so one display-governance failure does not silently contaminate the other flow.
 
 ## 9. Four frequency bands
 
@@ -69,6 +84,8 @@ A statistical-only source is never silently promoted into display content.
 | Common | 301–700 | 400 |
 | Broad | 701–1200 | 500 |
 
+English v1 uses lowercase alphabetic forms only. One-letter forms are restricted to `a` and `i`; contractions, hyphens, digits, symbols, and capitals are excluded.
+
 ## 10. Practice bank
 
 Practice bank:
@@ -77,8 +94,10 @@ Practice bank:
 - version: `1`
 - status: `ready`
 - partition: `training`
+- display source: `ws-common-words-en-training-v1`
 - lexical coverage: 100 Core / 200 Frequent / 400 Common / 500 Broad
 - ready minimums: 80 / 160 / 320 / 400 respectively
+- checksum: `sha256-be881b000a0c6329344f2ad1e0ef81d74bb04638441f52d4630c77225cf8c5c1`
 
 ## 11. Check forms
 
@@ -89,8 +108,10 @@ Check form set:
 - generator version: `1`
 - status: `ready`
 - partition: `diagnostic`
+- display source: `ws-common-words-en-diagnostic-v1`
 - generated forms: `8`
 - minimum ready forms: `4`
+- checksum: `sha256-f22e101ec7b895d6519fa51f9d0b90ae55ed59e74af0dd44a7831a65a22de5a3`
 
 ## 12. Coverage-first Practice selection
 
@@ -132,6 +153,8 @@ V1 supports exactly:
 
 Default: `160`.
 
+Practice plan hashes bind canonical word IDs, lexical keys, exact order, the separator, and protocol versions. The same session/evidence snapshot produces the same plan; the plan does not adapt after the session starts.
+
 ## 16. No direct PL16 dose
 
 Common Words Practice produces ordinary canonical PL11 word evidence. It does not invent a new learning record and does not directly create a PL16 learning dose or PL13 ability observation.
@@ -167,7 +190,11 @@ The static builder and artifact certification enforce:
 - relative difficulty percentile spread: `≤ 12`;
 - pairwise lexical overlap ratio: `≤ 0.30`.
 
+Final v1 generated forms measure PL10 available-model coverage `1.00`, maximum pairwise lexical overlap `0.21`, relative percentile spread `0`, and effectively zero cross-form difficulty/RMS spread within floating-point precision.
+
 These are engineering matching gates, not empirical population equating. `empiricalEquating` remains `false`.
+
+Form hashes bind canonical word IDs, lexical keys, exact order, separator, form version, and reference version. Text hashes independently bind the exact displayed space-separated text.
 
 ## 20. Target-blind Check selection
 
@@ -184,6 +211,8 @@ The result UI reports canonical PL13 fields:
 - common-word typing ability estimate WPM;
 - 95% model interval;
 - confidence.
+
+Repository commit semantics remain exactly-once: replaying the same completed Check session cannot increment the canonical PL13 ability state twice.
 
 ## 22. Per-band metrics
 
@@ -232,14 +261,16 @@ PL28 persists no user private text, definitions, vocabulary knowledge, raw typin
 
 ## 28. Performance and integrity
 
-- Static Common Words artifacts load lazily.
+- Static Common Words artifacts load lazily; they are not loaded on normal WordStrike startup.
+- Pure/runtime module imports perform zero IndexedDB opens, localStorage writes, fetches, timers, or listener registration.
 - Breadth work is bounded over 1,200 reference words.
 - Word stats are loaded once and indexed in memory; there are no 1,200 database lookups.
-- Runtime verifies SHA-256 content integrity, common-reference bindings, canonical rank/band identity, form hashes, and text hashes.
+- Runtime verifies SHA-256 content integrity, the governed PL6 statistical/training/diagnostic records, source snapshot integrity, PL7 canonical `wordId` identity, common-reference bindings, canonical rank/band identity, form hashes, and text hashes.
 - Stale Practice data disables Practice only; stale Check data disables Check only; stale shared reference data disables both.
+- Revoking only PL6 training display approval disables Practice only; revoking only PL6 diagnostic display approval disables Check only; revoking shared statistical approval disables both.
 - If cryptographic verification is unavailable, the feature fails closed.
 
-Artifacts also bind to the exact upstream corpus, PL7 index, PL10 typability reference/model, frequency reference, common-word reference, and builder version.
+Artifacts also bind to the exact upstream corpus, PL7 index, PL10 typability reference/model, frequency reference, common-word reference, PL6 source governance, and builder version.
 
 ## 29. Non-goals / remaining limitations
 
@@ -302,4 +333,6 @@ PL28 intentionally adds **0 new IndexedDB stores**, does not bump generic Practi
 
 ## Certification coverage
 
-PL28's targeted tests cover the prerequisite/channel contract, reference construction, rank/band validation, provenance and display-safety separation, Practice/Check artifact integrity, upstream bindings, coverage-first selection, no weakness reads, balanced bands and microblocks, duplicate prevention, breadth derivation/comparison, per-band launch/internal metrics, registry separation, UI/accessibility, canonical PL13 interval presentation, and stale-artifact isolation. Final release certification additionally requires the complete WordStrike test suite through the pull-request workflow.
+The final targeted PL28 suite passes **41/41** tests. It covers the prerequisite/channel contract, reference construction, PL7 word identity, English-v1 lexical restrictions, rank/band validation, canonical PL6 provenance, independent training/diagnostic display safety, governed source-snapshot integrity, Practice/Check artifact integrity, exact upstream bindings, plan/form hash identity, target-blind Check selection, coverage-first Practice selection, no weakness reads, balanced bands and microblocks, duplicate prevention, PL13 admission and exactly-once persistence, breadth derivation/comparison, per-band launch/internal metrics, import-side-effect safety, registry separation, UI/accessibility, canonical PL13 interval presentation, and stale-artifact/source isolation.
+
+Final release certification additionally requires the complete WordStrike pull-request test workflow and browser regression workflows to be green on the final head.
