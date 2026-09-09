@@ -35,9 +35,9 @@ const stableJson = (value) => `${JSON.stringify(value, null, 2)}\n`;
 const relative = (file) => path.relative(root, file).replaceAll(path.sep, "/");
 
 function renderSentence(subject, verb, ending, variant) {
-  if (variant === "comma-link") return `${subject} ${verb}, then checks the next line ${ending}`;
-  if (variant === "ordinary-practice-link") return `${subject} ${verb} during ordinary practice ${ending}`;
-  return `${subject} ${verb} ${ending}`;
+  if (variant === "comma-link") return `${subject} ${verb}, then checks the next line, ${ending}`;
+  if (variant === "ordinary-practice-link") return `${subject}, ${verb} during ordinary practice, ${ending}`;
+  return `${subject}, ${verb}, ${ending}`;
 }
 
 function buildSentencePool(source) {

@@ -32,7 +32,7 @@
         "notes": "Original diagnostic natural-text material authored for the Pace Ladder protocol."
       },
       "retrievedAt": null,
-      "sourceChecksum": "sha256-171749fbe7dc7ffda4f0a9508ff740c54747c43fb673fd5c5d8f3f807e093f21",
+      "sourceChecksum": "sha256-77c30534ae24da1a34bf45b285caf9efa91519041dab328dd04553b3867be0bf",
       "snapshotPath": "pace-ladder/en-v1/source.json",
       "usageApproval": "practice-display-approved",
       "notes": "Diagnostic-only source material for PL26 Pace Ladder forms; not part of protected evaluation pools."

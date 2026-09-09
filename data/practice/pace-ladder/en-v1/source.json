@@ -7,7 +7,7 @@
   "reviewStatus": "approved",
   "generation": {
     "algorithm": "sha256-ranked-cartesian-v1",
-    "sentenceCount": 112,
+    "sentenceCount": 108,
     "passageCount": 20,
     "subjects": [
       "The careful writer",
