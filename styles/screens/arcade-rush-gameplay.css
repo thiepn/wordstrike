@@ -1,0 +1,955 @@
+/* UI9 — Arcade Rush Unified Gameplay Treatment
+   Presentation-only layer over the certified AR6 runtime and UI port. */
+
+.arcade-rush-ui {
+  --rush-ui9-cyan: var(--ui-accent, var(--primary, #00fff2));
+  --rush-ui9-magenta: var(--ui-accent-special, var(--secondary, #ff3cac));
+  --rush-ui9-danger: var(--ui-accent-danger, var(--danger, #ff4757));
+  --rush-ui9-text: var(--text-primary, var(--text, #e8f0f5));
+  --rush-ui9-muted: var(--text-muted, var(--muted, #8fa0ad));
+  --rush-ui9-secondary: var(--text-secondary, #bdc9d3);
+  --rush-ui9-bg: var(--background, var(--bg, #0a0e14));
+  --rush-ui9-line: rgb(129 144 158 / 0.16);
+  --rush-ui9-line-strong: rgb(129 144 158 / 0.28);
+  --rush-ui9-wave: var(--rush-ui9-cyan);
+  overflow-x: clip;
+}
+
+.arcade-rush-ui[data-ui9-wave="4"],
+.arcade-rush-ui[data-ui9-wave="5"] {
+  --rush-ui9-wave: color-mix(in srgb, var(--rush-ui9-cyan) 66%, var(--rush-ui9-magenta));
+}
+
+.arcade-rush-ui[data-ui9-wave="6"],
+.arcade-rush-ui[data-ui9-wave="boss"] {
+  --rush-ui9-wave: var(--rush-ui9-magenta);
+}
+
+/* ---------- Ready: identity without a terminal card ---------- */
+
+.arcade-rush-ui.arcade-rush-ready {
+  min-height: 100dvh;
+  padding: 0;
+  place-items: center;
+  overflow-y: auto;
+  background:
+    radial-gradient(circle at 68% 42%, rgb(255 60 172 / 0.055), transparent 29rem),
+    radial-gradient(circle at 30% 54%, rgb(0 255 242 / 0.045), transparent 31rem),
+    var(--rush-ui9-bg);
+}
+
+.arcade-rush-ui.arcade-rush-ready .arcade-rush-shell {
+  width: min(100% - clamp(2rem, 8vw, 8rem), 76rem);
+  padding-block: max(2.5rem, env(safe-area-inset-top)) max(2.5rem, env(safe-area-inset-bottom));
+}
+
+.arcade-rush-ui.arcade-rush-ready .arcade-rush-ready-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(19rem, 0.72fr);
+  grid-template-areas:
+    "kicker rules"
+    "title rules"
+    "subtitle rules"
+    "route rules"
+    "pb actions";
+  column-gap: clamp(2rem, 6vw, 6rem);
+  row-gap: 1rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  text-align: left;
+}
+
+.arcade-rush-ui.arcade-rush-ready .arcade-rush-kicker {
+  grid-area: kicker;
+  margin: 0;
+  color: var(--rush-ui9-muted);
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+}
+
+.arcade-rush-ui.arcade-rush-ready .arcade-rush-title {
+  grid-area: title;
+  margin: 0;
+  max-width: 9ch;
+  color: var(--rush-ui9-text);
+  font-size: clamp(3.25rem, 8.5vw, 7.5rem);
+  font-weight: 780;
+  line-height: 0.88;
+  letter-spacing: -0.055em;
+  text-wrap: balance;
+}
+
+.arcade-rush-ui.arcade-rush-ready .arcade-rush-title::after {
+  content: "// 6 + 1";
+  display: block;
+  margin-top: 0.9rem;
+  color: var(--rush-ui9-magenta);
+  font-family: var(--ui-font-mono, monospace);
+  font-size: 0.62rem;
+  font-weight: 750;
+  letter-spacing: 0.18em;
+}
+
+.arcade-rush-ui.arcade-rush-ready .arcade-rush-subtitle {
+  grid-area: subtitle;
+  max-width: 39rem;
+  margin: 0.35rem 0 0;
+  color: var(--rush-ui9-secondary);
+  font-size: clamp(0.95rem, 1.5vw, 1.08rem);
+  line-height: 1.7;
+}
+
+.arcade-rush-ui.arcade-rush-ready .arcade-rush-route-visual {
+  grid-area: route;
+  margin-top: clamp(1rem, 3vh, 2rem);
+}
+
+.arcade-rush-route-track {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  align-items: center;
+  width: min(100%, 34rem);
+}
+
+.arcade-rush-route-track::before {
+  content: "";
+  position: absolute;
+  right: 4%;
+  left: 4%;
+  top: 50%;
+  height: 1px;
+  background: linear-gradient(90deg, rgb(0 255 242 / 0.58), rgb(0 255 242 / 0.18) 62%, rgb(255 60 172 / 0.52));
+}
+
+.arcade-rush-route-node {
+  position: relative;
+  z-index: 1;
+  justify-self: center;
+  width: 0.58rem;
+  height: 0.58rem;
+  border: 1px solid rgb(0 255 242 / 0.62);
+  border-radius: 50%;
+  background: var(--rush-ui9-bg);
+  box-shadow: 0 0 0 0.2rem rgb(10 14 20 / 0.9);
+}
+
+.arcade-rush-route-node[data-wave="4"],
+.arcade-rush-route-node[data-wave="5"],
+.arcade-rush-route-node[data-wave="6"] {
+  border-color: rgb(255 60 172 / 0.56);
+}
+
+.arcade-rush-route-boss {
+  width: 0.78rem;
+  height: 0.78rem;
+  border-color: var(--rush-ui9-magenta);
+  border-radius: 0;
+  transform: rotate(45deg);
+}
+
+.arcade-rush-ui.arcade-rush-ready .arcade-rush-rule-grid {
+  grid-area: rules;
+  align-self: center;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  margin: 0;
+  border-top: 1px solid var(--rush-ui9-line-strong);
+}
+
+.arcade-rush-ui.arcade-rush-ready .arcade-rush-rule {
+  min-height: 6.1rem;
+  padding: 1.25rem 1rem 1rem 0;
+  border: 0;
+  border-bottom: 1px solid var(--rush-ui9-line);
+  background: transparent;
+}
+
+.arcade-rush-ui.arcade-rush-ready .arcade-rush-rule:nth-child(even) {
+  padding-left: 1rem;
+  border-left: 1px solid var(--rush-ui9-line);
+}
+
+.arcade-rush-ui.arcade-rush-ready .arcade-rush-rule strong {
+  color: var(--rush-ui9-text);
+  font-family: var(--ui-font-mono, monospace);
+  font-size: clamp(1.35rem, 3vw, 2rem);
+  font-weight: 650;
+}
+
+.arcade-rush-ui.arcade-rush-ready .arcade-rush-rule span {
+  margin-top: 0.42rem;
+  color: var(--rush-ui9-muted);
+  font-size: 0.6rem;
+  letter-spacing: 0.11em;
+}
+
+.arcade-rush-ui.arcade-rush-ready .arcade-rush-pb {
+  grid-area: pb;
+  align-self: end;
+  justify-content: flex-start;
+  gap: 1rem;
+  width: fit-content;
+  margin: clamp(1rem, 3vh, 2rem) 0 0;
+  padding: 0;
+  border: 0;
+}
+
+.arcade-rush-ui.arcade-rush-ready .arcade-rush-pb strong {
+  color: var(--rush-ui9-cyan);
+  font-family: var(--ui-font-mono, monospace);
+  font-size: clamp(1.5rem, 4vw, 2.4rem);
+  font-weight: 650;
+}
+
+.arcade-rush-ui.arcade-rush-ready .arcade-rush-actions {
+  grid-area: actions;
+  align-self: end;
+  justify-content: flex-end;
+  margin-top: clamp(1rem, 3vh, 2rem);
+}
+
+.arcade-rush-ui.arcade-rush-ready .arcade-rush-action {
+  min-height: 44px;
+  border-radius: var(--ui-radius-sm, 4px);
+  box-shadow: none;
+}
+
+/* ---------- Gameplay field ---------- */
+
+.arcade-rush-ui.arcade-rush-gameplay {
+  position: relative;
+  height: 100dvh;
+  min-height: 34rem;
+  isolation: isolate;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 53%, rgb(0 255 242 / 0.055), transparent 25rem),
+    radial-gradient(circle at 50% 53%, rgb(255 60 172 / 0.022), transparent 39rem),
+    var(--rush-ui9-bg);
+}
+
+.arcade-rush-ui.arcade-rush-gameplay::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, transparent calc(50% - 1px), rgb(129 144 158 / 0.045) 50%, transparent calc(50% + 1px)),
+    linear-gradient(0deg, transparent calc(50% - 1px), rgb(129 144 158 / 0.035) 50%, transparent calc(50% + 1px));
+  mask-image: radial-gradient(circle at center, #000 0 34%, transparent 69%);
+}
+
+.arcade-rush-ui.arcade-rush-gameplay::after {
+  content: "";
+  position: absolute;
+  z-index: 31;
+  inset: 0;
+  pointer-events: none;
+  border: 0 solid transparent;
+  box-shadow: inset 0 0 0 rgb(255 71 87 / 0);
+  opacity: 0;
+}
+
+.arcade-rush-ui.arcade-rush-gameplay.damage-flash::after {
+  opacity: 1;
+  box-shadow: inset 0 0 5rem rgb(255 71 87 / 0.19);
+  animation: rush-ui9-damage-edge 260ms ease-out both;
+}
+
+/* ---------- HUD hierarchy ---------- */
+
+.arcade-rush-ui.arcade-rush-gameplay .arcade-rush-hud {
+  position: relative;
+  z-index: 20;
+  display: grid;
+  grid-template-columns: minmax(8rem, 1.35fr) repeat(3, minmax(5.5rem, 0.72fr)) auto;
+  align-items: center;
+  gap: clamp(0.45rem, 1.4vw, 1.15rem);
+  min-height: 4.75rem;
+  padding: max(0.65rem, env(safe-area-inset-top)) max(1rem, env(safe-area-inset-right)) 0.65rem max(1rem, env(safe-area-inset-left));
+  border: 0;
+  border-bottom: 0;
+  background: linear-gradient(180deg, rgb(10 14 20 / 0.94), rgb(10 14 20 / 0.58) 72%, transparent);
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+.arcade-rush-ui.arcade-rush-gameplay .arcade-rush-hud::after {
+  content: "";
+  position: absolute;
+  right: max(1rem, env(safe-area-inset-right));
+  bottom: 0;
+  left: max(1rem, env(safe-area-inset-left));
+  height: 1px;
+  background: linear-gradient(90deg, rgb(0 255 242 / 0.34), rgb(129 144 158 / 0.09) 52%, rgb(255 60 172 / 0.22));
+}
+
+.arcade-rush-ui.arcade-rush-gameplay .arcade-rush-hud-stat {
+  min-width: 0;
+  padding: 0.25rem 0.3rem;
+  text-align: left;
+}
+
+.arcade-rush-ui.arcade-rush-gameplay .arcade-rush-hud-stat > span {
+  color: var(--rush-ui9-muted);
+  font-size: 0.55rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+.arcade-rush-ui.arcade-rush-gameplay .arcade-rush-hud-stat > strong {
+  margin-top: 0.16rem;
+  color: var(--rush-ui9-text);
+  font-family: var(--ui-font-mono, monospace);
+  font-size: clamp(1rem, 2vw, 1.42rem);
+  font-weight: 620;
+  line-height: 1;
+  text-shadow: none;
+}
+
+.arcade-rush-ui.arcade-rush-gameplay .arcade-rush-hud-stat:first-child > strong {
+  color: var(--rush-ui9-cyan);
+  font-size: clamp(1.7rem, 3.5vw, 2.55rem);
+  font-weight: 670;
+  letter-spacing: -0.045em;
+}
+
+.arcade-rush-ui.arcade-rush-gameplay[data-ui9-combo-tier="charged"] .arcade-rush-hud-stat:nth-child(2) > strong,
+.arcade-rush-ui.arcade-rush-gameplay[data-ui9-combo-tier="surge"] .arcade-rush-hud-stat:nth-child(2) > strong,
+.arcade-rush-ui.arcade-rush-gameplay[data-ui9-combo-tier="overdrive"] .arcade-rush-hud-stat:nth-child(2) > strong {
+  color: var(--rush-ui9-magenta);
+}
+
+.arcade-rush-ui.arcade-rush-gameplay .arcade-rush-wave-name {
+  display: block;
+  margin-top: 0.28rem;
+  color: var(--rush-ui9-wave);
+  font-size: 0.5rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.12em;
+  white-space: nowrap;
+}
+
+.arcade-rush-ui.arcade-rush-gameplay .arcade-rush-hud > .arcade-rush-action {
+  min-width: 0;
+  min-height: 44px;
+  padding: 0.55rem 0.72rem;
+  border-color: rgb(129 144 158 / 0.2);
+  border-radius: var(--ui-radius-sm, 4px);
+  background: transparent;
+  color: var(--rush-ui9-secondary);
+  box-shadow: none;
+  font-size: 0.62rem;
+  letter-spacing: 0.09em;
+}
+
+.arcade-rush-ui.arcade-rush-gameplay .arcade-rush-hud > .arcade-rush-action:hover,
+.arcade-rush-ui.arcade-rush-gameplay .arcade-rush-hud > .arcade-rush-action:focus-visible {
+  border-color: rgb(0 255 242 / 0.48);
+  background: rgb(0 255 242 / 0.035);
+  color: var(--rush-ui9-cyan);
+}
+
+/* ---------- Core: intersecting Rush energy rather than Campaign/Endless duplication ---------- */
+
+.arcade-rush-ui.arcade-rush-gameplay .arcade-rush-core {
+  position: absolute;
+  z-index: 3;
+  top: 54%;
+  left: 50%;
+  width: clamp(5.4rem, 10vw, 7.7rem);
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  overflow: visible;
+}
+
+.arcade-rush-ui.arcade-rush-gameplay .arcade-rush-core::before,
+.arcade-rush-ui.arcade-rush-gameplay .arcade-rush-core::after {
+  content: "";
+  position: absolute;
+  inset: 18%;
+  pointer-events: none;
+}
+
+.arcade-rush-ui.arcade-rush-gameplay .arcade-rush-core::before {
+  border: 1px solid rgb(0 255 242 / 0.58);
+  background:
+    linear-gradient(45deg, transparent 46%, rgb(0 255 242 / 0.16) 49% 51%, transparent 54%),
+    linear-gradient(-45deg, transparent 46%, rgb(255 60 172 / 0.13) 49% 51%, transparent 54%),
+    rgb(0 255 242 / 0.018);
+  box-shadow: 0 0 1.9rem rgb(0 255 242 / 0.11);
+  transform: rotate(45deg);
+  animation: rush-ui9-core-drift 6s ease-in-out infinite alternate;
+}
+
+.arcade-rush-ui.arcade-rush-gameplay .arcade-rush-core::after {
+  inset: 34%;
+  border: 1px solid rgb(255 60 172 / 0.52);
+  background: rgb(10 14 20 / 0.92);
+  box-shadow: 0 0 1rem rgb(255 60 172 / 0.09);
+  transform: rotate(45deg);
+}
+
+.arcade-rush-core-integrity {
+  position: absolute;
+  z-index: 2;
+  inset: -0.5rem;
+  pointer-events: none;
+}
+
+.arcade-rush-core-integrity i {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0.22rem;
+  height: 0.8rem;
+  background: var(--rush-ui9-cyan);
+  box-shadow: 0 0 0.5rem rgb(0 255 242 / 0.24);
+  transform-origin: 50% 3.3rem;
+  transition: opacity 140ms ease, background-color 140ms ease;
+}
+
+.arcade-rush-core-integrity i:nth-child(1) { transform: translate(-50%, -3.3rem) rotate(0deg); }
+.arcade-rush-core-integrity i:nth-child(2) { transform: translate(-50%, -3.3rem) rotate(72deg); }
+.arcade-rush-core-integrity i:nth-child(3) { transform: translate(-50%, -3.3rem) rotate(144deg); }
+.arcade-rush-core-integrity i:nth-child(4) { transform: translate(-50%, -3.3rem) rotate(216deg); }
+.arcade-rush-core-integrity i:nth-child(5) { transform: translate(-50%, -3.3rem) rotate(288deg); }
+
+.arcade-rush-core-integrity i[data-filled="false"] {
+  background: rgb(129 144 158 / 0.18);
+  box-shadow: none;
+  opacity: 0.65;
+}
+
+.arcade-rush-ui.arcade-rush-gameplay[data-ui9-integrity="2"] .arcade-rush-core::before,
+.arcade-rush-ui.arcade-rush-gameplay[data-ui9-integrity="1"] .arcade-rush-core::before {
+  border-color: rgb(255 71 87 / 0.68);
+  box-shadow: 0 0 2.4rem rgb(255 71 87 / 0.14);
+}
+
+.arcade-rush-ui.arcade-rush-gameplay[data-ui9-integrity="1"] .arcade-rush-core::before {
+  animation-duration: 1.8s;
+}
+
+/* ---------- Incoming words ---------- */
+
+.arcade-rush-ui.arcade-rush-gameplay .arcade-rush-word-layer {
+  position: absolute;
+  z-index: 5;
+  inset: 0;
+  pointer-events: auto;
+}
+
+.arcade-rush-ui.arcade-rush-gameplay .word-position {
+  z-index: 5;
+}
+
+.arcade-rush-ui.arcade-rush-gameplay .word-visual {
+  position: relative;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  color: rgb(215 224 231 / 0.72);
+  font-family: var(--ui-font-mono, "JetBrains Mono", Consolas, monospace);
+  font-weight: 590;
+  text-shadow: 0 1px 0 rgb(0 0 0 / 0.5);
+  transition: color 90ms linear, opacity 90ms linear, transform 90ms ease;
+}
+
+.arcade-rush-ui.arcade-rush-gameplay .word-visual .word-text {
+  position: relative;
+  display: inline-block;
+  padding: 0.16em 0.05em 0.2em;
+}
+
+.arcade-rush-ui.arcade-rush-gameplay .word-visual .typed-letter {
+  color: rgb(0 255 242 / 0.84);
+}
+
+.arcade-rush-ui.arcade-rush-gameplay .word-visual.active {
+  z-index: 2;
+  color: var(--rush-ui9-text);
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
+.arcade-rush-ui.arcade-rush-gameplay .word-visual.active .typed-letter {
+  color: var(--rush-ui9-cyan);
+}
+
+.arcade-rush-ui.arcade-rush-gameplay .word-visual.active .word-text::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 1px;
+  background: linear-gradient(90deg, var(--rush-ui9-cyan), rgb(0 255 242 / 0.16));
+}
+
+.arcade-rush-ui.arcade-rush-gameplay .word-visual.candidate {
+  color: rgb(235 214 229 / 0.9);
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
+.arcade-rush-ui.arcade-rush-gameplay .word-visual.candidate .typed-letter {
+  color: var(--rush-ui9-magenta);
+}
+
+.arcade-rush-ui.arcade-rush-gameplay .word-visual.candidate .word-text::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 1px;
+  background: linear-gradient(90deg, var(--rush-ui9-magenta), rgb(255 60 172 / 0.12));
+}
+
+.arcade-rush-ui.arcade-rush-gameplay .word-visual.wrong {
+  border: 0;
+  background: transparent;
+  color: var(--rush-ui9-danger);
+  box-shadow: none;
+  animation: rush-ui9-word-error 150ms steps(2, end);
+}
+
+.arcade-rush-ui.arcade-rush-gameplay .word-visual.wrong .word-text::after {
+  content: "";
+  position: absolute;
+  right: -0.1em;
+  bottom: -0.02em;
+  left: -0.1em;
+  height: 1px;
+  background: var(--rush-ui9-danger);
+}
+
+/* ---------- Wave transitions ---------- */
+
+.arcade-rush-ui.arcade-rush-gameplay [data-rush-role="transition-overlay"] {
+  z-index: 40;
+  place-items: center;
+  padding: clamp(1rem, 4vw, 2.5rem);
+  background: rgb(10 14 20 / 0.78);
+  backdrop-filter: none;
+}
+
+.arcade-rush-ui.arcade-rush-gameplay [data-rush-role="transition-overlay"] .arcade-rush-overlay-card {
+  position: relative;
+  width: min(48rem, 100%);
+  padding: clamp(1.5rem, 5vw, 3.5rem) 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  text-align: center;
+}
+
+.arcade-rush-ui.arcade-rush-gameplay [data-rush-role="transition-overlay"] .arcade-rush-overlay-card::before,
+.arcade-rush-ui.arcade-rush-gameplay [data-rush-role="transition-overlay"] .arcade-rush-overlay-card::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  width: min(32rem, 72vw);
+  height: 1px;
+  translate: -50% 0;
+  background: linear-gradient(90deg, transparent, var(--rush-ui9-wave), transparent);
+  opacity: 0.56;
+}
+
+.arcade-rush-ui.arcade-rush-gameplay [data-rush-role="transition-overlay"] .arcade-rush-overlay-card::before { top: 0; }
+.arcade-rush-ui.arcade-rush-gameplay [data-rush-role="transition-overlay"] .arcade-rush-overlay-card::after { bottom: 0; }
+
+.arcade-rush-ui.arcade-rush-gameplay [data-rush-role="transition-overlay"] .arcade-rush-overlay-label {
+  color: var(--rush-ui9-wave);
+  font-size: 0.65rem;
+  font-weight: 750;
+  letter-spacing: 0.17em;
+}
+
+.arcade-rush-ui.arcade-rush-gameplay [data-rush-role="transition-overlay"] h2 {
+  margin: 0.7rem 0 0;
+  color: var(--rush-ui9-text);
+  font-size: clamp(2.5rem, 8vw, 5.75rem);
+  font-weight: 720;
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+}
+
+.arcade-rush-ui.arcade-rush-gameplay [data-rush-role="transition-overlay"] p {
+  color: var(--rush-ui9-secondary);
+}
+
+.arcade-rush-ui.arcade-rush-gameplay [data-rush-role="transition-overlay"] .arcade-rush-countdown {
+  margin-top: 1.4rem;
+  color: var(--rush-ui9-wave);
+  font-family: var(--ui-font-mono, monospace);
+  font-size: clamp(2rem, 7vw, 4.5rem);
+  font-weight: 600;
+  line-height: 1;
+  animation: rush-ui9-countdown-pulse 700ms ease-in-out infinite alternate;
+}
+
+/* ---------- Core Breaker ---------- */
+
+.arcade-rush-ui.arcade-rush-gameplay .arcade-rush-boss-panel {
+  position: absolute;
+  z-index: 13;
+  top: clamp(5.8rem, 13vh, 7.3rem);
+  left: 50%;
+  width: min(52rem, calc(100% - 2rem));
+  translate: -50% 0;
+  padding: 0.65rem 0 1rem;
+  border: 0;
+  border-top: 1px solid rgb(255 60 172 / 0.3);
+  border-bottom: 1px solid rgb(129 144 158 / 0.12);
+  background: linear-gradient(180deg, rgb(10 14 20 / 0.84), rgb(10 14 20 / 0.4));
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+.arcade-rush-ui.arcade-rush-gameplay .arcade-rush-boss-header {
+  align-items: baseline;
+  margin: 0 0 0.55rem;
+  padding-inline: 0.35rem;
+}
+
+.arcade-rush-ui.arcade-rush-gameplay .arcade-rush-boss-header strong {
+  color: var(--rush-ui9-magenta);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.17em;
+}
+
+.arcade-rush-ui.arcade-rush-gameplay .arcade-rush-boss-header span {
+  color: var(--rush-ui9-muted);
+  font-family: var(--ui-font-mono, monospace);
+  font-size: 0.62rem;
+  letter-spacing: 0.04em;
+}
+
+.arcade-rush-ui.arcade-rush-gameplay .arcade-rush-boss-meter {
+  height: 2px;
+  margin: 0 0 0.85rem;
+  background: rgb(255 255 255 / 0.08);
+}
+
+.arcade-rush-ui.arcade-rush-gameplay .arcade-rush-boss-meter i {
+  background: linear-gradient(90deg, var(--rush-ui9-magenta), rgb(255 60 172 / 0.45));
+  box-shadow: none;
+  transition: transform 120ms ease;
+}
+
+.arcade-rush-ui.arcade-rush-gameplay .arcade-rush-phrase {
+  min-height: 2.2rem;
+  margin: 0;
+  padding-inline: 0.35rem;
+  color: rgb(211 220 228 / 0.63);
+  font-family: var(--ui-font-mono, monospace);
+  font-size: clamp(1.15rem, 3.2vw, 2rem);
+  font-weight: 590;
+  line-height: 1.4;
+  letter-spacing: -0.015em;
+  text-align: center;
+  text-transform: none;
+}
+
+.arcade-rush-ui.arcade-rush-gameplay .arcade-rush-phrase .typed {
+  color: var(--rush-ui9-cyan);
+}
+
+.arcade-rush-ui.arcade-rush-gameplay[data-ui9-phase="boss"] .arcade-rush-core::after {
+  border-color: rgb(255 60 172 / 0.76);
+  box-shadow: 0 0 1.5rem rgb(255 60 172 / 0.14);
+}
+
+.arcade-rush-ui.arcade-rush-gameplay[data-ui9-phase="boss-intro"] [data-rush-role="transition-overlay"] .arcade-rush-overlay-label,
+.arcade-rush-ui.arcade-rush-gameplay[data-ui9-phase="boss-intro"] [data-rush-role="transition-overlay"] .arcade-rush-countdown {
+  color: var(--rush-ui9-magenta);
+}
+
+/* UI10 owns the full Pause redesign. UI9 only guarantees Rush compatibility. */
+.arcade-rush-ui.arcade-rush-gameplay [data-rush-role="pause-overlay"] .arcade-rush-action {
+  min-height: 44px;
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 900px) {
+  .arcade-rush-ui.arcade-rush-ready .arcade-rush-ready-card {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "kicker"
+      "title"
+      "subtitle"
+      "route"
+      "rules"
+      "pb"
+      "actions";
+  }
+
+  .arcade-rush-ui.arcade-rush-ready .arcade-rush-rule-grid {
+    margin-top: 1rem;
+  }
+
+  .arcade-rush-ui.arcade-rush-ready .arcade-rush-actions {
+    justify-content: flex-start;
+  }
+
+  .arcade-rush-ui.arcade-rush-gameplay .arcade-rush-hud {
+    grid-template-columns: minmax(7.5rem, 1.25fr) repeat(3, minmax(4.6rem, 0.7fr)) auto;
+    gap: 0.35rem;
+  }
+}
+
+@media (max-width: 760px) {
+  .arcade-rush-ui.arcade-rush-ready .arcade-rush-shell {
+    width: min(100% - 2rem, 44rem);
+  }
+
+  .arcade-rush-ui.arcade-rush-ready .arcade-rush-title {
+    font-size: clamp(3rem, 15vw, 5.8rem);
+  }
+
+  .arcade-rush-ui.arcade-rush-gameplay {
+    min-height: 31rem;
+  }
+
+  .arcade-rush-ui.arcade-rush-gameplay .arcade-rush-hud {
+    grid-template-columns: 1.45fr repeat(3, minmax(0, 0.76fr));
+    grid-template-rows: auto auto;
+    padding-inline: max(0.75rem, env(safe-area-inset-left));
+  }
+
+  .arcade-rush-ui.arcade-rush-gameplay .arcade-rush-hud > .arcade-rush-action {
+    grid-column: 1 / -1;
+    justify-self: stretch;
+    min-height: 44px;
+    margin-top: 0.18rem;
+  }
+
+  .arcade-rush-ui.arcade-rush-gameplay .arcade-rush-hud-stat {
+    padding-inline: 0.18rem;
+  }
+
+  .arcade-rush-ui.arcade-rush-gameplay .arcade-rush-hud-stat:first-child > strong {
+    font-size: clamp(1.4rem, 6vw, 2rem);
+  }
+
+  .arcade-rush-ui.arcade-rush-gameplay .arcade-rush-core {
+    top: 57%;
+    width: clamp(4.9rem, 19vw, 6.2rem);
+  }
+
+  .arcade-rush-core-integrity i {
+    transform-origin: 50% 2.8rem;
+  }
+
+  .arcade-rush-core-integrity i:nth-child(1) { transform: translate(-50%, -2.8rem) rotate(0deg); }
+  .arcade-rush-core-integrity i:nth-child(2) { transform: translate(-50%, -2.8rem) rotate(72deg); }
+  .arcade-rush-core-integrity i:nth-child(3) { transform: translate(-50%, -2.8rem) rotate(144deg); }
+  .arcade-rush-core-integrity i:nth-child(4) { transform: translate(-50%, -2.8rem) rotate(216deg); }
+  .arcade-rush-core-integrity i:nth-child(5) { transform: translate(-50%, -2.8rem) rotate(288deg); }
+
+  .arcade-rush-ui.arcade-rush-gameplay .arcade-rush-boss-panel {
+    top: 9.4rem;
+    width: calc(100% - 1.25rem);
+  }
+}
+
+@media (max-width: 520px) {
+  .arcade-rush-ui.arcade-rush-ready .arcade-rush-shell {
+    width: min(100% - 1.25rem, 36rem);
+  }
+
+  .arcade-rush-ui.arcade-rush-ready .arcade-rush-rule-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .arcade-rush-ui.arcade-rush-ready .arcade-rush-rule {
+    min-height: 5.2rem;
+    padding: 1rem 0.65rem 0.8rem 0;
+  }
+
+  .arcade-rush-ui.arcade-rush-ready .arcade-rush-rule:nth-child(even) {
+    padding-left: 0.65rem;
+  }
+
+  .arcade-rush-ui.arcade-rush-ready .arcade-rush-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    width: 100%;
+  }
+
+  .arcade-rush-ui.arcade-rush-ready .arcade-rush-action {
+    width: 100%;
+  }
+
+  .arcade-rush-ui.arcade-rush-gameplay .arcade-rush-hud {
+    grid-template-columns: 1.35fr 0.72fr 0.72fr 0.72fr;
+    gap: 0.1rem;
+  }
+
+  .arcade-rush-ui.arcade-rush-gameplay .arcade-rush-hud-stat > span {
+    font-size: 0.49rem;
+    letter-spacing: 0.075em;
+  }
+
+  .arcade-rush-ui.arcade-rush-gameplay .arcade-rush-hud-stat > strong {
+    font-size: 0.88rem;
+  }
+
+  .arcade-rush-ui.arcade-rush-gameplay .arcade-rush-wave-name {
+    font-size: 0.42rem;
+    letter-spacing: 0.065em;
+  }
+
+  .arcade-rush-ui.arcade-rush-gameplay .arcade-rush-boss-header {
+    gap: 0.5rem;
+  }
+
+  .arcade-rush-ui.arcade-rush-gameplay .arcade-rush-boss-header span {
+    font-size: 0.52rem;
+  }
+}
+
+@media (max-height: 430px) {
+  .arcade-rush-ui.arcade-rush-gameplay {
+    min-height: 100dvh;
+  }
+
+  .arcade-rush-ui.arcade-rush-gameplay .arcade-rush-hud {
+    grid-template-columns: minmax(6.2rem, 1.3fr) repeat(2, minmax(4rem, 0.72fr)) auto;
+    grid-template-rows: auto;
+    min-height: 3.35rem;
+    padding-block: max(0.3rem, env(safe-area-inset-top)) 0.3rem;
+  }
+
+  .arcade-rush-ui.arcade-rush-gameplay .arcade-rush-hud-stat:nth-child(2) {
+    display: none;
+  }
+
+  .arcade-rush-ui.arcade-rush-gameplay .arcade-rush-hud > .arcade-rush-action {
+    grid-column: auto;
+    min-height: 44px;
+    margin: 0;
+  }
+
+  .arcade-rush-ui.arcade-rush-gameplay .arcade-rush-hud-stat:first-child > strong {
+    font-size: 1.35rem;
+  }
+
+  .arcade-rush-ui.arcade-rush-gameplay .arcade-rush-core {
+    top: 58%;
+    width: 4.7rem;
+  }
+
+  .arcade-rush-core-integrity {
+    inset: -0.25rem;
+  }
+
+  .arcade-rush-core-integrity i {
+    height: 0.58rem;
+    transform-origin: 50% 2.35rem;
+  }
+
+  .arcade-rush-core-integrity i:nth-child(1) { transform: translate(-50%, -2.35rem) rotate(0deg); }
+  .arcade-rush-core-integrity i:nth-child(2) { transform: translate(-50%, -2.35rem) rotate(72deg); }
+  .arcade-rush-core-integrity i:nth-child(3) { transform: translate(-50%, -2.35rem) rotate(144deg); }
+  .arcade-rush-core-integrity i:nth-child(4) { transform: translate(-50%, -2.35rem) rotate(216deg); }
+  .arcade-rush-core-integrity i:nth-child(5) { transform: translate(-50%, -2.35rem) rotate(288deg); }
+
+  .arcade-rush-ui.arcade-rush-gameplay .arcade-rush-boss-panel {
+    top: 3.7rem;
+    width: min(48rem, calc(100% - 0.8rem));
+    padding-bottom: 0.4rem;
+  }
+
+  .arcade-rush-ui.arcade-rush-gameplay .arcade-rush-boss-header {
+    margin-bottom: 0.25rem;
+  }
+
+  .arcade-rush-ui.arcade-rush-gameplay .arcade-rush-boss-meter {
+    margin-bottom: 0.35rem;
+  }
+
+  .arcade-rush-ui.arcade-rush-gameplay .arcade-rush-phrase {
+    min-height: 1.4rem;
+    font-size: clamp(0.88rem, 2.4vw, 1.25rem);
+    line-height: 1.2;
+  }
+}
+
+/* ---------- Motion / accessibility ---------- */
+
+.arcade-rush-ui.arcade-rush-ready .arcade-rush-action:focus-visible,
+.arcade-rush-ui.arcade-rush-gameplay .arcade-rush-action:focus-visible,
+.arcade-rush-ui.arcade-rush-gameplay .arcade-rush-core:focus-visible {
+  outline: 2px solid var(--rush-ui9-cyan);
+  outline-offset: 2px;
+}
+
+@keyframes rush-ui9-core-drift {
+  from { transform: rotate(43deg) scale(0.97); }
+  to { transform: rotate(47deg) scale(1.025); }
+}
+
+@keyframes rush-ui9-countdown-pulse {
+  from { opacity: 0.58; transform: scale(0.98); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes rush-ui9-word-error {
+  0% { transform: translateX(0); }
+  38% { transform: translateX(-0.12rem); }
+  72% { transform: translateX(0.1rem); }
+  100% { transform: translateX(0); }
+}
+
+@keyframes rush-ui9-damage-edge {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .arcade-rush-ui.arcade-rush-ready *,
+  .arcade-rush-ui.arcade-rush-ready *::before,
+  .arcade-rush-ui.arcade-rush-ready *::after,
+  .arcade-rush-ui.arcade-rush-gameplay *,
+  .arcade-rush-ui.arcade-rush-gameplay *::before,
+  .arcade-rush-ui.arcade-rush-gameplay *::after {
+    animation: none !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .arcade-rush-ui.arcade-rush-gameplay {
+    transform: none !important;
+  }
+
+  .arcade-rush-ui.arcade-rush-gameplay.damage-flash::after {
+    animation: none !important;
+    opacity: 0.34;
+  }
+}
+
+.arcade-rush-ui[data-reduced-motion="true"].arcade-rush-gameplay,
+.arcade-rush-ui[data-reduced-motion="true"].arcade-rush-gameplay * {
+  animation: none !important;
+  transition: none !important;
+}
