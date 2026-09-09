@@ -153,6 +153,21 @@ def matrix(browser,name,base,checks):
  }""")
  assert effects_probe=={'animations':0,'bursts':0,'damage':True},effects_probe
  if name=='chromium':page.screenshot(path=str(ARTIFACTS/'campaign-midnight-violet-reduced.png'),animations='disabled')
+ # The real Rush UI port exercises an animated pseudo-element without running a game clock.
+ page.evaluate("""async () => {
+ const {createArcadeRushDomUiController}=await import('./js/arcadeRush/arcadeRushUi.js');
+ const port=createArcadeRushDomUiController({root:document.querySelector('#app'),actions:{}});
+ port.renderHud({runState:'active',phase:'WAVE_1',currentWave:1,score:0,combo:0,integrity:5});
+ }""")
+ expect(page.locator('.arcade-rush-core')).to_be_visible()
+ assert page.locator('.arcade-rush-core').evaluate("el=>getComputedStyle(el,'::before').animationName")=='none'
+ page.evaluate("""async () => {
+ const {appState}=await import('./js/state.js');
+ const {updateCustomizationSetting}=await import('./js/storage.js');
+ updateCustomizationSetting(appState.save,'effectsIntensity','standard');
+ document.dispatchEvent(new CustomEvent('wordstrike:settings-changed'));
+ }""")
+ assert page.locator('.arcade-rush-core').evaluate("el=>getComputedStyle(el,'::before').animationName")!='none'
  # Changing route to Practice removes palette/effects; returning restores preferences.
  page.evaluate("document.querySelector('#app').innerHTML='<section class=\"screen practice-lab-screen\"><button>Practice probe</button></section>'")
  expect(page.locator('html')).to_have_attribute('data-customization-active','false')
@@ -162,8 +177,8 @@ def matrix(browser,name,base,checks):
  expect(page.locator('html')).to_have_attribute('data-customization-active','true')
  expect(page.locator('html')).to_have_attribute('data-accent','violet')
  open_settings(page)
- # Storage failure is visible; the selection still applies for the current visit.
- page.evaluate("Storage.prototype.setItem=()=>{throw new DOMException('Full','QuotaExceededError')}")
+ # Return void: returning the assigned function makes Playwright invoke the quota stub itself.
+ page.evaluate("() => { Storage.prototype.setItem = () => { throw new DOMException('Full','QuotaExceededError'); }; }")
  select(page,'theme','oled')
  expect(page.locator('[data-appearance-status]')).to_contain_text('could not be saved')
  assert not errors,errors
