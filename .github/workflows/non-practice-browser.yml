@@ -45,7 +45,9 @@ jobs:
       - name: Certify UI10 shared Results, Pause, and onboarding
         run: python tests/browser/ui10_results_pause_onboarding.py
       - name: Certify UI11 Profile, Leaderboards, and Settings
-        run: python tests/browser/ui11_profile_leaderboards_settings.py
+        run: |
+          python tests/browser/ui11_profile_leaderboards_settings.py
+          python tests/browser/ui11_mobile_heading_contract.py
       - uses: actions/upload-artifact@v4
         if: always()
         with:
