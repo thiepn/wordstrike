@@ -4,7 +4,6 @@ import {
 } from "./arcadeRush/arcadeRushContract.js";
 import { getArcadeRushWaveProfile } from "./arcadeRush/arcadeRushConfig.js";
 
-const ROOT_SELECTOR = ".arcade-rush-ui";
 const GAMEPLAY_SELECTOR = '.arcade-rush-ui[data-rush-view="gameplay"]';
 const READY_SELECTOR = '.arcade-rush-ui[data-rush-view="ready"]';
 const CORE_ROLE = '[data-rush-role="core"]';
@@ -53,6 +52,11 @@ function setProgressbar(element, { label, value, max }) {
   element.setAttribute("aria-valuemin", "0");
   element.setAttribute("aria-valuemax", String(max));
   element.setAttribute("aria-valuenow", String(value));
+}
+
+function preventDevIndicatorControlCollision() {
+  const indicator = document.querySelector(".dev-mode-indicator");
+  if (indicator) indicator.style.pointerEvents = "none";
 }
 
 function buildRouteVisual(documentRef) {
@@ -207,9 +211,9 @@ function enhanceGameplay(root) {
 
 export function enhanceCurrentArcadeRushView() {
   const ready = document.querySelector(READY_SELECTOR);
-  if (ready) enhanceReady(ready);
-
   const gameplay = document.querySelector(GAMEPLAY_SELECTOR);
+  if (ready || gameplay) preventDevIndicatorControlCollision();
+  if (ready) enhanceReady(ready);
   if (gameplay) enhanceGameplay(gameplay);
   return Boolean(ready || gameplay);
 }
