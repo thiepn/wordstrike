@@ -5,17 +5,31 @@ on:
       - codex/pl28-common-words-v1
   workflow_dispatch:
 permissions:
-  contents: read
+  contents: write
 jobs:
   build:
+    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: codex/pl28-common-words-v1
       - uses: actions/setup-node@v4
         with:
           node-version: 22
       - name: Build PL28 static artifacts
         run: node scripts/buildPracticeCommonWords.mjs
+      - name: Commit generated artifacts
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/practice/common-words/en-v1/*.json
+          if git diff --cached --quiet; then
+            echo "Artifacts already current"
+            exit 0
+          fi
+          git commit -m "build(pl28): generate Common Words v1 artifacts"
+          git push origin HEAD:codex/pl28-common-words-v1
       - name: Upload PL28 static artifacts
         uses: actions/upload-artifact@v4
         with:
