@@ -825,6 +825,40 @@
     padding-left: 0;
   }
 
+  .endless-hud-survival,
+  .endless-hud-pressure {
+    position: relative;
+    gap: 4px;
+    white-space: nowrap;
+  }
+
+  .endless-hud-survival .endless-hud-label,
+  .endless-hud-pressure .endless-hud-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .endless-hud-survival::before,
+  .endless-hud-pressure::before {
+    color: var(--ui-text-muted);
+    font-family: var(--ui-font);
+    font-size: 7px;
+    font-weight: 700;
+    letter-spacing: .1em;
+    line-height: 1;
+  }
+
+  .endless-hud-survival::before { content: "TIME"; }
+  .endless-hud-pressure::before { content: "LOAD"; }
+
   .endless-hud-survival { grid-area: survival; }
   .endless-stage-progress { grid-area: progress; }
   .endless-hud-pressure { grid-area: pressure; }
