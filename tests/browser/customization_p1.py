@@ -16,6 +16,8 @@ ROOT = Path(__file__).resolve().parents[2]
 ARTIFACTS = ROOT / "browser-artifacts" / "customization-p1"
 THEMES = {"wordstrike": "#0a0e14", "oled": "#000000", "midnight": "#080e20", "monochrome": "#111111"}
 ACCENTS = {"cyan": "#00fff2", "blue": "#70a7ff", "violet": "#b2a0ff", "magenta": "#ff80cf", "orange": "#ffb470", "green": "#70e1b2"}
+# DOMRect subtraction in Firefox can report 44 CSS px as 43.99998474121094.
+MIN_TARGET = 44 - 0.01
 SEED = """(() => {
  for (const [id,version] of Object.entries({general:3,campaign:1,typing:1,endless:1,boss:1,leaderboards:1,'arcade-rush':1}))
   localStorage.setItem(`wordstrike.onboarding.${id}.v${version}`, 'seen');
@@ -98,7 +100,7 @@ def matrix(browser,name,base,checks):
    state=snapshot(page)
    assert state['bg']==bg and state['accent']==color,state
    assert {k:state[k] for k in semantics}==semantics,state
-   assert state['overflow']<=1 and state['selectHeight']>=44,state
+   assert state['overflow']<=1 and state['selectHeight']>=MIN_TARGET,state
    assert contrast(state['selectColor'],state['selectBackground'])>=4.5,state
    assert contrast(state['accentColor'],state['accentBackground'])>=4.5,state
    for effects in ['reduced','standard','cinematic']:
@@ -190,10 +192,10 @@ def responsive(browser,name,base,checks):
   context=context_for(browser,base,w,h);page=context.new_page();open_title(page,base);open_settings(page)
   select(page,'theme','oled');select(page,'accent','magenta')
   state=snapshot(page)
-  assert state['overflow']<=1 and state['selectHeight']>=44,state
+  assert state['overflow']<=1 and state['selectHeight']>=MIN_TARGET,state
   for control in page.locator('[data-appearance-setting], [data-reset-appearance]').all():
    control.scroll_into_view_if_needed();box=control.bounding_box()
-   assert box and box['height']>=44 and box['x']>=-1 and box['x']+box['width']<=w+1,box
+   assert box and box['height']>=MIN_TARGET and box['x']>=-1 and box['x']+box['width']<=w+1,box
   if name=='chromium':
    page.locator('[data-customization-settings]').scroll_into_view_if_needed()
    page.screenshot(path=str(ARTIFACTS/f'settings-{w}x{h}.png'),full_page=True,animations='disabled')
