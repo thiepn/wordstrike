@@ -14,7 +14,10 @@ function soundEnabled() {
 function syncAudioPreference() {
   const enabled = soundEnabled();
   setUiAudioEnabled(enabled);
-  document.body?.setAttribute("data-ui12-audio-enabled", String(enabled));
+  const next = String(enabled);
+  if (document.body?.getAttribute("data-ui12-audio-enabled") !== next) {
+    document.body.setAttribute("data-ui12-audio-enabled", next);
+  }
   return enabled;
 }
 
@@ -37,9 +40,11 @@ function updateAudioSetting(section, enabled) {
   const button = section?.querySelector("[data-ui12-sound-toggle]");
   if (!button) return;
   button.classList.toggle("on", enabled);
-  button.setAttribute("aria-checked", String(enabled));
+  const checked = String(enabled);
+  if (button.getAttribute("aria-checked") !== checked) button.setAttribute("aria-checked", checked);
   const label = button.querySelector("strong");
-  if (label) label.textContent = enabled ? "ON" : "OFF";
+  const nextLabel = enabled ? "ON" : "OFF";
+  if (label && label.textContent !== nextLabel) label.textContent = nextLabel;
 }
 
 function enhanceSettings(screen) {
@@ -67,14 +72,18 @@ function enhanceSettings(screen) {
       const next = !previous;
       updateSetting(appState.save, "soundEffects", next);
       setUiAudioEnabled(next);
-      document.body?.setAttribute("data-ui12-audio-enabled", String(next));
+      const bodyValue = String(next);
+      if (document.body?.getAttribute("data-ui12-audio-enabled") !== bodyValue) {
+        document.body.setAttribute("data-ui12-audio-enabled", bodyValue);
+      }
       updateAudioSetting(section, next);
       if (next) playUiAudio("toggle");
     });
   }
 
   const hint = screen.querySelector(".settings-panel > .footer-hint");
-  if (hint) hint.textContent = "↑ ↓ CORE SETTINGS · ENTER TOGGLE · TAB ALL CONTROLS · ESC BACK";
+  const hintCopy = "↑ ↓ CORE SETTINGS · ENTER TOGGLE · TAB ALL CONTROLS · ESC BACK";
+  if (hint && hint.textContent !== hintCopy) hint.textContent = hintCopy;
 }
 
 function isPracticeTarget(target) {
@@ -120,7 +129,7 @@ function handleClick(event) {
 }
 
 function handleKeydown(event) {
-  if (event.repeat || event.defaultPrevented || isPracticeTarget(event.target)) return;
+  if (event.repeat || isPracticeTarget(event.target)) return;
   if (event.target?.matches?.("input, textarea, select, [contenteditable=true], .gameplay-input")) return;
   if (!audibleKeyboardSurface() || !syncAudioPreference()) return;
 
@@ -136,7 +145,7 @@ function enhance() {
   if (!root) return;
   const currentScreen = root.querySelector(":scope > .screen");
   if (currentScreen && !currentScreen.classList.contains("practice-lab-screen")) {
-    currentScreen.dataset.ui12Polished = "true";
+    if (currentScreen.dataset.ui12Polished !== "true") currentScreen.dataset.ui12Polished = "true";
   }
   enhanceSettings(root.querySelector(".settings-screen"));
   syncAudioPreference();
