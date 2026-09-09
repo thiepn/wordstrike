@@ -19,7 +19,7 @@ test("home renderer exposes semantic sections, honest empty states, native contr
   assert.match(target.innerHTML, /NO SKILL PROFILE YET/i);
   assert.match(target.innerHTML, /RECOMMENDATIONS NEED DATA/i);
   assert.match(target.innerHTML, /disabled aria-disabled="true"/);
-  assert.equal((target.innerHTML.match(/data-experiment-id=/g) || []).length, 16);
+  assert.equal((target.innerHTML.match(/data-experiment-id=/g) || []).length, 17);
   assert.doesNotMatch(target.innerHTML, /implementationPrompt|Prompt 6/);
 });
 
