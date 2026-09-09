@@ -286,7 +286,7 @@ def certify_mobile_and_reduced(browser, browser_name, base, checks):
       const c=createOnboardingController(); createOnboardingView(c,{root:document}); c.open('general',{source:'help'});
     }""")
     motion = reduced_page.locator('.onboarding-dialog').evaluate("el=>({animation:getComputedStyle(el).animationName,transition:getComputedStyle(el).transitionDuration})")
-    assert motion["animation"] == "none" and motion["transition"] in {"0s","0.001ms"}, motion
+    assert motion["animation"] == "none" and motion["transition"] in {"0s","0.001ms","1e-06s"}, motion
     checks.append({"browser":"chromium","case":"mobile short-height + reduced motion","mobile":normal,"short":short,"motion":motion})
     reduced_context.close()
 
