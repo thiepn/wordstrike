@@ -69,27 +69,31 @@ test("PL28 statistical, training, and diagnostic sources are separately governed
   assert.equal(statistical.sourceChecksum, loaded.reference.bindings.statisticalSourceChecksum);
   assert.equal(training.sourceChecksum, loaded.practice.bindings.displaySourceChecksum);
   assert.equal(diagnostic.sourceChecksum, loaded.check.bindings.displaySourceChecksum);
-  const governedSubsetChecksum = sha({
-    registryVersion: loaded.sourceRegistry.registryVersion,
-    statisticalSource: statistical,
-    trainingSource: training,
-    diagnosticSource: diagnostic,
-  });
-  assert.equal(governedSubsetChecksum, loaded.reference.bindings.sourceRegistryChecksum);
-  assert.equal(governedSubsetChecksum, loaded.practice.bindings.sourceRegistryChecksum);
-  assert.equal(governedSubsetChecksum, loaded.check.bindings.sourceRegistryChecksum);
+
+  const statisticalRegistryChecksum = sha({ registryVersion: loaded.sourceRegistry.registryVersion, statisticalSource: statistical });
+  const trainingRegistryChecksum = sha({ registryVersion: loaded.sourceRegistry.registryVersion, displaySource: training });
+  const diagnosticRegistryChecksum = sha({ registryVersion: loaded.sourceRegistry.registryVersion, displaySource: diagnostic });
+  assert.equal(statisticalRegistryChecksum, loaded.reference.bindings.sourceRegistryChecksum);
+  assert.equal(statisticalRegistryChecksum, loaded.practice.bindings.sourceRegistryChecksum);
+  assert.equal(statisticalRegistryChecksum, loaded.check.bindings.sourceRegistryChecksum);
+  assert.equal(trainingRegistryChecksum, loaded.practice.bindings.displaySourceRegistryChecksum);
+  assert.equal(diagnosticRegistryChecksum, loaded.check.bindings.displaySourceRegistryChecksum);
+  assert.notEqual(trainingRegistryChecksum, diagnosticRegistryChecksum);
 });
 
-test("PL28 governed source snapshot binds reviewed upstream words and both display roles to canonical PL7 word identity", async () => {
+test("PL28 governed source snapshot binds reviewed upstream words and isolated display roles to canonical PL7 word identity", async () => {
   const loaded = await loadAll();
   assert.equal(loaded.sourceSnapshot.words.length, 1200);
   assert.equal(loaded.sourceSnapshot.checksum, loaded.reference.bindings.sourceSnapshotChecksum);
   assert.equal(loaded.sourceSnapshot.sourceRegistryVersion, loaded.sourceRegistry.registryVersion);
+  assert.equal(loaded.sourceSnapshot.sourceRegistryChecksum, loaded.reference.bindings.sourceRegistryChecksum);
   assert.equal(loaded.sourceSnapshot.statisticalSourceId, loaded.reference.bindings.statisticalSourceId);
   assert.equal(loaded.sourceSnapshot.trainingSourceId, loaded.practice.bindings.displaySourceId);
   assert.equal(loaded.sourceSnapshot.trainingSourceChecksum, loaded.practice.bindings.displaySourceChecksum);
+  assert.equal(loaded.sourceSnapshot.trainingSourceRegistryChecksum, loaded.practice.bindings.displaySourceRegistryChecksum);
   assert.equal(loaded.sourceSnapshot.diagnosticSourceId, loaded.check.bindings.displaySourceId);
   assert.equal(loaded.sourceSnapshot.diagnosticSourceChecksum, loaded.check.bindings.displaySourceChecksum);
+  assert.equal(loaded.sourceSnapshot.diagnosticSourceRegistryChecksum, loaded.check.bindings.displaySourceRegistryChecksum);
   const referenceByKey = new Map(loaded.reference.words.map((word) => [word.lexicalKey, word]));
   for (const word of loaded.sourceSnapshot.words) {
     assert.equal(word.wordId, `word:${word.lexicalKey}`);
@@ -127,5 +131,7 @@ test("PL28 Practice and Check preserve independent display partitions and source
   assert.notEqual(loaded.check.displayProvenance.sourceType, "statistical-reference");
   assert.equal(loaded.practice.displayProvenance.sourceId, loaded.practice.bindings.displaySourceId);
   assert.equal(loaded.check.displayProvenance.sourceId, loaded.check.bindings.displaySourceId);
+  assert.equal(loaded.practice.displayProvenance.sourceRegistryChecksum, loaded.practice.bindings.displaySourceRegistryChecksum);
+  assert.equal(loaded.check.displayProvenance.sourceRegistryChecksum, loaded.check.bindings.displaySourceRegistryChecksum);
   assert.notEqual(loaded.practice.bindings.displaySourceId, loaded.check.bindings.displaySourceId);
 });
