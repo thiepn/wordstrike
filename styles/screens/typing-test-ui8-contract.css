@@ -12,6 +12,11 @@
   );
 }
 
+/* Typing feedback takes priority over decorative fades. */
+.speed-test-screen.typing-active .speed-test-controls-wrap {
+  transition: none;
+}
+
 @media (min-width: 769px) {
   .speed-test-screen {
     --speed-test-font-size: clamp(28px, 2.7vw, 39.2px);
