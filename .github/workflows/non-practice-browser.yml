@@ -48,6 +48,8 @@ jobs:
         run: |
           python tests/browser/ui11_profile_leaderboards_settings.py
           python tests/browser/ui11_mobile_heading_contract.py
+      - name: Certify UI12 final motion, audio, and consistency
+        run: python tests/browser/ui12_final_polish.py
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -64,4 +66,5 @@ jobs:
             browser-artifacts/ui9-arcade-rush/
             browser-artifacts/ui10-results-pause-onboarding/
             browser-artifacts/ui11-profile-leaderboards-settings/
+            browser-artifacts/ui12-final-polish/
           retention-days: 7
