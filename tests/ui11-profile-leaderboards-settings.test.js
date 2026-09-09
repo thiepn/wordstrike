@@ -1,9 +1,10 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
-const [index, css, presentation, statisticsUi, leaderboardUi, ui, modes, workflow] = await Promise.all([
+const [index, css, narrowContract, presentation, statisticsUi, leaderboardUi, ui, modes, workflow] = await Promise.all([
   readFile(new URL("../index.html", import.meta.url), "utf8"),
   readFile(new URL("../styles/screens/profile-leaderboards-settings.css", import.meta.url), "utf8"),
+  readFile(new URL("../styles/screens/profile-leaderboards-settings-ui11-contract.css", import.meta.url), "utf8"),
   readFile(new URL("../js/profileLeaderboardsSettingsPresentation.js", import.meta.url), "utf8"),
   readFile(new URL("../js/statisticsUi.js", import.meta.url), "utf8"),
   readFile(new URL("../js/leaderboardUi.js", import.meta.url), "utf8"),
@@ -13,8 +14,9 @@ const [index, css, presentation, statisticsUi, leaderboardUi, ui, modes, workflo
 ]);
 
 assert.equal((index.match(/styles\/screens\/profile-leaderboards-settings\.css/g) || []).length, 1);
+assert.equal((index.match(/styles\/screens\/profile-leaderboards-settings-ui11-contract\.css/g) || []).length, 1);
 assert.equal((index.match(/js\/profileLeaderboardsSettingsPresentation\.js/g) || []).length, 1);
-assert.match(index, /results-pause-onboarding\.css[\s\S]*profile-leaderboards-settings\.css[\s\S]*practiceLabV20\.css/);
+assert.match(index, /results-pause-onboarding\.css[\s\S]*profile-leaderboards-settings\.css[\s\S]*profile-leaderboards-settings-ui11-contract\.css[\s\S]*practiceLabV20\.css/);
 assert.match(index, /arcadeRushGameplayPresentation\.js[\s\S]*profileLeaderboardsSettingsPresentation\.js/);
 
 assert.match(css, /UI11 — Profile \/ Leaderboards \/ Settings/);
@@ -33,6 +35,15 @@ assert.match(css, /@media \(max-height: 430px\)/);
 assert.match(css, /@media \(prefers-reduced-motion: reduce\)/);
 assert.doesNotMatch(css, /\.game-screen|\.boss-screen|\.speed-test-screen|\.endless-screen|arcade-rush-gameplay/);
 assert.doesNotMatch(css, /practice-lab|practiceLab|\.practice-/i);
+
+// The narrow visual contract prevents the mobile GLOBAL LEADERBOARDS heading from orphaning its final letter.
+assert.match(narrowContract, /UI11 narrow-screen visual contract/);
+assert.match(narrowContract, /@media \(max-width: 680px\)/);
+assert.match(narrowContract, /\.leaderboards-screen\[data-ui11-surface="leaderboards"\] \.leaderboards-panel > h1/);
+assert.match(narrowContract, /font-size:\s*clamp\(2\.05rem, 10vw, 3rem\)/);
+assert.match(narrowContract, /word-break:\s*normal/);
+assert.match(narrowContract, /hyphens:\s*none/);
+assert.doesNotMatch(narrowContract, /practice-lab|practiceLab|\.practice-/i);
 
 // UI11 augments semantics and presentation; it does not import or own app state.
 assert.doesNotMatch(presentation, /^import\s/m);
