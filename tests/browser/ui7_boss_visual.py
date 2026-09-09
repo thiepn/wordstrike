@@ -104,7 +104,7 @@ def geometry(page):
         timeTier: screen.dataset.bossTimeTier,
         resolve: document.querySelector('[data-boss-resolve-value]')?.textContent,
         timer: document.querySelector('#boss-timer')?.textContent,
-        sequenceText: document.querySelector('.boss-hud-sequence')?.textContent?.replace(/\s+/g, ' ').trim() || '',
+        sequenceText: document.querySelector('.boss-hud-sequence')?.textContent?.trim() || '',
         currentBackground: current ? getComputedStyle(current).backgroundColor : null,
         keyboardDisplay: triggerStyle?.display || null,
         keyboardHeight: triggerBox?.height || 0,
