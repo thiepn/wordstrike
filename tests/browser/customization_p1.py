@@ -207,7 +207,9 @@ def default_equivalence(browser,name,base,baseline_base,checks):
  outputs=[]
  for origin in [baseline_base,base]:
   context=context_for(browser,origin);page=context.new_page();open_title(page,origin)
-  # The new preference feature deliberately adds no pixels outside Settings by default.
+  # P1 palette equivalence remains exact. P2's explicitly requested mode controls
+  # are certified separately; hide only those additions on both comparison pages.
+  page.add_style_tag(content='[data-mode-presentation] { display: none !important; }')
   title=page.screenshot(animations='disabled',caret='hide')
   page.locator('[data-action="modes"]').click();expect(page.locator('.mode-select-screen')).to_be_visible()
   modes=page.screenshot(animations='disabled',caret='hide')

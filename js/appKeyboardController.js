@@ -53,6 +53,17 @@ export function createGlobalKeyboardController({
   if (typeof routeActiveGameplayKey !== "function") throw new TypeError("Keyboard controller requires gameplay routing");
 
   return function handleGlobalKeydown(event) {
+    // Native mode controls must not type, launch a level, restart, or navigate a menu.
+    const presentation = event.target?.closest?.("[data-mode-presentation]");
+    if (presentation) {
+      if (event.key === "Escape" && presentation.open) {
+        event.preventDefault?.();
+        presentation.open = false;
+        presentation.querySelector("summary")?.focus?.();
+        return;
+      }
+      if (event.key !== "Escape") return;
+    }
     const gameplayInputMode = state.screen === Screens.SPEED_TEST_RUN
       ? "typing"
       : state.screen === Screens.PLAYING
