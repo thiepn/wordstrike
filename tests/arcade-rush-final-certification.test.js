@@ -344,11 +344,12 @@ assert.doesNotMatch(submitEdge, /Daily Strike|CHALLENGE_MISMATCH/);
 assert.doesNotMatch(readEdge, /Daily Strike|INVALID_CHALLENGE_DATE/);
 
 // 8. Repository/deployment gate remains wired for PRs and main, and docs point
-// to the canonical deployed site.
+// to the canonical deployed site. Additional certification branches and logging
+// must not remove the main/PR triggers or the full npm test command.
 const workflow = await readRoot(".github", "workflows", "test.yml");
-assert.match(workflow, /push:\s*\n\s*branches:\s*\[main\]/);
+assert.match(workflow, /push:\s*\n\s*branches:\s*\[\s*main\s*(?:,[^\]]*)?\]/);
 assert.match(workflow, /pull_request:/);
-assert.match(workflow, /run:\s*npm test/);
+assert.match(workflow, /^\s+(?:run:\s*)?npm test(?:\s|$)/m);
 const readme = await readRoot("README.md");
 assert.match(readme, /https:\/\/thiepn\.dev\/wordstrike\//);
 assert.match(readme, /\*\*Arcade Rush\*\*/);
