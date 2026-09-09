@@ -73,6 +73,18 @@ html[data-customization-active="true"] .boss-screen[data-action-intensity="focus
 @media (max-width: 768px) {
   .mode-presentation-row select { font-size: 1rem; }
   .speed-test-screen[data-typing-hud="data"] .speed-test-hud { flex-basis: 100%; justify-content: center; }
+
+  /* The existing Typing Test toolbar is a horizontal scroller on mobile. Put the
+     customization entry first, and when opened give it the whole secondary row
+     instead of letting focus-induced scroll offset clip the panel off-screen. */
+  .speed-test-controls-wrap > .mode-presentation { order: -1; flex: 0 0 auto; }
+  .speed-test-topbar-secondary:has(.mode-presentation[open]) { grid-template-columns: minmax(0, 1fr); }
+  .speed-test-topbar-secondary:has(.mode-presentation[open]) .speed-test-hud { display: none; }
+  .speed-test-controls-wrap:has(> .mode-presentation[open]) { overflow-x: visible; flex-wrap: wrap; }
+  .speed-test-controls-wrap:has(> .mode-presentation[open]) > :not(.mode-presentation) { display: none; }
+  .speed-test-controls-wrap > .mode-presentation[open] { flex: 1 1 100%; width: 100%; }
+  .speed-test-controls-wrap > .mode-presentation[open] > summary,
+  .speed-test-controls-wrap > .mode-presentation[open] .mode-presentation-panel { width: 100%; max-width: none; }
 }
 @media (max-width: 720px) and (max-height: 520px) {
   /* Campaign's certified short-landscape layout hides the legacy tools row. Keep
