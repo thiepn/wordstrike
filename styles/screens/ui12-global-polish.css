@@ -93,8 +93,7 @@
 }
 
 /* ================================================================
-   AUDIO SETTING — separate from the three gameplay behavior toggles.
-   It remains native-focusable and explicitly documented by the Settings hint.
+   AUDIO SETTING — separate category, shared Settings switch grammar.
    ================================================================ */
 
 .settings-screen .ui12-audio-setting {
@@ -137,70 +136,26 @@
   line-height: 1.55;
 }
 
-.settings-screen .ui12-sound-toggle {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.65rem;
-  min-width: 7.5rem;
+/* UI11 owns the switch appearance. UI12 only raises the audio target to the
+   final 44px interaction baseline while keeping the same compact pill grammar. */
+.settings-screen .toggle.ui12-sound-toggle[role="switch"] {
+  min-width: 4.25rem;
   min-height: 44px;
-  padding: 0.55rem 0.7rem;
-  border: 1px solid var(--color-border-default, rgb(142 160 174 / 0.28));
-  border-radius: var(--radius-md, 6px);
-  background: var(--color-surface-1, #101720);
-  color: var(--color-text-secondary, #c1cbd2);
-  cursor: pointer;
+  align-self: center;
 }
 
-.settings-screen .ui12-sound-toggle:hover,
-.settings-screen .ui12-sound-toggle:focus-visible {
-  border-color: var(--color-border-strong, rgb(176 193 205 / 0.44));
-  background: var(--color-surface-hover, #1b2835);
-  color: var(--color-text-primary, #edf4f7);
+/* The unavailable Mode Select entry must remain clearly legible even though it
+   is non-interactive. Avoid compounding disabled text color with heavy opacity. */
+.mode-select-screen .mode-option.coming-soon {
+  opacity: 0.8;
 }
 
-.settings-screen .ui12-sound-toggle.on {
-  border-color: rgb(0 255 242 / 0.42);
-  color: var(--color-accent, #00fff2);
+.mode-select-screen .mode-option.coming-soon.selected {
+  opacity: 1;
 }
 
-.settings-screen .ui12-sound-toggle-track {
-  position: relative;
-  display: inline-block;
-  width: 2rem;
-  height: 1rem;
-  border: 1px solid var(--color-border-strong, rgb(176 193 205 / 0.44));
-  border-radius: 999px;
-  background: var(--color-bg, #0a0e14);
-}
-
-.settings-screen .ui12-sound-toggle-track i {
-  position: absolute;
-  top: 50%;
-  left: 0.16rem;
-  width: 0.55rem;
-  height: 0.55rem;
-  border-radius: 50%;
-  background: var(--color-text-muted, #8f9ba5);
-  transform: translateY(-50%);
-  transition:
-    left var(--motion-fast, 140ms) var(--ease-standard, ease),
-    background-color var(--motion-fast, 140ms) var(--ease-standard, ease);
-}
-
-.settings-screen .ui12-sound-toggle.on .ui12-sound-toggle-track i {
-  left: 1.08rem;
-  background: var(--color-accent, #00fff2);
-}
-
-.settings-screen .ui12-sound-toggle strong {
-  min-width: 2.2rem;
-  font-family: var(--font-game, monospace);
-  font-size: 0.7rem;
-  letter-spacing: 0.08em;
-}
-
-/* Touch devices should not inherit desktop hover lift from earlier phases. */
+/* Touch devices should not inherit desktop hover lift or desktop-only keyboard
+   legends. These hints remain intact for mouse/keyboard users. */
 @media (hover: none), (pointer: coarse) {
   #app > .screen:not(.practice-lab-screen) :is(
     .arcade-button,
@@ -222,15 +177,22 @@
   ):hover {
     transform: none;
   }
-}
 
-@media (max-width: 680px) {
-  .settings-screen .ui12-audio-setting {
-    grid-template-columns: 1fr;
+  .title-keyboard-hint,
+  .mode-select-hint,
+  .settings-screen .footer-hint,
+  .campaign-progress-footer > span:first-child {
+    display: none;
   }
 
-  .settings-screen .ui12-sound-toggle {
-    width: 100%;
+  .campaign-progress-footer {
+    justify-content: flex-end;
+  }
+
+  .mode-showcase-command kbd,
+  .campaign-mission-command kbd,
+  .gameplay-control-button kbd {
+    display: none;
   }
 }
 
