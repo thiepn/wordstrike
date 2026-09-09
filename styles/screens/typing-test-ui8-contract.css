@@ -5,6 +5,19 @@
   --speed-test-max-width: 66.25rem;
 }
 
+.speed-test-upper-overlay {
+  width: min(
+    calc(100% - var(--speed-test-stage-inline) - var(--speed-test-stage-inline)),
+    var(--speed-test-max-width)
+  );
+}
+
+@media (min-width: 769px) {
+  .speed-test-screen {
+    --speed-test-font-size: clamp(28px, 2.7vw, 39.2px);
+  }
+}
+
 .speed-test-screen[data-speed-font-size="small"] {
   --speed-test-font-size: 28px;
 }
