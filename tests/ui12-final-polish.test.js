@@ -50,7 +50,7 @@ assert.match(css, /\.onboarding-root::selection/);
 assert.match(css, /\.ui12-audio-setting/);
 assert.match(css, /\.ui12-sound-toggle/);
 assert.match(css, /min-height:\s*44px/);
-assert.match(css, /@media \(hover: none\), \(pointer: coarse\)/);
+assert.match(css, /@media \(max-width: 680px\), \(hover: none\), \(pointer: coarse\)/);
 assert.match(css, /@media \(prefers-reduced-motion: reduce\)/);
 assert.match(css, /animation-duration:\s*0\.001ms !important/);
 assert.match(css, /transition-duration:\s*0\.001ms !important/);

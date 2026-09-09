@@ -104,12 +104,18 @@ def geometry(page):
         timeTier: screen.dataset.bossTimeTier,
         resolve: document.querySelector('[data-boss-resolve-value]')?.textContent,
         timer: document.querySelector('#boss-timer')?.textContent,
+        sequenceText: document.querySelector('.boss-hud-sequence')?.textContent?.trim() || '',
         currentBackground: current ? getComputedStyle(current).backgroundColor : null,
         keyboardDisplay: triggerStyle?.display || null,
         keyboardHeight: triggerBox?.height || 0,
         keyboardText: trigger?.textContent?.trim() || null,
       };
     }""")
+
+
+def assert_sequence_label(metrics):
+    assert metrics["sequenceText"].count("SEQUENCE") == 1, metrics
+    assert "2 / 3" in metrics["sequenceText"], metrics
 
 
 def main():
@@ -143,6 +149,7 @@ def main():
                 assert desktop_metrics["resolve"] in {"53%", "52%"}, desktop_metrics
                 assert desktop_metrics["keyboardDisplay"] == "none", desktop_metrics
                 assert desktop_metrics["currentBackground"] in {"rgba(0, 0, 0, 0)", "transparent"}, desktop_metrics
+                assert_sequence_label(desktop_metrics)
                 desktop.screenshot(path=str(ARTIFACTS / f"{browser_name}-ui7-boss-player-desktop.png"), full_page=True)
                 result["checks"].append({"browser": browser_name, "case": "player desktop", **desktop_metrics})
                 desktop_context.close()
@@ -160,6 +167,7 @@ def main():
                 assert mobile_metrics["keyboardText"] == "KEYBOARD", mobile_metrics
                 assert mobile_metrics["keyboardDisplay"] != "none", mobile_metrics
                 assert mobile_metrics["keyboardHeight"] >= 44, mobile_metrics
+                assert_sequence_label(mobile_metrics)
                 mobile.screenshot(path=str(ARTIFACTS / f"{browser_name}-ui7-boss-player-mobile.png"), full_page=True)
                 result["checks"].append({"browser": browser_name, "case": "player mobile", **mobile_metrics})
 
@@ -172,6 +180,7 @@ def main():
                     assert short_metrics["frameWidth"] <= 390, short_metrics
                     assert short_metrics["keyboardDisplay"] != "none", short_metrics
                     assert short_metrics["keyboardHeight"] >= 44, short_metrics
+                    assert_sequence_label(short_metrics)
                     mobile.screenshot(path=str(ARTIFACTS / "chromium-ui7-boss-keyboard-height.png"), full_page=True)
                     result["checks"].append({"browser": browser_name, "case": "player 390x360", **short_metrics})
 

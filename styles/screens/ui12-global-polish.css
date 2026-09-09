@@ -93,8 +93,7 @@
 }
 
 /* ================================================================
-   AUDIO SETTING — separate from the three gameplay behavior toggles.
-   It remains native-focusable and explicitly documented by the Settings hint.
+   AUDIO SETTING — separate category, visually aligned with UI11 switches.
    ================================================================ */
 
 .settings-screen .ui12-audio-setting {
@@ -137,71 +136,67 @@
   line-height: 1.55;
 }
 
-.settings-screen .ui12-sound-toggle {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.65rem;
-  min-width: 7.5rem;
+/* UI12 is the final accessibility/consistency layer: every Settings switch gets
+   the same 44px interaction target, including the three UI11 core toggles. */
+.settings-screen .settings-list .toggle[role="switch"],
+.settings-screen .ui12-sound-toggle[role="switch"] {
   min-height: 44px;
-  padding: 0.55rem 0.7rem;
-  border: 1px solid var(--color-border-default, rgb(142 160 174 / 0.28));
-  border-radius: var(--radius-md, 6px);
-  background: var(--color-surface-1, #101720);
-  color: var(--color-text-secondary, #c1cbd2);
-  cursor: pointer;
 }
 
-.settings-screen .ui12-sound-toggle:hover,
-.settings-screen .ui12-sound-toggle:focus-visible {
-  border-color: var(--color-border-strong, rgb(176 193 205 / 0.44));
-  background: var(--color-surface-hover, #1b2835);
-  color: var(--color-text-primary, #edf4f7);
-}
-
-.settings-screen .ui12-sound-toggle.on {
-  border-color: rgb(0 255 242 / 0.42);
-  color: var(--color-accent, #00fff2);
-}
-
-.settings-screen .ui12-sound-toggle-track {
+/* Match the UI11 compact pill exactly while keeping the audio switch outside
+   UI11's authoritative .settings-list toggle set. */
+.settings-screen .ui12-sound-toggle[role="switch"] {
   position: relative;
-  display: inline-block;
-  width: 2rem;
-  height: 1rem;
-  border: 1px solid var(--color-border-strong, rgb(176 193 205 / 0.44));
+  min-width: 4.25rem;
+  padding: 0 0.7rem 0 1.8rem;
+  border: 1px solid var(--ui11-line-strong, rgb(129 144 158 / 0.28));
   border-radius: 999px;
-  background: var(--color-bg, #0a0e14);
+  background: rgb(255 255 255 / 0.025);
+  color: var(--ui11-muted, var(--color-text-muted, #8f9ba5));
+  box-shadow: none;
+  cursor: pointer;
+  font-size: 0.6rem;
+  font-weight: 720;
+  letter-spacing: 0.07em;
+  text-align: right;
 }
 
-.settings-screen .ui12-sound-toggle-track i {
+.settings-screen .ui12-sound-toggle[role="switch"]::before {
+  content: "";
   position: absolute;
   top: 50%;
-  left: 0.16rem;
-  width: 0.55rem;
-  height: 0.55rem;
+  left: 0.42rem;
+  width: 1rem;
+  height: 1rem;
   border-radius: 50%;
-  background: var(--color-text-muted, #8f9ba5);
+  background: var(--ui11-muted, var(--color-text-muted, #8f9ba5));
   transform: translateY(-50%);
-  transition:
-    left var(--motion-fast, 140ms) var(--ease-standard, ease),
-    background-color var(--motion-fast, 140ms) var(--ease-standard, ease);
 }
 
-.settings-screen .ui12-sound-toggle.on .ui12-sound-toggle-track i {
-  left: 1.08rem;
-  background: var(--color-accent, #00fff2);
+.settings-screen .ui12-sound-toggle[role="switch"].on {
+  border-color: rgb(0 255 242 / 0.55);
+  background: rgb(0 255 242 / 0.065);
+  color: var(--ui11-cyan, var(--color-accent, #00fff2));
 }
 
-.settings-screen .ui12-sound-toggle strong {
-  min-width: 2.2rem;
-  font-family: var(--font-game, monospace);
-  font-size: 0.7rem;
-  letter-spacing: 0.08em;
+.settings-screen .ui12-sound-toggle[role="switch"].on::before {
+  background: var(--ui11-cyan, var(--color-accent, #00fff2));
 }
 
-/* Touch devices should not inherit desktop hover lift from earlier phases. */
-@media (hover: none), (pointer: coarse) {
+/* The unavailable Mode Select entry must remain clearly legible even though it
+   is non-interactive. Avoid compounding disabled text color with heavy opacity. */
+.mode-select-screen .mode-option.coming-soon {
+  opacity: 0.8;
+}
+
+.mode-select-screen .mode-option.coming-soon.selected {
+  opacity: 1;
+}
+
+/* Mobile/touch layouts should not inherit desktop hover lift or desktop-only
+   keyboard legends. The width clause is intentional: some desktop-engine test
+   browsers and hybrid devices report pointer capabilities inconsistently. */
+@media (max-width: 680px), (hover: none), (pointer: coarse) {
   #app > .screen:not(.practice-lab-screen) :is(
     .arcade-button,
     .ui-button,
@@ -222,15 +217,22 @@
   ):hover {
     transform: none;
   }
-}
 
-@media (max-width: 680px) {
-  .settings-screen .ui12-audio-setting {
-    grid-template-columns: 1fr;
+  .title-keyboard-hint,
+  .mode-select-hint,
+  .settings-screen .footer-hint,
+  .campaign-progress-footer > span:first-child {
+    display: none;
   }
 
-  .settings-screen .ui12-sound-toggle {
-    width: 100%;
+  .campaign-progress-footer {
+    justify-content: flex-end;
+  }
+
+  .mode-showcase-command kbd,
+  .campaign-mission-command kbd,
+  .gameplay-control-button kbd {
+    display: none;
   }
 }
 

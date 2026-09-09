@@ -17,6 +17,10 @@ jobs:
       - name: Install browser test dependencies
         run: |
           pip install -r tests/browser/requirements.txt
+          # Playwright downloads its own Chromium/Firefox builds. The runner's
+          # unrelated Google Chrome APT source can transiently publish a mismatched
+          # index and break `--with-deps`, so exclude that unnecessary source.
+          sudo rm -f /etc/apt/sources.list.d/google-chrome.list /etc/apt/sources.list.d/google-chrome.sources
           python -m playwright install --with-deps chromium firefox
       - name: Exercise active WordStrike surfaces except Practice Lab
         run: python tests/browser/non_practice_regressions.py
