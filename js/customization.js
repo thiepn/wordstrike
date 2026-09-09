@@ -27,7 +27,7 @@ const choose = (value, options, fallback) => options.some((option) => (option.va
 export function createDefaultCustomization() {
   return {
     theme: "wordstrike", accent: "cyan", effectsIntensity: "standard",
-    // Reserved for P2. The existing Typing Test size control remains authoritative.
+    // Mode-local preferences. The existing Typing Test size control remains authoritative.
     typingTest: { hudLayout: "balanced", textSize: "auto", liveStats: true },
     gameplayHud: "standard", actionModeIntensity: "full",
   };

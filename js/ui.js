@@ -501,6 +501,8 @@ export function renderSpeedTestRun(state, devMode = false, handlers = {}) {
             <span>WPM <b id="speed-test-wpm">0</b></span>
             <span>ACC <b id="speed-test-accuracy">100%</b></span>
             <span>RAW <b id="speed-test-raw">0</b></span>
+            <span class="speed-test-data-metric">WORDS <b id="speed-test-words">0</b></span>
+            <span class="speed-test-data-metric" title="Incorrect keystrokes, including corrected mistakes">ERRORS <b id="speed-test-errors">0</b></span>
           </div>
         </div>
       </header>
@@ -634,6 +636,8 @@ export function updateSpeedTestRun(state, nowMs) {
   }
   const values = {
     "#speed-test-wpm": Math.round(live.wpm),
+    "#speed-test-words": state.metrics.wordsCompleted,
+    "#speed-test-errors": state.metrics.incorrectKeystrokes,
     "#speed-test-raw": Math.round(live.rawWpm),
     "#speed-test-accuracy": `${live.accuracy.toFixed(1)}%`,
     "#speed-test-elapsed": `${Math.floor(activeDuration / 60000).toString().padStart(2, "0")}:${Math.floor((activeDuration % 60000) / 1000).toString().padStart(2, "0")}`,
@@ -649,6 +653,11 @@ export function updateSpeedTestRun(state, nowMs) {
     "typing-active",
     state.activeStartedAtMs != null,
   );
+
+  // Collapse configuration before the first active frame. It never starts or pauses a test.
+  if (state.activeStartedAtMs != null) {
+    document.querySelector(".speed-test-topbar [data-mode-presentation][open]")?.removeAttribute?.("open");
+  }
 
   const flow = document.querySelector("#speed-test-word-flow");
   if (flow) {

@@ -1,6 +1,6 @@
-# Customization — P1
+# Customization — P1 and P2
 
-## Shipped scope
+## Global controls (P1)
 
 Settings → Appearance contains three native selectors and a small live preview:
 
@@ -14,7 +14,7 @@ Reset appearance restores only these three selectors. It does not erase progress
 
 ## Preference contract
 
-`js/customization.js` contains the curated options and pure validation functions. Missing, unknown, wrong-type, and corrupt preferences receive safe defaults. Nested defaults are fresh objects. P2 preference fields are reserved and normalized but have no new UI or gameplay behavior in P1:
+`js/customization.js` contains the curated options and pure validation functions. Missing, unknown, wrong-type, and corrupt preferences receive safe defaults. Nested defaults are fresh objects. P1 established the preference schema; P2 exposes the mode-local controls without adding them to global Settings:
 
 ```js
 {
@@ -58,4 +58,36 @@ The controller observes direct route replacements on `#app`, not its gameplay su
 - `BASELINE_DIR` enables exact before/after default screenshots for Title, Mode Select, and Campaign Route in the same engine and font environment.
 - The existing source, Typing/UI8, and complete non-Practice UI1–UI12 suites remain separate release gates.
 
-Physical-device Safari, assistive-technology validation, and P2 mode-local presentation controls remain separate work; this document does not claim those are covered by P1.
+Physical-device Safari, assistive-technology validation, and the wider P3 integration/visual audit remain separate checks. Source tests do not substitute for browser or device verification.
+
+
+## Mode-local controls (P2)
+
+- **Typing Test:** Presentation → Focus / Balanced / Data and Live statistics On / Off. The existing Auto / Small / Medium / Large text-size selector remains alongside the test controls; the pause panel also provides text size. There is no second size preference or new Start button.
+- **Campaign Route:** Presentation → Gameplay HUD (Minimal / Standard) and Boss visuals (Focused / Full).
+- **Endless ready:** Presentation → Gameplay HUD, sharing the Campaign preference.
+- **Arcade Rush ready:** Presentation → Visual intensity, sharing the Boss preference.
+- **Pause overlays:** the relevant mode's presentation controls remain available without abandoning a run. Boss intensity is therefore also configurable inside a Boss encounter.
+
+Focus hides live performance counters but keeps the existing timer / word progress. It does not overwrite the saved Live statistics preference. Switching back to Balanced or Data restores that choice; selecting Data never silently enables live stats. Results and personal-best calculations are always complete.
+
+Data adds **completed words** and **incorrect keystrokes**, including corrected errors, using the existing runtime counters. It does not change accuracy semantics or introduce a new analytics collector. Balanced retains the existing HUD. The manual text sizes retain the established desktop 28 / 34 / 42 px and responsive mobile rules.
+
+Minimal hides Campaign/Endless performance telemetry, not Core integrity, level/stage, progress, pressure/target status, or the pause/keyboard controls. The existing HUD row dimensions and playfield/Core geometry remain authoritative. Mobile uses explicit minimal grid areas rather than inheriting the standard multi-row placement.
+
+Focused lowers nonessential Boss/Rush decoration, burst particles and screen displacement. State information, error feedback, threat colors, attack timers and countdown text remain visible. Full means the original mode presentation within the selected global effects policy—not an override of Reduced or system reduced motion. Palette and effect opt-outs remain independent.
+
+`updateModeCustomizationSetting(save, field, value)` validates known fields and saves through the existing storage path. The old `speedTestFontSize` and nested `typingTest.textSize` stay synchronized. Appearance reset leaves mode preferences unchanged; full settings reset restores all defaults without erasing progress.
+
+The mode controller observes only route replacement and direct pause-overlay insertion. Rush's persistent pause card is enhanced once when its shell mounts; its repeatedly written `hidden` attribute is deliberately not observed. It does not subscribe to the word-stream subtree or run an extra animation/timer loop. Existing input routing explicitly leaves native presentation controls alone; Escape closes an open panel, then normal Escape behavior remains available.
+
+### P2 verification commands
+
+```sh
+node tests/customization-p2.test.js
+python tests/browser/customization_p2.py
+```
+
+The pure suite covers 24 typing preference combinations, 60 effect-precedence cases, storage/reset boundaries, native keyboard isolation, and 192 controlled-time replays across all eight Typing Test configurations. The browser suite and its independent CI workflow cover actual controls, pause/resume, full results with live stats hidden, geometry invariance, responsive layouts, cleanup and screenshots in Chromium and Firefox. They are release requirements, not implied passing results merely because these test files exist.
+
+The P1 palette screenshot comparison excludes only P2's newly requested mode-control elements. The original Title, Mode Select and Campaign compositions still undergo exact comparison; P2 control layouts have their own browser checks.

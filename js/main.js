@@ -1,3 +1,4 @@
+import { startModeCustomizationPresentation } from "./modeCustomizationPresentation.js";
 import { startCustomizationPresentation } from "./customizationPresentation.js";
 import {
   appState,
@@ -1542,6 +1543,19 @@ async function bootstrap() {
     : 1;
   appState.save = loadSave();
   startCustomizationPresentation({ getSave: () => appState.save });
+  startModeCustomizationPresentation({
+    getSave: () => appState.save,
+    onTypingPreferences: (preferences) => {
+      const state = getCurrentSpeedTest();
+      if (!state || state.ended) return;
+      if (state.fontSize !== preferences.textSize) {
+        state.fontSize = preferences.textSize;
+        applySpeedTestFontSize(state);
+      }
+      // Read existing counters; do not restart or change the session configuration.
+      updateSpeedTestRun(state, currentTimeMs());
+    },
+  });
   [
     appState.wordBank,
     appState.bossWordBank,
