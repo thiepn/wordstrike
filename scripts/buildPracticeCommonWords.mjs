@@ -16,7 +16,8 @@ const TYPOABILITY_MANIFEST = path.join(ROOT, "data", "practice", "models", "en-v
 const TYPOABILITY_REFERENCE = path.join(ROOT, "data", "practice", "models", "en-v1", "typability-v1.reference.json");
 const FREQUENCY_REFERENCE = path.join(ROOT, "data", "practice", "provenance", "frequency", "en-v1.frequency.json");
 const STATISTICAL_SOURCE_ID = "ws-common-words-en-statistical-v1";
-const DISPLAY_SOURCE_ID = "ws-common-words-en-display-v1";
+const TRAINING_SOURCE_ID = "ws-common-words-en-training-v1";
+const DIAGNOSTIC_SOURCE_ID = "ws-common-words-en-diagnostic-v1";
 const BANDS = ["core", "frequent", "common", "broad"];
 const RANGE = { core: [1, 100], frequent: [101, 300], common: [301, 700], broad: [701, 1200] };
 const bandFor = (rank) => BANDS.find((band) => rank >= RANGE[band][0] && rank <= RANGE[band][1]);
@@ -111,9 +112,10 @@ const [source, sourceRegistry, corpusManifest, indexManifest, typabilityManifest
 ]);
 const sourceIndex = createPracticeSourceIndex(sourceRegistry);
 const statisticalSource = assertPracticeSourceUsage({ sourceId: STATISTICAL_SOURCE_ID, registry: sourceRegistry, index: sourceIndex, requestedUse: "statistical-reference" });
-const displaySource = assertPracticeSourceUsage({ sourceId: DISPLAY_SOURCE_ID, registry: sourceRegistry, index: sourceIndex, requestedUse: "production-display" });
+const trainingSource = assertPracticeSourceUsage({ sourceId: TRAINING_SOURCE_ID, registry: sourceRegistry, index: sourceIndex, requestedUse: "production-display" });
+const diagnosticSource = assertPracticeSourceUsage({ sourceId: DIAGNOSTIC_SOURCE_ID, registry: sourceRegistry, index: sourceIndex, requestedUse: "production-display" });
 const expectedUpstreamChecksum = `sha256-${source.source?.sourceSha256}`;
-if (statisticalSource.sourceChecksum !== expectedUpstreamChecksum || displaySource.sourceChecksum !== expectedUpstreamChecksum) throw new Error("Common-word PL6 source checksum does not match reviewed upstream snapshot");
+if ([statisticalSource, trainingSource, diagnosticSource].some((entry) => entry.sourceChecksum !== expectedUpstreamChecksum)) throw new Error("Common-word PL6 source checksum does not match reviewed upstream snapshot");
 if (corpusManifest.buildChecksum !== indexManifest.corpusChecksum || corpusManifest.buildChecksum !== typabilityManifest.corpusChecksum) throw new Error("Common-word build upstream corpus binding mismatch");
 if (indexManifest.indexChecksum !== typabilityManifest.indexChecksum) throw new Error("Common-word build upstream index binding mismatch");
 if (typabilityManifest.referenceVersion !== typabilityReference.referenceVersion) throw new Error("Common-word build PL10 reference binding mismatch");
@@ -136,7 +138,8 @@ if (new Set(words.map((word) => word.lexicalKey)).size !== 1200 || new Set(words
 const sourceRegistryBinding = {
   registryVersion: sourceRegistry.registryVersion,
   statisticalSource,
-  displaySource,
+  trainingSource,
+  diagnosticSource,
 };
 const sourceRegistryChecksum = sha(sourceRegistryBinding);
 const sourceBinding = {
@@ -156,8 +159,10 @@ const sourceSnapshotCore = {
   sourceRegistryChecksum,
   statisticalSourceId: statisticalSource.sourceId,
   statisticalSourceChecksum: statisticalSource.sourceChecksum,
-  displaySourceId: displaySource.sourceId,
-  displaySourceChecksum: displaySource.sourceChecksum,
+  trainingSourceId: trainingSource.sourceId,
+  trainingSourceChecksum: trainingSource.sourceChecksum,
+  diagnosticSourceId: diagnosticSource.sourceId,
+  diagnosticSourceChecksum: diagnosticSource.sourceChecksum,
   upstream: sourceBinding,
   lexicalPolicy: { entityType: "word", identity: "PL7 entityType + lexicalKey", lowercaseOnly: true, punctuation: false, contractions: false },
   words: words.map(({ wordId, lexicalKey, sourceRank }) => ({ wordId, lexicalKey, sourceRank })),
@@ -205,11 +210,14 @@ const commonReferenceBindings = {
   commonWordReferenceVersion: reference.referenceVersion,
   commonWordReferenceChecksum: reference.checksum,
   sourceChecksum: reference.checksum,
-  displaySourceId: displaySource.sourceId,
-  displaySourceChecksum: displaySource.sourceChecksum,
 };
 const displayWords = words.map(({ wordId, lexicalKey, rank, band }) => ({ wordId, lexicalKey, rank, band }));
-const displayProvenance = (partition) => ({
+const flowBindings = (displaySource) => ({
+  ...commonReferenceBindings,
+  displaySourceId: displaySource.sourceId,
+  displaySourceChecksum: displaySource.sourceChecksum,
+});
+const displayProvenance = (displaySource, partition) => ({
   sourceId: displaySource.sourceId,
   sourceRegistryVersion: sourceRegistry.registryVersion,
   sourceRegistryChecksum,
@@ -223,8 +231,8 @@ const displayProvenance = (partition) => ({
 const practiceCore = {
   bankId: "WS-COMMON-PRACTICE-EN-1", bankVersion: 1, referenceId: reference.referenceId, referenceVersion: reference.referenceVersion,
   language: "en", status: "ready", partition: "training",
-  displayProvenance: displayProvenance("training"),
-  bindings: commonReferenceBindings,
+  displayProvenance: displayProvenance(trainingSource, "training"),
+  bindings: flowBindings(trainingSource),
   words: displayWords,
 };
 const practice = { ...practiceCore, checksum: sha(practiceCore) };
@@ -235,8 +243,8 @@ const typabilityMatching = assertPracticeCommonWordCheckTypability({ forms, typa
 const checkCore = {
   bankId: "WS-COMMON-CHECK-EN-1", formSetId: "WS-COMMON-CHECK-EN-1", bankVersion: 1, schemaVersion: 1, generatorVersion: 1,
   referenceId: reference.referenceId, referenceVersion: reference.referenceVersion, language: "en", status: "ready", partition: "diagnostic",
-  displayProvenance: displayProvenance("diagnostic"),
-  bindings: commonReferenceBindings,
+  displayProvenance: displayProvenance(diagnosticSource, "diagnostic"),
+  bindings: flowBindings(diagnosticSource),
   diagnosticPool: displayWords,
   matching: { engineeringMatched: true, empiricalEquating: false, maximumPairwiseLexicalOverlapRatio, note: "Length distributions are matched deterministically by band; canonical PL10 difficulty is rechecked at runtime/foundation analysis." },
   forms,
@@ -259,7 +267,7 @@ console.log(JSON.stringify({
   relativePercentileSpread: typabilityMatching.relativePercentileSpread,
   sourceRegistryChecksum,
   sourceSnapshotChecksum: sourceSnapshot.checksum,
-  bindings: commonReferenceBindings,
+  bindings: { practice: practice.bindings, check: check.bindings },
   referenceChecksum: reference.checksum,
   practiceChecksum: practice.checksum,
   checkChecksum: check.checksum,
