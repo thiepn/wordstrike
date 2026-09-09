@@ -98,18 +98,33 @@ test("PL28 stale PL6 statistical approval disables the shared reference and both
   assert.equal(state.checkAvailable, false);
 });
 
-test("PL28 stale PL6 display approval disables Practice and Check while leaving statistical reference structurally valid", async () => {
+test("PL28 stale PL6 training display approval disables Practice only", async () => {
   const loaded = await artifacts();
   loaded.sourceRegistry = clone(loaded.sourceRegistry);
   const source = loaded.sourceRegistry.sources.find((entry) => entry.sourceId === loaded.practiceBank.bindings.displaySourceId);
   source.usageApproval = "statistical-only";
   const integrity = await verifyPracticeCommonWordArtifactIntegrity(loaded);
+  assert.equal(integrity.reference.valid, true);
   assert.equal(integrity.practice.valid, false);
-  assert.equal(integrity.check.valid, false);
+  assert.equal(integrity.check.valid, true);
   assert.ok(integrity.practice.reasons.includes("display-source-not-approved"));
-  assert.ok(integrity.check.reasons.includes("display-source-not-approved"));
   const state = availability(loaded, integrity);
   assert.equal(state.practiceAvailable, false);
+  assert.equal(state.checkAvailable, true);
+});
+
+test("PL28 stale PL6 diagnostic display approval disables Check only", async () => {
+  const loaded = await artifacts();
+  loaded.sourceRegistry = clone(loaded.sourceRegistry);
+  const source = loaded.sourceRegistry.sources.find((entry) => entry.sourceId === loaded.checkFormSet.bindings.displaySourceId);
+  source.usageApproval = "statistical-only";
+  const integrity = await verifyPracticeCommonWordArtifactIntegrity(loaded);
+  assert.equal(integrity.reference.valid, true);
+  assert.equal(integrity.practice.valid, true);
+  assert.equal(integrity.check.valid, false);
+  assert.ok(integrity.check.reasons.includes("display-source-not-approved"));
+  const state = availability(loaded, integrity);
+  assert.equal(state.practiceAvailable, true);
   assert.equal(state.checkAvailable, false);
 });
 
