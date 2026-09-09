@@ -17,6 +17,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: Validate canonical PL6 corpus rebuild
+        run: node scripts/buildPracticeCorpus.mjs --validate
       - name: Build PL28 static artifacts
         run: node scripts/buildPracticeCommonWords.mjs
       - name: Run PL28 targeted certification
