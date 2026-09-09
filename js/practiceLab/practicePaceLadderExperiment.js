@@ -11,7 +11,7 @@ export function createPracticePaceLadderExperiment(prepared = null) {
     version: PRACTICE_PACE_LADDER_EXPERIMENT_VERSION,
     sessionSchemaVersion: 1,
     title: "Pace Ladder",
-    category: "Performance",
+    category: "advanced",
     defaultCorrectionBehavior: "allow",
     supportedCompletionModes: ["duration"],
     resumable: false,
