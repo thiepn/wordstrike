@@ -173,20 +173,29 @@ def certify_selection_isolation(browser, browser_name, base, evidence):
     page = context.new_page()
     open_title(page, base)
 
-    selection = page.evaluate("""() => {
+    scope = page.evaluate("""() => {
+      const sheet = [...document.styleSheets].find((candidate) => candidate.href?.endsWith('/styles/screens/ui12-global-polish.css'));
+      const selectors = [...(sheet?.cssRules || [])]
+        .filter((rule) => rule.selectorText?.includes('::selection'))
+        .flatMap((rule) => rule.selectorText.split(',').map((selector) => selector.trim()));
       const migrated = document.querySelector('.title-screen');
-      const migratedStyle = getComputedStyle(migrated, '::selection');
       document.querySelector('#app').innerHTML = '<section class="screen practice-lab-screen"><p id="ui12-practice-selection">Practice text</p></section>';
-      const practice = document.querySelector('#ui12-practice-selection');
-      const practiceStyle = getComputedStyle(practice, '::selection');
+      const practice = document.querySelector('.practice-lab-screen');
       return {
-        migratedBackground: migratedStyle.backgroundColor,
-        practiceBackground: practiceStyle.backgroundColor,
+        selectors,
+        migratedMatchesScope: migrated.matches('#app > .screen:not(.practice-lab-screen)'),
+        practiceMatchesScope: practice.matches('#app > .screen:not(.practice-lab-screen)'),
       };
     }""")
-    assert "0, 255, 242" in selection["migratedBackground"], selection
-    assert "0, 255, 242" not in selection["practiceBackground"], selection
-    evidence.append({"browser": browser_name, "case": "selection styling respects Practice boundary", **selection})
+    assert len(scope["selectors"]) == 4, scope
+    assert all(selector != "::selection" for selector in scope["selectors"]), scope
+    assert all(
+        selector.startswith("#app > .screen:not(.practice-lab-screen)") or selector.startswith(".onboarding-root")
+        for selector in scope["selectors"]
+    ), scope
+    assert scope["migratedMatchesScope"] is True, scope
+    assert scope["practiceMatchesScope"] is False, scope
+    evidence.append({"browser": browser_name, "case": "selection CSSOM respects Practice boundary", **scope})
     context.close()
 
 
