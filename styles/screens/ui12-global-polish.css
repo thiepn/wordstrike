@@ -1,8 +1,9 @@
+/* P1: palette-aware color values; literal fallbacks preserve the certified default. */
 /* UI12 — Final motion / audio / global consistency pass.
    Scoped to active non-Practice product surfaces. No screen composition ownership moves here. */
 
 :root {
-  --ui12-focus-outline: 2px solid var(--color-accent, #00fff2);
+  --ui12-focus-outline: 2px solid var(--color-accent, var(--custom-accent, #00fff2));
   --ui12-focus-offset: 2px;
 }
 
@@ -11,7 +12,7 @@
 #app > .screen:not(.practice-lab-screen) ::selection,
 .onboarding-root::selection,
 .onboarding-root ::selection {
-  background: rgb(0 255 242 / 0.24);
+  background: rgb(var(--custom-accent-rgb, 0 255 242) / 0.24);
   color: var(--color-text-primary, #edf4f7);
 }
 
@@ -103,8 +104,8 @@
   gap: 1rem;
   margin: clamp(1.25rem, 3vw, 2rem) 0;
   padding: 1rem 0;
-  border-top: 1px solid var(--color-border-subtle, rgb(142 160 174 / 0.16));
-  border-bottom: 1px solid var(--color-border-subtle, rgb(142 160 174 / 0.16));
+  border-top: 1px solid var(--color-border-subtle, rgb(var(--custom-border-rgb, 142 160 174) / 0.16));
+  border-bottom: 1px solid var(--color-border-subtle, rgb(var(--custom-border-rgb, 142 160 174) / 0.16));
 }
 
 .settings-screen .ui12-audio-copy {
@@ -149,7 +150,7 @@
   position: relative;
   min-width: 4.25rem;
   padding: 0 0.7rem 0 1.8rem;
-  border: 1px solid var(--ui11-line-strong, rgb(129 144 158 / 0.28));
+  border: 1px solid var(--ui11-line-strong, rgb(var(--custom-border-rgb, 129 144 158) / 0.28));
   border-radius: 999px;
   background: rgb(255 255 255 / 0.025);
   color: var(--ui11-muted, var(--color-text-muted, #8f9ba5));
@@ -174,13 +175,13 @@
 }
 
 .settings-screen .ui12-sound-toggle[role="switch"].on {
-  border-color: rgb(0 255 242 / 0.55);
-  background: rgb(0 255 242 / 0.065);
-  color: var(--ui11-cyan, var(--color-accent, #00fff2));
+  border-color: rgb(var(--custom-accent-rgb, 0 255 242) / 0.55);
+  background: rgb(var(--custom-accent-rgb, 0 255 242) / 0.065);
+  color: var(--ui11-cyan, var(--color-accent, var(--custom-accent, #00fff2)));
 }
 
 .settings-screen .ui12-sound-toggle[role="switch"].on::before {
-  background: var(--ui11-cyan, var(--color-accent, #00fff2));
+  background: var(--ui11-cyan, var(--color-accent, var(--custom-accent, #00fff2)));
 }
 
 /* The unavailable Mode Select entry must remain clearly legible even though it

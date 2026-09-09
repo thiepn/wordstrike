@@ -1,3 +1,4 @@
+/* P1: palette-aware color values; literal fallbacks preserve the certified default. */
 /* UI7 — Boss encounter cinematic + gameplay presentation.
    Boss-only ownership. Campaign/Endless remain under UI5/UI6. */
 
@@ -15,7 +16,7 @@
     radial-gradient(circle at 50% 54%, var(--boss-atmosphere), transparent 28%),
     radial-gradient(circle at 50% 54%, transparent 0 34%, rgb(255 60 172 / 2.3%) 34.4%, transparent 34.8%),
     linear-gradient(180deg, rgb(7 8 14 / 97%) 0, rgb(10 11 18 / 54%) 150px, transparent 260px),
-    var(--ui-bg, #0a0e14);
+    var(--ui-bg, var(--custom-bg, #0a0e14));
 }
 
 .boss-gameplay-screen[data-boss-tier="escalated"] {
@@ -546,13 +547,13 @@
 .boss-gameplay-screen .boss-typed {
   color: var(--ui-accent);
   background: transparent;
-  text-shadow: 0 0 8px rgb(0 255 242 / 54%);
+  text-shadow: 0 0 8px rgb(var(--custom-accent-rgb, 0 255 242) / 54%);
 }
 
 .boss-gameplay-screen .boss-current {
   color: var(--ui-text);
   background: transparent;
-  text-shadow: 0 0 7px rgb(0 255 242 / 22%);
+  text-shadow: 0 0 7px rgb(var(--custom-accent-rgb, 0 255 242) / 22%);
   animation: boss-ui-caret 720ms ease-in-out infinite alternate;
 }
 
@@ -562,7 +563,7 @@
   left: 8%;
   height: 2px;
   background: var(--ui-accent);
-  box-shadow: 0 0 7px rgb(0 255 242 / 68%);
+  box-shadow: 0 0 7px rgb(var(--custom-accent-rgb, 0 255 242) / 68%);
 }
 
 @keyframes boss-ui-caret {
@@ -584,7 +585,7 @@
 .boss-gameplay-screen .boss-sequence-progress > div {
   height: 100%;
   background: linear-gradient(90deg, var(--ui-accent), var(--boss-threat));
-  box-shadow: 0 0 8px rgb(0 255 242 / 34%);
+  box-shadow: 0 0 8px rgb(var(--custom-accent-rgb, 0 255 242) / 34%);
   transition: width 80ms linear;
 }
 

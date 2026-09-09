@@ -1,3 +1,4 @@
+/* P1: palette-aware color values; literal fallbacks preserve the certified default. */
 /* UI6 — Endless gameplay presentation.
    Endless-only ownership. Campaign and Boss keep their dedicated UI5/UI7 boundaries. */
 
@@ -7,10 +8,10 @@
   --endless-pressure-color: var(--ui-text-muted);
   grid-template-rows: var(--endless-hud-height) minmax(0, 1fr);
   background:
-    radial-gradient(circle at 50% 52%, rgb(0 255 242 / 8%), transparent 22%),
-    radial-gradient(circle at 50% 52%, transparent 0 31%, rgb(0 255 242 / 1.8%) 31.5%, transparent 32%),
+    radial-gradient(circle at 50% 52%, rgb(var(--custom-accent-rgb, 0 255 242) / 8%), transparent 22%),
+    radial-gradient(circle at 50% 52%, transparent 0 31%, rgb(var(--custom-accent-rgb, 0 255 242) / 1.8%) 31.5%, transparent 32%),
     linear-gradient(180deg, rgb(6 11 17 / 94%) 0, rgb(8 13 19 / 38%) 130px, transparent 230px),
-    var(--ui-bg, #0a0e14);
+    var(--ui-bg, var(--custom-bg, #0a0e14));
 }
 
 .endless-gameplay-screen[data-endless-stage-tier="mid"] {
@@ -175,7 +176,7 @@
   width: 12px;
   height: 4px;
   background: var(--ui-accent);
-  box-shadow: 0 0 8px rgb(0 255 242 / 45%);
+  box-shadow: 0 0 8px rgb(var(--custom-accent-rgb, 0 255 242) / 45%);
   transform: skewX(-18deg);
   transition:
     opacity var(--ui-motion-fast) var(--ui-ease-out),
@@ -243,8 +244,8 @@
   position: absolute;
   inset: 0 auto 0 0;
   width: var(--endless-stage-progress, 0%);
-  background: linear-gradient(90deg, rgb(0 255 242 / 34%), var(--ui-accent));
-  box-shadow: 0 0 8px rgb(0 255 242 / 36%);
+  background: linear-gradient(90deg, rgb(var(--custom-accent-rgb, 0 255 242) / 34%), var(--ui-accent));
+  box-shadow: 0 0 8px rgb(var(--custom-accent-rgb, 0 255 242) / 36%);
   transition: width 130ms linear;
 }
 
@@ -255,8 +256,8 @@
 .endless-gameplay-screen .play-area {
   isolation: isolate;
   background:
-    radial-gradient(circle at 50% 50%, rgb(0 255 242 / 5%), transparent 17%),
-    repeating-radial-gradient(circle at center, transparent 0 82px, rgb(0 255 242 / 1.8%) 83px 84px, transparent 85px 165px);
+    radial-gradient(circle at 50% 50%, rgb(var(--custom-accent-rgb, 0 255 242) / 5%), transparent 17%),
+    repeating-radial-gradient(circle at center, transparent 0 82px, rgb(var(--custom-accent-rgb, 0 255 242) / 1.8%) 83px 84px, transparent 85px 165px);
 }
 
 .endless-gameplay-screen .play-area::before {
@@ -266,8 +267,8 @@
   inset: 0;
   pointer-events: none;
   background:
-    linear-gradient(90deg, transparent 49.94%, rgb(0 255 242 / 2.5%) 50%, transparent 50.06%),
-    linear-gradient(0deg, transparent 49.94%, rgb(0 255 242 / 2.5%) 50%, transparent 50.06%);
+    linear-gradient(90deg, transparent 49.94%, rgb(var(--custom-accent-rgb, 0 255 242) / 2.5%) 50%, transparent 50.06%),
+    linear-gradient(0deg, transparent 49.94%, rgb(var(--custom-accent-rgb, 0 255 242) / 2.5%) 50%, transparent 50.06%);
   mask-image: radial-gradient(circle at center, #000 0 14%, transparent 68%);
 }
 
@@ -306,16 +307,16 @@
 
 .endless-core-field {
   inset: -34px;
-  border: 1px solid rgb(0 255 242 / 9%);
+  border: 1px solid rgb(var(--custom-accent-rgb, 0 255 242) / 9%);
   border-radius: 50%;
-  background: radial-gradient(circle, rgb(0 255 242 / 8%), transparent 56%);
-  box-shadow: 0 0 48px rgb(0 255 242 / 10%);
+  background: radial-gradient(circle, rgb(var(--custom-accent-rgb, 0 255 242) / 8%), transparent 56%);
+  box-shadow: 0 0 48px rgb(var(--custom-accent-rgb, 0 255 242) / 10%);
 }
 
 .endless-core-radar {
   left: 50%;
   top: 50%;
-  border: 1px solid rgb(0 255 242 / 18%);
+  border: 1px solid rgb(var(--custom-accent-rgb, 0 255 242) / 18%);
   border-radius: 50%;
   transform: translate(-50%, -50%);
 }
@@ -340,20 +341,20 @@
   height: 1px;
   transform-origin: 0 50%;
   background: linear-gradient(90deg, var(--ui-accent), transparent);
-  box-shadow: 0 0 7px rgb(0 255 242 / 55%);
+  box-shadow: 0 0 7px rgb(var(--custom-accent-rgb, 0 255 242) / 55%);
   animation: endless-radar-sweep 4.8s linear infinite;
 }
 
 .endless-core-reactor {
   inset: 10px;
-  border: 1px solid rgb(0 255 242 / 56%);
+  border: 1px solid rgb(var(--custom-accent-rgb, 0 255 242) / 56%);
   border-radius: 50%;
   background:
-    radial-gradient(circle, rgb(235 255 254 / 90%) 0 7%, var(--ui-accent) 8% 17%, rgb(0 255 242 / 20%) 19% 50%, transparent 52%);
+    radial-gradient(circle, rgb(235 255 254 / 90%) 0 7%, var(--ui-accent) 8% 17%, rgb(var(--custom-accent-rgb, 0 255 242) / 20%) 19% 50%, transparent 52%);
   box-shadow:
-    0 0 9px rgb(0 255 242 / 52%),
-    0 0 28px rgb(0 255 242 / 22%),
-    inset 0 0 11px rgb(0 255 242 / 26%);
+    0 0 9px rgb(var(--custom-accent-rgb, 0 255 242) / 52%),
+    0 0 28px rgb(var(--custom-accent-rgb, 0 255 242) / 22%),
+    inset 0 0 11px rgb(var(--custom-accent-rgb, 0 255 242) / 26%);
   animation: endless-reactor-breathe 2.1s ease-in-out infinite;
 }
 
@@ -374,7 +375,7 @@
   margin-left: -12.5px;
   transform-origin: 50% 49px;
   background: var(--ui-accent);
-  box-shadow: 0 0 8px rgb(0 255 242 / 66%);
+  box-shadow: 0 0 8px rgb(var(--custom-accent-rgb, 0 255 242) / 66%);
 }
 
 .endless-core-integrity i:nth-child(1) { transform: translateY(-49px) rotate(0deg); }
@@ -476,12 +477,12 @@
   background: transparent;
   color: var(--ui-text);
   box-shadow: none;
-  text-shadow: 0 0 8px rgb(0 255 242 / 28%);
+  text-shadow: 0 0 8px rgb(var(--custom-accent-rgb, 0 255 242) / 28%);
 }
 
 .endless-gameplay-screen .word-visual.active::after {
   background: var(--ui-accent);
-  box-shadow: 0 0 8px rgb(0 255 242 / 62%);
+  box-shadow: 0 0 8px rgb(var(--custom-accent-rgb, 0 255 242) / 62%);
   opacity: 1;
   transform: scaleX(1);
 }
@@ -503,7 +504,7 @@
 
 .endless-gameplay-screen .word-visual.active .typed-letter {
   color: var(--ui-accent);
-  text-shadow: 0 0 8px rgb(0 255 242 / 74%);
+  text-shadow: 0 0 8px rgb(var(--custom-accent-rgb, 0 255 242) / 74%);
 }
 
 .endless-gameplay-screen .word-visual.candidate .typed-letter {
@@ -548,7 +549,7 @@
   height: 10px;
   border: 1px solid var(--ui-accent);
   border-radius: 50%;
-  box-shadow: 0 0 12px rgb(0 255 242 / 55%);
+  box-shadow: 0 0 12px rgb(var(--custom-accent-rgb, 0 255 242) / 55%);
   transform: translate(-50%, -50%);
   animation: endless-burst-collapse 300ms var(--ui-ease-out) forwards;
 }
@@ -562,8 +563,8 @@
   height: 1px;
   transform: rotate(var(--campaign-burst-angle, 0deg));
   transform-origin: 0 50%;
-  background: linear-gradient(90deg, rgb(0 255 242 / 75%), transparent);
-  box-shadow: 0 0 7px rgb(0 255 242 / 45%);
+  background: linear-gradient(90deg, rgb(var(--custom-accent-rgb, 0 255 242) / 75%), transparent);
+  box-shadow: 0 0 7px rgb(var(--custom-accent-rgb, 0 255 242) / 45%);
 }
 
 @keyframes endless-burst-collapse {
@@ -599,7 +600,7 @@
   min-width: min(420px, 78vw);
   padding: 16px 28px;
   border: 0;
-  border-block: 1px solid rgb(0 255 242 / 32%);
+  border-block: 1px solid rgb(var(--custom-accent-rgb, 0 255 242) / 32%);
   background: linear-gradient(90deg, transparent, rgb(7 15 22 / 86%) 18% 82%, transparent);
   color: var(--ui-accent);
   font-family: var(--data-font);
@@ -647,7 +648,7 @@
   border: 0;
   border-radius: var(--ui-radius-sm);
   outline: none;
-  background: rgb(16 23 32 / 88%);
+  background: rgb(var(--custom-surface-1-rgb, 16 23 32) / 88%);
   color: var(--ui-text-muted);
   box-shadow: var(--ui-shadow-sm);
   font-family: var(--ui-font);
@@ -665,14 +666,14 @@
 .endless-gameplay-screen .endless-keyboard-trigger:focus-visible {
   outline: 2px solid var(--ui-accent);
   outline-offset: 2px;
-  background: rgb(22 33 45 / 94%);
+  background: rgb(var(--custom-surface-2-rgb, 22 33 45) / 94%);
   color: var(--ui-text);
   box-shadow: var(--ui-shadow-md), var(--ui-glow-cyan-soft);
   transform: none;
 }
 
 .endless-gameplay-screen .gameplay-input-dock.keyboard-ready .endless-keyboard-trigger {
-  background: rgb(0 255 242 / 8%);
+  background: rgb(var(--custom-accent-rgb, 0 255 242) / 8%);
   color: var(--ui-accent);
   box-shadow: var(--ui-glow-cyan-soft);
 }

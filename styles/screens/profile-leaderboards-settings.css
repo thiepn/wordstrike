@@ -1,17 +1,18 @@
+/* P1: palette-aware color values; literal fallbacks preserve the certified default. */
 /* UI11 — Profile / Leaderboards / Settings
    Low-chrome utility surfaces built on the UI1 design system. */
 
 :root {
-  --ui11-cyan: var(--ui-accent, var(--primary, #00fff2));
+  --ui11-cyan: var(--ui-accent, var(--primary, var(--custom-accent, #00fff2)));
   --ui11-magenta: var(--ui-accent-special, var(--secondary, #ff3cac));
   --ui11-danger: var(--ui-accent-danger, var(--danger, #ff4757));
   --ui11-success: var(--ui-accent-success, var(--success, #4cff8e));
-  --ui11-bg: var(--background, var(--bg, #0a0e14));
+  --ui11-bg: var(--background, var(--bg, var(--custom-bg, #0a0e14)));
   --ui11-text: var(--text-primary, var(--text, #e8f0f5));
   --ui11-secondary: var(--text-secondary, #bdc9d3);
   --ui11-muted: var(--text-muted, var(--muted, #8fa0ad));
-  --ui11-line: rgb(129 144 158 / 0.16);
-  --ui11-line-strong: rgb(129 144 158 / 0.28);
+  --ui11-line: rgb(var(--custom-border-rgb, 129 144 158) / 0.16);
+  --ui11-line-strong: rgb(var(--custom-border-rgb, 129 144 158) / 0.28);
   --ui11-surface: rgb(255 255 255 / 0.018);
   --ui11-surface-raised: rgb(255 255 255 / 0.032);
 }
@@ -32,7 +33,7 @@
     max(2.5rem, env(safe-area-inset-bottom))
     max(1.1rem, env(safe-area-inset-left));
   background:
-    radial-gradient(circle at 82% 8%, rgb(0 255 242 / 0.04), transparent 28rem),
+    radial-gradient(circle at 82% 8%, rgb(var(--custom-accent-rgb, 0 255 242) / 0.04), transparent 28rem),
     radial-gradient(circle at 12% 70%, rgb(255 60 172 / 0.025), transparent 30rem),
     var(--ui11-bg);
 }
@@ -138,7 +139,7 @@
 
 .profile-stats-screen .profile-tabs button.active {
   border-bottom-color: var(--ui11-line);
-  background: linear-gradient(90deg, rgb(0 255 242 / 0.045), transparent 78%);
+  background: linear-gradient(90deg, rgb(var(--custom-accent-rgb, 0 255 242) / 0.045), transparent 78%);
   color: var(--ui11-cyan);
 }
 
@@ -279,7 +280,7 @@
   height: 3px;
   margin: 1.4rem 0 1.8rem;
   overflow: hidden;
-  background: rgb(129 144 158 / 0.15);
+  background: rgb(var(--custom-border-rgb, 129 144 158) / 0.15);
 }
 
 .profile-stats-screen .campaign-progress-track span {
@@ -518,7 +519,7 @@
 .profile-stats-screen .profile-stats-diagnostics {
   pointer-events: none;
   border-color: rgb(255 60 172 / 0.24);
-  background: rgb(7 10 15 / 0.9);
+  background: rgb(var(--custom-overlay-rgb, 7 10 15) / 0.9);
   color: var(--ui11-muted);
   opacity: 0.78;
 }
@@ -539,7 +540,7 @@
     max(2.5rem, env(safe-area-inset-bottom))
     max(1.1rem, env(safe-area-inset-left));
   background:
-    radial-gradient(circle at 50% 0%, rgb(0 255 242 / 0.04), transparent 32rem),
+    radial-gradient(circle at 50% 0%, rgb(var(--custom-accent-rgb, 0 255 242) / 0.04), transparent 32rem),
     var(--ui11-bg);
 }
 
@@ -618,7 +619,7 @@
 .leaderboards-screen .leaderboard-tabs button.selected,
 .leaderboards-screen .leaderboard-duration-tabs button.selected {
   border-bottom-color: var(--ui11-cyan);
-  background: linear-gradient(180deg, transparent 65%, rgb(0 255 242 / 0.045));
+  background: linear-gradient(180deg, transparent 65%, rgb(var(--custom-accent-rgb, 0 255 242) / 0.045));
   color: var(--ui11-cyan);
 }
 
@@ -765,7 +766,7 @@
 
 .leaderboards-screen .leaderboard-row.viewer-row {
   position: relative;
-  background: linear-gradient(90deg, rgb(0 255 242 / 0.055), transparent 72%);
+  background: linear-gradient(90deg, rgb(var(--custom-accent-rgb, 0 255 242) / 0.055), transparent 72%);
 }
 
 .leaderboards-screen .leaderboard-row.viewer-row::before {
@@ -1000,7 +1001,7 @@
 
 .settings-screen .setting-row.selected {
   padding-left: 0.8rem;
-  background: linear-gradient(90deg, rgb(0 255 242 / 0.045), transparent 65%);
+  background: linear-gradient(90deg, rgb(var(--custom-accent-rgb, 0 255 242) / 0.045), transparent 65%);
   box-shadow: inset 2px 0 0 var(--ui11-cyan);
 }
 
@@ -1048,8 +1049,8 @@
 }
 
 .settings-screen .toggle[role="switch"].on {
-  border-color: rgb(0 255 242 / 0.55);
-  background: rgb(0 255 242 / 0.065);
+  border-color: rgb(var(--custom-accent-rgb, 0 255 242) / 0.55);
+  background: rgb(var(--custom-accent-rgb, 0 255 242) / 0.065);
   color: var(--ui11-cyan);
 }
 
@@ -1131,7 +1132,7 @@
     overflow-x: auto;
     border-top: 0;
     border-bottom: 1px solid var(--ui11-line-strong);
-    background: rgb(10 14 20 / 0.94);
+    background: rgb(var(--custom-bg-rgb, 10 14 20) / 0.94);
     backdrop-filter: blur(8px);
   }
 

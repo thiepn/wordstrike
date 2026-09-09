@@ -1,18 +1,19 @@
+/* P1: palette-aware color values; literal fallbacks preserve the certified default. */
 /* UI10 — Shared Results, Pause & Onboarding
    Presentation-only normalization. Result data, grading, routing, pause state,
    onboarding state/versioning and Practice Lab remain owned by existing modules. */
 
 :root {
-  --ui10-cyan: var(--ui-accent, var(--primary, #00fff2));
+  --ui10-cyan: var(--ui-accent, var(--primary, var(--custom-accent, #00fff2)));
   --ui10-magenta: var(--ui-accent-special, var(--secondary, #ff3cac));
   --ui10-danger: var(--ui-accent-danger, var(--danger, #ff4757));
   --ui10-success: var(--ui-accent-success, var(--success, #4cff8e));
-  --ui10-bg: var(--background, var(--bg, #0a0e14));
+  --ui10-bg: var(--background, var(--bg, var(--custom-bg, #0a0e14)));
   --ui10-text: var(--text-primary, var(--text, #e8f0f5));
   --ui10-secondary: var(--text-secondary, #bdc9d3);
   --ui10-muted: var(--text-muted, var(--muted, #8fa0ad));
-  --ui10-line: rgb(129 144 158 / 0.16);
-  --ui10-line-strong: rgb(129 144 158 / 0.28);
+  --ui10-line: rgb(var(--custom-border-rgb, 129 144 158) / 0.16);
+  --ui10-line-strong: rgb(var(--custom-border-rgb, 129 144 158) / 0.28);
   --ui10-surface: rgb(255 255 255 / 0.018);
 }
 
@@ -29,7 +30,7 @@
   overflow-y: auto;
   padding: max(1.25rem, env(safe-area-inset-top)) max(1rem, env(safe-area-inset-right)) max(1.75rem, env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left));
   background:
-    radial-gradient(circle at 50% 20%, rgb(0 255 242 / 0.035), transparent 30rem),
+    radial-gradient(circle at 50% 20%, rgb(var(--custom-accent-rgb, 0 255 242) / 0.035), transparent 30rem),
     var(--ui10-bg);
 }
 
@@ -413,7 +414,7 @@
   place-items: center;
   padding: max(1rem, env(safe-area-inset-top)) max(1rem, env(safe-area-inset-right)) max(1rem, env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left));
   overflow-y: auto;
-  background: rgb(7 10 15 / 0.82);
+  background: rgb(var(--custom-overlay-rgb, 7 10 15) / 0.82);
   backdrop-filter: blur(3px);
 }
 
@@ -426,7 +427,7 @@
   width: min(100%, 31rem);
   padding: clamp(1.75rem, 5vw, 3rem) 0;
   border: 0;
-  border-top: 1px solid rgb(0 255 242 / 0.42);
+  border-top: 1px solid rgb(var(--custom-accent-rgb, 0 255 242) / 0.42);
   border-bottom: 1px solid var(--ui10-line);
   background: transparent;
   box-shadow: none;
@@ -479,8 +480,8 @@
 
 .pause-panel > .menu-list .arcade-button:first-child,
 .arcade-rush-ui [data-rush-role="pause-overlay"] .arcade-rush-action:first-child {
-  border-color: rgb(0 255 242 / 0.38);
-  background: rgb(0 255 242 / 0.045);
+  border-color: rgb(var(--custom-accent-rgb, 0 255 242) / 0.38);
+  background: rgb(var(--custom-accent-rgb, 0 255 242) / 0.045);
   color: var(--ui10-cyan);
 }
 
@@ -512,7 +513,7 @@
   place-items: center;
   padding: max(1rem, env(safe-area-inset-top)) max(1rem, env(safe-area-inset-right)) max(1rem, env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left));
   overflow-y: auto;
-  background: rgb(7 10 15 / 0.88);
+  background: rgb(var(--custom-overlay-rgb, 7 10 15) / 0.88);
   backdrop-filter: blur(4px);
 }
 
@@ -529,9 +530,9 @@
   overflow-y: auto;
   padding: clamp(1.5rem, 4.5vw, 3.4rem);
   border: 1px solid var(--ui10-line-strong);
-  border-top-color: rgb(0 255 242 / 0.5);
+  border-top-color: rgb(var(--custom-accent-rgb, 0 255 242) / 0.5);
   border-radius: var(--ui-radius-md, 6px);
-  background: rgb(10 14 20 / 0.98);
+  background: rgb(var(--custom-bg-rgb, 10 14 20) / 0.98);
   box-shadow: 0 2rem 5rem rgb(0 0 0 / 0.34);
 }
 
@@ -655,7 +656,7 @@
   min-height: 15rem;
   padding: clamp(1rem, 3vw, 2rem);
   border-left: 1px solid var(--ui10-line);
-  background: radial-gradient(circle at 50% 50%, rgb(0 255 242 / 0.04), transparent 70%);
+  background: radial-gradient(circle at 50% 50%, rgb(var(--custom-accent-rgb, 0 255 242) / 0.04), transparent 70%);
 }
 
 .onboarding-word-stream,
@@ -703,7 +704,7 @@
   display: block;
   width: clamp(1rem, 3vw, 2rem);
   height: 2px;
-  background: rgb(129 144 158 / 0.22);
+  background: rgb(var(--custom-border-rgb, 129 144 158) / 0.22);
 }
 
 .onboarding-progress > span.active {
@@ -760,7 +761,7 @@
 .onboarding-secondary:focus-visible,
 .onboarding-tertiary:focus-visible {
   border-color: var(--ui10-cyan);
-  outline: 2px solid rgb(0 255 242 / 0.25);
+  outline: 2px solid rgb(var(--custom-accent-rgb, 0 255 242) / 0.25);
   outline-offset: 2px;
 }
 
