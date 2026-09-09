@@ -77,7 +77,9 @@ export function isPracticeCommonWordEnglishV1LexicalKey(value) {
   if (typeof value !== "string" || value !== value.normalize("NFC") || value !== value.toLowerCase()) return false;
   const graphemeCount = Array.from(value).length;
   if (graphemeCount < 1 || graphemeCount > 15) return false;
-  return /^[a-z]+$/.test(value);
+  if (!/^[a-z]+$/.test(value)) return false;
+  if (graphemeCount === 1 && !PRACTICE_COMMON_WORDS_POLICY_V1.lexicalPolicy.allowOneLetter.includes(value)) return false;
+  return true;
 }
 
 export function validatePracticeCommonWordsPolicy(policy = PRACTICE_COMMON_WORDS_POLICY_V1) {
