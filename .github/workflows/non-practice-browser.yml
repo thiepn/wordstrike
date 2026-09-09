@@ -8,7 +8,7 @@ permissions:
 jobs:
   browser:
     runs-on: ubuntu-latest
-    timeout-minutes: 18
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -32,6 +32,10 @@ jobs:
         run: |
           python tests/browser/ui5_campaign_gameplay.py
           python tests/browser/ui5_campaign_visual.py
+      - name: Certify UI6 Endless gameplay
+        run: |
+          python tests/browser/ui6_endless_gameplay.py
+          python tests/browser/ui6_endless_visual.py
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -43,4 +47,5 @@ jobs:
             browser-artifacts/ui3-mode-select/
             browser-artifacts/ui4-campaign-progression/
             browser-artifacts/ui5-campaign-gameplay/
+            browser-artifacts/ui6-endless-gameplay/
           retention-days: 7

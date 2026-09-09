@@ -69,14 +69,19 @@ assert.match(inputCss, /\.gameplay-input-dock\.keyboard-ready \.campaign-keyboar
 assert.match(inputCss, /prefers-reduced-motion/);
 assert.doesNotMatch(inputCss, /endless-screen|boss-screen|practice-lab/i);
 
-assert.match(renderer, /\["wrong", "campaign-word-error"\]\.includes\(event\.animationName\)/);
+// UI6 extends the shared renderer, so UI5 asserts the Campaign capabilities it owns
+// without freezing the renderer to UI5-only array contents or helper naming.
+assert.ok(renderer.includes('"campaign-word-error"'), "Campaign wrong-word animation must remain handled");
 assert.match(renderer, /--campaign-burst-angle/);
 assert.match(renderer, /--campaign-burst-reach/);
 assert.match(renderer, /Math\.atan2\(deltaY, deltaX\)/);
 assert.match(renderer, /Math\.hypot\(deltaX, deltaY\)/);
-assert.match(renderer, /campaignPrefersReducedMotion/);
+assert.ok(
+  renderer.includes('".campaign-gameplay-screen, .endless-gameplay-screen"'),
+  "shared reduced-motion renderer boundary must continue to include Campaign",
+);
 assert.match(renderer, /matchMedia\("\(prefers-reduced-motion: reduce\)"\)/);
-assert.match(renderer, /screenShake && !campaignPrefersReducedMotion\(area\)/);
+assert.match(renderer, /screenShake && !gameplayPresentationPrefersReducedMotion\(area\)/);
 
 assert.match(workflow, /Certify UI5 Campaign gameplay/);
 assert.match(workflow, /tests\/browser\/ui5_campaign_gameplay\.py/);

@@ -11,9 +11,9 @@ function playArea() {
   return document.querySelector("#play-area");
 }
 
-function campaignPrefersReducedMotion(area) {
+function gameplayPresentationPrefersReducedMotion(area) {
   return Boolean(
-    area?.closest?.(".campaign-gameplay-screen") &&
+    area?.closest?.(".campaign-gameplay-screen, .endless-gameplay-screen") &&
     typeof window !== "undefined" &&
     typeof window.matchMedia === "function" &&
     window.matchMedia("(prefers-reduced-motion: reduce)").matches
@@ -45,7 +45,9 @@ export function createWordElement(word) {
   position.dataset.wordId = word.id;
   position.setAttribute("aria-label", word.text);
   visual.addEventListener("animationend", (event) => {
-    if (["wrong", "campaign-word-error"].includes(event.animationName)) visual.classList.remove("wrong");
+    if (["wrong", "campaign-word-error", "endless-word-error"].includes(event.animationName)) {
+      visual.classList.remove("wrong");
+    }
   });
   text.append(typed, remaining);
   visual.append(text);
@@ -131,7 +133,7 @@ export function flashDamage(screenShake = true) {
   area.classList.remove("damage-flash");
   void area.offsetWidth;
   area.classList.add("damage-flash");
-  if (screenShake && !campaignPrefersReducedMotion(area)) {
+  if (screenShake && !gameplayPresentationPrefersReducedMotion(area)) {
     area.animate(
       [
         { transform: "translate(0, 0)" },
