@@ -8,9 +8,11 @@ import {
   validatePracticeCommonWordCheckFormSet,
 } from "../js/practiceLab/practiceCommonWordReference.js";
 import { PRACTICE_COMMON_WORD_BANDS, PRACTICE_COMMON_WORD_CHECK_MATCHING } from "../js/practiceLab/practiceCommonWordsConstants.js";
+import { evaluatePracticeCommonWordCheckTypability } from "../scripts/lib/practiceCommonWordsMatching.mjs";
 
 const base = new URL("../data/practice/common-words/en-v1/", import.meta.url);
 const read = async (name) => JSON.parse(await fs.readFile(new URL(name, base), "utf8"));
+const readUrl = async (url) => JSON.parse(await fs.readFile(url, "utf8"));
 const checksum = (value) => `sha256-${crypto.createHash("sha256").update(JSON.stringify(value)).digest("hex")}`;
 const withoutChecksum = (value) => { const copy = { ...value }; delete copy.checksum; return copy; };
 const spread = (values) => Math.max(...values) - Math.min(...values);
@@ -64,4 +66,25 @@ test("PL28 ships eight engineering-matched 200-word Check forms", async () => {
   for (const band of PRACTICE_COMMON_WORD_BANDS) assert.ok(spread(check.forms.map((form) => form.metrics.bandMeanWordLength[band])) <= PRACTICE_COMMON_WORD_CHECK_MATCHING.bandMeanWordLengthSpread);
   assert.ok(check.matching.maximumPairwiseLexicalOverlapRatio <= PRACTICE_COMMON_WORD_CHECK_MATCHING.maximumPairwiseLexicalOverlapRatio);
   assert.equal(check.matching.empiricalEquating, false);
+});
+
+test("PL28 Check forms satisfy canonical PL10 coverage, difficulty, RMS, and percentile matching", async () => {
+  const [check, typabilityReference, frequencyReference] = await Promise.all([
+    read("WS-COMMON-CHECK-EN-1.manifest.json"),
+    readUrl(new URL("../data/practice/models/en-v1/typability-v1.reference.json", import.meta.url)),
+    readUrl(new URL("../data/practice/provenance/frequency/en-v1.frequency.json", import.meta.url)),
+  ]);
+  assert.equal(check.bindings.typabilityReferenceVersion, typabilityReference.referenceVersion);
+  const evaluation = evaluatePracticeCommonWordCheckTypability({
+    forms: check.forms,
+    typabilityReference,
+    frequencyReference,
+  });
+  assert.deepEqual(evaluation.reasons, []);
+  assert.equal(evaluation.valid, true);
+  assert.ok(evaluation.minimumAvailableModelWeight >= PRACTICE_COMMON_WORD_CHECK_MATCHING.minimumTypabilityCoverage);
+  assert.ok(evaluation.difficultySpread <= PRACTICE_COMMON_WORD_CHECK_MATCHING.maximumDifficultySpread);
+  assert.ok(evaluation.maximumWeightedRmsDistance <= PRACTICE_COMMON_WORD_CHECK_MATCHING.maximumFeatureRmsDistance);
+  assert.ok(evaluation.relativePercentileSpread <= PRACTICE_COMMON_WORD_CHECK_MATCHING.maximumRelativePercentileSpread);
+  assert.ok(evaluation.forms.every((form) => form.textDifficulty.status === "full"));
 });
