@@ -14,11 +14,12 @@ assert.match(uiSource, /id="boss-phrase-count">SEQUENCE 1 \/ \$\{config\.segment
 assert.match(bossPresentation, /sequence\.append\(phraseCount\)/);
 assert.doesNotMatch(bossPresentation, /sequence\.append\(label\("SEQUENCE"\),\s*phraseCount\)/);
 
-// Audio is a separate setting category but visually uses the same UI11 switch grammar.
-assert.match(ui12Presentation, /class="toggle ui12-sound-toggle/);
+// Audio is a UI12-owned setting but mirrors the compact UI11 switch grammar.
+assert.match(ui12Presentation, /class="ui12-sound-toggle/);
+assert.doesNotMatch(ui12Presentation, /class="toggle ui12-sound-toggle/);
 assert.match(ui12Presentation, /data-ui12-sound-toggle role="switch"/);
 assert.doesNotMatch(ui12Presentation, /ui12-sound-toggle-track/);
-assert.match(ui12Css, /\.settings-screen \.toggle\.ui12-sound-toggle\[role="switch"\][\s\S]*min-height:\s*44px/);
+assert.match(ui12Css, /\.settings-screen \.ui12-sound-toggle\[role="switch"\][\s\S]*min-width:\s*4\.25rem[\s\S]*min-height:\s*44px[\s\S]*border-radius:\s*999px/);
 
 // Touch-only cleanup must remove desktop keyboard legends without deleting desktop markup.
 assert.match(uiSource, /title-keyboard-hint/);
