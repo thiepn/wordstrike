@@ -791,24 +791,19 @@
     padding-inline: 8px;
   }
 
-  .endless-hud-primary,
-  .endless-hud-secondary {
+  .endless-hud-primary {
     width: 100%;
     max-width: 100%;
     min-width: 0;
-  }
-
-  .endless-hud-primary > *,
-  .endless-hud-secondary > * {
-    min-width: 0;
-  }
-
-  .endless-hud-primary {
     grid-template-columns: minmax(48px, auto) auto minmax(40px, 1fr) auto auto;
     grid-template-areas:
       "back stage pace combo core"
       "back score score score core";
     column-gap: 6px;
+  }
+
+  .endless-hud-primary > * {
+    min-width: 0;
   }
 
   .endless-hud-back { grid-area: back; }
@@ -819,50 +814,38 @@
   .endless-hud-integrity { grid-area: core; }
 
   .endless-hud-secondary {
-    grid-template-columns: auto minmax(36px, 1fr) auto;
-    grid-template-areas: "survival progress pressure";
-    column-gap: 5px;
-    padding-left: 0;
+    position: absolute;
+    right: 8px;
+    bottom: 2px;
+    left: 8px;
+    display: block;
+    width: auto;
+    max-width: none;
+    height: 2px;
+    min-width: 0;
+    padding: 0;
+  }
+
+  .endless-stage-progress {
+    display: block;
+    width: 100%;
+    height: 2px;
   }
 
   .endless-hud-survival,
-  .endless-hud-pressure {
-    position: relative;
-    gap: 4px;
-    white-space: nowrap;
+  .endless-hud-pressure,
+  .endless-target-state {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0 0 0 0) !important;
+    clip-path: inset(50%) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
   }
-
-  .endless-hud-survival .endless-hud-label,
-  .endless-hud-pressure .endless-hud-label {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0 0 0 0);
-    clip-path: inset(50%);
-    white-space: nowrap;
-    border: 0;
-  }
-
-  .endless-hud-survival::before,
-  .endless-hud-pressure::before {
-    color: var(--ui-text-muted);
-    font-family: var(--ui-font);
-    font-size: 7px;
-    font-weight: 700;
-    letter-spacing: .1em;
-    line-height: 1;
-  }
-
-  .endless-hud-survival::before { content: "TIME"; }
-  .endless-hud-pressure::before { content: "LOAD"; }
-
-  .endless-hud-survival { grid-area: survival; }
-  .endless-stage-progress { grid-area: progress; }
-  .endless-hud-pressure { grid-area: pressure; }
-  .endless-target-state { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
