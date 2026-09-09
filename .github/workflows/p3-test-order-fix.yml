@@ -1,0 +1,30 @@
+name: P3 test order fix helper
+on:
+  push:
+    branches: [qa/customization-p3-release]
+permissions:
+  contents: write
+jobs:
+  fix:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: qa/customization-p3-release
+      - name: Correct Focus test ordering
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('tests/browser/customization_p3_release.py')
+          s=p.read_text()
+          old='''        select_mode(panel, "typingTest.hudLayout", hud)\n        select_mode(panel, "typingTest.liveStats", True)\n'''
+          new='''        # Set the saved live-stat choice before Focus disables that selector.\n        select_mode(panel, "typingTest.liveStats", True)\n        select_mode(panel, "typingTest.hudLayout", hud)\n'''
+          assert old in s
+          p.write_text(s.replace(old,new,1))
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add tests/browser/customization_p3_release.py
+          git commit -m "Fix P3 Focus audit ordering"
+          git push origin HEAD:qa/customization-p3-release
