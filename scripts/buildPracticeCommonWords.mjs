@@ -7,6 +7,9 @@ import { assertPracticeCommonWordCheckTypability } from "./lib/practiceCommonWor
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const SOURCE = path.join(ROOT, "data", "commonGameplayWords.json");
 const OUT = path.join(ROOT, "data", "practice", "common-words", "en-v1");
+const CORPUS_MANIFEST = path.join(ROOT, "data", "practice", "manifests", "en-v1.manifest.json");
+const INDEX_MANIFEST = path.join(ROOT, "data", "practice", "indexes", "en-v1", "manifest.json");
+const TYPOABILITY_MANIFEST = path.join(ROOT, "data", "practice", "models", "en-v1", "manifest.json");
 const TYPOABILITY_REFERENCE = path.join(ROOT, "data", "practice", "models", "en-v1", "typability-v1.reference.json");
 const FREQUENCY_REFERENCE = path.join(ROOT, "data", "practice", "provenance", "frequency", "en-v1.frequency.json");
 const BANDS = ["core", "frequent", "common", "broad"];
@@ -15,6 +18,7 @@ const bandFor = (rank) => BANDS.find((band) => rank >= RANGE[band][0] && rank <=
 const sha = (value) => `sha256-${crypto.createHash("sha256").update(typeof value === "string" ? value : JSON.stringify(value)).digest("hex")}`;
 const hash = (value) => crypto.createHash("sha256").update(String(value)).digest("hex");
 const graphemes = (word) => Array.from(word.normalize("NFC")).length;
+const readJson = async (file) => JSON.parse(await fs.readFile(file, "utf8"));
 
 function validateLexical(word) {
   return typeof word === "string" && word === word.normalize("NFC") && word === word.toLowerCase() && /^[a-z]+$/.test(word) && graphemes(word) >= 1 && graphemes(word) <= 15;
@@ -85,7 +89,33 @@ function validateOverlap(forms) {
   return maximum;
 }
 
-const source = JSON.parse(await fs.readFile(SOURCE, "utf8"));
+const [source, corpusManifest, indexManifest, typabilityManifest, typabilityReference, frequencyReference] = await Promise.all([
+  readJson(SOURCE),
+  readJson(CORPUS_MANIFEST),
+  readJson(INDEX_MANIFEST),
+  readJson(TYPOABILITY_MANIFEST),
+  readJson(TYPOABILITY_REFERENCE),
+  readJson(FREQUENCY_REFERENCE),
+]);
+if (corpusManifest.buildChecksum !== indexManifest.corpusChecksum || corpusManifest.buildChecksum !== typabilityManifest.corpusChecksum) throw new Error("Common-word build upstream corpus binding mismatch");
+if (indexManifest.indexChecksum !== typabilityManifest.indexChecksum) throw new Error("Common-word build upstream index binding mismatch");
+if (typabilityManifest.referenceVersion !== typabilityReference.referenceVersion) throw new Error("Common-word build PL10 reference binding mismatch");
+if (typabilityManifest.frequencyReferenceVersion !== frequencyReference.referenceVersion || typabilityManifest.frequencyReferenceChecksum !== frequencyReference.checksum) throw new Error("Common-word build PL10 frequency binding mismatch");
+const upstreamBindings = {
+  corpusId: corpusManifest.corpusId,
+  corpusVersion: corpusManifest.corpusVersion,
+  corpusChecksum: corpusManifest.buildChecksum,
+  indexSchemaVersion: indexManifest.indexSchemaVersion,
+  indexGeneratorVersion: indexManifest.indexGeneratorVersion,
+  indexChecksum: indexManifest.indexChecksum,
+  typabilityModelVersion: typabilityManifest.modelVersion,
+  typabilityReferenceVersion: typabilityManifest.referenceVersion,
+  typabilityReferenceChecksum: typabilityManifest.referenceChecksum,
+  frequencyReferenceVersion: typabilityManifest.frequencyReferenceVersion,
+  frequencyReferenceChecksum: typabilityManifest.frequencyReferenceChecksum,
+  builderVersion: 1,
+};
+
 const ranked = (source.words ?? [])
   .filter((entry) => validateLexical(entry.word) && Number.isFinite(entry.frequencyRank))
   .sort((a, b) => a.frequencyRank - b.frequencyRank || a.word.localeCompare(b.word));
@@ -112,32 +142,36 @@ const sourceBinding = {
 const referenceCore = {
   referenceId: "WS-COMMON-EN-1", referenceVersion: 1, language: "en", sourceRegistryVersion: 1,
   rankingSource: { sourceType: "statistical-reference", usageApproval: "statistical-only", ...sourceBinding },
+  bindings: upstreamBindings,
   bandRanges: { core: [1, 100], frequent: [101, 300], common: [301, 700], broad: [701, 1200] },
   words,
 };
 const reference = { ...referenceCore, checksum: sha(referenceCore) };
+const commonReferenceBindings = {
+  ...upstreamBindings,
+  commonWordReferenceId: reference.referenceId,
+  commonWordReferenceVersion: reference.referenceVersion,
+  commonWordReferenceChecksum: reference.checksum,
+  sourceChecksum: reference.checksum,
+};
 const displayWords = words.map(({ lexicalKey, rank, band }) => ({ lexicalKey, rank, band }));
 const practiceCore = {
   bankId: "WS-COMMON-PRACTICE-EN-1", bankVersion: 1, referenceId: reference.referenceId, referenceVersion: reference.referenceVersion,
   language: "en", status: "ready", partition: "training",
   displayProvenance: { sourceType: "permissive-import", usageApproval: "practice-display-approved", partition: "training", ...sourceBinding },
-  bindings: { sourceChecksum: reference.checksum, lexicalIndexVersion: 1, typabilityReferenceVersion: 1, builderVersion: 1 },
+  bindings: commonReferenceBindings,
   words: displayWords,
 };
 const practice = { ...practiceCore, checksum: sha(practiceCore) };
 const forms = buildForms(words);
 const maximumPairwiseLexicalOverlapRatio = validateOverlap(forms);
 if (maximumPairwiseLexicalOverlapRatio > 0.30) throw new Error(`Common-word check overlap ${maximumPairwiseLexicalOverlapRatio.toFixed(3)} exceeds 0.30`);
-const [typabilityReference, frequencyReference] = await Promise.all([
-  fs.readFile(TYPOABILITY_REFERENCE, "utf8").then(JSON.parse),
-  fs.readFile(FREQUENCY_REFERENCE, "utf8").then(JSON.parse),
-]);
 const typabilityMatching = assertPracticeCommonWordCheckTypability({ forms, typabilityReference, frequencyReference });
 const checkCore = {
   bankId: "WS-COMMON-CHECK-EN-1", formSetId: "WS-COMMON-CHECK-EN-1", bankVersion: 1, schemaVersion: 1, generatorVersion: 1,
   referenceId: reference.referenceId, referenceVersion: reference.referenceVersion, language: "en", status: "ready", partition: "diagnostic",
   displayProvenance: { sourceType: "permissive-import", usageApproval: "practice-display-approved", partition: "diagnostic", ...sourceBinding },
-  bindings: { sourceChecksum: reference.checksum, lexicalIndexVersion: 1, typabilityReferenceVersion: 1, builderVersion: 1 },
+  bindings: commonReferenceBindings,
   diagnosticPool: displayWords,
   matching: { engineeringMatched: true, empiricalEquating: false, maximumPairwiseLexicalOverlapRatio, note: "Length distributions are matched deterministically by band; canonical PL10 difficulty is rechecked at runtime/foundation analysis." },
   forms,
@@ -157,6 +191,7 @@ console.log(JSON.stringify({
   difficultySpread: typabilityMatching.difficultySpread,
   maximumFeatureRmsDistance: typabilityMatching.maximumWeightedRmsDistance,
   relativePercentileSpread: typabilityMatching.relativePercentileSpread,
+  bindings: commonReferenceBindings,
   referenceChecksum: reference.checksum,
   practiceChecksum: practice.checksum,
   checkChecksum: check.checksum,
