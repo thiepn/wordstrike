@@ -129,13 +129,12 @@ def snapshot(page):
         target: document.querySelector('[data-endless-target-state]')?.textContent,
         progressNow: progress?.getAttribute('aria-valuenow'),
         progressText: progress?.getAttribute('aria-valuetext'),
+        progressHeight: progress?.getBoundingClientRect().height || 0,
         imminent: document.querySelectorAll('.endless-word-imminent').length,
         activeBoxes: getComputedStyle(document.querySelector('.word-visual.active')).borderTopWidth,
         bannerText: document.querySelector('#endless-stage-banner')?.textContent,
         survivalMetricHeight: survivalMetric?.getBoundingClientRect().height || 0,
         pressureMetricHeight: pressureMetric?.getBoundingClientRect().height || 0,
-        survivalCompactCue: survivalMetric ? getComputedStyle(survivalMetric, '::before').content : null,
-        pressureCompactCue: pressureMetric ? getComputedStyle(pressureMetric, '::before').content : null,
         keyboardText: trigger?.textContent?.trim() || null,
         keyboardDisplay: triggerStyle?.display || null,
         keyboardHeight: triggerBox?.height || 0,
@@ -209,10 +208,9 @@ def certify_mobile(browser, browser_name, base, evidence):
         assert short["playHeight"] >= 180, short
         assert short["keyboardDisplay"] != "none", short
         assert short["keyboardHeight"] >= 44, short
-        assert short["survivalMetricHeight"] <= 18, short
-        assert short["pressureMetricHeight"] <= 18, short
-        assert "TIME" in (short["survivalCompactCue"] or ""), short
-        assert "LOAD" in (short["pressureCompactCue"] or ""), short
+        assert short["survivalMetricHeight"] <= 2, short
+        assert short["pressureMetricHeight"] <= 2, short
+        assert short["progressHeight"] >= 2, short
         evidence.append({"browser": browser_name, "case": "390x360", **short})
 
     evidence.append({"browser": browser_name, "case": "mobile", **state})
