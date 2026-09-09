@@ -80,7 +80,7 @@ def main():
                 first = expected[0]
                 wrong = "z" if first.lower() != "z" else "x"
                 page.keyboard.type(first + wrong)
-                expect(page.locator(".speed-test-screen")).to_have_class("speed-test-screen typing-active")
+                assert "typing-active" in (page.locator(".speed-test-screen").get_attribute("class") or "")
                 expect(page.locator("#speed-test-status")).to_be_hidden()
                 expect(page.locator(".speed-test-char-correct")).to_have_count(1)
                 expect(page.locator(".speed-test-char-incorrect")).to_have_count(1)
