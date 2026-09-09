@@ -1,42 +1,32 @@
 name: PL28 Common Words artifacts
 on:
+  pull_request:
   push:
-    branches:
-      - codex/pl28-common-words-v1
+    branches: [main, codex/pl27-burst-sprints-v1, codex/pl28-common-words-v1]
   workflow_dispatch:
 permissions:
-  contents: write
+  contents: read
 jobs:
   build:
-    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: codex/pl28-common-words-v1
       - uses: actions/setup-node@v4
         with:
           node-version: 22
       - name: Validate canonical PL6 corpus rebuild
         run: node scripts/buildPracticeCorpus.mjs --validate
-      - name: Build PL28 static artifacts
-        run: node scripts/buildPracticeCommonWords.mjs
-      - name: Run PL28 targeted certification
-        run: node --test tests/practice-common-words*.test.js
-      - name: Commit generated artifacts
+      - name: Verify deterministic PL28 static artifacts
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/practice/common-words/en-v1/*.json
-          if git diff --cached --quiet; then
-            echo "Artifacts already current"
-            exit 0
-          fi
-          git commit -m "build(pl28): generate Common Words v1 artifacts"
-          git push origin HEAD:codex/pl28-common-words-v1
+          node scripts/buildPracticeCommonWords.mjs
+          git diff --exit-code -- data/practice/common-words/en-v1/
+      - name: Run PL28 and session lifecycle certification
+        run: node --test tests/practice-common-words*.test.js tests/practice-session-pulse-pl28.test.js
       - name: Upload PL28 static artifacts
         uses: actions/upload-artifact@v4
         with:
           name: pl28-common-word-artifacts
           path: data/practice/common-words/en-v1/*.json
+          retention-days: 7
           if-no-files-found: error
