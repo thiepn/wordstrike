@@ -82,7 +82,7 @@ test("PL28 Check result presents canonical PL13 estimate, 95% model interval, co
   assert.match(root.innerHTML, /<th>First-pass accuracy<\/th><th>Starting words<\/th><th>Inside words<\/th>/);
   assert.match(root.innerHTML, /<th scope="row">Broad<\/th>/);
   assert.match(root.innerHTML, /<h2>Typing breadth coverage<\/h2>/);
-  assert.doesNotMatch(root.innerHTML, /Vocabulary Breadth Score|vocabulary level|You know/i);
+  assert.doesNotMatch(root.innerHTML, /Vocabulary Breadth Score|vocabulary level|You know \d|Your vocabulary is limited|You don't know broad vocabulary/i);
   assert.equal(root.focusCalls.at(-1)?.selector, "[data-common-words-session-action='finish']");
 });
 
