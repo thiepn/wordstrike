@@ -187,9 +187,10 @@
   opacity: 1;
 }
 
-/* Touch devices should not inherit desktop hover lift or desktop-only keyboard
-   legends. These hints remain intact for mouse/keyboard users. */
-@media (hover: none), (pointer: coarse) {
+/* Mobile/touch layouts should not inherit desktop hover lift or desktop-only
+   keyboard legends. The width clause is intentional: some desktop-engine test
+   browsers and hybrid devices report pointer capabilities inconsistently. */
+@media (max-width: 680px), (hover: none), (pointer: coarse) {
   #app > .screen:not(.practice-lab-screen) :is(
     .arcade-button,
     .ui-button,
