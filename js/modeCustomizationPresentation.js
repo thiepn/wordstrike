@@ -140,7 +140,10 @@ export function startModeCustomizationPresentation({ getSave, onTypingPreference
     screen = root.querySelector(":scope > .screen");
     if (!screen || screen.matches(".practice-lab-screen")) return;
     const mode = screenMode(screen);
-    if (mode === "typing") insert(screen.querySelector(".speed-test-controls-wrap"), mode, "ready");
+    if (mode === "typing") {
+      const host = screen.querySelector(".speed-test-topbar-secondary");
+      insert(host, mode, "ready", host?.querySelector(".speed-test-hud"));
+    }
     if (screen.matches(".campaign-progress-screen")) insert(screen.querySelector(".campaign-progress-tools"), mode, "ready");
     if (screen.matches(".endless-ready-screen")) {
       const host = screen.querySelector(".endless-ready-panel");
