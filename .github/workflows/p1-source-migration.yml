@@ -1,0 +1,33 @@
+name: P1 source preparation
+on:
+  push:
+    branches: [feat/customization-p1]
+permissions:
+  contents: write
+jobs:
+  prepare:
+    if: github.ref == 'refs/heads/feat/customization-p1'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/customization-p1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Apply the reviewed one-time source transformation
+        run: |
+          node scripts/materializeCustomizationP1.mjs
+          node --check js/main.js
+          node --check js/customizationPresentation.js
+          node tests/customization-p1.test.js
+          node tests/scoring-storage.test.js
+          node tests/speed-test-storage.test.js
+      - name: Commit source files and remove preparation-only files
+        run: |
+          git rm -- .github/workflows/p1-source-migration.yml scripts/materializeCustomizationP1.mjs
+          git add -- js styles style.css index.html
+          git diff --cached --stat
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'P1: integrate palette tokens, saved preferences, and renderer effects'
+          git push origin HEAD:feat/customization-p1
