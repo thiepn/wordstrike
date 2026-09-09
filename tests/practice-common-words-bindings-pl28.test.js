@@ -68,4 +68,4 @@ test("PL28 Practice and Check preserve independent display partitions while shar
   assert.equal(loaded.check.displayProvenance.usageApproval, "practice-display-approved");
   assert.notEqual(loaded.practice.displayProvenance.sourceType, "statistical-reference");
   assert.notEqual(loaded.check.displayProvenance.sourceType, "statistical-reference");
-}
+});
