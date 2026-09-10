@@ -1,0 +1,47 @@
+name: PL31 compact DB9 assertion reconciliation
+
+on:
+  push:
+    branches: [pl31-custom-text]
+
+permissions:
+  contents: write
+
+jobs:
+  reconcile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Replace remaining compact DB8 assertions
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          old = 'assert.equal(PRACTICE_DATABASE_VERSION,8);'
+          new = 'assert.equal(PRACTICE_DATABASE_VERSION,9);'
+          changed = []
+          for path in sorted(Path('tests').glob('*.test.js')):
+              text = path.read_text(encoding='utf-8')
+              updated = text.replace(old, new)
+              if updated != text:
+                  path.write_text(updated, encoding='utf-8')
+                  changed.append(str(path))
+          print('Updated files:')
+          print('\n'.join(changed) if changed else '(none)')
+          PY
+          git rm .github/workflows/pl31-db9-tight-reconcile.yml
+          git diff --check
+          git diff -- tests .github/workflows/pl31-db9-tight-reconcile.yml
+      - name: Commit reconciliation
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add tests
+          git commit -m "PL31: reconcile compact DB9 test expectations"
+          git push origin HEAD:pl31-custom-text
