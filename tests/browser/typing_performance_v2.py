@@ -71,7 +71,8 @@ def main():
 
                 raw_toggle = page.locator('[data-performance-layer="raw"]')
                 raw_toggle.click()
-                expect(page.locator('[data-speed-performance]')).to_have_class(lambda value: 'hide-raw' in value)
+                graph_class = page.locator('[data-speed-performance]').get_attribute('class') or ''
+                assert 'hide-raw' in graph_class, graph_class
                 expect(raw_toggle).to_have_attribute('aria-pressed', 'false')
 
                 overflow = page.evaluate("""() => ({
@@ -94,7 +95,8 @@ def main():
                     compare = page.locator('[data-speed-performance-compare]')
                     expect(compare).to_contain_text('Versus previous same test')
                     expect(page.locator('[data-performance-layer="raw"]')).to_have_attribute('aria-pressed', 'false')
-                    assert 'hide-raw' in page.locator('[data-speed-performance]').get_attribute('class')
+                    graph_class = page.locator('[data-speed-performance]').get_attribute('class') or ''
+                    assert 'hide-raw' in graph_class, graph_class
 
                 page.screenshot(
                     path=str(ARTIFACTS / f'typing-performance-v2-{width}x{height}.png'),
