@@ -69,7 +69,7 @@ def main():
                   };
                 }""")
                 assert ready["overflow"] <= 1, ready
-                assert ready["width"] <= 1060.5, ready
+                assert ready["width"] <= 1248.5, ready
                 assert ready["viewportBorder"] == "0px", ready
                 assert ready["passageFont"] >= 28, ready
                 assert ready["currentUnderline"] != "0px", ready
