@@ -26,4 +26,4 @@ PL31 turns the existing `custom-text` Practice Lab card into a local-only user-a
 
 `npm run test:pl31-custom-text` covers the PL31 storage envelope, normalization/projection, privacy metadata, non-resumability/measurement isolation, capacity gating, selection, optimistic conflicts, strict UTF-8 import, bounded rendering, and retention/reset boundaries.
 
-Historical Practice tests that asserted the prior database envelope now expect DB9 while retaining their original record-version and behavioral checks. The repository-wide `npm test`, prior Practice phase workflows, and browser regressions are the final merge gate for PR #77.
+Historical Practice tests that asserted the prior database envelope now expect DB9 while retaining their original record-version and behavioral checks. A temporary final release gate runs the complete Node suite, deterministic PL29/PL30 artifact validation, and the existing Typing and non-Practice browser regression suites before merge.
