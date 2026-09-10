@@ -2,7 +2,7 @@ name: Typing browser regressions
 on:
   pull_request:
   push:
-    branches: [main, codex/pl28-common-words-v1]
+    branches: [main]
   workflow_dispatch:
 permissions:
   contents: read
@@ -23,6 +23,8 @@ jobs:
         run: python3 -m pip install -r tests/browser/requirements.txt
       - name: Exercise real Typing Test UI in Chromium and Firefox
         run: python3 tests/browser/typing_regressions.py
+      - name: Exercise UI8 visual hierarchy and responsive contracts
+        run: python3 tests/browser/typing_ui8_visual_regressions.py
       - uses: actions/upload-artifact@v4
         if: always()
         with:
