@@ -17,12 +17,26 @@ function safeLocation(value) {
   if (!value) return null;
   try {
     const url = new URL(value);
+    const googleRedirect = url.hostname === "accounts.google.com"
+      ? url.searchParams.get("redirect_uri")
+      : null;
+    let googleRedirectTarget = null;
+    if (googleRedirect) {
+      try {
+        const parsed = new URL(googleRedirect);
+        googleRedirectTarget = { host: parsed.host, pathname: parsed.pathname };
+      } catch {
+        googleRedirectTarget = { invalid: true };
+      }
+    }
     return {
       protocol: url.protocol,
       host: url.host,
       pathname: url.pathname,
       error: url.searchParams.get("error") || url.searchParams.get("error_code"),
       errorDescription: url.searchParams.get("error_description"),
+      googleRedirectTarget,
+      googleResponseType: url.hostname === "accounts.google.com" ? url.searchParams.get("response_type") : null,
     };
   } catch {
     return { invalid: true };
@@ -54,12 +68,31 @@ for (const redirectTo of redirects) {
     const response = await fetch(`${SUPABASE_CONFIG.url}/auth/v1/authorize?${params}`, {
       redirect: "manual",
     });
-    result.redirects.push({
+    const googleUrl = response.headers.get("location");
+    const entry = {
       redirectTo,
       status: response.status,
-      location: safeLocation(response.headers.get("location")),
+      location: safeLocation(googleUrl),
       body: response.status >= 400 ? (await response.text()).slice(0, 300) : undefined,
-    });
+      googleLanding: null,
+    };
+    if (googleUrl && entry.location?.host === "accounts.google.com") {
+      try {
+        const googleResponse = await fetch(googleUrl, { redirect: "manual" });
+        const html = await googleResponse.text();
+        const normalized = html.toLowerCase();
+        entry.googleLanding = {
+          status: googleResponse.status,
+          location: safeLocation(googleResponse.headers.get("location")),
+          redirectUriMismatch: normalized.includes("redirect_uri_mismatch"),
+          accessBlocked: normalized.includes("access blocked") || normalized.includes("access_denied"),
+          invalidClient: normalized.includes("invalid_client") || normalized.includes("deleted_client"),
+        };
+      } catch (error) {
+        entry.googleLanding = { error: error?.message || String(error) };
+      }
+    }
+    result.redirects.push(entry);
   } catch (error) {
     result.redirects.push({ redirectTo, error: error?.message || String(error) });
   }
@@ -82,3 +115,5 @@ console.log(JSON.stringify(result, null, 2));
 if (result.settings?.status !== 200 || !result.settings?.googleEnabled) process.exitCode = 1;
 if (result.sdk?.status !== 200) process.exitCode = 1;
 if (result.redirects.some((entry) => entry.status !== 302 || !entry.location?.host)) process.exitCode = 1;
+if (result.redirects.some((entry) => entry.location?.googleRedirectTarget?.host !== result.projectHost || entry.location?.googleRedirectTarget?.pathname !== "/auth/v1/callback")) process.exitCode = 1;
+if (result.redirects.some((entry) => entry.googleLanding?.redirectUriMismatch || entry.googleLanding?.invalidClient)) process.exitCode = 1;
