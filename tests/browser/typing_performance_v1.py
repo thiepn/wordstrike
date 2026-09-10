@@ -113,8 +113,8 @@ def main():
 
                 overflow = page.evaluate("""() => ({
                   page: document.documentElement.scrollWidth - document.documentElement.clientWidth,
-                  panel: document.querySelector('.speed-test-result-panel').scrollWidth
-                    - document.querySelector('.speed-test-result-panel').clientWidth,
+                  panel: document.querySelector('.speed-results-panel').scrollWidth
+                    - document.querySelector('.speed-results-panel').clientWidth,
                   stored: JSON.parse(localStorage.getItem('wordstrike_speed_test_timelines_v1') || '[]').length,
                 })""")
                 assert overflow['page'] <= 1, overflow
