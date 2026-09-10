@@ -7,6 +7,11 @@ export const TYPING_HUD_LAYOUTS = Object.freeze([
   Object.freeze({ value: "balanced", label: "Balanced" }),
   Object.freeze({ value: "data", label: "Data" }),
 ]);
+export const TYPING_PASSAGE_WIDTHS = Object.freeze([
+  Object.freeze({ value: "narrow", label: "Narrow" }),
+  Object.freeze({ value: "normal", label: "Normal" }),
+  Object.freeze({ value: "wide", label: "Wide" }),
+]);
 export const GAMEPLAY_HUD_LAYOUTS = Object.freeze([
   Object.freeze({ value: "minimal", label: "Minimal" }),
   Object.freeze({ value: "standard", label: "Standard" }),
@@ -16,7 +21,7 @@ export const ACTION_INTENSITIES = Object.freeze([
   Object.freeze({ value: "full", label: "Full" }),
 ]);
 export const MODE_CUSTOMIZATION_FIELDS = Object.freeze([
-  "typingTest.hudLayout", "typingTest.textSize", "typingTest.liveStats",
+  "typingTest.hudLayout", "typingTest.textSize", "typingTest.liveStats", "typingTest.passageWidth",
   "gameplayHud", "actionModeIntensity",
 ]);
 const choice = (value, options, fallback) => options.some((item) => item.value === value) ? value : fallback;
@@ -26,6 +31,7 @@ export function normalizeModeCustomizationValue(field, value) {
     case "typingTest.hudLayout": return choice(value, TYPING_HUD_LAYOUTS, "balanced");
     case "typingTest.textSize": return normalizeSpeedTestFontSize(value);
     case "typingTest.liveStats": return typeof value === "boolean" ? value : true;
+    case "typingTest.passageWidth": return choice(value, TYPING_PASSAGE_WIDTHS, "normal");
     case "gameplayHud": return choice(value, GAMEPLAY_HUD_LAYOUTS, "standard");
     case "actionModeIntensity": return choice(value, ACTION_INTENSITIES, "full");
     default: throw new TypeError(`Unknown mode presentation preference: ${field}`);
@@ -35,7 +41,12 @@ export function normalizeModeCustomizationValue(field, value) {
 /** Focus hides live stats without overwriting the player's saved On/Off choice. */
 export function resolveTypingPresentation(settings) {
   const typing = normalizeCustomization(settings).typingTest;
-  return { ...typing, showLiveStats: typing.hudLayout !== "focus" && typing.liveStats };
+  const passageWidth = choice(settings?.speedTestPassageWidth, TYPING_PASSAGE_WIDTHS, "normal");
+  return {
+    ...typing,
+    passageWidth,
+    showLiveStats: typing.hudLayout !== "focus" && typing.liveStats,
+  };
 }
 
 export function resolveModeEffectsIntensity(settings, mode, reducedMotion = false) {
