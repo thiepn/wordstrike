@@ -1,0 +1,42 @@
+name: PL29 exact tree bootstrap
+
+on:
+  push:
+    branches: [codex/pl29-consistency-endurance-v1]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: pl29-exact-tree-bootstrap
+  cancel-in-progress: false
+
+jobs:
+  apply-tested-tree:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Apply and verify tested PL29 tree
+        shell: bash
+        run: |
+          set -euo pipefail
+          base64 -d .pl29-bootstrap.b64 > /tmp/pl29-bootstrap.tar.gz
+          tar -tzf /tmp/pl29-bootstrap.tar.gz >/dev/null
+          tar -xzf /tmp/pl29-bootstrap.tar.gz
+          rm -f .pl29-bootstrap.b64 .github/workflows/pl29-bootstrap.yml
+
+          git add -A
+          actual_tree="$(git write-tree)"
+          expected_tree="32453e72dcce074ad15739fe278909e3ff765897"
+          echo "Expected tree: $expected_tree"
+          echo "Actual tree:   $actual_tree"
+          test "$actual_tree" = "$expected_tree"
+
+          git config user.name "thiepn"
+          git config user.email "junsosmart@gmail.com"
+          git commit -m "feat(pl29): implement consistency and endurance"
+          git push origin HEAD:codex/pl29-consistency-endurance-v1
