@@ -1,0 +1,46 @@
+name: PL30 bootstrap
+
+on:
+  push:
+    branches: [codex/pl30-punctuation-numbers-v1]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: pl30-bootstrap
+  cancel-in-progress: false
+
+jobs:
+  bootstrap:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Reconstruct, certify, and commit PL30
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat .pl30-bootstrap/chunk-* | base64 --decode > /tmp/pl30-bootstrap-code.tar.gz
+          echo "11e43cca9145ef36e0bec08d85a0acbeb1954ede69f7bc6afea326bd9d515919  /tmp/pl30-bootstrap-code.tar.gz" | sha256sum --check --strict
+          tar -xzf /tmp/pl30-bootstrap-code.tar.gz
+          node scripts/applyPL30.mjs
+          rm -f scripts/applyPL30.mjs .github/workflows/pl30-bootstrap.yml
+          rm -rf .pl30-bootstrap
+          node scripts/buildPracticeSpecialDomains.mjs
+          node scripts/buildPracticeSpecialDomains.mjs --validate
+          node --test tests/practice-special-domains-pl30.test.js
+          npm test
+          git diff --check
+          git status --short
+          git config user.name "thiepn"
+          git config user.email "junsosmart@gmail.com"
+          git add -A
+          git commit -m "PL30: punctuation, capitals, numbers, and symbols"
+          git push origin HEAD:codex/pl30-punctuation-numbers-v1
