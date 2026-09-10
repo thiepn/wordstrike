@@ -28,6 +28,9 @@ export function createPracticeRepository(options = {}) {
 
     const activeProfile = await core.getPracticeProfile?.().catch?.(() => null) ?? null;
     const rawCustomTexts = await dataStore.list("customTexts").catch(() => []);
+    const ownedCustomTexts = activeProfile
+      ? rawCustomTexts.filter((raw) => raw?.profileId === activeProfile.profileId)
+      : [];
 
     preserveCustomTextDuringReset = true;
     try {
@@ -36,9 +39,13 @@ export function createPracticeRepository(options = {}) {
       preserveCustomTextDuringReset = false;
     }
 
+    // Preserve the historical empty-reset contract: do not recreate a profile/context
+    // merely because Custom Text support exists. Recreate identity only when user-authored
+    // documents actually need an owner after the Practice reset.
+    if (!ownedCustomTexts.length) return true;
+
     const initialized = await core.initializePracticeStorage();
-    for (const raw of rawCustomTexts) {
-      if (!activeProfile || raw?.profileId !== activeProfile.profileId) continue;
+    for (const raw of ownedCustomTexts) {
       await dataStore.put("customTexts", { ...raw, profileId: initialized.profile.profileId });
     }
     return true;
