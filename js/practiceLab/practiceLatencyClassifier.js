@@ -322,3 +322,52 @@ export function summarizePracticeLatencyByEntity({
       disfluentMedianMs: group.disfluent.length ? practiceMedian(group.disfluent) : null,
     })));
 }
+
+export function createPracticeLatencyStreamingClassifier({ policy = PRACTICE_LATENCY_POLICY_V1, maximumCalibrationSamples = 256 } = {}) {
+  validatePolicy(policy);
+  if (!Number.isInteger(maximumCalibrationSamples) || maximumCalibrationSamples < policy.minimumCalibrationSamples) throw new TypeError("Invalid PL8 streaming calibration bound");
+  const calibrationLatencies = [];
+  let priorInsertion = null;
+  let correctionSincePrior = false;
+  let lastThresholdMs = null;
+  let classifiedCount = 0;
+  let disfluentCount = 0;
+  let interruptionCount = 0;
+  return Object.freeze({
+    record(event) {
+      if (CORRECTION_TYPES.has(event?.type)) { correctionSincePrior = true; return null; }
+      if (!INSERTION_TYPES.has(event?.type)) return null;
+      const candidate = derivePracticeLatencyTransitionCandidate({ event, priorInsertion, correctionSincePrior, policy });
+      if (candidate.baselineEligible) {
+        calibrationLatencies.push(candidate.latency);
+        if (calibrationLatencies.length > maximumCalibrationSamples) calibrationLatencies.shift();
+      }
+      const stats = thresholdFromCalibration(calibrationLatencies, policy);
+      const adaptive = calibrationLatencies.length >= policy.minimumCalibrationSamples;
+      lastThresholdMs = adaptive ? stats.threshold : null;
+      let classification = "excluded";
+      let reason = candidate.exclusionReason ?? null;
+      if (candidate.hardInterruption) { classification = "interruption"; reason = "hard-interruption"; interruptionCount += 1; }
+      else if (!candidate.exclusionReason && adaptive) {
+        classification = candidate.latency <= lastThresholdMs ? "fluent" : "disfluent";
+        reason = classification === "disfluent" ? "adaptive-threshold" : null;
+        classifiedCount += 1;
+        if (classification === "disfluent") disfluentCount += 1;
+      } else if (!candidate.exclusionReason && !adaptive) reason = "insufficient-data";
+      priorInsertion = event;
+      correctionSincePrior = false;
+      return freezeDeep({ classification, reason, latencyMs: Number.isFinite(candidate.latency) ? candidate.latency : null, thresholdMs: lastThresholdMs, adaptive });
+    },
+    getSnapshot() {
+      return freezeDeep({
+        classifierVersion: PRACTICE_LATENCY_CLASSIFIER_VERSION,
+        policyVersion: policy.version,
+        calibrationSampleCount: calibrationLatencies.length,
+        thresholdMs: lastThresholdMs,
+        classifiedCount,
+        disfluentCount,
+        interruptionCount,
+      });
+    },
+  });
+}

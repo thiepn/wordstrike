@@ -14,3 +14,7 @@ Implementation document initialized from the PL20 specification. This document w
 - result: v1
 
 Combination Repair is a training intervention for exactly one canonical lowercase bigram or trigram per session. It uses approved training-partition content only and does not create protected benchmark, cold-transfer, retention-review, ability, performance-frontier, or assessment evidence.
+
+## PL30 boundary
+
+Combination Repair v1 remains alphabetic-only and does not activate punctuation/number/symbol pattern entity types.

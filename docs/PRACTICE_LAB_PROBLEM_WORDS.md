@@ -374,3 +374,7 @@ COMPLETING THE WORD CORRECTLY
 ```
 
 The correct intervention moves from uncued Baseline to deliberate but spaced whole-word Focus, broader Context, uncued target/neutral Mix, and a different matched uncued Check. A constituent n-gram may partly explain a word, but PL22 does not silently turn into Combination Repair. A corrected target-word error remains a first-pass error. A strong Check remains immediate practice evidence, not proof that the word is mastered, retained, transferred, or fixed forever.
+
+## PL30 boundary
+
+Problem Words v1 remains lowercase alphabetic lexical practice; punctuation-bearing tokens are not promoted into PL22 word targets by PL30.

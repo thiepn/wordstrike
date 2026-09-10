@@ -354,3 +354,7 @@ Final release certification additionally requires the complete WordStrike pull-r
 ## PL29 boundary — Common Words is not Endurance
 
 Common Words measures broad lexical-list execution. Session duration alone does not turn Common Words Practice or the 200-word Typing Breadth Check into Endurance evidence. Only the standardized hidden `endurance-check` provider can create PL13 Endurance ability observations.
+
+## PL30 boundary
+
+Common Words remains lowercase alphabetic lexical material. PL30 owns the dedicated punctuation/capital and numbers/symbol domain protocols.

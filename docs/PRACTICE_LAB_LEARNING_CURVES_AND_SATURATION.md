@@ -1345,3 +1345,7 @@ A PL20-PL23 targeted child preserves its canonical direct-target opportunity con
 PL29 supplies the first real standardized observations for the already-defined PL13 `endurance` channel. PL16 requires no Endurance-specific history store: its generic ability-trajectory helper may derive an Endurance trajectory from recent PL13 `endurance` observations for the same profile/context.
 
 Endurance Practice (5/10/20 minutes) and Consistency Trainer are untargeted training and contribute **zero direct PL16 acquisition dose**. The standardized `endurance-check` is diagnostic and also contributes zero acquisition dose. PL16 global plateau semantics remain unchanged and continue to use the canonical cold-natural ability contract rather than substituting Endurance.
+
+## PL30 domain trajectories
+
+PL16 may now derive ordinary context-specific ability trajectories for the canonical `punctuation` and `numbers-symbols` PL13 channels. PL30 adds no trajectory store and does not change global plateau logic. A rising trajectory does not prove PL30 Practice caused the change.

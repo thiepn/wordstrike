@@ -1237,3 +1237,7 @@ The trusted provider supplies the protocol's adjusted log performance and versio
 The Endurance uncertainty contract is `clamp(sqrt(sigma_individual^2 / 4 + sigma_spread^2 + 0.03^2), 0.05, 0.20)`, where `sigma_individual` is the median compatible 30-second window sigma and `sigma_spread = max(1.4826 × MAD(Y_i), 0.02)`.
 
 **Endurance ability** means robust typability-adjusted first-pass effective typing pace during the final three minutes of the standardized 10-minute Endurance Check, after seven prior minutes of continuous session activity including the one-minute settling period. It is not generic sustainable speed, a 10-minute average, burst capacity, or the PL14 control frontier.
+
+## PL30 — first canonical punctuation and numbers-symbols protocols
+
+PL30 activates the reserved `punctuation` and `numbers-symbols` channels as protocol-defined domain typing abilities. A valid dedicated Check contributes exactly one channel observation. These are whole-form effective typing abilities guarded by domain first-pass accuracy, not isolated character-speed scores. Where PL10 is in-domain, normal PL13 adjustment applies; otherwise the form is `protocol-matched-only`, uses A_d = 0, and adds 0.04 log-units of protocol-form uncertainty.

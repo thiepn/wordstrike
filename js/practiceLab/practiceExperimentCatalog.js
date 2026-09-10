@@ -31,8 +31,8 @@ const definitions = [
   ["metronome-typing", "Metronome Typing", "Metronome", "fluency", "Develop controlled cadence at adjustable tempos.", "A guided pulse will support deliberate rhythm practice while preserving accuracy and correction awareness.", 2, 5, 8, "intermediate", false, false, 26, 30, "metronome", "fluency", "cadence"],
   ["read-ahead", "Read-Ahead", "Read-Ahead", "fluency", "Train visual preparation beyond the current word.", "Progressive text presentation will encourage planning ahead while keeping the active target understandable.", 3, 6, 10, "intermediate", false, true, 27, 40, "eye", "fluency", "visual preparation"],
   ["endurance", "Endurance", "Endurance", "fluency", "Practice sustained natural-text typing or run a standardized Endurance Check.", "Practice continuous natural text for 5, 10, or 20 minutes, or run a standardized 10-minute Endurance Check that compares late-session performance with an earlier settled period and can supply one PL13 endurance ability observation.", 5, 10, 20, "all-levels", false, false, 28, 50, "endurance", "fluency", "sustained performance"],
-  ["punctuation-capitals", "Punctuation & Capitals", "Punctuation", "real-world", "Practice punctuation, capitalization, and Shift transitions.", "Targeted material will develop reliable sentence mechanics without treating symbols as an afterthought.", 2, 5, 8, "all-levels", false, true, 31, 20, "punctuation", "real-world", "punctuation and capitals"],
-  ["numbers-symbols", "Numbers & Symbols", "Numbers", "real-world", "Improve control of numbers and common symbols.", "Structured patterns will train number-row and symbol transitions used in practical typing tasks.", 2, 5, 8, "intermediate", false, true, 32, 30, "numbers", "real-world", "numbers and symbols"],
+  ["punctuation-capitals", "Punctuation & Capitals", "Punctuation", "real-world", "Practice capitalization and common punctuation in realistic text, or run a standardized Check for punctuation-and-capitals ability.", "Practice reliable capitalization, sentence punctuation, quotes, separators, and punctuation boundaries in realistic typing contexts. The protocol scores textual output and does not prescribe a physical Shift-key technique.", 2, 5, 8, "all-levels", false, false, 31, 20, "punctuation", "real-world", "punctuation and capitals"],
+  ["numbers-symbols", "Numbers & Symbols", "Numbers", "real-world", "Practice digits and common symbols in practical transcription patterns, or run a standardized Numbers & Symbols Check.", "Practice digits and common practical symbols in structured transcription without assuming one keyboard layout, physical modifier route, numeracy skill, or mental arithmetic.", 2, 5, 8, "all-levels", false, false, 32, 30, "numbers", "real-world", "numbers and symbols"],
   ["custom-text", "Custom Text", "Custom Text", "custom", "Practice with text you choose.", "A future local-only editor will let you train personal material without sending it to rankings or cloud services.", 1, 5, 30, "all-levels", false, false, 33, 10, "custom", "custom", "user-selected material"],
 ];
 
@@ -46,7 +46,7 @@ const deepFreeze = (value) => {
 
 const buildEntry = ([id, title, shortTitle, category, description, longDescription, minimum, recommended, maximum, difficulty, requiresAssessment, requiresPracticeData, implementationPrompt, displayOrder, iconKey, accentKey, primarySkill]) => deepFreeze({
   id, version: 1, title, shortTitle, category, description, longDescription,
-  status: ["full-assessment", "weak-keys", "combination-repair", "problem-words", "accuracy-control", "burst-sprints", "real-text", "pace-ladder", "common-words", "consistency-trainer", "endurance"].includes(id) ? "preview" : "planned",
+  status: ["full-assessment", "weak-keys", "combination-repair", "problem-words", "accuracy-control", "burst-sprints", "real-text", "pace-ladder", "common-words", "consistency-trainer", "endurance", "punctuation-capitals", "numbers-symbols"].includes(id) ? "preview" : "planned",
   estimatedDurationMinutes: { minimum, recommended, maximum }, difficulty,
   requiresAssessment, requiresPracticeData, supportsMobile: true,
   supportsPhysicalKeyboard: true, supportsSoftwareKeyboard: true,
@@ -58,9 +58,11 @@ const buildEntry = ([id, title, shortTitle, category, description, longDescripti
         ? ["target-blind", "six-sprint-protocol", "recovery-intervals", "burst-ability", "robust-top-three"]
         : id === "common-words"
           ? ["coverage-first", "balanced-frequency-bands", "word-count-options", "typing-breadth-check", "common-words-ability"]
-          : ["weak-keys", "combination-repair", "problem-words", "accuracy-control"].includes(id)
-            ? ["manual-target", "recommended-target", "fixed-dose", "same-session-check"]
-            : [],
+          : ["punctuation-capitals", "numbers-symbols"].includes(id)
+            ? ["duration-options", "standardized-check", "target-blind", "domain-diagnostics", "layout-neutral"]
+            : ["weak-keys", "combination-repair", "problem-words", "accuracy-control"].includes(id)
+              ? ["manual-target", "recommended-target", "fixed-dose", "same-session-check"]
+              : [],
   tags: [category, primarySkill], implementationPrompt, displayOrder,
   iconKey, accentKey, primarySkill,
 });

@@ -1,0 +1,66 @@
+{
+  "manifestVersion": 1,
+  "formSetId": "WS-NUMSYM-PRACTICE-EN-1",
+  "formSetVersion": 1,
+  "formSchemaVersion": 1,
+  "generatorVersion": 1,
+  "protocolVersion": 1,
+  "annotationVersion": 1,
+  "domain": "numbers-symbols",
+  "partition": "training",
+  "status": "ready",
+  "readyFormCount": 4,
+  "formsChecksum": "sha256-d53668880b2eb62757dabf973a9337005c6100ba9978339e4869cd239ad0d5cf",
+  "source": {
+    "sourceId": "ws-original-en-numbers-symbols-v1",
+    "sourceChecksum": "sha256-03075fe4f0f8650cf182f52074e8ab8b8e4f13dd295e705bd155d9c0a623f6b2"
+  },
+  "bindings": {
+    "corpusId": "practice-en-v1",
+    "corpusVersion": 1,
+    "corpusChecksum": "sha256-28beccf65eed71519da306c129da5040a20f364aed320dc21eea2d16c2a1c404",
+    "indexSchemaVersion": 1,
+    "indexChecksum": "sha256-bb198244a6b6cefcae5cb908bf3dee6e9e52259f9ef41576ec69c429a423ff32",
+    "typabilityModelVersion": 1,
+    "typabilityFeatureVersion": 1,
+    "typabilityReferenceVersion": 1,
+    "typabilityReferenceChecksum": "sha256-94a6f90c3593ebc089211882e2d9afaf0bf46b66386cdc98dbe60c533e6dd471",
+    "frequencyReferenceVersion": 1,
+    "frequencyReferenceId": "ws-en-frequency-v1",
+    "frequencyReferenceChecksum": "sha256-b9bc8dde064335c2258844919c6dd62537f95ac4a2d5920fdd7213a9cb5d45ad"
+  },
+  "forms": [
+    {
+      "formId": "WS-NUMSYM-PRACTICE-EN-1-P1",
+      "formHash": "sha256-715ea2267d535ca8421b0008678d836ede6922afc32e324941cd986f798bd585",
+      "annotationHash": "sha256-1e10cbdf3eeaa44918785823b51a5a997bf9c38419519d1bf53d2e528bb5fe67",
+      "ready": true,
+      "graphemeCount": 20239,
+      "primaryOpportunityCount": 1800
+    },
+    {
+      "formId": "WS-NUMSYM-PRACTICE-EN-1-P2",
+      "formHash": "sha256-8e304902dcd10eb456471f669095b771d2a532f1fc1f7c597e3f37ec0659bc95",
+      "annotationHash": "sha256-1a401e0dab9694eeeae22af07acf25f5a439a86af4445ebdaa2ab37015520d40",
+      "ready": true,
+      "graphemeCount": 20239,
+      "primaryOpportunityCount": 1800
+    },
+    {
+      "formId": "WS-NUMSYM-PRACTICE-EN-1-P3",
+      "formHash": "sha256-0904e3538406753832188ec08fa4dafc490c68e0f817c0c318086c087ee0f3d9",
+      "annotationHash": "sha256-bd28e4949a8efefebf15e9672288d9dfb6d4a7317de342863e92b596322fa15a",
+      "ready": true,
+      "graphemeCount": 20239,
+      "primaryOpportunityCount": 1800
+    },
+    {
+      "formId": "WS-NUMSYM-PRACTICE-EN-1-P4",
+      "formHash": "sha256-309d483ca233bb80e583ab4b9dfd5af19cc4e8ab06118c814a9291e199527455",
+      "annotationHash": "sha256-518b6a66613f995ef4d0d89afe2e5fffef799574f7805852f8be59e3ec4dd783",
+      "ready": true,
+      "graphemeCount": 20239,
+      "primaryOpportunityCount": 1800
+    }
+  ]
+}

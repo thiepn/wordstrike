@@ -395,3 +395,7 @@ PL29 certification covers prerequisites, catalog IDs, descriptors, form generati
 PL29 does not implement physiological fatigue measurement, concentration measurement, injury/ergonomic inference, adaptive Endurance duration, Endurance pace targets, Consistency metronome or auditory cadence, automatic Daily Coach scheduling, causal treatment-effect attribution, individualized treatment personalization, or a public Practice release.
 
 PL30 may introduce punctuation/capital/numbers/symbol domains; PL29 prose must not be treated as canonical measurement for those channels. PL32 may later treat `consistency-trainer` and `endurance` Practice as intervention families while keeping `endurance-check` as standardized measurement. PL33 may later learn when either training intervention helps a specific user; PL29 itself makes no causal claim.
+
+## PL30 boundary
+
+Normal punctuation that appears in Consistency or Endurance content remains part of those protocols and does not create PL30 `punctuation` or `numbers-symbols` ability observations.

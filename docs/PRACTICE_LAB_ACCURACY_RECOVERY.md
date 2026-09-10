@@ -331,3 +331,7 @@ The results view states:
 > This compares the beginning and end of this practice session. Recovery metrics are observational and only exist when relevant errors occurred. Durable learning, transfer, and retention require later evidence.
 
 A strong Check does not mean mastered, transferred, retained, fixed, or causally improved.
+
+## PL30 boundary
+
+Accuracy & Recovery v1 remains limited to the existing alphabetic key/bigram/trigram/word entity architecture. PL30 does not route punctuation, numeric, or symbol patterns through PL23 target entities.

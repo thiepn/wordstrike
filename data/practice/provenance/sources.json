@@ -162,6 +162,42 @@
       "snapshotPath": "endurance/en-v1/check-source.json",
       "usageApproval": "practice-display-approved",
       "notes": "PL29 diagnostic sustained natural-prose source."
+    },
+    {
+      "sourceId": "ws-original-en-punctuation-capitals-v1",
+      "title": "WordStrike Punctuation & Capitals English v1 authored templates",
+      "sourceType": "wordstrike-original",
+      "upstream": null,
+      "license": {
+        "name": "WordStrike-authored original corpus material",
+        "spdx": null,
+        "url": null,
+        "attributionRequired": false,
+        "notes": "Original PL30 punctuation/capital transcription material."
+      },
+      "retrievedAt": null,
+      "sourceChecksum": "sha256-1ae7bfcb5118a05108c552bc15af2b5c4cf15316e38dde67faecc6d8eec2371a",
+      "snapshotPath": "punctuation-capitals/en-v1/source.json",
+      "usageApproval": "practice-display-approved",
+      "notes": "PL30 training and diagnostic source templates. Derived artifacts remain partition-separated."
+    },
+    {
+      "sourceId": "ws-original-en-numbers-symbols-v1",
+      "title": "WordStrike Numbers & Symbols English v1 authored templates",
+      "sourceType": "wordstrike-original",
+      "upstream": null,
+      "license": {
+        "name": "WordStrike-authored original corpus material",
+        "spdx": null,
+        "url": null,
+        "attributionRequired": false,
+        "notes": "Original PL30 synthetic practical-transcription material."
+      },
+      "retrievedAt": null,
+      "sourceChecksum": "sha256-03075fe4f0f8650cf182f52074e8ab8b8e4f13dd295e705bd155d9c0a623f6b2",
+      "snapshotPath": "numbers-symbols/en-v1/source.json",
+      "usageApproval": "practice-display-approved",
+      "notes": "PL30 training and diagnostic source templates. Values are synthetic and non-PII."
     }
   ]
 }

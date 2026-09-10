@@ -1,0 +1,66 @@
+{
+  "manifestVersion": 1,
+  "formSetId": "WS-PUNCT-PRACTICE-EN-1",
+  "formSetVersion": 1,
+  "formSchemaVersion": 1,
+  "generatorVersion": 1,
+  "protocolVersion": 1,
+  "annotationVersion": 1,
+  "domain": "punctuation-capitals",
+  "partition": "training",
+  "status": "ready",
+  "readyFormCount": 4,
+  "formsChecksum": "sha256-673dafbbe1fc075186e82344fee8d45421e0c65e2b5099199b70a7991ea052b0",
+  "source": {
+    "sourceId": "ws-original-en-punctuation-capitals-v1",
+    "sourceChecksum": "sha256-1ae7bfcb5118a05108c552bc15af2b5c4cf15316e38dde67faecc6d8eec2371a"
+  },
+  "bindings": {
+    "corpusId": "practice-en-v1",
+    "corpusVersion": 1,
+    "corpusChecksum": "sha256-28beccf65eed71519da306c129da5040a20f364aed320dc21eea2d16c2a1c404",
+    "indexSchemaVersion": 1,
+    "indexChecksum": "sha256-bb198244a6b6cefcae5cb908bf3dee6e9e52259f9ef41576ec69c429a423ff32",
+    "typabilityModelVersion": 1,
+    "typabilityFeatureVersion": 1,
+    "typabilityReferenceVersion": 1,
+    "typabilityReferenceChecksum": "sha256-94a6f90c3593ebc089211882e2d9afaf0bf46b66386cdc98dbe60c533e6dd471",
+    "frequencyReferenceVersion": 1,
+    "frequencyReferenceId": "ws-en-frequency-v1",
+    "frequencyReferenceChecksum": "sha256-b9bc8dde064335c2258844919c6dd62537f95ac4a2d5920fdd7213a9cb5d45ad"
+  },
+  "forms": [
+    {
+      "formId": "WS-PUNCT-PRACTICE-EN-1-P1",
+      "formHash": "sha256-f3f5d96cfc9d276a86c6c81a5b0323109a771a22db97bc6b128e834fef5cfb35",
+      "annotationHash": "sha256-17800f66d9fe0146d1a23e264164001b7543b6775fcc0f6d87cca398c298a58c",
+      "ready": true,
+      "graphemeCount": 18749,
+      "primaryOpportunityCount": 1800
+    },
+    {
+      "formId": "WS-PUNCT-PRACTICE-EN-1-P2",
+      "formHash": "sha256-cc7214ea298bc6c1a66d52f6790def0573923da330948cd32505c99fd20fff5a",
+      "annotationHash": "sha256-fccb29145e87e1cea317aca86d7bd1c98f54c1d8caa558b88406115ceb50604b",
+      "ready": true,
+      "graphemeCount": 18744,
+      "primaryOpportunityCount": 1800
+    },
+    {
+      "formId": "WS-PUNCT-PRACTICE-EN-1-P3",
+      "formHash": "sha256-df4966655a24fcb13e48e7216719909793c91a5ff7331860829998fafe307863",
+      "annotationHash": "sha256-6c913fef2bbcf448f0926ef29a7b64d2ece05f27d9f29fa6c11a6a063397ca68",
+      "ready": true,
+      "graphemeCount": 18749,
+      "primaryOpportunityCount": 1800
+    },
+    {
+      "formId": "WS-PUNCT-PRACTICE-EN-1-P4",
+      "formHash": "sha256-4564db71177e88ef1a9e570e314e474fb5ac6adc6b961ba1a1edb95d653c9fc2",
+      "annotationHash": "sha256-ff4315a697ad690e9f3561c9b5336892eab216113ebbc749831230fbec94a1ed",
+      "ready": true,
+      "graphemeCount": 18749,
+      "primaryOpportunityCount": 1800
+    }
+  ]
+}

@@ -1,0 +1,82 @@
+{
+  "manifestVersion": 1,
+  "formSetId": "WS-PUNCT-CHECK-EN-1",
+  "formSetVersion": 1,
+  "formSchemaVersion": 1,
+  "generatorVersion": 1,
+  "protocolVersion": 1,
+  "annotationVersion": 1,
+  "domain": "punctuation-capitals",
+  "partition": "diagnostic",
+  "status": "ready",
+  "readyFormCount": 6,
+  "formsChecksum": "sha256-11d6062665d46abe62f85c88cd5c911f81567e3e80e15b7a80d2e637ddcd7f1d",
+  "source": {
+    "sourceId": "ws-original-en-punctuation-capitals-v1",
+    "sourceChecksum": "sha256-1ae7bfcb5118a05108c552bc15af2b5c4cf15316e38dde67faecc6d8eec2371a"
+  },
+  "bindings": {
+    "corpusId": "practice-en-v1",
+    "corpusVersion": 1,
+    "corpusChecksum": "sha256-28beccf65eed71519da306c129da5040a20f364aed320dc21eea2d16c2a1c404",
+    "indexSchemaVersion": 1,
+    "indexChecksum": "sha256-bb198244a6b6cefcae5cb908bf3dee6e9e52259f9ef41576ec69c429a423ff32",
+    "typabilityModelVersion": 1,
+    "typabilityFeatureVersion": 1,
+    "typabilityReferenceVersion": 1,
+    "typabilityReferenceChecksum": "sha256-94a6f90c3593ebc089211882e2d9afaf0bf46b66386cdc98dbe60c533e6dd471",
+    "frequencyReferenceVersion": 1,
+    "frequencyReferenceId": "ws-en-frequency-v1",
+    "frequencyReferenceChecksum": "sha256-b9bc8dde064335c2258844919c6dd62537f95ac4a2d5920fdd7213a9cb5d45ad"
+  },
+  "forms": [
+    {
+      "formId": "WS-PUNCT-CHECK-EN-1-F1",
+      "formHash": "sha256-8d0e2546ec639b4f8ce5de6b7b496053b3735a40c254e0a00a4b67f9f9a9e939",
+      "annotationHash": "sha256-fc5ddf3a8a9fd57e6fea3f2296a2b545214b3dcc38ece0d392598d496fc8758d",
+      "ready": true,
+      "graphemeCount": 1874,
+      "primaryOpportunityCount": 180
+    },
+    {
+      "formId": "WS-PUNCT-CHECK-EN-1-F2",
+      "formHash": "sha256-50dd2f692ab8e14d3bef8e0168b2fe845b77ff6316d7ec30f16baee8eef1e11b",
+      "annotationHash": "sha256-19cb2b5c7f897ec27820f1233771e458f169ec36c569232e375536e1d74e237d",
+      "ready": true,
+      "graphemeCount": 1872,
+      "primaryOpportunityCount": 180
+    },
+    {
+      "formId": "WS-PUNCT-CHECK-EN-1-F3",
+      "formHash": "sha256-ffd00e84ceb796ef5d6c312f1e85e1d9d3c7d1621a7f2db2e56197799353bc8c",
+      "annotationHash": "sha256-1249112c9fcc9973bc9595b063fc257c24feeb4a08388a07063796ca5997cfdc",
+      "ready": true,
+      "graphemeCount": 1875,
+      "primaryOpportunityCount": 180
+    },
+    {
+      "formId": "WS-PUNCT-CHECK-EN-1-F4",
+      "formHash": "sha256-93b4c8debf61c2b4de1058e75d6d60bede1149956c9ae3bcdcf0da875c346ae8",
+      "annotationHash": "sha256-41c53d28a0f90a160daa32aa0a09fc0959c1d740aa72151dbf7087bcad446e09",
+      "ready": true,
+      "graphemeCount": 1872,
+      "primaryOpportunityCount": 180
+    },
+    {
+      "formId": "WS-PUNCT-CHECK-EN-1-F5",
+      "formHash": "sha256-66c39c9a106ded82e574b1fe80645acac6b5dd72b096a899bfe4666ca80406de",
+      "annotationHash": "sha256-5e8eb75cd73a5d7900bd7370fb0fb2738bb51a9e13abcf5ab3cccdada5686bcb",
+      "ready": true,
+      "graphemeCount": 1876,
+      "primaryOpportunityCount": 180
+    },
+    {
+      "formId": "WS-PUNCT-CHECK-EN-1-F6",
+      "formHash": "sha256-96d3a21a0c30757b012541870cd0a5832662270c9d4492eb9827823212685d38",
+      "annotationHash": "sha256-60f17a2c99d0afea56e7b248574659bd09e982bf56178eba617e3756d1f1d4a2",
+      "ready": true,
+      "graphemeCount": 1874,
+      "primaryOpportunityCount": 180
+    }
+  ]
+}
