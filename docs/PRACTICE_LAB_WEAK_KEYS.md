@@ -564,3 +564,7 @@ PL21 consumes existing models but does not duplicate them:
 | Combination Repair | PL20 | unchanged independent intervention |
 
 Weak Keys therefore remains a narrow experiment-specific intervention over the shared Practice architecture rather than another permanent skill model.
+
+## PL30 boundary
+
+Weak Keys v1 remains alphabetic-only. PL30 uppercase scoring is textual output and does not introduce Shift-side or finger-technique targets.

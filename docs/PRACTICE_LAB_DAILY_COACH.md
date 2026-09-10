@@ -253,3 +253,7 @@ The phase remains a draft/developer preview until the exact latest branch head p
 ## PL29 catalog availability
 
 PL29 implements `consistency-trainer` and the `endurance` surface, but Daily Coach v1 does not automatically schedule either intervention. This is intentional: PL29 adds protocols and measurements without changing the stable PL25 planner policy. A future Coach version may consider pace variability, sustained decline, or low Endurance ability when choosing interventions.
+
+## PL30 scheduling boundary
+
+PL30 domains now exist, but Daily Coach v1 remains version-stable and does not automatically schedule `punctuation-capitals` or `numbers-symbols`. A later Coach policy may use domain ability or treatment-effect evidence.

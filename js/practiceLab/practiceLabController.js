@@ -5,7 +5,7 @@ import {
 
 const IS_NODE_RUNTIME = Boolean(globalThis.process?.versions?.node);
 const nodeRuntime = IS_NODE_RUNTIME
-  ? await import("./practiceLabControllerRuntimeV29.js")
+  ? await import("./practiceLabControllerRuntimeV30.js")
   : null;
 
 export const PRACTICE_LAB_ONBOARDING_VERSION = 1;
@@ -51,6 +51,7 @@ export function createPracticeLabController(options = {}) {
       import("./practiceLabControllerRuntimeV27.js"),
       import("./practiceLabControllerRuntimeV28.js"),
       import("./practiceLabControllerRuntimeV29.js"),
+      import("./practiceLabControllerRuntimeV30.js"),
       import("./practiceCombinationRepairExperiment.js"),
       import("./practiceWeakKeysExperiment.js"),
       import("./practiceProblemWordsExperiment.js"),
@@ -61,7 +62,9 @@ export function createPracticeLabController(options = {}) {
       import("./practiceCommonWordsExperiment.js"),
       import("./practiceConsistencyExperiment.js"),
       import("./practiceEnduranceExperiment.js"),
-    ]).then(([registryModule, _canonicalControllerModule, _v22ControllerModule, _v23ControllerModule, _v24ControllerModule, _v25ControllerModule, _v26ControllerModule, _v27ControllerModule, _v28ControllerModule, controllerModule, combinationRepairModule, weakKeysModule, problemWordsModule, accuracyRecoveryModule, realTextModule, paceLadderModule, burstSprintsModule, commonWordsModule, consistencyModule, enduranceModule]) => {
+      import("./practicePunctuationCapitalsExperiment.js"),
+      import("./practiceNumbersSymbolsExperiment.js"),
+    ]).then(([registryModule, _canonicalControllerModule, _v22ControllerModule, _v23ControllerModule, _v24ControllerModule, _v25ControllerModule, _v26ControllerModule, _v27ControllerModule, _v28ControllerModule, _v29ControllerModule, controllerModule, combinationRepairModule, weakKeysModule, problemWordsModule, accuracyRecoveryModule, realTextModule, paceLadderModule, burstSprintsModule, commonWordsModule, consistencyModule, enduranceModule, punctuationCapitalsModule, numbersSymbolsModule]) => {
       const lazyRegistry = getPracticeRegistryLazyState(experimentRegistry);
       if (lazyRegistry?.destroyed) return null;
 
@@ -81,6 +84,8 @@ export function createPracticeLabController(options = {}) {
       commonWordsModule.registerPracticeCommonWordsExperiment(resolvedRegistry);
       consistencyModule.registerPracticeConsistencyExperiment(resolvedRegistry);
       enduranceModule.registerPracticeEnduranceExperiment(resolvedRegistry);
+      punctuationCapitalsModule.registerPracticePunctuationCapitalsExperiment(resolvedRegistry);
+      numbersSymbolsModule.registerPracticeNumbersSymbolsExperiment(resolvedRegistry);
 
       runtimeController = controllerModule.createPracticeLabController({
         ...options,

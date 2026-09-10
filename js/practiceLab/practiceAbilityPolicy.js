@@ -76,15 +76,17 @@ export const PRACTICE_ABILITY_CHANNEL_POLICY_V1 = freezeDeep({
     channel: "punctuation",
     allowedEvidenceRoles: ["diagnostic", "benchmark"],
     minimumDurationMs: 30_000,
-    maximumDurationMs: 300_000,
+    maximumDurationMs: 420_000,
     minimumTypedCharacters: 100,
+    minimumAccuracy: 60,
   }),
   "numbers-symbols": channel({
     channel: "numbers-symbols",
     allowedEvidenceRoles: ["diagnostic", "benchmark"],
     minimumDurationMs: 30_000,
-    maximumDurationMs: 300_000,
+    maximumDurationMs: 420_000,
     minimumTypedCharacters: 100,
+    minimumAccuracy: 60,
   }),
 });
 

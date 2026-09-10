@@ -471,3 +471,7 @@ PL19 does not implement:
 PL20 Combination Repair, PL21 Weak Keys, PL22 Problem Words, PL23 Accuracy/Recovery, and PL24 Real Text will consume the same canonical post-assessment evidence without PL19 preselecting an intervention.
 
 PL25 Daily Coach may later use assessment age/depth/coverage plus limiter, ability, mastery, learning, and review state as inputs. Assessment age is informational and does not become a hard prerequisite unless a future explicit policy changes that rule.
+
+## PL30 dedicated Check boundary
+
+PL19 Full Assessment retains its own fixed battery. Its punctuation/numbers blocks do not substitute for PL30 dedicated ability Checks and receive no historical PL30 ability backfill.

@@ -99,9 +99,9 @@ test("PL13 channel policies lock exact v1 roles, duration, volume and protocol f
   assert.deepEqual([channels.burst.minimumDurationMs, channels.burst.maximumDurationMs, channels.burst.minimumTypedCharacters, channels.burst.durationReferenceFloorSeconds], [5_000, 15_000, 25, 5]);
   assert.deepEqual(channels.endurance.allowedEvidenceRoles, ["diagnostic"]);
   assert.deepEqual([channels.endurance.minimumDurationMs, channels.endurance.maximumDurationMs, channels.endurance.minimumTypedCharacters], [180_000, 181_000, 125]);
-  for (const name of ["punctuation", "numbers-symbols"]) assert.deepEqual([channels[name].minimumDurationMs, channels[name].maximumDurationMs, channels[name].minimumTypedCharacters], [30_000, 300_000, 100]);
-  for (const channel of Object.values(channels)) {
-    assert.equal(channel.minimumAccuracy, 70);
+  for (const name of ["punctuation", "numbers-symbols"]) assert.deepEqual([channels[name].minimumDurationMs, channels[name].maximumDurationMs, channels[name].minimumTypedCharacters], [30_000, 420_000, 100]);
+  for (const [name, channel] of Object.entries(channels)) {
+    assert.equal(channel.minimumAccuracy, ["punctuation", "numbers-symbols"].includes(name) ? 60 : 70);
     assert.equal(channel.requiresUntargetedContent, true);
     assert.equal(channel.requiresCorrectionAllowed, true);
   }

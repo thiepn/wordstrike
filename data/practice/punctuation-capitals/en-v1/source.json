@@ -1,0 +1,40 @@
+{
+  "sourceVersion": 1,
+  "sourceId": "ws-original-en-punctuation-capitals-v1",
+  "title": "WordStrike Punctuation & Capitals English v1 authored templates",
+  "sourceType": "wordstrike-original",
+  "language": "en",
+  "displayApproval": "practice-display-approved",
+  "labels": [
+    "Atlas",
+    "Birch",
+    "Cedar",
+    "Delta",
+    "Elm",
+    "Fjord",
+    "Grove",
+    "Harbor",
+    "Iris",
+    "Juniper",
+    "Kite",
+    "Lumen",
+    "Maple",
+    "Nova",
+    "Orchid",
+    "Pine",
+    "Quartz",
+    "River",
+    "Sable",
+    "Tide",
+    "Umber",
+    "Vale",
+    "Willow",
+    "Xeno",
+    "Yarrow",
+    "Zephyr"
+  ],
+  "notes": [
+    "Original synthetic transcription material authored for PL30.",
+    "Templates intentionally exercise textual capitalization and punctuation without prescribing physical Shift technique."
+  ]
+}

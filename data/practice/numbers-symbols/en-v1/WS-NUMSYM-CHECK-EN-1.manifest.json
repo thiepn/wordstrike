@@ -1,0 +1,82 @@
+{
+  "manifestVersion": 1,
+  "formSetId": "WS-NUMSYM-CHECK-EN-1",
+  "formSetVersion": 1,
+  "formSchemaVersion": 1,
+  "generatorVersion": 1,
+  "protocolVersion": 1,
+  "annotationVersion": 1,
+  "domain": "numbers-symbols",
+  "partition": "diagnostic",
+  "status": "ready",
+  "readyFormCount": 6,
+  "formsChecksum": "sha256-ef61bc1c676e337b5933a9f75ca1824a9bc9407a17352f613037ba6b1cab57dc",
+  "source": {
+    "sourceId": "ws-original-en-numbers-symbols-v1",
+    "sourceChecksum": "sha256-03075fe4f0f8650cf182f52074e8ab8b8e4f13dd295e705bd155d9c0a623f6b2"
+  },
+  "bindings": {
+    "corpusId": "practice-en-v1",
+    "corpusVersion": 1,
+    "corpusChecksum": "sha256-28beccf65eed71519da306c129da5040a20f364aed320dc21eea2d16c2a1c404",
+    "indexSchemaVersion": 1,
+    "indexChecksum": "sha256-bb198244a6b6cefcae5cb908bf3dee6e9e52259f9ef41576ec69c429a423ff32",
+    "typabilityModelVersion": 1,
+    "typabilityFeatureVersion": 1,
+    "typabilityReferenceVersion": 1,
+    "typabilityReferenceChecksum": "sha256-94a6f90c3593ebc089211882e2d9afaf0bf46b66386cdc98dbe60c533e6dd471",
+    "frequencyReferenceVersion": 1,
+    "frequencyReferenceId": "ws-en-frequency-v1",
+    "frequencyReferenceChecksum": "sha256-b9bc8dde064335c2258844919c6dd62537f95ac4a2d5920fdd7213a9cb5d45ad"
+  },
+  "forms": [
+    {
+      "formId": "WS-NUMSYM-CHECK-EN-1-F1",
+      "formHash": "sha256-f567489a1c77c86451416555c03595a5438546866b43fd195c4e1d3f828a6256",
+      "annotationHash": "sha256-e5dc21b29e81ffc9b7d830ac7bae2c7ae52be5ab6b03833f109252dd6c0498b2",
+      "ready": true,
+      "graphemeCount": 2023,
+      "primaryOpportunityCount": 180
+    },
+    {
+      "formId": "WS-NUMSYM-CHECK-EN-1-F2",
+      "formHash": "sha256-9827fc6f16628773d209ce6bebd0589c2204c34c1ea4176507988c15bd222f24",
+      "annotationHash": "sha256-300e42283a57bc766944d1233850f26272896a89c458f283de634bbf65171c91",
+      "ready": true,
+      "graphemeCount": 2023,
+      "primaryOpportunityCount": 180
+    },
+    {
+      "formId": "WS-NUMSYM-CHECK-EN-1-F3",
+      "formHash": "sha256-3e00165b22691ecc3cfa57e14cde24f0875211042902e5af4088b9f057f5782c",
+      "annotationHash": "sha256-03e95c24c8a7d6311783a90ec5a0189695e83fd1aadd6b6bb1f650139efc2f3e",
+      "ready": true,
+      "graphemeCount": 2023,
+      "primaryOpportunityCount": 180
+    },
+    {
+      "formId": "WS-NUMSYM-CHECK-EN-1-F4",
+      "formHash": "sha256-1d24147f1bd68d0343ce945198b401958b4a7cbbecd1924385f33b594c91b894",
+      "annotationHash": "sha256-5ba636cee65c279cd79871a2604048be039a8141197cc1528e509d3f993252af",
+      "ready": true,
+      "graphemeCount": 2023,
+      "primaryOpportunityCount": 180
+    },
+    {
+      "formId": "WS-NUMSYM-CHECK-EN-1-F5",
+      "formHash": "sha256-84d210462173f357a4f97a86216d6684e85b9e7319d58f94dbb90c766243de1f",
+      "annotationHash": "sha256-3f4a4f6e7a98093b4b205bd046a0733567aba5e2e1d07ad04cfecfbba51a6601",
+      "ready": true,
+      "graphemeCount": 2023,
+      "primaryOpportunityCount": 180
+    },
+    {
+      "formId": "WS-NUMSYM-CHECK-EN-1-F6",
+      "formHash": "sha256-8b4fa7c94162fe945d993fb3d5f3c08857e45951be81fb6af3868c175f846918",
+      "annotationHash": "sha256-6618a14b077eea1beb3371a8f3a8cbde6163f759e33e55221ad22f1be68acf79",
+      "ready": true,
+      "graphemeCount": 2023,
+      "primaryOpportunityCount": 180
+    }
+  ]
+}

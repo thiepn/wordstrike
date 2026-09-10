@@ -15,6 +15,9 @@
     "test:pl28-common-words": "node --test tests/practice-common-words*.test.js",
     "build:practice-sustained": "node scripts/buildPracticeConsistencyEnduranceForms.mjs",
     "validate:practice-sustained": "node scripts/buildPracticeConsistencyEnduranceForms.mjs --validate",
-    "test:pl29-sustained": "node --test tests/practice-consistency-endurance-pl29.test.js"
+    "test:pl29-sustained": "node --test tests/practice-consistency-endurance-pl29.test.js",
+    "build:practice-special-domains": "node scripts/buildPracticeSpecialDomains.mjs",
+    "validate:practice-special-domains": "node scripts/buildPracticeSpecialDomains.mjs --validate",
+    "test:pl30-special-domains": "node --test tests/practice-special-domains-pl30.test.js"
   }
 }
