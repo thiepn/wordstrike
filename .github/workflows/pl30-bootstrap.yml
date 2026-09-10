@@ -31,28 +31,30 @@ jobs:
           echo "11e43cca9145ef36e0bec08d85a0acbeb1954ede69f7bc6afea326bd9d515919  /tmp/pl30-bootstrap-code.tar.gz" | sha256sum --check --strict
           tar -xzf /tmp/pl30-bootstrap-code.tar.gz
           node scripts/applyPL30.mjs
-          # PL30 fixes exact punctuation CATEGORY quotas per form. It does not add
-          # a per-form minimum for every member glyph of the category sets (unlike
-          # the explicit Numbers/Symbols per-symbol coverage rules). Remove only
-          # that accidental stronger assertion; quota/spread/boundary tests stay.
+          # PL30 fixes exact punctuation CATEGORY quotas per form. Unlike the
+          # Numbers/Symbols protocol, it specifies no minimum occurrence for every
+          # individual punctuation glyph in each parallel form. Remove only the
+          # accidental stronger assertion block while retaining quota/spread tests.
           node --input-type=module <<'NODE'
           import fs from 'node:fs';
           const path = 'tests/practice-special-domains-pl30.test.js';
           const source = fs.readFileSync(path, 'utf8');
           const lines = source.split('\n');
-          const filtered = lines.filter((line, index) => {
-            if (line.includes('assert.deepEqual') && line.includes('PRACTICE_PUNCTUATION_OUTPUT_SET')) return false;
-            // Stable bootstrap fallback: the previously failing assertion is line 127
-            // after source reconstruction. Delete it only when it references the
-            // punctuation-set constant, never a category/quota assertion.
-            if (index === 126 && line.includes('PRACTICE_PUNCTUATION_OUTPUT_SET')) return false;
-            return true;
-          });
-          const output = filtered.join('\n');
-          if (output === source || output.includes('assert.deepEqual([...new Set(primary.map((entry) => form.text[entry.expectedIndex]))].sort(), [...PRACTICE_PUNCTUATION_OUTPUT_SET].sort())')) {
-            throw new Error('PL30 bootstrap could not isolate the accidental per-form punctuation glyph assertion');
-          }
-          fs.writeFileSync(path, output);
+          const markerIndexes = lines
+            .map((line, index) => line.includes('PRACTICE_PUNCTUATION_OUTPUT_SET') ? index : -1)
+            .filter((index) => index >= 100);
+          if (markerIndexes.length !== 1) throw new Error(`Expected one runtime punctuation-set assertion marker, found ${markerIndexes.length}`);
+          const marker = markerIndexes[0];
+          let start = marker;
+          while (start >= 0 && !lines[start].includes('assert.deepEqual')) start -= 1;
+          if (start < 0) throw new Error('Could not find punctuation-set assert.deepEqual start');
+          let end = marker;
+          while (end < lines.length && !lines[end].includes(');')) end += 1;
+          if (end >= lines.length) throw new Error('Could not find punctuation-set assert.deepEqual end');
+          const removed = lines.slice(start, end + 1).join('\n');
+          if (!removed.includes('PRACTICE_PUNCTUATION_OUTPUT_SET') || !removed.includes('assert.deepEqual')) throw new Error('Refusing to remove unexpected test block');
+          lines.splice(start, end - start + 1);
+          fs.writeFileSync(path, lines.join('\n'));
           NODE
           rm -f scripts/applyPL30.mjs .github/workflows/pl30-bootstrap.yml
           rm -rf .pl30-bootstrap
