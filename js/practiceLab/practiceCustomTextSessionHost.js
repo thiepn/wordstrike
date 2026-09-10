@@ -61,7 +61,8 @@ export async function mountPracticeCustomTextSession({ root, session, runtime = 
   const cleanup = async () => {
     if (closed) return;
     closed = true;
-    if (timer) clearInterval(timer);
+    if (timer) clearTimeout(timer);
+    timer = null;
     unsubscribe?.();
     root.removeEventListener("beforeinput", beforeInput);
     root.removeEventListener("keydown", keyDown);
@@ -74,11 +75,26 @@ export async function mountPracticeCustomTextSession({ root, session, runtime = 
   const complete = async () => {
     if (finishing || finalResult || closed) return;
     finishing = true;
+    if (timer) clearTimeout(timer);
+    timer = null;
     try {
       finalResult = await engine.complete();
       if (finalResult?.summary?.status === "completed") await runtime?.markPractised?.(session, finalResult.summary.completedAtUtc).catch(() => false);
       renderResult(root, session, finalResult);
     } catch (error) { logger?.warn?.("Custom Text completion failed", error); finishing = false; }
+  };
+  const scheduleTimedTick = () => {
+    if (closed || finalResult || finishing || session.customTextPlan.sessionMode !== "timed" || timer) return;
+    timer = setTimeout(() => {
+      timer = null;
+      if (closed || finalResult || finishing) return;
+      Promise.resolve(engine.tick?.())
+        .then((result) => {
+          if (result?.completed) { void complete(); return; }
+          scheduleTimedTick();
+        })
+        .catch(() => { scheduleTimedTick(); });
+    }, 250);
   };
   const beforeInput = (event) => {
     const capture = event.target?.closest?.("[data-custom-text-session-input]");
@@ -117,6 +133,6 @@ export async function mountPracticeCustomTextSession({ root, session, runtime = 
   const snapshot = await engine.start();
   renderActive(root, session, snapshot);
   focus();
-  if (session.customTextPlan.sessionMode === "timed") timer = setInterval(() => { void engine.tick?.().then((result) => { if (result?.completed) void complete(); }).catch(() => {}); }, 250);
+  scheduleTimedTick();
   return Object.freeze({ getSnapshot: () => engine.getSnapshot(), exit: cleanup, stop });
 }
