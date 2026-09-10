@@ -184,16 +184,21 @@ export function startModeCustomizationPresentation({ getSave, onTypingPreference
       : "Applied for this visit. Browser storage is unavailable, so this preference could not be saved.");
   }
 
+  function openTypingReadyPopover() {
+    if (!screen?.matches?.(".speed-test-screen")) return null;
+    return screen.querySelector(
+      '[data-mode-presentation="typing"][data-presentation-location="ready"][open]',
+    );
+  }
+
   function onPointerDown(event) {
-    if (!screen?.isConnected) return;
-    screen.querySelectorAll("[data-mode-presentation][open]").forEach((details) => {
-      if (!details.contains(event.target)) details.removeAttribute("open");
-    });
+    const details = openTypingReadyPopover();
+    if (details && !details.contains(event.target)) details.removeAttribute("open");
   }
 
   function onKeydown(event) {
-    if (event.key !== "Escape" || !screen?.isConnected) return;
-    const open = screen.querySelector("[data-mode-presentation][open]");
+    if (event.key !== "Escape") return;
+    const open = openTypingReadyPopover();
     if (!open) return;
     event.preventDefault?.();
     event.stopPropagation?.();
