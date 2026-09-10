@@ -63,11 +63,17 @@ const previous = selectPreviousComparableSession(recent, {
 assert.equal(previous?.sessionId, "previous");
 
 const index = readFileSync(new URL("../index.html", import.meta.url), "utf8");
-assert.match(index, /styles\/screens\/typing-performance-v2\.css\?v=20260910a/);
-assert.match(index, /js\/speedTestPerformanceV2\.js\?v=20260910a/);
+assert.doesNotMatch(index, /<link[^>]+typing-performance-v2\.css/,
+  "V2 results styling must not be globally loaded on unrelated screens");
+assert.match(index, /js\/speedTestPerformanceV2\.js\?v=20260910b/);
+
+const v2Source = readFileSync(new URL("../js/speedTestPerformanceV2.js", import.meta.url), "utf8");
+assert.match(v2Source, /styles\/screens\/typing-performance-v2\.css\?v=20260910a/,
+  "V2 should lazy-load its stylesheet only when Typing results are enhanced");
+assert.match(v2Source, /data-speed-performance-v2-style/);
 
 const submission = readFileSync(new URL("../js/leaderboardSubmissionService.js", import.meta.url), "utf8");
 assert.doesNotMatch(submission, /performanceTimeline/,
   "V2 analytics must remain local-only and outside ranked leaderboard payloads");
 
-console.log("Typing Performance Timeline V2 analysis, comparison, layers, and ranked-data isolation passed.");
+console.log("Typing Performance Timeline V2 analysis, comparison, layers, lazy styling, and ranked-data isolation passed.");
