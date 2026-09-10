@@ -5,6 +5,7 @@ const SVG_WIDTH = 1000;
 const SVG_HEIGHT = 330;
 const PLOT = Object.freeze({ left: 62, right: 22, top: 24, bottom: 62 });
 const LAYER_STORAGE_KEY = "wordstrike_speed_performance_layers_v2";
+const V2_STYLE_HREF = "styles/screens/typing-performance-v2.css?v=20260910a";
 const DEFAULT_LAYERS = Object.freeze({ raw: true, sustained: true, errors: true });
 
 const finite = (value, fallback = 0) => {
@@ -168,6 +169,18 @@ function writeLayerPreferences(layers) {
   }
 }
 
+function ensureV2Styles() {
+  if (typeof document === "undefined") return null;
+  const existing = document.querySelector('link[data-speed-performance-v2-style]');
+  if (existing) return existing;
+  const link = document.createElement("link");
+  link.rel = "stylesheet";
+  link.href = V2_STYLE_HREF;
+  link.dataset.speedPerformanceV2Style = "";
+  document.head.append(link);
+  return link;
+}
+
 function signed(value, suffix = "") {
   const number = rounded(value);
   if (Math.abs(number) < 0.05) return `0${suffix}`;
@@ -319,6 +332,7 @@ function enhanceV2() {
   if (!analysis) return;
   const previous = selectPreviousComparableSession(getRecentSessions(), result);
 
+  ensureV2Styles();
   addSustainedLayer(base, timeline, analysis, result.wpm);
   addSustainedLegend(base);
   addLayerControls(base);
