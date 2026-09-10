@@ -91,7 +91,7 @@ assert.match(createPracticePresetId({ uuid: () => "preset-12345678" }), /^practi
 
 assert.equal(PRACTICE_MANIFEST_KEY, "wordstrike.practice.manifest.v1");
 assert.equal(PRACTICE_DATABASE_NAME, "wordstrike-practice-lab");
-assert.equal(PRACTICE_DATABASE_VERSION, 8);
+assert.equal(PRACTICE_DATABASE_VERSION, 9);
 assert.equal(PRACTICE_LIMITS.manifestBytes, 65536);
 assert.deepEqual(Object.keys(PRACTICE_STORE_DEFINITIONS), [
   "meta", "profiles", "contexts", "skillStats", "abilityStates", "performanceStates", "learningStates", "evaluationStates", "assessmentRuns", "coachPlans", "sessionSummaries", "reviewItems",
@@ -107,4 +107,4 @@ assert.equal(isValidPracticeUtcIso("2026-07-05 18:42:13"), false);
 assert.match(getPracticeLocalDayKey(now), /^2026-07-05$/);
 assert.equal(getPracticeTimeContext(now).timezoneOffsetMinutes, new Date(now()).getTimezoneOffset());
 
-console.log("Practice defaults, injected IDs/clocks, independent nested values, ability state, and PL25 DB8 schema descriptors passed.");
+console.log("Practice defaults, injected IDs/clocks, independent nested values, ability state, and PL31 DB9 schema descriptors passed.");

@@ -52,7 +52,7 @@ const numCheck=readJson("data/practice/numbers-symbols/en-v1/WS-NUMSYM-CHECK-EN-
 const numPractice=readJson("data/practice/numbers-symbols/en-v1/WS-NUMSYM-PRACTICE-EN-1.forms.json");
 const provenance=readJson("data/practice/provenance/sources.json");
 
-test("PL30 prerequisite channels exist and persistent envelope does not change",()=>{
+test("PL30 prerequisite channels and record versions remain stable inside the PL31 DB9 envelope",()=>{
   assert.ok(PRACTICE_ABILITY_CHANNELS.includes("punctuation"));
   assert.ok(PRACTICE_ABILITY_CHANNELS.includes("numbers-symbols"));
   assert.equal(PRACTICE_DATABASE_VERSION,8);
