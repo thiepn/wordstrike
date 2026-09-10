@@ -18,6 +18,7 @@ export function createDefaultSave() {
       soundEffects: false,
       speedTestTimerPosition: "center",
       speedTestFontSize: "auto",
+      speedTestPassageWidth: "normal",
       ...createDefaultCustomization(),
     },
   };
@@ -47,6 +48,10 @@ function validateSave(value) {
       speedTestTimerPosition: value.settings?.speedTestTimerPosition === "top" ? "top" : "center",
       ...normalizeCustomization(value.settings),
       speedTestFontSize: normalizeCustomization(value.settings).typingTest.textSize,
+      speedTestPassageWidth: normalizeModeCustomizationValue(
+        "typingTest.passageWidth",
+        value.settings?.speedTestPassageWidth,
+      ),
     },
   };
 }
@@ -157,7 +162,9 @@ export function updateModeCustomizationSetting(save, field, value) {
   const normalized = normalizeModeCustomizationValue(field, value);
   if (!save || typeof save !== "object") throw new TypeError("A save is required");
   save.settings ??= createDefaultSave().settings;
-  if (field.startsWith("typingTest.")) {
+  if (field === "typingTest.passageWidth") {
+    save.settings.speedTestPassageWidth = normalized;
+  } else if (field.startsWith("typingTest.")) {
     save.settings.typingTest = {
       ...normalizeCustomization(save.settings).typingTest,
       [field.slice("typingTest.".length)]: normalized,
