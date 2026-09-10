@@ -108,6 +108,60 @@
       "snapshotPath": "common-words/en-v1/PL6-COMMON-WORD-SOURCE-EN-1.json",
       "usageApproval": "practice-display-approved",
       "notes": "Independent PL6 production-display approval for the PL28 diagnostic form pool. The derived Check artifact is partitioned diagnostic and never sources training, transfer, benchmark, or research-holdout records as measurement material."
+    },
+    {
+      "sourceId": "ws-original-en-consistency-v1",
+      "title": "WordStrike Consistency English Training Source v1",
+      "sourceType": "wordstrike-original",
+      "upstream": null,
+      "license": {
+        "name": "WordStrike-authored original corpus material",
+        "spdx": null,
+        "url": null,
+        "attributionRequired": false,
+        "notes": "Content-specific reviewed metadata. Repository code licensing is a separate concern."
+      },
+      "retrievedAt": null,
+      "sourceChecksum": "sha256-4b06c70f300ea07daabe4e7422335196e7032d85091c823a9e12fe10174d4e44",
+      "snapshotPath": "consistency/en-v1/source.json",
+      "usageApproval": "practice-display-approved",
+      "notes": "PL29 training sustained natural-prose source."
+    },
+    {
+      "sourceId": "ws-original-en-endurance-practice-v1",
+      "title": "WordStrike Endurance Practice English Training Source v1",
+      "sourceType": "wordstrike-original",
+      "upstream": null,
+      "license": {
+        "name": "WordStrike-authored original corpus material",
+        "spdx": null,
+        "url": null,
+        "attributionRequired": false,
+        "notes": "Content-specific reviewed metadata. Repository code licensing is a separate concern."
+      },
+      "retrievedAt": null,
+      "sourceChecksum": "sha256-39466cc376afbb245ec2eccd753a2f080c1ce6cc328e33b9d98c849bdc6b6939",
+      "snapshotPath": "endurance/en-v1/practice-source.json",
+      "usageApproval": "practice-display-approved",
+      "notes": "PL29 training sustained natural-prose source."
+    },
+    {
+      "sourceId": "ws-original-en-endurance-check-v1",
+      "title": "WordStrike Endurance Check English Diagnostic Source v1",
+      "sourceType": "wordstrike-original",
+      "upstream": null,
+      "license": {
+        "name": "WordStrike-authored original corpus material",
+        "spdx": null,
+        "url": null,
+        "attributionRequired": false,
+        "notes": "Content-specific reviewed metadata. Repository code licensing is a separate concern."
+      },
+      "retrievedAt": null,
+      "sourceChecksum": "sha256-359d7eedd3d039b0b0f44927392e74be83aeabab98b8e1f83f11fa638e14fa4d",
+      "snapshotPath": "endurance/en-v1/check-source.json",
+      "usageApproval": "practice-display-approved",
+      "notes": "PL29 diagnostic sustained natural-prose source."
     }
   ]
 }

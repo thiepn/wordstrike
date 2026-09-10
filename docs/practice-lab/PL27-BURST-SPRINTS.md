@@ -49,3 +49,7 @@ PL27 does not claim universal maximum WPM, endurance ability, cold-transfer perf
 During sprints, live WPM is hidden. The user sees sprint number and remaining time only, plus the instruction to type fast while staying controlled. Recovery intervals reject typing and are excluded from active timing.
 
 The result view shows the robust burst estimate, estimator-selected bouts, accuracy, eligibility, controlled-speed reference when available, and burst reserve when a reference exists.
+
+## PL29 boundary — Burst is not Endurance
+
+Burst Sprints remains a brief upper-end effective-pace protocol. PL29 Endurance instead uses continuous 10-minute standardized typing and estimates the final three minutes after prior continuous activity. Neither provider writes the other's PL13 channel, and no combined “stamina” measure is created.
