@@ -1,3 +1,4 @@
+import { createPracticeSessionPulse } from "./practiceSessionPulse.js";
 import { createPracticeIndexedDbStore } from "./practiceIndexedDbStore.js";
 import { createPracticeManifestStore } from "./practiceManifestStore.js";
 import { createPracticeRepository } from "./practiceRepository.js";
@@ -26,21 +27,117 @@ function input(type, value) { return { type, value, source: "browser-input", mon
 
 export async function mountPracticePaceLadderSession({ root, session, onExit = () => {}, logger = null, dependencies = {} } = {}) {
   if (!root?.addEventListener || !session?.experiment || !session?.contentPlan) throw new TypeError("Pace Ladder host requires a prepared session");
-  const dataStore = dependencies.dataStore ?? createPracticeIndexedDbStore(); const repository = dependencies.repository ?? createPracticeRepository({ dataStore, manifestStore: dependencies.manifestStore ?? createPracticeManifestStore() }); const initialized = dependencies.initialized ?? await repository.initializePracticeStorage();
+  const dataStore = dependencies.dataStore ?? createPracticeIndexedDbStore();
+  const repository = dependencies.repository ?? createPracticeRepository({ dataStore, manifestStore: dependencies.manifestStore ?? createPracticeManifestStore() });
+  const initialized = dependencies.initialized ?? await repository.initializePracticeStorage();
   if (initialized.context.contextId !== session.contextId || initialized.profile.profileId !== session.profileId) throw Object.assign(new Error("Practice context changed after Pace Ladder preparation"), { code: "PRACTICE_CONTEXT_MISMATCH" });
   const engine = (dependencies.engineFactory ?? createPracticeSessionEngine)({ repository, sessionId: session.sessionId, profileId: session.profileId, contextId: session.contextId, logger });
-  let finalResult = null; let closed = false; let unsubscribe = null; let timer = null;
-  const focus = () => queueMicrotask(() => root.querySelector?.("[data-pace-input]")?.focus?.({ preventScroll: true }));
-  const cleanup = async () => { if (closed) return; closed = true; if (timer) clearInterval(timer); unsubscribe?.(); root.removeEventListener("beforeinput", beforeInput); root.removeEventListener("keydown", keyDown); root.removeEventListener("click", click); globalThis.document?.removeEventListener?.("visibilitychange", visibilityChange); try { await engine.destroy(); } catch {} try { dataStore.close?.(); } catch {} onExit(finalResult); };
-  const interrupt = async (reason) => { if (finalResult || closed) return; session.experiment.paceAccumulator?.markInterrupted(reason); const snapshot = engine.getSnapshot(); try { await engine.interrupt(reason); } catch {} const paceResult = session.experiment.paceAccumulator?.finalize({ finalActiveDurationMs: snapshot.timing?.activeDurationMs ?? 0 }); const { analyzePracticePaceLadderResult } = await import("./practicePaceLadderAnalyzer.js"); const analysis = analyzePracticePaceLadderResult({ paceResult, plan: session.plan, foundationAnalysis: null, startedAt: session.preparedAt, completedAt: new Date().toISOString() }); finalResult = { interrupted: true, artifact: analysis.trainingQuality }; renderResult(root, analysis.trainingQuality, true); };
-  const beforeInput = (event) => { const target = event.target?.closest?.("[data-pace-input]"); if (!target || closed || finalResult || !root.contains?.(target)) return; event.preventDefault(); if (INSERT_TYPES.has(event.inputType) && typeof event.data === "string") for (const ch of Array.from(event.data.normalize("NFC"))) engine.handleInput(input(ch === " " ? "space" : "character", ch)); else if (event.inputType === "deleteContentBackward") engine.handleInput(input("backspace", "")); else if (event.inputType === "deleteWordBackward") engine.handleInput(input("word-delete", "")); target.value = ""; };
-  const keyDown = (event) => { if (event.key === "Escape") { event.preventDefault(); void interrupt("manual-stop"); } else if ((event.ctrlKey || event.metaKey) && ["v", "x"].includes(String(event.key).toLowerCase())) event.preventDefault(); };
-  const click = (event) => { const button = event.target?.closest?.("[data-pace-session-action]"); if (!button || !root.contains?.(button)) return; if (button.dataset.paceSessionAction === "stop") void interrupt("manual-stop"); else if (button.dataset.paceSessionAction === "finish") void cleanup(); };
-  const visibilityChange = () => { if (globalThis.document?.visibilityState === "hidden" && !closed && !finalResult) void interrupt("visibility-hidden"); };
-  root.addEventListener("beforeinput", beforeInput); root.addEventListener("keydown", keyDown); root.addEventListener("click", click); globalThis.document?.addEventListener?.("visibilitychange", visibilityChange);
-  await engine.prepare({ experiment: session.experiment, configuration: session.configuration, contentPlan: session.contentPlan });
-  unsubscribe = engine.subscribe((snapshot, event) => { if (event === "completed") { void engine.complete().then((result) => { finalResult = result; renderResult(root, result.summary?.trainingQuality, false); }).catch((error) => logger?.warn?.("Pace Ladder completion retrieval failed", error)); return; } if (!finalResult && snapshot.lifecycleState === "active") { renderActive(root, session, snapshot); focus(); } });
-  const snapshot = await engine.start(); renderActive(root, session, snapshot); focus();
-  timer = setInterval(() => { if (closed || finalResult) return; void engine.tick().then(({ completed, snapshot: tickSnapshot }) => { if (!completed && tickSnapshot) { renderActive(root, session, tickSnapshot); focus(); } }).catch((error) => { logger?.warn?.("Pace Ladder timer failed", error); void interrupt("measurement-corruption"); }); }, 200);
+  let finalResult = null;
+  let closed = false;
+  let interrupted = false;
+  let completing = false;
+  let unsubscribe = null;
+  let pulseLoop = null;
+  const running = () => !closed && !interrupted && !completing && !finalResult;
+  const focus = () => queueMicrotask(() => {
+    if (running()) root.querySelector?.("[data-pace-input]")?.focus?.({ preventScroll: true });
+  });
+  const cleanup = async (notify = true) => {
+    if (closed) return;
+    closed = true;
+    pulseLoop?.stop();
+    unsubscribe?.();
+    root.removeEventListener("beforeinput", beforeInput);
+    root.removeEventListener("keydown", keyDown);
+    root.removeEventListener("click", click);
+    globalThis.document?.removeEventListener?.("visibilitychange", visibilityChange);
+    try { await engine.destroy(); } catch {}
+    try { dataStore.close?.(); } catch {}
+    if (notify) onExit(finalResult);
+  };
+  const interrupt = async (reason) => {
+    if (!running()) return;
+    interrupted = true;
+    pulseLoop?.stop();
+    session.experiment.paceAccumulator?.markInterrupted(reason);
+    const snapshot = engine.getSnapshot();
+    try { await engine.interrupt(reason); } catch {}
+    if (closed) return;
+    const paceResult = session.experiment.paceAccumulator?.finalize({ finalActiveDurationMs: snapshot.timing?.activeDurationMs ?? 0 });
+    const { analyzePracticePaceLadderResult } = await import("./practicePaceLadderAnalyzer.js");
+    if (closed) return;
+    const analysis = analyzePracticePaceLadderResult({ paceResult, plan: session.plan, foundationAnalysis: null, startedAt: session.preparedAt, completedAt: new Date().toISOString() });
+    finalResult = { interrupted: true, artifact: analysis.trainingQuality };
+    renderResult(root, analysis.trainingQuality, true);
+  };
+  const beforeInput = (event) => {
+    const target = event.target?.closest?.("[data-pace-input]");
+    if (!target || !running() || !root.contains?.(target)) return;
+    event.preventDefault();
+    if (INSERT_TYPES.has(event.inputType) && typeof event.data === "string") {
+      for (const ch of Array.from(event.data.normalize("NFC"))) engine.handleInput(input(ch === " " ? "space" : "character", ch));
+    } else if (event.inputType === "deleteContentBackward") engine.handleInput(input("backspace", ""));
+    else if (event.inputType === "deleteWordBackward") engine.handleInput(input("word-delete", ""));
+    target.value = "";
+  };
+  const keyDown = (event) => {
+    if (event.key === "Escape") { event.preventDefault(); void interrupt("manual-stop"); }
+    else if ((event.ctrlKey || event.metaKey) && ["v", "x"].includes(String(event.key).toLowerCase())) event.preventDefault();
+  };
+  const click = (event) => {
+    const button = event.target?.closest?.("[data-pace-session-action]");
+    if (!button || !root.contains?.(button)) return;
+    if (button.dataset.paceSessionAction === "stop") void interrupt("manual-stop");
+    else if (button.dataset.paceSessionAction === "finish") void cleanup();
+  };
+  const visibilityChange = () => {
+    if (globalThis.document?.visibilityState === "hidden" && running()) void interrupt("visibility-hidden");
+  };
+
+  try {
+    await engine.prepare({ experiment: session.experiment, configuration: session.configuration, contentPlan: session.contentPlan });
+    unsubscribe = engine.subscribe((snapshot, event) => {
+      if (!running()) return;
+      if (event === "completed") {
+        completing = true;
+        pulseLoop?.stop();
+        void engine.complete().then((result) => {
+          if (closed || interrupted) return;
+          finalResult = result;
+          renderResult(root, result.summary?.trainingQuality, false);
+        }).catch((error) => {
+          completing = false;
+          logger?.warn?.("Pace Ladder completion retrieval failed", error);
+          void interrupt("measurement-corruption");
+        });
+        return;
+      }
+      if (snapshot.lifecycleState === "active") { renderActive(root, session, snapshot); focus(); }
+    });
+    root.addEventListener("beforeinput", beforeInput);
+    root.addEventListener("keydown", keyDown);
+    root.addEventListener("click", click);
+    globalThis.document?.addEventListener?.("visibilitychange", visibilityChange);
+    const snapshot = await engine.start();
+    if (running()) { renderActive(root, session, snapshot); focus(); }
+    pulseLoop = createPracticeSessionPulse({
+      ...dependencies.pulseTimers,
+      intervalMs: 200,
+      isActive: running,
+      run: async () => {
+        const { completed, snapshot: tickSnapshot } = await engine.tick();
+        if (running() && !completed && tickSnapshot) { renderActive(root, session, tickSnapshot); focus(); }
+      },
+      onError: async (error) => {
+        logger?.warn?.("Pace Ladder timer failed", error);
+        await interrupt("measurement-corruption");
+      },
+    });
+    pulseLoop.start();
+    visibilityChange();
+  } catch (error) {
+    await cleanup(false);
+    throw error;
+  }
   return Object.freeze({ getSnapshot: () => engine.getSnapshot(), exit: cleanup, interrupt });
 }

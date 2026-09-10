@@ -2,30 +2,33 @@ name: Non-Practice browser regressions
 on:
   pull_request:
   push:
-    branches: [main]
+    branches: [main, codex/pl28-common-words-v1]
+  workflow_dispatch:
 permissions:
   contents: read
 jobs:
   browser:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    container:
+      # Keep this version aligned with tests/browser/requirements.txt.
+      image: mcr.microsoft.com/playwright/python:v1.57.0-noble
+      options: --ipc=host
+    env:
+      # Firefox requires HOME to be owned by the container's current user.
+      HOME: /root
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
       - name: Install browser test dependencies
-        run: |
-          pip install -r tests/browser/requirements.txt
-          python -m playwright install --with-deps chromium firefox
+        run: python3 -m pip install -r tests/browser/requirements.txt
       - name: Exercise active WordStrike surfaces except Practice Lab
-        run: python tests/browser/non_practice_regressions.py
+        run: python3 tests/browser/non_practice_regressions.py
       - name: Certify UI1 design-system and responsive contracts
-        run: python tests/browser/ui1_design_system.py
+        run: python3 tests/browser/ui1_design_system.py
       - name: Certify UI2 Title and global navigation
-        run: python tests/browser/ui2_title_navigation.py
+        run: python3 tests/browser/ui2_title_navigation.py
       - name: Certify UI3 Mode Select
-        run: python tests/browser/ui3_mode_select.py
+        run: python3 tests/browser/ui3_mode_select.py
       - uses: actions/upload-artifact@v4
         if: always()
         with:

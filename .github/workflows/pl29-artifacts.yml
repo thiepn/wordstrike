@@ -1,0 +1,26 @@
+name: PL29 Consistency and Endurance
+
+on:
+  pull_request:
+  push:
+    branches: [codex/pl29-consistency-endurance-v1]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  certify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Validate deterministic PL29 form artifacts
+        run: npm run validate:practice-sustained
+      - name: Run PL29 certification
+        run: npm run test:pl29-sustained
+      - name: Ensure builders are read-only under validation
+        run: git diff --exit-code
