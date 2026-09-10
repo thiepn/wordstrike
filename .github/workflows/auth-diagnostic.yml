@@ -1,0 +1,30 @@
+name: Google auth diagnostic
+on:
+  pull_request:
+    paths:
+      - 'js/authService.js'
+      - 'js/supabaseClient.js'
+      - 'js/supabaseConfig.js'
+      - 'index.html'
+      - 'scripts/authDiagnostic.mjs'
+      - '.github/workflows/auth-diagnostic.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  auth:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify Supabase Google OAuth path
+        run: node scripts/authDiagnostic.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: google-auth-diagnostic
+          path: auth-diagnostic.json
+          retention-days: 3
