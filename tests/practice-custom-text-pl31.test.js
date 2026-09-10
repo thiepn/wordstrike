@@ -16,12 +16,13 @@ import { getPracticeExperiment } from "../js/practiceLab/practiceExperimentCatal
 const longText = (count) => "alpha beta gamma delta ".repeat(Math.ceil(count / 23)).slice(0, count);
 const memoryStore = () => {
   const rows = new Map();
+  const clone = (value) => structuredClone(value);
   const api = {
-    async get(_store, key) { return rows.get(key) ?? null; },
-    async put(_store, value) { rows.set(value.customTextId, structuredClone(value)); return value; },
+    async get(_store, key) { return rows.has(key) ? clone(rows.get(key)) : null; },
+    async put(_store, value) { rows.set(value.customTextId, clone(value)); return value; },
     async delete(_store, key) { rows.delete(key); return true; },
-    async query(_store, index, query) { return [...rows.values()].filter((row) => index === "profileId" ? row.profileId === query : row[index] === query).map(structuredClone); },
-    async list() { return [...rows.values()].map(structuredClone); },
+    async query(_store, index, query) { return [...rows.values()].filter((row) => index === "profileId" ? row.profileId === query : row[index] === query).map((row) => clone(row)); },
+    async list() { return [...rows.values()].map((row) => clone(row)); },
   };
   api.runTransaction = async (_stores, _mode, callback) => callback(api);
   return api;
