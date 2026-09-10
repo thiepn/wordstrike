@@ -13,17 +13,14 @@ export function getSupabaseClient({
   try {
     clientSingleton = sdk.createClient(config.url, config.publishableKey, {
       auth: {
-        flowType: "pkce",
+        // WordStrike is a client-only static site. Use Supabase's browser-native
+        // implicit OAuth flow so the returned session can be consumed directly
+        // from the URL fragment without a PKCE verifier/code exchange round-trip.
+        flowType: "implicit",
         persistSession: true,
         autoRefreshToken: true,
         detectSessionInUrl: true,
         storageKey: SUPABASE_AUTH_STORAGE_KEY,
-        experimental: {
-          // Keep the PKCE verifier tied to the OAuth attempt that created it.
-          // This prevents a second/repeated Google sign-in from overwriting the
-          // verifier needed when the first redirect returns to WordStrike.
-          appendPkceFlowIdToRedirects: true,
-        },
       },
     });
   } catch {
