@@ -2,7 +2,7 @@
    Keep established Typing Test geometry/selection sizes while retaining the UI8 hierarchy. */
 
 .speed-test-screen {
-  --speed-test-max-width: 66.25rem;
+  --speed-test-max-width: 78rem;
 }
 
 .speed-test-upper-overlay {

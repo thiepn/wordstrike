@@ -25,14 +25,43 @@
 .mode-presentation-preview[data-layout="data"][data-live="true"] [data-preview-data] { display: block; flex-basis: 100%; }
 .mode-presentation-preview[data-live="false"] .mode-preview-hud { justify-content: center; }
 
-/* Typing configuration is a sibling of the legacy horizontal controls, so it can
-   never be scrolled off-screen with them. It still expands in normal flow. */
-.speed-test-topbar-secondary > .mode-presentation { flex: 0 0 auto; width: min(10.5rem, 100%); }
-.speed-test-topbar-secondary > .mode-presentation[open] { flex-basis: min(30rem, 100%); width: min(30rem, 100%); }
-.speed-test-topbar-secondary > .mode-presentation[open] > summary,
-.speed-test-topbar-secondary > .mode-presentation .mode-presentation-panel { width: 100%; }
-.speed-test-topbar-secondary > .mode-presentation .mode-presentation-panel { max-height: min(23rem, 50dvh); overflow-y: auto; overscroll-behavior: contain; }
+/* Typing presentation is a floating popover. Opening it never changes the
+   topbar, HUD, timer, stage, or passage geometry. */
+.speed-test-topbar-secondary > .mode-presentation {
+  flex: 0 0 auto;
+  width: min(10.5rem, 100%);
+  z-index: 30;
+  isolation: isolate;
+}
+.speed-test-topbar-secondary > .mode-presentation[open] {
+  flex-basis: auto;
+  width: min(10.5rem, 100%);
+}
+.speed-test-topbar-secondary > .mode-presentation[open] > summary {
+  width: 100%;
+  border-color: rgb(var(--custom-accent-rgb, 0 255 242) / .42);
+}
+.speed-test-topbar-secondary > .mode-presentation .mode-presentation-panel {
+  position: absolute;
+  top: calc(100% + .42rem);
+  right: 0;
+  z-index: 60;
+  width: min(30rem, calc(100vw - 1.5rem));
+  max-width: calc(100vw - 1.5rem);
+  max-height: min(32rem, calc(100dvh - 8rem));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 18px 48px rgb(0 0 0 / 44%);
+}
 .speed-test-screen.typing-active .speed-test-topbar .mode-presentation { visibility: hidden; }
+
+/* Passage width is presentation-only. The viewport still clamps to the actual
+   stage width on smaller screens. */
+.speed-test-screen[data-speed-passage-width="narrow"] { --speed-test-max-width: 66.25rem; }
+.speed-test-screen[data-speed-passage-width="normal"] { --speed-test-max-width: 78rem; }
+.speed-test-screen[data-speed-passage-width="wide"] { --speed-test-max-width: 96rem; }
 
 /* Hidden live counters do not affect collection, results, PBs, or record eligibility. */
 .speed-test-screen .speed-test-hud > .speed-test-data-metric { display: none; }
@@ -76,9 +105,8 @@ html[data-customization-active="true"] .boss-screen[data-action-intensity="focus
   .mode-presentation-row select { font-size: 1rem; }
   .speed-test-screen[data-typing-hud="data"] .speed-test-hud { flex-basis: 100%; justify-content: center; }
 
-  /* Before typing, presentation and test controls occupy the first row while the
-     requested live telemetry remains visible beneath them. Once typing starts,
-     the trigger disappears and the original controls/HUD arrangement returns. */
+  /* Presentation stays in its normal trigger slot while the panel floats over
+     the page. No controls are hidden and no grid areas change when it opens. */
   .speed-test-topbar-secondary {
     grid-template-columns: auto minmax(0, 1fr);
     grid-template-areas: "presentation controls" "hud hud";
@@ -86,19 +114,14 @@ html[data-customization-active="true"] .boss-screen[data-action-intensity="focus
   .speed-test-topbar-secondary > .speed-test-controls-wrap { grid-area: controls; min-width: 0; }
   .speed-test-topbar-secondary > .mode-presentation { grid-area: presentation; width: min(9.75rem, 40vw); min-width: 7.75rem; }
   .speed-test-topbar-secondary > .speed-test-hud { grid-area: hud; display: flex; justify-content: center; padding-left: 0; background: transparent; }
-  .speed-test-topbar-secondary:has(> .mode-presentation[open]) {
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-areas: "presentation";
+  .speed-test-topbar-secondary > .mode-presentation[open] { width: min(9.75rem, 40vw); min-width: 7.75rem; }
+  .speed-test-topbar-secondary > .mode-presentation .mode-presentation-panel {
+    left: 0;
+    right: auto;
+    width: min(30rem, calc(100vw - 1rem));
+    max-width: calc(100vw - 1rem);
+    max-height: min(30rem, calc(100dvh - 7rem));
   }
-  .speed-test-topbar-secondary:has(> .mode-presentation[open]) > .speed-test-controls-wrap,
-  .speed-test-topbar-secondary:has(> .mode-presentation[open]) > .speed-test-hud { display: none; }
-  .speed-test-topbar-secondary > .mode-presentation[open] { width: 100%; max-width: none; }
-  .speed-test-screen.typing-active .speed-test-topbar-secondary {
-    grid-template-columns: minmax(0, 1fr) auto;
-    grid-template-areas: "controls hud";
-  }
-  .speed-test-screen.typing-active .speed-test-topbar-secondary > .mode-presentation { display: none; }
-  .speed-test-screen.typing-active .speed-test-topbar-secondary > .speed-test-hud { display: flex; padding-left: .55rem; background: linear-gradient(90deg, transparent, rgb(var(--custom-bg-rgb, 10 14 20) / .96) 14%); }
 }
 @media (max-width: 720px) and (max-height: 520px) {
   /* Campaign's certified short-landscape layout hides the legacy tools row. Keep
