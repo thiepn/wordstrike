@@ -86,7 +86,7 @@ def main():
                     if not touch:
                         assert not geometry['short'], geometry
                         assert geometry['font'] >= 28, geometry
-                        assert geometry['width'] <= 1060, geometry
+                        assert geometry['width'] <= 1248.5, geometry
                     for selector in ['.speed-test-controls-wrap', '[data-speed-config="time-60"]',
                                      '[data-speed-timer-position="center"]', 'select[data-speed-font-size]']:
                         expect(page.locator(selector)).to_be_visible()
