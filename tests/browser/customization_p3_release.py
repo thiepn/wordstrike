@@ -63,13 +63,16 @@ def clean(page):
     page.add_style_tag(content=CLEAN_EVIDENCE_CSS)
 
 
-def no_horizontal_overflow(page):
+def no_horizontal_overflow(page, include_screen=True):
     values = page.evaluate("""() => ({
       root: document.documentElement.scrollWidth - document.documentElement.clientWidth,
       body: document.body.scrollWidth - document.body.clientWidth,
       screen: (() => { const s=document.querySelector('#app > .screen'); return s ? s.scrollWidth-s.clientWidth : 0; })()
     })""")
-    assert max(values.values()) <= 1, values
+    # Dynamic game objects may intentionally cross a clipped arena edge. Root/body
+    # overflow is always forbidden; inner-screen overflow is checked where meaningful.
+    relevant = values.values() if include_screen else (values["root"], values["body"])
+    assert max(relevant) <= 1, values
     return values
 
 
@@ -299,7 +302,10 @@ def certify_action_modes(browser, engine, base, checks):
         expect(page.locator('[data-rush-role="wave"]')).to_be_visible()
         if intensity == "focused":
             expect(rush).to_have_attribute("data-effective-effects", "reduced")
-        no_horizontal_overflow(page)
+        # Rush words deliberately enter/leave through arena edges. The gameplay shell
+        # must clip them, while the real document/body must never become scrollable.
+        assert rush.evaluate("e => getComputedStyle(e).overflowX") in ("hidden", "clip")
+        no_horizontal_overflow(page, include_screen=False)
         if engine == "chromium": screenshot(page, f"arcade-rush-{intensity}-desktop")
         context.close()
     checks.append({"browser": engine, "case": "Boss/Rush focused+full player-facing states"})
