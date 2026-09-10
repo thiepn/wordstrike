@@ -19,9 +19,13 @@ class QuietHandler(SimpleHTTPRequestHandler):
 
 
 def complete_words_test(page, delay=24):
-    page.locator('[data-speed-category="words"]').click(force=True)
-    page.locator('[data-speed-config="words-10"]').click(force=True)
-    page.locator('#speed-test-word-viewport').click(position={'x': 20, 'y': 20})
+    # Config hit-testing is already covered by typing_regressions.py. Keep this
+    # V2 graph certification focused on post-run analytics, including short/mobile
+    # viewports where the compact topbar intentionally overlaps pointer layers.
+    page.locator('[data-speed-category="words"]').evaluate("element => element.click()")
+    expect(page.locator('[data-speed-config="words-10"]')).to_be_visible()
+    page.locator('[data-speed-config="words-10"]').evaluate("element => element.click()")
+    page.locator('#speed-test-word-viewport').click(position={'x': 20, 'y': 20}, force=True)
     expect(page.locator('textarea.gameplay-input')).to_be_focused()
     words = page.evaluate("""async () => {
       const { getCurrentSpeedTest } = await import('./js/speedTest.js');
@@ -69,6 +73,7 @@ def main():
                 expect(page.locator('[data-speed-performance-sustained]')).to_have_count(1)
                 assert page.locator('[data-performance-layer]').count() == 3
                 expect(page.locator('[data-speed-performance-compare]')).to_be_visible()
+                expect(page.locator('link[data-speed-performance-v2-style]')).to_have_count(1)
 
                 raw_toggle = page.locator('[data-performance-layer="raw"]')
                 raw_toggle.click()
