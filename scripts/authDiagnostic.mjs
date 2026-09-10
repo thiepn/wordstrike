@@ -8,6 +8,7 @@ const redirects = [
 
 const result = {
   projectHost: new URL(SUPABASE_CONFIG.url).hostname,
+  clientFlow: "implicit",
   settings: null,
   redirects: [],
   sdk: null,
@@ -59,11 +60,11 @@ try {
 
 for (const redirectTo of redirects) {
   try {
+    // Intentionally omit a PKCE code challenge. WordStrike is a browser-only
+    // static app and uses Supabase's implicit client flow.
     const params = new URLSearchParams({
       provider: "google",
       redirect_to: redirectTo,
-      code_challenge: "pDlkNCckbtZcCnm04sG2k4H4T0cVrllnnM0YlDK5Tjo",
-      code_challenge_method: "s256",
     });
     const response = await fetch(`${SUPABASE_CONFIG.url}/auth/v1/authorize?${params}`, {
       redirect: "manual",
