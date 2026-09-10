@@ -2,14 +2,14 @@ name: Non-Practice browser regressions
 on:
   pull_request:
   push:
-    branches: [main, codex/pl28-common-words-v1]
+    branches: [main]
   workflow_dispatch:
 permissions:
   contents: read
 jobs:
   browser:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     container:
       # Keep this version aligned with tests/browser/requirements.txt.
       image: mcr.microsoft.com/playwright/python:v1.57.0-noble
@@ -29,6 +29,30 @@ jobs:
         run: python3 tests/browser/ui2_title_navigation.py
       - name: Certify UI3 Mode Select
         run: python3 tests/browser/ui3_mode_select.py
+      - name: Certify UI4 Campaign progression
+        run: python3 tests/browser/ui4_campaign_progression.py
+      - name: Certify UI5 Campaign gameplay
+        run: |
+          python3 tests/browser/ui5_campaign_gameplay.py
+          python3 tests/browser/ui5_campaign_visual.py
+      - name: Certify UI6 Endless gameplay
+        run: |
+          python3 tests/browser/ui6_endless_gameplay.py
+          python3 tests/browser/ui6_endless_visual.py
+      - name: Certify UI7 Boss cinematic gameplay
+        run: |
+          python3 tests/browser/ui7_boss_gameplay.py
+          python3 tests/browser/ui7_boss_visual.py
+      - name: Certify UI9 Arcade Rush unified gameplay
+        run: python3 tests/browser/ui9_arcade_rush.py
+      - name: Certify UI10 shared Results, Pause, and onboarding
+        run: python3 tests/browser/ui10_results_pause_onboarding.py
+      - name: Certify UI11 Profile, Leaderboards, and Settings
+        run: |
+          python3 tests/browser/ui11_profile_leaderboards_settings.py
+          python3 tests/browser/ui11_mobile_heading_contract.py
+      - name: Certify UI12 final motion, audio, and consistency
+        run: python3 tests/browser/ui12_final_polish.py
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -38,4 +62,12 @@ jobs:
             browser-artifacts/ui1-design-system/
             browser-artifacts/ui2-title-navigation/
             browser-artifacts/ui3-mode-select/
+            browser-artifacts/ui4-campaign-progression/
+            browser-artifacts/ui5-campaign-gameplay/
+            browser-artifacts/ui6-endless-gameplay/
+            browser-artifacts/ui7-boss-gameplay/
+            browser-artifacts/ui9-arcade-rush/
+            browser-artifacts/ui10-results-pause-onboarding/
+            browser-artifacts/ui11-profile-leaderboards-settings/
+            browser-artifacts/ui12-final-polish/
           retention-days: 7
