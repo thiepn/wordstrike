@@ -1,7 +1,7 @@
 /** P2 mode-local controls. Observes route/pause boundaries, never the word stream. */
 import { normalizeCustomization } from "./customization.js";
 import {
-  ACTION_INTENSITIES, GAMEPLAY_HUD_LAYOUTS, TYPING_HUD_LAYOUTS,
+  ACTION_INTENSITIES, GAMEPLAY_HUD_LAYOUTS, TYPING_HUD_LAYOUTS, TYPING_PASSAGE_WIDTHS,
   resolveTypingPresentation, resolveModeEffectsIntensity,
 } from "./modeCustomization.js";
 import { SPEED_TEST_FONT_SIZES } from "./speedTestPresentation.js";
@@ -23,9 +23,10 @@ export function modePresentationMarkup(mode, location = "ready") {
   let help = "";
   if (mode === "typing") {
     rows = row(`${id}-hud`, "HUD layout", "typingTest.hudLayout", TYPING_HUD_LAYOUTS)
-      + row(`${id}-live`, "Live statistics", "typingTest.liveStats", [{ value: "true", label: "On" }, { value: "false", label: "Off" }]);
+      + row(`${id}-live`, "Live statistics", "typingTest.liveStats", [{ value: "true", label: "On" }, { value: "false", label: "Off" }])
+      + row(`${id}-width`, "Passage width", "typingTest.passageWidth", TYPING_PASSAGE_WIDTHS);
     if (location === "pause") rows += row(`${id}-size`, "Text size", "typingTest.textSize", SPEED_TEST_FONT_SIZES);
-    help = "Focus shows only time or word progress. Balanced keeps the original HUD. Data adds completed words and incorrect keystrokes, including corrected mistakes.";
+    help = "Focus shows only time or word progress. Balanced keeps the original HUD. Data adds completed words and incorrect keystrokes, including corrected mistakes. Passage width changes only the horizontal reading area: Narrow, Normal, or Wide.";
   } else {
     if (["campaign", "endless"].includes(mode)) {
       rows = row(`${id}-hud`, "Gameplay HUD", "gameplayHud", GAMEPLAY_HUD_LAYOUTS);
@@ -75,11 +76,15 @@ export function startModeCustomizationPresentation({ getSave, onTypingPreference
   function refreshControls() {
     if (!screen?.isConnected) return;
     const value = normalizeCustomization(getSave()?.settings);
-    const typing = resolveTypingPresentation(value);
+    const typing = resolveTypingPresentation(getSave()?.settings);
     screen.querySelectorAll("[data-mode-presentation]").forEach((details) => {
       details.querySelectorAll("[data-mode-setting]").forEach((select) => {
         const field = select.dataset.modeSetting;
-        const next = field.startsWith("typingTest.") ? value.typingTest[field.split(".")[1]] : value[field];
+        const next = field === "typingTest.passageWidth"
+          ? typing.passageWidth
+          : field.startsWith("typingTest.")
+            ? value.typingTest[field.split(".")[1]]
+            : value[field];
         if (select.value !== String(next)) select.value = String(next);
         select.disabled = field === "typingTest.liveStats" && typing.hudLayout === "focus";
         select.setAttribute("aria-describedby", details.querySelector(".mode-presentation-help").id);
@@ -96,6 +101,7 @@ export function startModeCustomizationPresentation({ getSave, onTypingPreference
       attribute(preview, "data-layout", typing.hudLayout);
       attribute(preview, "data-live", typing.showLiveStats);
       attribute(preview, "data-size", typing.textSize);
+      attribute(preview, "data-width", typing.passageWidth);
     });
   }
 
@@ -109,6 +115,7 @@ export function startModeCustomizationPresentation({ getSave, onTypingPreference
       const typing = resolveTypingPresentation(settings);
       attribute(screen, "data-typing-hud", typing.hudLayout);
       attribute(screen, "data-live-stats", typing.showLiveStats);
+      attribute(screen, "data-speed-passage-width", typing.passageWidth);
       onTypingPreferences?.(typing);
     }
     if (["campaign", "endless"].includes(mode)) attribute(screen, "data-gameplay-hud", value.gameplayHud);
@@ -177,7 +184,26 @@ export function startModeCustomizationPresentation({ getSave, onTypingPreference
       : "Applied for this visit. Browser storage is unavailable, so this preference could not be saved.");
   }
 
+  function onPointerDown(event) {
+    if (!screen?.isConnected) return;
+    screen.querySelectorAll("[data-mode-presentation][open]").forEach((details) => {
+      if (!details.contains(event.target)) details.removeAttribute("open");
+    });
+  }
+
+  function onKeydown(event) {
+    if (event.key !== "Escape" || !screen?.isConnected) return;
+    const open = screen.querySelector("[data-mode-presentation][open]");
+    if (!open) return;
+    event.preventDefault?.();
+    event.stopPropagation?.();
+    open.removeAttribute("open");
+    open.querySelector("summary")?.focus?.({ preventScroll: true });
+  }
+
   root.addEventListener("change", onChange);
+  root.addEventListener("pointerdown", onPointerDown);
+  root.addEventListener("keydown", onKeydown);
   doc.addEventListener("wordstrike:settings-changed", apply);
   media?.addEventListener?.("change", apply);
   const routeObserver = new MutationObserver(mount);
@@ -188,6 +214,8 @@ export function startModeCustomizationPresentation({ getSave, onTypingPreference
     routeObserver.disconnect();
     screenObserver?.disconnect();
     root.removeEventListener("change", onChange);
+    root.removeEventListener("pointerdown", onPointerDown);
+    root.removeEventListener("keydown", onKeydown);
     doc.removeEventListener("wordstrike:settings-changed", apply);
     media?.removeEventListener?.("change", apply);
     root.querySelectorAll("[data-mode-presentation]").forEach((details) => details.remove());
