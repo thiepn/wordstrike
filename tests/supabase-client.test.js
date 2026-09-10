@@ -28,17 +28,14 @@ assert.deepEqual(calls[0], [
   validConfig.publishableKey,
   {
     auth: {
-      flowType: "pkce",
+      flowType: "implicit",
       persistSession: true,
       autoRefreshToken: true,
       detectSessionInUrl: true,
       storageKey: "wordstrike_supabase_auth_v1",
-      experimental: {
-        appendPkceFlowIdToRedirects: true,
-      },
     },
   },
 ]);
 assert.equal(SUPABASE_AUTH_STORAGE_KEY, "wordstrike_supabase_auth_v1");
 
-console.log("Supabase browser client singleton, persistent PKCE, and per-flow verifier options passed.");
+console.log("Supabase browser client singleton and persistent implicit OAuth options passed.");
