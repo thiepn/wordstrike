@@ -16,7 +16,7 @@ const freezeDeep = (value) => {
   return Object.freeze(value);
 };
 const clamp = (value, minimum, maximum) => Math.max(minimum, Math.min(maximum, value));
-const STAGE_KEYS = new Set(["stageId", "stageOrdinal", "plannedPaceWpm", "observedWpm", "accuracy", "disfluencyRate", "correctionCostRate", "correctionCostMs", "activeDurationMs", "typedCharacterCount", "interrupted", "majorPauseCount"]);
+const STAGE_KEYS = new Set(["stageId", "stageOrdinal", "plannedPaceWpm", "observedWpm", "adjustedWpm", "difficultyAdjustmentLog", "accuracy", "disfluencyRate", "correctionCostRate", "correctionCostMs", "activeDurationMs", "typedCharacterCount", "interrupted", "majorPauseCount"]);
 const finiteOrNull = (value) => value == null || Number.isFinite(value);
 
 function validateCandidate(candidate, index) {
@@ -27,7 +27,8 @@ function validateCandidate(candidate, index) {
   for (const key of ["observedWpm", "accuracy", "activeDurationMs"]) if (!Number.isFinite(candidate[key])) throw new TypeError(`Frontier stage ${index} ${key} must be finite`);
   if (candidate.observedWpm <= 0 || candidate.accuracy < 0 || candidate.accuracy > 100 || candidate.activeDurationMs < 0) throw new TypeError(`Frontier stage ${index} has invalid primary metrics`);
   if (!Number.isInteger(candidate.typedCharacterCount) || candidate.typedCharacterCount < 0) throw new TypeError(`Frontier stage ${index} has invalid typedCharacterCount`);
-  for (const key of ["plannedPaceWpm", "disfluencyRate", "correctionCostRate", "correctionCostMs"]) if (!finiteOrNull(candidate[key])) throw new TypeError(`Frontier stage ${index} ${key} must be finite or null`);
+  for (const key of ["plannedPaceWpm", "adjustedWpm", "difficultyAdjustmentLog", "disfluencyRate", "correctionCostRate", "correctionCostMs"]) if (!finiteOrNull(candidate[key])) throw new TypeError(`Frontier stage ${index} ${key} must be finite or null`);
+  if (candidate.adjustedWpm != null && candidate.adjustedWpm <= 0) throw new TypeError(`Frontier stage ${index} adjusted pace must be positive`);
   if (candidate.plannedPaceWpm != null && candidate.plannedPaceWpm <= 0) throw new TypeError(`Frontier stage ${index} planned pace must be positive`);
   if (candidate.disfluencyRate != null && (candidate.disfluencyRate < 0 || candidate.disfluencyRate > 1)) throw new TypeError(`Frontier stage ${index} disfluency rate must be 0..1`);
   if (candidate.correctionCostRate != null && (candidate.correctionCostRate < 0 || candidate.correctionCostRate > 1)) throw new TypeError(`Frontier stage ${index} correction rate must be 0..1`);
@@ -67,7 +68,11 @@ export function buildPracticeFrontierObservationBatch({
       : Number.isFinite(stage.correctionCostMs) && stage.activeDurationMs > 0
         ? clamp(stage.correctionCostMs / stage.activeDurationMs, 0, 1)
         : null;
-    const adjustedWpm = Math.exp(Math.log(stage.observedWpm) + difficulty.adjustment);
+    const hasStageAdjustment = Number.isFinite(stage.adjustedWpm) && stage.adjustedWpm > 0;
+    const difficultyAdjustmentLog = hasStageAdjustment
+      ? (Number.isFinite(stage.difficultyAdjustmentLog) ? stage.difficultyAdjustmentLog : Math.log(stage.adjustedWpm / stage.observedWpm))
+      : difficulty.adjustment;
+    const adjustedWpm = hasStageAdjustment ? stage.adjustedWpm : Math.exp(Math.log(stage.observedWpm) + difficultyAdjustmentLog);
     const valid = stage.activeDurationMs >= policy.minimumStageDurationMs
       && stage.typedCharacterCount >= policy.minimumStageCharacters
       && stage.accuracy >= policy.minimumStageAccuracy
@@ -90,7 +95,7 @@ export function buildPracticeFrontierObservationBatch({
       activeDurationMs: stage.activeDurationMs,
       typedCharacterCount: stage.typedCharacterCount,
       sourceRole: evidenceRole,
-      difficultyAdjustmentLog: difficulty.adjustment,
+      difficultyAdjustmentLog,
       valid,
     });
   });

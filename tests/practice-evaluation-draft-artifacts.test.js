@@ -9,7 +9,7 @@ test("PL18 current English protected artifacts remain honest drafts when release
   assert.equal(benchmark.suiteId, "WS-BENCH-EN-1");
   assert.equal(benchmark.status, "draft");
   assert.equal(benchmark.forms.length, 0);
-  assert.deepEqual(benchmark.matchReport.releaseBlockers, ["minimum-ready-form-count:0/6", "insufficient-protected-form-length", "typability-coverage-below-0.90"]);
+  assert.deepEqual(benchmark.matchReport.releaseBlockers, ["minimum-ready-form-count:0/6", "insufficient-protected-form-length"]);
   assert.equal(benchmark.comparabilityClass, "engineering-matched");
   assert.equal(benchmark.calibration, null);
   assert.equal(transfer.poolId, "WS-TRANSFER-EN-1");

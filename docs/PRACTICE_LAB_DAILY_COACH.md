@@ -249,3 +249,7 @@ PL25 certification requires dedicated tests for:
 - full existing WordStrike regression suite.
 
 The phase remains a draft/developer preview until the exact latest branch head passes the normal repository `Tests` workflow.
+
+## PL29 catalog availability
+
+PL29 implements `consistency-trainer` and the `endurance` surface, but Daily Coach v1 does not automatically schedule either intervention. This is intentional: PL29 adds protocols and measurements without changing the stable PL25 planner policy. A future Coach version may consider pace variability, sustained decline, or low Endurance ability when choosing interventions.

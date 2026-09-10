@@ -16,9 +16,11 @@
   "sourceIds": [
     "ws-original-en-foundation-v1"
   ],
-  "frequencyReferenceVersion": null,
-  "frequencyReferenceChecksum": null,
-  "frequencySourceIds": [],
+  "frequencyReferenceVersion": 1,
+  "frequencyReferenceChecksum": "sha256-b9bc8dde064335c2258844919c6dd62537f95ac4a2d5920fdd7213a9cb5d45ad",
+  "frequencySourceIds": [
+    "ws-original-en-frequency-v1"
+  ],
   "weights": {
     "meanWordLength": 0.16,
     "p90WordLength": 0.08,
@@ -87,23 +89,23 @@
       "epsilon": 0.01
     },
     "lexicalRarityScore": {
-      "sampleCount": 0,
-      "median": null,
-      "mad": null,
-      "robustScale": null,
+      "sampleCount": 2,
+      "median": 0.3333333333333333,
+      "mad": 0,
+      "robustScale": 0,
       "epsilon": 0.05
     },
     "bigramRarityScore": {
-      "sampleCount": 0,
-      "median": null,
-      "mad": null,
-      "robustScale": null,
+      "sampleCount": 2,
+      "median": 0.3333333333333335,
+      "mad": 0,
+      "robustScale": 0,
       "epsilon": 0.05
     }
   },
   "referenceItemCount": 2,
   "trainingDifficultyScores": [
-    -0.39783691375214225,
-    0.39783691375214275
+    -0.24665888652632822,
+    0.24665888652632856
   ]
 }

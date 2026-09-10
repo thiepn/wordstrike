@@ -112,41 +112,37 @@ function transitionRecord(event, latencyMs, classification, reason) {
   };
 }
 
+export function derivePracticeLatencyTransitionCandidate({ event, priorInsertion = null, correctionSincePrior = false, policy = PRACTICE_LATENCY_POLICY_V1 } = {}) {
+  validatePolicy(policy);
+  if (!event || !INSERTION_TYPES.has(event.type)) return freezeDeep({ latency: null, exclusionReason: "not-insertion", hardInterruption: false, baselineEligible: false });
+  const latency = event?.latencyFromPriorInsertionMs;
+  const segment = timingSegmentId(event);
+  const priorSegment = priorInsertion ? timingSegmentId(priorInsertion) : null;
+  let exclusionReason = null;
+  let hardInterruption = false;
+  if (!priorInsertion) exclusionReason = "segment-start";
+  else if (segment !== priorSegment) exclusionReason = event?.timingSegmentStartReason === "restore" ? "segment-start" : "timing-boundary";
+  else if (correctionSincePrior) exclusionReason = "post-correction";
+  else if (!Number.isFinite(latency) || latency < 0) exclusionReason = "invalid-latency";
+  else if (latency >= policy.hardInterruptionMs) hardInterruption = true;
+  else if (!isCorrectInsertion(event) || !isCorrectInsertion(priorInsertion)) exclusionReason = "correctness";
+  return freezeDeep({ latency, exclusionReason, hardInterruption, baselineEligible: !exclusionReason && !hardInterruption });
+}
+
 function deriveCandidates(events, policy) {
   const candidates = [];
   const calibrationLatencies = [];
   let priorInsertion = null;
   let correctionSincePrior = false;
-
   for (const event of events) {
-    if (CORRECTION_TYPES.has(event?.type)) {
-      correctionSincePrior = true;
-      continue;
-    }
+    if (CORRECTION_TYPES.has(event?.type)) { correctionSincePrior = true; continue; }
     if (!INSERTION_TYPES.has(event?.type)) continue;
-
-    const latency = event?.latencyFromPriorInsertionMs;
-    const segment = timingSegmentId(event);
-    const priorSegment = priorInsertion ? timingSegmentId(priorInsertion) : null;
-    let exclusionReason = null;
-    let hardInterruption = false;
-
-    if (!priorInsertion) exclusionReason = "segment-start";
-    else if (segment !== priorSegment) {
-      exclusionReason = event?.timingSegmentStartReason === "restore" ? "segment-start" : "timing-boundary";
-    } else if (correctionSincePrior) exclusionReason = "post-correction";
-    else if (!Number.isFinite(latency) || latency < 0) exclusionReason = "invalid-latency";
-    else if (latency >= policy.hardInterruptionMs) hardInterruption = true;
-    else if (!isCorrectInsertion(event) || !isCorrectInsertion(priorInsertion)) exclusionReason = "correctness";
-
-    const baselineEligible = !exclusionReason && !hardInterruption;
-    if (baselineEligible) calibrationLatencies.push(latency);
-
-    candidates.push({ event, latency, exclusionReason, hardInterruption, baselineEligible });
+    const candidate = derivePracticeLatencyTransitionCandidate({ event, priorInsertion, correctionSincePrior, policy });
+    if (candidate.baselineEligible) calibrationLatencies.push(candidate.latency);
+    candidates.push({ event, ...candidate });
     priorInsertion = event;
     correctionSincePrior = false;
   }
-
   return { candidates, calibrationLatencies };
 }
 

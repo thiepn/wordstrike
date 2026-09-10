@@ -40,7 +40,7 @@ test("PL10 typability build is deterministic and binds exact PL6/PL7 checksums",
   assert.equal(Object.hasOwn(first.scores, "research-holdout"), false);
 });
 
-test("PL10 production foundation model is partial at 0.62 because no governed frequency reference exists", async () => {
+test("PL10 no-frequency-reference fallback remains partial at 0.62", async () => {
   const build = buildPracticeTypabilityArtifacts(await inputs());
   for (const partition of ["training", "transfer", "benchmark", "diagnostic"]) {
     for (const row of build.scores[partition]) {
@@ -79,11 +79,14 @@ test("PL10 static scores equal runtime feature extraction and scoring for the sa
   assert.equal(serialized.includes(item.text), false);
 });
 
-test("PL10 checked-in model manifest advertises training-only fit and no normal holdout scoring", async () => {
+test("PL10 checked-in governed model keeps training-only fit and protected holdout isolation", async () => {
   const manifest = await readJson("data/practice/models/en-v1/manifest.json");
   assert.deepEqual(manifest.fitPartitions, ["training"]);
   assert.equal(manifest.referencePartition, "training");
   assert.equal(manifest.researchHoldoutScored, false);
-  assert.equal(manifest.frequencyReferenceVersion, null);
+  assert.equal(manifest.frequencyReferenceVersion, 1);
+  assert.equal(manifest.frequencyReferenceId, "ws-en-frequency-v1");
+  assert.ok(manifest.frequencyReferenceChecksum);
+  assert.deepEqual(manifest.frequencySourceIds, ["ws-original-en-frequency-v1"]);
   assert.equal(manifest.indexChecksum, "sha256-bb198244a6b6cefcae5cb908bf3dee6e9e52259f9ef41576ec69c429a423ff32");
 });

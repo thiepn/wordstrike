@@ -1,0 +1,134 @@
+{
+  "manifestVersion": 1,
+  "formSchemaVersion": 1,
+  "generatorVersion": 1,
+  "formSetId": "WS-PACE-EN-1",
+  "formSetVersion": 1,
+  "language": "en",
+  "partition": "diagnostic",
+  "status": "ready",
+  "formCount": 8,
+  "readyFormCount": 8,
+  "minimumReadyFormCount": 4,
+  "formLengthBounds": {
+    "minimum": 9000,
+    "maximum": 12000
+  },
+  "slidingWindow": {
+    "size": 600,
+    "stride": 300,
+    "maximumDifficultySpread": 0.6
+  },
+  "minimumAvailableModelWeight": 0.9,
+  "source": {
+    "sourceId": "ws-original-en-pace-ladder-v1",
+    "sourceChecksum": "sha256-77c30534ae24da1a34bf45b285caf9efa91519041dab328dd04553b3867be0bf",
+    "reviewStatus": "approved"
+  },
+  "bindings": {
+    "corpusId": "practice-en-v1",
+    "corpusVersion": 1,
+    "corpusChecksum": "sha256-28beccf65eed71519da306c129da5040a20f364aed320dc21eea2d16c2a1c404",
+    "indexSchemaVersion": 1,
+    "indexChecksum": "sha256-bb198244a6b6cefcae5cb908bf3dee6e9e52259f9ef41576ec69c429a423ff32",
+    "typabilityModelVersion": 1,
+    "typabilityFeatureVersion": 1,
+    "typabilityReferenceVersion": 1,
+    "typabilityReferenceChecksum": "sha256-94a6f90c3593ebc089211882e2d9afaf0bf46b66386cdc98dbe60c533e6dd471",
+    "frequencyReferenceVersion": 1,
+    "frequencyReferenceId": "ws-en-frequency-v1",
+    "frequencyReferenceChecksum": "sha256-b9bc8dde064335c2258844919c6dd62537f95ac4a2d5920fdd7213a9cb5d45ad"
+  },
+  "formsPath": "data/practice/pace-ladder/en-v1/WS-PACE-EN-1.forms.json",
+  "formsChecksum": "sha256-e0c4c353fabefbcc640f2461f6899aeb81b2679f2a024cba6120e96dff7fe735",
+  "forms": [
+    {
+      "formId": "pace-en-01",
+      "formHash": "sha256-258ef8bbf8e7bbd763c8a15b919452b2dfe3403045c1286ee9f79c75a47036cc",
+      "graphemeCount": 11893,
+      "availableModelWeight": 1,
+      "relativeDifficultyPercentile": 50,
+      "windowCount": 39,
+      "windowDifficultySpread": 0.2753813088994538,
+      "ready": true,
+      "reasons": []
+    },
+    {
+      "formId": "pace-en-02",
+      "formHash": "sha256-3b8ab2930b8066224511723b37745106395ab17f59548ef70f471ee4ffe15c21",
+      "graphemeCount": 11893,
+      "availableModelWeight": 1,
+      "relativeDifficultyPercentile": 50,
+      "windowCount": 39,
+      "windowDifficultySpread": 0.2605800416969719,
+      "ready": true,
+      "reasons": []
+    },
+    {
+      "formId": "pace-en-03",
+      "formHash": "sha256-ac572772e704464447a153d94e1f1beaf41e5f2755febfb8d548f47b4c4b930e",
+      "graphemeCount": 11893,
+      "availableModelWeight": 1,
+      "relativeDifficultyPercentile": 50,
+      "windowCount": 39,
+      "windowDifficultySpread": 0.3187939359137475,
+      "ready": true,
+      "reasons": []
+    },
+    {
+      "formId": "pace-en-04",
+      "formHash": "sha256-9eda53e9bd93c122cf7bf8b4bb46161956026463f1424685df8974089112db43",
+      "graphemeCount": 11893,
+      "availableModelWeight": 1,
+      "relativeDifficultyPercentile": 50,
+      "windowCount": 39,
+      "windowDifficultySpread": 0.24121494882627825,
+      "ready": true,
+      "reasons": []
+    },
+    {
+      "formId": "pace-en-05",
+      "formHash": "sha256-91cbc9b8ea8f980be5739c4bfc1dbf533f6d23b55707cd5599fe518822d849a5",
+      "graphemeCount": 11893,
+      "availableModelWeight": 1,
+      "relativeDifficultyPercentile": 50,
+      "windowCount": 39,
+      "windowDifficultySpread": 0.27727174378325625,
+      "ready": true,
+      "reasons": []
+    },
+    {
+      "formId": "pace-en-06",
+      "formHash": "sha256-a52dffdd4d5e835dc51c16e38608e20a773089d0dc1935e0e038e879fc4592cc",
+      "graphemeCount": 11893,
+      "availableModelWeight": 1,
+      "relativeDifficultyPercentile": 50,
+      "windowCount": 39,
+      "windowDifficultySpread": 0.2587085168780926,
+      "ready": true,
+      "reasons": []
+    },
+    {
+      "formId": "pace-en-07",
+      "formHash": "sha256-7a991734c8881fd117fedb71d9b3eddfe7d9cac040fd10167f4fbcdceec632d7",
+      "graphemeCount": 11893,
+      "availableModelWeight": 1,
+      "relativeDifficultyPercentile": 50,
+      "windowCount": 39,
+      "windowDifficultySpread": 0.26322276546142,
+      "ready": true,
+      "reasons": []
+    },
+    {
+      "formId": "pace-en-08",
+      "formHash": "sha256-06ec002886f340b0607b3f84c6b95989c4d6109babfd3030635cb0c30bd6abc5",
+      "graphemeCount": 11893,
+      "availableModelWeight": 1,
+      "relativeDifficultyPercentile": 50,
+      "windowCount": 39,
+      "windowDifficultySpread": 0.2753813088994538,
+      "ready": true,
+      "reasons": []
+    }
+  ]
+}

@@ -2,8 +2,9 @@ name: Tests
 
 on:
   push:
-    branches: [main]
+    branches: [main, codex/pl28-common-words-v1]
   pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -22,4 +23,17 @@ jobs:
           node-version: 22
 
       - name: Run tests
-        run: npm test
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p test-artifacts
+          npm test 2>&1 | tee test-artifacts/node-tests.log
+
+      - name: Upload test output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: node-test-evidence
+          path: test-artifacts/node-tests.log
+          retention-days: 7
+          if-no-files-found: warn

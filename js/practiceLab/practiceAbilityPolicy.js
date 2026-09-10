@@ -67,10 +67,10 @@ export const PRACTICE_ABILITY_CHANNEL_POLICY_V1 = freezeDeep({
   }),
   endurance: channel({
     channel: "endurance",
-    allowedEvidenceRoles: ["transfer", "benchmark"],
+    allowedEvidenceRoles: ["diagnostic"],
     minimumDurationMs: 180_000,
-    maximumDurationMs: 1_800_000,
-    minimumTypedCharacters: 500,
+    maximumDurationMs: 181_000,
+    minimumTypedCharacters: 125,
   }),
   punctuation: channel({
     channel: "punctuation",

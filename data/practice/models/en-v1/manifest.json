@@ -13,10 +13,12 @@
   "indexChecksum": "sha256-bb198244a6b6cefcae5cb908bf3dee6e9e52259f9ef41576ec69c429a423ff32",
   "segmentationVersion": 1,
   "tokenizationVersion": 1,
-  "frequencyReferenceVersion": null,
-  "frequencyReferenceChecksum": null,
-  "frequencySourceIds": [],
-  "frequencyReferenceId": null,
+  "frequencyReferenceVersion": 1,
+  "frequencyReferenceChecksum": "sha256-b9bc8dde064335c2258844919c6dd62537f95ac4a2d5920fdd7213a9cb5d45ad",
+  "frequencySourceIds": [
+    "ws-original-en-frequency-v1"
+  ],
+  "frequencyReferenceId": "ws-en-frequency-v1",
   "weights": {
     "meanWordLength": 0.16,
     "p90WordLength": 0.08,
@@ -49,42 +51,42 @@
     "diagnostic"
   ],
   "researchHoldoutScored": false,
-  "referenceChecksum": "sha256-ad320fbf7d7f804d7d9febd4a25595fe42f34baf89a016cd94eae538f10a2807",
+  "referenceChecksum": "sha256-94a6f90c3593ebc089211882e2d9afaf0bf46b66386cdc98dbe60c533e6dd471",
   "artifactChecksums": [
     {
       "path": "typability-v1.reference.json",
-      "sha256": "sha256-ad320fbf7d7f804d7d9febd4a25595fe42f34baf89a016cd94eae538f10a2807",
-      "bytes": 2675,
+      "sha256": "sha256-94a6f90c3593ebc089211882e2d9afaf0bf46b66386cdc98dbe60c533e6dd471",
+      "bytes": 2794,
       "external": false
     },
     {
       "path": "training.json",
-      "sha256": "sha256-128582dbfb5885b165a78fb9997b99b79d29d2c5869f8137ef32655076c9246c",
-      "bytes": 5250,
+      "sha256": "sha256-5e7e1f524a4856876073b7906dc4b8685c3495dc12fcbc954ba3c41d837470dc",
+      "bytes": 5545,
       "external": false
     },
     {
       "path": "transfer.json",
-      "sha256": "sha256-405bbc728c4144347b09203786ab1e920a6e6edd18ae83c12f52190462b038af",
-      "bytes": 2823,
+      "sha256": "sha256-a280dd6e31b1ec761227a962702bf2e8efb84772f99f91651666eedeb0caa2b6",
+      "bytes": 3018,
       "external": false
     },
     {
       "path": "benchmark.json",
-      "sha256": "sha256-52b482f50df598b4c13a08f5314159581c53a93ceadc1080a9688d58856843b8",
-      "bytes": 2825,
+      "sha256": "sha256-56e99d29573775abdf4415833a67064927d7d852fbcebe884c1c27188e94e259",
+      "bytes": 2975,
       "external": false
     },
     {
       "path": "diagnostic.json",
-      "sha256": "sha256-a4cc974230acbdadcd98ced4509a1253e23bf7033b6d62ea5468e6b1686d8f60",
-      "bytes": 5117,
+      "sha256": "sha256-a79916a7440b6099c5641d385cd5aa9ba023d2750142582383993f65adc20bef",
+      "bytes": 5469,
       "external": false
     },
     {
       "path": "js/practiceLab/generated/practiceTypabilityRuntimeData.js",
-      "sha256": "sha256-88f6d7342d6406122c14166af513ee97e198a69ca881e9cd721141e210d542a0",
-      "bytes": 18952,
+      "sha256": "sha256-909c82f39eb17323f1389d5bf41d20301ae49f52985f1bd0ab35fe8e614c86ac",
+      "bytes": 20143,
       "external": true
     }
   ]

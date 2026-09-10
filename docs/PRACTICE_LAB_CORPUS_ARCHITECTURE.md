@@ -267,3 +267,13 @@ PL6 does not provide full production corpus population, frequency statistics, ta
 PL7 may index only PL6-validated content. Every derived word/n-gram/position index must preserve `contentId`, `familyId`, `partition`, `sourceId`, and `corpusVersion`. It may not flatten the corpus into a generic pool or erase the allowed-use boundary.
 
 The implemented indexing contract is documented in **PRACTICE_LAB_TARGET_INDEX_ARCHITECTURE.md**. PL6 remains the source of truth; PL7 assets are rebuildable derived data bound to the PL6 manifest checksum.
+
+## PL29 sustained-prose consumers
+
+PL29 adds stricter static sustained-prose artifacts rather than treating the broad PL24 Real Text pool as standardized Endurance material:
+
+- Consistency Trainer → target-blind `training` natural text.
+- Endurance Practice → target-blind `training` natural text.
+- Endurance Check → target-blind `diagnostic` natural text.
+
+Their manifests bind the current corpus, PL7 index, PL10 typability/frequency references, source provenance, form schema, and generator versions. Local typability-uniformity gates prevent passage-position difficulty from being mistaken for time-series change.

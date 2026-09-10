@@ -1339,3 +1339,9 @@ Daily Coach is a read-only orchestration consumer of PL16. It may use current sa
 
 A PL20-PL23 targeted child preserves its canonical direct-target opportunity contract and therefore contributes the same acquisition dose it would contribute when launched manually. Hidden Coach Review is a PL17 retention measurement and contributes zero acquisition observations. PL24 Real Text remains target-blind and contributes zero direct acquisition dose. Merely including a block in a Daily Coach plan never manufactures a PL16 observation.
 
+
+## PL29 Endurance trajectory addendum
+
+PL29 supplies the first real standardized observations for the already-defined PL13 `endurance` channel. PL16 requires no Endurance-specific history store: its generic ability-trajectory helper may derive an Endurance trajectory from recent PL13 `endurance` observations for the same profile/context.
+
+Endurance Practice (5/10/20 minutes) and Consistency Trainer are untargeted training and contribute **zero direct PL16 acquisition dose**. The standardized `endurance-check` is diagnostic and also contributes zero acquisition dose. PL16 global plateau semantics remain unchanged and continue to use the canonical cold-natural ability contract rather than substituting Endurance.

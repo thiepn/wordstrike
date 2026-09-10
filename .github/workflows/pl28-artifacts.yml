@@ -1,0 +1,32 @@
+name: PL28 Common Words artifacts
+on:
+  pull_request:
+  push:
+    branches: [main, codex/pl27-burst-sprints-v1, codex/pl28-common-words-v1]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Validate canonical PL6 corpus rebuild
+        run: node scripts/buildPracticeCorpus.mjs --validate
+      - name: Verify deterministic PL28 static artifacts
+        run: |
+          node scripts/buildPracticeCommonWords.mjs
+          git diff --exit-code -- data/practice/common-words/en-v1/
+      - name: Run PL28 and session lifecycle certification
+        run: node --test tests/practice-common-words*.test.js tests/practice-session-pulse-pl28.test.js
+      - name: Upload PL28 static artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: pl28-common-word-artifacts
+          path: data/practice/common-words/en-v1/*.json
+          retention-days: 7
+          if-no-files-found: error

@@ -1,0 +1,63 @@
+{
+  "sourceArtifactVersion": 1,
+  "sourceId": "ws-original-en-pace-ladder-v1",
+  "title": "WordStrike Pace Ladder English Diagnostic Template Source v1",
+  "language": "en",
+  "partition": "diagnostic",
+  "reviewStatus": "approved",
+  "generation": {
+    "algorithm": "sha256-ranked-cartesian-v1",
+    "sentenceCount": 108,
+    "passageCount": 20,
+    "subjects": [
+      "The careful writer",
+      "A steady worker",
+      "The quiet reader",
+      "A patient learner",
+      "The focused typist",
+      "A calm traveler",
+      "The alert editor",
+      "A thoughtful planner",
+      "The curious student",
+      "A practiced musician",
+      "The attentive driver",
+      "A reliable builder"
+    ],
+    "verbs": [
+      "keeps a measured rhythm",
+      "follows a clear pattern",
+      "moves through the task steadily",
+      "works at a comfortable pace",
+      "checks each detail calmly",
+      "maintains an even tempo",
+      "keeps attention on the next step",
+      "moves with deliberate control",
+      "balances speed with accuracy",
+      "continues without rushing"
+    ],
+    "endings": [
+      "while the surrounding room stays quiet.",
+      "as small changes appear in the work.",
+      "while attention remains on the current line.",
+      "and leaves enough time for careful correction.",
+      "as the sequence becomes slightly more demanding.",
+      "while preserving a clean and natural flow.",
+      "and returns to a steady rhythm after each pause.",
+      "while the next idea comes into view.",
+      "as ordinary details pass without distraction.",
+      "and keeps the movement smooth from start to finish."
+    ],
+    "variants": [
+      "plain",
+      "comma-link",
+      "ordinary-practice-link"
+    ]
+  },
+  "metadata": {
+    "tags": [
+      "pace-ladder",
+      "diagnostic-natural-text"
+    ],
+    "notes": "Deterministic reviewed template source; the builder expands it into sentence families and long diagnostic forms."
+  }
+}

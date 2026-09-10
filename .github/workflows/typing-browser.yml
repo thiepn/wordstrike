@@ -3,29 +3,28 @@ on:
   pull_request:
   push:
     branches: [main]
+  workflow_dispatch:
 permissions:
   contents: read
 jobs:
   browser:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    container:
+      # Keep this version aligned with tests/browser/requirements.txt.
+      image: mcr.microsoft.com/playwright/python:v1.57.0-noble
+      options: --ipc=host
+    env:
+      # Firefox requires HOME to be owned by the container's current user.
+      HOME: /root
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
       - name: Install browser test dependencies
-        run: |
-          pip install -r tests/browser/requirements.txt
-          # Playwright downloads its own Chromium/Firefox builds. The runner's
-          # unrelated Google Chrome APT source can transiently publish a mismatched
-          # index and break `--with-deps`, so exclude that unnecessary source.
-          sudo rm -f /etc/apt/sources.list.d/google-chrome.list /etc/apt/sources.list.d/google-chrome.sources
-          python -m playwright install --with-deps chromium firefox
+        run: python3 -m pip install -r tests/browser/requirements.txt
       - name: Exercise real Typing Test UI in Chromium and Firefox
-        run: python tests/browser/typing_regressions.py
+        run: python3 tests/browser/typing_regressions.py
       - name: Exercise UI8 visual hierarchy and responsive contracts
-        run: python tests/browser/typing_ui8_visual_regressions.py
+        run: python3 tests/browser/typing_ui8_visual_regressions.py
       - uses: actions/upload-artifact@v4
         if: always()
         with:

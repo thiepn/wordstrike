@@ -159,7 +159,7 @@ All thresholds below are versioned engineering values, not scientifically optima
 | controlled-speed | benchmark, diagnostic | 20–300 s | 75 | 70% | required | required |
 | common-words | training, diagnostic | 15–180 s | 50 | 70% | required | required |
 | burst | training, diagnostic | 5–15 s | 25 | 70% | required | required |
-| endurance | transfer, benchmark | 180–1800 s | 500 | 70% | required | required |
+| endurance | diagnostic (`endurance-check`) | 180 s trusted final-window measurement | 125 | 70% pooled final-six | required | required |
 | punctuation | diagnostic, benchmark | 30–300 s | 100 | 70% | required | required |
 | numbers-symbols | diagnostic, benchmark | 30–300 s | 100 | 70% | required | required |
 
@@ -1227,3 +1227,13 @@ The shared adjusted-performance extraction introduced by PL14 preserves PL13's v
 ## PL19 Full Assessment integration
 
 PL19 Full Assessment Block 1 may contribute exactly one `cold-natural-text` PL13 ability observation when PL18 admits a fresh valid benchmark. The Deep cold-transfer block deliberately has `abilityChannel = null`, preventing two correlated ability observations from one assessment battery.
+
+## PL29 Endurance measurement provider
+
+PL29 activates the previously reserved `endurance` channel with one standardized provider: hidden descriptor `endurance-check`. The v1 channel accepts `diagnostic` evidence from the protocol-specific provider. Its canonical measurement is not the whole 10-minute average: it is the median typability-adjusted first-pass effective log pace across structurally valid measured windows 13–18 (the final three minutes), with at least 5/6 valid windows and pooled first-pass accuracy of at least 70%.
+
+The trusted provider supplies the protocol's adjusted log performance and versioned uncertainty directly to the existing PL13 observation builder. The PL13 recursive estimator, ability-state identity `(profile, context, channel)`, idempotency, and confidence machinery remain unchanged. One valid Endurance Check produces exactly one `endurance` observation.
+
+The Endurance uncertainty contract is `clamp(sqrt(sigma_individual^2 / 4 + sigma_spread^2 + 0.03^2), 0.05, 0.20)`, where `sigma_individual` is the median compatible 30-second window sigma and `sigma_spread = max(1.4826 × MAD(Y_i), 0.02)`.
+
+**Endurance ability** means robust typability-adjusted first-pass effective typing pace during the final three minutes of the standardized 10-minute Endurance Check, after seven prior minutes of continuous session activity including the one-minute settling period. It is not generic sustainable speed, a 10-minute average, burst capacity, or the PL14 control frontier.

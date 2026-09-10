@@ -43,7 +43,7 @@
     "modelVersion": 1,
     "featureVersion": 1,
     "referenceVersion": 1,
-    "artifactChecksum": "sha256-52b482f50df598b4c13a08f5314159581c53a93ceadc1080a9688d58856843b8"
+    "artifactChecksum": "sha256-56e99d29573775abdf4415833a67064927d7d852fbcebe884c1c27188e94e259"
   },
   "matchPolicyVersion": 1,
   "forms": [],
@@ -55,8 +55,7 @@
     "forms": [],
     "releaseBlockers": [
       "minimum-ready-form-count:0/6",
-      "insufficient-protected-form-length",
-      "typability-coverage-below-0.90"
+      "insufficient-protected-form-length"
     ]
   },
   "calibration": null,
