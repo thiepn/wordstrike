@@ -6,17 +6,26 @@ export function createPracticeRepository(options = {}) {
 
   const dataStore = options.dataStore;
   let preserveCustomTextDuringReset = false;
-  const coreDataStore = new Proxy(dataStore, {
-    get(target, property, receiver) {
-      if (property === "clearStore") {
-        return async (storeName) => {
-          if (preserveCustomTextDuringReset && storeName === "customTexts") return true;
-          return target.clearStore(storeName);
-        };
-      }
-      const value = Reflect.get(target, property, receiver);
-      return typeof value === "function" ? value.bind(target) : value;
+
+  // Do not Proxy a frozen store: JavaScript Proxy invariants require exact values for
+  // non-configurable properties. A small delegating facade is predictable for both the
+  // IndexedDB store and the frozen in-memory store used by Practice certification.
+  const coreDataStore = Object.freeze({
+    get kind() { return dataStore.kind; },
+    get isOpen() { return dataStore.isOpen; },
+    async open() { await dataStore.open(); return this; },
+    close() { return dataStore.close(); },
+    get(storeName, key) { return dataStore.get(storeName, key); },
+    put(storeName, record) { return dataStore.put(storeName, record); },
+    delete(storeName, key) { return dataStore.delete(storeName, key); },
+    list(storeName) { return dataStore.list(storeName); },
+    query(storeName, indexName, query) { return dataStore.query(storeName, indexName, query); },
+    clearStore(storeName) {
+      if (preserveCustomTextDuringReset && storeName === "customTexts") return Promise.resolve(true);
+      return dataStore.clearStore(storeName);
     },
+    runTransaction(storeNames, mode, callback) { return dataStore.runTransaction(storeNames, mode, callback); },
+    deleteDatabase() { return dataStore.deleteDatabase(); },
   });
 
   const core = createPracticeRepositoryV30({ ...options, dataStore: coreDataStore });
