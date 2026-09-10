@@ -1,0 +1,176 @@
+/* Typing customization V2 — hard override for a stable, compact toolbar popover.
+   This file intentionally loads after mode-customization.css so even a previously
+   cached customization stylesheet cannot reintroduce layout reflow. */
+
+/* The trigger always keeps exactly the same toolbar footprint, open or closed. */
+.speed-test-topbar-secondary > .mode-presentation[data-mode-presentation="typing"] {
+  position: relative;
+  flex: 0 0 10.5rem !important;
+  width: 10.5rem !important;
+  min-width: 10.5rem;
+  max-width: 10.5rem;
+  z-index: 40;
+  overflow: visible;
+  isolation: isolate;
+}
+
+.speed-test-topbar-secondary > .mode-presentation[data-mode-presentation="typing"][open] {
+  flex: 0 0 10.5rem !important;
+  flex-basis: 10.5rem !important;
+  width: 10.5rem !important;
+  min-width: 10.5rem !important;
+  max-width: 10.5rem !important;
+}
+
+.speed-test-topbar-secondary > .mode-presentation[data-mode-presentation="typing"] > summary,
+.speed-test-topbar-secondary > .mode-presentation[data-mode-presentation="typing"][open] > summary {
+  width: 100% !important;
+  min-width: 0;
+}
+
+/* Compact popover: it is removed from document flow and kept away from the
+   centered timer/typing passage on normal desktop widths. */
+.speed-test-topbar-secondary > .mode-presentation[data-mode-presentation="typing"] > .mode-presentation-panel {
+  position: absolute !important;
+  top: calc(100% + 0.38rem) !important;
+  right: 0 !important;
+  left: auto !important;
+  z-index: 90 !important;
+  width: min(21rem, calc(100vw - 1.5rem)) !important;
+  min-width: 0;
+  max-width: calc(100vw - 1.5rem) !important;
+  max-height: min(18rem, calc(100dvh - 7rem)) !important;
+  margin: 0 !important;
+  padding: 0.65rem !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  overscroll-behavior: contain;
+  border: 1px solid var(--color-border-default) !important;
+  border-radius: var(--radius-sm) !important;
+  background: rgb(var(--custom-surface-1-rgb, 16 23 32) / 0.985) !important;
+  box-shadow: 0 18px 48px rgb(0 0 0 / 48%) !important;
+  backdrop-filter: blur(14px);
+}
+
+@media (min-width: 1200px) {
+  .speed-test-topbar-secondary > .mode-presentation[data-mode-presentation="typing"] > .mode-presentation-panel {
+    left: 0 !important;
+    right: auto !important;
+  }
+}
+
+/* The ready-state menu should be controls, not a second dashboard. The old
+   preview and explanatory blocks made the flyout tall enough to cover the test. */
+.speed-test-topbar-secondary > .mode-presentation[data-mode-presentation="typing"][data-presentation-location="ready"]
+  :is(.mode-presentation-preview, .mode-presentation-help, .mode-presentation-note) {
+  display: none !important;
+}
+
+.speed-test-topbar-secondary > .mode-presentation[data-mode-presentation="typing"] .mode-presentation-row {
+  grid-template-columns: minmax(0, 1fr) minmax(8rem, 52%);
+  gap: 0.55rem;
+  margin-block: 0.18rem;
+}
+
+.speed-test-topbar-secondary > .mode-presentation[data-mode-presentation="typing"] .mode-presentation-row label {
+  font-size: 0.74rem;
+  line-height: 1.25;
+}
+
+.speed-test-topbar-secondary > .mode-presentation[data-mode-presentation="typing"] .mode-presentation-row select {
+  min-height: 44px;
+  padding-block: 0.34rem;
+  font-size: 0.8rem;
+}
+
+.speed-test-topbar-secondary > .mode-presentation[data-mode-presentation="typing"] .mode-presentation-status {
+  margin: 0.45rem 0 0;
+  font-size: 0.67rem;
+  line-height: 1.35;
+}
+
+/* Passage width presets. Normal is meaningfully wider than the old compact
+   view; Wide is the Monkeytype-like near-full-stage option. */
+.speed-test-screen:not([data-speed-passage-width]),
+.speed-test-screen[data-speed-passage-width="normal"] {
+  --speed-test-max-width: 78rem;
+  --speed-test-stage-inline: clamp(1rem, 4vw, 4rem);
+}
+
+.speed-test-screen[data-speed-passage-width="narrow"] {
+  --speed-test-max-width: 66.25rem;
+  --speed-test-stage-inline: clamp(1rem, 6vw, 6rem);
+}
+
+.speed-test-screen[data-speed-passage-width="wide"] {
+  --speed-test-max-width: 100rem;
+  --speed-test-stage-inline: clamp(0.75rem, 2vw, 2rem);
+}
+
+@media (max-width: 900px) {
+  .speed-test-screen:is([data-speed-passage-width="narrow"], [data-speed-passage-width="normal"], [data-speed-passage-width="wide"]),
+  .speed-test-screen:not([data-speed-passage-width]) {
+    --speed-test-stage-inline: clamp(0.8rem, 3vw, 1.5rem);
+  }
+}
+
+/* Override the original mobile open-state rules as well. Opening customization
+   must never hide the test controls/HUD or replace the toolbar grid. */
+@media (max-width: 768px) {
+  .speed-test-topbar-secondary:has(> .mode-presentation[data-mode-presentation="typing"][open]) {
+    grid-template-columns: auto minmax(0, 1fr) !important;
+    grid-template-areas: "presentation controls" "hud hud" !important;
+  }
+
+  .speed-test-topbar-secondary:has(> .mode-presentation[data-mode-presentation="typing"][open]) > .speed-test-controls-wrap {
+    display: flex !important;
+    grid-area: controls !important;
+    min-width: 0;
+  }
+
+  .speed-test-topbar-secondary:has(> .mode-presentation[data-mode-presentation="typing"][open]) > .speed-test-hud {
+    display: flex !important;
+    grid-area: hud !important;
+    justify-content: center;
+    padding-left: 0;
+    background: transparent;
+  }
+
+  .speed-test-topbar-secondary > .mode-presentation[data-mode-presentation="typing"],
+  .speed-test-topbar-secondary > .mode-presentation[data-mode-presentation="typing"][open] {
+    flex: 0 0 min(9.75rem, 40vw) !important;
+    width: min(9.75rem, 40vw) !important;
+    min-width: 7.75rem !important;
+    max-width: min(9.75rem, 40vw) !important;
+  }
+
+  .speed-test-topbar-secondary > .mode-presentation[data-mode-presentation="typing"] > .mode-presentation-panel {
+    left: 0 !important;
+    right: auto !important;
+    width: min(21rem, calc(100vw - 1rem)) !important;
+    max-width: calc(100vw - 1rem) !important;
+    max-height: min(18rem, calc(100dvh - 7rem)) !important;
+  }
+}
+
+@media (max-width: 420px) {
+  .speed-test-topbar-secondary > .mode-presentation[data-mode-presentation="typing"] .mode-presentation-row {
+    grid-template-columns: minmax(0, 1fr) minmax(7rem, 50%);
+    gap: 0.4rem;
+  }
+}
+
+/* Short landscape cannot reserve vertical space below the toolbar. Keep the
+   sheet below the trigger so it remains clickable and the header never reflows. */
+@media (max-height: 520px) {
+  .speed-test-topbar-secondary > .mode-presentation[data-mode-presentation="typing"] > .mode-presentation-panel {
+    position: fixed !important;
+    top: max(6.75rem, calc(env(safe-area-inset-top) + 6.25rem)) !important;
+    right: 0.5rem !important;
+    bottom: auto !important;
+    left: auto !important;
+    width: min(21rem, calc(100vw - 1rem)) !important;
+    max-width: calc(100vw - 1rem) !important;
+    max-height: calc(100dvh - 7.25rem) !important;
+  }
+}
