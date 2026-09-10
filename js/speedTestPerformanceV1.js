@@ -213,7 +213,8 @@ function wireGraph(section, timeline, averageWpm = 0) {
 }
 
 function enhanceSpeedTestResults() {
-  const panel = document.querySelector("#app .speed-test-result-panel");
+  const screen = document.querySelector("#app .speed-results-screen");
+  const panel = screen?.querySelector?.(".speed-results-panel");
   if (!panel || panel.querySelector("[data-speed-performance]")) return;
   const state = getCurrentSpeedTest();
   const result = state?.result;
@@ -221,15 +222,19 @@ function enhanceSpeedTestResults() {
   const timeline = result.modeData?.performanceTimeline
     || loadSpeedTestTimeline(result.sessionId);
   if (!timeline?.points?.length) return;
-  const primary = panel.querySelector(".speed-test-primary-result");
-  const grid = panel.querySelector(".speed-test-results");
-  const anchor = primary || grid;
-  if (!anchor) return;
+  const headline = panel.querySelector(".speed-result-headline");
+  const details = panel.querySelector(".speed-result-details");
+  const globalSubmission = panel.querySelector("#global-submission-region");
+  const menu = panel.querySelector(".menu-list");
   const template = document.createElement("template");
   template.innerHTML = graphMarkup(timeline, result.wpm ?? 0).trim();
   const section = template.content.firstElementChild;
   if (!section) return;
-  anchor.insertAdjacentElement("afterend", section);
+  if (headline) headline.insertAdjacentElement("afterend", section);
+  else if (details) details.insertAdjacentElement("beforebegin", section);
+  else if (globalSubmission) globalSubmission.insertAdjacentElement("beforebegin", section);
+  else if (menu) menu.insertAdjacentElement("beforebegin", section);
+  else panel.append(section);
   wireGraph(section, timeline, result.wpm ?? 0);
 }
 
@@ -241,10 +246,12 @@ function installEnhancer() {
   observer.observe(root, { childList: true, subtree: true });
 }
 
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", installEnhancer, { once: true });
-} else {
-  installEnhancer();
+if (typeof document !== "undefined") {
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", installEnhancer, { once: true });
+  } else {
+    installEnhancer();
+  }
 }
 
 export { graphMarkup as speedTestPerformanceGraphMarkup };
