@@ -10,6 +10,7 @@ permissions:
 
 jobs:
   implement:
+    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     timeout-minutes: 35
     steps:
@@ -32,11 +33,12 @@ jobs:
         run: npm run build:practice-sustained
       - name: Targeted PL29 certification before commit
         run: npm run test:pl29-sustained
-      - name: Commit clean PL29 implementation
+      - name: Commit PL29 product implementation
         shell: bash
         run: |
           set -euo pipefail
-          rm -f .pl29-bootstrap.00 .pl29-bootstrap.01 .pl29-bootstrap.02 .pl29-bootstrap.03 .pl29-bootstrap.04 .pl29-bootstrap.05 .pl29-bootstrap.06 .pl29-bootstrap.07 .pl29-bootstrap.08 .github/workflows/pl29-bootstrap.yml
+          rm -f .pl29-bootstrap.00 .pl29-bootstrap.01 .pl29-bootstrap.02 .pl29-bootstrap.03 .pl29-bootstrap.04 .pl29-bootstrap.05 .pl29-bootstrap.06 .pl29-bootstrap.07 .pl29-bootstrap.08
+          rm -f .github/workflows/pl29-artifacts.yml
           git add -A
           git diff --cached --check
           git config user.name "github-actions[bot]"
