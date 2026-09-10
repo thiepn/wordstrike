@@ -1,0 +1,33 @@
+name: Release integration probe
+
+on:
+  push:
+    branches: [release/practice-lab-through-pl29]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Probe merge with current main
+        shell: bash
+        run: |
+          set -o pipefail
+          git fetch origin main
+          if git merge --no-commit --no-ff origin/main; then
+            echo "MERGE_CLEAN=true"
+            git diff --stat HEAD
+          else
+            echo "MERGE_CLEAN=false"
+            echo "CONFLICTS_BEGIN"
+            git diff --name-only --diff-filter=U
+            echo "CONFLICTS_END"
+            exit 1
+          fi
