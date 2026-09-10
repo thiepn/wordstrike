@@ -1,3 +1,5 @@
+import { startModeCustomizationPresentation } from "./modeCustomizationPresentation.js";
+import { startCustomizationPresentation } from "./customizationPresentation.js";
 import {
   appState,
   canLaunchLevel,
@@ -1407,12 +1409,17 @@ function handleAppInput(event) {
   updateLeaderboardUsernameFeedback(event.target.value);
 }
 
-function moveLevelSelection(key) {
-  const selectionLimit = appState.devMode ? 100 : appState.save.currentFurthestLevel;
+function getCampaignProgressionColumns() {
+  return globalThis.matchMedia?.("(max-width: 720px)")?.matches ? 5 : 10;
+}
+
+function moveLevelSelection(direction) {
+  const maximumLevel = appState.devMode ? 100 : appState.save.currentFurthestLevel;
   appState.levelSelection = moveLevelGridSelection(
     appState.levelSelection,
-    key,
-    Math.min(100, selectionLimit),
+    direction,
+    maximumLevel,
+    getCampaignProgressionColumns(),
   );
   renderCurrentScreen();
 }
@@ -1535,6 +1542,20 @@ async function bootstrap() {
     ? Math.max(1, Number.parseInt(search.get("stage"), 10) || 1)
     : 1;
   appState.save = loadSave();
+  startCustomizationPresentation({ getSave: () => appState.save });
+  startModeCustomizationPresentation({
+    getSave: () => appState.save,
+    onTypingPreferences: (preferences) => {
+      const state = getCurrentSpeedTest();
+      if (!state || state.ended) return;
+      if (state.fontSize !== preferences.textSize) {
+        state.fontSize = preferences.textSize;
+        applySpeedTestFontSize(state);
+      }
+      // Read existing counters; do not restart or change the session configuration.
+      updateSpeedTestRun(state, currentTimeMs());
+    },
+  });
   [
     appState.wordBank,
     appState.bossWordBank,

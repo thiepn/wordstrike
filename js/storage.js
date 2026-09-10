@@ -1,6 +1,10 @@
 import { calculateGrade } from "./scoring.js";
 import { normalizeSpeedTestFontSize } from "./speedTestPresentation.js";
 
+import { createDefaultCustomization, normalizeCustomization, normalizeCustomizationValue } from "./customization.js";
+
+import { normalizeModeCustomizationValue } from "./modeCustomization.js";
+
 const STORAGE_KEY = "wordstrike_save";
 
 export function createDefaultSave() {
@@ -11,8 +15,10 @@ export function createDefaultSave() {
       screenShake: true,
       particles: true,
       strictMode: false,
+      soundEffects: false,
       speedTestTimerPosition: "center",
       speedTestFontSize: "auto",
+      ...createDefaultCustomization(),
     },
   };
 }
@@ -37,8 +43,10 @@ function validateSave(value) {
       screenShake: value.settings?.screenShake !== false,
       particles: value.settings?.particles !== false,
       strictMode: value.settings?.strictMode === true,
+      soundEffects: value.settings?.soundEffects === true,
       speedTestTimerPosition: value.settings?.speedTestTimerPosition === "top" ? "top" : "center",
-      speedTestFontSize: normalizeSpeedTestFontSize(value.settings?.speedTestFontSize),
+      ...normalizeCustomization(value.settings),
+      speedTestFontSize: normalizeCustomization(value.settings).typingTest.textSize,
     },
   };
 }
@@ -107,6 +115,7 @@ export function updateSpeedTestTimerPosition(save, position) {
 
 export function updateSpeedTestFontSize(save, value) {
   save.settings.speedTestFontSize = normalizeSpeedTestFontSize(value);
+  save.settings.typingTest = { ...normalizeCustomization(save.settings).typingTest, textSize: save.settings.speedTestFontSize };
   saveGame(save);
   return save.settings.speedTestFontSize;
 }
@@ -115,4 +124,52 @@ export function resetProgress(save) {
   save.currentFurthestLevel = 1;
   save.levels = {};
   saveGame(save);
+}
+
+/** Appearance-only writes use validated strings, not the legacy boolean setter. */
+export function updateCustomizationSetting(save, field, value) {
+  const normalized = normalizeCustomizationValue(field, value);
+  if (!save || typeof save !== "object") throw new TypeError("A save is required");
+  save.settings ??= createDefaultSave().settings;
+  save.settings[field] = normalized;
+  return { value: normalized, persisted: saveGame(save) };
+}
+
+export function resetAppearance(save) {
+  const defaults = createDefaultCustomization();
+  save.settings ??= createDefaultSave().settings;
+  for (const field of ["theme", "accent", "effectsIntensity"]) save.settings[field] = defaults[field];
+  return { persisted: saveGame(save) };
+}
+
+/** Full settings reset is separate from destructive progress reset. */
+export function resetSettings(save) {
+  save.settings = createDefaultSave().settings;
+  const persisted = saveGame(save);
+  if (typeof document !== "undefined" && typeof CustomEvent === "function") {
+    document.dispatchEvent(new CustomEvent("wordstrike:settings-changed"));
+  }
+  return { persisted };
+}
+
+/** P2 stores only validated presentation preferences; progress/records are untouched. */
+export function updateModeCustomizationSetting(save, field, value) {
+  const normalized = normalizeModeCustomizationValue(field, value);
+  if (!save || typeof save !== "object") throw new TypeError("A save is required");
+  save.settings ??= createDefaultSave().settings;
+  if (field.startsWith("typingTest.")) {
+    save.settings.typingTest = {
+      ...normalizeCustomization(save.settings).typingTest,
+      [field.slice("typingTest.".length)]: normalized,
+    };
+    // One authoritative font choice; preserve the original renderer/setter contract.
+    if (field === "typingTest.textSize") save.settings.speedTestFontSize = normalized;
+  } else {
+    save.settings[field] = normalized;
+  }
+  const persisted = saveGame(save);
+  if (typeof document !== "undefined" && typeof CustomEvent === "function") {
+    document.dispatchEvent?.(new CustomEvent("wordstrike:settings-changed"));
+  }
+  return { value: normalized, persisted };
 }

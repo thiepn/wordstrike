@@ -1,9 +1,10 @@
+/* P1: palette-aware color values; literal fallbacks preserve the certified default. */
 :root {
   color-scheme: dark;
-  --bg: #0a0e14;
-  --panel: #101720;
-  --panel-bright: #16212d;
-  --primary: #00fff2;
+  --bg: var(--custom-bg, #0a0e14);
+  --panel: var(--custom-surface-1, #101720);
+  --panel-bright: var(--custom-surface-2, #16212d);
+  --primary: var(--custom-accent, #00fff2);
   --secondary: #ff3cac;
   --text: #e8f0f5;
   --text-primary: #e8f0f5;
@@ -57,7 +58,7 @@ body {
   overflow-x: hidden;
   overflow-y: auto;
   background:
-    radial-gradient(circle at 50% 45%, rgb(0 255 242 / 7%), transparent 32%),
+    radial-gradient(circle at 50% 45%, rgb(var(--custom-accent-rgb, 0 255 242) / 7%), transparent 32%),
     linear-gradient(rgb(255 255 255 / 2%) 1px, transparent 1px),
     linear-gradient(90deg, rgb(255 255 255 / 2%) 1px, transparent 1px),
     var(--bg);
@@ -131,8 +132,8 @@ button {
   min-height: calc(100vh - 48px);
   margin: 0 auto;
   padding: 28px;
-  border: 1px solid rgb(0 255 242 / 32%);
-  background: rgb(10 14 20 / 95%);
+  border: 1px solid rgb(var(--custom-accent-rgb, 0 255 242) / 32%);
+  background: rgb(var(--custom-bg-rgb, 10 14 20) / 95%);
 }
 
 .profile-stats-topbar {
@@ -246,7 +247,7 @@ button {
 .profile-empty {
   margin: 18px 0;
   padding: 16px;
-  border-block: 1px solid rgb(129 144 158 / 25%);
+  border-block: 1px solid rgb(var(--custom-border-rgb, 129 144 158) / 25%);
   color: var(--profile-text-muted);
   text-align: center;
   letter-spacing: 0.1em;
@@ -274,7 +275,7 @@ button {
   gap: 18px;
   padding: 12px 14px;
   border-left: 2px solid var(--locked);
-  background: rgb(16 23 32 / 72%);
+  background: rgb(var(--custom-surface-1-rgb, 16 23 32) / 72%);
 }
 
 .recent-session-row div,
@@ -427,7 +428,7 @@ button {
   margin-top: 28px;
   padding: 18px;
   border-block: 1px solid var(--border-subtle);
-  background: rgb(16 23 32 / 72%);
+  background: rgb(var(--custom-surface-1-rgb, 16 23 32) / 72%);
 }
 
 .global-account h3 {
@@ -473,7 +474,7 @@ button {
 
 .leaderboard-username-form input:focus {
   border-color: var(--primary);
-  box-shadow: 0 0 12px rgb(0 255 242 / 15%);
+  box-shadow: 0 0 12px rgb(var(--custom-accent-rgb, 0 255 242) / 15%);
 }
 
 .leaderboard-username-feedback {
@@ -531,7 +532,7 @@ button {
   max-width: min(900px, 80vw);
   padding: 7px 9px;
   border: 1px solid rgb(255 60 172 / 45%);
-  background: rgb(10 14 20 / 94%);
+  background: rgb(var(--custom-bg-rgb, 10 14 20) / 94%);
   color: var(--profile-text-muted);
   font-size: 9px;
   overflow-wrap: anywhere;
@@ -561,9 +562,9 @@ button {
   width: min(1040px, 96vw);
   min-height: min(760px, calc(100vh - 48px));
   padding: clamp(22px, 4vw, 40px);
-  border: 1px solid rgb(0 255 242 / 40%);
-  background: rgb(10 14 20 / 95%);
-  box-shadow: 0 0 36px rgb(0 255 242 / 10%);
+  border: 1px solid rgb(var(--custom-accent-rgb, 0 255 242) / 40%);
+  background: rgb(var(--custom-bg-rgb, 10 14 20) / 95%);
+  box-shadow: 0 0 36px rgb(var(--custom-accent-rgb, 0 255 242) / 10%);
 }
 
 .leaderboards-panel h1 {
@@ -728,7 +729,7 @@ button {
   margin-top: 18px;
   padding: 15px;
   border-left: 2px solid var(--secondary);
-  background: rgb(16 23 32 / 74%);
+  background: rgb(var(--custom-surface-1-rgb, 16 23 32) / 74%);
 }
 
 .leaderboard-viewer h3 {
@@ -773,9 +774,9 @@ button {
   z-index: 1;
   width: min(620px, 92vw);
   padding: 42px;
-  border: 1px solid rgb(0 255 242 / 45%);
-  background: rgb(10 14 20 / 91%);
-  box-shadow: 0 0 36px rgb(0 255 242 / 10%), inset 0 0 30px rgb(0 255 242 / 3%);
+  border: 1px solid rgb(var(--custom-accent-rgb, 0 255 242) / 45%);
+  background: rgb(var(--custom-bg-rgb, 10 14 20) / 91%);
+  box-shadow: 0 0 36px rgb(var(--custom-accent-rgb, 0 255 242) / 10%), inset 0 0 30px rgb(var(--custom-accent-rgb, 0 255 242) / 3%);
   text-align: center;
 }
 
@@ -799,8 +800,8 @@ button {
 .settings-account-management {
   margin: 22px 0 28px;
   padding: 18px;
-  border: 1px solid rgb(0 255 242 / 28%);
-  background: rgb(16 23 32 / 72%);
+  border: 1px solid rgb(var(--custom-accent-rgb, 0 255 242) / 28%);
+  background: rgb(var(--custom-surface-1-rgb, 16 23 32) / 72%);
 }
 
 .settings-account-management h2 {
@@ -860,9 +861,9 @@ button {
   min-height: 44px;
   padding: 9px 12px;
   border: 1px solid var(--primary);
-  background: rgb(10 14 20 / 92%);
+  background: rgb(var(--custom-bg-rgb, 10 14 20) / 92%);
   color: var(--primary);
-  box-shadow: 0 0 12px rgb(0 255 242 / 18%);
+  box-shadow: 0 0 12px rgb(var(--custom-accent-rgb, 0 255 242) / 18%);
   pointer-events: auto;
   font-size: 10px;
   letter-spacing: 0.08em;
@@ -879,7 +880,7 @@ button {
   min-height: 44px;
   padding: 9px 12px;
   border: 1px solid var(--border-subtle);
-  background: rgb(10 14 20 / 98%);
+  background: rgb(var(--custom-bg-rgb, 10 14 20) / 98%);
   color: var(--text);
   cursor: pointer;
   font-size: 11px;
@@ -918,7 +919,7 @@ button {
 .tutorial-help-button {
   padding: 7px 10px;
   border: 1px solid var(--border-subtle);
-  background: rgb(10 14 20 / 76%);
+  background: rgb(var(--custom-bg-rgb, 10 14 20) / 76%);
   color: var(--text-muted);
   cursor: pointer;
   font-size: 10px;
@@ -951,7 +952,7 @@ button {
   margin: 0 0 26px;
   padding: 16px;
   border: 1px solid var(--border-subtle);
-  background: rgb(16 23 32 / 72%);
+  background: rgb(var(--custom-surface-1-rgb, 16 23 32) / 72%);
 }
 
 .settings-tutorials summary,
@@ -1009,7 +1010,7 @@ button {
     max(18px, env(safe-area-inset-bottom))
     max(18px, env(safe-area-inset-left));
   overflow: auto;
-  background: rgb(3 7 11 / 88%);
+  background: rgb(var(--custom-overlay-rgb, 3 7 11) / 88%);
   backdrop-filter: blur(6px);
 }
 
@@ -1023,9 +1024,9 @@ button {
   min-height: min(480px, calc(100dvh - 36px));
   max-height: 100%;
   overflow: hidden;
-  border: 1px solid rgb(0 255 242 / 48%);
-  background: rgb(10 14 20 / 98%);
-  box-shadow: 0 0 40px rgb(0 255 242 / 15%);
+  border: 1px solid rgb(var(--custom-accent-rgb, 0 255 242) / 48%);
+  background: rgb(var(--custom-bg-rgb, 10 14 20) / 98%);
+  box-shadow: 0 0 40px rgb(var(--custom-accent-rgb, 0 255 242) / 15%);
 }
 
 .onboarding-close {
@@ -1048,7 +1049,7 @@ button {
   place-items: center;
   overflow: hidden;
   border-left: 1px solid var(--locked);
-  background: radial-gradient(circle, rgb(0 255 242 / 12%), transparent 58%);
+  background: radial-gradient(circle, rgb(var(--custom-accent-rgb, 0 255 242) / 12%), transparent 58%);
 }
 
 .onboarding-copy {
@@ -1117,7 +1118,7 @@ button {
   min-height: 42px;
   place-items: center;
   border: 1px solid var(--primary);
-  background: rgb(0 255 242 / 9%);
+  background: rgb(var(--custom-accent-rgb, 0 255 242) / 9%);
   color: var(--primary);
 }
 
@@ -1166,7 +1167,7 @@ button {
   min-width: 0;
   padding: 9px;
   border: 1px solid var(--locked);
-  background: rgb(22 33 45 / 72%);
+  background: rgb(var(--custom-surface-2-rgb, 22 33 45) / 72%);
 }
 
 .onboarding-control-cards kbd,
@@ -1196,7 +1197,7 @@ button {
   padding: 9px 16px;
   transform: translateX(-50%);
   border-block: 1px solid var(--primary);
-  background: rgb(10 14 20 / 91%);
+  background: rgb(var(--custom-bg-rgb, 10 14 20) / 91%);
   color: var(--primary);
   pointer-events: none;
   text-align: center;
@@ -1236,12 +1237,12 @@ button {
   z-index: 1;
   width: min(760px, 94vw);
   padding: 38px;
-  background: rgb(10 14 20 / 92%);
+  background: rgb(var(--custom-bg-rgb, 10 14 20) / 92%);
   text-align: center;
 }
 
 .endless-ready-panel {
-  border-block: 1px solid rgb(0 255 242 / 38%);
+  border-block: 1px solid rgb(var(--custom-accent-rgb, 0 255 242) / 38%);
 }
 
 .endless-ready-panel h1,
@@ -1281,8 +1282,8 @@ button {
   align-items: center;
   gap: 22px;
   padding: max(5px, env(safe-area-inset-top)) clamp(12px, 4vw, 56px) 5px;
-  border-bottom: 2px solid rgb(0 255 242 / 52%);
-  background: rgb(10 14 20 / 99%);
+  border-bottom: 2px solid rgb(var(--custom-accent-rgb, 0 255 242) / 52%);
+  background: rgb(var(--custom-bg-rgb, 10 14 20) / 99%);
   color: var(--text-secondary);
   font-size: 13px;
   letter-spacing: 0.1em;
@@ -1305,7 +1306,7 @@ button {
   top: clamp(12px, 3vw, 28px);
   padding: 8px 18px;
   border: 1px solid var(--secondary);
-  background: rgb(10 14 20 / 88%);
+  background: rgb(var(--custom-bg-rgb, 10 14 20) / 88%);
   color: var(--secondary);
   font-size: 15px;
   letter-spacing: 0.14em;
@@ -1317,7 +1318,7 @@ button {
 }
 
 .endless-results-panel {
-  border-block: 1px solid rgb(0 255 242 / 38%);
+  border-block: 1px solid rgb(var(--custom-accent-rgb, 0 255 242) / 38%);
 }
 
 .endless-result-headline {
@@ -1417,9 +1418,9 @@ button {
   z-index: 1;
   width: min(860px, 94vw);
   padding: 36px;
-  border: 1px solid rgb(0 255 242 / 42%);
-  background: rgb(10 14 20 / 94%);
-  box-shadow: 0 0 38px rgb(0 255 242 / 10%);
+  border: 1px solid rgb(var(--custom-accent-rgb, 0 255 242) / 42%);
+  background: rgb(var(--custom-bg-rgb, 10 14 20) / 94%);
+  box-shadow: 0 0 38px rgb(var(--custom-accent-rgb, 0 255 242) / 10%);
   text-align: center;
 }
 
@@ -1438,7 +1439,7 @@ button {
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
   background:
-    radial-gradient(circle at 50% 45%, rgb(0 255 242 / 8%), transparent 40%),
+    radial-gradient(circle at 50% 45%, rgb(var(--custom-accent-rgb, 0 255 242) / 8%), transparent 40%),
     linear-gradient(135deg, rgb(255 60 172 / 3%), transparent 50%);
 }
 
@@ -1459,8 +1460,8 @@ body.gameplay-active .speed-test-screen { overflow-y: auto; }
   display: grid;
   min-height: 112px;
   padding-top: max(6px, env(safe-area-inset-top));
-  border-bottom: 2px solid rgb(0 255 242 / 52%);
-  background: rgb(10 14 20 / 99%);
+  border-bottom: 2px solid rgb(var(--custom-accent-rgb, 0 255 242) / 52%);
+  background: rgb(var(--custom-bg-rgb, 10 14 20) / 99%);
   box-shadow: 0 8px 24px rgb(0 0 0 / 28%);
 }
 
@@ -1547,7 +1548,7 @@ body.gameplay-active .speed-test-screen { overflow-y: auto; }
   min-width: 46px;
   padding: 8px 10px;
   border: 1px solid var(--border-subtle);
-  background: rgb(22 33 45 / 72%);
+  background: rgb(var(--custom-surface-2-rgb, 22 33 45) / 72%);
   color: var(--muted);
   cursor: pointer;
   font-size: 18px;
@@ -1560,7 +1561,7 @@ body.gameplay-active .speed-test-screen { overflow-y: auto; }
   outline: none;
   color: var(--primary);
   border-color: var(--primary);
-  text-shadow: 0 0 9px rgb(0 255 242 / 45%);
+  text-shadow: 0 0 9px rgb(var(--custom-accent-rgb, 0 255 242) / 45%);
 }
 
 .speed-config-control:disabled {
@@ -1584,7 +1585,7 @@ body.gameplay-active .speed-test-screen { overflow-y: auto; }
 .speed-test-hud strong {
   font-size: 34px;
   font-variant-numeric: tabular-nums;
-  text-shadow: 0 0 13px rgb(0 255 242 / 48%);
+  text-shadow: 0 0 13px rgb(var(--custom-accent-rgb, 0 255 242) / 48%);
 }
 
 .speed-timer-position {
@@ -1598,7 +1599,7 @@ body.gameplay-active .speed-test-screen { overflow-y: auto; }
   min-height: 34px;
   padding: 6px 10px;
   border: 1px solid var(--border-subtle);
-  background: rgb(16 23 32 / 92%);
+  background: rgb(var(--custom-surface-1-rgb, 16 23 32) / 92%);
   color: var(--text-secondary);
   cursor: pointer;
 }
@@ -1659,7 +1660,7 @@ body.gameplay-active .speed-test-screen { overflow-y: auto; }
   font-weight: 700;
   letter-spacing: 0.16em;
   text-align: center;
-  text-shadow: 0 0 10px rgb(0 255 242 / 35%);
+  text-shadow: 0 0 10px rgb(var(--custom-accent-rgb, 0 255 242) / 35%);
   transform: translate(-50%, -100%);
   white-space: nowrap;
 }
@@ -1673,7 +1674,7 @@ body.gameplay-active .speed-test-screen { overflow-y: auto; }
   align-self: center;
   height: var(--speed-test-word-viewport-height);
   overflow: hidden;
-  border-block: 1px solid rgb(129 144 158 / 18%);
+  border-block: 1px solid rgb(var(--custom-border-rgb, 129 144 158) / 18%);
   scroll-behavior: smooth;
 }
 
@@ -1729,7 +1730,7 @@ body.gameplay-active .speed-test-screen { overflow-y: auto; }
   width: 2px;
   height: 1.1em;
   background: var(--primary);
-  box-shadow: 0 0 7px rgb(0 255 242 / 70%);
+  box-shadow: 0 0 7px rgb(var(--custom-accent-rgb, 0 255 242) / 70%);
   animation: speed-caret-blink 900ms ease-in-out infinite alternate;
 }
 
@@ -1771,7 +1772,7 @@ body.gameplay-active .speed-test-screen { overflow-y: auto; }
   max-width: min(1000px, 86vw);
   padding: 7px 9px;
   border: 1px solid rgb(255 60 172 / 45%);
-  background: rgb(10 14 20 / 94%);
+  background: rgb(var(--custom-bg-rgb, 10 14 20) / 94%);
   color: var(--muted);
   font-size: 9px;
   overflow-wrap: anywhere;
@@ -1898,7 +1899,7 @@ body.gameplay-active .speed-test-screen { overflow-y: auto; }
   min-height: 48px;
   padding: 12px 20px;
   border: 1px solid var(--border-subtle);
-  background: rgb(22 33 45 / 96%);
+  background: rgb(var(--custom-surface-2-rgb, 22 33 45) / 96%);
   cursor: pointer;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -1934,7 +1935,7 @@ body.gameplay-active .speed-test-screen { overflow-y: auto; }
   min-width: 6ch;
   font-size: var(--speed-test-center-timer-size);
   line-height: 1;
-  text-shadow: 0 0 18px rgb(0 255 242 / 58%);
+  text-shadow: 0 0 18px rgb(var(--custom-accent-rgb, 0 255 242) / 58%);
 }
 
 .speed-test-center-timer span {
@@ -1950,9 +1951,9 @@ body.gameplay-active .speed-test-screen { overflow-y: auto; }
 .arcade-button.primary,
 .arcade-button.account-primary {
   border-color: var(--primary);
-  background: linear-gradient(135deg, rgb(0 255 242 / 28%), rgb(0 255 242 / 13%));
+  background: linear-gradient(135deg, rgb(var(--custom-accent-rgb, 0 255 242) / 28%), rgb(var(--custom-accent-rgb, 0 255 242) / 13%));
   color: #f7ffff;
-  box-shadow: 0 0 18px rgb(0 255 242 / 18%);
+  box-shadow: 0 0 18px rgb(var(--custom-accent-rgb, 0 255 242) / 18%);
 }
 
 .arcade-button.secondary { border-color: rgb(255 60 172 / 65%); }
@@ -1993,7 +1994,7 @@ body.gameplay-active .speed-test-screen { overflow-y: auto; }
   border-color: var(--primary);
   outline: none;
   color: var(--primary);
-  box-shadow: 0 0 16px rgb(0 255 242 / 18%), inset 3px 0 var(--primary);
+  box-shadow: 0 0 16px rgb(var(--custom-accent-rgb, 0 255 242) / 18%), inset 3px 0 var(--primary);
   transform: translateX(3px);
 }
 
@@ -2004,134 +2005,10 @@ body.gameplay-active .speed-test-screen { overflow-y: auto; }
   box-shadow: 0 0 16px rgb(255 71 87 / 18%), inset 3px 0 var(--danger);
 }
 
-.level-screen {
-  display: grid;
-  grid-template-rows: auto auto minmax(0, 1fr);
-  padding: 28px clamp(20px, 5vw, 72px);
-}
-
-.level-screen.dev-enabled {
-  grid-template-rows: auto auto auto minmax(0, 1fr);
-}
-
-.level-header {
-  z-index: 1;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;
-  padding-bottom: 20px;
-  border-bottom: 1px solid var(--locked);
-}
-
-.level-header h1 {
-  margin: 0;
-  color: var(--primary);
-  letter-spacing: 0.08em;
-}
-
-.level-grid-scroll {
-  z-index: 1;
-  min-height: 0;
-  overflow: auto;
-  scrollbar-color: var(--primary) var(--panel);
-}
-
-.level-grid {
-  display: grid;
-  grid-template-columns: repeat(10, minmax(0, 1fr));
-  gap: 14px;
-  width: 100%;
-  min-width: 820px;
-  padding: 24px 8px 60px;
-}
-
-.level-tile {
-  position: relative;
-  aspect-ratio: 1;
-  display: grid;
-  place-items: center;
-  align-content: center;
-  gap: 7px;
-  border: 1px solid var(--primary);
-  background: rgb(16 23 32 / 90%);
-  cursor: pointer;
-  transition: 120ms ease;
-}
-
-.level-detail {
-  z-index: 2;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-height: 34px;
-  padding: 7px 10px;
-  color: var(--muted);
-  font-size: 12px;
-  border-bottom: 1px solid var(--locked);
-}
-
-.level-tile:hover,
-.level-tile.selected,
-.level-tile:focus-visible {
-  outline: none;
-  color: var(--primary);
-  border-width: 2px;
-  box-shadow: 0 0 18px rgb(0 255 242 / 25%);
-  transform: translateY(-2px);
-}
-
-.level-tile.locked {
-  border-color: var(--locked);
-  color: var(--locked);
-  cursor: not-allowed;
-  filter: saturate(0.2);
-}
-
-.level-tile.locked.dev-access {
-  cursor: pointer;
-  filter: saturate(0.45);
-}
-
-.level-tile.locked.dev-access:hover,
-.level-tile.locked.dev-access.selected,
-.level-tile.locked.dev-access:focus-visible {
-  border-color: var(--secondary);
-  color: var(--secondary);
-  box-shadow: 0 0 18px rgb(255 60 172 / 20%);
-  transform: translateY(-2px);
-}
-
-.level-tile.locked:hover {
-  box-shadow: none;
-  transform: none;
-}
-
-.level-tile.boss {
-  border-color: var(--secondary);
-}
-
-.level-number {
-  font-size: 24px;
-  font-weight: 700;
-}
-
-.level-grade {
-  min-height: 16px;
-  color: var(--success);
-  font-size: 13px;
-}
-
-.boss-mark {
-  color: var(--secondary);
-  font-size: 11px;
-  letter-spacing: 0.12em;
-}
-
 .game-screen {
   display: grid;
   grid-template-rows: var(--hud-height) minmax(0, 1fr);
-  background: radial-gradient(circle at 50% 50%, rgb(0 255 242 / 8%), transparent 34%);
+  background: radial-gradient(circle at 50% 50%, rgb(var(--custom-accent-rgb, 0 255 242) / 8%), transparent 34%);
 }
 
 .hud {
@@ -2141,8 +2018,8 @@ body.gameplay-active .speed-test-screen { overflow-y: auto; }
   align-items: center;
   gap: 16px;
   padding: max(5px, env(safe-area-inset-top)) 20px 5px;
-  border-bottom: 2px solid rgb(0 255 242 / 52%);
-  background: rgb(10 14 20 / 99%);
+  border-bottom: 2px solid rgb(var(--custom-accent-rgb, 0 255 242) / 52%);
+  background: rgb(var(--custom-bg-rgb, 10 14 20) / 99%);
   color: var(--text-secondary);
   font-size: 14px;
 }
@@ -2205,8 +2082,8 @@ body.gameplay-active .speed-test-screen { overflow-y: auto; }
   height: 58px;
   transform: translate(-50%, -50%) rotate(45deg);
   border: 2px solid var(--primary);
-  background: rgb(0 255 242 / 8%);
-  box-shadow: 0 0 15px var(--primary), 0 0 48px rgb(0 255 242 / 30%), inset 0 0 18px rgb(0 255 242 / 35%);
+  background: rgb(var(--custom-accent-rgb, 0 255 242) / 8%);
+  box-shadow: 0 0 15px var(--primary), 0 0 48px rgb(var(--custom-accent-rgb, 0 255 242) / 30%), inset 0 0 18px rgb(var(--custom-accent-rgb, 0 255 242) / 35%);
   animation: core-pulse 1.8s ease-in-out infinite;
 }
 
@@ -2219,7 +2096,7 @@ body.gameplay-active .speed-test-screen { overflow-y: auto; }
 }
 
 @keyframes core-pulse {
-  50% { box-shadow: 0 0 23px var(--primary), 0 0 70px rgb(0 255 242 / 40%), inset 0 0 24px rgb(0 255 242 / 42%); }
+  50% { box-shadow: 0 0 23px var(--primary), 0 0 70px rgb(var(--custom-accent-rgb, 0 255 242) / 40%), inset 0 0 24px rgb(var(--custom-accent-rgb, 0 255 242) / 42%); }
 }
 
 .word-position {
@@ -2249,8 +2126,8 @@ body.gameplay-active .speed-test-screen { overflow-y: auto; }
 
 .word-visual.active {
   border-color: var(--primary);
-  background: rgb(0 255 242 / 8%);
-  box-shadow: 0 0 18px rgb(0 255 242 / 22%);
+  background: rgb(var(--custom-accent-rgb, 0 255 242) / 8%);
+  box-shadow: 0 0 18px rgb(var(--custom-accent-rgb, 0 255 242) / 22%);
 }
 
 .word-visual.candidate {
@@ -2286,7 +2163,7 @@ body.gameplay-active .speed-test-screen { overflow-y: auto; }
   right: 12px;
   padding: 6px 9px;
   border: 1px solid var(--secondary);
-  background: rgb(10 14 20 / 94%);
+  background: rgb(var(--custom-bg-rgb, 10 14 20) / 94%);
   color: var(--secondary);
   font-size: 11px;
   font-weight: 700;
@@ -2302,7 +2179,7 @@ body.gameplay-active .speed-test-screen { overflow-y: auto; }
   max-width: min(920px, 80vw);
   padding: 6px 9px;
   border: 1px solid rgb(255 60 172 / 38%);
-  background: rgb(10 14 20 / 94%);
+  background: rgb(var(--custom-bg-rgb, 10 14 20) / 94%);
   color: var(--muted);
   font-size: 9px;
   line-height: 1.4;
@@ -2318,7 +2195,7 @@ body.gameplay-active .speed-test-screen { overflow-y: auto; }
   max-width: min(900px, 80vw);
   padding: 7px 9px;
   border: 1px solid rgb(255 60 172 / 45%);
-  background: rgb(10 14 20 / 92%);
+  background: rgb(var(--custom-bg-rgb, 10 14 20) / 92%);
   color: var(--muted);
   font-size: 9px;
   line-height: 1.45;
@@ -2445,7 +2322,7 @@ body.gameplay-active .speed-test-screen { overflow-y: auto; }
   border: 1px solid var(--primary);
   background: var(--bg);
   text-align: center;
-  box-shadow: 0 0 40px rgb(0 255 242 / 18%);
+  box-shadow: 0 0 40px rgb(var(--custom-accent-rgb, 0 255 242) / 18%);
 }
 
 .pause-panel h2 {
@@ -2489,7 +2366,7 @@ body.gameplay-active .speed-test-screen { overflow-y: auto; }
   gap: 18px;
   padding: max(5px, env(safe-area-inset-top)) 20px 5px;
   border-bottom: 2px solid rgb(255 60 172 / 68%);
-  background: rgb(10 14 20 / 99%);
+  background: rgb(var(--custom-bg-rgb, 10 14 20) / 99%);
   color: var(--text-secondary);
   font-size: 14px;
 }
@@ -2511,7 +2388,7 @@ body.gameplay-active .speed-test-screen { overflow-y: auto; }
   color: var(--primary);
   font-size: 34px;
   line-height: 1;
-  text-shadow: 0 0 12px rgb(0 255 242 / 55%);
+  text-shadow: 0 0 12px rgb(var(--custom-accent-rgb, 0 255 242) / 55%);
 }
 
 .boss-timer.warning {
@@ -2608,7 +2485,7 @@ body.gameplay-active .speed-test-screen { overflow-y: auto; }
   width: min(1000px, 88vw);
   padding: clamp(26px, 4vw, 52px);
   border: 1px solid var(--secondary);
-  background: rgb(10 14 20 / 88%);
+  background: rgb(var(--custom-bg-rgb, 10 14 20) / 88%);
   box-shadow: 0 0 36px rgb(255 60 172 / 15%), inset 0 0 36px rgb(255 60 172 / 4%);
   text-align: center;
 }
@@ -2690,12 +2567,12 @@ body.gameplay-active .speed-test-screen { overflow-y: auto; }
 
 .boss-typed {
   color: var(--primary);
-  text-shadow: 0 0 9px rgb(0 255 242 / 75%);
+  text-shadow: 0 0 9px rgb(var(--custom-accent-rgb, 0 255 242) / 75%);
 }
 
 .boss-current {
   color: var(--text);
-  background: rgb(0 255 242 / 10%);
+  background: rgb(var(--custom-accent-rgb, 0 255 242) / 10%);
   animation: boss-caret 700ms ease-in-out infinite alternate;
 }
 
@@ -2711,7 +2588,7 @@ body.gameplay-active .speed-test-screen { overflow-y: auto; }
 }
 
 @keyframes boss-caret {
-  to { background: rgb(0 255 242 / 24%); }
+  to { background: rgb(var(--custom-accent-rgb, 0 255 242) / 24%); }
 }
 
 .boss-remaining {
@@ -2793,7 +2670,7 @@ body.gameplay-active .speed-test-screen { overflow-y: auto; }
 .toggle.on {
   border-color: var(--primary);
   color: var(--primary);
-  box-shadow: 0 0 12px rgb(0 255 242 / 15%);
+  box-shadow: 0 0 12px rgb(var(--custom-accent-rgb, 0 255 242) / 15%);
 }
 
 .footer-hint {
@@ -2811,8 +2688,7 @@ body.gameplay-active .speed-test-screen { overflow-y: auto; }
   .settings-screen,
   .endless-ready-screen,
   .endless-results-screen,
-  .speed-results-screen,
-  .level-screen {
+  .speed-results-screen {
     width: 100%;
     max-width: 100%;
     min-width: 0;
@@ -3087,14 +2963,14 @@ body.gameplay-active .speed-test-screen { overflow-y: auto; }
 
   .word-visual.active,
   .word-visual.candidate {
-    box-shadow: 0 0 8px rgb(0 255 242 / 14%);
+    box-shadow: 0 0 8px rgb(var(--custom-accent-rgb, 0 255 242) / 14%);
   }
 
   .core {
     width: 34px;
     height: 34px;
     border-width: 1px;
-    box-shadow: 0 0 8px var(--primary), 0 0 22px rgb(0 255 242 / 22%), inset 0 0 8px rgb(0 255 242 / 24%);
+    box-shadow: 0 0 8px var(--primary), 0 0 22px rgb(var(--custom-accent-rgb, 0 255 242) / 22%), inset 0 0 8px rgb(var(--custom-accent-rgb, 0 255 242) / 24%);
     animation: none;
   }
 
@@ -3159,18 +3035,6 @@ body.gameplay-active .speed-test-screen { overflow-y: auto; }
       max(var(--mobile-screen-gutter), env(safe-area-inset-right))
       max(var(--mobile-screen-gutter), env(safe-area-inset-bottom))
       max(var(--mobile-screen-gutter), env(safe-area-inset-left));
-  }
-
-  .level-screen {
-    padding-top: max(14px, env(safe-area-inset-top));
-    padding-bottom: max(18px, env(safe-area-inset-bottom));
-  }
-
-  .level-grid {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    min-width: 0;
-    gap: 8px;
-    padding: 14px 0 36px;
   }
 
 }
@@ -3273,7 +3137,7 @@ body.gameplay-viewport-short .core {
   width: 34px;
   height: 34px;
   border-width: 1px;
-  box-shadow: 0 0 8px var(--primary), 0 0 22px rgb(0 255 242 / 22%), inset 0 0 8px rgb(0 255 242 / 24%);
+  box-shadow: 0 0 8px var(--primary), 0 0 22px rgb(var(--custom-accent-rgb, 0 255 242) / 22%), inset 0 0 8px rgb(var(--custom-accent-rgb, 0 255 242) / 24%);
   animation: none;
 }
 
@@ -3403,7 +3267,7 @@ body.gameplay-viewport-short .boss-phrase-size-extreme { font-size: clamp(16px, 
 .practice-lab-feature-card button:not(:disabled):focus-visible {
   outline: 2px solid var(--primary);
   outline-offset: 2px;
-  background: rgb(0 255 242 / 8%);
+  background: rgb(var(--custom-accent-rgb, 0 255 242) / 8%);
 }
 
 .practice-lab-screen button:disabled {
@@ -3428,8 +3292,8 @@ body.gameplay-viewport-short .boss-phrase-size-extreme { font-size: clamp(16px, 
 .practice-lab-empty-state,
 .practice-lab-detail dl {
   border: 1px solid var(--border-subtle);
-  background: rgb(16 23 32 / 92%);
-  box-shadow: inset 3px 0 rgb(0 255 242 / 28%);
+  background: rgb(var(--custom-surface-1-rgb, 16 23 32) / 92%);
+  box-shadow: inset 3px 0 rgb(var(--custom-accent-rgb, 0 255 242) / 28%);
 }
 
 .practice-lab-feature-card {

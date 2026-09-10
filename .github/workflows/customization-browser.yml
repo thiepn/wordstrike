@@ -1,0 +1,35 @@
+name: Customization browser regressions
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  customization:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install browser test dependencies
+        run: |
+          pip install -r tests/browser/requirements.txt
+          sudo rm -f /etc/apt/sources.list.d/google-chrome.list /etc/apt/sources.list.d/google-chrome.sources
+          python -m playwright install --with-deps chromium firefox
+      - name: Check out the certified pre-customization visual baseline
+        run: git worktree add --detach "$RUNNER_TEMP/wordstrike-p1-baseline" c02a421d94f8503336abea1c6aca188625fa305b
+      - name: Certify P1 palettes, effects, persistence, accessibility and unchanged defaults
+        env:
+          BASELINE_DIR: ${{ runner.temp }}/wordstrike-p1-baseline
+        run: python tests/browser/customization_p1.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: customization-p1-evidence
+          path: browser-artifacts/customization-p1/
+          retention-days: 14

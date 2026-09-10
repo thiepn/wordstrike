@@ -1,3 +1,4 @@
+/* P1: palette-aware color values; literal fallbacks preserve the certified default. */
 /* =========================================================
    WORDSTRIKE UI3 — MODE SELECT
    Cyber-athletic mode discovery built on the UI1 foundation.
@@ -17,7 +18,7 @@
   overflow-x: hidden;
   overflow-y: auto;
   background:
-    radial-gradient(circle at 22% 38%, rgb(0 255 242 / 5%), transparent 28%),
+    radial-gradient(circle at 22% 38%, rgb(var(--custom-accent-rgb, 0 255 242) / 5%), transparent 28%),
     radial-gradient(circle at 74% 54%, rgb(255 60 172 / 3%), transparent 32%);
 }
 
@@ -27,7 +28,7 @@
   z-index: 0;
   inset: 0;
   pointer-events: none;
-  background: linear-gradient(112deg, transparent 0 52%, rgb(0 255 242 / 2.4%) 52% 52.08%, transparent 52.08% 100%);
+  background: linear-gradient(112deg, transparent 0 52%, rgb(var(--custom-accent-rgb, 0 255 242) / 2.4%) 52% 52.08%, transparent 52.08% 100%);
 }
 
 .mode-select-shell {
@@ -131,7 +132,7 @@
   border-bottom: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-lg);
   background:
-    linear-gradient(180deg, rgb(16 23 32 / 36%), rgb(10 14 20 / 80%)),
+    linear-gradient(180deg, rgb(var(--custom-surface-1-rgb, 16 23 32) / 36%), rgb(var(--custom-bg-rgb, 10 14 20) / 80%)),
     var(--color-bg-elevated);
   box-shadow: var(--shadow-elevation-medium);
   isolation: isolate;
@@ -165,7 +166,7 @@
   width: min(440px, 78%);
   aspect-ratio: 1;
   border-radius: 50%;
-  background: radial-gradient(circle, rgb(0 255 242 / 10%), transparent 62%);
+  background: radial-gradient(circle, rgb(var(--custom-accent-rgb, 0 255 242) / 10%), transparent 62%);
   filter: blur(2px);
 }
 
@@ -216,7 +217,7 @@
   align-items: end;
   padding: clamp(22px, 4vw, 38px);
   border-top: 1px solid var(--color-border-subtle);
-  background: rgb(8 13 20 / 82%);
+  background: rgb(var(--custom-elevated-rgb, 8 13 20) / 82%);
   backdrop-filter: blur(6px);
 }
 
@@ -266,7 +267,7 @@
   min-height: 30px;
   place-items: center;
   padding: 0 8px;
-  border: 1px solid rgb(0 255 242 / 32%);
+  border: 1px solid rgb(var(--custom-accent-rgb, 0 255 242) / 32%);
   border-radius: var(--radius-sm);
   background: var(--color-accent-soft);
   color: var(--color-accent);
@@ -297,7 +298,7 @@
   width: 73%;
   height: 1px;
   transform-origin: left center;
-  background: linear-gradient(90deg, transparent, rgb(0 255 242 / 40%), var(--color-accent));
+  background: linear-gradient(90deg, transparent, rgb(var(--custom-accent-rgb, 0 255 242) / 40%), var(--color-accent));
 }
 
 .mode-motif-campaign .trajectory:nth-child(1) { transform: rotate(-15deg); }
@@ -326,8 +327,8 @@
   width: 78px;
   height: 78px;
   transform: translateY(-50%) rotate(45deg);
-  border: 1px solid rgb(0 255 242 / 60%);
-  background: rgb(0 255 242 / 5%);
+  border: 1px solid rgb(var(--custom-accent-rgb, 0 255 242) / 60%);
+  background: rgb(var(--custom-accent-rgb, 0 255 242) / 5%);
   box-shadow: var(--bloom-accent-sm);
 }
 
@@ -336,7 +337,7 @@
   position: absolute;
   inset: 21px;
   border: 1px solid var(--color-accent);
-  background: rgb(0 255 242 / 12%);
+  background: rgb(var(--custom-accent-rgb, 0 255 242) / 12%);
 }
 
 /* Typing Test stream motif */
@@ -394,18 +395,18 @@
 .mode-motif-endless .ring {
   position: absolute;
   inset: 50%;
-  border: 1px solid rgb(0 255 242 / 25%);
+  border: 1px solid rgb(var(--custom-accent-rgb, 0 255 242) / 25%);
   border-radius: 50%;
   transform: translate(-50%, -50%);
 }
 
-.mode-motif-endless .ring:nth-child(1) { width: 68px; height: 68px; border-color: rgb(0 255 242 / 72%); }
+.mode-motif-endless .ring:nth-child(1) { width: 68px; height: 68px; border-color: rgb(var(--custom-accent-rgb, 0 255 242) / 72%); }
 .mode-motif-endless .ring:nth-child(2) { width: 132px; height: 132px; }
 .mode-motif-endless .ring:nth-child(3) { width: 202px; height: 202px; }
 .mode-motif-endless .ring:nth-child(4) {
   width: 246px;
   height: 246px;
-  border-color: rgb(0 255 242 / 10%);
+  border-color: rgb(var(--custom-accent-rgb, 0 255 242) / 10%);
   animation: mode-endless-pulse 4s var(--ease-emphasis) infinite;
 }
 
@@ -447,7 +448,7 @@
   height: 2px;
   transform-origin: center;
   background: linear-gradient(90deg, transparent, var(--color-accent), transparent);
-  box-shadow: 0 0 18px rgb(0 255 242 / 22%);
+  box-shadow: 0 0 18px rgb(var(--custom-accent-rgb, 0 255 242) / 22%);
 }
 
 .mode-motif-rush .rush-line:nth-child(1) { transform: translateY(-38px) skewY(-7deg); }
@@ -503,7 +504,7 @@
 .mode-motif-neutral::after { width: 126%; height: 1px; }
 
 .mode-tone-rush .mode-showcase-visual::before {
-  background: radial-gradient(circle, rgb(255 60 172 / 10%), rgb(0 255 242 / 4%) 38%, transparent 65%);
+  background: radial-gradient(circle, rgb(255 60 172 / 10%), rgb(var(--custom-accent-rgb, 0 255 242) / 4%) 38%, transparent 65%);
 }
 
 /* ---------- Mode rail ---------- */
@@ -645,7 +646,7 @@ button.mode-option { cursor: pointer; }
 }
 
 .mode-option[data-mode-id="arcade-rush"].selected {
-  background: linear-gradient(90deg, rgb(255 60 172 / 9%), rgb(0 255 242 / 5%) 55%, transparent);
+  background: linear-gradient(90deg, rgb(255 60 172 / 9%), rgb(var(--custom-accent-rgb, 0 255 242) / 5%) 55%, transparent);
 }
 
 .mode-option[data-mode-id="arcade-rush"].selected::before {
@@ -723,7 +724,7 @@ button.mode-option { cursor: pointer; }
 }
 
 .mode-home-action.selected {
-  border-color: rgb(0 255 242 / 36%);
+  border-color: rgb(var(--custom-accent-rgb, 0 255 242) / 36%);
   color: var(--color-accent);
 }
 

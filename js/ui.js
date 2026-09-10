@@ -501,6 +501,8 @@ export function renderSpeedTestRun(state, devMode = false, handlers = {}) {
             <span>WPM <b id="speed-test-wpm">0</b></span>
             <span>ACC <b id="speed-test-accuracy">100%</b></span>
             <span>RAW <b id="speed-test-raw">0</b></span>
+            <span class="speed-test-data-metric">WORDS <b id="speed-test-words">0</b></span>
+            <span class="speed-test-data-metric" title="Incorrect keystrokes, including corrected mistakes">ERRORS <b id="speed-test-errors">0</b></span>
           </div>
         </div>
       </header>
@@ -634,6 +636,8 @@ export function updateSpeedTestRun(state, nowMs) {
   }
   const values = {
     "#speed-test-wpm": Math.round(live.wpm),
+    "#speed-test-words": state.metrics.wordsCompleted,
+    "#speed-test-errors": state.metrics.incorrectKeystrokes,
     "#speed-test-raw": Math.round(live.rawWpm),
     "#speed-test-accuracy": `${live.accuracy.toFixed(1)}%`,
     "#speed-test-elapsed": `${Math.floor(activeDuration / 60000).toString().padStart(2, "0")}:${Math.floor((activeDuration % 60000) / 1000).toString().padStart(2, "0")}`,
@@ -649,6 +653,11 @@ export function updateSpeedTestRun(state, nowMs) {
     "typing-active",
     state.activeStartedAtMs != null,
   );
+
+  // Collapse configuration before the first active frame. It never starts or pauses a test.
+  if (state.activeStartedAtMs != null) {
+    document.querySelector(".speed-test-topbar [data-mode-presentation][open]")?.removeAttribute?.("open");
+  }
 
   const flow = document.querySelector("#speed-test-word-flow");
   if (flow) {
@@ -853,53 +862,174 @@ export function renderLevelSelect(
   developerSeed,
   handlers,
 ) {
-  const tiles = Array.from({ length: 100 }, (_, index) => {
-    const level = index + 1;
-    const locked = level > save.currentFurthestLevel;
-    const result = save.levels[String(level)];
-    const boss = level % 10 === 0;
-    return `
-      <button class="level-tile ${locked ? "locked" : ""} ${locked && devMode ? "dev-access" : ""} ${boss ? "boss" : ""} ${level === selectedLevel ? "selected" : ""}"
-        data-level="${level}" ${locked && !devMode ? "disabled" : ""}>
-        <span class="level-number">${String(level).padStart(2, "0")}</span>
-        <span class="level-grade">${result?.grade || (locked ? "LOCKED" : "READY")}</span>
-        ${boss ? '<span class="boss-mark">◆ BOSS</span>' : ""}
-      </button>`;
-  }).join("");
-  app().innerHTML = `
-    <section class="screen level-screen ${devMode ? "dev-enabled" : ""}">
-      <header class="level-header">
-        <div>
-          <div class="eyebrow">Mission routing</div>
-          <h1>LEVEL SELECT</h1>
-        </div>
-        ${menuButton("BACK", "back")}
+  const furthestLevel = Math.max(1, Math.min(100, Number(save.currentFurthestLevel) || 1));
+  const safeSelected = Math.max(1, Math.min(100, Number(selectedLevel) || 1));
+  const levels = save.levels || {};
+  const resultFor = (level) => levels[String(level)] || levels[level] || null;
+  const isCleared = (result) => Boolean(result?.grade && result.grade !== "Fail");
+  const clearedTotal = Object.values(levels).filter(isCleared).length;
+  const selectedResult = resultFor(safeSelected);
+  const selectedCleared = isCleared(selectedResult);
+  const selectedBoss = safeSelected % 10 === 0;
+  const selectedLocked = !devMode && safeSelected > furthestLevel;
+  const selectedState = selectedCleared
+    ? "cleared"
+    : selectedLocked
+      ? "locked"
+      : devMode && safeSelected > furthestLevel
+        ? "developer"
+        : "ready";
+  const selectedStateLabel = selectedState === "cleared"
+    ? "Cleared"
+    : selectedState === "locked"
+      ? "Locked"
+      : selectedState === "developer"
+        ? "Developer access"
+        : selectedBoss
+          ? "Boss ready"
+          : "Ready";
+  const metric = (value, suffix = "") => Number.isFinite(Number(value))
+    ? `${Number(value).toFixed(suffix ? 1 : 0)}${suffix}`
+    : "—";
+  const selectedGrade = selectedCleared ? selectedResult.grade : "—";
+  const selectedWpm = metric(selectedResult?.bestWPM ?? selectedResult?.wpm);
+  const selectedAccuracy = metric(selectedResult?.bestAccuracy ?? selectedResult?.accuracy, "%");
+
+  const sectors = Array.from({ length: 10 }, (_, sectorIndex) => {
+    const sector = sectorIndex + 1;
+    const firstLevel = sectorIndex * 10 + 1;
+    const lastLevel = firstLevel + 9;
+    const sectorLevels = Array.from({ length: 10 }, (_, offset) => firstLevel + offset);
+    const clearedCount = sectorLevels.filter((level) => isCleared(resultFor(level))).length;
+    const sectorSelected = safeSelected >= firstLevel && safeSelected <= lastLevel;
+    const sectorLocked = !devMode && firstLevel > furthestLevel;
+    const selectedBossInSector = sectorSelected && selectedBoss;
+    const sectorStatus = clearedCount === 10
+      ? "10 / 10 CLEAR"
+      : sectorLocked
+        ? "LOCKED"
+        : `${clearedCount} / 10 CLEAR`;
+    const nodes = sectorLevels.map((level) => {
+      const result = resultFor(level);
+      const cleared = isCleared(result);
+      const boss = level % 10 === 0;
+      const locked = !devMode && level > furthestLevel;
+      const developerAccess = devMode && level > furthestLevel;
+      const frontier = !devMode && level === furthestLevel && !cleared;
+      const classes = [
+        "campaign-node",
+        cleared ? "is-complete" : "",
+        boss ? "is-boss" : "",
+        locked ? "is-locked" : "",
+        developerAccess ? "dev-access is-locked" : "",
+        frontier ? "is-frontier" : "",
+        level === safeSelected ? "selected" : "",
+      ].filter(Boolean).join(" ");
+      const stateText = cleared
+        ? result.grade
+        : locked
+          ? "LOCKED"
+          : developerAccess
+            ? "DEV"
+            : boss
+              ? "BOSS"
+              : "READY";
+      const descriptor = boss ? "Boss" : "Standard mission";
+      const availability = cleared
+        ? `cleared with grade ${result.grade}`
+        : locked
+          ? "locked"
+          : developerAccess
+            ? "developer access"
+            : "ready";
+      return `<button type="button" class="${classes}" data-level="${level}"
+        ${locked ? "disabled" : ""}
+        aria-label="Level ${level}, ${descriptor}, ${availability}"
+        aria-current="${level === safeSelected ? "true" : "false"}">
+          <span class="campaign-node-marker" aria-hidden="true"><span class="campaign-node-number">${String(level).padStart(2, "0")}</span></span>
+          <span class="campaign-node-state">${stateText}</span>
+        </button>`;
+    }).join("");
+    return `<section class="campaign-sector${sectorSelected ? " is-current" : ""}${selectedBossInSector ? " has-boss-selection" : ""}${sectorLocked ? " is-locked" : ""}" data-campaign-sector="${sector}" aria-label="Sector ${sector}, levels ${firstLevel} to ${lastLevel}">
+      <header class="campaign-sector-header">
+        <span class="campaign-sector-kicker">Sector ${String(sector).padStart(2, "0")}</span>
+        <strong>${String(firstLevel).padStart(2, "0")}–${String(lastLevel).padStart(2, "0")}</strong>
+        <span>${sectorStatus}</span>
       </header>
-      <div class="level-tutorial-actions">
-        ${tutorialHelpButton("campaign", "Campaign")}
-        ${selectedLevel % 10 === 0 ? tutorialHelpButton("boss", "Boss battles") : ""}
-      </div>
-      ${devMode
-    ? renderDevPanel(selectedLevel, bossWordBank, developerSeed)
-    : ""}
-      <div class="level-detail">
-        <span>Type every incoming word before it reaches the core.</span>
-      </div>
-      <div class="level-grid-scroll">
-        <div class="level-grid" id="level-grid">${tiles}</div>
+      <div class="campaign-sector-track">${nodes}</div>
+    </section>`;
+  }).join("");
+
+  app().innerHTML = `
+    <section class="screen level-screen campaign-progress-screen ${devMode ? "dev-enabled" : ""}">
+      <div class="campaign-progress-shell">
+        <header class="campaign-progress-topline">
+          ${screenBackButton()}
+          <div class="campaign-progress-context"><strong>WORDSTRIKE</strong><span>CAMPAIGN ROUTE</span></div>
+          <div class="campaign-progress-count">UNLOCKED <strong>${devMode ? 100 : furthestLevel}</strong><span>/ 100</span></div>
+        </header>
+
+        <div class="campaign-progress-overview">
+          <div class="campaign-progress-intro">
+            <p class="campaign-progress-kicker">Progression map</p>
+            <h1>Campaign Route</h1>
+            <p class="campaign-progress-lead">Advance through ten sectors of increasing pressure. Each sector ends in a boss encounter; cleared missions keep their grade on the route.</p>
+            <div class="campaign-progress-tools">
+              ${tutorialHelpButton("campaign", "Campaign")}
+              ${selectedBoss ? tutorialHelpButton("boss", "Boss battles") : ""}
+            </div>
+          </div>
+
+          <aside class="campaign-mission-briefing${selectedBoss ? " is-boss" : ""}" aria-label="Selected campaign mission">
+            <div class="campaign-mission-heading">
+              <span class="campaign-mission-label">Selected mission</span>
+              <strong>${selectedBoss ? "BOSS " : "LEVEL "}${String(safeSelected).padStart(2, "0")}</strong>
+            </div>
+            <span class="campaign-mission-status" data-state="${selectedState}">${selectedStateLabel}</span>
+            <div class="campaign-mission-metrics">
+              <div class="campaign-mission-metric"><span>Grade</span><strong>${selectedGrade}</strong></div>
+              <div class="campaign-mission-metric"><span>Best WPM</span><strong>${selectedWpm}</strong></div>
+              <div class="campaign-mission-metric"><span>Accuracy</span><strong>${selectedAccuracy}</strong></div>
+            </div>
+            <div class="campaign-mission-command"><kbd>ENTER</kbd><span>${selectedLocked ? "Mission unavailable" : selectedBoss ? "Launch boss encounter" : "Launch selected mission"}</span></div>
+          </aside>
+        </div>
+
+        <div class="campaign-route-scroll" data-campaign-route-scroll>
+          ${devMode ? renderDevPanel(safeSelected, bossWordBank, developerSeed) : ""}
+          <div class="campaign-route" id="campaign-route" aria-label="Campaign progression map">${sectors}</div>
+        </div>
+
+        <footer class="campaign-progress-footer">
+          <span>← → move · ↑ ↓ change row · Enter launch · Esc modes</span>
+          <span>${clearedTotal} missions cleared</span>
+        </footer>
       </div>
     </section>`;
+
   app().querySelector('[data-action="back"]').onclick = handlers.back;
   const campaignHelp = app().querySelector('[data-tutorial-help="campaign"]');
   const bossHelp = app().querySelector('[data-tutorial-help="boss"]');
   if (campaignHelp) campaignHelp.onclick = handlers.helpCampaign;
   if (bossHelp) bossHelp.onclick = handlers.helpBoss;
-  app().querySelectorAll(".level-tile:not(:disabled)").forEach((tile) => {
-    tile.onclick = () => handlers.select(Number(tile.dataset.level));
+  app().querySelectorAll(".campaign-node:not(:disabled)").forEach((node) => {
+    node.onclick = () => handlers.select(Number(node.dataset.level));
   });
-  const selectedTile = app().querySelector(".level-tile.selected");
-  selectedTile?.focus({ preventScroll: true });
-  selectedTile?.scrollIntoView({ block: "nearest", inline: "nearest" });
+  const selectedNode = app().querySelector(".campaign-node.selected");
+  selectedNode?.focus?.({ preventScroll: true });
+  const scrollOwner = app().querySelector("[data-campaign-route-scroll]");
+  if (selectedNode && scrollOwner) {
+    const ownerRect = scrollOwner.getBoundingClientRect?.();
+    const nodeRect = selectedNode.getBoundingClientRect?.();
+    if (ownerRect && nodeRect) {
+      const inset = 18;
+      if (nodeRect.bottom > ownerRect.bottom - inset) {
+        scrollOwner.scrollTop += nodeRect.bottom - ownerRect.bottom + inset;
+      } else if (nodeRect.top < ownerRect.top + inset) {
+        scrollOwner.scrollTop += nodeRect.top - ownerRect.top - inset;
+      }
+    }
+  }
 
   if (devMode) {
     const input = app().querySelector("#dev-level-input");

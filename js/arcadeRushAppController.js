@@ -1,3 +1,4 @@
+import { presentationEffectsReduced } from "./customization.js";
 import {
   ARCADE_RUSH_MODE_ID,
   ARCADE_RUSH_UI_ACTIONS,
@@ -139,7 +140,7 @@ function createRenderer(root, getSettings) {
     void surface.offsetWidth;
     surface.classList.add("damage-flash");
     const settings = typeof getSettings === "function" ? getSettings() || {} : {};
-    if (settings.screenShake !== false && typeof surface.animate === "function") {
+    if (settings.screenShake !== false && !presentationEffectsReduced(surface) && typeof surface.animate === "function") {
       surface.animate([
         { transform: "translate(0,0)" },
         { transform: "translate(-4px,2px)" },

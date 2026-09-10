@@ -1,3 +1,4 @@
+/* P1: palette-aware color values; literal fallbacks preserve the certified default. */
 /* =========================================================
    WORDSTRIKE UI1 — CYBER-ATHLETIC DESIGN SYSTEM
    Loaded after legacy style.css so UI2–UI12 can migrate screen-by-screen.
@@ -30,26 +31,26 @@
   --tracking-micro: 0.11em;
 
   /* Semantic color roles — legacy variables remain intact. */
-  --color-bg: #0a0e14;
-  --color-bg-elevated: #0e141c;
-  --color-bg-overlay: rgb(3 7 11 / 84%);
-  --color-surface-1: #101720;
-  --color-surface-2: #151f2a;
-  --color-surface-hover: #1b2835;
-  --color-surface-active: #1d303a;
+  --color-bg: var(--custom-bg, #0a0e14);
+  --color-bg-elevated: var(--custom-elevated, #0e141c);
+  --color-bg-overlay: rgb(var(--custom-overlay-rgb, 3 7 11) / 84%);
+  --color-surface-1: var(--custom-surface-1, #101720);
+  --color-surface-2: var(--custom-surface-2, #151f2a);
+  --color-surface-hover: var(--custom-hover, #1b2835);
+  --color-surface-active: var(--custom-active, #1d303a);
 
   --color-text-primary: #edf4f7;
   --color-text-secondary: #c1cbd2;
   --color-text-muted: #8f9ba5;
   --color-text-disabled: #65717c;
 
-  --color-border-subtle: rgb(142 160 174 / 16%);
-  --color-border-default: rgb(142 160 174 / 28%);
-  --color-border-strong: rgb(176 193 205 / 44%);
+  --color-border-subtle: rgb(var(--custom-border-rgb, 142 160 174) / 16%);
+  --color-border-default: rgb(var(--custom-border-rgb, 142 160 174) / 28%);
+  --color-border-strong: rgb(var(--custom-border-strong-rgb, 176 193 205) / 44%);
 
-  --color-accent: #00fff2;
-  --color-accent-soft: rgb(0 255 242 / 10%);
-  --color-accent-hover: rgb(0 255 242 / 16%);
+  --color-accent: var(--custom-accent, #00fff2);
+  --color-accent-soft: rgb(var(--custom-accent-rgb, 0 255 242) / 10%);
+  --color-accent-hover: rgb(var(--custom-accent-rgb, 0 255 242) / 16%);
   --color-special: #ff3cac;
   --color-special-soft: rgb(255 60 172 / 10%);
   --color-danger: #ff4757;
@@ -94,8 +95,8 @@
   --shadow-elevation-subtle: 0 6px 18px rgb(0 0 0 / 18%);
   --shadow-elevation-medium: 0 14px 36px rgb(0 0 0 / 26%);
   --shadow-elevation-overlay: 0 28px 80px rgb(0 0 0 / 44%);
-  --bloom-accent-sm: 0 0 14px rgb(0 255 242 / 16%);
-  --bloom-accent-lg: 0 0 34px rgb(0 255 242 / 24%);
+  --bloom-accent-sm: 0 0 14px rgb(var(--custom-accent-rgb, 0 255 242) / 16%);
+  --bloom-accent-lg: 0 0 34px rgb(var(--custom-accent-rgb, 0 255 242) / 24%);
   --bloom-special: 0 0 28px rgb(255 60 172 / 22%);
   --bloom-danger: 0 0 24px rgb(255 71 87 / 24%);
   --bloom-success: 0 0 24px rgb(76 255 142 / 20%);
@@ -121,7 +122,7 @@ body {
   line-height: var(--leading-body);
   color: var(--color-text-primary);
   background:
-    radial-gradient(circle at 50% 42%, rgb(0 255 242 / 5%), transparent 38%),
+    radial-gradient(circle at 50% 42%, rgb(var(--custom-accent-rgb, 0 255 242) / 5%), transparent 38%),
     radial-gradient(circle at 84% 18%, rgb(255 60 172 / 2.5%), transparent 26%),
     linear-gradient(rgb(255 255 255 / 1%) 1px, transparent 1px),
     linear-gradient(90deg, rgb(255 255 255 / 1%) 1px, transparent 1px),
@@ -294,7 +295,7 @@ select {
 }
 
 .arcade-button.selected {
-  border-color: rgb(0 255 242 / 52%);
+  border-color: rgb(var(--custom-accent-rgb, 0 255 242) / 52%);
   background: var(--color-accent-soft);
   color: var(--color-accent);
   box-shadow: inset 2px 0 var(--color-accent);
@@ -341,46 +342,17 @@ select {
   filter: none;
 }
 
-.level-tile {
-  border-color: var(--color-border-default);
-  border-radius: var(--radius-md);
-  background: var(--color-surface-1);
-  box-shadow: none;
-  transition:
-    background-color var(--motion-fast) var(--ease-standard),
-    border-color var(--motion-fast) var(--ease-standard),
-    box-shadow var(--motion-fast) var(--ease-standard),
-    transform var(--motion-fast) var(--ease-standard);
-}
-
-.level-tile:hover,
-.level-tile:focus-visible {
-  border-color: var(--color-border-strong);
-  background: var(--color-surface-hover);
-  box-shadow: var(--shadow-elevation-subtle);
-}
-
-.level-tile.selected {
-  border-color: rgb(0 255 242 / 48%);
-  background: var(--color-accent-soft);
-  box-shadow: inset 2px 0 var(--color-accent);
-}
-
-.level-tile.boss {
-  border-color: rgb(255 60 172 / 42%);
-}
-
 :is(.hud, .endless-hud, .speed-test-topbar) {
   border-bottom-width: 1px;
   border-bottom-color: var(--color-border-default);
-  background: rgb(8 13 20 / 94%);
+  background: rgb(var(--custom-elevated-rgb, 8 13 20) / 94%);
   box-shadow: var(--shadow-elevation-subtle);
 }
 
 .boss-hud {
   border-bottom-width: 1px;
   border-bottom-color: rgb(255 60 172 / 38%);
-  background: rgb(8 13 20 / 94%);
+  background: rgb(var(--custom-elevated-rgb, 8 13 20) / 94%);
   box-shadow: var(--shadow-elevation-subtle);
 }
 
@@ -619,7 +591,7 @@ select {
 }
 
 .ui-toggle > input:checked + .ui-toggle-track {
-  border-color: rgb(0 255 242 / 48%);
+  border-color: rgb(var(--custom-accent-rgb, 0 255 242) / 48%);
   background: var(--color-accent-soft);
 }
 
@@ -873,7 +845,7 @@ select {
 .ui-hud-surface {
   border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-md);
-  background: rgb(10 14 20 / 78%);
+  background: rgb(var(--custom-bg-rgb, 10 14 20) / 78%);
   box-shadow: var(--shadow-elevation-subtle);
 }
 
@@ -925,8 +897,7 @@ select {
   .screen-back-button,
   .gameplay-pause-button,
   .gameplay-control-button,
-  .tutorial-help-button,
-  .level-tile {
+  .tutorial-help-button {
     transition-duration: 0.001ms;
   }
 
@@ -936,8 +907,7 @@ select {
   .screen-back-button:hover,
   .gameplay-pause-button:hover,
   .gameplay-control-button:hover,
-  .tutorial-help-button:hover,
-  .level-tile:hover {
+  .tutorial-help-button:hover {
     transform: none;
   }
 }

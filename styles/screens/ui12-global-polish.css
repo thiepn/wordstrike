@@ -1,0 +1,275 @@
+/* P1: palette-aware color values; literal fallbacks preserve the certified default. */
+/* UI12 — Final motion / audio / global consistency pass.
+   Scoped to active non-Practice product surfaces. No screen composition ownership moves here. */
+
+:root {
+  --ui12-focus-outline: 2px solid var(--color-accent, var(--custom-accent, #00fff2));
+  --ui12-focus-offset: 2px;
+}
+
+/* Keep selection readable and consistent with the player/accent semantic without crossing the Practice boundary. */
+#app > .screen:not(.practice-lab-screen)::selection,
+#app > .screen:not(.practice-lab-screen) ::selection,
+.onboarding-root::selection,
+.onboarding-root ::selection {
+  background: rgb(var(--custom-accent-rgb, 0 255 242) / 0.24);
+  color: var(--color-text-primary, #edf4f7);
+}
+
+/* All active-product controls share the same practical interaction baseline. */
+#app > .screen:not(.practice-lab-screen) :is(
+  button,
+  a[href],
+  [role="button"],
+  [role="tab"],
+  [role="switch"]
+),
+.onboarding-root :is(button, a[href], [role="button"], [role="tab"], [role="switch"]) {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+#app > .screen:not(.practice-lab-screen) :is(
+  button,
+  a[href],
+  [role="button"],
+  [role="tab"],
+  [role="switch"]
+):focus-visible,
+.onboarding-root :is(button, a[href], [role="button"], [role="tab"], [role="switch"]):focus-visible {
+  outline: var(--ui12-focus-outline);
+  outline-offset: var(--ui12-focus-offset);
+}
+
+#app > .screen:not(.practice-lab-screen) :is(
+  button,
+  [role="button"],
+  [role="tab"],
+  [role="switch"]
+):disabled,
+#app > .screen:not(.practice-lab-screen) :is(
+  button,
+  [role="button"],
+  [role="tab"],
+  [role="switch"]
+)[aria-disabled="true"] {
+  cursor: default;
+  transform: none;
+}
+
+/* Finalize common utility action rhythm without overriding gameplay/cinematic transforms. */
+#app > .screen:not(.practice-lab-screen) :is(
+  .screen-back-button,
+  .tutorial-help-button,
+  .text-action,
+  .profile-tabs button,
+  .recent-filters button,
+  .leaderboard-tabs button,
+  .leaderboard-duration-tabs button,
+  .leaderboard-actions button,
+  .settings-tutorial-grid button,
+  .settings-tutorial-resets button,
+  .toggle,
+  .ui12-sound-toggle
+) {
+  transition:
+    background-color var(--motion-fast, 140ms) var(--ease-standard, ease),
+    border-color var(--motion-fast, 140ms) var(--ease-standard, ease),
+    color var(--motion-fast, 140ms) var(--ease-standard, ease),
+    opacity var(--motion-fast, 140ms) var(--ease-standard, ease),
+    transform var(--motion-fast, 140ms) var(--ease-standard, ease),
+    box-shadow var(--motion-fast, 140ms) var(--ease-standard, ease);
+}
+
+#app > .screen:not(.practice-lab-screen) :is(
+  .profile-tabs button,
+  .recent-filters button,
+  .leaderboard-tabs button,
+  .leaderboard-duration-tabs button,
+  .text-action,
+  .toggle,
+  .ui12-sound-toggle
+):active {
+  transform: translateY(0);
+}
+
+/* ================================================================
+   AUDIO SETTING — separate category, visually aligned with UI11 switches.
+   ================================================================ */
+
+.settings-screen .ui12-audio-setting {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 1rem;
+  margin: clamp(1.25rem, 3vw, 2rem) 0;
+  padding: 1rem 0;
+  border-top: 1px solid var(--color-border-subtle, rgb(var(--custom-border-rgb, 142 160 174) / 0.16));
+  border-bottom: 1px solid var(--color-border-subtle, rgb(var(--custom-border-rgb, 142 160 174) / 0.16));
+}
+
+.settings-screen .ui12-audio-copy {
+  min-width: 0;
+}
+
+.settings-screen .ui12-section-label {
+  display: block;
+  margin-bottom: 0.35rem;
+  color: var(--color-text-muted, #8f9ba5);
+  font-size: var(--text-micro, 0.6875rem);
+  font-weight: 700;
+  letter-spacing: var(--tracking-micro, 0.11em);
+}
+
+.settings-screen .ui12-audio-setting h2 {
+  margin: 0;
+  color: var(--color-text-primary, #edf4f7);
+  font-size: clamp(1rem, 2vw, 1.2rem);
+  line-height: 1.25;
+  letter-spacing: -0.015em;
+}
+
+.settings-screen .ui12-audio-setting p {
+  max-width: 46rem;
+  margin: 0.4rem 0 0;
+  color: var(--color-text-secondary, #c1cbd2);
+  font-size: 0.78rem;
+  line-height: 1.55;
+}
+
+/* UI12 is the final accessibility/consistency layer: every Settings switch gets
+   the same 44px interaction target, including the three UI11 core toggles. */
+.settings-screen .settings-list .toggle[role="switch"],
+.settings-screen .ui12-sound-toggle[role="switch"] {
+  min-height: 44px;
+}
+
+/* Match the UI11 compact pill exactly while keeping the audio switch outside
+   UI11's authoritative .settings-list toggle set. */
+.settings-screen .ui12-sound-toggle[role="switch"] {
+  position: relative;
+  min-width: 4.25rem;
+  padding: 0 0.7rem 0 1.8rem;
+  border: 1px solid var(--ui11-line-strong, rgb(var(--custom-border-rgb, 129 144 158) / 0.28));
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.025);
+  color: var(--ui11-muted, var(--color-text-muted, #8f9ba5));
+  box-shadow: none;
+  cursor: pointer;
+  font-size: 0.6rem;
+  font-weight: 720;
+  letter-spacing: 0.07em;
+  text-align: right;
+}
+
+.settings-screen .ui12-sound-toggle[role="switch"]::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0.42rem;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  background: var(--ui11-muted, var(--color-text-muted, #8f9ba5));
+  transform: translateY(-50%);
+}
+
+.settings-screen .ui12-sound-toggle[role="switch"].on {
+  border-color: rgb(var(--custom-accent-rgb, 0 255 242) / 0.55);
+  background: rgb(var(--custom-accent-rgb, 0 255 242) / 0.065);
+  color: var(--ui11-cyan, var(--color-accent, var(--custom-accent, #00fff2)));
+}
+
+.settings-screen .ui12-sound-toggle[role="switch"].on::before {
+  background: var(--ui11-cyan, var(--color-accent, var(--custom-accent, #00fff2)));
+}
+
+/* The unavailable Mode Select entry must remain clearly legible even though it
+   is non-interactive. Avoid compounding disabled text color with heavy opacity. */
+.mode-select-screen .mode-option.coming-soon {
+  opacity: 0.8;
+}
+
+.mode-select-screen .mode-option.coming-soon.selected {
+  opacity: 1;
+}
+
+/* Mobile/touch layouts should not inherit desktop hover lift or desktop-only
+   keyboard legends. The width clause is intentional: some desktop-engine test
+   browsers and hybrid devices report pointer capabilities inconsistently. */
+@media (max-width: 680px), (hover: none), (pointer: coarse) {
+  #app > .screen:not(.practice-lab-screen) :is(
+    .arcade-button,
+    .ui-button,
+    .title-nav-action,
+    .mode-option,
+    .mode-home-action,
+    .screen-back-button,
+    .gameplay-pause-button,
+    .gameplay-control-button,
+    .tutorial-help-button,
+    .text-action,
+    .profile-tabs button,
+    .recent-filters button,
+    .leaderboard-tabs button,
+    .leaderboard-duration-tabs button,
+    .toggle,
+    .ui12-sound-toggle
+  ):hover {
+    transform: none;
+  }
+
+  .title-keyboard-hint,
+  .mode-select-hint,
+  .settings-screen .footer-hint,
+  .campaign-progress-footer > span:first-child {
+    display: none;
+  }
+
+  .campaign-progress-footer {
+    justify-content: flex-end;
+  }
+
+  .mode-showcase-command kbd,
+  .campaign-mission-command kbd,
+  .gameplay-control-button kbd {
+    display: none;
+  }
+}
+
+/* One final reduced-motion safety net for every migrated surface. It deliberately
+   excludes Practice Lab and does not remove static geometry transforms. */
+@media (prefers-reduced-motion: reduce) {
+  #app > .screen:not(.practice-lab-screen) *,
+  #app > .screen:not(.practice-lab-screen) *::before,
+  #app > .screen:not(.practice-lab-screen) *::after,
+  .onboarding-root *,
+  .onboarding-root *::before,
+  .onboarding-root *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  #app > .screen:not(.practice-lab-screen) :is(
+    .arcade-button,
+    .ui-button,
+    .title-nav-action,
+    .mode-option,
+    .mode-home-action,
+    .screen-back-button,
+    .gameplay-pause-button,
+    .gameplay-control-button,
+    .tutorial-help-button,
+    .text-action,
+    .profile-tabs button,
+    .recent-filters button,
+    .leaderboard-tabs button,
+    .leaderboard-duration-tabs button,
+    .toggle,
+    .ui12-sound-toggle
+  ):hover {
+    transform: none !important;
+  }
+}

@@ -1,0 +1,985 @@
+/* P1: palette-aware color values; literal fallbacks preserve the certified default. */
+/* UI10 — Shared Results, Pause & Onboarding
+   Presentation-only normalization. Result data, grading, routing, pause state,
+   onboarding state/versioning and Practice Lab remain owned by existing modules. */
+
+:root {
+  --ui10-cyan: var(--ui-accent, var(--primary, var(--custom-accent, #00fff2)));
+  --ui10-magenta: var(--ui-accent-special, var(--secondary, #ff3cac));
+  --ui10-danger: var(--ui-accent-danger, var(--danger, #ff4757));
+  --ui10-success: var(--ui-accent-success, var(--success, #4cff8e));
+  --ui10-bg: var(--background, var(--bg, var(--custom-bg, #0a0e14)));
+  --ui10-text: var(--text-primary, var(--text, #e8f0f5));
+  --ui10-secondary: var(--text-secondary, #bdc9d3);
+  --ui10-muted: var(--text-muted, var(--muted, #8fa0ad));
+  --ui10-line: rgb(var(--custom-border-rgb, 129 144 158) / 0.16);
+  --ui10-line-strong: rgb(var(--custom-border-rgb, 129 144 158) / 0.28);
+  --ui10-surface: rgb(255 255 255 / 0.018);
+}
+
+/* ================================================================
+   RESULTS — one quiet post-run grammar, mode-specific primary metric
+   ================================================================ */
+
+.results-screen,
+.speed-results-screen,
+.endless-results-screen,
+.arcade-rush-ui.arcade-rush-results {
+  min-height: 100dvh;
+  overflow-x: clip;
+  overflow-y: auto;
+  padding: max(1.25rem, env(safe-area-inset-top)) max(1rem, env(safe-area-inset-right)) max(1.75rem, env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left));
+  background:
+    radial-gradient(circle at 50% 20%, rgb(var(--custom-accent-rgb, 0 255 242) / 0.035), transparent 30rem),
+    var(--ui10-bg);
+}
+
+.results-panel,
+.speed-results-panel,
+.endless-results-panel,
+.arcade-rush-ui.arcade-rush-results .arcade-rush-results-card {
+  position: relative;
+  width: min(100%, 64rem);
+  min-height: 0;
+  margin: auto;
+  padding: clamp(2.1rem, 5vw, 4.8rem) clamp(0rem, 2vw, 1rem) clamp(2rem, 4vw, 3.5rem);
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.results-panel > .screen-back-button,
+.speed-results-panel > .screen-back-button,
+.endless-results-panel > .screen-back-button,
+.arcade-rush-results-card > .screen-back-button {
+  position: static;
+  display: inline-flex;
+  margin-bottom: clamp(2rem, 6vh, 4.5rem);
+}
+
+.results-panel > .eyebrow,
+.speed-results-panel > .eyebrow,
+.endless-results-panel > .eyebrow,
+.arcade-rush-results-card > .arcade-rush-result-label {
+  display: block;
+  margin: 0 0 0.75rem;
+  color: var(--ui10-muted);
+  font-size: 0.65rem;
+  font-weight: 720;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+/* Campaign: grade is the outcome. Accuracy/WPM remain supporting metrics. */
+.results-panel > .grade {
+  margin: 0 0 clamp(2rem, 5vh, 3.5rem);
+  color: var(--ui10-cyan);
+  font-family: var(--ui-font-mono, monospace);
+  font-size: clamp(5rem, 17vw, 10rem);
+  font-weight: 690;
+  line-height: 0.8;
+  letter-spacing: -0.08em;
+  text-shadow: none;
+}
+
+.results-panel > .grade.fail {
+  color: var(--ui10-danger);
+}
+
+.results-panel > .grade[class*="grade-s"] {
+  color: var(--ui10-magenta);
+}
+
+/* Typing: WPM is primary, accuracy next, raw intentionally tertiary. */
+.speed-results-panel > h1,
+.endless-results-panel > h1 {
+  margin: 0 0 clamp(1.7rem, 4vh, 3rem);
+  color: var(--ui10-text);
+  font-size: clamp(2rem, 5.5vw, 4rem);
+  font-weight: 690;
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+}
+
+.speed-result-headline,
+.endless-result-headline,
+.results-panel .stats-grid,
+.arcade-rush-result-grid {
+  display: grid;
+  gap: 0;
+  margin: 0 0 clamp(1.8rem, 5vh, 3.25rem);
+  border-top: 1px solid var(--ui10-line-strong);
+  border-bottom: 1px solid var(--ui10-line);
+}
+
+.speed-result-headline {
+  grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr) minmax(0, 0.7fr);
+}
+
+.endless-result-headline {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.results-panel .stats-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.arcade-rush-result-grid {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.speed-result-headline > div,
+.endless-result-headline > div,
+.results-panel .stat,
+.arcade-rush-result-grid .arcade-rush-stat {
+  min-width: 0;
+  padding: clamp(1rem, 3vw, 1.45rem) clamp(0.65rem, 2vw, 1.1rem);
+  border: 0;
+  border-right: 1px solid var(--ui10-line);
+  background: transparent;
+}
+
+.speed-result-headline > div:first-child,
+.endless-result-headline > div:first-child,
+.results-panel .stat:first-child,
+.arcade-rush-result-grid .arcade-rush-stat:first-child {
+  padding-left: 0;
+}
+
+.speed-result-headline > div:last-child,
+.endless-result-headline > div:last-child,
+.results-panel .stat:nth-child(3n),
+.arcade-rush-result-grid .arcade-rush-stat:last-child {
+  border-right: 0;
+}
+
+.speed-result-headline span,
+.endless-result-headline span,
+.results-panel .stat .micro-label,
+.arcade-rush-result-grid .arcade-rush-stat span {
+  display: block;
+  margin: 0 0 0.45rem;
+  color: var(--ui10-muted);
+  font-size: 0.56rem;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.speed-result-headline strong,
+.endless-result-headline strong,
+.results-panel .stat strong,
+.arcade-rush-result-grid .arcade-rush-stat strong {
+  display: block;
+  overflow: hidden;
+  color: var(--ui10-text);
+  font-family: var(--ui-font-mono, monospace);
+  font-size: clamp(1.45rem, 4vw, 2.65rem);
+  font-weight: 620;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.speed-result-headline > div:first-child strong {
+  color: var(--ui10-cyan);
+  font-size: clamp(3.6rem, 10vw, 7.4rem);
+  letter-spacing: -0.075em;
+}
+
+.speed-result-headline > div:nth-child(2) strong {
+  font-size: clamp(2.1rem, 6vw, 4.25rem);
+}
+
+.speed-result-headline > div:nth-child(3) {
+  opacity: 0.7;
+}
+
+.endless-result-headline > div:first-child strong {
+  color: var(--ui10-magenta);
+  font-size: clamp(3rem, 8vw, 5.8rem);
+}
+
+/* Arcade Rush: score is the run identity. */
+.arcade-rush-results-card .arcade-rush-result-score {
+  margin: 0 0 clamp(1.4rem, 4vh, 2.6rem);
+  color: var(--ui10-cyan);
+  font-family: var(--ui-font-mono, monospace);
+  font-size: clamp(4rem, 14vw, 8.5rem);
+  font-weight: 660;
+  line-height: 0.82;
+  letter-spacing: -0.07em;
+  text-shadow: none;
+}
+
+.arcade-rush-ui.arcade-rush-results.failed .arcade-rush-result-score,
+.arcade-rush-ui.arcade-rush-results.failed .arcade-rush-result-label {
+  color: var(--ui10-danger);
+}
+
+/* Records are proof, not celebration. */
+.speed-records,
+.arcade-rush-new-best {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem 0.9rem;
+  width: fit-content;
+  margin: -1rem 0 clamp(1.8rem, 5vh, 3rem);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ui10-success);
+  font-size: 0.6rem;
+  font-weight: 750;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.speed-records span::before,
+.arcade-rush-new-best::before {
+  content: "↗ ";
+}
+
+.speed-result-details,
+.endless-result-details {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0;
+  margin: 0 0 1.5rem;
+  border-top: 1px solid var(--ui10-line);
+}
+
+.speed-result-details > div,
+.endless-result-details > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 3.15rem;
+  padding: 0.82rem 0.85rem 0.82rem 0;
+  border-bottom: 1px solid var(--ui10-line);
+  color: var(--ui10-muted);
+}
+
+.speed-result-details > div:nth-child(even),
+.endless-result-details > div:nth-child(even) {
+  padding-left: 0.85rem;
+  border-left: 1px solid var(--ui10-line);
+}
+
+.speed-result-details strong,
+.endless-result-details strong {
+  color: var(--ui10-secondary);
+  font-family: var(--ui-font-mono, monospace);
+  font-size: 0.82rem;
+  font-weight: 580;
+  text-align: right;
+}
+
+.endless-score-breakdown,
+.arcade-rush-breakdown,
+.result-metric-help {
+  margin: 1.5rem 0;
+  padding: 0;
+  border: 0;
+  border-top: 1px solid var(--ui10-line);
+  border-bottom: 1px solid var(--ui10-line);
+  background: transparent;
+}
+
+.endless-score-breakdown h3,
+.result-metric-help summary,
+.arcade-rush-breakdown summary {
+  min-height: 44px;
+  margin: 0;
+  padding: 0.9rem 0;
+  color: var(--ui10-muted);
+  font-size: 0.62rem;
+  font-weight: 720;
+  letter-spacing: 0.1em;
+}
+
+.endless-score-breakdown > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.65rem 0;
+  color: var(--ui10-muted);
+  font-size: 0.75rem;
+}
+
+.endless-score-breakdown > div strong {
+  color: var(--ui10-secondary);
+  font-family: var(--ui-font-mono, monospace);
+}
+
+.endless-score-breakdown > div.total strong {
+  color: var(--ui10-cyan);
+}
+
+.result-metric-help p {
+  margin: 0 0 0.75rem;
+  color: var(--ui10-secondary);
+  font-size: 0.78rem;
+  line-height: 1.6;
+}
+
+.result-metric-help p:last-child {
+  margin-bottom: 1rem;
+}
+
+/* Global submission remains a supporting post-result utility. */
+.results-panel .global-submission,
+.speed-results-panel .global-submission,
+.endless-results-panel .global-submission {
+  margin: 1.5rem 0;
+  padding: 1rem 0;
+  border: 0;
+  border-top: 1px solid var(--ui10-line);
+  border-bottom: 1px solid var(--ui10-line);
+  background: transparent;
+}
+
+.results-panel .global-submission p,
+.speed-results-panel .global-submission p,
+.endless-results-panel .global-submission p {
+  color: var(--ui10-secondary);
+}
+
+.results-panel .global-submission-actions,
+.speed-results-panel .global-submission-actions,
+.endless-results-panel .global-submission-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+/* Action order is preserved; the first run-again/advance action is simply stronger. */
+.results-panel > .menu-list,
+.speed-results-panel > .menu-list,
+.endless-results-panel > .menu-list,
+.arcade-rush-results-card > .arcade-rush-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin-top: clamp(1.8rem, 5vh, 3rem);
+}
+
+.results-panel > .menu-list .arcade-button,
+.speed-results-panel > .menu-list .arcade-button,
+.endless-results-panel > .menu-list .arcade-button,
+.arcade-rush-results-card > .arcade-rush-actions .arcade-rush-action {
+  min-height: 44px;
+  min-width: 9rem;
+  padding: 0.7rem 1rem;
+  border: 1px solid var(--ui10-line-strong);
+  border-radius: var(--ui-radius-sm, 4px);
+  background: transparent;
+  box-shadow: none;
+  color: var(--ui10-secondary);
+}
+
+.results-panel > .menu-list .arcade-button:first-child,
+.speed-results-panel > .menu-list .arcade-button:first-child,
+.endless-results-panel > .menu-list .arcade-button:first-child,
+.arcade-rush-results-card > .arcade-rush-actions .arcade-rush-action:first-child {
+  border-color: var(--ui10-cyan);
+  background: var(--ui10-cyan);
+  color: var(--ui10-bg);
+}
+
+.results-panel > .menu-list .arcade-button.selected:not(:first-child),
+.speed-results-panel > .menu-list .arcade-button.selected:not(:first-child),
+.endless-results-panel > .menu-list .arcade-button.selected:not(:first-child),
+.arcade-rush-results-card > .arcade-rush-actions .arcade-rush-action:focus-visible {
+  border-color: var(--ui10-cyan);
+  color: var(--ui10-cyan);
+}
+
+/* ================================================================
+   PAUSE — same calm interruption grammar for every active mode
+   ================================================================ */
+
+.game-screen > .pause-overlay,
+.boss-screen > .pause-overlay,
+.endless-screen > .pause-overlay,
+.speed-test-screen > .pause-overlay,
+.arcade-rush-ui [data-rush-role="pause-overlay"] {
+  position: absolute;
+  z-index: 80;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: max(1rem, env(safe-area-inset-top)) max(1rem, env(safe-area-inset-right)) max(1rem, env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left));
+  overflow-y: auto;
+  background: rgb(var(--custom-overlay-rgb, 7 10 15) / 0.82);
+  backdrop-filter: blur(3px);
+}
+
+.game-screen > .pause-overlay .pause-panel,
+.boss-screen > .pause-overlay .pause-panel,
+.endless-screen > .pause-overlay .pause-panel,
+.speed-test-screen > .pause-overlay .pause-panel,
+.arcade-rush-ui [data-rush-role="pause-overlay"] .arcade-rush-overlay-card {
+  position: relative;
+  width: min(100%, 31rem);
+  padding: clamp(1.75rem, 5vw, 3rem) 0;
+  border: 0;
+  border-top: 1px solid rgb(var(--custom-accent-rgb, 0 255 242) / 0.42);
+  border-bottom: 1px solid var(--ui10-line);
+  background: transparent;
+  box-shadow: none;
+  text-align: left;
+}
+
+.pause-panel > .eyebrow,
+.arcade-rush-ui [data-rush-role="pause-overlay"] .arcade-rush-overlay-label {
+  margin: 0 0 0.55rem;
+  color: var(--ui10-muted);
+  font-size: 0.6rem;
+  font-weight: 720;
+  letter-spacing: 0.13em;
+}
+
+.pause-panel > h2,
+.arcade-rush-ui [data-rush-role="pause-overlay"] h2 {
+  margin: 0 0 clamp(1.5rem, 4vh, 2.4rem);
+  color: var(--ui10-text);
+  font-size: clamp(2.75rem, 9vw, 5rem);
+  font-weight: 680;
+  line-height: 0.9;
+  letter-spacing: -0.045em;
+}
+
+.pause-panel > .menu-list,
+.arcade-rush-ui [data-rush-role="pause-overlay"] .arcade-rush-actions {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.45rem;
+}
+
+.pause-panel > .menu-list .arcade-button,
+.arcade-rush-ui [data-rush-role="pause-overlay"] .arcade-rush-action {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 48px;
+  margin: 0;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid transparent;
+  border-bottom-color: var(--ui10-line);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  color: var(--ui10-secondary);
+  text-align: left;
+}
+
+.pause-panel > .menu-list .arcade-button:first-child,
+.arcade-rush-ui [data-rush-role="pause-overlay"] .arcade-rush-action:first-child {
+  border-color: rgb(var(--custom-accent-rgb, 0 255 242) / 0.38);
+  background: rgb(var(--custom-accent-rgb, 0 255 242) / 0.045);
+  color: var(--ui10-cyan);
+}
+
+.pause-panel > .menu-list .arcade-button.selected,
+.pause-panel > .menu-list .arcade-button:focus-visible,
+.arcade-rush-ui [data-rush-role="pause-overlay"] .arcade-rush-action:focus-visible {
+  border-color: var(--ui10-cyan);
+  color: var(--ui10-cyan);
+  outline: 0;
+}
+
+.pause-panel > .footer-hint,
+.arcade-rush-ui [data-rush-role="pause-overlay"] p {
+  margin: 1.1rem 0 0;
+  color: var(--ui10-muted);
+  font-size: 0.58rem;
+  letter-spacing: 0.1em;
+}
+
+/* ================================================================
+   ONBOARDING — instructional modal, not a neon terminal window
+   ================================================================ */
+
+.onboarding-backdrop {
+  position: fixed;
+  z-index: 120;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: max(1rem, env(safe-area-inset-top)) max(1rem, env(safe-area-inset-right)) max(1rem, env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left));
+  overflow-y: auto;
+  background: rgb(var(--custom-overlay-rgb, 7 10 15) / 0.88);
+  backdrop-filter: blur(4px);
+}
+
+.onboarding-dialog {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(13rem, 0.72fr);
+  grid-template-areas:
+    "copy visual"
+    "actions actions";
+  gap: clamp(1.5rem, 5vw, 4rem);
+  width: min(100%, 58rem);
+  max-height: min(48rem, calc(100dvh - 2rem));
+  overflow-y: auto;
+  padding: clamp(1.5rem, 4.5vw, 3.4rem);
+  border: 1px solid var(--ui10-line-strong);
+  border-top-color: rgb(var(--custom-accent-rgb, 0 255 242) / 0.5);
+  border-radius: var(--ui-radius-md, 6px);
+  background: rgb(var(--custom-bg-rgb, 10 14 20) / 0.98);
+  box-shadow: 0 2rem 5rem rgb(0 0 0 / 0.34);
+}
+
+.onboarding-dialog:focus {
+  outline: none;
+}
+
+.onboarding-close {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: var(--ui-radius-sm, 4px);
+  background: transparent;
+  color: var(--ui10-muted);
+  font-size: 1.35rem;
+  cursor: pointer;
+}
+
+.onboarding-close:hover,
+.onboarding-close:focus-visible {
+  border-color: var(--ui10-line-strong);
+  color: var(--ui10-cyan);
+  outline: none;
+}
+
+.onboarding-copy {
+  grid-area: copy;
+  align-self: center;
+  min-width: 0;
+}
+
+.onboarding-copy > .eyebrow {
+  display: block;
+  margin: 0 0 0.75rem;
+  color: var(--ui10-cyan);
+  font-size: 0.61rem;
+  font-weight: 740;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.onboarding-copy > h2 {
+  max-width: 13ch;
+  margin: 0;
+  color: var(--ui10-text);
+  font-size: clamp(2rem, 5.5vw, 4.2rem);
+  font-weight: 680;
+  line-height: 0.98;
+  letter-spacing: -0.045em;
+  text-wrap: balance;
+}
+
+.onboarding-copy > p {
+  max-width: 46rem;
+  margin: 1.15rem 0 0;
+  color: var(--ui10-secondary);
+  font-size: clamp(0.92rem, 1.6vw, 1.03rem);
+  line-height: 1.7;
+}
+
+.onboarding-helper {
+  display: block;
+  margin-top: 1rem;
+  color: var(--ui10-muted);
+  font-size: 0.75rem;
+  line-height: 1.55;
+}
+
+.onboarding-control-cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0;
+  margin-top: 1.35rem;
+  border-top: 1px solid var(--ui10-line);
+}
+
+.onboarding-control-cards > div {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 3.25rem;
+  padding: 0.65rem 0.75rem 0.65rem 0;
+  border-bottom: 1px solid var(--ui10-line);
+}
+
+.onboarding-control-cards > div:nth-child(even) {
+  padding-left: 0.75rem;
+  border-left: 1px solid var(--ui10-line);
+}
+
+.onboarding-control-cards kbd,
+.onboarding-navigation-visual kbd,
+.onboarding-navigation-visual strong {
+  min-width: 2.25rem;
+  padding: 0.3rem 0.4rem;
+  border: 1px solid var(--ui10-line-strong);
+  border-radius: 3px;
+  background: var(--ui10-surface);
+  color: var(--ui10-text);
+  font-family: var(--ui-font-mono, monospace);
+  font-size: 0.68rem;
+  text-align: center;
+}
+
+.onboarding-control-cards span {
+  color: var(--ui10-secondary);
+  font-size: 0.75rem;
+}
+
+.onboarding-visual {
+  grid-area: visual;
+  align-self: stretch;
+  display: grid;
+  place-items: center;
+  min-height: 15rem;
+  padding: clamp(1rem, 3vw, 2rem);
+  border-left: 1px solid var(--ui10-line);
+  background: radial-gradient(circle at 50% 50%, rgb(var(--custom-accent-rgb, 0 255 242) / 0.04), transparent 70%);
+}
+
+.onboarding-word-stream,
+.onboarding-boss-visual,
+.onboarding-ranking,
+.onboarding-local-visual,
+.onboarding-approach,
+.onboarding-navigation-visual,
+.onboarding-growth {
+  color: var(--ui10-muted);
+  font-family: var(--ui-font-mono, monospace);
+}
+
+.onboarding-word-stream strong,
+.onboarding-boss-visual strong,
+.onboarding-local-visual strong,
+.onboarding-approach .demo-core {
+  color: var(--ui10-text);
+}
+
+.onboarding-word-stream i,
+.onboarding-boss-visual i,
+.onboarding-word-stream .done {
+  color: var(--ui10-cyan);
+  font-style: normal;
+}
+
+.onboarding-action-dock {
+  grid-area: actions;
+  display: grid;
+  grid-template-columns: minmax(6rem, auto) 1fr;
+  align-items: center;
+  gap: 0.75rem 1rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--ui10-line);
+}
+
+.onboarding-progress {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.onboarding-progress > span {
+  display: block;
+  width: clamp(1rem, 3vw, 2rem);
+  height: 2px;
+  background: rgb(var(--custom-border-rgb, 129 144 158) / 0.22);
+}
+
+.onboarding-progress > span.active {
+  background: var(--ui10-cyan);
+  box-shadow: none;
+}
+
+.onboarding-actions {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.onboarding-actions button,
+.onboarding-secondary,
+.onboarding-tertiary {
+  min-height: 44px;
+}
+
+.onboarding-actions .arcade-button,
+.onboarding-actions .text-action,
+.onboarding-secondary,
+.onboarding-tertiary {
+  margin: 0;
+  padding: 0.65rem 0.9rem;
+  border-radius: var(--ui-radius-sm, 4px);
+  box-shadow: none;
+}
+
+.onboarding-actions .arcade-button.primary {
+  border-color: var(--ui10-cyan);
+  background: var(--ui10-cyan);
+  color: var(--ui10-bg);
+}
+
+.onboarding-actions .arcade-button.secondary,
+.onboarding-actions .text-action,
+.onboarding-secondary,
+.onboarding-tertiary {
+  border: 1px solid var(--ui10-line-strong);
+  background: transparent;
+  color: var(--ui10-secondary);
+}
+
+.onboarding-secondary,
+.onboarding-tertiary {
+  grid-column: 2;
+  justify-self: end;
+  width: fit-content;
+}
+
+.onboarding-actions button:focus-visible,
+.onboarding-secondary:focus-visible,
+.onboarding-tertiary:focus-visible {
+  border-color: var(--ui10-cyan);
+  outline: 2px solid rgb(var(--custom-accent-rgb, 0 255 242) / 0.25);
+  outline-offset: 2px;
+}
+
+/* ================================================================
+   Responsive / constrained layouts
+   ================================================================ */
+
+@media (max-width: 760px) {
+  .results-screen,
+  .speed-results-screen,
+  .endless-results-screen,
+  .arcade-rush-ui.arcade-rush-results {
+    padding-inline: max(0.75rem, env(safe-area-inset-left));
+  }
+
+  .results-panel,
+  .speed-results-panel,
+  .endless-results-panel,
+  .arcade-rush-ui.arcade-rush-results .arcade-rush-results-card {
+    padding-top: 1.5rem;
+  }
+
+  .results-panel > .screen-back-button,
+  .speed-results-panel > .screen-back-button,
+  .endless-results-panel > .screen-back-button {
+    margin-bottom: 2rem;
+  }
+
+  .speed-result-headline,
+  .endless-result-headline {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .speed-result-headline > div:first-child,
+  .endless-result-headline > div:first-child {
+    grid-column: 1 / -1;
+    border-right: 0;
+    border-bottom: 1px solid var(--ui10-line);
+  }
+
+  .speed-result-headline > div:nth-child(2),
+  .endless-result-headline > div:nth-child(2) {
+    padding-left: 0;
+  }
+
+  .results-panel .stats-grid,
+  .arcade-rush-result-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .results-panel .stat:nth-child(3n),
+  .arcade-rush-result-grid .arcade-rush-stat:last-child {
+    border-right: 1px solid var(--ui10-line);
+  }
+
+  .results-panel .stat:nth-child(even),
+  .arcade-rush-result-grid .arcade-rush-stat:nth-child(even) {
+    border-right: 0;
+  }
+
+  .results-panel .stat:nth-child(odd),
+  .arcade-rush-result-grid .arcade-rush-stat:nth-child(odd) {
+    padding-left: 0;
+  }
+
+  .results-panel > .menu-list,
+  .speed-results-panel > .menu-list,
+  .endless-results-panel > .menu-list,
+  .arcade-rush-results-card > .arcade-rush-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .results-panel > .menu-list .arcade-button,
+  .speed-results-panel > .menu-list .arcade-button,
+  .endless-results-panel > .menu-list .arcade-button,
+  .arcade-rush-results-card > .arcade-rush-actions .arcade-rush-action {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .onboarding-dialog {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "copy"
+      "visual"
+      "actions";
+    gap: 1.25rem;
+    padding: 1.35rem;
+  }
+
+  .onboarding-copy > h2 {
+    max-width: 15ch;
+  }
+
+  .onboarding-visual {
+    min-height: 9rem;
+    border-top: 1px solid var(--ui10-line);
+    border-left: 0;
+  }
+
+  .onboarding-action-dock {
+    grid-template-columns: 1fr;
+  }
+
+  .onboarding-actions {
+    justify-content: stretch;
+  }
+
+  .onboarding-actions button {
+    flex: 1 1 8rem;
+  }
+
+  .onboarding-secondary,
+  .onboarding-tertiary {
+    grid-column: 1;
+    justify-self: stretch;
+    width: 100%;
+  }
+}
+
+@media (max-width: 520px) {
+  .speed-result-details,
+  .endless-result-details {
+    grid-template-columns: 1fr;
+  }
+
+  .speed-result-details > div:nth-child(even),
+  .endless-result-details > div:nth-child(even) {
+    padding-left: 0;
+    border-left: 0;
+  }
+
+  .results-panel > .menu-list,
+  .speed-results-panel > .menu-list,
+  .endless-results-panel > .menu-list,
+  .arcade-rush-results-card > .arcade-rush-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .onboarding-control-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .onboarding-control-cards > div:nth-child(even) {
+    padding-left: 0;
+    border-left: 0;
+  }
+}
+
+@media (max-height: 520px) {
+  .game-screen > .pause-overlay,
+  .boss-screen > .pause-overlay,
+  .endless-screen > .pause-overlay,
+  .speed-test-screen > .pause-overlay,
+  .arcade-rush-ui [data-rush-role="pause-overlay"] {
+    place-items: start center;
+  }
+
+  .game-screen > .pause-overlay .pause-panel,
+  .boss-screen > .pause-overlay .pause-panel,
+  .endless-screen > .pause-overlay .pause-panel,
+  .speed-test-screen > .pause-overlay .pause-panel,
+  .arcade-rush-ui [data-rush-role="pause-overlay"] .arcade-rush-overlay-card {
+    padding-block: 1rem;
+  }
+
+  .pause-panel > h2,
+  .arcade-rush-ui [data-rush-role="pause-overlay"] h2 {
+    margin-bottom: 0.8rem;
+    font-size: clamp(2.2rem, 8vh, 3.25rem);
+  }
+
+  .pause-panel > .menu-list,
+  .arcade-rush-ui [data-rush-role="pause-overlay"] .arcade-rush-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .pause-panel > .footer-hint,
+  .arcade-rush-ui [data-rush-role="pause-overlay"] p {
+    margin-top: 0.55rem;
+  }
+
+  .onboarding-dialog {
+    max-height: calc(100dvh - 1rem);
+  }
+
+  .onboarding-visual {
+    min-height: 6rem;
+  }
+}
+
+/* ================================================================
+   Motion / focus / isolation
+   ================================================================ */
+
+.results-screen .arcade-button:focus-visible,
+.speed-results-screen .arcade-button:focus-visible,
+.endless-results-screen .arcade-button:focus-visible,
+.pause-overlay .arcade-button:focus-visible,
+.arcade-rush-results .arcade-rush-action:focus-visible {
+  outline: 2px solid var(--ui10-cyan);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .results-screen *,
+  .speed-results-screen *,
+  .endless-results-screen *,
+  .arcade-rush-results *,
+  .game-screen > .pause-overlay *,
+  .boss-screen > .pause-overlay *,
+  .endless-screen > .pause-overlay *,
+  .speed-test-screen > .pause-overlay *,
+  .arcade-rush-ui [data-rush-role="pause-overlay"] *,
+  .onboarding-root * {
+    animation: none !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -1,3 +1,5 @@
+import { presentationEffectsReduced } from "./customization.js";
+
 const wordElements = new Map();
 let bossPhraseElement = null;
 
@@ -9,6 +11,15 @@ export function getBossPhraseSizeClass(characterCount) {
 
 function playArea() {
   return document.querySelector("#play-area");
+}
+
+function gameplayPresentationPrefersReducedMotion(area) {
+  return Boolean(
+    area?.closest?.(".campaign-gameplay-screen, .endless-gameplay-screen") &&
+    typeof window !== "undefined" &&
+    typeof window.matchMedia === "function" &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  );
 }
 
 export function clearWordElements() {
@@ -36,7 +47,9 @@ export function createWordElement(word) {
   position.dataset.wordId = word.id;
   position.setAttribute("aria-label", word.text);
   visual.addEventListener("animationend", (event) => {
-    if (event.animationName === "wrong") visual.classList.remove("wrong");
+    if (["wrong", "campaign-word-error", "endless-word-error"].includes(event.animationName)) {
+      visual.classList.remove("wrong");
+    }
   });
   text.append(typed, remaining);
   visual.append(text);
@@ -83,12 +96,21 @@ export function updateWordElement(word, isActive, candidateState = null) {
 export function removeWordElement(word, completed = false, particlesEnabled = true) {
   const elements = wordElements.get(word.id);
   if (!elements) return;
-  if (completed && particlesEnabled) {
+  if (completed && particlesEnabled && !presentationEffectsReduced(playArea())) {
+    const area = playArea();
     const burst = document.createElement("div");
     burst.className = "burst";
     burst.style.left = `${word.x}px`;
     burst.style.top = `${word.y}px`;
-    playArea()?.append(burst);
+    if (area) {
+      const deltaX = (area.clientWidth / 2) - word.x;
+      const deltaY = (area.clientHeight / 2) - word.y;
+      const angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI);
+      const reach = Math.hypot(deltaX, deltaY);
+      burst.style.setProperty("--campaign-burst-angle", `${angle}deg`);
+      burst.style.setProperty("--campaign-burst-reach", `${reach}px`);
+      area.append(burst);
+    }
     window.setTimeout(() => burst.remove(), 350);
   }
   elements.position.remove();
@@ -113,7 +135,7 @@ export function flashDamage(screenShake = true) {
   area.classList.remove("damage-flash");
   void area.offsetWidth;
   area.classList.add("damage-flash");
-  if (screenShake) {
+  if (screenShake && !gameplayPresentationPrefersReducedMotion(area) && !presentationEffectsReduced(area)) {
     area.animate(
       [
         { transform: "translate(0, 0)" },
