@@ -72,7 +72,11 @@ jobs:
             fs.writeFileSync(path, source);
           }
           NODE
-          rm -f scripts/applyPL30.mjs .github/workflows/pl30-bootstrap.yml
+          # Keep this bootstrap workflow unchanged during the runner push; the
+          # Actions token has contents:write but not workflow-write permission.
+          # The permanent PL30 artifact workflow is installed separately after
+          # the certified implementation commit lands.
+          rm -f scripts/applyPL30.mjs .github/workflows/pl30-artifacts.yml
           rm -rf .pl30-bootstrap
           node scripts/buildPracticeSpecialDomains.mjs
           node scripts/buildPracticeSpecialDomains.mjs --validate
