@@ -1,0 +1,119 @@
+{
+  "manifestVersion": 1,
+  "formSchemaVersion": 1,
+  "generatorVersion": 1,
+  "formSetId": "WS-CONSISTENCY-EN-1",
+  "formSetVersion": 1,
+  "language": "en",
+  "partition": "training",
+  "status": "ready",
+  "formCount": 6,
+  "readyFormCount": 6,
+  "minimumReadyFormCount": 4,
+  "source": {
+    "sourceId": "ws-original-en-consistency-v1",
+    "sourceChecksum": "sha256-4b06c70f300ea07daabe4e7422335196e7032d85091c823a9e12fe10174d4e44",
+    "reviewStatus": "approved"
+  },
+  "bindings": {
+    "corpusId": "practice-en-v1",
+    "corpusVersion": 1,
+    "corpusChecksum": "sha256-28beccf65eed71519da306c129da5040a20f364aed320dc21eea2d16c2a1c404",
+    "indexSchemaVersion": 1,
+    "indexChecksum": "sha256-bb198244a6b6cefcae5cb908bf3dee6e9e52259f9ef41576ec69c429a423ff32",
+    "typabilityModelVersion": 1,
+    "typabilityFeatureVersion": 1,
+    "typabilityReferenceVersion": 1,
+    "typabilityReferenceChecksum": "sha256-94a6f90c3593ebc089211882e2d9afaf0bf46b66386cdc98dbe60c533e6dd471",
+    "frequencyReferenceVersion": 1,
+    "frequencyReferenceId": "ws-en-frequency-v1",
+    "frequencyReferenceChecksum": "sha256-b9bc8dde064335c2258844919c6dd62537f95ac4a2d5920fdd7213a9cb5d45ad"
+  },
+  "slidingWindow": {
+    "size": 600,
+    "stride": 300,
+    "maximumDifficultySpread": 0.5
+  },
+  "formsPath": "data/practice/consistency/en-v1/WS-CONSISTENCY-EN-1.forms.json",
+  "formsChecksum": "sha256-ab04d78a9547f6ca46089bf05cead59a726efde565c56b88b68ddc4e12095c0e",
+  "forms": [
+    {
+      "formId": "consistency-en-01",
+      "formHash": "sha256-1d3df01868135891e1197dba48abbc74e403e8c78b06b5d49a8d113f4c7f4041",
+      "graphemeCount": 24285,
+      "ready": true,
+      "reasons": [],
+      "warnings": [
+        "window-percentile-advisory"
+      ],
+      "availableModelWeight": 1,
+      "relativeDifficultyPercentile": 50,
+      "windowDifficultySpread": 0.22462524478255252
+    },
+    {
+      "formId": "consistency-en-02",
+      "formHash": "sha256-49372e3cd2439c319efe1fe171a41931e9b0d46b364c9a71b4c2ad4b5a10e34a",
+      "graphemeCount": 24274,
+      "ready": true,
+      "reasons": [],
+      "warnings": [
+        "window-percentile-advisory"
+      ],
+      "availableModelWeight": 1,
+      "relativeDifficultyPercentile": 50,
+      "windowDifficultySpread": 0.2401756799828949
+    },
+    {
+      "formId": "consistency-en-03",
+      "formHash": "sha256-62aab8cf7484ba272f818cd6c0f3290f2802e49d4b55fab10d700d4ac3b9e1fe",
+      "graphemeCount": 24237,
+      "ready": true,
+      "reasons": [],
+      "warnings": [
+        "window-percentile-advisory"
+      ],
+      "availableModelWeight": 1,
+      "relativeDifficultyPercentile": 50,
+      "windowDifficultySpread": 0.23192148337340876
+    },
+    {
+      "formId": "consistency-en-04",
+      "formHash": "sha256-bac5f543c31db5d93203b26bc797efd2020dea6a74bb489a54859d61bc679aaa",
+      "graphemeCount": 24434,
+      "ready": true,
+      "reasons": [],
+      "warnings": [
+        "window-percentile-advisory"
+      ],
+      "availableModelWeight": 1,
+      "relativeDifficultyPercentile": 50,
+      "windowDifficultySpread": 0.25475529731252494
+    },
+    {
+      "formId": "consistency-en-05",
+      "formHash": "sha256-8a1742f7022328fb2d55140f4ca90ced2c322cd109d4d109c7c0f277485ac644",
+      "graphemeCount": 24343,
+      "ready": true,
+      "reasons": [],
+      "warnings": [
+        "window-percentile-advisory"
+      ],
+      "availableModelWeight": 1,
+      "relativeDifficultyPercentile": 50,
+      "windowDifficultySpread": 0.21821602663524
+    },
+    {
+      "formId": "consistency-en-06",
+      "formHash": "sha256-e5c49c612f79c3798e87b1a4d0bbabd855e6753d03724d2e2a3c293af896191d",
+      "graphemeCount": 24365,
+      "ready": true,
+      "reasons": [],
+      "warnings": [
+        "window-percentile-advisory"
+      ],
+      "availableModelWeight": 1,
+      "relativeDifficultyPercentile": 50,
+      "windowDifficultySpread": 0.23883682678107512
+    }
+  ]
+}

@@ -1,0 +1,89 @@
+{
+  "manifestVersion": 1,
+  "formSchemaVersion": 1,
+  "generatorVersion": 1,
+  "formSetId": "WS-ENDURANCE-PRACTICE-EN-1",
+  "formSetVersion": 1,
+  "language": "en",
+  "partition": "training",
+  "status": "ready",
+  "formCount": 4,
+  "readyFormCount": 4,
+  "minimumReadyFormCount": 2,
+  "source": {
+    "sourceId": "ws-original-en-endurance-practice-v1",
+    "sourceChecksum": "sha256-39466cc376afbb245ec2eccd753a2f080c1ce6cc328e33b9d98c849bdc6b6939",
+    "reviewStatus": "approved"
+  },
+  "bindings": {
+    "corpusId": "practice-en-v1",
+    "corpusVersion": 1,
+    "corpusChecksum": "sha256-28beccf65eed71519da306c129da5040a20f364aed320dc21eea2d16c2a1c404",
+    "indexSchemaVersion": 1,
+    "indexChecksum": "sha256-bb198244a6b6cefcae5cb908bf3dee6e9e52259f9ef41576ec69c429a423ff32",
+    "typabilityModelVersion": 1,
+    "typabilityFeatureVersion": 1,
+    "typabilityReferenceVersion": 1,
+    "typabilityReferenceChecksum": "sha256-94a6f90c3593ebc089211882e2d9afaf0bf46b66386cdc98dbe60c533e6dd471",
+    "frequencyReferenceVersion": 1,
+    "frequencyReferenceId": "ws-en-frequency-v1",
+    "frequencyReferenceChecksum": "sha256-b9bc8dde064335c2258844919c6dd62537f95ac4a2d5920fdd7213a9cb5d45ad"
+  },
+  "slidingWindow": {
+    "size": 800,
+    "stride": 400,
+    "maximumDifficultySpread": 0.55
+  },
+  "formsPath": "data/practice/endurance/en-v1/WS-ENDURANCE-PRACTICE-EN-1.forms.json",
+  "formsChecksum": "sha256-6d78244df73fdd4e97a3c0b7e95161ae193cc91f2113a0441abccff4c7c07fc0",
+  "forms": [
+    {
+      "formId": "endurance-practice-en-01",
+      "formHash": "sha256-0a5e9d83add1eff6ee85fc805ba724092f97c9b733b64bbf8c190145bf9cad7a",
+      "graphemeCount": 52108,
+      "ready": true,
+      "reasons": [],
+      "warnings": [
+        "window-percentile-advisory"
+      ],
+      "availableModelWeight": 1,
+      "relativeDifficultyPercentile": 50,
+      "windowDifficultySpread": 0.17667375473084973
+    },
+    {
+      "formId": "endurance-practice-en-02",
+      "formHash": "sha256-385e1b0694ea007967bff5a6cfb91465738f2d9f274c6bd378b44fda7c5cba92",
+      "graphemeCount": 52120,
+      "ready": true,
+      "reasons": [],
+      "warnings": [
+        "window-percentile-advisory"
+      ],
+      "availableModelWeight": 1,
+      "relativeDifficultyPercentile": 50,
+      "windowDifficultySpread": 0.19652736809248983
+    },
+    {
+      "formId": "endurance-practice-en-03",
+      "formHash": "sha256-deb64994fcebcd595a77d20357dab604bb3cf93ab0d011ded6d89a30a619fa67",
+      "graphemeCount": 52150,
+      "ready": true,
+      "reasons": [],
+      "warnings": [],
+      "availableModelWeight": 1,
+      "relativeDifficultyPercentile": 50,
+      "windowDifficultySpread": 0.1533261492540255
+    },
+    {
+      "formId": "endurance-practice-en-04",
+      "formHash": "sha256-be688153553c65bb1fd8d4297a7a63501c82aa4a683560e3ef9f32556d01718b",
+      "graphemeCount": 52133,
+      "ready": true,
+      "reasons": [],
+      "warnings": [],
+      "availableModelWeight": 1,
+      "relativeDifficultyPercentile": 50,
+      "windowDifficultySpread": 0.15036072933927302
+    }
+  ]
+}

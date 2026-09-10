@@ -3,11 +3,11 @@ import assert from "node:assert/strict";
 import { readFile, readdir } from "node:fs/promises";
 
 test("isolated Practice imports do not touch storage, DOM listeners, timers, auth, or production registration", async () => {
-  const calls = { storage: 0, indexedDb: 0, listeners: 0, timers: 0 };
+  const calls = { storage: 0, indexedDb: 0, listeners: 0, timers: 0, fetches: 0 };
   const original = {
     localStorage: globalThis.localStorage, indexedDB: globalThis.indexedDB,
     document: globalThis.document, window: globalThis.window,
-    setTimeout: globalThis.setTimeout, setInterval: globalThis.setInterval,
+    setTimeout: globalThis.setTimeout, setInterval: globalThis.setInterval, fetch: globalThis.fetch,
   };
   Object.defineProperties(globalThis, {
     localStorage: { configurable: true, value: { getItem() { calls.storage += 1; }, setItem() { calls.storage += 1; }, removeItem() { calls.storage += 1; } } },
@@ -16,11 +16,12 @@ test("isolated Practice imports do not touch storage, DOM listeners, timers, aut
     window: { configurable: true, value: { addEventListener() { calls.listeners += 1; } } },
     setTimeout: { configurable: true, value: (...args) => { calls.timers += 1; return original.setTimeout(...args); } },
     setInterval: { configurable: true, value: (...args) => { calls.timers += 1; return original.setInterval(...args); } },
+    fetch: { configurable: true, value: async (...args) => { calls.fetches += 1; return original.fetch?.(...args); } },
   });
   try {
     const modules = ["practiceExperimentCatalog", "practiceExperimentRegistry", "practiceFeatureGate", "practiceLabRoutes", "practiceLabViewModel", "practiceLabRenderer", "practiceLabController", "practiceSessionEngine"];
     for (const name of modules) await import(new URL(`../js/practiceLab/${name}.js?audit=${name}`, import.meta.url));
-    assert.deepEqual(calls, { storage: 0, indexedDb: 0, listeners: 0, timers: 0 });
+    assert.deepEqual(calls, { storage: 0, indexedDb: 0, listeners: 0, timers: 0, fetches: 0 });
   } finally {
     for (const [key, value] of Object.entries(original)) Object.defineProperty(globalThis, key, { configurable: true, writable: true, value });
   }

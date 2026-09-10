@@ -63,8 +63,11 @@ function resolveMeasurementSession({ session, experiment, foundationAnalysis, co
   const requiredFinite = ["wpm", "accuracy", "activeDurationMs", "typedCharacterCount"];
   if (requiredFinite.some((key) => !Number.isFinite(measurement[key]))) return { session, invalid: true };
   if (!Number.isInteger(measurement.typedCharacterCount)) return { session, invalid: true };
+  const suppliedAdjusted = ["adjustedLogPerformance", "measurementSigmaLog", "measurementVarianceLog", "reliabilityWeight", "difficultyAdjustmentLog", "difficultyCoverage"].every((key) => Number.isFinite(measurement[key]));
+  if (suppliedAdjusted && (!Number.isFinite(measurement.adjustedWpm) || measurement.adjustedWpm <= 0 || Math.abs(Math.log(measurement.adjustedWpm) - measurement.adjustedLogPerformance) > 1e-8 || Math.abs(measurement.measurementVarianceLog - measurement.measurementSigmaLog ** 2) > 1e-8)) return { session, invalid: true };
   return {
     invalid: false,
+    trustedAdjustedMeasurement: suppliedAdjusted ? freezeDeep({ ...measurement }) : null,
     session: freezeDeep({
       ...session,
       wpm: measurement.wpm,
@@ -116,7 +119,23 @@ export function buildPracticeAbilityObservation({
   if (!["full", "partial", "insufficient", "unsupported-language"].includes(difficulty.status)) reasons.push("invalid-normalization");
   if (reasons.length) return assessment(channelName, "not-eligible", reasons, null, { sourceRole: evidenceRole, difficultyModelStatus: difficulty.status });
 
-  const core = buildPracticeAdjustedPerformanceObservation({
+  const supplied = resolved.trustedAdjustedMeasurement;
+  const core = supplied ? freezeDeep({
+    rawWpm: Number.isFinite(supplied.rawWpm) ? supplied.rawWpm : null,
+    wpm: measurementSession.wpm,
+    adjustedWpm: supplied.adjustedWpm,
+    adjustedLogPerformance: supplied.adjustedLogPerformance,
+    accuracy: measurementSession.accuracy,
+    activeDurationMs: measurementSession.activeDurationMs,
+    typedCharacterCount: measurementSession.typedCharacterCount,
+    difficultyIndex: Number.isFinite(supplied.difficultyIndex) ? supplied.difficultyIndex : null,
+    difficultyAdjustmentLog: supplied.difficultyAdjustmentLog,
+    difficultyModelStatus: supplied.difficultyModelStatus ?? "insufficient",
+    difficultyCoverage: supplied.difficultyCoverage,
+    measurementSigmaLog: supplied.measurementSigmaLog,
+    measurementVarianceLog: supplied.measurementVarianceLog,
+    reliabilityWeight: supplied.reliabilityWeight,
+  }) : buildPracticeAdjustedPerformanceObservation({
     wpm: measurementSession.wpm,
     rawWpm: measurementSession.rawWpm,
     accuracy: measurementSession.accuracy,

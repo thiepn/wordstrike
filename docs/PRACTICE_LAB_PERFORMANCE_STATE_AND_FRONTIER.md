@@ -174,3 +174,7 @@ PL14 performance state is a read-only readiness input to Daily Coach. Current re
 
 Daily Coach does not modify the control frontier, warm-up model, burst reserve, or any performance-state policy. Dedicated PL14 measurement protocols remain authoritative.
 
+
+## PL29 boundary — control frontier is not Endurance
+
+PL29 Endurance does not update PL14 current readiness or the control frontier. Pace/control decline observed late in a 10-minute Endurance Check is a separate time-on-task phenomenon; PL14's frontier remains the speed–control boundary established by its own controlled protocol. PL29 therefore neither infers reduced current readiness nor writes `performanceState` from Endurance results.

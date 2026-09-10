@@ -12,6 +12,9 @@
     "build:practice-typability": "node scripts/buildPracticeTypability.mjs",
     "validate:practice-typability": "node scripts/buildPracticeTypability.mjs --validate",
     "build:practice-common-words": "node scripts/buildPracticeCommonWords.mjs",
-    "test:pl28-common-words": "node --test tests/practice-common-words*.test.js"
+    "test:pl28-common-words": "node --test tests/practice-common-words*.test.js",
+    "build:practice-sustained": "node scripts/buildPracticeConsistencyEnduranceForms.mjs",
+    "validate:practice-sustained": "node scripts/buildPracticeConsistencyEnduranceForms.mjs --validate",
+    "test:pl29-sustained": "node --test tests/practice-consistency-endurance-pl29.test.js"
   }
 }

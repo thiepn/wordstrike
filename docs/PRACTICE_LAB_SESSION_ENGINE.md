@@ -547,3 +547,9 @@ PL25 advances `sessionSummary` to v13 solely to add nullable compact `coachBindi
 
 At preparation the engine verifies profile/context identity, frozen plan hash, block ordinal, planned child session ID, experiment identity, and the block-specific target/review/Real-Text contract. Assessment and Coach bindings are mutually exclusive. Child completion reconciles exactly once to the matching active Coach block; stale parent state produces a diagnostic instead of reinterpreting the child.
 
+
+## PL29 sustained-window sessions
+
+PL29 reuses the canonical Practice input/session engine and adds a bounded experiment-owned 30-second accumulator. Consistency Trainer, Endurance Practice, and Endurance Check are non-resumable in v1. Runtime pulse timers begin only after explicit session start and use the existing mount-owned non-overlapping timeout pulse.
+
+Window timing excludes a latency transition that crosses a 30-second boundary. PL9 correction episodes remain whole-session evidence; for PL29 window summaries, a cross-window correction episode leaves its initial first-pass error in the source window but contributes no window-specific correction cost. No raw passage substring, raw trace copy, or wrong string is persisted in the PL29 accumulator.

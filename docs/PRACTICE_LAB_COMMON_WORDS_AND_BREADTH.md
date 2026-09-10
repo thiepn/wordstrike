@@ -350,3 +350,7 @@ PL28 intentionally adds **0 new IndexedDB stores**, does not bump generic Practi
 The targeted PL28 suite passes **41/41** tests. It covers the prerequisite/channel contract, reference construction, PL7 word identity, English-v1 lexical restrictions, rank/band validation, canonical PL6 provenance, independent training/diagnostic display safety, governed source-snapshot integrity, Practice/Check artifact integrity, exact upstream bindings, plan/form hash identity, target-blind Check selection, coverage-first Practice selection, no weakness reads, balanced bands and microblocks, duplicate prevention, PL13 admission and exactly-once persistence, breadth derivation/comparison, per-band launch/internal metrics, import-side-effect safety, registry separation, UI/accessibility, canonical PL13 interval presentation, and stale-artifact/source isolation.
 
 Final release certification additionally requires the complete WordStrike pull-request test workflow and browser regression workflows to be green on the final head.
+
+## PL29 boundary — Common Words is not Endurance
+
+Common Words measures broad lexical-list execution. Session duration alone does not turn Common Words Practice or the 200-word Typing Breadth Check into Endurance evidence. Only the standardized hidden `endurance-check` provider can create PL13 Endurance ability observations.
