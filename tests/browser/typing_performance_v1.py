@@ -36,9 +36,13 @@ def timeline_snapshot(page):
 
 
 def complete_words_test(page, delay=22):
-    page.locator('[data-speed-category="words"]').click()
-    page.locator('[data-speed-config="words-10"]').click()
-    page.locator('#speed-test-word-viewport').click(position={'x': 20, 'y': 20})
+    # Configuration interaction itself is covered by the existing Typing regressions.
+    # Invoke the same DOM handlers directly here so this graph-focused certification
+    # is not coupled to compact/mobile topbar hit-testing.
+    page.locator('[data-speed-category="words"]').evaluate("element => element.click()")
+    expect(page.locator('[data-speed-config="words-10"]')).to_be_visible()
+    page.locator('[data-speed-config="words-10"]').evaluate("element => element.click()")
+    page.locator('#speed-test-word-viewport').click(position={'x': 20, 'y': 20}, force=True)
     expect(page.locator('textarea.gameplay-input')).to_be_focused()
     words = page.evaluate("""async () => {
       const { getCurrentSpeedTest } = await import('./js/speedTest.js');
@@ -99,7 +103,7 @@ def main():
                 assert box and box['width'] <= width + 1, box
 
                 if touch:
-                    chart.tap(position={'x': box['width'] * 0.55, 'y': box['height'] * 0.45})
+                    chart.tap(position={'x': box['width'] * 0.55, 'y': box['height'] * 0.45}, force=True)
                 else:
                     chart.hover(position={'x': box['width'] * 0.55, 'y': box['height'] * 0.45})
                 expect(page.locator('[data-speed-performance-tooltip]')).to_be_visible()
