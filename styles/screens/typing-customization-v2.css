@@ -89,11 +89,11 @@
   line-height: 1.35;
 }
 
-/* Passage width presets. Normal is deliberately much closer to Monkeytype's
-   reading width, while Wide uses nearly the whole desktop stage. */
+/* Passage width presets. Normal is meaningfully wider than the old compact
+   view; Wide is the Monkeytype-like near-full-stage option. */
 .speed-test-screen:not([data-speed-passage-width]),
 .speed-test-screen[data-speed-passage-width="normal"] {
-  --speed-test-max-width: 84rem;
+  --speed-test-max-width: 78rem;
   --speed-test-stage-inline: clamp(1rem, 4vw, 4rem);
 }
 
@@ -160,17 +160,17 @@
   }
 }
 
-/* Short landscape cannot reserve vertical space below the toolbar. Use an
-   intentional fixed sheet instead of allowing the header to expand. */
+/* Short landscape cannot reserve vertical space below the toolbar. Keep the
+   sheet below the trigger so it remains clickable and the header never reflows. */
 @media (max-height: 520px) {
   .speed-test-topbar-secondary > .mode-presentation[data-mode-presentation="typing"] > .mode-presentation-panel {
     position: fixed !important;
-    top: max(0.5rem, env(safe-area-inset-top)) !important;
+    top: max(6.75rem, calc(env(safe-area-inset-top) + 6.25rem)) !important;
     right: 0.5rem !important;
     bottom: auto !important;
     left: auto !important;
     width: min(21rem, calc(100vw - 1rem)) !important;
     max-width: calc(100vw - 1rem) !important;
-    max-height: calc(100dvh - 1rem) !important;
+    max-height: calc(100dvh - 7.25rem) !important;
   }
 }
