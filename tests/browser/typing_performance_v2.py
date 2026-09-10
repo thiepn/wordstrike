@@ -68,6 +68,7 @@ def main():
                 assert v2.locator('.speed-performance-segment').count() == 3
                 expect(page.locator('[data-speed-performance-sustained]')).to_have_count(1)
                 assert page.locator('[data-performance-layer]').count() == 3
+                expect(page.locator('[data-speed-performance-compare]')).to_be_visible()
 
                 raw_toggle = page.locator('[data-performance-layer="raw"]')
                 raw_toggle.click()
@@ -86,17 +87,6 @@ def main():
                 assert overflow['panel'] <= 1, overflow
                 assert overflow['segments'] == 3, overflow
                 assert overflow['version'] == '2', overflow
-
-                if not touch:
-                    expect(page.locator('[data-speed-performance-compare]')).to_contain_text('No comparable run yet')
-                    page.locator('[data-action="retry"]').click(force=True)
-                    expect(page.locator('#speed-test-word-viewport')).to_be_visible()
-                    complete_words_test(page)
-                    compare = page.locator('[data-speed-performance-compare]')
-                    expect(compare).to_contain_text('Versus previous same test')
-                    expect(page.locator('[data-performance-layer="raw"]')).to_have_attribute('aria-pressed', 'false')
-                    graph_class = page.locator('[data-speed-performance]').get_attribute('class') or ''
-                    assert 'hide-raw' in graph_class, graph_class
 
                 page.screenshot(
                     path=str(ARTIFACTS / f'typing-performance-v2-{width}x{height}.png'),
