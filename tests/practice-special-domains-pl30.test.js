@@ -55,7 +55,7 @@ const provenance=readJson("data/practice/provenance/sources.json");
 test("PL30 prerequisite channels and record versions remain stable inside the PL31 DB9 envelope",()=>{
   assert.ok(PRACTICE_ABILITY_CHANNELS.includes("punctuation"));
   assert.ok(PRACTICE_ABILITY_CHANNELS.includes("numbers-symbols"));
-  assert.equal(PRACTICE_DATABASE_VERSION,8);
+  assert.equal(PRACTICE_DATABASE_VERSION,9);
   assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary,13);
   assert.equal(PRACTICE_RECORD_VERSIONS.abilityState,1);
   assert.equal(PRACTICE_RECORD_VERSIONS.learningState,1);
