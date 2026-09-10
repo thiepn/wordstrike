@@ -115,6 +115,6 @@ export function createPracticeCustomTextRuntime({ repository = null, dataStore =
       });
     },
     async deleteAllCustomTexts() { const initialized = await initialize(); return repo.deleteAllCustomTexts(initialized.profile.profileId); },
-    close() { ownedDataStore?.close?.(); },
+    close() { initializedPromise = null; ownedDataStore?.close?.(); },
   });
 }

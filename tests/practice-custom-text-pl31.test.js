@@ -116,6 +116,14 @@ test("PL31 renderer window remains bounded with one global expected index", () =
   assert.ok(window.end < window.total);
 });
 
+test("PL31 controller discards confirmed dirty drafts and runtime can reopen after close", () => {
+  const controller = fs.readFileSync(new URL("../js/practiceLab/practiceLabControllerRuntimeV31.js", import.meta.url), "utf8");
+  const runtime = fs.readFileSync(new URL("../js/practiceLab/practiceCustomTextRuntime.js", import.meta.url), "utf8");
+  assert.match(controller, /const discardEditor/);
+  assert.match(controller, /if \(dirty\(\)\) discardEditor\(\)/);
+  assert.match(runtime, /initializedPromise = null; ownedDataStore/);
+});
+
 test("PL31 retention and ordinary reset code do not prune Custom Text", () => {
   const legacyRepository = fs.readFileSync(new URL("../js/practiceLab/practiceRepositoryLegacyV17.js", import.meta.url), "utf8");
   const wrapper = fs.readFileSync(new URL("../js/practiceLab/practiceRepository.js", import.meta.url), "utf8");

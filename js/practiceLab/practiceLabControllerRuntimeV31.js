@@ -35,6 +35,7 @@ export function createPracticeLabController(options = {}) {
     : Boolean(state.editor.title.trim() || state.editor.sourceText);
   const sourceDirty = () => Boolean(state.editor.customTextId) && state.editor.sourceText !== state.editor.baselineSourceText;
   const confirmDiscard = () => !dirty() || globalThis.confirm?.("Discard unsaved Custom Text changes?") !== false;
+  const discardEditor = () => { state = { ...state, editor: { ...emptyEditor(), dataLocale: state.contextDataLocale }, localeMismatch: false, errorCode: null, dirty: false }; };
 
   function attach() {
     if (listeners || !mounted) return;
@@ -224,7 +225,7 @@ export function createPracticeLabController(options = {}) {
     const action = button.dataset.practiceAction;
     if (!["back", "custom-new", "custom-open", "custom-save", "custom-delete", "custom-import", "custom-export", "custom-rebind", "custom-mode", "custom-duration", "custom-start"].includes(action)) return;
     event.stopPropagation();
-    if (action === "back") { if (confirmDiscard()) { const value = base.back(); queueMicrotask(afterRoute); return value; } return; }
+    if (action === "back") { if (confirmDiscard()) { if (dirty()) discardEditor(); const value = base.back(); queueMicrotask(afterRoute); return value; } return; }
     if (action === "custom-new") { newText(); return; }
     if (action === "custom-open") { void openSaved(button.dataset.customTextId); return; }
     if (action === "custom-save") { void save(); return; }
@@ -240,8 +241,8 @@ export function createPracticeLabController(options = {}) {
   const afterRoute = () => { if (routeId(base) === CUSTOM) void load(); else detach(); };
   return Object.freeze({
     mount(route) { mounted = true; const value = base.mount(route); queueMicrotask(afterRoute); return value; },
-    navigate(...args) { if (routeId(base) === CUSTOM && !host && !confirmDiscard()) return false; const value = base.navigate(...args); queueMicrotask(afterRoute); return value; },
-    back() { if (host) { void host.stop?.(); return true; } if (routeId(base) === CUSTOM && !confirmDiscard()) return false; const value = base.back(); queueMicrotask(afterRoute); return value; },
+    navigate(...args) { if (routeId(base) === CUSTOM && !host) { if (!confirmDiscard()) return false; if (dirty()) discardEditor(); } const value = base.navigate(...args); queueMicrotask(afterRoute); return value; },
+    back() { if (host) { void host.stop?.(); return true; } if (routeId(base) === CUSTOM) { if (!confirmDiscard()) return false; if (dirty()) discardEditor(); } const value = base.back(); queueMicrotask(afterRoute); return value; },
     getSnapshot() { const snapshot = base.getSnapshot(); return Object.freeze({ ...snapshot, customText: Object.freeze({ ...state, dirty: dirty(), sessionActive: Boolean(host) }) }); },
     subscribe(listener) { return base.subscribe(listener); },
     unmount() { mounted = false; loadEpoch += 1; startEpoch += 1; if (deriveTimer) clearTimeout(deriveTimer); detach(); if (host) { void host.exit(); host = null; } experimentRegistry.getRegistration(CUSTOM)?.runtime?.close?.(); return base.unmount(); },
