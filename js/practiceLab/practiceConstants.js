@@ -1,5 +1,6 @@
 import {
   PRACTICE_LIMITS as PRACTICE_LIMITS_V30,
+  PRACTICE_OBSOLETE_INDEXES as PRACTICE_OBSOLETE_INDEXES_V30,
   PRACTICE_STORE_DEFINITIONS as PRACTICE_STORE_DEFINITIONS_V30,
 } from "./practiceConstantsV30.js";
 
@@ -27,6 +28,11 @@ export const PRACTICE_STORE_DEFINITIONS = Object.freeze({
       Object.freeze({ name: "createdAt", keyPath: "createdAt" }),
     ],
   }),
+});
+
+export const PRACTICE_OBSOLETE_INDEXES = Object.freeze({
+  ...PRACTICE_OBSOLETE_INDEXES_V30,
+  customTexts: Object.freeze(["lastUsedAt", "normalizedTitle"]),
 });
 
 export const PRACTICE_STORE_NAMES = Object.freeze(Object.keys(PRACTICE_STORE_DEFINITIONS));
