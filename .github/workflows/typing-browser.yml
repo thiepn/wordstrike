@@ -23,6 +23,8 @@ jobs:
         run: python3 -m pip install -r tests/browser/requirements.txt
       - name: Exercise real Typing Test UI in Chromium and Firefox
         run: python3 tests/browser/typing_regressions.py
+      - name: Certify Typing Performance Timeline V1
+        run: python3 tests/browser/typing_performance_v1.py
       - name: Exercise UI8 visual hierarchy and responsive contracts
         run: python3 tests/browser/typing_ui8_visual_regressions.py
       - uses: actions/upload-artifact@v4

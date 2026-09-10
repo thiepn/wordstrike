@@ -25,7 +25,7 @@ assert.equal(auth.experimental, undefined,
 const index = readFileSync(new URL("../index.html", import.meta.url), "utf8");
 assert.match(index, /@supabase\/supabase-js@2\.116\.0/,
   "Production must load the certified Supabase browser SDK");
-assert.match(index, /js\/main\.js\?v=20260910e/,
-  "Auth-facing application code should be cache-busted after the session-completion repair");
+assert.match(index, /js\/main\.js\?v=20260910f/,
+  "Auth-facing application entry point should stay cache-busted after later releases");
 
 console.log("Google OAuth client uses current Supabase JS with the client-native implicit flow.");
