@@ -99,7 +99,7 @@ for (const redirectTo of redirects) {
 }
 
 try {
-  const response = await fetch("https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4");
+  const response = await fetch("https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0");
   result.sdk = {
     status: response.status,
     contentType: response.headers.get("content-type"),
