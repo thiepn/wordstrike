@@ -11,12 +11,12 @@ function trackingLogger(options) {
   return options?.logger ?? console;
 }
 
-function sidecarRepository(repository, capture) {
+function sidecarRepository(repository, afterCanonicalCommit) {
   return Object.freeze({
     ...repository,
     async commitCompletedPracticeSession(payload) {
       const result = await repository.commitCompletedPracticeSession(payload);
-      capture(payload, result);
+      await afterCanonicalCommit(payload, result);
       return result;
     },
   });
@@ -26,10 +26,25 @@ export function createPracticeSessionEngine(options = {}) {
   const { repository, profileId, contextId, sessionId, wallClock = () => new Date() } = options;
   if (!repository) throw new TypeError("Practice engine requires a repository");
   const logger = trackingLogger(options);
-  let canonicalCommit = null;
-  const capture = (payload, result) => { canonicalCommit = { payload, result }; };
-  const core = createPracticeSessionEngineV31({ ...options, repository: sidecarRepository(repository, capture) });
   const treatment = createPracticeTreatmentService({ repository, profileId, contextId, sessionId, wallClock, logger });
+  let core = null;
+
+  const afterCanonicalCommit = async (payload) => {
+    try {
+      await treatment.flush();
+      await treatment.afterCanonicalCommit({
+        commitPayload: payload,
+        retentionAnalysis: core?.getRetentionAnalysis?.() ?? null,
+      });
+    } catch (cause) {
+      logger?.warn?.("Treatment tracking failed after canonical Practice commit", { cause });
+    }
+  };
+
+  core = createPracticeSessionEngineV31({
+    ...options,
+    repository: sidecarRepository(repository, afterCanonicalCommit),
+  });
 
   const unsubscribeTracking = core.subscribe((snapshot, event) => {
     try { treatment.observeProgress(snapshot, event); }
@@ -52,21 +67,7 @@ export function createPracticeSessionEngine(options = {}) {
     return prepared;
   };
 
-  const complete = async (reason) => {
-    const result = await core.complete(reason);
-    try {
-      await treatment.flush();
-      if (canonicalCommit?.payload) {
-        await treatment.afterCanonicalCommit({
-          commitPayload: canonicalCommit.payload,
-          retentionAnalysis: core.getRetentionAnalysis?.() ?? null,
-        });
-      }
-    } catch (cause) {
-      logger?.warn?.("Treatment tracking failed after canonical Practice commit", { cause });
-    }
-    return result;
-  };
+  const complete = async (reason) => core.complete(reason);
 
   const abandon = async (reason = "manual-stop") => {
     const result = await core.abandon(reason);
