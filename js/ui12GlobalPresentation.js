@@ -129,38 +129,23 @@ function handleKeydown(event) {
   if (event.target?.matches?.("input, textarea, select, [contenteditable=true], .gameplay-input")) return;
   if (!audibleKeyboardSurface() || !syncAudioPreference()) return;
 
-  // Native buttons emit click for Enter/Space and are handled by the click path.
   if (["Enter", " "].includes(event.key) && event.target?.closest?.("button, a[href], [role=button], [role=tab], [role=switch]")) return;
   if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) playUiAudio("navigate");
   else if (event.key === "Escape") playUiAudio("back");
   else if (event.key === "Enter") playUiAudio("activate");
 }
 
-function enhance() {
+export function syncUi12GlobalPresentation() {
   const root = appRoot();
-  if (!root) return;
+  if (!root) return false;
   const currentScreen = root.querySelector(":scope > .screen");
   if (currentScreen && !currentScreen.classList.contains("practice-lab-screen")) {
     if (currentScreen.dataset.ui12Polished !== "true") currentScreen.dataset.ui12Polished = "true";
   }
   enhanceSettings(root.querySelector(".settings-screen"));
   syncAudioPreference();
-}
-
-let enhancementQueued = false;
-function queueEnhancement() {
-  if (enhancementQueued) return;
-  enhancementQueued = true;
-  queueMicrotask(() => {
-    enhancementQueued = false;
-    enhance();
-  });
+  return true;
 }
 
 document.addEventListener("click", handleClick, false);
 document.addEventListener("keydown", handleKeydown, false);
-
-const observer = new MutationObserver(queueEnhancement);
-const root = appRoot();
-if (root) observer.observe(root, { childList: true, subtree: true });
-enhance();
