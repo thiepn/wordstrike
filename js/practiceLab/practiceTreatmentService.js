@@ -5,6 +5,7 @@ import {
   buildPracticeConsistencyBaseline,
   buildPracticeFrontierBaseline,
   buildPracticeTargetBaseline,
+  createPendingPracticeTreatmentBaseline,
 } from "./practiceTreatmentBaseline.js";
 import { PRACTICE_TREATMENT_POLICY } from "./practiceTreatmentConstants.js";
 import {
@@ -28,6 +29,8 @@ import {
   linkPracticeTreatmentOutcomeCandidate,
   markPracticeTreatmentInterference,
 } from "./practiceTreatmentLinker.js";
+import { buildPracticeMetronomeTreatmentBaseline, createPracticeMetronomeSilentOutcomeCandidate } from "./practiceMetronomeTreatment.js";
+import { getPracticeMetronomeProtocol } from "./practiceMetronomePolicy.js";
 
 const TERMINAL = new Set(["observed", "contaminated", "expired", "incompatible", "not-applicable"]);
 const finite = Number.isFinite;
@@ -93,7 +96,7 @@ function relatedTargetIds(profileId, contextId, contentPlan, directId) {
 function treatmentComplete(identity, summary) {
   if (!summary || summary.status !== "completed") return false;
   if (identity.treatmentClass === "targeted") return summary.completionReason === "content-complete";
-  if (["real-text", "consistency-trainer", "endurance", "punctuation-capitals", "numbers-symbols"].includes(identity.experimentId)) return summary.completionReason === "time-complete";
+  if (["real-text", "consistency-trainer", "metronome-typing", "read-ahead", "endurance", "punctuation-capitals", "numbers-symbols"].includes(identity.experimentId)) return summary.completionReason === "time-complete";
   if (identity.experimentId === "common-words") return summary.completionReason === "word-target-complete";
   if (["pace-ladder", "burst-sprints"].includes(identity.experimentId)) return !["manual-stop", "navigation-away", "refresh-interruption", "error"].includes(summary.completionReason);
   return false;
@@ -135,6 +138,7 @@ async function priorConsistencyBaseline(repository, profileId, contextId, config
 
 async function preTreatmentBaseline(repository, profileId, contextId, identity, configuration, now) {
   if (identity.treatmentClass === "targeted") return null;
+  if (identity.outcomeDomain === "metronome-cadence") return createPendingPracticeTreatmentBaseline({ kind: "metronome-silent" });
   if (identity.outcomeDomain === "consistency") {
     const prior = await priorConsistencyBaseline(repository, profileId, contextId, configuration, now);
     return buildPracticeConsistencyBaseline({ result: prior?.trainingQuality ?? null, observedAt: prior?.completedAtUtc ?? null });
@@ -156,11 +160,24 @@ function contextSnapshot(baseline, performanceState) {
   });
 }
 
+function metronomeBaselineObservedAt(summary, configuration) {
+  const completed = time(summary?.completedAtUtc);
+  const activeDurationMs = Number(summary?.activeDurationMs);
+  if (completed == null || !finite(activeDurationMs)) return summary?.completedAtUtc ?? null;
+  try {
+    const baselineMs = getPracticeMetronomeProtocol(configuration?.durationMs).baselineMs;
+    return new Date(completed - Math.max(0, activeDurationMs - baselineMs)).toISOString();
+  } catch {
+    return summary?.completedAtUtc ?? null;
+  }
+}
+
 export function createPracticeTreatmentService({ repository, profileId, contextId, sessionId, wallClock = () => new Date(), logger = console } = {}) {
   if (!repository || !profileId || !contextId || !sessionId) throw new TypeError("Treatment service requires repository and session identity");
   let identity = null;
   let episode = null;
   let contentPlan = null;
+  let preparedConfiguration = {};
   let baselineCompletedAt = null;
   let queue = Promise.resolve();
 
@@ -179,6 +196,7 @@ export function createPracticeTreatmentService({ repository, profileId, contextI
 
   async function prepare({ experiment, configuration = {}, preparedContentPlan, coachBinding = null } = {}) {
     contentPlan = preparedContentPlan;
+    preparedConfiguration = configuration;
     identity = resolvePracticeTreatmentIdentity({ experiment, configuration, contentPlan, coachBinding });
     if (!identity) return null;
     const existing = await repository.getTreatmentEpisodeBySession?.(sessionId);
@@ -219,12 +237,20 @@ export function createPracticeTreatmentService({ repository, profileId, contextI
           next = markPracticeTreatmentExposureStarted(next, stamp);
           startedExposure = true;
         }
+      } else if (identity.experimentId === "metronome-typing" && !next.treatment?.exposureStartedAt && event === "input" && (snapshot?.metrics?.acceptedInsertions ?? 0) > 0) {
+        let baselineMs = Infinity;
+        try { baselineMs = getPracticeMetronomeProtocol(preparedConfiguration?.durationMs).baselineMs; } catch { baselineMs = Infinity; }
+        const activeSessionMs = Number(snapshot?.activeSessionMs ?? snapshot?.metrics?.activeDurationMs ?? 0);
+        if (activeSessionMs >= baselineMs) {
+          next = markPracticeTreatmentExposureStarted(next, stamp);
+          startedExposure = true;
+        }
       } else if (!next.treatment?.exposureStartedAt && event === "input" && (snapshot?.metrics?.acceptedInsertions ?? 0) > 0) {
         next = markPracticeTreatmentExposureStarted(next, stamp);
         startedExposure = true;
       }
       if (next !== episode) await persist(next);
-      if (startedExposure) await markPracticeTreatmentInterference({ repository, newEpisode: next, exposedAt: stamp });
+      if (startedExposure && identity.experimentId !== "metronome-typing") await markPracticeTreatmentInterference({ repository, newEpisode: next, exposedAt: stamp });
     });
   }
 
@@ -245,6 +271,18 @@ export function createPracticeTreatmentService({ repository, profileId, contextI
         protocolFingerprint: episode.treatment.protocolFingerprint,
         metrics: acquisitionTargetMetrics(summary, commitPayload.learningObservationDeltas, episode),
         probeIdentity: episode.baseline?.probeIdentity,
+      });
+      if (candidate) output.push(candidate);
+    }
+    if (summary.experimentId === "metronome-typing") {
+      const candidate = createPracticeMetronomeSilentOutcomeCandidate({
+        profileId,
+        contextId,
+        sessionId,
+        observedAt: metronomeBaselineObservedAt(summary, preparedConfiguration),
+        localDayKey: summary.localDayKey,
+        analysis: summary.trainingQuality,
+        role: "baseline",
       });
       if (candidate) output.push(candidate);
     }
@@ -277,6 +315,11 @@ export function createPracticeTreatmentService({ repository, profileId, contextI
         metrics,
         observedAt: next.baseline?.observedAt ?? baselineCompletedAt,
         probeIdentity: next.baseline?.probeIdentity,
+      }));
+    } else if (identity.experimentId === "metronome-typing") {
+      next = setPracticeTreatmentBaseline(next, buildPracticeMetronomeTreatmentBaseline({
+        analysis: summary.trainingQuality,
+        observedAt: metronomeBaselineObservedAt(summary, preparedConfiguration),
       }));
     }
     next = updatePracticeTreatmentEpisode(next, { treatment: { ...next.treatment, completedLocalDayKey: summary.localDayKey ?? null } }, summary.completedAtUtc);
