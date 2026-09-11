@@ -76,7 +76,7 @@ const savedCustomText = await repository.getCustomText(customTextId);
 assert.equal(savedCustomText.sourceText, "local words only");
 assert.equal("privacy" in savedCustomText, false);
 assert.equal("syncEnabled" in savedCustomText, false);
-assert.equal((await repository.listCustomTexts()).length, 1);
+assert.equal((await repository.listCustomTexts(profileId)).length, 1);
 
 const preset = createDefaultPreset({ profileId, presetId, now });
 await repository.savePreset(preset);
