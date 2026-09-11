@@ -6,6 +6,8 @@ const timeline = readFileSync(new URL("../js/speedTestTimeline.js", import.meta.
 const graph = readFileSync(new URL("../js/speedTestPerformanceV1.js", import.meta.url), "utf8");
 const css = readFileSync(new URL("../styles/screens/typing-performance-v1.css", import.meta.url), "utf8");
 const index = readFileSync(new URL("../index.html", import.meta.url), "utf8");
+const appCss = readFileSync(new URL("../styles/app.css", import.meta.url), "utf8");
+const resultsFeature = readFileSync(new URL("../js/speedTestResultsFeature.js", import.meta.url), "utf8");
 const leaderboard = readFileSync(new URL("../js/leaderboardSubmissionService.js", import.meta.url), "utf8");
 
 assert.match(speedTest, /timeline:\s*createSpeedTestTimeline\(\)/);
@@ -35,11 +37,20 @@ assert.match(css, /\.speed-performance-chart/);
 assert.match(css, /touch-action:\s*pan-y/);
 assert.match(css, /@media \(max-width:\s*720px\)/);
 
-assert.match(index, /typing-performance-v1\.css\?v=20260910a/);
-assert.match(index, /speedTestPerformanceV1\.js\?v=20260910a/);
-assert.match(index, /js\/main\.js\?v=20260910f/);
+assert.match(index, /styles\/app\.css\?v=20260911v8/,
+  "V8 should load Typing performance styling through the semantic app stylesheet boundary");
+assert.match(index, /js\/appBootstrap\.js\?v=20260911v8/,
+  "V8 should load Typing performance behavior through the semantic application bootstrap");
+assert.match(appCss, /\.\/screens\/typing-performance-v1\.css\?v=20260910a/,
+  "the semantic stylesheet boundary must retain Typing performance V1 styling");
+assert.match(resultsFeature, /import "\.\/speedTestPerformanceV1\.js";/,
+  "the semantic results feature must retain Typing performance V1 behavior");
+assert.doesNotMatch(index, /typing-performance-v1\.css\?v=20260910a/,
+  "historical performance CSS must not return to index.html");
+assert.doesNotMatch(index, /speedTestPerformanceV1\.js\?v=20260910a/,
+  "historical performance scripts must not return to index.html");
 
 assert.doesNotMatch(leaderboard, /performanceTimeline/,
   "rich per-second analytics must remain local and outside leaderboard submissions");
 
-console.log("Typing Test performance V1 wiring keeps analytics local and adds responsive graph inspection.");
+console.log("Typing Test performance V1 analytics remain local and load through the V8 semantic app boundaries.");
