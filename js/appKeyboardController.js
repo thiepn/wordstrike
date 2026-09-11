@@ -9,6 +9,7 @@ import {
 import { getCurrentSpeedTest } from "./speedTest.js";
 import { STATISTICS_TABS } from "./statisticsUi.js";
 import { getResultsActions, isResultsInputBlocked, Screens } from "./state.js";
+import { observePracticePhysicalTelemetryKeyDown } from "./practiceLab/practicePhysicalTelemetryRuntime.js";
 
 const PREVENTED_NAVIGATION_KEYS = new Set([
   "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Home", "End", "Enter", "Escape",
@@ -81,6 +82,9 @@ export function createGlobalKeyboardController({
       routeActiveGameplayKey(event);
       return;
     }
+    // PL36 reuses this existing global keydown pipeline. The observer is inert unless
+    // an eligible physical-keyboard Practice session has explicitly activated it.
+    if (state.screen === Screens.PRACTICE_LAB) observePracticePhysicalTelemetryKeyDown(event);
     if (isTextEntryTarget(event.target)) return;
     if (["Enter", " "].includes(event.key) && event.target?.matches?.("button, a, [role=tab]")) return;
     if (routeActiveGameplayKey(event)) return;
