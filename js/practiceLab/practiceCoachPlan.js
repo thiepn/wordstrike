@@ -60,21 +60,10 @@ export function calculatePracticeCoachCoverage(plannedMinutes, requestedMinutes)
 
 function compactDecisionForHash(decision) {
   if (!decision) return null;
-  return {
-    version: decision.version,
-    personalizationPolicyVersion: decision.personalizationPolicyVersion,
-    treatmentFamilyKey: decision.treatmentFamilyKey,
-    sourceScope: decision.sourceScope,
-    responseModifier: decision.responseModifier,
-    sourceResponseStateId: decision.sourceResponseStateId,
-    sourceResponseStateUpdatedAt: decision.sourceResponseStateUpdatedAt,
-    evidenceInputs: (decision.evidenceInputs ?? []).map((entry) => ({
-      treatmentFamilyKey: entry.treatmentFamilyKey,
-      treatmentResponseStateId: entry.treatmentResponseStateId,
-      updatedAt: entry.updatedAt,
-      responseModifier: entry.responseModifier,
-    })),
-  };
+  // Personalization decisions are already bounded before persistence. Hash the
+  // complete persisted decision so diagnostic/audit fields cannot drift while
+  // the frozen plan still appears hash-valid.
+  return clone(decision);
 }
 
 function compactBlockForHash(block) {
