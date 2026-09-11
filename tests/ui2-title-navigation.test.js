@@ -9,6 +9,7 @@ const read = (relativePath) => fs.readFileSync(path.join(ROOT, relativePath), "u
 const ui = read("js/ui.js");
 const css = read("styles/screens/title.css");
 const index = read("index.html");
+const appCss = read("styles/app.css");
 const legacyCss = read("style.css");
 const uiSystem = read("styles/ui-system.css");
 const doc = read("docs/UI2_TITLE_NAVIGATION.md");
@@ -17,10 +18,14 @@ const titleStart = ui.indexOf("export function renderTitle");
 const titleEnd = ui.indexOf("export function renderModeSelect");
 const titleSource = ui.slice(titleStart, titleEnd);
 
-test("UI2 Title stylesheet loads after the UI1 system", () => {
-  const uiSystemIndex = index.indexOf('href="styles/ui-system.css"');
-  const titleIndex = index.indexOf('href="styles/screens/title.css"');
-  assert.ok(uiSystemIndex >= 0, "UI1 design system link missing");
+test("UI2 Title stylesheet loads after the UI1 system through the V8 app boundary", () => {
+  assert.match(index, /styles\/app\.css\?v=20260911v8/);
+  assert.doesNotMatch(index, /href="styles\/ui-system\.css"|href="styles\/screens\/title\.css"/);
+  const legacyIndex = appCss.indexOf('@import url("../style.css")');
+  const uiSystemIndex = appCss.indexOf('@import url("./ui-system.css")');
+  const titleIndex = appCss.indexOf('@import url("./screens/title.css")');
+  assert.ok(legacyIndex >= 0, "legacy stylesheet import missing from semantic app boundary");
+  assert.ok(uiSystemIndex > legacyIndex, "UI1 design system must follow legacy style.css");
   assert.ok(titleIndex > uiSystemIndex, "UI2 Title stylesheet must load after UI1");
 });
 
@@ -95,4 +100,4 @@ test("UI2 documentation freezes scope and Practice Lab exclusion", () => {
   }
 });
 
-console.log("UI2 Title screen, global navigation, responsive, accessibility and migration contracts passed.");
+console.log("UI2 Title screen, semantic V8 stylesheet ownership, global navigation, responsive, accessibility and migration contracts passed.");
