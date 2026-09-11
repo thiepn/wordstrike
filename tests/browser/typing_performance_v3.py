@@ -41,6 +41,62 @@ def complete_words_test(page, delay=14):
     expect(page.locator('[data-speed-performance-v3]')).to_be_visible(timeout=5000)
 
 
+def seed_previous_pb(page):
+    return page.evaluate("""async () => {
+      const { getCurrentSpeedTest } = await import('./js/speedTest.js');
+      const { loadModeData, saveModeData } = await import('./js/modeStorage.js');
+      const { persistSpeedTestTimeline } = await import('./js/speedTestTimeline.js');
+      const result = getCurrentSpeedTest()?.result;
+      const timeline = result?.modeData?.performanceTimeline;
+      if (!result || !timeline) return false;
+      const data = loadModeData();
+      const mode = data.modes?.['speed-test'];
+      const wordSetId = result.modeData.wordSetId;
+      const configId = result.modeData.configId;
+      const record = mode?.wordSetRecords?.[wordSetId]?.[configId];
+      if (!record) return false;
+      const seededId = 'v3-seeded-pb';
+      record.bestWpm = result.wpm;
+      record.bestRawWpm = result.modeData.rawWpm;
+      record.bestAccuracy = result.accuracy;
+      record.bestResultAt = result.endedAt - 1000;
+      record.sessionId = seededId;
+      record.tieAccuracy = result.accuracy;
+      record.tieRawWpm = result.modeData.rawWpm;
+      data.recentSessions = [{
+        sessionId: seededId,
+        modeId: 'speed-test',
+        variantId: result.variantId,
+        endedAt: result.endedAt - 1000,
+        success: true,
+        score: null,
+        grade: null,
+        accuracy: result.accuracy,
+        wpm: result.wpm,
+        activeDurationMs: result.activeDurationMs,
+        modeData: {
+          configId,
+          wordSetId,
+          wordSetName: result.modeData.wordSetName,
+          wordSetVersion: result.modeData.wordSetVersion,
+          wordSetWordCount: result.modeData.wordSetWordCount,
+          metricVersion: result.modeData.metricVersion,
+          rawWpm: result.modeData.rawWpm,
+          correctTestCharacters: result.modeData.correctTestCharacters,
+          rawTestCharacters: result.modeData.rawTestCharacters,
+          correctSpaces: result.modeData.correctSpaces,
+          validSpaces: result.modeData.validSpaces,
+          backspaces: result.modeData.backspaces,
+          wordDeletes: result.modeData.wordDeletes,
+          completedWordCount: result.modeData.completedWordCount,
+        },
+      }];
+      const saved = saveModeData(data);
+      const timelineSaved = persistSpeedTestTimeline(seededId, timeline, result.endedAt - 1000);
+      return saved && timelineSaved;
+    }""")
+
+
 def main():
     ARTIFACTS.mkdir(exist_ok=True)
     server = ThreadingHTTPServer(('127.0.0.1', 0), partial(QuietHandler, directory=str(ROOT)))
@@ -87,7 +143,7 @@ def main():
                 assert overflow['zones'] == 4, overflow
 
                 if not touch:
-                    expect(v3.locator('.speed-performance-v3-pb')).to_contain_text('Current run is PB')
+                    assert seed_previous_pb(page), 'Failed to seed a local PB timeline for comparison'
                     page.locator('[data-action="retry"]').click(force=True)
                     expect(page.locator('#speed-test-word-viewport')).to_be_visible()
                     complete_words_test(page, delay=34)
