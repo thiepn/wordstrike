@@ -80,8 +80,8 @@ function validObservation(index = 1) {
   };
 }
 
-test("PL13 ability contracts remain intact inside the PL25 storage/session/foundation envelope", () => {
-  assert.equal(PRACTICE_DATABASE_VERSION, 9);
+test("PL13 ability contracts remain intact inside the PL32 storage/session/foundation envelope", () => {
+  assert.equal(PRACTICE_DATABASE_VERSION, 10);
   assert.equal(PRACTICE_RECORD_VERSIONS.abilityState, 1);
   assert.equal(PRACTICE_RECORD_VERSIONS.skillStat, 3);
   assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 13);
@@ -106,7 +106,7 @@ test("PL13 abilityStates schema has exact key/index ownership and unique profile
   assert.equal(PRACTICE_LIMITS.abilityStateBytes, 32 * 1024);
 });
 
-test("PL13 abilityStates remain structurally correct in the current fresh DB v8 schema", () => {
+test("PL13 abilityStates remain structurally correct in the current fresh DB10 schema", () => {
   const fresh = makeDatabase();
   applyPracticeDatabaseUpgrade(fresh);
   assert.deepEqual([...fresh.stores.keys()], PRACTICE_STORE_NAMES);
