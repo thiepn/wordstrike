@@ -10,6 +10,7 @@ import {
   PRACTICE_TREATMENT_EVIDENCE_GRADES,
   PRACTICE_TREATMENT_OUTCOME_DOMAINS,
   PRACTICE_TREATMENT_OUTCOME_STATUSES,
+  PRACTICE_TREATMENT_POLICY,
   PRACTICE_TREATMENT_RESPONSE_MODEL_VERSION,
   PRACTICE_TREATMENT_RESPONSE_PATTERNS,
   PRACTICE_TREATMENT_RESPONSE_STATE_VERSION,
@@ -69,8 +70,8 @@ export function validatePracticeTreatmentEpisode(record) {
 
   if (!record.baseline || !PRACTICE_TREATMENT_BASELINE_STATUSES.includes(record.baseline.status)) errors.push({ path: "baseline.status", code: "INVALID_ENUM", message: "unsupported baseline status" });
   if (record.baseline?.observedAt != null && !iso(record.baseline.observedAt)) errors.push({ path: "baseline.observedAt", code: "INVALID_TIME", message: "baseline observedAt must be ISO time" });
-  if (!Array.isArray(record.outcomeContracts) || record.outcomeContracts.length > PRACTICE_LIMITS.treatmentOpenEpisodesPerContext) errors.push({ path: "outcomeContracts", code: "ARRAY_LIMIT", message: "outcome contracts are invalid" });
-  if (!Array.isArray(record.outcomes) || record.outcomes.length > 4) errors.push({ path: "outcomes", code: "ARRAY_LIMIT", message: "outcomes are invalid" });
+  if (!Array.isArray(record.outcomeContracts) || record.outcomeContracts.length > PRACTICE_TREATMENT_POLICY.episodeOutcomeMaximum) errors.push({ path: "outcomeContracts", code: "ARRAY_LIMIT", message: "outcome contracts are invalid" });
+  if (!Array.isArray(record.outcomes) || record.outcomes.length > PRACTICE_TREATMENT_POLICY.episodeOutcomeMaximum) errors.push({ path: "outcomes", code: "ARRAY_LIMIT", message: "outcomes are invalid" });
   else {
     const keys = new Set();
     record.outcomes.forEach((outcome, index) => { outcomeErrors(outcome, `outcomes[${index}]`, errors); if (keys.has(outcome?.outcomeKey)) errors.push({ path: `outcomes[${index}].outcomeKey`, code: "DUPLICATE", message: "outcome keys must be unique" }); keys.add(outcome?.outcomeKey); });
