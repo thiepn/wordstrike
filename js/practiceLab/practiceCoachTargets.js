@@ -71,6 +71,26 @@ function reasonCodes(candidate, experimentId, utilityBreakdown, responseInformed
   return Object.freeze([...new Set(reasons)].slice(0, 4));
 }
 
+function boundedPersonalizationDecision(rawDecision, personalized, needUtility) {
+  if (!rawDecision?.evidenceInputs?.length) return null;
+  const optionComparisons = (personalized?.optionComparisons ?? []).slice(0, 4).map((row) => Object.freeze({
+    experimentId: row.experimentId,
+    treatmentFamilyKey: row.treatmentFamilyKey,
+    baseInterventionMatch: row.baseInterventionMatch,
+    responseModifier: row.responseModifier,
+    personalizedInterventionMatch: row.personalizedInterventionMatch,
+    personalizedOptionUtility: row.personalizedOptionUtility,
+    sourceScope: row.sourceScope,
+    responsePattern: row.responsePattern,
+    evidenceDepth: row.evidenceDepth,
+  }));
+  return Object.freeze({
+    ...rawDecision,
+    needUtility,
+    optionComparisons: Object.freeze(optionComparisons),
+  });
+}
+
 export function buildPracticeCoachTargetCandidates({
   limiterCandidates = [],
   masteryByStat = new Map(),
@@ -136,7 +156,7 @@ export function buildPracticeCoachTargetCandidates({
     const experimentId = personalized?.experimentId ?? intervention.experimentId;
     const personalizedUtilityScore = personalized?.personalizedOptionUtility ?? baseUtilityScore;
     const rawDecision = personalized?.personalizationDecision ?? null;
-    const personalizationDecision = rawDecision?.evidenceInputs?.length ? rawDecision : null;
+    const personalizationDecision = boundedPersonalizationDecision(rawDecision, personalized, breakdown.needUtility);
     const responseInformed = personalized?.responseInformed === true;
     const {
       coachTreatmentResponseStates,
@@ -165,7 +185,7 @@ export function buildPracticeCoachTargetCandidates({
       utilityScore: personalizedUtilityScore,
       personalizationDecision,
       responseInformed,
-      personalizationDiagnostics: personalized?.optionComparisons ?? Object.freeze([]),
+      personalizationDiagnostics: personalizationDecision?.optionComparisons ?? Object.freeze([]),
       reasonCodes: reasonCodes(candidate, experimentId, breakdown, responseInformed),
     }));
   }

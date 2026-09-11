@@ -7,6 +7,8 @@ on:
     paths:
       - 'js/practiceLab/**'
       - 'tests/practice-coach-personalization-*.test.js'
+      - 'docs/practice-lab/PL33-COACH-PERSONALIZATION.md'
+      - 'package.json'
       - '.github/workflows/pl33-coach-personalization.yml'
 
 jobs:
@@ -19,6 +21,4 @@ jobs:
         with:
           node-version: 22
       - name: Run PL33 Coach Personalization certification
-        run: |
-          node tests/practice-coach-personalization-pl33.test.js
-          node tests/practice-coach-personalization-storage-pl33.test.js
+        run: node --test tests/practice-coach-personalization-*.test.js

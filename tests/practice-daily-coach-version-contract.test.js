@@ -18,10 +18,10 @@ import {
 } from "../js/practiceLab/practiceCoachConstants.js";
 import { createPracticeCoachReviewDescriptor } from "../js/practiceLab/practiceCoachReview.js";
 
-test("PL25 has the exact DB8/session13/foundation10 and v1 Coach envelope", () => {
+test("PL33 keeps DB10/session13/foundation10 while Coach uses the v2 personalization envelope", () => {
   assert.equal(PRACTICE_DATABASE_VERSION, 10);
   assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 13);
-  assert.equal(PRACTICE_RECORD_VERSIONS.coachPlan, 1);
+  assert.equal(PRACTICE_RECORD_VERSIONS.coachPlan, 2);
   assert.equal(PRACTICE_RECORD_VERSIONS.skillStat, 3);
   assert.equal(PRACTICE_RECORD_VERSIONS.learningState, 1);
   assert.equal(PRACTICE_RECORD_VERSIONS.reviewItem, 3);
@@ -29,16 +29,16 @@ test("PL25 has the exact DB8/session13/foundation10 and v1 Coach envelope", () =
   assert.equal(PRACTICE_RECORD_VERSIONS.assessmentRun, 1);
   assert.equal(PRACTICE_FOUNDATION_ANALYSIS_VERSION, 10);
 
-  assert.equal(PRACTICE_COACH_PLAN_VERSION, 1);
-  assert.equal(PRACTICE_COACH_PLANNER_VERSION, 1);
-  assert.equal(PRACTICE_COACH_POLICY_VERSION, 1);
-  assert.equal(PRACTICE_COACH_BLOCK_VERSION, 1);
+  assert.equal(PRACTICE_COACH_PLAN_VERSION, 2);
+  assert.equal(PRACTICE_COACH_PLANNER_VERSION, 2);
+  assert.equal(PRACTICE_COACH_POLICY_VERSION, 2);
+  assert.equal(PRACTICE_COACH_BLOCK_VERSION, 2);
   assert.equal(PRACTICE_COACH_UTILITY_VERSION, 1);
   assert.equal(PRACTICE_COACH_REVIEW_GENERATOR_VERSION, 1);
   assert.equal(PRACTICE_COACH_REVIEW_EXPERIMENT_VERSION, 1);
 });
 
-test("PL25 coachPlans store and session child lookup are the only new persistence ownership", () => {
+test("PL25 coachPlans store and session child lookup remain the only Coach persistence ownership", () => {
   const coach = PRACTICE_STORE_DEFINITIONS.coachPlans;
   assert.equal(coach.keyPath, "coachPlanId");
   assert.deepEqual(coach.indexes.map((index) => index.name), [
