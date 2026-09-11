@@ -1,68 +1,238 @@
-import { createPracticeRepository as createPracticeRepositoryV30 } from "./practiceRepositoryV30.js";
-import { createPracticeCustomTextRepositoryFacade } from "./practiceCustomTextRepository.js";
+import { createPracticeRepository as createPracticeRepositoryV31 } from "./practiceRepositoryV31.js";
+import { PRACTICE_LIMITS } from "./practiceConstants.js";
+import {
+  validatePracticeTreatmentEpisode,
+  validatePracticeTreatmentResponseState,
+} from "./practiceTreatmentValidation.js";
+
+const terminalEpisode = (episode) => ["closed", "invalid"].includes(episode?.status);
+
+function treatmentValidationError(kind, validation) {
+  const error = new TypeError(`${kind} failed PL32 validation`);
+  error.code = "PRACTICE_TREATMENT_RECORD_INVALID";
+  error.details = validation?.errors ?? [];
+  return error;
+}
+
+function assertTreatmentEpisode(episode) {
+  const validation = validatePracticeTreatmentEpisode(episode);
+  if (!validation.valid) throw treatmentValidationError("Treatment Episode", validation);
+  return episode;
+}
+
+function assertTreatmentResponseState(state) {
+  const validation = validatePracticeTreatmentResponseState(state);
+  if (!validation.valid) throw treatmentValidationError("Treatment Response state", validation);
+  return state;
+}
+
+const validEpisode = (episode) => validatePracticeTreatmentEpisode(episode).valid;
+const validState = (state) => validatePracticeTreatmentResponseState(state).valid;
 
 export function createPracticeRepository(options = {}) {
-  if (!options.dataStore) return createPracticeRepositoryV30(options);
-
+  const core = createPracticeRepositoryV31(options);
   const dataStore = options.dataStore;
-  let preserveCustomTextDuringReset = false;
+  if (!dataStore) return core;
+  const now = options.now ?? Date.now;
 
-  // Do not Proxy a frozen store: JavaScript Proxy invariants require exact values for
-  // non-configurable properties. A small delegating facade is predictable for both the
-  // IndexedDB store and the frozen in-memory store used by Practice certification.
-  const coreDataStore = Object.freeze({
-    get kind() { return dataStore.kind; },
-    get isOpen() { return dataStore.isOpen; },
-    async open() { await dataStore.open(); return this; },
-    close() { return dataStore.close(); },
-    get(storeName, key) { return dataStore.get(storeName, key); },
-    put(storeName, record) { return dataStore.put(storeName, record); },
-    delete(storeName, key) { return dataStore.delete(storeName, key); },
-    list(storeName) { return dataStore.list(storeName); },
-    query(storeName, indexName, query) { return dataStore.query(storeName, indexName, query); },
-    clearStore(storeName) {
-      if (preserveCustomTextDuringReset && storeName === "customTexts") return Promise.resolve(true);
-      return dataStore.clearStore(storeName);
-    },
-    runTransaction(storeNames, mode, callback) { return dataStore.runTransaction(storeNames, mode, callback); },
-    deleteDatabase() { return dataStore.deleteDatabase(); },
-  });
+  async function getTreatmentEpisode(treatmentEpisodeId) {
+    const record = await dataStore.get("treatmentEpisodes", treatmentEpisodeId);
+    return record && validEpisode(record) ? record : null;
+  }
 
-  const core = createPracticeRepositoryV30({ ...options, dataStore: coreDataStore });
-  const custom = createPracticeCustomTextRepositoryFacade({ dataStore, now: options.now ?? Date.now });
+  async function getTreatmentEpisodeBySession(treatmentSessionId) {
+    const records = await dataStore.query("treatmentEpisodes", "treatmentSessionId", treatmentSessionId);
+    return records.find(validEpisode) ?? null;
+  }
 
-  async function resetPracticeData(resetOptions = {}) {
-    const deleteUserContent = resetOptions === true || resetOptions?.deleteUserContent === true;
-    if (deleteUserContent) return core.resetPracticeData();
+  async function createTreatmentEpisode(episode) {
+    assertTreatmentEpisode(episode);
+    return dataStore.runTransaction(["treatmentEpisodes"], "readwrite", async (transaction) => {
+      const existingById = await transaction.get("treatmentEpisodes", episode.treatmentEpisodeId);
+      if (existingById) {
+        if (validEpisode(existingById)) return { created: false, episode: existingById };
+        await transaction.delete("treatmentEpisodes", episode.treatmentEpisodeId);
+      }
+      const existing = await transaction.query("treatmentEpisodes", "treatmentSessionId", episode.treatment.treatmentSessionId);
+      const canonical = existing.find(validEpisode);
+      if (canonical) return { created: false, episode: canonical };
+      for (const malformed of existing.filter((record) => !validEpisode(record))) {
+        if (malformed?.treatmentEpisodeId) await transaction.delete("treatmentEpisodes", malformed.treatmentEpisodeId);
+      }
+      const open = await transaction.query("treatmentEpisodes", "contextId", episode.contextId);
+      const openCount = open.filter((item) => validEpisode(item)
+        && item.profileId === episode.profileId
+        && ["prepared", "tracking"].includes(item.status)).length;
+      if (openCount >= PRACTICE_LIMITS.treatmentOpenEpisodesPerContext) throw new TypeError("Treatment tracking open-episode cap reached");
+      await transaction.put("treatmentEpisodes", episode);
+      return { created: true, episode };
+    });
+  }
 
-    const activeProfile = await core.getPracticeProfile?.().catch?.(() => null) ?? null;
-    const rawCustomTexts = await dataStore.list("customTexts").catch(() => []);
-    const ownedCustomTexts = activeProfile
-      ? rawCustomTexts.filter((raw) => raw?.profileId === activeProfile.profileId)
-      : [];
+  async function saveTreatmentEpisode(episode) {
+    assertTreatmentEpisode(episode);
+    await dataStore.put("treatmentEpisodes", episode);
+    return episode;
+  }
 
-    preserveCustomTextDuringReset = true;
-    try {
-      await core.resetPracticeData();
-    } finally {
-      preserveCustomTextDuringReset = false;
+  async function listTreatmentEpisodes(profileId, { contextId = null, status = null, limit = 100, offset = 0 } = {}) {
+    const raw = contextId
+      ? await dataStore.query("treatmentEpisodes", "contextId", contextId)
+      : await dataStore.query("treatmentEpisodes", "profileId", profileId);
+    return raw
+      .filter((episode) => validEpisode(episode)
+        && episode.profileId === profileId
+        && (!contextId || episode.contextId === contextId)
+        && (!status || episode.status === status))
+      .sort((a, b) => String(b.treatment?.completedAt ?? b.createdAt).localeCompare(String(a.treatment?.completedAt ?? a.createdAt)) || a.treatmentEpisodeId.localeCompare(b.treatmentEpisodeId))
+      .slice(Math.max(0, offset), Math.max(0, offset) + Math.max(1, Math.min(200, limit)));
+  }
+
+  async function listOpenTreatmentEpisodes(profileId, contextId) {
+    const records = await dataStore.query("treatmentEpisodes", "contextId", contextId);
+    return records
+      .filter((episode) => validEpisode(episode)
+        && episode.profileId === profileId
+        && episode.contextId === contextId
+        && ["prepared", "tracking"].includes(episode.status))
+      .sort((a, b) => String(b.updatedAt).localeCompare(String(a.updatedAt)))
+      .slice(0, PRACTICE_LIMITS.treatmentOpenEpisodesPerContext);
+  }
+
+  async function getTreatmentResponseState(treatmentResponseStateId) {
+    const state = await dataStore.get("treatmentResponseStates", treatmentResponseStateId);
+    return state && validState(state) ? state : null;
+  }
+
+  async function saveTreatmentResponseState(state) {
+    assertTreatmentResponseState(state);
+    await dataStore.put("treatmentResponseStates", state);
+    return state;
+  }
+
+  async function listTreatmentResponseStates(profileId, { contextId = null, treatmentFamilyKey = null } = {}) {
+    const raw = contextId
+      ? await dataStore.query("treatmentResponseStates", "contextId", contextId)
+      : await dataStore.query("treatmentResponseStates", "profileId", profileId);
+    return raw
+      .filter((state) => validState(state)
+        && state.profileId === profileId
+        && (!contextId || state.contextId === contextId)
+        && (!treatmentFamilyKey || state.treatmentFamilyKey === treatmentFamilyKey))
+      .sort((a, b) => String(b.updatedAt).localeCompare(String(a.updatedAt)));
+  }
+
+  async function saveTreatmentOutcomeAndResponseState(episode, state = null) {
+    assertTreatmentEpisode(episode);
+    if (state) assertTreatmentResponseState(state);
+    const stores = state ? ["treatmentEpisodes", "treatmentResponseStates"] : ["treatmentEpisodes"];
+    return dataStore.runTransaction(stores, "readwrite", async (transaction) => {
+      const current = await transaction.get("treatmentEpisodes", episode.treatmentEpisodeId);
+      if (!current || !validEpisode(current)) throw new TypeError("Treatment episode disappeared or became invalid before outcome attachment");
+      await transaction.put("treatmentEpisodes", episode);
+      if (state) await transaction.put("treatmentResponseStates", state);
+      return { episode, state };
+    });
+  }
+
+  async function listTreatmentIntervalSessions(profileId, contextId, afterUtc, beforeUtc) {
+    const after = Date.parse(afterUtc ?? "");
+    const before = Date.parse(beforeUtc ?? "");
+    let records;
+    const canUseRange = dataStore.kind === "indexeddb"
+      && Number.isFinite(after)
+      && Number.isFinite(before)
+      && before > after
+      && typeof globalThis.IDBKeyRange?.bound === "function";
+    if (canUseRange) {
+      const range = globalThis.IDBKeyRange.bound(
+        [profileId, contextId, afterUtc],
+        [profileId, contextId, beforeUtc],
+        true,
+        true,
+      );
+      records = await dataStore.query("sessionSummaries", "profileContextCompletedAt", range);
+    } else {
+      records = await dataStore.query("sessionSummaries", "contextId", contextId);
     }
+    return records.filter((session) => session.profileId === profileId && session.contextId === contextId
+      && Number.isFinite(Date.parse(session.completedAtUtc))
+      && (!Number.isFinite(after) || Date.parse(session.completedAtUtc) > after)
+      && (!Number.isFinite(before) || Date.parse(session.completedAtUtc) < before))
+      .sort((a, b) => String(a.completedAtUtc).localeCompare(String(b.completedAtUtc)))
+      .slice(-500);
+  }
 
-    // Preserve the historical empty-reset contract: do not recreate a profile/context
-    // merely because Custom Text support exists. Recreate identity only when user-authored
-    // documents actually need an owner after the Practice reset.
-    if (!ownedCustomTexts.length) return true;
+  async function getTreatmentAbilityState(profileId, contextId, channel) {
+    const records = await dataStore.query("abilityStates", "profileContextChannel", [profileId, contextId, channel]);
+    return records[0] ?? null;
+  }
 
-    const initialized = await core.initializePracticeStorage();
-    for (const raw of ownedCustomTexts) {
-      await dataStore.put("customTexts", { ...raw, profileId: initialized.profile.profileId });
+  async function getTreatmentPerformanceState(profileId, contextId) {
+    const records = await dataStore.query("performanceStates", "profileContext", [profileId, contextId]);
+    return records[0] ?? null;
+  }
+
+  async function pruneTreatmentTracking(profileId) {
+    const currentValue = typeof now === "function" ? now() : now;
+    const currentMs = currentValue instanceof Date ? currentValue.getTime() : Number(currentValue);
+    const episodes = await dataStore.query("treatmentEpisodes", "profileId", profileId);
+    const deletionMap = new Map();
+    for (const episode of episodes) {
+      if (!validEpisode(episode)) {
+        if (episode?.treatmentEpisodeId) deletionMap.set(episode.treatmentEpisodeId, episode);
+        continue;
+      }
+      if (!terminalEpisode(episode)) continue;
+      const reference = Date.parse(episode.closedAt ?? episode.updatedAt ?? episode.createdAt ?? "");
+      const horizonDays = episode.status === "invalid" ? PRACTICE_LIMITS.treatmentInvalidDays : PRACTICE_LIMITS.treatmentClosedDays;
+      if (Number.isFinite(reference) && Number.isFinite(currentMs) && currentMs - reference > horizonDays * 86_400_000) deletionMap.set(episode.treatmentEpisodeId, episode);
     }
-    return true;
+    const survivors = episodes.filter((episode) => validEpisode(episode) && !deletionMap.has(episode.treatmentEpisodeId));
+    const excess = Math.max(0, survivors.length - PRACTICE_LIMITS.treatmentEpisodesPerProfile);
+    if (excess) {
+      survivors.filter((episode) => episode.status === "closed")
+        .sort((a, b) => String(a.closedAt ?? a.updatedAt).localeCompare(String(b.closedAt ?? b.updatedAt)))
+        .slice(0, excess)
+        .forEach((episode) => deletionMap.set(episode.treatmentEpisodeId, episode));
+    }
+    for (const id of deletionMap.keys()) await dataStore.delete("treatmentEpisodes", id);
+
+    const states = await dataStore.query("treatmentResponseStates", "profileId", profileId);
+    const invalidStateIds = states.filter((state) => !validState(state)).map((state) => state?.treatmentResponseStateId).filter(Boolean);
+    for (const id of invalidStateIds) await dataStore.delete("treatmentResponseStates", id);
+    const validStates = states.filter(validState);
+    if (validStates.length > PRACTICE_LIMITS.treatmentResponseStatesPerProfile) {
+      const removable = validStates.slice().sort((a, b) => String(a.updatedAt).localeCompare(String(b.updatedAt)))
+        .slice(0, validStates.length - PRACTICE_LIMITS.treatmentResponseStatesPerProfile);
+      for (const state of removable) await dataStore.delete("treatmentResponseStates", state.treatmentResponseStateId);
+    }
+    return { deletedEpisodeIds: [...deletionMap.keys()], deletedInvalidStateIds: invalidStateIds };
+  }
+
+  async function runPracticeRetention(...args) {
+    const profile = await core.getPracticeProfile?.();
+    const treatment = profile ? await pruneTreatmentTracking(profile.profileId) : { deletedEpisodeIds: [] };
+    const coreResult = await core.runPracticeRetention(...args);
+    return { ...coreResult, treatmentEpisodes: treatment.deletedEpisodeIds };
   }
 
   return Object.freeze({
     ...core,
-    ...custom,
-    resetPracticeData,
+    getTreatmentEpisode,
+    getTreatmentEpisodeBySession,
+    createTreatmentEpisode,
+    saveTreatmentEpisode,
+    listTreatmentEpisodes,
+    listOpenTreatmentEpisodes,
+    getTreatmentResponseState,
+    saveTreatmentResponseState,
+    listTreatmentResponseStates,
+    saveTreatmentOutcomeAndResponseState,
+    listTreatmentIntervalSessions,
+    getTreatmentAbilityState,
+    getTreatmentPerformanceState,
+    pruneTreatmentTracking,
+    runPracticeRetention,
   });
 }

@@ -57,8 +57,8 @@ function snapshotFromSeries(series, { analysisStartMs = 30_000, accuracies = [],
 }
 
 // Architecture/version boundary.
-test("PL29 generic record and foundation versions remain stable inside the PL31 DB9 envelope", () => {
-  assert.equal(PRACTICE_DATABASE_VERSION, 9); assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 13); assert.equal(PRACTICE_FOUNDATION_ANALYSIS_VERSION, 10);
+test("PL29 generic record and foundation versions remain stable inside the PL32 DB10 envelope", () => {
+  assert.equal(PRACTICE_DATABASE_VERSION, 10); assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 13); assert.equal(PRACTICE_FOUNDATION_ANALYSIS_VERSION, 10);
   assert.equal(PRACTICE_CONSISTENCY_VERSION, 1); assert.equal(PRACTICE_CONSISTENCY_POLICY_VERSION, 1); assert.equal(PRACTICE_CONSISTENCY_FORM_SCHEMA_VERSION, 1); assert.equal(PRACTICE_CONSISTENCY_GUIDE_VERSION, 1); assert.equal(PRACTICE_CONSISTENCY_ANALYSIS_VERSION, 1); assert.equal(PRACTICE_CONSISTENCY_RESULT_VERSION, 1);
   assert.equal(PRACTICE_ENDURANCE_VERSION, 1); assert.equal(PRACTICE_ENDURANCE_POLICY_VERSION, 1); assert.equal(PRACTICE_ENDURANCE_FORM_SCHEMA_VERSION, 1); assert.equal(PRACTICE_ENDURANCE_ANALYSIS_VERSION, 1); assert.equal(PRACTICE_ENDURANCE_ESTIMATOR_VERSION, 1); assert.equal(PRACTICE_ENDURANCE_RESULT_VERSION, 1); assert.equal(PRACTICE_SUSTAINED_WINDOW_VERSION, 1);
 });

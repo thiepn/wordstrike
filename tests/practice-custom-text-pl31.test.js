@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import { PRACTICE_DATABASE_VERSION, PRACTICE_OBSOLETE_INDEXES, PRACTICE_STORE_DEFINITIONS } from "../js/practiceLab/practiceConstants.js";
+import { PRACTICE_DATABASE_VERSION as PRACTICE_DATABASE_VERSION_V31 } from "../js/practiceLab/practiceConstantsV31.js";
 import { PRACTICE_CUSTOM_TEXT_ERROR_CODES, requiredPracticeCustomTextTimedGraphemes } from "../js/practiceLab/practiceCustomTextConstants.js";
 import { normalizePracticeCustomTextSource, inspectPracticeCustomTextSource } from "../js/practiceLab/practiceCustomTextValidation.js";
 import { buildPracticeCustomTypingProjection } from "../js/practiceLab/practiceCustomTextProjection.js";
@@ -28,8 +29,9 @@ const memoryStore = () => {
   return api;
 };
 
-test("PL31 upgrades DB8 to DB9 and replaces obsolete Custom Text indexes", () => {
-  assert.equal(PRACTICE_DATABASE_VERSION, 9);
+test("PL31 DB9 snapshot remains intact inside the PL32 DB10 envelope and obsolete Custom Text indexes stay replaced", () => {
+  assert.equal(PRACTICE_DATABASE_VERSION_V31, 9);
+  assert.equal(PRACTICE_DATABASE_VERSION, 10);
   assert.deepEqual(PRACTICE_STORE_DEFINITIONS.customTexts.indexes.map((entry) => entry.name), ["profileId", "updatedAt", "createdAt"]);
   assert.deepEqual(PRACTICE_OBSOLETE_INDEXES.customTexts, ["lastUsedAt", "normalizedTitle"]);
 });
@@ -126,9 +128,11 @@ test("PL31 controller discards confirmed dirty drafts and runtime can reopen aft
 
 test("PL31 retention and ordinary reset code do not prune Custom Text", () => {
   const legacyRepository = fs.readFileSync(new URL("../js/practiceLab/practiceRepositoryLegacyV17.js", import.meta.url), "utf8");
-  const wrapper = fs.readFileSync(new URL("../js/practiceLab/practiceRepository.js", import.meta.url), "utf8");
+  const repositoryV31 = fs.readFileSync(new URL("../js/practiceLab/practiceRepositoryV31.js", import.meta.url), "utf8");
+  const currentWrapper = fs.readFileSync(new URL("../js/practiceLab/practiceRepository.js", import.meta.url), "utf8");
   const retentionBody = legacyRepository.slice(legacyRepository.indexOf("const runRetention"), legacyRepository.indexOf("const writeWithQuotaRecovery"));
   assert.equal(retentionBody.includes("customTexts"), false);
-  assert.match(wrapper, /deleteUserContent/);
-  assert.match(wrapper, /rawCustomTexts/);
+  assert.match(repositoryV31, /deleteUserContent/);
+  assert.match(repositoryV31, /rawCustomTexts/);
+  assert.match(currentWrapper, /createPracticeRepositoryV31/);
 });

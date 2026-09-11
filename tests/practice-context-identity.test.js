@@ -112,7 +112,7 @@ for (const [type, current] of [
   assert.equal(migrated.value.contextId, defaultA);
 }
 
-assert.equal(PRACTICE_DATABASE_VERSION, 9);
+assert.equal(PRACTICE_DATABASE_VERSION, 10);
 assert.equal(PRACTICE_RECORD_VERSIONS.profile, 3);
 assert.equal(PRACTICE_RECORD_VERSIONS.context, 1);
 assert.equal(PRACTICE_RECORD_VERSIONS.skillStat, 3);

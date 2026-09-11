@@ -52,10 +52,10 @@ const numCheck=readJson("data/practice/numbers-symbols/en-v1/WS-NUMSYM-CHECK-EN-
 const numPractice=readJson("data/practice/numbers-symbols/en-v1/WS-NUMSYM-PRACTICE-EN-1.forms.json");
 const provenance=readJson("data/practice/provenance/sources.json");
 
-test("PL30 prerequisite channels and record versions remain stable inside the PL31 DB9 envelope",()=>{
+test("PL30 prerequisite channels and record versions remain stable inside the PL32 DB10 envelope",()=>{
   assert.ok(PRACTICE_ABILITY_CHANNELS.includes("punctuation"));
   assert.ok(PRACTICE_ABILITY_CHANNELS.includes("numbers-symbols"));
-  assert.equal(PRACTICE_DATABASE_VERSION,9);
+  assert.equal(PRACTICE_DATABASE_VERSION,10);
   assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary,13);
   assert.equal(PRACTICE_RECORD_VERSIONS.abilityState,1);
   assert.equal(PRACTICE_RECORD_VERSIONS.learningState,1);
