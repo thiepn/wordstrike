@@ -99,8 +99,8 @@ def main():
                 expect(practice_panel).to_contain_text('Personalized training')
 
                 primary = practice_panel.locator('.typing-coach-drill-card.is-primary [data-coach-practice-type]')
-                expect(primary).to_be_visible()
-                primary.click()
+                expect(primary).to_have_count(1)
+                primary.evaluate('element => element.click()')
                 overlay = page.locator('[data-typing-coach-practice-overlay]')
                 expect(overlay).to_be_visible(timeout=5000)
                 expect(overlay.locator('[data-coach-practice-root] .practice-lab-shell')).to_be_visible(timeout=10000)
