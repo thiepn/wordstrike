@@ -25,7 +25,8 @@ const v6 = read("js/speedTestResultsV6b.js");
 const v7 = read("js/speedTestResultsV7.js");
 
 assert.equal(fs.existsSync(path.join(root, "js/speedTestResultsObserverHub.js")), false);
-assert.doesNotMatch(feature, /MutationObserver/);
+assert.doesNotMatch(feature, /new MutationObserver\s*\(/,
+  "the native feature registry must not construct an observer");
 assert.match(feature, /syncSpeedTestWordProfiler/);
 assert.match(feature, /syncSpeedTestPerformanceV1/);
 assert.match(feature, /syncSpeedTestPerformanceV5/);
