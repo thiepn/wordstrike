@@ -1,6 +1,7 @@
 import { createSkillStatId } from "./practiceIds.js";
 import { createPracticeTreatmentOutcomeCandidate } from "./practiceTreatmentOutcome.js";
 import { normalizePracticeConsistencyResult } from "./practiceTreatmentBaseline.js";
+import { PRACTICE_TREATMENT_POLICY } from "./practiceTreatmentConstants.js";
 
 export function buildPracticeAbilityOutcomeCandidate(observation, { abilityModelVersion = null, abilityPolicyVersion = null } = {}) {
   if (!observation || !["cold-natural-text", "common-words", "burst", "endurance", "punctuation", "numbers-symbols"].includes(observation.channel)) return null;
@@ -28,6 +29,12 @@ export function buildPracticeAbilityOutcomeCandidate(observation, { abilityModel
 
 export function buildPracticeTargetRetestCandidate({ profileId, contextId, sessionId, observedAt, localDayKey = null, entityType, entityKey, protocolFingerprint, metrics, probeIdentity = null } = {}) {
   if (!profileId || !contextId || !sessionId || !observedAt || !entityType || typeof entityKey !== "string") return null;
+  const qualityEligible = Number.isFinite(metrics?.quality)
+    && Number.isFinite(metrics?.qualityCoverage)
+    && metrics.qualityCoverage >= PRACTICE_TREATMENT_POLICY.baselineQualityCoverageMinimum
+    && Number.isInteger(metrics?.opportunityCount)
+    && metrics.opportunityCount > 0;
+  if (!qualityEligible) return null;
   const subjectId = createSkillStatId(profileId, contextId, entityType, entityKey);
   return createPracticeTreatmentOutcomeCandidate({
     profileId, contextId, sessionId, observedAt, localDayKey,
