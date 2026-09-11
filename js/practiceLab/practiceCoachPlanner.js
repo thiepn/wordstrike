@@ -13,7 +13,7 @@ import { hashPracticeContent } from "./practiceIds.js";
 const entityIdentity = (target) => `${target?.entityType ?? ""}\u0000${target?.entityKey ?? ""}`;
 
 function plannedSessionId(profileId, contextId, localDayKey, blockId) {
-  const hash = hashPracticeContent(`${profileId}|${contextId}|${localDayKey}|${blockId}|${PRACTICE_COACH_PLANNER_VERSION}`).slice(-8);
+  const hash = hashPracticeContent(`${profileId}|${contextId}|${localDayKey}|${blockId}|1`).slice(-8);
   return `practice-session_coach-${hash}-${blockId}`;
 }
 
@@ -29,11 +29,11 @@ export function shouldIncludePracticeCoachReview(queue, requestedMinutes, policy
 
 function selectSecondTarget(targets, first, policy) {
   const eligible = targets.filter((candidate) => candidate !== first
-    && candidate.utilityScore >= Math.max(PRACTICE_COACH_SECOND_TARGET_UTILITY, policy.secondTargetUtility)
+    && Number(candidate.baseUtilityScore ?? candidate.utilityScore) >= Math.max(PRACTICE_COACH_SECOND_TARGET_UTILITY, policy.secondTargetUtility)
     && !practiceCoachTargetsOverlap(first, candidate));
   if (!eligible.length) return null;
   const top = eligible[0];
-  const diversityWindow = eligible.filter((candidate) => top.utilityScore - candidate.utilityScore <= policy.diversityWindow);
+  const diversityWindow = eligible.filter((candidate) => Number(top.personalizedUtilityScore ?? top.utilityScore) - Number(candidate.personalizedUtilityScore ?? candidate.utilityScore) <= policy.diversityWindow);
   const distinct = diversityWindow.find((candidate) => candidate.experimentId !== first.experimentId);
   return distinct ?? top;
 }
@@ -52,6 +52,8 @@ function createReviewBlock({ profileId, contextId, localDayKey, reviewPlan }) {
     plannedSessionId: plannedSessionId(profileId, contextId, localDayKey, "review"),
     estimatedMinutes: PRACTICE_COACH_REVIEW_COST_MINUTES,
     reviewPlan,
+    personalizationDecision: null,
+    responseInformed: false,
     reasonCodes: [reviewPlan?.hasOverdue ? "overdue-review" : "high-review-value"],
   };
 }
@@ -67,7 +69,11 @@ function createTargetBlock({ profileId, contextId, localDayKey, candidate, index
     estimatedMinutes: PRACTICE_COACH_TARGET_COST_MINUTES,
     target: { entityType: candidate.entityType, entityKey: candidate.entityKey, statId: candidate.statId ?? null },
     targetSource: "external-plan",
-    utilityScore: candidate.utilityScore,
+    baseUtilityScore: candidate.baseUtilityScore ?? candidate.utilityScore,
+    personalizedUtilityScore: candidate.personalizedUtilityScore ?? candidate.utilityScore,
+    utilityScore: candidate.personalizedUtilityScore ?? candidate.utilityScore,
+    personalizationDecision: candidate.personalizationDecision ?? null,
+    responseInformed: candidate.responseInformed === true,
     reasonCodes: candidate.reasonCodes ?? [],
   };
 }
@@ -81,6 +87,8 @@ function createRealTextBlock({ profileId, contextId, localDayKey, minutes, reaso
     plannedSessionId: plannedSessionId(profileId, contextId, localDayKey, "integration"),
     estimatedMinutes: minutes,
     realTextDurationMs: minutes * 60_000,
+    personalizationDecision: null,
+    responseInformed: false,
     reasonCodes: ["broad-integration", ...reasonCodes].slice(0, 4),
   };
 }
@@ -127,7 +135,7 @@ export function buildPracticeCoachDailyPlan({
   const readyTargets = (Array.isArray(targetCandidates) ? targetCandidates : [])
     .filter((candidate) => candidate?.availabilityStatus === undefined || candidate.availabilityStatus === "ready")
     .filter((candidate) => !reviewedEntities.has(entityIdentity(candidate)))
-    .filter((candidate) => candidate.utilityScore >= policy.actionableUtility);
+    .filter((candidate) => Number(candidate.baseUtilityScore ?? candidate.utilityScore) >= policy.actionableUtility);
 
   let remaining = minutes;
   let reviewBlock = null;

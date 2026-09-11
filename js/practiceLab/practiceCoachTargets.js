@@ -5,6 +5,8 @@ import {
 } from "./practiceCoachConstants.js";
 import { PRACTICE_COACH_POLICY_V1 } from "./practiceCoachPolicy.js";
 import { calculatePracticeCoachTargetUtility } from "./practiceCoachUtility.js";
+import { buildPracticeCoachTreatmentOptions } from "./practiceCoachTreatmentOptions.js";
+import { selectPersonalizedPracticeTreatment } from "./practiceCoachPersonalization.js";
 
 const STATUS_RANK = Object.freeze({ confirmed: 2, likely: 1 });
 const finite = (value) => Number.isFinite(Number(value));
@@ -49,13 +51,23 @@ export function practiceCoachTargetsOverlap(left, right) {
   return hierarchyIds(left).has(right.statId) || hierarchyIds(right).has(left.statId);
 }
 
-function reasonCodes(candidate, intervention, utilityBreakdown) {
+function reasonCodeForExperiment(candidate, experimentId) {
+  if (experimentId === "accuracy-control") return "accuracy-recovery-match";
+  if (candidate.entityType === "key") return "key-foundation";
+  if (["bigram", "trigram"].includes(candidate.entityType)) return "combination-limiter";
+  if (candidate.entityType === "word") return "word-limiter";
+  return null;
+}
+
+function reasonCodes(candidate, experimentId, utilityBreakdown, responseInformed = false) {
   const reasons = [];
   if (finite(candidate?.priorityScore) && Number(candidate.priorityScore) >= 60) reasons.push("high-impact-limiter");
   if (Number(candidate?.evidenceMetadata?.primaryDimensionConfidenceScore ?? candidate?.evidenceConfidenceScore ?? 0) >= 70) reasons.push("high-confidence-limiter");
-  if (intervention.reasonCode) reasons.push(intervention.reasonCode);
+  const interventionReason = reasonCodeForExperiment(candidate, experimentId);
+  if (interventionReason) reasons.push(interventionReason);
   if (utilityBreakdown.headroom >= 0.7) reasons.push("learning-headroom");
   else if (["likely", "supported"].includes(candidate?.saturationStatus)) reasons.push("saturation-deemphasis");
+  if (responseInformed) reasons.push("response-informed-treatment");
   return Object.freeze([...new Set(reasons)].slice(0, 4));
 }
 
@@ -95,22 +107,69 @@ export function buildPracticeCoachTargetCandidates({
       interventionMatch: intervention.interventionMatch,
       policy,
     });
-    if (breakdown.coachTargetUtility < Math.max(PRACTICE_COACH_ACTIONABLE_UTILITY, policy.actionableUtility)) continue;
-    output.push(Object.freeze({
+    const baseUtilityScore = breakdown.coachTargetUtility;
+    if (baseUtilityScore < Math.max(PRACTICE_COACH_ACTIONABLE_UTILITY, policy.actionableUtility)) continue;
+
+    const personalizationCandidate = {
       ...candidate,
-      experimentId: intervention.experimentId,
-      interventionMatch: intervention.interventionMatch,
+      accuracyRecoveryPressure: intervention.ar,
+      otherExecutionPressure: intervention.other,
+      needUtility: breakdown.needUtility,
+      utilityBreakdown: breakdown,
+      baseUtilityScore,
+    };
+    const treatmentOptions = buildPracticeCoachTreatmentOptions(personalizationCandidate, {
+      preferredIntervention: intervention,
+      availabilityByExperiment: candidate.coachTreatmentOptionAvailability ?? null,
+      policy,
+    });
+    const personalized = treatmentOptions.length && candidate.coachProfileId && candidate.coachContextId
+      ? selectPersonalizedPracticeTreatment({
+        candidate: personalizationCandidate,
+        options: treatmentOptions,
+        responseStates: candidate.coachTreatmentResponseStates ?? [],
+        profileId: candidate.coachProfileId,
+        contextId: candidate.coachContextId,
+        now: candidate.coachPersonalizationNow ?? new Date(),
+      })
+      : null;
+    const experimentId = personalized?.experimentId ?? intervention.experimentId;
+    const personalizedUtilityScore = personalized?.personalizedOptionUtility ?? baseUtilityScore;
+    const rawDecision = personalized?.personalizationDecision ?? null;
+    const personalizationDecision = rawDecision?.evidenceInputs?.length ? rawDecision : null;
+    const responseInformed = personalized?.responseInformed === true;
+    const {
+      coachTreatmentResponseStates,
+      coachTreatmentOptionAvailability,
+      coachProfileId,
+      coachContextId,
+      coachPersonalizationNow,
+      ...persistableCandidate
+    } = candidate;
+    output.push(Object.freeze({
+      ...persistableCandidate,
+      experimentId,
+      experimentVersion: personalized?.experimentVersion ?? 1,
+      interventionMatch: personalized?.personalizedInterventionMatch ?? intervention.interventionMatch,
+      baseInterventionMatch: personalized?.baseInterventionMatch ?? intervention.interventionMatch,
+      responseModifier: personalizationDecision?.responseModifier ?? 1,
       accuracyRecoveryPressure: intervention.ar,
       otherExecutionPressure: intervention.other,
       masteryStage,
       saturationStatus,
       marginalGainBand,
       utilityBreakdown: breakdown,
-      utilityScore: breakdown.coachTargetUtility,
-      reasonCodes: reasonCodes(candidate, intervention, breakdown),
+      needUtility: breakdown.needUtility,
+      baseUtilityScore,
+      personalizedUtilityScore,
+      utilityScore: personalizedUtilityScore,
+      personalizationDecision,
+      responseInformed,
+      personalizationDiagnostics: personalized?.optionComparisons ?? Object.freeze([]),
+      reasonCodes: reasonCodes(candidate, experimentId, breakdown, responseInformed),
     }));
   }
-  output.sort((a, b) => Number(b.utilityScore) - Number(a.utilityScore)
+  output.sort((a, b) => Number(b.personalizedUtilityScore) - Number(a.personalizedUtilityScore)
     || (STATUS_RANK[b.status] ?? 0) - (STATUS_RANK[a.status] ?? 0)
     || Number(b.evidenceMetadata?.primaryDimensionConfidenceScore ?? b.evidenceConfidenceScore ?? 0) - Number(a.evidenceMetadata?.primaryDimensionConfidenceScore ?? a.evidenceConfidenceScore ?? 0)
     || Number(b.weaknessScore ?? 0) - Number(a.weaknessScore ?? 0)
