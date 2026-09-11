@@ -2,11 +2,29 @@ export * from "./practiceDefaultsLegacy.js";
 
 import {
   createDefaultCustomText as createDefaultCustomTextLegacy,
+  createDefaultPracticeManifest as createDefaultPracticeManifestLegacy,
+  createDefaultPracticeSettings as createDefaultPracticeSettingsLegacy,
   createDefaultSessionSummary as createDefaultSessionSummaryV17,
 } from "./practiceDefaultsLegacy.js";
 import { splitGraphemes } from "./practiceTextSegmentation.js";
 import { PRACTICE_RECORD_VERSIONS } from "./practiceConstants.js";
 import { PRACTICE_CUSTOM_TEXT_PROJECTION_VERSION } from "./practiceCustomTextConstants.js";
+
+export function createDefaultPracticeSettings(overrides = {}) {
+  return {
+    ...createDefaultPracticeSettingsLegacy(),
+    physicalKeyboardTelemetryEnabled: false,
+    ...JSON.parse(JSON.stringify(overrides)),
+  };
+}
+
+export function createDefaultPracticeManifest(options = {}) {
+  const manifest = createDefaultPracticeManifestLegacy(options);
+  return {
+    ...manifest,
+    settings: createDefaultPracticeSettings(manifest.settings ?? options.settings ?? {}),
+  };
+}
 
 export function createDefaultSessionSummary(options = {}) {
   const summary = createDefaultSessionSummaryV17(options);
