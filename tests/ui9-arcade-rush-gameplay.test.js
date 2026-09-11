@@ -1,8 +1,10 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
-const [index, presentation, css, runtime, config, ui, workflow, modes] = await Promise.all([
+const [index, appCss, presentationBootstrap, presentation, css, runtime, config, ui, workflow, modes] = await Promise.all([
   readFile(new URL("../index.html", import.meta.url), "utf8"),
+  readFile(new URL("../styles/app.css", import.meta.url), "utf8"),
+  readFile(new URL("../js/presentationBootstrap.js", import.meta.url), "utf8"),
   readFile(new URL("../js/arcadeRushGameplayPresentation.js", import.meta.url), "utf8"),
   readFile(new URL("../styles/screens/arcade-rush-gameplay.css", import.meta.url), "utf8"),
   readFile(new URL("../js/arcadeRush/arcadeRushRuntime.js", import.meta.url), "utf8"),
@@ -12,10 +14,12 @@ const [index, presentation, css, runtime, config, ui, workflow, modes] = await P
   readFile(new URL("../js/modes.js", import.meta.url), "utf8"),
 ]);
 
-assert.equal((index.match(/styles\/screens\/arcade-rush-gameplay\.css/g) || []).length, 1);
-assert.equal((index.match(/js\/arcadeRushGameplayPresentation\.js/g) || []).length, 1);
-assert.match(index, /typing-test-ui8-contract\.css[\s\S]*arcade-rush-gameplay\.css[\s\S]*practiceLabV20\.css/);
-assert.match(index, /bossGameplayPresentation\.js[\s\S]*arcadeRushGameplayPresentation\.js/);
+assert.match(index, /styles\/app\.css\?v=20260911v8/);
+assert.doesNotMatch(index, /styles\/screens\/arcade-rush-gameplay\.css|js\/arcadeRushGameplayPresentation\.js/);
+assert.equal((appCss.match(/\.\/screens\/arcade-rush-gameplay\.css/g) || []).length, 1);
+assert.match(appCss, /typing-test-ui8-contract\.css[\s\S]*arcade-rush-gameplay\.css[\s\S]*results-pause-onboarding\.css/);
+assert.equal((presentationBootstrap.match(/arcadeRushGameplayPresentation\.js/g) || []).length, 1);
+assert.match(presentationBootstrap, /bossGameplayPresentation\.js[\s\S]*arcadeRushGameplayPresentation\.js[\s\S]*profileLeaderboardsSettingsPresentation\.js/);
 
 assert.match(presentation, /ARCADE_RUSH_STARTING_INTEGRITY/);
 assert.match(presentation, /ARCADE_RUSH_WAVE_COUNT/);
@@ -86,4 +90,4 @@ assert.match(workflow, /browser-artifacts\/ui9-arcade-rush\//);
 assert.match(modes, /PRACTICE: "practice"/);
 assert.match(modes, /id: MODE_IDS\.PRACTICE,[\s\S]*enabled: false,[\s\S]*status: "coming-soon",[\s\S]*route: null/);
 
-console.log("UI9 Arcade Rush source contracts passed: presentation-only route/HUD/Core/word/wave/boss treatment, responsive and reduced-motion coverage, AR6 runtime preservation, and Practice isolation.");
+console.log("UI9 Arcade Rush source contracts passed: semantic V8 resource ownership, presentation-only route/HUD/Core/word/wave/boss treatment, responsive and reduced-motion coverage, AR6 runtime preservation, and Practice isolation.");
