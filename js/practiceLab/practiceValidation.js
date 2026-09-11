@@ -1,6 +1,8 @@
 export * from "./practiceValidationLegacy.js";
 
 import {
+  normalizePracticeManifest as normalizePracticeManifestLegacy,
+  normalizePracticeSettings as normalizePracticeSettingsLegacy,
   validateSessionSummary as validateLegacySessionSummary,
 } from "./practiceValidationLegacy.js";
 import {
@@ -16,6 +18,22 @@ import { validatePracticeCustomTextRecord } from "./practiceCustomTextValidation
 export const validateReviewItem = validatePracticeReviewItemV3;
 export const validateAssessmentRun = validatePracticeAssessmentRun;
 export const validateCustomText = validatePracticeCustomTextRecord;
+
+export function normalizePracticeSettings(value = {}) {
+  return {
+    ...normalizePracticeSettingsLegacy(value),
+    physicalKeyboardTelemetryEnabled: value?.physicalKeyboardTelemetryEnabled === true,
+  };
+}
+
+export function normalizePracticeManifest(value) {
+  const normalized = normalizePracticeManifestLegacy(value);
+  if (!normalized) return null;
+  return {
+    ...normalized,
+    settings: normalizePracticeSettings(value?.settings),
+  };
+}
 
 export function validatePracticeAssessmentBinding(binding) {
   const errors = [];
