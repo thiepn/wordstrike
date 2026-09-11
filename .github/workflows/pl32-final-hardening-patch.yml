@@ -1,0 +1,45 @@
+name: PL32 Final Hardening Patch
+
+on:
+  push:
+    branches: [pl32-treatment-response]
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: pl32-treatment-response
+      - name: Close temporarily preserved outcomes after unusable or abandoned later exposure
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          path = Path('js/practiceLab/practiceTreatmentService.js')
+          text = path.read_text(encoding='utf-8')
+          old_finalize = '''    next = treatmentComplete(identity, summary)\n      ? finalizePracticeTreatmentEpisode(next, { completedAt: summary.completedAtUtc, actualDurationMs: summary.activeDurationMs, treatmentExposureEligible: Boolean(next.treatment?.exposureStartedAt) })\n      : invalidatePracticeTreatmentEpisode(next, "incomplete-treatment", summary.completedAtUtc);\n    return persist(next);'''
+          new_finalize = '''    next = treatmentComplete(identity, summary)\n      ? finalizePracticeTreatmentEpisode(next, { completedAt: summary.completedAtUtc, actualDurationMs: summary.activeDurationMs, treatmentExposureEligible: Boolean(next.treatment?.exposureStartedAt) })\n      : invalidatePracticeTreatmentEpisode(next, "incomplete-treatment", summary.completedAtUtc);\n    const persisted = await persist(next);\n    if (persisted?.treatment?.exposureStartedAt) {\n      await markPracticeTreatmentInterference({\n        repository,\n        newEpisode: persisted,\n        exposedAt: persisted.treatment.exposureStartedAt,\n        preserveCompatibleMeasurement: false,\n      });\n    }\n    return persisted;'''
+          old_abandon = '''      if (!episode || episode.status !== "prepared") return episode;\n      return persist(invalidatePracticeTreatmentEpisode(episode, episode.treatment?.exposureStartedAt ? "incomplete-treatment" : reason, nowIso(wallClock)));'''
+          new_abandon = '''      if (!episode || episode.status !== "prepared") return episode;\n      const invalid = await persist(invalidatePracticeTreatmentEpisode(episode, episode.treatment?.exposureStartedAt ? "incomplete-treatment" : reason, nowIso(wallClock)));\n      if (invalid?.treatment?.exposureStartedAt) {\n        await markPracticeTreatmentInterference({\n          repository,\n          newEpisode: invalid,\n          exposedAt: invalid.treatment.exposureStartedAt,\n          preserveCompatibleMeasurement: false,\n        });\n      }\n      return invalid;'''
+          old_expired = 'return freezeDeep({ ...slot, status: "expired", reason: "tracking-window-expired", evidenceGrade: "insufficient", primaryEligible: false });'
+          new_expired = 'return freezeDeep({ ...slot, status: "expired", reason: "tracking-window-expired", evidenceGrade: "insufficient", primaryEligible: false, aggregateEligible: false });'
+          replacements = [(old_finalize, new_finalize), (old_abandon, new_abandon), (old_expired, new_expired)]
+          for old, new in replacements:
+              if old not in text:
+                  raise SystemExit(f'Expected hardening source not found: {old[:80]!r}')
+              text = text.replace(old, new, 1)
+          path.write_text(text, encoding='utf-8')
+          PY
+      - name: Commit hardening patch
+        shell: bash
+        run: |
+          if git diff --quiet; then exit 0; fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add js/practiceLab/practiceTreatmentService.js
+          git commit -m 'PL32: close preserved outcomes after unresolved later exposure'
+          git push origin HEAD:pl32-treatment-response
