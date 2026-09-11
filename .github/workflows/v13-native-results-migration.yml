@@ -1,18 +1,18 @@
 name: V13 native results migration
 
 on:
-  push:
+  pull_request:
+    types:
+      - opened
     branches:
-      - v13-native-results-pipeline
-    paths:
-      - .github/workflows/v13-native-results-migration.yml
+      - v12-typing-results-runtime
 
 permissions:
   contents: write
 
 jobs:
   migrate:
-    if: github.event.head_commit.message == 'V13: install native results migration runner'
+    if: github.event.pull_request.head.ref == 'v13-native-results-pipeline'
     runs-on: ubuntu-latest
     steps:
       - name: Check out V13 branch
