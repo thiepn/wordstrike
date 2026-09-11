@@ -6,6 +6,10 @@ import {
   createPracticeTreatmentService,
   reconcilePracticeTreatmentTracking,
 } from "./practiceTreatmentService.js";
+import { createPracticeIndexedDbStore } from "./practiceIndexedDbStore.js";
+import { createPracticePhysicalTelemetryRepositoryFacade } from "./practicePhysicalTelemetryService.js";
+import { createPracticePhysicalTelemetryRuntime } from "./practicePhysicalTelemetryRuntime.js";
+import { reconcilePracticePhysicalTelemetry } from "./practicePhysicalTelemetryReconciliation.js";
 
 function trackingLogger(options) {
   return options?.logger ?? console;
@@ -27,8 +31,24 @@ export function createPracticeSessionEngine(options = {}) {
   if (!repository) throw new TypeError("Practice engine requires a repository");
   const logger = trackingLogger(options);
   const treatment = createPracticeTreatmentService({ repository, profileId, contextId, sessionId, wallClock, logger });
+  const physicalDataStore = options.physicalTelemetryDataStore ?? createPracticeIndexedDbStore();
+  const ownsPhysicalDataStore = options.physicalTelemetryDataStore == null;
+  const physicalRepository = createPracticePhysicalTelemetryRepositoryFacade({ dataStore: physicalDataStore, now: wallClock });
+  const physical = createPracticePhysicalTelemetryRuntime({
+    repository,
+    telemetryRepository: physicalRepository,
+    profileId,
+    contextId,
+    sessionId,
+    wallClock,
+    clock: options.clock,
+    documentObject: options.documentObject,
+    logger,
+  });
   let core = null;
   let postCanonicalCommit = async () => {};
+  let preparedContentPlan = null;
+  let physicalAvailable = true;
 
   core = createPracticeSessionEngineV31({
     ...options,
@@ -36,8 +56,8 @@ export function createPracticeSessionEngine(options = {}) {
   });
 
   const complete = async (reason) => {
-    const result = await core.complete(reason);
-    return result;
+    try { return await core.complete(reason); }
+    finally { physical.stop(); }
   };
 
   postCanonicalCommit = async (payload) => {
@@ -50,15 +70,24 @@ export function createPracticeSessionEngine(options = {}) {
     } catch (cause) {
       logger?.warn?.("Treatment tracking failed after canonical Practice commit", { cause });
     }
+    if (physicalAvailable) {
+      try {
+        await physical.afterCanonicalCommit({ sessionSummary: payload.sessionSummary, contentPlan: preparedContentPlan });
+      } catch (cause) {
+        logger?.warn?.("Physical telemetry failed after canonical Practice commit", { cause });
+      }
+    }
   };
 
   const unsubscribeTracking = core.subscribe((snapshot, event) => {
     try { treatment.observeProgress(snapshot, event); }
     catch (cause) { logger?.warn?.("Treatment tracking progress hook failed", { cause }); }
+    if (["paused", "resumed", "content-appended", "restored"].includes(event)) physical.resetTimingContinuity();
   });
 
   const prepare = async (args = {}) => {
     const prepared = await core.prepare(args);
+    preparedContentPlan = args.contentPlan ?? null;
     try {
       await treatment.prepare({
         experiment: args.experiment,
@@ -70,28 +99,62 @@ export function createPracticeSessionEngine(options = {}) {
     } catch (cause) {
       logger?.warn?.("Treatment tracking unavailable for prepared Practice session", { cause });
     }
+    try {
+      await physicalDataStore.open();
+      await physical.prepare({ contentPlan: args.contentPlan });
+      await reconcilePracticePhysicalTelemetry({ repository: physicalRepository, profileId });
+    } catch (cause) {
+      physicalAvailable = false;
+      logger?.warn?.("Physical telemetry unavailable for prepared Practice session", { cause });
+    }
     return prepared;
   };
 
+  const start = (...args) => {
+    const started = core.start(...args);
+    if (physicalAvailable) physical.start();
+    return started;
+  };
+
+  const handleInput = (rawInput) => {
+    const outcome = core.handleInput(rawInput);
+    if (physicalAvailable) {
+      try { physical.observeCanonicalInput(rawInput, outcome, core.getSnapshot?.() ?? null); }
+      catch (cause) { logger?.warn?.("Physical telemetry input hook failed", { cause }); }
+    }
+    return outcome;
+  };
+
   const abandon = async (reason = "manual-stop") => {
-    const result = await core.abandon(reason);
-    try { await treatment.abandon("abandoned-before-treatment"); }
-    catch (cause) { logger?.warn?.("Treatment tracking abandonment hook failed", { cause }); }
-    return result;
+    try {
+      const result = await core.abandon(reason);
+      try { await treatment.abandon("abandoned-before-treatment"); }
+      catch (cause) { logger?.warn?.("Treatment tracking abandonment hook failed", { cause }); }
+      return result;
+    } finally {
+      physical.stop();
+    }
   };
 
   const destroy = (...args) => {
     try { unsubscribeTracking?.(); } catch {}
+    physical.stop();
+    if (ownsPhysicalDataStore) {
+      try { physicalDataStore.close(); } catch {}
+    }
     return core.destroy?.(...args);
   };
 
   return Object.freeze({
     ...core,
     prepare,
+    start,
+    handleInput,
     complete,
     abandon,
     destroy,
     getTreatmentEpisode() { return treatment.getEpisode(); },
+    getPhysicalTelemetryDiagnostics() { return physical.getDiagnostics(); },
   });
 }
 
@@ -102,5 +165,6 @@ export async function restorePracticeSessionEngine(options = {}) {
     try { await reconcilePracticeTreatmentTracking({ repository, profileId, contextId, now: options.wallClock ?? Date.now }); }
     catch (cause) { trackingLogger(options)?.warn?.("Treatment tracking reconciliation failed during restore", { cause }); }
   }
+  // PL36 intentionally does not reconstruct physical events from checkpoints/session summaries.
   return restored;
 }
