@@ -3,11 +3,7 @@ import { readFileSync } from "node:fs";
 import { buildPerformanceV4Analysis } from "../js/speedTestPerformanceV4.js";
 
 const profile = {
-  version: 1,
-  sessionId: "current",
-  configId: "time-60",
-  wordSetId: "english-200",
-  activeDurationMs: 6000,
+  version: 1, sessionId: "current", configId: "time-60", wordSetId: "english-200", activeDurationMs: 6000,
   words: [
     { index: 1, expected: "the", typed: "the", exact: true, durationMs: 450, effectiveChars: 4, rawChars: 4, incorrectChars: 0, missingCharacters: 0, errors: 0, backspaces: 0, wordDeletes: 0, wpm: 106.7, rawWpm: 106.7, accuracy: 100, clean: true },
     { index: 2, expected: "quick", typed: "quick", exact: true, durationMs: 720, effectiveChars: 6, rawChars: 6, incorrectChars: 0, missingCharacters: 0, errors: 0, backspaces: 0, wordDeletes: 0, wpm: 100, rawWpm: 100, accuracy: 100, clean: true },
@@ -17,11 +13,8 @@ const profile = {
     { index: 6, expected: "jumps", typed: "jumps", exact: true, durationMs: 760, effectiveChars: 6, rawChars: 6, incorrectChars: 0, missingCharacters: 0, errors: 0, backspaces: 0, wordDeletes: 0, wpm: 94.7, rawWpm: 94.7, accuracy: 100, clean: true },
   ],
 };
-
 const timeline = {
-  version: 1,
-  bucketMs: 1000,
-  activeDurationMs: 6000,
+  version: 1, bucketMs: 1000, activeDurationMs: 6000,
   points: Array.from({ length: 6 }, (_, index) => ({ second: index + 1, durationMs: 1000, wpm: 80, rawWpm: 88 })),
   mistakes: [
     { timeMs: 2100, second: 3, type: "incorrect", count: 1, expected: "o", typed: "i", word: "brown" },
@@ -29,7 +22,6 @@ const timeline = {
     { timeMs: 4900, second: 5, type: "missed", count: 2, expected: "se", typed: "becaus", word: "because" },
   ],
 };
-
 const analysis = buildPerformanceV4Analysis(profile, timeline, { wpm: 80 });
 assert.equal(analysis.version, 4);
 assert.equal(analysis.wordCount, 6);
@@ -49,12 +41,16 @@ assert.match(analysis.insight, /because/i);
 assert.match(analysis.insight, /clean/i);
 
 const index = readFileSync(new URL("../index.html", import.meta.url), "utf8");
-assert.match(index, /js\/speedTestPerformanceV4\.js\?v=20260911a/);
+const resultsFeature = readFileSync(new URL("../js/speedTestResultsFeature.js", import.meta.url), "utf8");
+assert.match(index, /js\/appBootstrap\.js\?v=20260911v8/);
+assert.match(resultsFeature, /import "\.\/speedTestPerformanceV4\.js";/,
+  "the semantic results feature must retain Typing Performance V4");
+assert.doesNotMatch(index, /speedTestPerformanceV4\.js\?v=20260911a/,
+  "historical V4 scripts must not return directly to index.html");
 assert.doesNotMatch(index, /<link[^>]+typing-performance-v4\.css/,
   "V4 styling should remain lazy so unrelated screens keep certified default pixels");
 
 const submission = readFileSync(new URL("../js/leaderboardSubmissionService.js", import.meta.url), "utf8");
 assert.doesNotMatch(submission, /wordProfile|performanceV4|problemWords|mistakeFingerprint/,
   "V4 deep-dive analytics must remain outside ranked leaderboard payloads");
-
-console.log("Typing Performance Timeline V4 word pace, friction, mistake fingerprint, and ranked-data isolation passed.");
+console.log("Typing Performance Timeline V4 word pace, friction, fingerprint, semantic bootstrap, and ranked-data isolation passed.");
