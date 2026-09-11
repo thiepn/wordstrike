@@ -49,6 +49,7 @@ export const PRACTICE_TREATMENT_OUTCOME_DOMAINS = Object.freeze([
 ]);
 
 export const PRACTICE_TREATMENT_POLICY = Object.freeze({
+  preparedTtlMs: 24 * 60 * 60 * 1000,
   minimumDelayedMs: 12 * 60 * 60 * 1000,
   hybridMinimumDelayedMs: 24 * 60 * 60 * 1000,
   retestMaximumMs: 14 * 24 * 60 * 60 * 1000,
