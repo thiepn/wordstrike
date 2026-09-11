@@ -56,6 +56,8 @@ def complete_words_test(page, delay=22):
     page.keyboard.press('Space')
     page.keyboard.type(' '.join(words[1:]), delay=delay)
     expect(page.locator('.speed-results-screen')).to_be_visible(timeout=10000)
+    expect(page.locator('[data-speed-results-v6]')).to_be_visible(timeout=10000)
+    page.locator('[data-v6-tab="timeline"]').click()
     expect(page.locator('[data-speed-performance]')).to_be_visible(timeout=5000)
 
 
