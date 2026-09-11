@@ -36,7 +36,7 @@ function mad(values, center = median(values)) {
 export function getPracticeTreatmentResponseThreshold({ responseUnit, outcomeKey } = {}) {
   if (responseUnit === "quality-points") return PRACTICE_TREATMENT_THRESHOLDS.targetQualityPoints;
   if (outcomeKey === "control-frontier") return PRACTICE_TREATMENT_THRESHOLDS.frontierPercent;
-  if (outcomeKey === "consistency") return PRACTICE_TREATMENT_THRESHOLDS.consistencyVariationPp;
+  if (["consistency", "metronome-silent"].includes(outcomeKey)) return PRACTICE_TREATMENT_THRESHOLDS.consistencyVariationPp;
   if (responseUnit === "percent") return PRACTICE_TREATMENT_THRESHOLDS.abilityPercent;
   return null;
 }
@@ -82,80 +82,25 @@ export function summarizePracticeTreatmentResponses({ samples = [], responseUnit
     else deadbandCount += 1;
   }
   const depth = calculatePracticeTreatmentEvidenceDepth(eligible, { targeted });
-  return freezeDeep({
-    count: eligible.length,
-    median: center,
-    mad: spread,
-    positiveCount,
-    negativeCount,
-    deadbandCount,
-    distinctDays: depth.distinctDays,
-    distinctTargets: depth.distinctTargets,
-    manualCount: eligible.filter((sample) => sample.assignmentKind === "manual").length,
-    coachCount: eligible.filter((sample) => sample.assignmentKind === "coach").length,
-    responsePattern: classifyPracticeTreatmentResponsePattern({ values, threshold, medianResponse: center }),
-    evidenceDepth: depth.depth,
-    practicalThreshold: threshold,
-    hybridOnly: eligible.length > 0 && eligible.every((sample) => sample.measurementGrade === "hybrid"),
-  });
+  return freezeDeep({ count: eligible.length, median: center, mad: spread, positiveCount, negativeCount, deadbandCount, distinctDays: depth.distinctDays, distinctTargets: depth.distinctTargets, manualCount: eligible.filter((sample) => sample.assignmentKind === "manual").length, coachCount: eligible.filter((sample) => sample.assignmentKind === "coach").length, responsePattern: classifyPracticeTreatmentResponsePattern({ values, threshold, medianResponse: center }), evidenceDepth: depth.depth, practicalThreshold: threshold, hybridOnly: eligible.length > 0 && eligible.every((sample) => sample.measurementGrade === "hybrid") });
 }
 
 function summarize(state) {
   const eligible = state.samples.filter((sample) => sample.aggregateEligible === true && finite(sample.responseValue));
-  const summary = summarizePracticeTreatmentResponses({
-    samples: state.samples,
-    responseUnit: state.responseUnit,
-    outcomeKey: state.outcomeKey,
-    targeted: Boolean(state.targetEntityType),
-  });
-  return freezeDeep({
-    ...summary,
-    contaminatedEpisodeCount: state.samples.filter((sample) => sample.contaminated === true).length,
-    hybridOnly: eligible.length > 0 && eligible.every((sample) => sample.measurementGrade === "hybrid"),
-  });
+  const summary = summarizePracticeTreatmentResponses({ samples: state.samples, responseUnit: state.responseUnit, outcomeKey: state.outcomeKey, targeted: Boolean(state.targetEntityType) });
+  return freezeDeep({ ...summary, contaminatedEpisodeCount: state.samples.filter((sample) => sample.contaminated === true).length, hybridOnly: eligible.length > 0 && eligible.every((sample) => sample.measurementGrade === "hybrid") });
 }
 
 export function createPracticeTreatmentResponseState({ profileId, contextId, treatmentFamilyKey, targetEntityType = null, outcomeKey, delayBucket, responseUnit, now = new Date().toISOString() } = {}) {
   const treatmentResponseStateId = createPracticeTreatmentResponseStateId({ profileId, contextId, treatmentFamilyKey, targetEntityType, outcomeKey, delayBucket });
-  const state = {
-    treatmentResponseStateId,
-    profileId,
-    contextId,
-    recordVersion: PRACTICE_RECORD_VERSIONS.treatmentResponseState,
-    stateVersion: PRACTICE_TREATMENT_RESPONSE_STATE_VERSION,
-    responseModelVersion: PRACTICE_TREATMENT_RESPONSE_MODEL_VERSION,
-    treatmentFamilyKey,
-    targetEntityType,
-    outcomeKey,
-    delayBucket,
-    responseUnit,
-    samples: [],
-    summary: null,
-    updatedAt: now,
-  };
+  const state = { treatmentResponseStateId, profileId, contextId, recordVersion: PRACTICE_RECORD_VERSIONS.treatmentResponseState, stateVersion: PRACTICE_TREATMENT_RESPONSE_STATE_VERSION, responseModelVersion: PRACTICE_TREATMENT_RESPONSE_MODEL_VERSION, treatmentFamilyKey, targetEntityType, outcomeKey, delayBucket, responseUnit, samples: [], summary: null, updatedAt: now };
   return freezeDeep({ ...state, summary: summarize(state) });
 }
 
 export function buildPracticeTreatmentResponseSample({ episode, outcome, localDayKey = null } = {}) {
   const response = outcome?.response;
   if (!episode || !outcome || !finite(response?.responseValue)) return null;
-  return freezeDeep({
-    treatmentEpisodeId: episode.treatmentEpisodeId,
-    candidateId: outcome.candidateId,
-    observedAt: outcome.observedAt,
-    localDayKey,
-    assignmentKind: episode.assignmentKind,
-    targetStatId: episode.treatment?.targetStatId ?? null,
-    measurementGrade: outcome.measurementGrade ?? "independent",
-    primaryEligible: outcome.primaryEligible === true,
-    aggregateEligible: outcome.aggregateEligible === true,
-    contaminated: outcome.status === "contaminated" || outcome.evidenceGrade === "recorded-confounded",
-    evidenceGrade: outcome.evidenceGrade ?? "insufficient",
-    responseValue: response.responseValue,
-    responseUnit: response.responseUnit,
-    tradeoff: response.tradeoff === true,
-    classification: response.classification ?? null,
-  });
+  return freezeDeep({ treatmentEpisodeId: episode.treatmentEpisodeId, candidateId: outcome.candidateId, observedAt: outcome.observedAt, localDayKey, assignmentKind: episode.assignmentKind, targetStatId: episode.treatment?.targetStatId ?? null, measurementGrade: outcome.measurementGrade ?? "independent", primaryEligible: outcome.primaryEligible === true, aggregateEligible: outcome.aggregateEligible === true, contaminated: outcome.status === "contaminated" || outcome.evidenceGrade === "recorded-confounded", evidenceGrade: outcome.evidenceGrade ?? "insufficient", responseValue: response.responseValue, responseUnit: response.responseUnit, tradeoff: response.tradeoff === true, classification: response.classification ?? null });
 }
 
 export function mergePracticeTreatmentResponseSample(state, sample, now = sample?.observedAt ?? new Date().toISOString()) {
@@ -164,9 +109,7 @@ export function mergePracticeTreatmentResponseSample(state, sample, now = sample
   if (sample.responseUnit !== state.responseUnit) throw new TypeError("Treatment response units cannot be mixed");
   const duplicate = state.samples.some((entry) => entry.treatmentEpisodeId === sample.treatmentEpisodeId && entry.candidateId === sample.candidateId);
   if (duplicate) return state;
-  const samples = [...state.samples, sample]
-    .sort((a, b) => String(a.observedAt).localeCompare(String(b.observedAt)) || String(a.treatmentEpisodeId).localeCompare(String(b.treatmentEpisodeId)))
-    .slice(-PRACTICE_TREATMENT_POLICY.responseSamplesMaximum);
+  const samples = [...state.samples, sample].sort((a, b) => String(a.observedAt).localeCompare(String(b.observedAt)) || String(a.treatmentEpisodeId).localeCompare(String(b.treatmentEpisodeId))).slice(-PRACTICE_TREATMENT_POLICY.responseSamplesMaximum);
   const next = { ...state, samples, updatedAt: now };
   return freezeDeep({ ...next, summary: summarize(next) });
 }

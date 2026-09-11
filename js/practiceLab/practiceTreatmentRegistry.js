@@ -15,6 +15,10 @@ const durationVariant = (configuration) => Number.isFinite(configuration?.durati
 const wordVariant = (configuration) => Number.isFinite(configuration?.wordCount) ? `words-${configuration.wordCount}` : null;
 const oneDose = () => "one-dose";
 const fixed = (value) => () => value;
+const metronomeDimensions = (configuration = {}) => {
+  if (!Number.isFinite(configuration.durationMs) || !["audio", "visual"].includes(configuration.cueMode)) return null;
+  return Object.freeze({ durationMs: configuration.durationMs, cueMode: configuration.cueMode });
+};
 
 const DEFINITIONS = Object.freeze({
   "weak-keys": Object.freeze({ title: "Weak Keys", treatmentClass: "targeted", outcomeDomain: "entity-target", variant: oneDose }),
@@ -24,6 +28,7 @@ const DEFINITIONS = Object.freeze({
   "real-text": Object.freeze({ title: "Real Text Practice", treatmentClass: "broad", outcomeDomain: "cold-natural-text", variant: durationVariant }),
   "common-words": Object.freeze({ title: "Common Words Practice", treatmentClass: "broad", outcomeDomain: "common-words", variant: wordVariant, requiredFlow: "practice" }),
   "consistency-trainer": Object.freeze({ title: "Consistency Trainer", treatmentClass: "hybrid", outcomeDomain: "consistency", variant: durationVariant }),
+  "metronome-typing": Object.freeze({ title: "Metronome Typing", treatmentClass: "broad", outcomeDomain: "metronome-cadence", variant: durationVariant, responseDimensions: metronomeDimensions }),
   "read-ahead": Object.freeze({ title: "Read-Ahead", treatmentClass: "broad", outcomeDomain: "read-ahead", variant: durationVariant }),
   "endurance": Object.freeze({ title: "Endurance Practice", treatmentClass: "broad", outcomeDomain: "endurance", variant: durationVariant, requiredFlow: "practice" }),
   "punctuation-capitals": Object.freeze({ title: "Punctuation & Capitals Practice", treatmentClass: "broad", outcomeDomain: "punctuation", variant: durationVariant, requiredFlow: "practice" }),
@@ -51,7 +56,7 @@ function versionFingerprint(configuration = {}) {
 }
 function directTarget(contentPlan) { return (contentPlan?.targetEntities ?? []).find((target) => target?.directTarget === true) ?? (contentPlan?.targetEntities ?? [])[0] ?? null; }
 export function getPracticeTreatmentDefinition(experimentId) { return DEFINITIONS[experimentId] ?? null; }
-export function listPracticeTreatmentDefinitions() { return Object.entries(DEFINITIONS).map(([experimentId, value]) => freezeDeep({ experimentId, ...value, variant: undefined })); }
+export function listPracticeTreatmentDefinitions() { return Object.entries(DEFINITIONS).map(([experimentId, value]) => freezeDeep({ experimentId, ...value, variant: undefined, responseDimensions: undefined })); }
 export function resolvePracticeTreatmentIdentity({ experiment, configuration = {}, contentPlan = null, coachBinding = null } = {}) {
   const experimentId = experiment?.id ?? null;
   const definition = getPracticeTreatmentDefinition(experimentId);
@@ -60,12 +65,14 @@ export function resolvePracticeTreatmentIdentity({ experiment, configuration = {
   if (definition.requiredFlow && flow !== definition.requiredFlow) return null;
   const protocolVariant = definition.variant(configuration, contentPlan);
   if (!protocolVariant) return null;
+  const responseDimensions = definition.responseDimensions ? definition.responseDimensions(configuration, contentPlan) : null;
+  if (definition.responseDimensions && !responseDimensions) return null;
   const experimentVersion = experiment?.version ?? null;
   if (!Number.isFinite(experimentVersion) && typeof experimentVersion !== "string") return null;
   const versions = versionFingerprint(configuration);
-  const familyInput = canonical({ experimentId, experimentVersion, versions, flow: flow ?? "default", protocolVariant });
+  const familyInput = canonical({ experimentId, experimentVersion, versions, flow: flow ?? "default", protocolVariant, responseDimensions });
   const protocolInput = canonical({ registryVersion: PRACTICE_TREATMENT_REGISTRY_VERSION, ...familyInput });
   const target = definition.treatmentClass === "targeted" ? directTarget(contentPlan) : null;
-  return freezeDeep({ registryVersion: PRACTICE_TREATMENT_REGISTRY_VERSION, experimentId, experimentVersion, title: definition.title, treatmentClass: definition.treatmentClass, outcomeDomain: definition.outcomeDomain, flow: flow ?? "default", protocolVariant, protocolFingerprint: hashPracticeContent(JSON.stringify(protocolInput)), treatmentFamilyKey: `${experimentId}:${hashPracticeContent(JSON.stringify(familyInput))}`, assignmentKind: coachBinding ? "coach" : "manual", targetEntityType: target?.entityType ?? null, targetEntityKey: target?.entityKey ?? null, doseDescriptor: protocolVariant, materialVersions: versions });
+  return freezeDeep({ registryVersion: PRACTICE_TREATMENT_REGISTRY_VERSION, experimentId, experimentVersion, title: definition.title, treatmentClass: definition.treatmentClass, outcomeDomain: definition.outcomeDomain, flow: flow ?? "default", protocolVariant, protocolFingerprint: hashPracticeContent(JSON.stringify(protocolInput)), treatmentFamilyKey: `${experimentId}:${hashPracticeContent(JSON.stringify(familyInput))}`, assignmentKind: coachBinding ? "coach" : "manual", targetEntityType: target?.entityType ?? null, targetEntityKey: target?.entityKey ?? null, doseDescriptor: protocolVariant, responseDimensions, materialVersions: versions });
 }
 export function isPracticeTreatmentSession(input = {}) { return resolvePracticeTreatmentIdentity(input) != null; }

@@ -35,6 +35,9 @@ export function buildPracticeTreatmentOutcomeContracts(identity) {
     contract(PRACTICE_TREATMENT_OUTCOME_KEYS.RETENTION_REVIEW, "retention-review", PRACTICE_TREATMENT_POLICY.retentionMaximumMs, PRACTICE_TREATMENT_POLICY.minimumDelayedMs),
     contract(PRACTICE_TREATMENT_OUTCOME_KEYS.COLD_TRANSFER, "cold-transfer", PRACTICE_TREATMENT_POLICY.transferMaximumMs, PRACTICE_TREATMENT_POLICY.minimumDelayedMs),
   ]);
+  if (identity?.outcomeDomain === "metronome-cadence") return Object.freeze([
+    contract(PRACTICE_TREATMENT_OUTCOME_KEYS.METRONOME_SILENT, "consistency-result", PRACTICE_TREATMENT_POLICY.metronomeMaximumMs, PRACTICE_TREATMENT_POLICY.metronomeMinimumDelayedMs),
+  ]);
   if (identity?.outcomeDomain === "consistency") return Object.freeze([
     contract(PRACTICE_TREATMENT_OUTCOME_KEYS.CONSISTENCY, "consistency-result", PRACTICE_TREATMENT_POLICY.consistencyMaximumMs, PRACTICE_TREATMENT_POLICY.hybridMinimumDelayedMs, "hybrid"),
   ]);
@@ -51,6 +54,7 @@ export function buildPracticeTreatmentOutcomeContracts(identity) {
 
 function baselineKind(identity) {
   if (identity.treatmentClass === "targeted") return "target";
+  if (identity.outcomeDomain === "metronome-cadence") return "metronome-silent";
   if (identity.outcomeDomain === "consistency") return "consistency";
   if (identity.outcomeDomain === "control-frontier") return "control-frontier";
   return "ability";
@@ -95,6 +99,7 @@ export function createPracticeTreatmentEpisode({
       protocolFingerprint: identity.protocolFingerprint,
       protocolVariant: identity.protocolVariant,
       outcomeDomain: identity.outcomeDomain,
+      responseDimensions: identity.responseDimensions ?? null,
       targetEntityType: identity.targetEntityType,
       targetEntityKey: identity.targetEntityKey,
       targetStatId,
