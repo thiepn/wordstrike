@@ -419,7 +419,7 @@ function v3Markup(analysis, pb) {
   </section>`;
 }
 
-function enhanceV3() {
+export function syncSpeedTestPerformanceV3() {
   const base = document.querySelector("#app .speed-results-screen [data-speed-performance]");
   if (!base || base.dataset.performanceV3 === "true") return;
   const v2 = document.querySelector("#app .speed-results-screen [data-speed-performance-v2]");
@@ -443,18 +443,3 @@ function enhanceV3() {
   base.dataset.performanceV3 = "true";
 }
 
-function install() {
-  const root = document.querySelector("#app");
-  if (!root) return;
-  enhanceV3();
-  const observer = new MutationObserver(enhanceV3);
-  observer.observe(root, { childList: true, subtree: true });
-}
-
-if (typeof document !== "undefined") {
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", install, { once: true });
-  } else {
-    install();
-  }
-}

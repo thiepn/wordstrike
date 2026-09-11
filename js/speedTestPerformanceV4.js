@@ -1,8 +1,5 @@
 import { getCurrentSpeedTest } from "./speedTest.js";
-import {
-  finalizeCurrentSpeedTestWordProfile,
-  installSpeedTestWordProfiler,
-} from "./speedTestWordProfileV4.js";
+import { finalizeCurrentSpeedTestWordProfile } from "./speedTestWordProfileV4.js";
 
 const V4_STYLE_HREF = "styles/screens/typing-performance-v4.css?v=20260911a";
 const MAX_WORD_MARKERS = 160;
@@ -363,7 +360,7 @@ function bindWordInspector(section, analysis) {
   });
 }
 
-function enhanceV4() {
+export function syncSpeedTestPerformanceV4() {
   const base = document.querySelector("#app .speed-results-screen [data-speed-performance]");
   if (!base || base.dataset.performanceV4 === "true") return;
   const v3 = document.querySelector("#app .speed-results-screen [data-speed-performance-v3]");
@@ -386,16 +383,3 @@ function enhanceV4() {
   base.dataset.performanceV4 = "true";
 }
 
-function install() {
-  installSpeedTestWordProfiler();
-  const root = document.querySelector("#app");
-  if (!root) return;
-  enhanceV4();
-  const observer = new MutationObserver(enhanceV4);
-  observer.observe(root, { childList: true, subtree: true });
-}
-
-if (typeof document !== "undefined") {
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", install, { once: true });
-  else install();
-}

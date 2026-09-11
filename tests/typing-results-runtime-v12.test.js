@@ -6,7 +6,7 @@ import {
   TYPING_RESULTS_RUNTIME_VERSION,
 } from "../js/typingResultsRuntime.js";
 
-assert.equal(TYPING_RESULTS_RUNTIME_VERSION, 12);
+assert.equal(TYPING_RESULTS_RUNTIME_VERSION, 13);
 assert.deepEqual(TYPING_RESULTS_PRACTICE_ATTRIBUTE_FILTER, [
   "data-practice-view",
   "disabled",
@@ -197,23 +197,23 @@ assert.equal(stressRemoves, 100,
 
 const rootUrl = new URL("../", import.meta.url);
 const read = (path) => readFile(new URL(path, rootUrl), "utf8");
-const [runtimeSource, hubSource, featureSource, bootstrapSource] = await Promise.all([
+const [runtimeSource, featureSource, v6Source, v7Source, profileSource, bootstrapSource] = await Promise.all([
   read("js/typingResultsRuntime.js"),
-  read("js/speedTestResultsObserverHub.js"),
   read("js/speedTestResultsFeature.js"),
+  read("js/speedTestResultsV6b.js"),
+  read("js/speedTestResultsV7.js"),
+  read("js/speedTestWordProfileV4.js"),
   read("js/presentationBootstrap.js"),
 ]);
 
 assert.match(runtimeSource, /export function createTypingResultsRuntime/);
-assert.match(runtimeSource, /syncTypingResultsRuntime/);
-assert.match(runtimeSource, /PRACTICE_OVERLAY_SELECTOR/);
-assert.doesNotMatch(runtimeSource, /#app[\s\S]{0,160}new MutationObserver/,
-  "V12 must not create another app-root results observer");
-assert.doesNotMatch(hubSource, /new NativeMutationObserver\(/,
-  "historical observer capture must be callback-only in V12");
-assert.match(hubSource, /runSpeedTestResultsObserverCallbacks/);
-assert.match(featureSource, /TYPING_RESULTS_RUNTIME_VERSION/);
+assert.match(runtimeSource, /runSpeedTestResultsFeatures/);
+assert.match(featureSource, /SPEED_TEST_RESULTS_LIFECYCLE_VERSION = 13/);
+assert.doesNotMatch(featureSource, /speedTestResultsObserverHub/);
+assert.doesNotMatch(v6Source, /new MutationObserver/);
+assert.doesNotMatch(v7Source, /new MutationObserver/);
+assert.doesNotMatch(profileSource, /new MutationObserver/);
 assert.match(bootstrapSource, /\{ id: "typing-results", sync: syncTypingResultsRuntime \}/,
   "Typing Results must execute inside the one shared production presentation lifecycle");
 
-console.log("WORDSTRIKE V12 explicit Typing Results mount/sync/destroy, scoped Coach observation, stress cleanup, and shared lifecycle ownership passed.");
+console.log("WORDSTRIKE V13 native Typing Results mount/sync/destroy, single scoped Coach observation, stress cleanup, and shared lifecycle ownership passed.");

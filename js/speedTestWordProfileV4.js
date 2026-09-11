@@ -20,8 +20,6 @@ const round = (value, digits = 1) => {
 
 let tracker = null;
 let frameId = null;
-let observer = null;
-let installed = false;
 
 function snapshotMetrics(state) {
   const metrics = state?.metrics || {};
@@ -312,14 +310,17 @@ function ensureSampling() {
   if (frameId == null) frameId = globalThis.requestAnimationFrame?.(samplingFrame) ?? null;
 }
 
-export function installSpeedTestWordProfiler() {
-  if (installed || typeof document === "undefined") return;
-  installed = true;
+export function syncSpeedTestWordProfiler() {
+  if (typeof document === "undefined") return false;
   const root = document.querySelector("#app");
-  if (!root) return;
+  if (!root) return false;
   ensureSampling();
-  observer = new MutationObserver(() => ensureSampling());
-  observer.observe(root, { childList: true, subtree: true });
+  return true;
+}
+
+// Compatibility alias for callers outside the semantic results owner.
+export function installSpeedTestWordProfiler() {
+  return syncSpeedTestWordProfiler();
 }
 
 export const SPEED_TEST_WORD_PROFILE_STORAGE_KEY = STORAGE_KEY;

@@ -36,8 +36,6 @@ const signed = (value, suffix = "") => {
   return `${number > 0 ? "+" : ""}${number.toFixed(suffix === " / word" ? 2 : 1)}${suffix}`;
 };
 
-let observer = null;
-let scheduled = false;
 
 function ensureStyles() {
   if (typeof document === "undefined") return null;
@@ -296,7 +294,7 @@ function onShellClick(event) {
   }
 }
 
-function enhanceResultsV7() {
+export function syncSpeedTestResultsV7() {
   const context = currentCoachContext();
   if (!context) return;
   if (!context.shell.dataset.v7Bound) {
@@ -307,38 +305,12 @@ function enhanceResultsV7() {
   syncPracticeCompletion();
 }
 
-function scheduleEnhance() {
-  if (scheduled) return;
-  scheduled = true;
-  queueMicrotask(() => {
-    scheduled = false;
-    enhanceResultsV7();
-  });
-}
-
-function onDocumentClickCapture(event) {
-  if (!event.target.closest?.("[data-coach-retest-original]")) return;
+export function handleTypingCoachV7DocumentClick(event) {
+  if (!event?.target?.closest?.("[data-coach-retest-original]")) return false;
   const plan = loadTypingCoachV7Plan();
   const cycle = loadActiveTypingCoachCycle();
-  if (!plan || !cycle || cycle.sourceSessionId !== plan.sourceSessionId) return;
+  if (!plan || !cycle || cycle.sourceSessionId !== plan.sourceSessionId) return false;
   prepareRetest({ skipRemaining: true });
-  scheduleEnhance();
+  return true;
 }
 
-function install() {
-  const root = document.querySelector("#app");
-  if (!root) return;
-  enhanceResultsV7();
-  observer = new MutationObserver(() => {
-    syncPracticeCompletion();
-    scheduleEnhance();
-  });
-  observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["data-practice-view"] });
-  document.addEventListener("click", onDocumentClickCapture, true);
-  window.addEventListener("pagehide", () => observer?.disconnect?.(), { once: true });
-}
-
-if (typeof document !== "undefined") {
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", install, { once: true });
-  else install();
-}

@@ -43,7 +43,7 @@ assert.match(analysis.insight, /clean/i);
 const index = readFileSync(new URL("../index.html", import.meta.url), "utf8");
 const resultsFeature = readFileSync(new URL("../js/speedTestResultsFeature.js", import.meta.url), "utf8");
 assert.match(index, /js\/appBootstrap\.js\?v=20260911v8/);
-assert.match(resultsFeature, /import "\.\/speedTestPerformanceV4\.js";/,
+assert.match(resultsFeature, /speedTestPerformanceV4\.js/,
   "the semantic results feature must retain Typing Performance V4");
 assert.doesNotMatch(index, /speedTestPerformanceV4\.js\?v=20260911a/,
   "historical V4 scripts must not return directly to index.html");

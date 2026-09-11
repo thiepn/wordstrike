@@ -164,7 +164,7 @@ const index = readFileSync(new URL("../index.html", import.meta.url), "utf8");
 const resultsFeature = readFileSync(new URL("../js/speedTestResultsFeature.js", import.meta.url), "utf8");
 assert.match(index, /js\/appBootstrap\.js\?v=20260911v8/,
   "V7 should load through the semantic V8 application bootstrap");
-assert.match(resultsFeature, /import "\.\/speedTestResultsV7\.js";/,
+assert.match(resultsFeature, /speedTestResultsV7\.js/,
   "V7 adaptive training results must remain in the semantic results feature chain");
 assert.doesNotMatch(index, /<link[^>]+typing-coach-v7\.css/,
   "V7 styling should stay lazy and not affect unrelated screens");

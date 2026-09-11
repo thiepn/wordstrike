@@ -321,7 +321,7 @@ function addSustainedLegend(section) {
   legend.insertBefore(item, legend.querySelector(".is-error"));
 }
 
-function enhanceV2() {
+export function syncSpeedTestPerformanceV2() {
   const base = document.querySelector("#app .speed-results-screen [data-speed-performance]");
   if (!base || base.dataset.performanceVersion === "2") return;
   const state = getCurrentSpeedTest();
@@ -342,22 +342,6 @@ function enhanceV2() {
   template.innerHTML = analysisMarkup(analysis, previous, result).trim();
   const v2 = template.content.firstElementChild;
   if (v2) base.insertAdjacentElement("afterend", v2);
-}
-
-function install() {
-  const root = document.querySelector("#app");
-  if (!root) return;
-  enhanceV2();
-  const observer = new MutationObserver(enhanceV2);
-  observer.observe(root, { childList: true, subtree: true });
-}
-
-if (typeof document !== "undefined") {
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", install, { once: true });
-  } else {
-    install();
-  }
 }
 
 export const SPEED_TEST_PERFORMANCE_V2_LAYER_STORAGE_KEY = LAYER_STORAGE_KEY;

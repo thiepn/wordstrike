@@ -51,7 +51,7 @@ assert.ok(oneRun.focusWords.length > 0);
 const index = readFileSync(new URL("../index.html", import.meta.url), "utf8");
 const resultsFeature = readFileSync(new URL("../js/speedTestResultsFeature.js", import.meta.url), "utf8");
 assert.match(index, /js\/appBootstrap\.js\?v=20260911v8/);
-assert.match(resultsFeature, /import "\.\/speedTestPerformanceV5\.js";/,
+assert.match(resultsFeature, /speedTestPerformanceV5\.js/,
   "the semantic results feature must retain Typing Performance V5");
 assert.doesNotMatch(index, /speedTestPerformanceV5\.js\?v=20260911a/,
   "historical V5 scripts must not return directly to index.html");
