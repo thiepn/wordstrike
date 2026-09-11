@@ -116,6 +116,16 @@ export async function linkPracticeTreatmentOutcomeCandidate({ repository, profil
   return { episode: attached, outcome, state };
 }
 
+function preservesPriorRetestSlot(prior, newEpisode, slot, exposedAt) {
+  if (slot?.outcomeKey !== "same-protocol-retest") return false;
+  if (prior.treatment?.treatmentClass !== "targeted" || newEpisode.treatment?.treatmentClass !== "targeted") return false;
+  if (!prior.treatment?.targetStatId || prior.treatment.targetStatId !== newEpisode.treatment?.targetStatId) return false;
+  if (prior.treatment?.protocolFingerprint !== newEpisode.treatment?.protocolFingerprint) return false;
+  const baselineObservedAt = time(newEpisode.baseline?.observedAt);
+  const exposure = time(exposedAt);
+  return baselineObservedAt != null && exposure != null && baselineObservedAt < exposure;
+}
+
 export async function markPracticeTreatmentInterference({ repository, newEpisode, exposedAt } = {}) {
   if (!repository || !newEpisode || !exposedAt) return { contaminated: 0 };
   const episodes = await repository.listTreatmentEpisodes(newEpisode.profileId, { contextId: newEpisode.contextId, limit: 500 });
@@ -133,6 +143,7 @@ export async function markPracticeTreatmentInterference({ repository, newEpisode
     let next = prior;
     for (const slot of prior.outcomes ?? []) {
       if (slot.status !== "pending") continue;
+      if (preservesPriorRetestSlot(prior, newEpisode, slot, exposedAt)) continue;
       next = contaminatePracticeTreatmentOutcomeSlot(next, slot.outcomeKey, "superseded-by-later-treatment", exposedAt);
     }
     if (next !== prior) { await repository.saveTreatmentEpisode(next); contaminated += 1; }
