@@ -22,6 +22,10 @@ import {
 
 const STYLE_HREF = "styles/screens/typing-coach-v7.css?v=20260911a";
 const finite = (value, fallback = 0) => Number.isFinite(Number(value)) ? Number(value) : fallback;
+const round = (value, digits = 1) => {
+  const factor = 10 ** digits;
+  return Math.round(finite(value) * factor) / factor;
+};
 const escapeHtml = (value) => String(value ?? "")
   .replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;")
   .replaceAll('"', "&quot;").replaceAll("'", "&#39;");
@@ -47,6 +51,38 @@ function ensureStyles() {
   return link;
 }
 
+function profileSummary(profile = {}) {
+  const words = Array.isArray(profile?.words) ? profile.words.filter(Boolean) : [];
+  if (!words.length) return { cleanPercent: null, correctionsPerWord: null };
+  const clean = words.filter((word) => word.clean === true).length;
+  const corrections = words.reduce((sum, word) => (
+    sum + Math.max(0, finite(word?.backspaces)) + Math.max(0, finite(word?.wordDeletes))
+  ), 0);
+  return {
+    cleanPercent: round((clean / words.length) * 100),
+    correctionsPerWord: round(corrections / words.length, 2),
+  };
+}
+
+function fallbackRetestCycle(plan, result, profile) {
+  if (!plan?.retestRequestedAt || !result?.sessionId || result.sessionId === plan.sourceSessionId) return null;
+  if (plan.configId && result.modeData?.configId !== plan.configId) return null;
+  if (plan.wordSetId && result.modeData?.wordSetId && result.modeData.wordSetId !== plan.wordSetId) return null;
+  const summary = profileSummary(profile);
+  return {
+    sourceSessionId: plan.sourceSessionId,
+    after: { sessionId: result.sessionId },
+    comparison: {
+      wpmDelta: round(finite(result.wpm) - finite(plan.snapshot?.wpm)),
+      accuracyDelta: round(finite(result.accuracy) - finite(plan.snapshot?.accuracy)),
+      cleanDelta: summary.cleanPercent == null || plan.snapshot?.cleanPercent == null
+        ? null : round(summary.cleanPercent - finite(plan.snapshot.cleanPercent)),
+      correctionsDelta: summary.correctionsPerWord == null || plan.snapshot?.correctionsPerWord == null
+        ? null : round(summary.correctionsPerWord - finite(plan.snapshot.correctionsPerWord), 2),
+    },
+  };
+}
+
 function currentCoachContext() {
   const screen = document.querySelector("#app .speed-results-screen");
   const shell = screen?.querySelector("[data-speed-results-v6]");
@@ -65,9 +101,12 @@ function currentCoachContext() {
   const v6Plan = buildTypingCoachV6({ samples, result, profile });
   if (!v6Plan) return null;
 
-  const completedCycle = getTypingCoachCycleForRetestSession(result.sessionId);
   const current = loadTypingCoachV7Plan();
-  if (completedCycle && current?.retestRequestedAt) completeTypingCoachV7Retest(result, completedCycle);
+  if (current?.retestRequestedAt) {
+    const completedCycle = getTypingCoachCycleForRetestSession(result.sessionId)
+      || fallbackRetestCycle(current, result, profile);
+    if (completedCycle) completeTypingCoachV7Retest(result, completedCycle);
+  }
   const plan = ensureTypingCoachV7Plan(v6Plan);
   if (!plan) return null;
   return { screen, shell, practicePanel, result, profile, v6Plan, plan };
@@ -154,7 +193,7 @@ function renderPlan(context = currentCoachContext()) {
     }
   }
   const renderKey = `${result.sessionId}:${plan.updatedAt}:${plan.status}:${plan.steps.map((step) => step.status).join(",")}`;
-  let root = practicePanel.querySelector("[data-typing-coach-v7]");
+  const root = practicePanel.querySelector("[data-typing-coach-v7]");
   if (root?.dataset.renderKey === renderKey) return true;
   const template = document.createElement("template");
   template.innerHTML = planMarkup(plan).trim();
@@ -190,19 +229,22 @@ function startStep(stepId) {
   clickUnderlyingDrill(context.practicePanel, step.drill.type);
 }
 
-function requestRetest({ skipRemaining = false } = {}) {
+function prepareRetest({ skipRemaining = false } = {}) {
   let plan = loadTypingCoachV7Plan();
-  if (!plan) return false;
+  if (!plan) return null;
   if (skipRemaining) {
     for (const step of plan.steps) {
       if (step.kind === "retest") break;
-      if (isTypingCoachV7StepAvailable(plan, step.id)) {
-        plan = skipTypingCoachV7Step(step.id) || plan;
-      }
+      if (isTypingCoachV7StepAvailable(plan, step.id)) plan = skipTypingCoachV7Step(step.id) || plan;
     }
   }
   plan = markTypingCoachV7RetestRequested();
-  if (!plan?.retestRequestedAt) return false;
+  return plan?.retestRequestedAt ? plan : null;
+}
+
+function requestRetest(options = {}) {
+  const plan = prepareRetest(options);
+  if (!plan) return false;
   markTypingCoachRetestRequested();
   document.querySelector('#app .speed-results-screen [data-action="retry"]')?.click?.();
   return true;
@@ -279,9 +321,8 @@ function onDocumentClickCapture(event) {
   const plan = loadTypingCoachV7Plan();
   const cycle = loadActiveTypingCoachCycle();
   if (!plan || !cycle || cycle.sourceSessionId !== plan.sourceSessionId) return;
-  requestRetest({ skipRemaining: true });
-  event.preventDefault();
-  event.stopImmediatePropagation();
+  prepareRetest({ skipRemaining: true });
+  scheduleEnhance();
 }
 
 function install() {
