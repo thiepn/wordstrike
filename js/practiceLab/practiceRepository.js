@@ -27,6 +27,9 @@ export function createPracticeRepository(options = {}) {
       if (existingById) return { created: false, episode: existingById };
       const existing = await transaction.query("treatmentEpisodes", "treatmentSessionId", episode.treatment.treatmentSessionId);
       if (existing.length) return { created: false, episode: existing[0] };
+      const open = await transaction.query("treatmentEpisodes", "contextId", episode.contextId);
+      const openCount = open.filter((item) => item.profileId === episode.profileId && ["prepared", "tracking"].includes(item.status)).length;
+      if (openCount >= PRACTICE_LIMITS.treatmentOpenEpisodesPerContext) throw new TypeError("Treatment tracking open-episode cap reached");
       await transaction.put("treatmentEpisodes", episode);
       return { created: true, episode };
     });
@@ -87,7 +90,8 @@ export function createPracticeRepository(options = {}) {
 
   async function listTreatmentIntervalSessions(profileId, contextId, afterUtc, beforeUtc) {
     const records = await dataStore.query("sessionSummaries", "contextId", contextId);
-    const after = Date.parse(afterUtc ?? ""); const before = Date.parse(beforeUtc ?? "");
+    const after = Date.parse(afterUtc ?? "");
+    const before = Date.parse(beforeUtc ?? "");
     return records.filter((session) => session.profileId === profileId && session.contextId === contextId
       && Number.isFinite(Date.parse(session.completedAtUtc))
       && (!Number.isFinite(after) || Date.parse(session.completedAtUtc) > after)
@@ -107,31 +111,40 @@ export function createPracticeRepository(options = {}) {
   }
 
   async function pruneTreatmentTracking(profileId) {
-    const currentMs = Number(typeof now === "function" ? now() : now);
+    const currentValue = typeof now === "function" ? now() : now;
+    const currentMs = currentValue instanceof Date ? currentValue.getTime() : Number(currentValue);
     const episodes = await dataStore.query("treatmentEpisodes", "profileId", profileId);
-    const deletable = [];
+    const deletionMap = new Map();
     for (const episode of episodes) {
       if (!terminalEpisode(episode)) continue;
       const reference = Date.parse(episode.closedAt ?? episode.updatedAt ?? episode.createdAt ?? "");
       const horizonDays = episode.status === "invalid" ? PRACTICE_LIMITS.treatmentInvalidDays : PRACTICE_LIMITS.treatmentClosedDays;
-      if (Number.isFinite(reference) && currentMs - reference > horizonDays * 86_400_000) deletable.push(episode);
+      if (Number.isFinite(reference) && Number.isFinite(currentMs) && currentMs - reference > horizonDays * 86_400_000) deletionMap.set(episode.treatmentEpisodeId, episode);
     }
-    const remainingAfterAge = episodes.filter((episode) => !deletable.some((item) => item.treatmentEpisodeId === episode.treatmentEpisodeId));
-    const excess = Math.max(0, remainingAfterAge.length - PRACTICE_LIMITS.treatmentEpisodesPerProfile);
+    const survivors = episodes.filter((episode) => !deletionMap.has(episode.treatmentEpisodeId));
+    const excess = Math.max(0, survivors.length - PRACTICE_LIMITS.treatmentEpisodesPerProfile);
     if (excess) {
-      const oldestClosed = remainingAfterAge.filter((episode) => episode.status === "closed")
-        .sort((a, b) => String(a.closedAt ?? a.updatedAt).localeCompare(String(b.closedAt ?? b.updatedAt)));
-      deletable.push(...oldestClosed.slice(0, excess));
+      survivors.filter((episode) => episode.status === "closed")
+        .sort((a, b) => String(a.closedAt ?? a.updatedAt).localeCompare(String(b.closedAt ?? b.updatedAt)))
+        .slice(0, excess)
+        .forEach((episode) => deletionMap.set(episode.treatmentEpisodeId, episode));
     }
-    for (const episode of new Map(deletable.map((item) => [item.treatmentEpisodeId, item])).values()) await dataStore.delete("treatmentEpisodes", episode.treatmentEpisodeId);
+    for (const id of deletionMap.keys()) await dataStore.delete("treatmentEpisodes", id);
 
     const states = await dataStore.query("treatmentResponseStates", "profileId", profileId);
     if (states.length > PRACTICE_LIMITS.treatmentResponseStatesPerProfile) {
-      const removable = states.sort((a, b) => String(a.updatedAt).localeCompare(String(b.updatedAt)))
+      const removable = states.slice().sort((a, b) => String(a.updatedAt).localeCompare(String(b.updatedAt)))
         .slice(0, states.length - PRACTICE_LIMITS.treatmentResponseStatesPerProfile);
       for (const state of removable) await dataStore.delete("treatmentResponseStates", state.treatmentResponseStateId);
     }
-    return { deletedEpisodeIds: [...new Set(deletable.map((item) => item.treatmentEpisodeId))] };
+    return { deletedEpisodeIds: [...deletionMap.keys()] };
+  }
+
+  async function runPracticeRetention(...args) {
+    const profile = await core.getPracticeProfile?.();
+    const treatment = profile ? await pruneTreatmentTracking(profile.profileId) : { deletedEpisodeIds: [] };
+    const coreResult = await core.runPracticeRetention(...args);
+    return { ...coreResult, treatmentEpisodes: treatment.deletedEpisodeIds };
   }
 
   return Object.freeze({
@@ -150,5 +163,6 @@ export function createPracticeRepository(options = {}) {
     getTreatmentAbilityState,
     getTreatmentPerformanceState,
     pruneTreatmentTracking,
+    runPracticeRetention,
   });
 }
