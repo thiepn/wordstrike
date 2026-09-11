@@ -3,6 +3,8 @@ export * from "./practiceValidationLegacy.js";
 import {
   normalizePracticeManifest as normalizePracticeManifestLegacy,
   normalizePracticeSettings as normalizePracticeSettingsLegacy,
+  validatePracticeManifest as validatePracticeManifestLegacy,
+  validatePracticeSettings as validatePracticeSettingsLegacy,
   validateSessionSummary as validateLegacySessionSummary,
 } from "./practiceValidationLegacy.js";
 import {
@@ -33,6 +35,24 @@ export function normalizePracticeManifest(value) {
     ...normalized,
     settings: normalizePracticeSettings(value?.settings),
   };
+}
+
+export function validatePracticeSettings(settings) {
+  const legacy = validatePracticeSettingsLegacy(settings);
+  const errors = [...legacy.errors];
+  if (settings && Object.hasOwn(settings, "physicalKeyboardTelemetryEnabled") && typeof settings.physicalKeyboardTelemetryEnabled !== "boolean") {
+    errors.push({ path: "physicalKeyboardTelemetryEnabled", code: "INVALID_TYPE", message: "physicalKeyboardTelemetryEnabled must be boolean" });
+  }
+  return { valid: errors.length === 0, errors };
+}
+
+export function validatePracticeManifest(manifest) {
+  const legacy = validatePracticeManifestLegacy(manifest);
+  const errors = [...legacy.errors];
+  if (manifest?.settings && Object.hasOwn(manifest.settings, "physicalKeyboardTelemetryEnabled") && typeof manifest.settings.physicalKeyboardTelemetryEnabled !== "boolean") {
+    errors.push({ path: "settings.physicalKeyboardTelemetryEnabled", code: "INVALID_TYPE", message: "physicalKeyboardTelemetryEnabled must be boolean" });
+  }
+  return { valid: errors.length === 0, errors };
 }
 
 export function validatePracticeAssessmentBinding(binding) {
