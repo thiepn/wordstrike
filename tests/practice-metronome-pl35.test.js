@@ -37,7 +37,7 @@ test("PL35 catalog exposes the target-blind fixed-tempo experiment", () => {
   assert.equal(experiment.status, "preview");
   assert.deepEqual(experiment.estimatedDurationMinutes, { minimum: 2, recommended: 5, maximum: 8 });
   for (const capability of ["self-calibrated-fixed-tempo", "audio-with-visual-fallback", "counterbalanced-pulse-silent", "target-blind"]) assert.ok(experiment.capabilities.includes(capability));
-  assert.doesNotMatch(experiment.longDescription, /one[- ]key[- ]per[- ]beat/i);
+  assert.match(experiment.longDescription, /not a one-key-per-beat target/i);
 });
 
 test("PL35 calibration retains 90-180 BPM candidates and chooses nearest 120", () => {
