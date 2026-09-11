@@ -39,8 +39,11 @@ function responseFor(episode, candidate) {
 
 function hasRepeatedProbeFamily(episode, candidate) {
   if (candidate.sourceKind !== "target-baseline-retest") return false;
-  const previous = new Set(episode.baseline?.probeIdentity?.familyIds ?? []);
-  return (candidate.validity?.probeIdentity?.familyIds ?? []).some((id) => previous.has(id));
+  const previousIdentity = episode.baseline?.probeIdentity ?? null;
+  const candidateIdentity = candidate.validity?.probeIdentity ?? null;
+  if (previousIdentity?.probeHash && candidateIdentity?.probeHash && previousIdentity.probeHash === candidateIdentity.probeHash) return true;
+  const previousFamilies = new Set(previousIdentity?.familyIds ?? []);
+  return (candidateIdentity?.familyIds ?? []).some((id) => previousFamilies.has(id));
 }
 
 async function contaminationFor(repository, targetEpisode, candidate, allEpisodes) {
