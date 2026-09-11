@@ -1,0 +1,24 @@
+name: PL33 Coach Personalization
+
+on:
+  push:
+    branches: [pl33-coach-personalization]
+  pull_request:
+    paths:
+      - 'js/practiceLab/**'
+      - 'tests/practice-coach-personalization-*.test.js'
+      - '.github/workflows/pl33-coach-personalization.yml'
+
+jobs:
+  certify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Run PL33 Coach Personalization certification
+        run: |
+          node tests/practice-coach-personalization-pl33.test.js
+          node tests/practice-coach-personalization-storage-pl33.test.js
