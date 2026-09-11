@@ -48,8 +48,10 @@ const result = {
 const currentProfile = {
   words: [
     word("because", { wpm: 52, errors: 1, corrections: 1, clean: false }),
-    word("through", { wpm: 60, clean: false }),
+    word("through", { wpm: 60 }),
     word("people", { wpm: 90 }),
+    word("before", { wpm: 86 }),
+    word("other", { wpm: 84 }),
   ],
 };
 const samples = [
@@ -59,8 +61,8 @@ const samples = [
     wpm: 78,
     accuracy: 97.5,
     rawWpm: 84,
-    cleanPercent: 67,
-    correctionsPerWord: 0.33,
+    cleanPercent: 80,
+    correctionsPerWord: 0.2,
     profile: { words: [word("because", { wpm: 48, errors: 1, corrections: 1, clean: false }), word("people", { wpm: 82 })] },
     timeline: { mistakes: [{ type: "incorrect", expected: "e", typed: "r", count: 2 }] },
   },
@@ -70,17 +72,18 @@ const samples = [
     wpm: 82,
     accuracy: 98.2,
     rawWpm: 88,
-    cleanPercent: 33.3,
-    correctionsPerWord: 0.33,
+    cleanPercent: 80,
+    correctionsPerWord: 0.2,
     profile: currentProfile,
     timeline: { mistakes: [{ type: "incorrect", expected: "e", typed: "r", count: 2 }] },
   },
 ];
 
 const summary = summarizeTypingCoachProfile(currentProfile);
-assert.equal(summary.wordCount, 3);
-assert.equal(summary.cleanWords, 1);
-assert.equal(summary.correctionsPerWord, 0.33);
+assert.equal(summary.wordCount, 5);
+assert.equal(summary.cleanWords, 4);
+assert.equal(summary.cleanPercent, 80);
+assert.equal(summary.correctionsPerWord, 0.2);
 
 const coach = buildTypingCoachV6({ samples, result, profile: currentProfile });
 assert.equal(coach.version, 6);
