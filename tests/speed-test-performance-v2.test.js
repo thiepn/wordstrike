@@ -63,9 +63,15 @@ const previous = selectPreviousComparableSession(recent, {
 assert.equal(previous?.sessionId, "previous");
 
 const index = readFileSync(new URL("../index.html", import.meta.url), "utf8");
+const resultsFeature = readFileSync(new URL("../js/speedTestResultsFeature.js", import.meta.url), "utf8");
 assert.doesNotMatch(index, /<link[^>]+typing-performance-v2\.css/,
   "V2 results styling must not be globally loaded on unrelated screens");
-assert.match(index, /js\/speedTestPerformanceV2\.js\?v=20260910b/);
+assert.match(index, /js\/appBootstrap\.js\?v=20260911v8/,
+  "V2 should load through the semantic V8 application bootstrap");
+assert.match(resultsFeature, /import "\.\/speedTestPerformanceV2\.js";/,
+  "the semantic results feature must retain Typing Performance V2");
+assert.doesNotMatch(index, /speedTestPerformanceV2\.js\?v=20260910b/,
+  "historical V2 scripts must not return directly to index.html");
 
 const v2Source = readFileSync(new URL("../js/speedTestPerformanceV2.js", import.meta.url), "utf8");
 assert.match(v2Source, /styles\/screens\/typing-performance-v2\.css\?v=20260910a/,
@@ -76,4 +82,4 @@ const submission = readFileSync(new URL("../js/leaderboardSubmissionService.js",
 assert.doesNotMatch(submission, /performanceTimeline/,
   "V2 analytics must remain local-only and outside ranked leaderboard payloads");
 
-console.log("Typing Performance Timeline V2 analysis, comparison, layers, lazy styling, and ranked-data isolation passed.");
+console.log("Typing Performance Timeline V2 analysis, comparison, semantic bootstrap, lazy styling, and ranked-data isolation passed.");

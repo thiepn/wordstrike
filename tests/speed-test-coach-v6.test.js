@@ -141,11 +141,17 @@ memory.set(TYPING_COACH_V6_ACTIVE_KEY, "{not-json");
 assert.equal(loadActiveTypingCoachCycle(), null);
 
 const index = readFileSync(new URL("../index.html", import.meta.url), "utf8");
-assert.match(index, /js\/speedTestResultsV6\.js\?v=20260911a/);
+const resultsFeature = readFileSync(new URL("../js/speedTestResultsFeature.js", import.meta.url), "utf8");
+assert.match(index, /js\/appBootstrap\.js\?v=20260911v8/,
+  "V6 should load through the semantic V8 application bootstrap");
+assert.match(resultsFeature, /import "\.\/speedTestResultsV6b\.js";/,
+  "V6 coach results must remain in the semantic results feature chain");
+assert.doesNotMatch(resultsFeature, /import "\.\/speedTestResultsV6\.js";/,
+  "The removed V6 compatibility wrapper must not return");
 assert.doesNotMatch(index, /<link[^>]+typing-coach-v6\.css/,
   "V6 coach styling should remain lazy and not change unrelated screens");
 const submission = readFileSync(new URL("../js/leaderboardSubmissionService.js", import.meta.url), "utf8");
 assert.doesNotMatch(submission, /typingCoach|coachCycle|focusWords|practiceCompletedAt/,
   "Typing Coach V6 data must stay outside ranked leaderboard payloads");
 
-console.log("Typing Coach V6 recommendations, practice-cycle comparison, storage bounds, and ranked-data isolation passed.");
+console.log("Typing Coach V6 recommendations, practice-cycle comparison, storage bounds, semantic bootstrap, and ranked-data isolation passed.");

@@ -161,11 +161,15 @@ assert.equal(accuracyFirst.steps[0].drill.type, "accuracy-recovery");
 assert.equal(accuracyFirst.steps[1].drill.type, "weak-words");
 
 const index = readFileSync(new URL("../index.html", import.meta.url), "utf8");
-assert.match(index, /js\/speedTestResultsV7\.js\?v=20260911a/);
+const resultsFeature = readFileSync(new URL("../js/speedTestResultsFeature.js", import.meta.url), "utf8");
+assert.match(index, /js\/appBootstrap\.js\?v=20260911v8/,
+  "V7 should load through the semantic V8 application bootstrap");
+assert.match(resultsFeature, /import "\.\/speedTestResultsV7\.js";/,
+  "V7 adaptive training results must remain in the semantic results feature chain");
 assert.doesNotMatch(index, /<link[^>]+typing-coach-v7\.css/,
   "V7 styling should stay lazy and not affect unrelated screens");
 const submission = readFileSync(new URL("../js/leaderboardSubmissionService.js", import.meta.url), "utf8");
 assert.doesNotMatch(submission, /typing_coach_v7|adaptiveTrainingPlan|retestRequestedAt/,
   "Typing Coach V7 plan state must stay outside ranked leaderboard payloads");
 
-console.log("Typing Coach V7 adaptive plan ordering, progression, persistence, retest completion, and ranked-data isolation passed.");
+console.log("Typing Coach V7 adaptive plan ordering, progression, persistence, semantic bootstrap, retest completion, and ranked-data isolation passed.");

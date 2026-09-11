@@ -71,13 +71,15 @@ assert.equal(analysis.dropStreakSeconds, 1);
 assert.ok(analysis.burstWpm >= 100);
 assert.match(analysis.insight, /recent same-test baseline/i);
 
-assert.deepEqual(
-  resampleWpmSeries([{ wpm: 50 }, { wpm: 100 }], 3),
-  [50, 75, 100],
-);
+assert.deepEqual(resampleWpmSeries([{ wpm: 50 }, { wpm: 100 }], 3), [50, 75, 100]);
 
 const index = readFileSync(new URL("../index.html", import.meta.url), "utf8");
-assert.match(index, /js\/speedTestPerformanceV3\.js\?v=20260911a/);
+const resultsFeature = readFileSync(new URL("../js/speedTestResultsFeature.js", import.meta.url), "utf8");
+assert.match(index, /js\/appBootstrap\.js\?v=20260911v8/);
+assert.match(resultsFeature, /import "\.\/speedTestPerformanceV3\.js";/,
+  "the semantic results feature must retain Typing Performance V3");
+assert.doesNotMatch(index, /speedTestPerformanceV3\.js\?v=20260911a/,
+  "historical V3 scripts must not return directly to index.html");
 assert.doesNotMatch(index, /<link[^>]+typing-performance-v3\.css/,
   "V3 styling should remain lazy so unrelated screens keep certified default pixels");
 
@@ -85,4 +87,4 @@ const submission = readFileSync(new URL("../js/leaderboardSubmissionService.js",
 assert.doesNotMatch(submission, /performanceV3|paceZone|errorRecovery|recentPercentile/,
   "V3 intelligence must stay outside ranked leaderboard payloads");
 
-console.log("Typing Performance Timeline V3 flow, recovery, trend, PB-series helpers, and ranked-data isolation passed.");
+console.log("Typing Performance Timeline V3 flow, recovery, trend, semantic bootstrap, PB-series helpers, and ranked-data isolation passed.");

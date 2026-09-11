@@ -1,8 +1,10 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
-const [index, css, narrowContract, presentation, statisticsUi, leaderboardUi, ui, modes, workflow] = await Promise.all([
+const [index, appCss, presentationBootstrap, css, narrowContract, presentation, statisticsUi, leaderboardUi, ui, modes, workflow] = await Promise.all([
   readFile(new URL("../index.html", import.meta.url), "utf8"),
+  readFile(new URL("../styles/app.css", import.meta.url), "utf8"),
+  readFile(new URL("../js/presentationBootstrap.js", import.meta.url), "utf8"),
   readFile(new URL("../styles/screens/profile-leaderboards-settings.css", import.meta.url), "utf8"),
   readFile(new URL("../styles/screens/profile-leaderboards-settings-ui11-contract.css", import.meta.url), "utf8"),
   readFile(new URL("../js/profileLeaderboardsSettingsPresentation.js", import.meta.url), "utf8"),
@@ -13,11 +15,18 @@ const [index, css, narrowContract, presentation, statisticsUi, leaderboardUi, ui
   readFile(new URL("../.github/workflows/non-practice-browser.yml", import.meta.url), "utf8"),
 ]);
 
-assert.equal((index.match(/styles\/screens\/profile-leaderboards-settings\.css/g) || []).length, 1);
-assert.equal((index.match(/styles\/screens\/profile-leaderboards-settings-ui11-contract\.css/g) || []).length, 1);
-assert.equal((index.match(/js\/profileLeaderboardsSettingsPresentation\.js/g) || []).length, 1);
-assert.match(index, /results-pause-onboarding\.css[\s\S]*profile-leaderboards-settings\.css[\s\S]*profile-leaderboards-settings-ui11-contract\.css[\s\S]*practiceLabV20\.css/);
-assert.match(index, /arcadeRushGameplayPresentation\.js[\s\S]*profileLeaderboardsSettingsPresentation\.js/);
+assert.match(index, /styles\/app\.css\?v=20260911v8/,
+  "V8 should expose UI11 through the semantic application stylesheet boundary");
+assert.doesNotMatch(index, /styles\/screens\/profile-leaderboards-settings(?:-ui11-contract)?\.css/,
+  "UI11 styles must not return as direct index.html resources");
+assert.equal((appCss.match(/\.\/screens\/profile-leaderboards-settings\.css/g) || []).length, 1);
+assert.equal((appCss.match(/\.\/screens\/profile-leaderboards-settings-ui11-contract\.css/g) || []).length, 1);
+assert.match(appCss, /results-pause-onboarding\.css[\s\S]*profile-leaderboards-settings\.css[\s\S]*profile-leaderboards-settings-ui11-contract\.css[\s\S]*practice-lab\.css/,
+  "V8 must preserve UI11 cascade placement before Practice Lab");
+assert.doesNotMatch(index, /js\/profileLeaderboardsSettingsPresentation\.js/,
+  "UI11 presentation must load through presentationBootstrap.js");
+assert.match(presentationBootstrap, /arcadeRushGameplayPresentation\.js[\s\S]*profileLeaderboardsSettingsPresentation\.js/,
+  "presentationBootstrap must preserve Arcade Rush → UI11 presentation order");
 
 assert.match(css, /UI11 — Profile \/ Leaderboards \/ Settings/);
 assert.match(css, /\.profile-stats-screen\[data-ui11-surface="profile"\]/);
@@ -101,4 +110,4 @@ assert.match(workflow, /tests\/browser\/ui11_profile_leaderboards_settings\.py/)
 assert.match(workflow, /tests\/browser\/ui11_mobile_heading_contract\.py/);
 assert.match(workflow, /browser-artifacts\/ui11-profile-leaderboards-settings\//);
 
-console.log("UI11 source contracts passed: Profile/Stats, Leaderboards and Settings share one low-chrome presentation layer while existing data, auth, routing, persistence and mode boundaries remain authoritative.");
+console.log("UI11 source contracts passed: semantic V8 resource ownership, Profile/Stats, Leaderboards and Settings presentation, and existing data/auth/routing/persistence boundaries.");
