@@ -1,14 +1,16 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
-const [legacyCss, modeCss, ui, index] = await Promise.all([
+const [legacyCss, modeCss, ui, index, appCss] = await Promise.all([
   readFile(new URL("../style.css", import.meta.url), "utf8"),
   readFile(new URL("../styles/screens/mode-select.css", import.meta.url), "utf8"),
   readFile(new URL("../js/ui.js", import.meta.url), "utf8"),
   readFile(new URL("../index.html", import.meta.url), "utf8"),
+  readFile(new URL("../styles/app.css", import.meta.url), "utf8"),
 ]);
 
-assert.match(index, /styles\/screens\/title\.css[\s\S]*styles\/screens\/mode-select\.css/);
+assert.match(index, /styles\/app\.css\?v=20260911v8/);
+assert.match(appCss, /\.\/screens\/title\.css[\s\S]*\.\/screens\/mode-select\.css/);
 assert.match(modeCss, /\.mode-select-layout\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1\.23fr\) minmax\(330px, 0\.77fr\)/s);
 assert.match(modeCss, /\.mode-option\s*\{[^}]*min-height:\s*82px/s);
 assert.match(modeCss, /@media \(max-width: 980px\)[\s\S]*\.mode-select-layout\s*\{[^}]*grid-template-columns:\s*1fr/s);
