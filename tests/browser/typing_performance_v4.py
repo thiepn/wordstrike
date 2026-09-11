@@ -76,7 +76,8 @@ def main():
 
                 markers.nth(1).click(force=True)
                 expect(v4.locator('[data-v4-inspector]')).to_contain_text('Word 2')
-                expect(markers.nth(1)).to_have_class(lambda value: 'is-selected' in value)
+                marker_class = markers.nth(1).get_attribute('class') or ''
+                assert 'is-selected' in marker_class, marker_class
 
                 profile = page.evaluate("""async () => {
                   const { getCurrentSpeedTest } = await import('./js/speedTest.js');
