@@ -106,11 +106,23 @@ export function attachPracticeTreatmentOutcome(episode, { contract, candidate, e
   else if (["material", "uncertain"].includes(contaminationLevel)) evidenceGrade = "recorded-confounded";
   else if (measurementGrade === "hybrid") evidenceGrade = "hybrid-measurement";
   else if (contaminationLevel === "background") evidenceGrade = "background-practice";
-  const eligibleForPrimary = Boolean(primaryEligible)
-    && evidenceGrade === "prospective-recorded-clean"
+
+  const responseUsable = Boolean(primaryEligible)
     && !repeatedFamily
     && Number.isFinite(response?.responseValue)
-    && episode?.baseline?.status === "available";
+    && episode?.baseline?.status === "available"
+    && response?.tradeoff !== true
+    && response?.classification !== "uncertain";
+  const eligibleForPrimary = responseUsable && evidenceGrade === "prospective-recorded-clean";
+  const eligibleForAggregate = eligibleForPrimary || (responseUsable && evidenceGrade === "hybrid-measurement");
+  const reason = repeatedFamily
+    ? "repeated-family"
+    : response?.tradeoff === true
+      ? "response-tradeoff"
+      : response?.classification === "uncertain"
+        ? "response-uncertain"
+        : contamination?.reasons?.[0] ?? null;
+
   const outcomes = (episode.outcomes ?? []).map((slot) => slot.outcomeKey !== contract.outcomeKey ? slot : freezeDeep({
     ...slot,
     status: evidenceGrade === "incompatible" ? "incompatible" : ["material", "uncertain"].includes(contaminationLevel) ? "contaminated" : "observed",
@@ -121,10 +133,11 @@ export function attachPracticeTreatmentOutcome(episode, { contract, candidate, e
     evidenceGrade,
     measurementGrade,
     primaryEligible: eligibleForPrimary,
+    aggregateEligible: eligibleForAggregate,
     repeatedFamily,
     contamination,
     response,
-    reason: repeatedFamily ? "repeated-family" : contamination?.reasons?.[0] ?? null,
+    reason,
   }));
   const updatedAt = candidate.observedAt;
   const terminal = outcomes.every((slot) => ["observed", "contaminated", "expired", "incompatible", "not-applicable"].includes(slot.status));
@@ -137,6 +150,7 @@ export function contaminatePracticeTreatmentOutcomeSlot(episode, outcomeKey, rea
     status: "contaminated",
     evidenceGrade: "recorded-confounded",
     primaryEligible: false,
+    aggregateEligible: false,
     contamination: { level: "material", reasons: [reason], auditedAt: at },
     reason,
   }));
