@@ -1,0 +1,434 @@
+.speed-results-v6 {
+  width: 100%;
+  min-width: 0;
+  display: grid;
+  gap: 1rem;
+  margin: 1rem 0 0;
+}
+
+.speed-results-v6-heading,
+.typing-coach-card-head {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.speed-results-v6-heading p,
+.typing-coach-card-head span,
+.typing-coach-priority-copy > span,
+.typing-coach-drill-card > div:first-child > span,
+.typing-coach-focus-set > span {
+  margin: 0;
+  font: 700 0.72rem/1.2 var(--font-ui, system-ui, sans-serif);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted, #8d99aa);
+}
+
+.speed-results-v6-heading h3,
+.typing-coach-card-head strong {
+  margin: 0.18rem 0 0;
+  color: var(--text-primary, #f5f7fa);
+}
+
+.speed-results-v6-heading > span {
+  flex: 0 0 auto;
+  border: 1px solid var(--border-strong, rgba(255,255,255,.18));
+  border-radius: 999px;
+  padding: 0.32rem 0.55rem;
+  font-size: 0.72rem;
+  color: var(--text-muted, #9aa6b6);
+}
+
+.speed-results-v6-tabs {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.4rem;
+  padding: 0.35rem;
+  border: 1px solid var(--border-subtle, rgba(255,255,255,.1));
+  border-radius: 0.9rem;
+  background: var(--surface-raised, rgba(255,255,255,.035));
+}
+
+.speed-results-v6-tabs button {
+  min-width: 0;
+  min-height: 2.55rem;
+  border: 1px solid transparent;
+  border-radius: 0.65rem;
+  background: transparent;
+  color: var(--text-muted, #96a0af);
+  font: 700 0.76rem/1 var(--font-ui, system-ui, sans-serif);
+  letter-spacing: 0.04em;
+  cursor: pointer;
+}
+
+.speed-results-v6-tabs button:hover,
+.speed-results-v6-tabs button:focus-visible {
+  color: var(--text-primary, #fff);
+  border-color: var(--border-strong, rgba(255,255,255,.18));
+  outline: none;
+}
+
+.speed-results-v6-tabs button[aria-selected="true"] {
+  color: var(--text-primary, #fff);
+  background: var(--surface-active, rgba(255,255,255,.09));
+  border-color: var(--border-strong, rgba(255,255,255,.18));
+}
+
+.speed-results-v6-panel {
+  min-width: 0;
+}
+
+.speed-results-v6-panel[hidden] {
+  display: none !important;
+}
+
+.speed-results-v6-panel > [data-speed-performance],
+.speed-results-v6-panel > [data-speed-performance-v2],
+.speed-results-v6-panel > [data-speed-performance-v3],
+.speed-results-v6-panel > [data-speed-performance-v4],
+.speed-results-v6-panel > [data-speed-performance-v5] {
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+.typing-coach-overview,
+.typing-coach-practice {
+  display: grid;
+  gap: 1rem;
+}
+
+.typing-coach-overview-metrics,
+.typing-coach-comparison-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.7rem;
+}
+
+.typing-coach-overview-metrics > div,
+.typing-coach-comparison-grid > div {
+  min-width: 0;
+  border: 1px solid var(--border-subtle, rgba(255,255,255,.1));
+  border-radius: 0.8rem;
+  padding: 0.9rem;
+  background: var(--surface-raised, rgba(255,255,255,.035));
+}
+
+.typing-coach-overview-metrics span,
+.typing-coach-comparison-grid span,
+.typing-coach-drill-target small {
+  display: block;
+  color: var(--text-muted, #8d99aa);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.typing-coach-overview-metrics strong,
+.typing-coach-comparison-grid strong {
+  display: block;
+  margin-top: 0.3rem;
+  color: var(--text-primary, #fff);
+  font-size: clamp(1rem, 2vw, 1.4rem);
+  overflow-wrap: anywhere;
+}
+
+.typing-coach-overview-metrics small,
+.typing-coach-comparison-grid small {
+  display: block;
+  margin-top: 0.2rem;
+  color: var(--text-muted, #8d99aa);
+}
+
+.typing-coach-priority-card {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 1.2rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--border-strong, rgba(255,255,255,.17));
+  border-radius: 0.95rem;
+  background: var(--surface-raised, rgba(255,255,255,.05));
+}
+
+.typing-coach-priority-copy h4,
+.typing-coach-drill-card h4 {
+  margin: 0.25rem 0 0;
+  color: var(--text-primary, #fff);
+  font-size: 1.1rem;
+}
+
+.typing-coach-priority-copy p,
+.typing-coach-drill-card p,
+.typing-coach-practice-lead,
+.typing-coach-observations p {
+  margin: 0.42rem 0 0;
+  color: var(--text-secondary, #bac3cf);
+  line-height: 1.55;
+}
+
+.typing-coach-priority-card button,
+.typing-coach-drill-card button,
+.typing-coach-practice-context button,
+.typing-coach-practice-chrome button {
+  min-height: 2.55rem;
+  border: 1px solid var(--border-strong, rgba(255,255,255,.22));
+  border-radius: 0.65rem;
+  padding: 0.65rem 0.9rem;
+  background: var(--surface-active, rgba(255,255,255,.1));
+  color: var(--text-primary, #fff);
+  font: 800 0.73rem/1 var(--font-ui, system-ui, sans-serif);
+  letter-spacing: 0.06em;
+  cursor: pointer;
+}
+
+.typing-coach-priority-card button:hover,
+.typing-coach-drill-card button:hover,
+.typing-coach-practice-context button:hover,
+.typing-coach-practice-chrome button:hover {
+  background: var(--surface-hover, rgba(255,255,255,.16));
+}
+
+.typing-coach-observations {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.typing-coach-observations p {
+  margin: 0;
+  padding-left: 1rem;
+  position: relative;
+}
+
+.typing-coach-observations p::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.68em;
+  width: 0.35rem;
+  height: 0.35rem;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.typing-coach-drill-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.typing-coach-drill-card {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  border: 1px solid var(--border-subtle, rgba(255,255,255,.1));
+  border-radius: 0.9rem;
+  padding: 1rem;
+  background: var(--surface-raised, rgba(255,255,255,.035));
+}
+
+.typing-coach-drill-card.is-primary {
+  border-color: var(--border-strong, rgba(255,255,255,.23));
+  background: var(--surface-active, rgba(255,255,255,.065));
+}
+
+.typing-coach-drill-card button {
+  margin-top: auto;
+  width: 100%;
+}
+
+.typing-coach-drill-target {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.typing-coach-drill-target strong,
+.typing-coach-focus-set strong {
+  color: var(--text-primary, #fff);
+  overflow-wrap: anywhere;
+}
+
+.typing-coach-focus-set,
+.typing-coach-comparison {
+  border: 1px solid var(--border-subtle, rgba(255,255,255,.1));
+  border-radius: 0.9rem;
+  padding: 1rem;
+  background: var(--surface-raised, rgba(255,255,255,.03));
+}
+
+.typing-coach-focus-set {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.typing-coach-focus-set small,
+.typing-coach-card-head small {
+  color: var(--text-muted, #8d99aa);
+}
+
+.typing-coach-comparison {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.typing-coach-empty {
+  padding: 1.2rem;
+  border: 1px dashed var(--border-subtle, rgba(255,255,255,.12));
+  border-radius: 0.8rem;
+  color: var(--text-muted, #8d99aa);
+}
+
+.typing-coach-practice-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  background: var(--background, #0a0e14);
+  color: var(--text-primary, #fff);
+  overflow: hidden;
+}
+
+.typing-coach-practice-chrome {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem max(1rem, env(safe-area-inset-right)) 0.75rem max(1rem, env(safe-area-inset-left));
+  border-bottom: 1px solid var(--border-subtle, rgba(255,255,255,.1));
+  background: var(--surface-raised, #101720);
+}
+
+.typing-coach-practice-chrome > div:first-child {
+  min-width: 0;
+  display: grid;
+  gap: 0.15rem;
+}
+
+.typing-coach-practice-chrome span {
+  color: var(--text-muted, #8d99aa);
+  font-size: 0.67rem;
+  letter-spacing: 0.1em;
+}
+
+.typing-coach-practice-chrome strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.typing-coach-practice-chrome-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex: 0 0 auto;
+}
+
+.typing-coach-practice-root {
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+.typing-coach-practice-root > .screen {
+  min-height: 100%;
+}
+
+.typing-coach-practice-context {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding: 0.8rem 0.9rem;
+  border: 1px solid var(--border-strong, rgba(255,255,255,.18));
+  border-radius: 0.8rem;
+  background: var(--surface-active, rgba(255,255,255,.06));
+}
+
+.typing-coach-practice-context > div {
+  min-width: 0;
+  display: grid;
+  gap: 0.15rem;
+}
+
+.typing-coach-practice-context span {
+  color: var(--text-muted, #8d99aa);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.typing-coach-practice-context strong,
+.typing-coach-practice-context small {
+  overflow-wrap: anywhere;
+}
+
+.typing-coach-practice-context small {
+  color: var(--text-secondary, #b9c2cd);
+}
+
+@media (max-width: 760px) {
+  .speed-results-v6-tabs {
+    grid-template-columns: repeat(5, minmax(4.4rem, 1fr));
+    overflow-x: auto;
+    scrollbar-width: thin;
+  }
+
+  .typing-coach-overview-metrics,
+  .typing-coach-comparison-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .typing-coach-drill-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .typing-coach-priority-card,
+  .typing-coach-practice-context {
+    grid-template-columns: 1fr;
+  }
+
+  .typing-coach-priority-card button,
+  .typing-coach-practice-context button {
+    width: 100%;
+  }
+
+  .typing-coach-practice-chrome {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .typing-coach-practice-chrome-actions {
+    display: grid;
+    grid-template-columns: 1fr auto;
+  }
+}
+
+@media (max-width: 430px) {
+  .speed-results-v6-tabs {
+    margin-inline: -0.15rem;
+    padding: 0.25rem;
+  }
+
+  .speed-results-v6-tabs button {
+    padding-inline: 0.45rem;
+    font-size: 0.68rem;
+  }
+
+  .typing-coach-overview-metrics,
+  .typing-coach-comparison-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .typing-coach-practice-overlay,
+  .speed-results-v6 * {
+    scroll-behavior: auto !important;
+    transition: none !important;
+    animation: none !important;
+  }
+}
