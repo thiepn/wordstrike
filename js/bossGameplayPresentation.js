@@ -2,7 +2,6 @@ import { appState } from "./state.js";
 
 const BOSS_SCREEN_SELECTOR = ".boss-screen";
 let frameId = null;
-let observer = null;
 
 function label(text) {
   const node = document.createElement("span");
@@ -120,8 +119,6 @@ function enhanceHud(screen) {
 
   const sequence = document.createElement("span");
   sequence.className = "boss-hud-sequence";
-  // The authoritative phrase-count node already includes the SEQUENCE label.
-  // Reuse it directly so the presentation layer never produces "SEQUENCE SEQUENCE".
   sequence.append(phraseCount);
 
   const words = document.createElement("span");
@@ -255,16 +252,13 @@ function queue() {
   frameId = requestAnimationFrame(tick);
 }
 
-const appRoot = document.querySelector("#app");
-if (appRoot) {
-  observer = new MutationObserver(queue);
-  observer.observe(appRoot, { childList: true, subtree: true });
+export function syncBossGameplayPresentation() {
+  if (!document.querySelector(BOSS_SCREEN_SELECTOR)) return false;
   queue();
+  return true;
 }
 
 export function stopBossPresentation() {
   if (frameId != null) cancelAnimationFrame(frameId);
   frameId = null;
-  observer?.disconnect?.();
-  observer = null;
 }

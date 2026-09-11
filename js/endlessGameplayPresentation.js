@@ -4,7 +4,6 @@ import { getCurrentEndless } from "./endlessMode.js";
 const ENDLESS_SCREEN_SELECTOR = ".endless-screen";
 const MAX_INTEGRITY = ENDLESS_CONFIG.startingIntegrity;
 let frameId = null;
-let observer = null;
 
 function setText(node, value) {
   if (!node) return;
@@ -121,7 +120,6 @@ function enhanceHud(screen) {
   secondary.append(survival, progress, pressure, target);
   hud.replaceChildren(primary, secondary);
 
-  // Preserve the authoritative legacy stage progress text for assistive technology/tests.
   stageProgress.classList.add("endless-hud-legacy-progress");
   hud.append(stageProgress);
 }
@@ -295,16 +293,13 @@ function queuePresentation() {
   frameId = requestAnimationFrame(tickPresentation);
 }
 
-const appRoot = document.querySelector("#app");
-if (appRoot) {
-  observer = new MutationObserver(queuePresentation);
-  observer.observe(appRoot, { childList: true, subtree: true });
+export function syncEndlessGameplayPresentation() {
+  if (!document.querySelector(ENDLESS_SCREEN_SELECTOR)) return false;
   queuePresentation();
+  return true;
 }
 
 export function stopEndlessPresentation() {
   if (frameId != null) cancelAnimationFrame(frameId);
   frameId = null;
-  observer?.disconnect?.();
-  observer = null;
 }

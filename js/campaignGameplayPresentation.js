@@ -2,7 +2,6 @@ import { appState } from "./state.js";
 
 const CAMPAIGN_SCREEN_SELECTOR = ".game-screen:not(.endless-screen):not(.boss-screen)";
 const MAX_INTEGRITY = 3;
-let syncQueued = false;
 
 function setText(node, value) {
   if (!node) return;
@@ -209,27 +208,13 @@ function syncPresentation(screen) {
   syncIntegrity(screen, lives);
 }
 
-function enhanceCampaignScreen() {
+export function syncCampaignGameplayPresentation() {
   const screen = document.querySelector(CAMPAIGN_SCREEN_SELECTOR);
-  if (!screen) return;
+  if (!screen) return false;
   screen.classList.add("campaign-gameplay-screen");
   enhanceHud(screen);
   enhanceCore(screen);
   enhanceKeyboardTrigger(screen);
   syncPresentation(screen);
-}
-
-function queueSync() {
-  if (syncQueued) return;
-  syncQueued = true;
-  requestAnimationFrame(() => {
-    syncQueued = false;
-    enhanceCampaignScreen();
-  });
-}
-
-const appRoot = document.querySelector("#app");
-if (appRoot) {
-  new MutationObserver(queueSync).observe(appRoot, { childList: true, subtree: true });
-  queueSync();
+  return true;
 }

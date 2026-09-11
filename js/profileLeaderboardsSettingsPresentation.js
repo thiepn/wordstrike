@@ -98,25 +98,11 @@ function enhanceSettings(screen) {
   if (account) setAttributeIfChanged(account, "data-ui11-section", "account");
 }
 
-function enhance() {
+export function syncProfileLeaderboardsSettingsPresentation() {
   const root = appRoot();
-  if (!root) return;
+  if (!root) return false;
   enhanceProfile(root.querySelector(".profile-stats-screen"));
   enhanceLeaderboards(root.querySelector(".leaderboards-screen"));
   enhanceSettings(root.querySelector(".settings-screen"));
+  return true;
 }
-
-let queued = false;
-function queueEnhancement() {
-  if (queued) return;
-  queued = true;
-  queueMicrotask(() => {
-    queued = false;
-    enhance();
-  });
-}
-
-const observer = new MutationObserver(queueEnhancement);
-const root = appRoot();
-if (root) observer.observe(root, { childList: true, subtree: true });
-enhance();

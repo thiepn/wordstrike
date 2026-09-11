@@ -218,6 +218,12 @@ export function enhanceCurrentArcadeRushView() {
   return Boolean(ready || gameplay);
 }
 
+export function syncArcadeRushGameplayPresentation() {
+  return enhanceCurrentArcadeRushView();
+}
+
+// Legacy/isolated explicit lifecycle hook. Production V10 uses the shared
+// presentationLifecycle observer and therefore does not call this automatically.
 export function startArcadeRushGameplayPresentation() {
   if (observer || !globalThis.MutationObserver || !document?.querySelector) {
     scheduleEnhancement();
@@ -247,5 +253,3 @@ export function stopArcadeRushGameplayPresentation() {
   frameId = null;
   return true;
 }
-
-startArcadeRushGameplayPresentation();
