@@ -11,11 +11,11 @@ import { buildPracticeFoundationAnalysis, PRACTICE_FOUNDATION_ANALYSIS_VERSION }
 import { migratePracticeRecord } from "../js/practiceLab/practiceMigrations.js";
 import { validateSessionSummary } from "../js/practiceLab/practiceValidation.js";
 
-test("PL19 contracts remain intact inside the PL25 DB8/session13/foundation10 envelope", () => {
+test("PL19 contracts remain intact inside the current PL33 DB10/session13/foundation10 envelope", () => {
   assert.equal(PRACTICE_DATABASE_VERSION, 10);
   assert.equal(PRACTICE_RECORD_VERSIONS.assessmentRun, 1);
   assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 13);
-  assert.equal(PRACTICE_RECORD_VERSIONS.coachPlan, 1);
+  assert.equal(PRACTICE_RECORD_VERSIONS.coachPlan, 2);
   assert.equal(PRACTICE_FOUNDATION_ANALYSIS_VERSION, 10);
   assert.equal(PRACTICE_LIMITS.assessmentRunBytes, 128 * 1024);
   assert.equal(PRACTICE_LIMITS.assessmentRuns, 50);
