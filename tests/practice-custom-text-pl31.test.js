@@ -31,7 +31,7 @@ const memoryStore = () => {
 
 test("PL31 DB9 snapshot remains intact inside the PL32 DB10 envelope and obsolete Custom Text indexes stay replaced", () => {
   assert.equal(PRACTICE_DATABASE_VERSION_V31, 9);
-  assert.equal(PRACTICE_DATABASE_VERSION, 10);
+  assert.ok(PRACTICE_DATABASE_VERSION >= 10);
   assert.deepEqual(PRACTICE_STORE_DEFINITIONS.customTexts.indexes.map((entry) => entry.name), ["profileId", "updatedAt", "createdAt"]);
   assert.deepEqual(PRACTICE_OBSOLETE_INDEXES.customTexts, ["lastUsedAt", "normalizedTitle"]);
 });

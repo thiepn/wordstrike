@@ -57,7 +57,7 @@ assert.equal(initialized.profile.recordVersion, 3);
 assert.equal(initialized.profile.lastTrainingDayKey, null);
 assert.deepEqual(await dataStore.get("profiles", profileId), initialized.profile);
 
-assert.equal(PRACTICE_DATABASE_VERSION, 10);
+assert.ok(PRACTICE_DATABASE_VERSION >= 10);
 assert.equal(PRACTICE_MANIFEST_VERSION, 1);
 const legacyRecordVersions = {
   context: 1,

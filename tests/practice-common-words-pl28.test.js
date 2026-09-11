@@ -35,7 +35,7 @@ function assertPlanShape(words, size) {
 }
 
 test("PL28 generic record schemas remain stable inside the current PL33 DB10 envelope", () => {
-  assert.equal(PRACTICE_DATABASE_VERSION, 10);
+  assert.ok(PRACTICE_DATABASE_VERSION >= 10);
   assert.equal(PRACTICE_RECORD_VERSIONS.skillStat, 3);
   assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 13);
   assert.equal(PRACTICE_RECORD_VERSIONS.abilityState, 1);

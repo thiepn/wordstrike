@@ -56,7 +56,7 @@ export function createPracticeSessionEngine(options = {}) {
   });
 
   const complete = async (reason) => {
-    try { return await core.complete(reason); }
+    try { const result = await core.complete(reason); return result; }
     finally { physical.stop(); }
   };
 

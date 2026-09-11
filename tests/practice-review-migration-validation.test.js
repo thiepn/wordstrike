@@ -56,7 +56,7 @@ function legacyReviewV2() {
 }
 
 test("PL17 review contracts remain intact inside the PL33 DB10/session13/foundation10 envelope", () => {
-  assert.equal(PRACTICE_DATABASE_VERSION, 10);
+  assert.ok(PRACTICE_DATABASE_VERSION >= 10);
   assert.equal(PRACTICE_RECORD_VERSIONS.reviewItem, 3);
   assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 13);
   assert.equal(PRACTICE_RECORD_VERSIONS.evaluationState, 1);

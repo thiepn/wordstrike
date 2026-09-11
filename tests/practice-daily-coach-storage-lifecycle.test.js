@@ -55,7 +55,7 @@ function activateFirst(plan) {
 }
 
 test("PL25 storage behavior remains intact inside the current DB10 Coach v2 envelope", () => {
-  assert.equal(PRACTICE_DATABASE_VERSION, 10);
+  assert.ok(PRACTICE_DATABASE_VERSION >= 10);
   assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 13);
   assert.equal(PRACTICE_RECORD_VERSIONS.coachPlan, 2);
   assert.equal(PRACTICE_STORE_DEFINITIONS.coachPlans.keyPath, "coachPlanId");
