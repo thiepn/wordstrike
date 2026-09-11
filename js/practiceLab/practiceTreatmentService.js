@@ -283,7 +283,16 @@ export function createPracticeTreatmentService({ repository, profileId, contextI
     next = treatmentComplete(identity, summary)
       ? finalizePracticeTreatmentEpisode(next, { completedAt: summary.completedAtUtc, actualDurationMs: summary.activeDurationMs, treatmentExposureEligible: Boolean(next.treatment?.exposureStartedAt) })
       : invalidatePracticeTreatmentEpisode(next, "incomplete-treatment", summary.completedAtUtc);
-    return persist(next);
+    const persisted = await persist(next);
+    if (persisted?.treatment?.exposureStartedAt) {
+      await markPracticeTreatmentInterference({
+        repository,
+        newEpisode: persisted,
+        exposedAt: persisted.treatment.exposureStartedAt,
+        preserveCompatibleMeasurement: false,
+      });
+    }
+    return persisted;
   }
 
   async function afterCanonicalCommit({ commitPayload, retentionAnalysis = null } = {}) {
@@ -300,7 +309,16 @@ export function createPracticeTreatmentService({ repository, profileId, contextI
   async function abandon(reason = "abandoned-before-treatment") {
     return serial(async () => {
       if (!episode || episode.status !== "prepared") return episode;
-      return persist(invalidatePracticeTreatmentEpisode(episode, episode.treatment?.exposureStartedAt ? "incomplete-treatment" : reason, nowIso(wallClock)));
+      const invalid = await persist(invalidatePracticeTreatmentEpisode(episode, episode.treatment?.exposureStartedAt ? "incomplete-treatment" : reason, nowIso(wallClock)));
+      if (invalid?.treatment?.exposureStartedAt) {
+        await markPracticeTreatmentInterference({
+          repository,
+          newEpisode: invalid,
+          exposedAt: invalid.treatment.exposureStartedAt,
+          preserveCompatibleMeasurement: false,
+        });
+      }
+      return invalid;
     });
   }
 
@@ -334,7 +352,7 @@ export async function reconcilePracticeTreatmentTracking({ repository, profileId
           if (slot.status !== "pending") return slot;
           const contract = contracts.get(slot.outcomeKey);
           if (!contract || current - completed <= contract.maximumDelayMs) return slot;
-          return freezeDeep({ ...slot, status: "expired", reason: "tracking-window-expired", evidenceGrade: "insufficient", primaryEligible: false });
+          return freezeDeep({ ...slot, status: "expired", reason: "tracking-window-expired", evidenceGrade: "insufficient", primaryEligible: false, aggregateEligible: false });
         });
         const terminal = outcomes.every((slot) => TERMINAL.has(slot.status));
         const changed = outcomes.some((slot, index) => slot !== episode.outcomes[index]);
