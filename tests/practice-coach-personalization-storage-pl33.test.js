@@ -14,7 +14,11 @@ import {
 } from "../js/practiceLab/practiceCoachPersonalizationConstants.js";
 import { PRACTICE_TREATMENT_RESPONSE_MODEL_VERSION } from "../js/practiceLab/practiceTreatmentConstants.js";
 import { buildPracticeCoachDailyPlan } from "../js/practiceLab/practiceCoachPlanner.js";
-import { migratePracticeCoachPlanV1ToV2, validatePracticeCoachPlan } from "../js/practiceLab/practiceCoachPlan.js";
+import {
+  calculatePracticeCoachPlanHash,
+  migratePracticeCoachPlanV1ToV2,
+  validatePracticeCoachPlan,
+} from "../js/practiceLab/practiceCoachPlan.js";
 import { migratePracticeRecord } from "../js/practiceLab/practiceMigrations.js";
 import { createPracticeId } from "../js/practiceLab/practiceIds.js";
 
@@ -123,7 +127,6 @@ test("PL33 plan hash distinguishes personalization audit inputs", () => {
   const modified = structuredClone(plan);
   modified.inputFingerprint = "different-response-state-fingerprint";
   modified.planHash = null;
-  const { calculatePracticeCoachPlanHash } = await import("../js/practiceLab/practiceCoachPlan.js");
   modified.planHash = calculatePracticeCoachPlanHash(modified);
   assert.notEqual(modified.planHash, plan.planHash);
   assert.equal(validatePracticeCoachPlan(modified).valid, true);
