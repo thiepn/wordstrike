@@ -154,7 +154,7 @@ export async function markPracticeTreatmentInterference({ repository, newEpisode
     let next = prior;
     for (const slot of prior.outcomes ?? []) {
       if (slot.status !== "pending") continue;
-      if (preservesPriorRetestSlot(prior, newEpisode, slot, exposedAt)) continue;
+      if (preserveCompatibleMeasurement && preservesPriorRetestSlot(prior, newEpisode, slot, exposedAt)) continue;
       if (preserveCompatibleMeasurement && preservesHybridMeasurementSlot(prior, newEpisode, slot)) continue;
       next = contaminatePracticeTreatmentOutcomeSlot(next, slot.outcomeKey, "superseded-by-later-treatment", exposedAt);
     }
