@@ -19,7 +19,7 @@ import {
 import { createPracticeCoachReviewDescriptor } from "../js/practiceLab/practiceCoachReview.js";
 
 test("PL25 has the exact DB8/session13/foundation10 and v1 Coach envelope", () => {
-  assert.equal(PRACTICE_DATABASE_VERSION, 9);
+  assert.equal(PRACTICE_DATABASE_VERSION, 10);
   assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 13);
   assert.equal(PRACTICE_RECORD_VERSIONS.coachPlan, 1);
   assert.equal(PRACTICE_RECORD_VERSIONS.skillStat, 3);

@@ -55,7 +55,7 @@ function activateFirst(plan) {
 }
 
 test("PL25 storage envelope is DB8 with coachPlans and sessionSummary v13 coach lookup", () => {
-  assert.equal(PRACTICE_DATABASE_VERSION, 9);
+  assert.equal(PRACTICE_DATABASE_VERSION, 10);
   assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 13);
   assert.equal(PRACTICE_RECORD_VERSIONS.coachPlan, 1);
   assert.equal(PRACTICE_STORE_DEFINITIONS.coachPlans.keyPath, "coachPlanId");

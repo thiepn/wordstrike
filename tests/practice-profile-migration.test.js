@@ -57,7 +57,7 @@ assert.equal(initialized.profile.recordVersion, 3);
 assert.equal(initialized.profile.lastTrainingDayKey, null);
 assert.deepEqual(await dataStore.get("profiles", profileId), initialized.profile);
 
-assert.equal(PRACTICE_DATABASE_VERSION, 9);
+assert.equal(PRACTICE_DATABASE_VERSION, 10);
 assert.equal(PRACTICE_MANIFEST_VERSION, 1);
 assert.deepEqual(PRACTICE_RECORD_VERSIONS, {
   context: 1,
