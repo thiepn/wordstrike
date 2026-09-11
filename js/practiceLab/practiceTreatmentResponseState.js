@@ -85,7 +85,7 @@ function summarize(state) {
     distinctTargets: depth.distinctTargets,
     manualCount: eligible.filter((sample) => sample.assignmentKind === "manual").length,
     coachCount: eligible.filter((sample) => sample.assignmentKind === "coach").length,
-    contaminatedEpisodeCount: state.summary?.contaminatedEpisodeCount ?? 0,
+    contaminatedEpisodeCount: state.samples.filter((sample) => sample.contaminated === true).length,
     responsePattern,
     evidenceDepth: depth.depth,
     practicalThreshold: threshold,
@@ -129,6 +129,8 @@ export function buildPracticeTreatmentResponseSample({ episode, outcome, localDa
     measurementGrade: outcome.measurementGrade ?? "independent",
     primaryEligible: outcome.primaryEligible === true,
     aggregateEligible: outcome.primaryEligible === true || nonConfoundedHybrid,
+    contaminated: outcome.status === "contaminated" || outcome.evidenceGrade === "recorded-confounded",
+    evidenceGrade: outcome.evidenceGrade ?? "insufficient",
     responseValue: response.responseValue,
     responseUnit: response.responseUnit,
     tradeoff: response.tradeoff === true,
@@ -149,6 +151,6 @@ export function mergePracticeTreatmentResponseSample(state, sample, now = sample
 }
 
 export function incrementPracticeTreatmentContaminatedCount(state, now = new Date().toISOString()) {
-  const next = { ...state, updatedAt: now, summary: { ...(state.summary ?? {}), contaminatedEpisodeCount: (state.summary?.contaminatedEpisodeCount ?? 0) + 1 } };
-  return freezeDeep({ ...next, summary: { ...summarize(next), contaminatedEpisodeCount: next.summary.contaminatedEpisodeCount } });
+  if (!state) return state;
+  return freezeDeep({ ...state, updatedAt: now, summary: summarize(state) });
 }
