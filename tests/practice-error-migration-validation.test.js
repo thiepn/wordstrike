@@ -25,13 +25,13 @@ function emptyErrorSummary() {
   }).sessionSummary;
 }
 
-test("PL9 contracts remain intact inside the current PL25 storage/session envelope", () => {
+test("PL9 contracts remain intact inside the current PL33 storage/session envelope", () => {
   assert.equal(PRACTICE_DATABASE_VERSION, 10);
   assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 13);
   assert.equal(PRACTICE_RECORD_VERSIONS.reviewItem, 3);
   assert.equal(PRACTICE_RECORD_VERSIONS.evaluationState, 1);
   assert.equal(PRACTICE_RECORD_VERSIONS.assessmentRun, 1);
-  assert.equal(PRACTICE_RECORD_VERSIONS.coachPlan, 1);
+  assert.equal(PRACTICE_RECORD_VERSIONS.coachPlan, 2);
   assert.equal(PRACTICE_RECORD_VERSIONS.checkpoint, 3);
   assert.equal(PRACTICE_RECORD_VERSIONS.skillStat, 3);
   assert.equal(PRACTICE_RECORD_VERSIONS.abilityState, 1);
