@@ -6,6 +6,7 @@ import {
   PRACTICE_MANIFEST_KEY,
   PRACTICE_STORE_DEFINITIONS,
 } from "../js/practiceLab/practiceConstants.js";
+import { PRACTICE_STORE_DEFINITIONS as PRACTICE_STORE_DEFINITIONS_V31 } from "../js/practiceLab/practiceConstantsV31.js";
 import { createDefaultPracticeAbilityState } from "../js/practiceLab/practiceAbilityEstimator.js";
 import { validatePracticeAbilityState } from "../js/practiceLab/practiceAbilityValidation.js";
 import {
@@ -93,10 +94,12 @@ assert.equal(PRACTICE_MANIFEST_KEY, "wordstrike.practice.manifest.v1");
 assert.equal(PRACTICE_DATABASE_NAME, "wordstrike-practice-lab");
 assert.equal(PRACTICE_DATABASE_VERSION, 10);
 assert.equal(PRACTICE_LIMITS.manifestBytes, 65536);
-assert.deepEqual(Object.keys(PRACTICE_STORE_DEFINITIONS), [
+const legacyStoreNames = [
   "meta", "profiles", "contexts", "skillStats", "abilityStates", "performanceStates", "learningStates", "evaluationStates", "assessmentRuns", "coachPlans", "sessionSummaries", "reviewItems",
   "customTexts", "presets", "activeSessionCheckpoints", "quarantine",
-]);
+];
+assert.deepEqual(Object.keys(PRACTICE_STORE_DEFINITIONS_V31), legacyStoreNames);
+assert.deepEqual(Object.keys(PRACTICE_STORE_DEFINITIONS), [...legacyStoreNames, "treatmentEpisodes", "treatmentResponseStates"]);
 assert.equal(summary.recordVersion, 13);
 assert.equal(summary.evaluationSummary, null);
 assert.equal(summary.assessmentBinding, null);
@@ -107,4 +110,4 @@ assert.equal(isValidPracticeUtcIso("2026-07-05 18:42:13"), false);
 assert.match(getPracticeLocalDayKey(now), /^2026-07-05$/);
 assert.equal(getPracticeTimeContext(now).timezoneOffsetMinutes, new Date(now()).getTimezoneOffset());
 
-console.log("Practice defaults, injected IDs/clocks, independent nested values, ability state, and PL31 DB9 schema descriptors passed.");
+console.log("Practice defaults, injected IDs/clocks, independent nested values, ability state, and PL32 DB10 schema descriptors passed.");
