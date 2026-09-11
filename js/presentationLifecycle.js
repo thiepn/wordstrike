@@ -100,7 +100,6 @@ export function createPresentationLifecycle({
     start,
     stop,
     queue,
-    flush,
     isRunning: () => running,
     presenterIds: Object.freeze(orderedPresenters.map((presenter) => presenter.id)),
   });
