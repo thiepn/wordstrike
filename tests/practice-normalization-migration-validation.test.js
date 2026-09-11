@@ -76,7 +76,7 @@ function validNormalizationSummary() {
   };
 }
 
-test("PL10 model versions remain stable inside the current PL25 storage/session/foundation envelope", () => {
+test("PL10 model versions remain stable inside the current PL33 storage/session/foundation envelope", () => {
   assert.equal(PRACTICE_DATABASE_VERSION, 10);
   assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 13);
   assert.equal(PRACTICE_RECORD_VERSIONS.reviewItem, 3);
@@ -84,7 +84,7 @@ test("PL10 model versions remain stable inside the current PL25 storage/session/
   assert.equal(PRACTICE_RECORD_VERSIONS.skillStat, 3);
   assert.equal(PRACTICE_RECORD_VERSIONS.learningState, 1);
   assert.equal(PRACTICE_RECORD_VERSIONS.evaluationState, 1);
-  assert.equal(PRACTICE_RECORD_VERSIONS.coachPlan, 1);
+  assert.equal(PRACTICE_RECORD_VERSIONS.coachPlan, 2);
   assert.equal(PRACTICE_RECORD_VERSIONS.profile, 3);
   assert.equal(PRACTICE_FOUNDATION_ANALYSIS_VERSION, 10);
   assert.equal(PRACTICE_NORMALIZATION_ANALYSIS_VERSION, 1);
