@@ -1,0 +1,11 @@
+/*
+ * WORDSTRIKE V8 — Practice Lab stylesheet boundary
+ *
+ * These files are historical additive layers. Keep their cascade order here so
+ * the application bootstrap has one semantic Practice Lab stylesheet owner.
+ * Future Practice Lab styling should migrate into this boundary rather than
+ * adding another versioned <link> to index.html.
+ */
+@import url("../practiceLabV20.css");
+@import url("../practiceLabV21.css");
+@import url("../practiceLabV25.css");
