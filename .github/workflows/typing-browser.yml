@@ -33,6 +33,8 @@ jobs:
         run: python3 tests/browser/typing_performance_v4.py
       - name: Certify Typing Performance Timeline V5
         run: python3 tests/browser/typing_performance_v5.py
+      - name: Certify Typing Coach and Results 2.0 V6
+        run: python3 tests/browser/typing_coach_v6.py
       - name: Exercise UI8 visual hierarchy and responsive contracts
         run: python3 tests/browser/typing_ui8_visual_regressions.py
       - uses: actions/upload-artifact@v4

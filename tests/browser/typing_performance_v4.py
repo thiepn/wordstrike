@@ -36,7 +36,8 @@ def complete_words_test(page, delay=28):
     page.keyboard.press('Space')
     page.keyboard.type(' '.join(words[1:]), delay=delay)
     expect(page.locator('.speed-results-screen')).to_be_visible(timeout=10000)
-    expect(page.locator('[data-speed-performance-v3]')).to_be_visible(timeout=5000)
+    expect(page.locator('[data-speed-results-v6]')).to_be_visible(timeout=10000)
+    page.locator('[data-v6-tab="words"]').click()
     expect(page.locator('[data-speed-performance-v4]')).to_be_visible(timeout=5000)
 
 
@@ -50,13 +51,8 @@ def main():
         with sync_playwright() as playwright:
             browser = playwright.chromium.launch(headless=True)
             for width, height, touch in [(1280, 800, False), (390, 844, True)]:
-                context = browser.new_context(
-                    viewport={'width': width, 'height': height},
-                    has_touch=touch,
-                    **({'is_mobile': True} if touch else {}),
-                )
-                context.route('**/*', lambda route: route.continue_()
-                              if route.request.url.startswith(base) else route.abort())
+                context = browser.new_context(viewport={'width': width, 'height': height}, has_touch=touch, **({'is_mobile': True} if touch else {}))
+                context.route('**/*', lambda route: route.continue_() if route.request.url.startswith(base) else route.abort())
                 page = context.new_page()
                 errors = []
                 page.on('pageerror', lambda error: errors.append(str(error)))
@@ -94,29 +90,18 @@ def main():
 
                 overflow = page.evaluate("""() => ({
                   page: document.documentElement.scrollWidth - document.documentElement.clientWidth,
-                  panel: document.querySelector('.speed-results-panel').scrollWidth
-                    - document.querySelector('.speed-results-panel').clientWidth,
-                  v4: document.querySelector('[data-speed-performance-v4]').scrollWidth
-                    - document.querySelector('[data-speed-performance-v4]').clientWidth,
-                  wordMap: document.querySelector('.speed-performance-word-map').scrollWidth
-                    - document.querySelector('.speed-performance-word-map').clientWidth,
+                  panel: document.querySelector('.speed-results-panel').scrollWidth - document.querySelector('.speed-results-panel').clientWidth,
+                  v4: document.querySelector('[data-speed-performance-v4]').scrollWidth - document.querySelector('[data-speed-performance-v4]').clientWidth,
+                  wordMap: document.querySelector('.speed-performance-word-map').scrollWidth - document.querySelector('.speed-performance-word-map').clientWidth,
                 })""")
                 assert overflow['page'] <= 1, overflow
                 assert overflow['panel'] <= 1, overflow
                 assert overflow['v4'] <= 1, overflow
                 assert overflow['wordMap'] <= 1, overflow
 
-                page.screenshot(
-                    path=str(ARTIFACTS / f'typing-performance-v4-{width}x{height}.png'),
-                    full_page=True,
-                )
+                page.screenshot(path=str(ARTIFACTS / f'typing-performance-v4-{width}x{height}.png'), full_page=True)
                 assert not errors, errors
-                report['checks'].append({
-                    'viewport': f'{width}x{height}',
-                    'touch': touch,
-                    'profile': profile,
-                    'overflow': overflow,
-                })
+                report['checks'].append({'viewport': f'{width}x{height}', 'touch': touch, 'profile': profile, 'overflow': overflow})
                 context.close()
             browser.close()
         report['success'] = True
