@@ -1,6 +1,33 @@
 import { PRACTICE_EXPERIMENT_CATALOG as CATALOG_V30, validatePracticeExperimentCatalog } from "./practiceExperimentCatalogV30.js";
 export * from "./practiceExperimentCatalogV30.js";
 export { validatePracticeExperimentCatalog };
-const CUSTOM_CAPABILITIES = Object.freeze(["plain-text-editor", "local-save", "txt-import", "txt-export", "full-text", "selection", "timed-practice", "local-only"]); const customDescription = "Paste or save your own plain text and practice it locally without sending the text to rankings, cloud services, standardized ability models, or protected evaluation systems.";
-export const PRACTICE_EXPERIMENT_CATALOG = Object.freeze(CATALOG_V30.map((entry) => entry.id === "custom-text" ? Object.freeze({ ...entry, status: "preview", description: "Paste or save your own text and practice it locally.", longDescription: customDescription, requiresAssessment: false, requiresPracticeData: false, supportsMobile: true, supportsPhysicalKeyboard: true, supportsSoftwareKeyboard: true, capabilities: CUSTOM_CAPABILITIES }) : entry));
-const validation = validatePracticeExperimentCatalog(PRACTICE_EXPERIMENT_CATALOG); if (!validation.valid) throw new Error(`Invalid PL31 Practice experiment catalog: ${validation.errors[0]?.code}`); const BY_ID = new Map(PRACTICE_EXPERIMENT_CATALOG.map((entry) => [entry.id, entry])); export const getPracticeExperiment = (experimentId) => BY_ID.get(experimentId) ?? null;
+
+const CUSTOM_CAPABILITIES = Object.freeze(["plain-text-editor", "local-save", "txt-import", "txt-export", "full-text", "selection", "timed-practice", "local-only"]);
+const customDescription = "Paste or save your own plain text and practice it locally without sending the text to rankings, cloud services, standardized ability models, or protected evaluation systems.";
+const READ_AHEAD_CAPABILITIES = Object.freeze(["duration-options", "visual-preview-manipulation", "target-blind", "experimental", "same-session-profile"]);
+const readAheadDescription = "Practice typing while WordStrike changes how many upcoming words remain visible. This experiment measures how visible preview affects typing—it does not track your eyes.";
+const readAheadLongDescription = "An experimental visual-preview exercise that keeps the current text visible while varying whether one, two, or four future words can be seen. It measures how visible preview changes typing performance; it does not track gaze or eye movements.";
+
+export const PRACTICE_EXPERIMENT_CATALOG = Object.freeze(CATALOG_V30.map((entry) => {
+  if (entry.id === "custom-text") return Object.freeze({ ...entry, status: "preview", description: "Paste or save your own text and practice it locally.", longDescription: customDescription, requiresAssessment: false, requiresPracticeData: false, supportsMobile: true, supportsPhysicalKeyboard: true, supportsSoftwareKeyboard: true, capabilities: CUSTOM_CAPABILITIES });
+  if (entry.id === "read-ahead") return Object.freeze({
+    ...entry,
+    status: "preview",
+    description: readAheadDescription,
+    longDescription: readAheadLongDescription,
+    estimatedDurationMinutes: Object.freeze({ minimum: 3, recommended: 6, maximum: 10 }),
+    requiresAssessment: false,
+    requiresPracticeData: false,
+    supportsMobile: true,
+    supportsPhysicalKeyboard: true,
+    supportsSoftwareKeyboard: true,
+    capabilities: READ_AHEAD_CAPABILITIES,
+    tags: Object.freeze(["fluency", "visible lookahead", "experimental"]),
+    primarySkill: "visible preview",
+  });
+  return entry;
+}));
+const validation = validatePracticeExperimentCatalog(PRACTICE_EXPERIMENT_CATALOG);
+if (!validation.valid) throw new Error(`Invalid PL34 Practice experiment catalog: ${validation.errors[0]?.code}`);
+const BY_ID = new Map(PRACTICE_EXPERIMENT_CATALOG.map((entry) => [entry.id, entry]));
+export const getPracticeExperiment = (experimentId) => BY_ID.get(experimentId) ?? null;

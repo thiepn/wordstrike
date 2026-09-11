@@ -21,6 +21,7 @@
     "test:pl30-special-domains": "node --test tests/practice-special-domains-pl30.test.js",
     "test:pl31-custom-text": "node --test tests/practice-custom-text-pl31.test.js",
     "test:pl32-treatment-response": "node --test tests/practice-treatment-response*-pl32.test.js",
-    "test:pl33-coach-personalization": "node --test tests/practice-coach-personalization-*.test.js"
+    "test:pl33-coach-personalization": "node --test tests/practice-coach-personalization-*.test.js",
+    "test:pl34-read-ahead": "node --test tests/practice-read-ahead*-pl34.test.js"
   }
 }
