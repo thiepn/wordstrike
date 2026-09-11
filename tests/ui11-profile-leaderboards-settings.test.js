@@ -1,8 +1,11 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
-const [index, css, narrowContract, presentation, statisticsUi, leaderboardUi, ui, modes, workflow] = await Promise.all([
+const [index, appCss, presentationBootstrap, presentationLifecycle, css, narrowContract, presentation, statisticsUi, leaderboardUi, ui, modes, workflow] = await Promise.all([
   readFile(new URL("../index.html", import.meta.url), "utf8"),
+  readFile(new URL("../styles/app.css", import.meta.url), "utf8"),
+  readFile(new URL("../js/presentationBootstrap.js", import.meta.url), "utf8"),
+  readFile(new URL("../js/presentationLifecycle.js", import.meta.url), "utf8"),
   readFile(new URL("../styles/screens/profile-leaderboards-settings.css", import.meta.url), "utf8"),
   readFile(new URL("../styles/screens/profile-leaderboards-settings-ui11-contract.css", import.meta.url), "utf8"),
   readFile(new URL("../js/profileLeaderboardsSettingsPresentation.js", import.meta.url), "utf8"),
@@ -13,11 +16,23 @@ const [index, css, narrowContract, presentation, statisticsUi, leaderboardUi, ui
   readFile(new URL("../.github/workflows/non-practice-browser.yml", import.meta.url), "utf8"),
 ]);
 
-assert.equal((index.match(/styles\/screens\/profile-leaderboards-settings\.css/g) || []).length, 1);
-assert.equal((index.match(/styles\/screens\/profile-leaderboards-settings-ui11-contract\.css/g) || []).length, 1);
-assert.equal((index.match(/js\/profileLeaderboardsSettingsPresentation\.js/g) || []).length, 1);
-assert.match(index, /results-pause-onboarding\.css[\s\S]*profile-leaderboards-settings\.css[\s\S]*profile-leaderboards-settings-ui11-contract\.css[\s\S]*practiceLabV20\.css/);
-assert.match(index, /arcadeRushGameplayPresentation\.js[\s\S]*profileLeaderboardsSettingsPresentation\.js/);
+assert.match(index, /styles\/app\.css\?v=20260911v8/,
+  "UI11 should load through the semantic application stylesheet boundary");
+assert.doesNotMatch(index, /styles\/screens\/profile-leaderboards-settings(?:-ui11-contract)?\.css/);
+assert.equal((appCss.match(/\.\/screens\/profile-leaderboards-settings\.css/g) || []).length, 1);
+assert.equal((appCss.match(/\.\/screens\/profile-leaderboards-settings-ui11-contract\.css/g) || []).length, 1);
+assert.match(appCss, /results-pause-onboarding\.css[\s\S]*profile-leaderboards-settings\.css[\s\S]*profile-leaderboards-settings-ui11-contract\.css[\s\S]*ui12-global-polish\.css[\s\S]*practice-lab\.css/);
+assert.doesNotMatch(index, /js\/profileLeaderboardsSettingsPresentation\.js/);
+assert.match(presentationBootstrap, /syncArcadeRushGameplayPresentation[\s\S]*syncProfileLeaderboardsSettingsPresentation[\s\S]*syncUi12GlobalPresentation/,
+  "shared presentation order must keep Arcade Rush → UI11 → UI12");
+assert.match(presentationBootstrap, /\{ id: "profile-leaderboards-settings", sync: syncProfileLeaderboardsSettingsPresentation \}/);
+assert.doesNotMatch(presentation, /new MutationObserver/,
+  "UI11 presentation must not own an app observer after V10");
+assert.match(presentation, /export function syncProfileLeaderboardsSettingsPresentation\(/);
+assert.match(presentationLifecycle, /observer = new MutationObserverImpl\(queue\)/,
+  "the shared presentation lifecycle owns app-root mutation observation");
+assert.match(presentationLifecycle, /childList:\s*true/);
+assert.match(presentationLifecycle, /subtree:\s*true/);
 
 assert.match(css, /UI11 — Profile \/ Leaderboards \/ Settings/);
 assert.match(css, /\.profile-stats-screen\[data-ui11-surface="profile"\]/);
@@ -47,8 +62,6 @@ assert.doesNotMatch(narrowContract, /practice-lab|practiceLab|\.practice-/i);
 
 // UI11 augments semantics and presentation; it does not import or own app state.
 assert.doesNotMatch(presentation, /^import\s/m);
-assert.match(presentation, /new MutationObserver/);
-assert.match(presentation, /childList:\s*true/);
 assert.match(presentation, /dataset\.ui11Surface = "profile"/);
 assert.match(presentation, /dataset\.ui11Surface = "leaderboards"/);
 assert.match(presentation, /dataset\.ui11Surface = "settings"/);
@@ -101,4 +114,4 @@ assert.match(workflow, /tests\/browser\/ui11_profile_leaderboards_settings\.py/)
 assert.match(workflow, /tests\/browser\/ui11_mobile_heading_contract\.py/);
 assert.match(workflow, /browser-artifacts\/ui11-profile-leaderboards-settings\//);
 
-console.log("UI11 source contracts passed: Profile/Stats, Leaderboards and Settings share one low-chrome presentation layer while existing data, auth, routing, persistence and mode boundaries remain authoritative.");
+console.log("UI11 source contracts passed: semantic stylesheet ownership, shared presentation lifecycle, Profile/Stats, Leaderboards and Settings behavior, and existing data/auth/routing/persistence boundaries.");
