@@ -1,0 +1,41 @@
+name: PL32 Contamination Test Patch
+
+on:
+  push:
+    branches: [pl32-treatment-response]
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: pl32-treatment-response
+      - name: Add recorded exposure to contamination fixtures
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          path = Path('tests/practice-treatment-response-pl32.test.js')
+          text = path.read_text(encoding='utf-8')
+          old_unrelated = 'interveningTreatmentEpisodes: [{ status: "tracking", treatmentEpisodeId: "unrelated", treatment: { targetStatId: createSkillStatId(PROFILE, CONTEXT, "bigram", "zz") } }]'
+          new_unrelated = 'interveningTreatmentEpisodes: [{ status: "tracking", treatmentEpisodeId: "unrelated", treatment: { exposureStartedAt: "2026-09-08T11:00:00.000Z", targetStatId: createSkillStatId(PROFILE, CONTEXT, "bigram", "zz") } }]'
+          old_same = 'interveningTreatmentEpisodes: [{ status: "tracking", treatmentEpisodeId: "same", treatment: { targetStatId: prior.treatment.targetStatId } }]'
+          new_same = 'interveningTreatmentEpisodes: [{ status: "tracking", treatmentEpisodeId: "same", treatment: { exposureStartedAt: "2026-09-08T11:00:00.000Z", targetStatId: prior.treatment.targetStatId } }]'
+          if old_unrelated not in text or old_same not in text:
+              print('Fixtures already patched or source changed.')
+          else:
+              path.write_text(text.replace(old_unrelated, new_unrelated).replace(old_same, new_same), encoding='utf-8')
+          PY
+      - name: Commit fixture patch
+        shell: bash
+        run: |
+          if git diff --quiet; then exit 0; fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add tests/practice-treatment-response-pl32.test.js
+          git commit -m 'PL32: model recorded exposure in contamination test'
+          git push origin HEAD:pl32-treatment-response
