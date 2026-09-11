@@ -2,13 +2,14 @@ import { getPracticeExperiment } from "./practiceExperimentCatalog.js";
 
 export const PRACTICE_LAB_ROUTES = Object.freeze({
   HOME: "home", DAILY_TRAINING: "daily-training", EXPERIMENT_DETAIL: "experiment-detail", SKILL_MAP: "skill-map",
-  REVIEW_QUEUE: "review-queue", PROGRESS: "progress",
+  REVIEW_QUEUE: "review-queue", PROGRESS: "progress", PHYSICAL_KEYBOARD: "physical-keyboard",
   EXPERIMENT_SETUP: "experiment-setup", ACTIVE_SESSION: "active-session",
   SESSION_RESULTS: "session-results", ASSESSMENT_RESULTS: "assessment-results",
 });
 export const PRACTICE_LAB_PUBLIC_ROUTES = Object.freeze([
   PRACTICE_LAB_ROUTES.HOME, PRACTICE_LAB_ROUTES.DAILY_TRAINING, PRACTICE_LAB_ROUTES.EXPERIMENT_DETAIL,
   PRACTICE_LAB_ROUTES.SKILL_MAP, PRACTICE_LAB_ROUTES.REVIEW_QUEUE, PRACTICE_LAB_ROUTES.PROGRESS,
+  PRACTICE_LAB_ROUTES.PHYSICAL_KEYBOARD,
 ]);
 export const PRACTICE_LAB_RESERVED_ROUTES = Object.freeze([
   PRACTICE_LAB_ROUTES.EXPERIMENT_SETUP, PRACTICE_LAB_ROUTES.ACTIVE_SESSION,
