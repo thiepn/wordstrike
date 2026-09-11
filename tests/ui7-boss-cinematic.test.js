@@ -1,8 +1,10 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
-const [index, presentation, css, bossLoop, renderer, workflow, modes] = await Promise.all([
+const [index, appCss, presentationBootstrap, presentation, css, bossLoop, renderer, workflow, modes] = await Promise.all([
   readFile(new URL("../index.html", import.meta.url), "utf8"),
+  readFile(new URL("../styles/app.css", import.meta.url), "utf8"),
+  readFile(new URL("../js/presentationBootstrap.js", import.meta.url), "utf8"),
   readFile(new URL("../js/bossGameplayPresentation.js", import.meta.url), "utf8"),
   readFile(new URL("../styles/screens/boss-gameplay.css", import.meta.url), "utf8"),
   readFile(new URL("../js/bossLoop.js", import.meta.url), "utf8"),
@@ -11,10 +13,12 @@ const [index, presentation, css, bossLoop, renderer, workflow, modes] = await Pr
   readFile(new URL("../js/modes.js", import.meta.url), "utf8"),
 ]);
 
-assert.equal((index.match(/styles\/screens\/boss-gameplay\.css/g) || []).length, 1);
-assert.equal((index.match(/js\/bossGameplayPresentation\.js/g) || []).length, 1);
-assert.match(index, /endless-gameplay\.css[\s\S]*boss-gameplay\.css[\s\S]*practiceLabV20\.css/);
-assert.match(index, /endlessGameplayPresentation\.js[\s\S]*bossGameplayPresentation\.js/);
+assert.match(index, /styles\/app\.css\?v=20260911v8/);
+assert.doesNotMatch(index, /styles\/screens\/boss-gameplay\.css|js\/bossGameplayPresentation\.js/);
+assert.equal((appCss.match(/\.\/screens\/boss-gameplay\.css/g) || []).length, 1);
+assert.match(appCss, /endless-gameplay\.css[\s\S]*boss-gameplay\.css[\s\S]*typing-test\.css/);
+assert.equal((presentationBootstrap.match(/bossGameplayPresentation\.js/g) || []).length, 1);
+assert.match(presentationBootstrap, /endlessGameplayPresentation\.js[\s\S]*bossGameplayPresentation\.js[\s\S]*arcadeRushGameplayPresentation\.js/);
 
 assert.match(presentation, /import \{ appState \} from "\.\/state\.js"/);
 assert.match(presentation, /BOSS_SCREEN_SELECTOR = "\.boss-screen"/);
@@ -103,4 +107,4 @@ assert.match(workflow, /browser-artifacts\/ui7-boss-gameplay\//);
 assert.match(modes, /PRACTICE: "practice"/);
 assert.match(modes, /id: MODE_IDS\.PRACTICE,[\s\S]*enabled: false,[\s\S]*status: "coming-soon",[\s\S]*route: null/);
 
-console.log("UI7 Boss source contracts passed: runtime-clock cinematic, Boss Resolve/sequence progress, phrase states, responsive/reduced-motion treatment, no fake HP, and Practice isolation.");
+console.log("UI7 Boss source contracts passed: semantic V8 resource ownership, runtime-clock cinematic, Boss Resolve/sequence progress, phrase states, responsive/reduced-motion treatment, no fake HP, and Practice isolation.");
