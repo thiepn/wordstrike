@@ -17,20 +17,8 @@ const time = (value) => {
 };
 
 export function createPracticeTreatmentOutcomeCandidate({
-  profileId,
-  contextId,
-  sessionId,
-  observedAt,
-  localDayKey = null,
-  sourceKind,
-  subjectKind,
-  subjectId,
-  outcomeDomain = null,
-  protocolFingerprint = null,
-  metrics = {},
-  uncertainty = null,
-  validity = {},
-  evidenceRole = null,
+  profileId, contextId, sessionId, observedAt, localDayKey = null, sourceKind, subjectKind, subjectId,
+  outcomeDomain = null, protocolFingerprint = null, metrics = {}, uncertainty = null, validity = {}, evidenceRole = null,
 } = {}) {
   if (!profileId || !contextId || !sessionId || !observedAt || !sourceKind || !subjectKind || !subjectId) throw new TypeError("Treatment outcome candidate identity is incomplete");
   const candidateId = `practice-treatment-candidate_${hashPracticeContent(JSON.stringify([sessionId, sourceKind, subjectId, protocolFingerprint ?? "none"]))}`;
@@ -38,20 +26,8 @@ export function createPracticeTreatmentOutcomeCandidate({
     candidateId,
     policyVersion: PRACTICE_TREATMENT_OUTCOME_POLICY_VERSION,
     responseModelVersion: PRACTICE_TREATMENT_RESPONSE_MODEL_VERSION,
-    profileId,
-    contextId,
-    sessionId,
-    observedAt,
-    localDayKey,
-    sourceKind,
-    subjectKind,
-    subjectId,
-    outcomeDomain,
-    protocolFingerprint,
-    metrics,
-    uncertainty,
-    validity,
-    evidenceRole,
+    profileId, contextId, sessionId, observedAt, localDayKey, sourceKind, subjectKind, subjectId,
+    outcomeDomain, protocolFingerprint, metrics, uncertainty, validity, evidenceRole,
   });
 }
 
@@ -72,13 +48,16 @@ export function evaluatePracticeTreatmentOutcomeCandidate(episode, contract, can
   if (episode.treatment?.treatmentSessionId === candidate.sessionId) return { eligible: false, reason: "same-session" };
   if (contract.sourceKind !== candidate.sourceKind) return { eligible: false, reason: "source-mismatch" };
   if (candidate.validity?.eligible === false || candidate.validity?.valid === false) return { eligible: false, reason: "invalid-candidate" };
+  if (candidate.responseModelVersion !== episode.responseModelVersion) return { eligible: false, reason: "response-model-version-mismatch" };
+
   const completedAt = time(episode.treatment?.completedAt);
   const observedAt = time(candidate.observedAt);
   if (completedAt == null || observedAt == null || observedAt <= completedAt) return { eligible: false, reason: "not-later" };
   const delayMs = observedAt - completedAt;
   if (delayMs < contract.minimumDelayMs) return { eligible: false, reason: "too-early", delayMs };
   if (delayMs > contract.maximumDelayMs) return { eligible: false, reason: "expired", delayMs };
-  if (episode.treatment?.completedLocalDayKey && candidate.localDayKey && episode.treatment.completedLocalDayKey === candidate.localDayKey) return { eligible: false, reason: "same-local-day", delayMs };
+  if (!episode.treatment?.completedLocalDayKey || !candidate.localDayKey) return { eligible: false, reason: "local-day-unknown", delayMs };
+  if (episode.treatment.completedLocalDayKey === candidate.localDayKey) return { eligible: false, reason: "same-local-day", delayMs };
 
   if (["target-baseline-retest", "retention-review", "cold-transfer"].includes(candidate.sourceKind)) {
     if (!episode.treatment?.targetStatId || candidate.subjectId !== episode.treatment.targetStatId) return { eligible: false, reason: "target-mismatch", delayMs };
@@ -89,14 +68,16 @@ export function evaluatePracticeTreatmentOutcomeCandidate(episode, contract, can
 
   const baseline = episode.baseline;
   if (candidate.sourceKind === "ability-observation" && baseline?.abilityState) {
-    if (!compatibleVersion(baseline.abilityState.abilityModelVersion, candidate.validity?.abilityModelVersion)) return { eligible: false, reason: "model-version-mismatch", delayMs };
+    if (!compatibleVersion(baseline.abilityState.abilityModelVersion, candidate.validity?.abilityModelVersion)
+      || !compatibleVersion(baseline.abilityState.abilityPolicyVersion, candidate.validity?.abilityPolicyVersion)) return { eligible: false, reason: "model-version-mismatch", delayMs };
   }
   if (candidate.sourceKind === "consistency-result" && baseline?.consistencyState) {
     if (!compatibleVersion(baseline.consistencyState.analysisVersion, candidate.validity?.analysisVersion)) return { eligible: false, reason: "model-version-mismatch", delayMs };
     if (Number.isFinite(baseline.consistencyState.durationMs) && Number.isFinite(candidate.validity?.durationMs) && baseline.consistencyState.durationMs !== candidate.validity.durationMs) return { eligible: false, reason: "duration-mismatch", delayMs };
   }
   if (candidate.sourceKind === "control-frontier" && baseline?.frontierState) {
-    if (!compatibleVersion(baseline.frontierState.modelVersion, candidate.validity?.modelVersion) || !compatibleVersion(baseline.frontierState.policyVersion, candidate.validity?.policyVersion)) return { eligible: false, reason: "model-version-mismatch", delayMs };
+    if (!compatibleVersion(baseline.frontierState.modelVersion, candidate.validity?.modelVersion)
+      || !compatibleVersion(baseline.frontierState.policyVersion, candidate.validity?.policyVersion)) return { eligible: false, reason: "model-version-mismatch", delayMs };
   }
   return { eligible: true, reason: null, delayMs, delayBucket: getPracticeTreatmentDelayBucket(delayMs) };
 }
