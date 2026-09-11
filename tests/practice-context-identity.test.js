@@ -122,7 +122,7 @@ assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 13);
 assert.equal(PRACTICE_RECORD_VERSIONS.reviewItem, 3);
 assert.equal(PRACTICE_RECORD_VERSIONS.evaluationState, 1);
 assert.equal(PRACTICE_RECORD_VERSIONS.assessmentRun, 1);
-assert.equal(PRACTICE_RECORD_VERSIONS.coachPlan, 1);
+assert.equal(PRACTICE_RECORD_VERSIONS.coachPlan, 2);
 assert.equal(PRACTICE_RECORD_VERSIONS.checkpoint, 3);
 assert.equal(PRACTICE_STORE_DEFINITIONS.skillStats.indexes.some((index) => index.name === "profileEntity"), false);
 assert.equal(PRACTICE_STORE_DEFINITIONS.reviewItems.indexes.some((index) => index.name === "profileEntity"), false);
