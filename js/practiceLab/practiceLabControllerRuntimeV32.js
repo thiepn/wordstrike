@@ -1,14 +1,14 @@
 import { createPracticeLabController as createPracticeLabControllerV31 } from "./practiceLabControllerRuntimeV31.js";
 import { renderPracticeLabV32, renderPracticeTreatmentResponseProgress } from "./practiceLabRendererV32.js";
 import { PRACTICE_LAB_ROUTES } from "./practiceLabRoutes.js";
-import { createPracticeTreatmentResponseRuntime } from "./practiceTreatmentResponseRuntime.js";
 import { buildPracticeTreatmentResponseViewModel } from "./practiceTreatmentResponseViewModel.js";
 
 export function createPracticeLabController(options = {}) {
   const { root, logger = null } = options;
   const externalRenderer = typeof options.renderer === "function" ? options.renderer : null;
   const ownsRuntime = !options.treatmentResponseRuntime;
-  const runtime = options.treatmentResponseRuntime ?? createPracticeTreatmentResponseRuntime();
+  let runtime = options.treatmentResponseRuntime ?? null;
+  let runtimePromise = null;
   let state = buildPracticeTreatmentResponseViewModel({ status: "loading" });
   let mounted = false;
   let listeners = false;
@@ -16,6 +16,16 @@ export function createPracticeLabController(options = {}) {
   let loadEpoch = 0;
 
   const isProgressRoute = (base) => base.getSnapshot()?.route?.name === PRACTICE_LAB_ROUTES.PROGRESS;
+
+  async function ensureRuntime() {
+    if (runtime) return runtime;
+    runtimePromise ??= import("./practiceTreatmentResponseRuntime.js")
+      .then((module) => {
+        runtime = module.createPracticeTreatmentResponseRuntime();
+        return runtime;
+      });
+    return runtimePromise;
+  }
 
   function attach() {
     if (listeners || !mounted) return;
@@ -56,7 +66,8 @@ export function createPracticeLabController(options = {}) {
     state = buildPracticeTreatmentResponseViewModel({ status: "loading" });
     rerender(focusSelector);
     try {
-      const next = await runtime.getSnapshot();
+      const responseRuntime = await ensureRuntime();
+      const next = await responseRuntime.getSnapshot();
       if (!mounted || epoch !== loadEpoch || !isProgressRoute(base)) return;
       state = next;
       rerender(focusSelector);
@@ -116,7 +127,9 @@ export function createPracticeLabController(options = {}) {
       mounted = false;
       loadEpoch += 1;
       detach();
-      if (ownsRuntime) runtime.close?.();
+      if (ownsRuntime) runtime?.close?.();
+      runtime = options.treatmentResponseRuntime ?? null;
+      runtimePromise = null;
       return base.unmount();
     },
   });
