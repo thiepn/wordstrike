@@ -227,8 +227,8 @@ test("first compatible candidate is not replaced and a shared outcome belongs to
 test("contamination distinguishes Custom Text uncertainty, unrelated background and same-domain material exposure", () => {
   const prior = trackingEpisode({ sessionId: "contamination-prior" });
   assert.equal(classifyPracticeTreatmentContamination({ episode: prior, interveningSessions: [{ experimentId: "custom-text", sessionId: "custom" }] }).level, "uncertain");
-  assert.equal(classifyPracticeTreatmentContamination({ episode: prior, interveningTreatmentEpisodes: [{ status: "tracking", treatmentEpisodeId: "unrelated", treatment: { targetStatId: createSkillStatId(PROFILE, CONTEXT, "bigram", "zz") } }] }).level, "background");
-  assert.equal(classifyPracticeTreatmentContamination({ episode: prior, interveningTreatmentEpisodes: [{ status: "tracking", treatmentEpisodeId: "same", treatment: { targetStatId: prior.treatment.targetStatId } }] }).level, "material");
+  assert.equal(classifyPracticeTreatmentContamination({ episode: prior, interveningTreatmentEpisodes: [{ status: "tracking", treatmentEpisodeId: "unrelated", treatment: { exposureStartedAt: "2026-09-08T11:00:00.000Z", targetStatId: createSkillStatId(PROFILE, CONTEXT, "bigram", "zz") } }] }).level, "background");
+  assert.equal(classifyPracticeTreatmentContamination({ episode: prior, interveningTreatmentEpisodes: [{ status: "tracking", treatmentEpisodeId: "same", treatment: { exposureStartedAt: "2026-09-08T11:00:00.000Z", targetStatId: prior.treatment.targetStatId } }] }).level, "material");
 });
 
 test("later targeted exposure preserves an already-observed compatible Baseline retest but contaminates remaining target outcomes", async () => {
