@@ -2,12 +2,13 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { getAllModes, MODE_IDS } from "../js/modes.js";
 
-const [ui, css, legacyCss, systemCss, index, keyboard, modesSource] = await Promise.all([
+const [ui, css, legacyCss, systemCss, index, appCss, keyboard, modesSource] = await Promise.all([
   readFile(new URL("../js/ui.js", import.meta.url), "utf8"),
   readFile(new URL("../styles/screens/mode-select.css", import.meta.url), "utf8"),
   readFile(new URL("../style.css", import.meta.url), "utf8"),
   readFile(new URL("../styles/ui-system.css", import.meta.url), "utf8"),
   readFile(new URL("../index.html", import.meta.url), "utf8"),
+  readFile(new URL("../styles/app.css", import.meta.url), "utf8"),
   readFile(new URL("../js/appKeyboardController.js", import.meta.url), "utf8"),
   readFile(new URL("../js/modes.js", import.meta.url), "utf8"),
 ]);
@@ -23,7 +24,9 @@ assert.deepEqual(modes.map(({ id }) => id), [
 assert.deepEqual(modes.map(({ enabled }) => enabled), [true, true, true, true, false]);
 assert.equal(modes.at(-1).status, "coming-soon");
 
-assert.match(index, /styles\/ui-system\.css[\s\S]*styles\/screens\/title\.css[\s\S]*styles\/screens\/mode-select\.css/);
+assert.match(index, /styles\/app\.css\?v=20260911v8/);
+assert.doesNotMatch(index, /styles\/ui-system\.css|styles\/screens\/(?:title|mode-select)\.css/);
+assert.match(appCss, /\.\/ui-system\.css[\s\S]*\.\/screens\/title\.css[\s\S]*\.\/screens\/mode-select\.css/);
 assert.match(ui, /<section class="screen mode-screen mode-select-screen">/);
 assert.match(ui, /class="mode-select-shell"/);
 assert.match(ui, /class="mode-showcase mode-tone-\$\{toneFor\(selectedMode\)\}"/);
@@ -78,4 +81,4 @@ assert.match(keyboard, /else if \(event\.key === "Escape"\) \{\s*openTitle\(\)/s
 assert.match(modesSource, /PRACTICE: "practice"/);
 assert.match(modesSource, /id: MODE_IDS\.PRACTICE,[\s\S]*enabled: false,[\s\S]*status: "coming-soon",[\s\S]*route: null/);
 
-console.log("UI3 source contracts passed: dedicated Mode Select ownership, four active identities, neutral disabled fallback, and unchanged six-position navigation.");
+console.log("UI3 source contracts passed: semantic V8 stylesheet ownership, four active identities, neutral disabled fallback, and unchanged six-position navigation.");
