@@ -1,8 +1,9 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
-const [index, css, ui, onboardingView, onboardingController, rushUi, modes, workflow] = await Promise.all([
+const [index, appCss, css, ui, onboardingView, onboardingController, rushUi, modes, workflow] = await Promise.all([
   readFile(new URL("../index.html", import.meta.url), "utf8"),
+  readFile(new URL("../styles/app.css", import.meta.url), "utf8"),
   readFile(new URL("../styles/screens/results-pause-onboarding.css", import.meta.url), "utf8"),
   readFile(new URL("../js/ui.js", import.meta.url), "utf8"),
   readFile(new URL("../js/onboardingView.js", import.meta.url), "utf8"),
@@ -12,8 +13,14 @@ const [index, css, ui, onboardingView, onboardingController, rushUi, modes, work
   readFile(new URL("../.github/workflows/non-practice-browser.yml", import.meta.url), "utf8"),
 ]);
 
-assert.equal((index.match(/styles\/screens\/results-pause-onboarding\.css/g) || []).length, 1);
-assert.match(index, /arcade-rush-gameplay\.css[\s\S]*results-pause-onboarding\.css[\s\S]*practiceLabV20\.css/);
+assert.match(index, /styles\/app\.css\?v=20260911v8/,
+  "V8 should expose UI10 through the semantic application stylesheet boundary");
+assert.doesNotMatch(index, /styles\/screens\/results-pause-onboarding\.css/,
+  "UI10 must not return as a direct index.html stylesheet");
+assert.equal((appCss.match(/\.\/screens\/results-pause-onboarding\.css/g) || []).length, 1,
+  "the semantic stylesheet boundary should include UI10 exactly once");
+assert.match(appCss, /arcade-rush-gameplay\.css[\s\S]*results-pause-onboarding\.css[\s\S]*practice-lab\.css/,
+  "V8 must preserve UI10 cascade placement between Arcade Rush and Practice Lab");
 
 assert.match(css, /UI10 — Shared Results, Pause & Onboarding/);
 assert.match(css, /\.results-screen,/);
@@ -85,4 +92,4 @@ assert.match(workflow, /Certify UI10 shared Results, Pause, and onboarding/);
 assert.match(workflow, /tests\/browser\/ui10_results_pause_onboarding\.py/);
 assert.match(workflow, /browser-artifacts\/ui10-results-pause-onboarding\//);
 
-console.log("UI10 source contracts passed: shared presentation only, authoritative result/pause/onboarding behavior preserved, responsive/reduced-motion coverage, and Practice/UI11 isolation.");
+console.log("UI10 source contracts passed: semantic V8 stylesheet ownership, authoritative result/pause/onboarding behavior, responsive/reduced-motion coverage, and Practice/UI11 isolation.");
