@@ -57,7 +57,7 @@ export function buildPracticeTargetBaseline({ metrics, observedAt, probeIdentity
 export function buildPracticeAbilityBaseline({ state, observedAt } = {}) {
   const estimate = state?.estimate ?? state?.currentEstimate ?? null;
   const muLog = finiteOrNull(estimate?.meanLogWpm ?? estimate?.muLog ?? state?.muLog);
-  const variance = finiteOrNull(estimate?.varianceLog ?? estimate?.variance ?? state?.variance);
+  const variance = finiteOrNull(estimate?.varianceLogWpm ?? estimate?.varianceLog ?? estimate?.variance ?? state?.variance);
   if (muLog == null || variance == null || variance < 0) {
     return freezeDeep({ ...createPendingPracticeTreatmentBaseline({ kind: "ability", observedAt }), status: "missing" });
   }
@@ -75,6 +75,7 @@ export function buildPracticeAbilityBaseline({ state, observedAt } = {}) {
       observationCount: Number.isInteger(state?.evidence?.observationCount) ? state.evidence.observationCount : Number.isInteger(state?.observationCount) ? state.observationCount : 0,
       updatedAt: state?.updatedAt ?? null,
       abilityModelVersion: state?.estimatorVersion ?? null,
+      abilityPolicyVersion: state?.estimatorPolicyVersion ?? null,
       channel: state?.channel ?? null,
     },
     consistencyState: null,
@@ -82,8 +83,27 @@ export function buildPracticeAbilityBaseline({ state, observedAt } = {}) {
   });
 }
 
+export function normalizePracticeConsistencyResult(result) {
+  if (!result) return null;
+  return freezeDeep({
+    analysisVersion: result.analysisVersion ?? null,
+    resultVersion: result.resultVersion ?? null,
+    status: result.status ?? null,
+    durationMs: finiteOrNull(result.durationMs),
+    paceVariationPercent: finiteOrNull(result.paceVariationPercent ?? result.pace?.variationPercent),
+    paceDriftPercent: finiteOrNull(result.paceDriftPercent ?? result.pace?.driftPercent),
+    medianAdjustedGrossWpm: finiteOrNull(result.medianAdjustedGrossWpm ?? result.pace?.medianAdjustedGrossWpm),
+    firstPassAccuracyMedian: finiteOrNull(result.firstPassAccuracyMedian ?? result.control?.firstPassAccuracyMedian),
+    disfluencyMedian: finiteOrNull(result.disfluencyMedian ?? result.control?.disfluencyMedian),
+    correctionCostMedian: finiteOrNull(result.correctionCostMedian ?? result.control?.correctionCostMedian),
+  });
+}
+
 export function buildPracticeConsistencyBaseline({ result, observedAt } = {}) {
-  if (!result || !finite(result.paceVariationPercent)) return freezeDeep({ ...createPendingPracticeTreatmentBaseline({ kind: "consistency", observedAt }), status: "missing" });
+  const normalized = normalizePracticeConsistencyResult(result);
+  if (!normalized || normalized.status !== "complete" || !finite(normalized.paceVariationPercent)) {
+    return freezeDeep({ ...createPendingPracticeTreatmentBaseline({ kind: "consistency", observedAt }), status: "missing" });
+  }
   return freezeDeep({
     policyVersion: PRACTICE_TREATMENT_BASELINE_POLICY_VERSION,
     kind: "consistency",
@@ -92,16 +112,7 @@ export function buildPracticeConsistencyBaseline({ result, observedAt } = {}) {
     probeIdentity: null,
     metrics: null,
     abilityState: null,
-    consistencyState: {
-      analysisVersion: result.analysisVersion ?? null,
-      durationMs: finiteOrNull(result.durationMs),
-      paceVariationPercent: result.paceVariationPercent,
-      paceDriftPercent: finiteOrNull(result.paceDriftPercent),
-      medianAdjustedGrossWpm: finiteOrNull(result.medianAdjustedGrossWpm),
-      firstPassAccuracyMedian: finiteOrNull(result.firstPassAccuracyMedian),
-      disfluencyMedian: finiteOrNull(result.disfluencyMedian),
-      correctionCostMedian: finiteOrNull(result.correctionCostMedian),
-    },
+    consistencyState: normalized,
     frontierState: null,
   });
 }
@@ -124,7 +135,8 @@ export function buildPracticeFrontierBaseline({ frontier, observedAt } = {}) {
       status: frontier.status ?? null,
       confidence: frontier.confidence ?? null,
       frontierWpm: finiteOrNull(frontier.frontierWpm),
-      lowerBoundWpm: finiteOrNull(frontier.lowerBoundWpm),
+      lowerBoundWpm: finiteOrNull(frontier.frontierLowerWpm ?? frontier.lowerBoundWpm),
+      upperBoundWpm: finiteOrNull(frontier.frontierUpperWpm ?? frontier.upperBoundWpm),
       scalarEligible,
     },
   });
