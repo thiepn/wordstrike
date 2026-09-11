@@ -1,0 +1,32 @@
+name: V13 native results migration
+
+on:
+  push:
+    branches:
+      - v13-native-results-pipeline
+    paths:
+      - .github/workflows/v13-native-results-migration.yml
+
+permissions:
+  contents: write
+
+jobs:
+  migrate:
+    if: github.event.head_commit.message == 'V13: install native results migration runner'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out V13 branch
+        uses: actions/checkout@v4
+        with:
+          ref: v13-native-results-pipeline
+          fetch-depth: 0
+      - name: Apply native Typing Results migration
+        run: node scripts/v13MigrateNativeResults.mjs
+      - name: Commit migration output
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --quiet && exit 0
+          git commit -m "V13: retire results observer compatibility bridge"
+          git push origin HEAD:v13-native-results-pipeline
