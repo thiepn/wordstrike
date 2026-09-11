@@ -136,6 +136,9 @@ def main():
                 }""")
                 assert config_id == 'words-10', config_id
                 type_current_words(page, make_first_mistake=False, delay=10 if touch else 14)
+                results = page.locator('[data-speed-results-v6]')
+                results.locator('[data-v6-tab="practice"]').click()
+                expect(results.locator('[data-v6-tab="practice"]')).to_have_attribute('aria-selected', 'true')
                 expect(page.locator('[data-typing-coach-v7-complete]')).to_be_visible(timeout=10000)
                 expect(page.locator('[data-typing-coach-v7-complete]')).to_contain_text('Baseline → retest')
 
