@@ -123,11 +123,12 @@ const presenterOrder = [
   "syncArcadeRushGameplayPresentation",
   "syncProfileLeaderboardsSettingsPresentation",
   "syncUi12GlobalPresentation",
+  "syncTypingResultsRuntime",
 ];
 let previousIndex = -1;
 for (const token of presenterOrder) {
   const currentIndex = bootstrap.indexOf(token);
-  assert.ok(currentIndex > previousIndex, `V10 presentation order is invalid at ${token}`);
+  assert.ok(currentIndex > previousIndex, `shared presentation order is invalid at ${token}`);
   previousIndex = currentIndex;
 }
 
@@ -148,4 +149,4 @@ assert.match(arcade, /export function startArcadeRushGameplayPresentation\(\)/,
 assert.doesNotMatch(arcade, /\nstartArcadeRushGameplayPresentation\(\);\s*$/,
   "Arcade Rush compatibility observation must not auto-start in production");
 
-console.log("WORDSTRIKE V10 shared presentation lifecycle, coalescing, ordering, cleanup, and observer ownership passed.");
+console.log("WORDSTRIKE shared presentation lifecycle, coalescing, ordering, cleanup, and V12 Typing Results ownership passed.");
