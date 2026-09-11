@@ -117,8 +117,6 @@ export function createPracticeTreatmentResponseState({ profileId, contextId, tre
 export function buildPracticeTreatmentResponseSample({ episode, outcome, localDayKey = null } = {}) {
   const response = outcome?.response;
   if (!episode || !outcome || !finite(response?.responseValue)) return null;
-  const hybrid = outcome.measurementGrade === "hybrid";
-  const nonConfoundedHybrid = hybrid && outcome.status === "observed" && !["recorded-confounded", "incompatible"].includes(outcome.evidenceGrade);
   return freezeDeep({
     treatmentEpisodeId: episode.treatmentEpisodeId,
     candidateId: outcome.candidateId,
@@ -128,12 +126,13 @@ export function buildPracticeTreatmentResponseSample({ episode, outcome, localDa
     targetStatId: episode.treatment?.targetStatId ?? null,
     measurementGrade: outcome.measurementGrade ?? "independent",
     primaryEligible: outcome.primaryEligible === true,
-    aggregateEligible: outcome.primaryEligible === true || nonConfoundedHybrid,
+    aggregateEligible: outcome.aggregateEligible === true,
     contaminated: outcome.status === "contaminated" || outcome.evidenceGrade === "recorded-confounded",
     evidenceGrade: outcome.evidenceGrade ?? "insufficient",
     responseValue: response.responseValue,
     responseUnit: response.responseUnit,
     tradeoff: response.tradeoff === true,
+    classification: response.classification ?? null,
   });
 }
 
