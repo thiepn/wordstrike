@@ -23,6 +23,7 @@
     "test:pl32-treatment-response": "node --test tests/practice-treatment-response*-pl32.test.js",
     "test:pl33-coach-personalization": "node --test tests/practice-coach-personalization-*.test.js",
     "test:pl34-read-ahead": "node --test tests/practice-read-ahead*-pl34.test.js",
-    "test:pl35-metronome": "node --test tests/practice-metronome*-pl35.test.js"
+    "test:pl35-metronome": "node --test tests/practice-metronome*-pl35.test.js",
+    "test:pl36-physical-telemetry": "node --test tests/practice-physical-telemetry*-pl36.test.js"
   }
 }
