@@ -1,8 +1,10 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
-const [index, css, presentation, audio, storage, designSystem, modes, workflow] = await Promise.all([
+const [index, appCss, presentationBootstrap, css, presentation, audio, storage, designSystem, modes, workflow] = await Promise.all([
   readFile(new URL("../index.html", import.meta.url), "utf8"),
+  readFile(new URL("../styles/app.css", import.meta.url), "utf8"),
+  readFile(new URL("../js/presentationBootstrap.js", import.meta.url), "utf8"),
   readFile(new URL("../styles/screens/ui12-global-polish.css", import.meta.url), "utf8"),
   readFile(new URL("../js/ui12GlobalPresentation.js", import.meta.url), "utf8"),
   readFile(new URL("../js/uiAudio.js", import.meta.url), "utf8"),
@@ -12,10 +14,12 @@ const [index, css, presentation, audio, storage, designSystem, modes, workflow] 
   readFile(new URL("../.github/workflows/non-practice-browser.yml", import.meta.url), "utf8"),
 ]);
 
-assert.equal((index.match(/styles\/screens\/ui12-global-polish\.css/g) || []).length, 1);
-assert.equal((index.match(/js\/ui12GlobalPresentation\.js/g) || []).length, 1);
-assert.match(index, /profile-leaderboards-settings-ui11-contract\.css[\s\S]*ui12-global-polish\.css[\s\S]*practiceLabV20\.css/);
-assert.match(index, /profileLeaderboardsSettingsPresentation\.js[\s\S]*ui12GlobalPresentation\.js/);
+assert.match(index, /styles\/app\.css\?v=20260911v8/);
+assert.doesNotMatch(index, /styles\/screens\/ui12-global-polish\.css|js\/ui12GlobalPresentation\.js/);
+assert.equal((appCss.match(/\.\/screens\/ui12-global-polish\.css/g) || []).length, 1);
+assert.match(appCss, /profile-leaderboards-settings-ui11-contract\.css[\s\S]*ui12-global-polish\.css[\s\S]*customization\.css[\s\S]*practice-lab\.css/);
+assert.equal((presentationBootstrap.match(/ui12GlobalPresentation\.js/g) || []).length, 1);
+assert.match(presentationBootstrap, /profileLeaderboardsSettingsPresentation\.js[\s\S]*ui12GlobalPresentation\.js/);
 
 assert.match(storage, /soundEffects:\s*false/);
 assert.match(storage, /soundEffects:\s*value\.settings\?\.soundEffects === true/);
@@ -66,4 +70,4 @@ assert.match(workflow, /Certify UI12 final motion, audio, and consistency/);
 assert.match(workflow, /tests\/browser\/ui12_final_polish\.py/);
 assert.match(workflow, /browser-artifacts\/ui12-final-polish\//);
 
-console.log("UI12 source contracts passed: opt-in lazy audio, global interaction/reduced-motion polish, authoritative save integration, and Practice isolation.");
+console.log("UI12 source contracts passed: semantic V8 resource ownership, opt-in lazy audio, global interaction/reduced-motion polish, authoritative save integration, and Practice isolation.");
