@@ -91,9 +91,9 @@ test("Treatment Response renderer keeps the non-causal doctrine visible", () => 
   };
   assert.equal(renderPracticeTreatmentResponseProgress(root, view), true);
   assert.match(root.innerHTML, /Treatment Response/);
-  assert.match(root.innerHTML, /does not prove/i);
+  assert.match(root.innerHTML, /does not prove that a treatment caused/i);
   assert.match(root.innerHTML, /Positive observed signal/);
-  assert.doesNotMatch(root.innerHTML, /proven effective|treatment caused|non-responder|responder classification/i);
+  assert.doesNotMatch(root.innerHTML, /proven effective|non-responder|responder classification/i);
 });
 
 test("V32 controller route-lazy-loads Treatment Response persistence", async () => {
