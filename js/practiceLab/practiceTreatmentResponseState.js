@@ -33,47 +33,55 @@ function mad(values, center = median(values)) {
   return center == null ? null : median(values.filter(finite).map((value) => Math.abs(value - center)));
 }
 
-function thresholdFor(state) {
-  if (state.responseUnit === "quality-points") return PRACTICE_TREATMENT_THRESHOLDS.targetQualityPoints;
-  if (state.outcomeKey === "control-frontier") return PRACTICE_TREATMENT_THRESHOLDS.frontierPercent;
-  if (state.outcomeKey === "consistency") return PRACTICE_TREATMENT_THRESHOLDS.consistencyVariationPp;
-  if (state.responseUnit === "percent") return PRACTICE_TREATMENT_THRESHOLDS.abilityPercent;
+export function getPracticeTreatmentResponseThreshold({ responseUnit, outcomeKey } = {}) {
+  if (responseUnit === "quality-points") return PRACTICE_TREATMENT_THRESHOLDS.targetQualityPoints;
+  if (outcomeKey === "control-frontier") return PRACTICE_TREATMENT_THRESHOLDS.frontierPercent;
+  if (outcomeKey === "consistency") return PRACTICE_TREATMENT_THRESHOLDS.consistencyVariationPp;
+  if (responseUnit === "percent") return PRACTICE_TREATMENT_THRESHOLDS.abilityPercent;
   return null;
 }
 
-function evidenceDepth(samples, targeted, hybridOnly) {
+export function calculatePracticeTreatmentEvidenceDepth(samples = [], { targeted = false, hybridOnly = null } = {}) {
   const days = new Set(samples.map((sample) => sample.localDayKey ?? String(sample.observedAt ?? "").slice(0, 10)).filter(Boolean));
   const targets = new Set(samples.map((sample) => sample.targetStatId).filter(Boolean));
   let depth = "insufficient";
   if (samples.length >= 3 && days.size >= 2) depth = "low";
   if (samples.length >= 5 && days.size >= 3 && (!targeted || targets.size >= 2)) depth = "medium";
   if (samples.length >= 10 && days.size >= 5 && (!targeted || targets.size >= 3)) depth = "high";
-  if (hybridOnly && depth === "high") depth = "medium";
-  return { depth, distinctDays: days.size, distinctTargets: targets.size };
+  const resolvedHybridOnly = hybridOnly == null
+    ? samples.length > 0 && samples.every((sample) => sample.measurementGrade === "hybrid")
+    : hybridOnly === true;
+  if (resolvedHybridOnly && depth === "high") depth = "medium";
+  return freezeDeep({ depth, distinctDays: days.size, distinctTargets: targets.size });
 }
 
-function summarize(state) {
-  const eligible = state.samples.filter((sample) => sample.aggregateEligible === true && finite(sample.responseValue));
+export function classifyPracticeTreatmentResponsePattern({ values = [], threshold, medianResponse = median(values) } = {}) {
+  if (!Array.isArray(values) || values.length < 3 || !finite(threshold) || !finite(medianResponse)) return "insufficient";
+  let positiveCount = 0; let negativeCount = 0; let deadbandCount = 0;
+  for (const value of values) {
+    if (value >= threshold) positiveCount += 1;
+    else if (value <= -threshold) negativeCount += 1;
+    else deadbandCount += 1;
+  }
+  if (medianResponse >= threshold && positiveCount / values.length >= 0.60) return "positive-signal";
+  if (medianResponse <= -threshold && negativeCount / values.length >= 0.60) return "negative-signal";
+  if (Math.abs(medianResponse) < threshold && deadbandCount / values.length >= 0.50) return "little-signal";
+  return "mixed";
+}
+
+export function summarizePracticeTreatmentResponses({ samples = [], responseUnit, outcomeKey, targeted = false } = {}) {
+  const eligible = (Array.isArray(samples) ? samples : []).filter((sample) => sample?.aggregateEligible === true && finite(sample?.responseValue));
   const values = eligible.map((sample) => sample.responseValue);
   const center = median(values);
   const spread = mad(values, center);
-  const threshold = thresholdFor(state);
+  const threshold = getPracticeTreatmentResponseThreshold({ responseUnit, outcomeKey });
   let positiveCount = 0; let negativeCount = 0; let deadbandCount = 0;
   if (finite(threshold)) for (const value of values) {
     if (value >= threshold) positiveCount += 1;
     else if (value <= -threshold) negativeCount += 1;
     else deadbandCount += 1;
   }
-  let responsePattern = "insufficient";
-  if (eligible.length >= 3 && finite(threshold) && finite(center)) {
-    if (center >= threshold && positiveCount / eligible.length >= 0.60) responsePattern = "positive-signal";
-    else if (center <= -threshold && negativeCount / eligible.length >= 0.60) responsePattern = "negative-signal";
-    else if (Math.abs(center) < threshold && deadbandCount / eligible.length >= 0.50) responsePattern = "little-signal";
-    else responsePattern = "mixed";
-  }
-  const targeted = Boolean(state.targetEntityType);
-  const hybridOnly = eligible.length > 0 && eligible.every((sample) => sample.measurementGrade === "hybrid");
-  const depth = evidenceDepth(eligible, targeted, hybridOnly);
+  const depth = calculatePracticeTreatmentEvidenceDepth(eligible, { targeted });
   return freezeDeep({
     count: eligible.length,
     median: center,
@@ -85,11 +93,25 @@ function summarize(state) {
     distinctTargets: depth.distinctTargets,
     manualCount: eligible.filter((sample) => sample.assignmentKind === "manual").length,
     coachCount: eligible.filter((sample) => sample.assignmentKind === "coach").length,
-    contaminatedEpisodeCount: state.samples.filter((sample) => sample.contaminated === true).length,
-    responsePattern,
+    responsePattern: classifyPracticeTreatmentResponsePattern({ values, threshold, medianResponse: center }),
     evidenceDepth: depth.depth,
     practicalThreshold: threshold,
-    hybridOnly,
+    hybridOnly: eligible.length > 0 && eligible.every((sample) => sample.measurementGrade === "hybrid"),
+  });
+}
+
+function summarize(state) {
+  const eligible = state.samples.filter((sample) => sample.aggregateEligible === true && finite(sample.responseValue));
+  const summary = summarizePracticeTreatmentResponses({
+    samples: state.samples,
+    responseUnit: state.responseUnit,
+    outcomeKey: state.outcomeKey,
+    targeted: Boolean(state.targetEntityType),
+  });
+  return freezeDeep({
+    ...summary,
+    contaminatedEpisodeCount: state.samples.filter((sample) => sample.contaminated === true).length,
+    hybridOnly: eligible.length > 0 && eligible.every((sample) => sample.measurementGrade === "hybrid"),
   });
 }
 

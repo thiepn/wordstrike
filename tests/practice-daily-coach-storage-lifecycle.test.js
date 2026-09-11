@@ -54,10 +54,10 @@ function activateFirst(plan) {
   return value;
 }
 
-test("PL25 storage envelope is DB8 with coachPlans and sessionSummary v13 coach lookup", () => {
+test("PL25 storage behavior remains intact inside the current DB10 Coach v2 envelope", () => {
   assert.equal(PRACTICE_DATABASE_VERSION, 10);
   assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 13);
-  assert.equal(PRACTICE_RECORD_VERSIONS.coachPlan, 1);
+  assert.equal(PRACTICE_RECORD_VERSIONS.coachPlan, 2);
   assert.equal(PRACTICE_STORE_DEFINITIONS.coachPlans.keyPath, "coachPlanId");
   const unique = PRACTICE_STORE_DEFINITIONS.coachPlans.indexes.find((index) => index.name === "profileContextDay");
   assert.deepEqual(unique.keyPath, ["profileId", "contextId", "localDayKey"]);

@@ -55,12 +55,12 @@ function legacyReviewV2() {
   };
 }
 
-test("PL17 review contracts remain intact inside the PL25 DB8/session13/foundation10 envelope", () => {
+test("PL17 review contracts remain intact inside the PL33 DB10/session13/foundation10 envelope", () => {
   assert.equal(PRACTICE_DATABASE_VERSION, 10);
   assert.equal(PRACTICE_RECORD_VERSIONS.reviewItem, 3);
   assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 13);
   assert.equal(PRACTICE_RECORD_VERSIONS.evaluationState, 1);
-  assert.equal(PRACTICE_RECORD_VERSIONS.coachPlan, 1);
+  assert.equal(PRACTICE_RECORD_VERSIONS.coachPlan, 2);
   assert.equal(PRACTICE_FOUNDATION_ANALYSIS_VERSION, 10);
   assert.equal(PRACTICE_LIMITS.reviewItemBytes, 32 * 1024);
   assert.equal(PRACTICE_REVIEW_MODEL_VERSION, 1);

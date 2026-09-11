@@ -12,6 +12,7 @@ export const PRACTICE_DATABASE_VERSION = 10;
 
 export const PRACTICE_RECORD_VERSIONS = Object.freeze({
   ...PRACTICE_RECORD_VERSIONS_V31,
+  coachPlan: 2,
   treatmentEpisode: 1,
   treatmentResponseState: 1,
 });

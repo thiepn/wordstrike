@@ -80,7 +80,7 @@ function validObservation(index = 1) {
   };
 }
 
-test("PL13 ability contracts remain intact inside the PL32 storage/session/foundation envelope", () => {
+test("PL13 ability contracts remain intact inside the current PL33 storage/session/foundation envelope", () => {
   assert.equal(PRACTICE_DATABASE_VERSION, 10);
   assert.equal(PRACTICE_RECORD_VERSIONS.abilityState, 1);
   assert.equal(PRACTICE_RECORD_VERSIONS.skillStat, 3);
@@ -88,7 +88,7 @@ test("PL13 ability contracts remain intact inside the PL32 storage/session/found
   assert.equal(PRACTICE_RECORD_VERSIONS.checkpoint, 3);
   assert.equal(PRACTICE_RECORD_VERSIONS.evaluationState, 1);
   assert.equal(PRACTICE_RECORD_VERSIONS.assessmentRun, 1);
-  assert.equal(PRACTICE_RECORD_VERSIONS.coachPlan, 1);
+  assert.equal(PRACTICE_RECORD_VERSIONS.coachPlan, 2);
   assert.equal(PRACTICE_FOUNDATION_ANALYSIS_VERSION, 10);
   assert.equal(PRACTICE_ABILITY_ESTIMATOR_VERSION, 1);
   assert.equal(PRACTICE_ABILITY_POLICY_VERSION, 1);
@@ -165,15 +165,7 @@ test("PL13 ability state accepts fractional accumulated active time, remains bou
 
 test("PL13 ability modules import with zero storage/network/listener/timer side effects", async () => {
   const calls = { storage: 0, indexedDb: 0, fetch: 0, listeners: 0, timers: 0 };
-  const original = {
-    localStorage: globalThis.localStorage,
-    indexedDB: globalThis.indexedDB,
-    fetch: globalThis.fetch,
-    document: globalThis.document,
-    window: globalThis.window,
-    setTimeout: globalThis.setTimeout,
-    setInterval: globalThis.setInterval,
-  };
+  const original = { localStorage: globalThis.localStorage, indexedDB: globalThis.indexedDB, fetch: globalThis.fetch, document: globalThis.document, window: globalThis.window, setTimeout: globalThis.setTimeout, setInterval: globalThis.setInterval };
   Object.defineProperties(globalThis, {
     localStorage: { configurable: true, value: { getItem() { calls.storage += 1; }, setItem() { calls.storage += 1; }, removeItem() { calls.storage += 1; } } },
     indexedDB: { configurable: true, value: { open() { calls.indexedDb += 1; throw new Error("unexpected IndexedDB open"); } } },
@@ -184,9 +176,7 @@ test("PL13 ability modules import with zero storage/network/listener/timer side 
     setInterval: { configurable: true, value: (...args) => { calls.timers += 1; return original.setInterval(...args); } },
   });
   try {
-    for (const module of ["practiceAbilityConstants.js", "practiceAbilityPolicy.js", "practiceAbilityObservation.js", "practiceAbilityEstimator.js", "practiceAbilityComparison.js", "practiceAbilityValidation.js"]) {
-      await import(new URL(`../js/practiceLab/${module}?pl13=${encodeURIComponent(module)}`, import.meta.url));
-    }
+    for (const module of ["practiceAbilityConstants.js", "practiceAbilityPolicy.js", "practiceAbilityObservation.js", "practiceAbilityEstimator.js", "practiceAbilityComparison.js", "practiceAbilityValidation.js"]) await import(new URL(`../js/practiceLab/${module}?pl13=${encodeURIComponent(module)}`, import.meta.url));
     assert.deepEqual(calls, { storage: 0, indexedDb: 0, fetch: 0, listeners: 0, timers: 0 });
   } finally {
     for (const [key, value] of Object.entries(original)) Object.defineProperty(globalThis, key, { configurable: true, writable: true, value });

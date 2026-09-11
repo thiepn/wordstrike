@@ -1,7 +1,7 @@
-export const PRACTICE_COACH_PLANNER_VERSION = 1;
-export const PRACTICE_COACH_POLICY_VERSION = 1;
-export const PRACTICE_COACH_PLAN_VERSION = 1;
-export const PRACTICE_COACH_BLOCK_VERSION = 1;
+export const PRACTICE_COACH_PLANNER_VERSION = 2;
+export const PRACTICE_COACH_POLICY_VERSION = 2;
+export const PRACTICE_COACH_PLAN_VERSION = 2;
+export const PRACTICE_COACH_BLOCK_VERSION = 2;
 export const PRACTICE_COACH_UTILITY_VERSION = 1;
 export const PRACTICE_COACH_REVIEW_GENERATOR_VERSION = 1;
 
@@ -40,6 +40,7 @@ export const PRACTICE_COACH_REASON_CODES = Object.freeze([
   "readiness-reduced",
   "warmup-observed",
   "invalid-budget-setting",
+  "response-informed-treatment",
 ]);
 
 export const PRACTICE_COACH_ACTIONABLE_UTILITY = 35;
