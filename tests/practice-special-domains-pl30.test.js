@@ -52,7 +52,7 @@ const numCheck=readJson("data/practice/numbers-symbols/en-v1/WS-NUMSYM-CHECK-EN-
 const numPractice=readJson("data/practice/numbers-symbols/en-v1/WS-NUMSYM-PRACTICE-EN-1.forms.json");
 const provenance=readJson("data/practice/provenance/sources.json");
 
-test("PL30 prerequisite channels and record versions remain stable inside the PL32 DB10 envelope",()=>{
+test("PL30 prerequisite channels and record versions remain stable inside the current PL33 DB10 envelope",()=>{
   assert.ok(PRACTICE_ABILITY_CHANNELS.includes("punctuation"));
   assert.ok(PRACTICE_ABILITY_CHANNELS.includes("numbers-symbols"));
   assert.equal(PRACTICE_DATABASE_VERSION,10);
@@ -61,7 +61,7 @@ test("PL30 prerequisite channels and record versions remain stable inside the PL
   assert.equal(PRACTICE_RECORD_VERSIONS.learningState,1);
   assert.equal(PRACTICE_RECORD_VERSIONS.reviewItem,3);
   assert.equal(PRACTICE_RECORD_VERSIONS.performanceState,1);
-  assert.equal(PRACTICE_RECORD_VERSIONS.coachPlan,1);
+  assert.equal(PRACTICE_RECORD_VERSIONS.coachPlan,2);
   assert.equal(PRACTICE_FOUNDATION_ANALYSIS_VERSION,10);
   assert.equal(PRACTICE_LAB_PUBLIC_ENABLED,false);
 });
@@ -226,14 +226,7 @@ test("Practice and Check descriptors preserve role, target, correction, and abil
 });
 
 test("streaming accumulator pools first-pass counts and reuses PL9 content classes without wrong strings",()=>{
-  const annotations={
-    version:1,formHash:"x",annotationHash:"y",
-    primary:[
-      {expectedIndex:0,domain:"punctuation-capitals",category:"capital-letter"},
-      {expectedIndex:1,domain:"punctuation-capitals",category:"comma"},
-    ],
-    derived:{"sentence-capital":[{startIndex:0,endIndex:1,kind:"sentence-capital"}],"post-punctuation-boundary":[]},
-  };
+  const annotations={ version:1,formHash:"x",annotationHash:"y", primary:[ {expectedIndex:0,domain:"punctuation-capitals",category:"capital-letter"}, {expectedIndex:1,domain:"punctuation-capitals",category:"comma"} ], derived:{"sentence-capital":[{startIndex:0,endIndex:1,kind:"sentence-capital"}],"post-punctuation-boundary":[]} };
   const acc=createPracticeSpecialDomainAccumulator({annotations,primaryCategories:["capital-letter","comma"]});
   acc.recordProcessedInput({type:"character",textPosition:0,isFirstAttempt:true,correctness:"correct",latencyFromPriorInsertionMs:null,timingSegmentId:1});
   acc.recordProcessedInput({type:"character",textPosition:1,isFirstAttempt:true,correctness:"incorrect",latencyFromPriorInsertionMs:100,timingSegmentId:1});
@@ -241,63 +234,30 @@ test("streaming accumulator pools first-pass counts and reuses PL9 content class
   acc.recordProcessedInput({type:"character",textPosition:1,isFirstAttempt:false,correctness:"correct",latencyFromPriorInsertionMs:100,timingSegmentId:1});
   acc.recordClosedErrorEpisode({primaryPosition:1,contentClass:"punctuation"});
   const snap=acc.getSnapshot();
-  assert.equal(snap.domainOpportunityCount,2);
-  assert.equal(snap.domainFirstPassCorrectCount,1);
-  assert.equal(snap.domainFirstPassAccuracy,.5);
-  assert.equal(snap.categories.comma.firstPassAccuracy,0);
-  assert.equal(snap.categories.comma.primaryErrorEpisodeCount,1);
-  assert.equal(snap.contentErrorClasses.punctuation,1);
-  assert.equal(JSON.stringify(snap).includes("entered"),false);
-  assert.equal(JSON.stringify(snap).includes("expected"),false);
+  assert.equal(snap.domainOpportunityCount,2); assert.equal(snap.domainFirstPassCorrectCount,1); assert.equal(snap.domainFirstPassAccuracy,.5); assert.equal(snap.categories.comma.firstPassAccuracy,0); assert.equal(snap.categories.comma.primaryErrorEpisodeCount,1); assert.equal(snap.contentErrorClasses.punctuation,1); assert.equal(JSON.stringify(snap).includes("entered"),false); assert.equal(JSON.stringify(snap).includes("expected"),false);
 });
 
 test("PL30 ability admission uses 60% domain + 70% overall floors and exactly protocol-specific channel policy",()=>{
-  const policyP=getPracticeAbilityChannelPolicy("punctuation");
-  const policyN=getPracticeAbilityChannelPolicy("numbers-symbols");
-  assert.equal(policyP.minimumAccuracy,60);
-  assert.equal(policyN.minimumAccuracy,60);
-  assert.equal(policyP.maximumDurationMs,420000);
-  assert.equal(policyN.maximumDurationMs,420000);
-  const foundation={
-    normalization:{sessionSummary:{textDifficulty:{status:"full",difficultyIndex:.5,availableModelWeight:.95}}},
-    latency:{sessionSummary:{fluentMedianMs:100,fluentMadMs:10,interruptionRate:0,coverage:{scope:"complete-session"}}},
-  };
-  const session={status:"completed",completionReason:"content-complete",wpm:72,rawWpm:75,activeDurationMs:180000,typedCharacterCount:1900};
-  const good={domainOpportunityCount:180,domainFirstPassAccuracy:.60,overallFirstPassAccuracy:.70};
+  const policyP=getPracticeAbilityChannelPolicy("punctuation"); const policyN=getPracticeAbilityChannelPolicy("numbers-symbols");
+  assert.equal(policyP.minimumAccuracy,60); assert.equal(policyN.minimumAccuracy,60); assert.equal(policyP.maximumDurationMs,420000); assert.equal(policyN.maximumDurationMs,420000);
+  const foundation={ normalization:{sessionSummary:{textDifficulty:{status:"full",difficultyIndex:.5,availableModelWeight:.95}}}, latency:{sessionSummary:{fluentMedianMs:100,fluentMadMs:10,interruptionRate:0,coverage:{scope:"complete-session"}}} };
+  const session={status:"completed",completionReason:"content-complete",wpm:72,rawWpm:75,activeDurationMs:180000,typedCharacterCount:1900}; const good={domainOpportunityCount:180,domainFirstPassAccuracy:.60,overallFirstPassAccuracy:.70};
   const result=buildPracticeSpecialDomainAbilityMeasurement({accumulatorSnapshot:good,session,foundationAnalysis:foundation,channel:"punctuation",protocol:"punctuation-capitals-check"});
-  assert.ok(result);
-  assert.equal(result.accuracy,60);
-  assert.equal(result.difficultyModelStatus,"full");
-  assert.equal(result.difficultyAdjustmentLog,.03*.5*.95);
+  assert.ok(result); assert.equal(result.accuracy,60); assert.equal(result.difficultyModelStatus,"full"); assert.equal(result.difficultyAdjustmentLog,.03*.5*.95);
   assert.equal(buildPracticeSpecialDomainAbilityMeasurement({accumulatorSnapshot:{...good,domainFirstPassAccuracy:.599},session,foundationAnalysis:foundation,channel:"punctuation",protocol:"punctuation-capitals-check"}),null);
   assert.equal(buildPracticeSpecialDomainAbilityMeasurement({accumulatorSnapshot:{...good,overallFirstPassAccuracy:.699},session,foundationAnalysis:foundation,channel:"punctuation",protocol:"punctuation-capitals-check"}),null);
 });
 
 test("PL10 out-of-domain ability path sets A_d=0 and adds the 0.04 protocol uncertainty term",()=>{
-  const foundation={
-    normalization:{sessionSummary:{textDifficulty:{status:"insufficient",difficultyIndex:null,availableModelWeight:0}}},
-    latency:{sessionSummary:{fluentMedianMs:100,fluentMadMs:10,interruptionRate:0,coverage:{scope:"complete-session"}}},
-  };
-  const session={status:"completed",completionReason:"content-complete",wpm:60,rawWpm:63,activeDurationMs:200000,typedCharacterCount:1900};
-  const snap={domainOpportunityCount:180,domainFirstPassAccuracy:.9,overallFirstPassAccuracy:.95};
+  const foundation={ normalization:{sessionSummary:{textDifficulty:{status:"insufficient",difficultyIndex:null,availableModelWeight:0}}}, latency:{sessionSummary:{fluentMedianMs:100,fluentMadMs:10,interruptionRate:0,coverage:{scope:"complete-session"}}} };
+  const session={status:"completed",completionReason:"content-complete",wpm:60,rawWpm:63,activeDurationMs:200000,typedCharacterCount:1900}; const snap={domainOpportunityCount:180,domainFirstPassAccuracy:.9,overallFirstPassAccuracy:.95};
   const result=buildPracticeSpecialDomainAbilityMeasurement({accumulatorSnapshot:snap,session,foundationAnalysis:foundation,channel:"numbers-symbols",protocol:"numbers-symbols-check"});
-  assert.ok(result);
-  assert.equal(result.difficultyAdjustmentLog,0);
-  assert.equal(result.adjustedWpm,60);
-  assert.equal(result.difficultyModelStatus,"protocol-matched-only");
-  assert.ok(result.measurementSigmaLog>=.05&&result.measurementSigmaLog<=.25);
+  assert.ok(result); assert.equal(result.difficultyAdjustmentLog,0); assert.equal(result.adjustedWpm,60); assert.equal(result.difficultyModelStatus,"protocol-matched-only"); assert.ok(result.measurementSigmaLog>=.05&&result.measurementSigmaLog<=.25);
 });
 
 test("PL30 source contains no combined score or physical-technique grading implementation",()=>{
-  const source=[
-    fs.readFileSync("js/practiceLab/practicePunctuationCapitalsExperiment.js","utf8"),
-    fs.readFileSync("js/practiceLab/practiceNumbersSymbolsExperiment.js","utf8"),
-    fs.readFileSync("js/practiceLab/practiceSpecialDomainSessionHost.js","utf8"),
-  ].join("\n");
-  assert.doesNotMatch(source,/special.?character.?score/i);
-  assert.doesNotMatch(source,/correct Shift|wrong Shift|right Shift for left/i);
-  assert.doesNotMatch(source,/numeracy score|math skill/i);
-  assert.doesNotMatch(source,/submit.*leaderboard|leaderboardId|personalBest|updatePersonalBest/i);
+  const source=[ fs.readFileSync("js/practiceLab/practicePunctuationCapitalsExperiment.js","utf8"), fs.readFileSync("js/practiceLab/practiceNumbersSymbolsExperiment.js","utf8"), fs.readFileSync("js/practiceLab/practiceSpecialDomainSessionHost.js","utf8") ].join("\n");
+  assert.doesNotMatch(source,/special.?character.?score/i); assert.doesNotMatch(source,/correct Shift|wrong Shift|right Shift for left/i); assert.doesNotMatch(source,/numeracy score|math skill/i); assert.doesNotMatch(source,/submit.*leaderboard|leaderboardId|personalBest|updatePersonalBest/i);
 });
 
 test("PL30 pure modules have no import-time fetch, storage writes, timers, or listeners",async()=>{
