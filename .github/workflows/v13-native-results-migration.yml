@@ -3,7 +3,7 @@ name: V13 native results migration
 on:
   pull_request:
     types:
-      - opened
+      - reopened
     branches:
       - v12-typing-results-runtime
 
@@ -20,8 +20,19 @@ jobs:
         with:
           ref: v13-native-results-pipeline
           fetch-depth: 0
-      - name: Apply native Typing Results migration
-        run: node scripts/v13MigrateNativeResults.mjs
+      - name: Apply proven source migration
+        shell: bash
+        run: |
+          set +e
+          node scripts/v13MigrateNativeResults.mjs
+          status=$?
+          set -e
+          if [ "$status" -ne 1 ]; then
+            echo "Expected the proven migration to stop at the superseded historical-test matcher; got status $status"
+            exit 1
+          fi
+      - name: Finish deterministic contract migration
+        run: node scripts/v13FinishNativeResultsMigration.mjs
       - name: Commit migration output
         run: |
           git config user.name "github-actions[bot]"
