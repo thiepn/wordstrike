@@ -150,12 +150,12 @@ test("PL16 reset clears learningStates with the rest of Practice data", async ()
   assert.equal((await harness.dataStore.list("learningStates")).length, 0);
 });
 
-test("PL16/PL17 record contracts remain intact inside the current PL25 DB8 / evaluation1 / coach1 / session13 envelope", () => {
+test("PL16/PL17 record contracts remain intact inside the current PL33 DB10 / evaluation1 / coach2 / session13 envelope", () => {
   assert.equal(PRACTICE_DATABASE_VERSION, 10);
   assert.equal(PRACTICE_RECORD_VERSIONS.learningState, 1);
   assert.equal(PRACTICE_RECORD_VERSIONS.reviewItem, 3);
   assert.equal(PRACTICE_RECORD_VERSIONS.evaluationState, 1);
-  assert.equal(PRACTICE_RECORD_VERSIONS.coachPlan, 1);
+  assert.equal(PRACTICE_RECORD_VERSIONS.coachPlan, 2);
   assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 13);
 });
 
