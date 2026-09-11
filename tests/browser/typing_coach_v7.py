@@ -1,4 +1,4 @@
-"""Browser certification for Typing Coach & Results 2.0 V6."""
+"""Browser certification for Typing Coach V7 adaptive training plans."""
 from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -41,6 +41,7 @@ def type_current_words(page, make_first_mistake=False, delay=18):
         page.keyboard.type(' '.join(words), delay=delay)
     expect(page.locator('.speed-results-screen')).to_be_visible(timeout=10000)
     expect(page.locator('[data-speed-results-v6]')).to_be_visible(timeout=10000)
+    expect(page.locator('[data-typing-coach-v7]')).to_be_attached(timeout=10000)
     return words
 
 
@@ -49,6 +50,25 @@ def start_words_10(page, delay=18):
     expect(page.locator('[data-speed-config="words-10"]')).to_be_visible()
     page.locator('[data-speed-config="words-10"]').evaluate("element => element.click()")
     return type_current_words(page, make_first_mistake=True, delay=delay)
+
+
+def complete_current_v7_practice(page):
+    completed = page.evaluate("""async () => {
+      const v6 = await import('./js/speedTestCoachV6.js');
+      const v7 = await import('./js/speedTestCoachV7.js');
+      const cycle = v6.loadActiveTypingCoachCycle();
+      if (!cycle?.drill) return null;
+      const plan = v7.markTypingCoachV7PracticeCompleted({
+        sourceSessionId: cycle.sourceSessionId,
+        drillType: cycle.drill.type,
+        target: cycle.drill.target,
+      });
+      document.querySelector('[data-coach-close-practice]')?.click();
+      return { drillType: cycle.drill.type, target: cycle.drill.target, plan };
+    }""")
+    assert completed and completed['plan'], completed
+    expect(page.locator('[data-typing-coach-practice-overlay]')).to_have_count(0, timeout=5000)
+    return completed
 
 
 def main():
@@ -71,70 +91,78 @@ def main():
                 page = context.new_page()
                 errors = []
                 page.on('pageerror', lambda error: errors.append(str(error)))
-                page.goto(base + '?dev=1&mode=speed-test&seed=619')
+                page.goto(base + '?dev=1&mode=speed-test&seed=731')
                 expect(page.locator('#speed-test-word-viewport')).to_be_visible()
                 first_words = start_words_10(page, delay=14 if touch else 18)
 
                 shell = page.locator('[data-speed-results-v6]')
-                expect(shell).to_have_attribute('data-performance-version', '6')
-                expect(page.locator('link[data-typing-coach-v6-style]')).to_have_count(1)
-                assert shell.locator('[role="tab"]').count() == 5
-                expect(shell.locator('[data-v6-panel="overview"]')).to_be_visible()
-                expect(shell).to_contain_text('Recommended next step')
-
-                timeline_tab = shell.locator('[data-v6-tab="timeline"]')
-                timeline_tab.click()
-                expect(shell.locator('[data-v6-panel="timeline"]')).to_be_visible()
-                expect(shell.locator('[data-speed-performance]')).to_be_visible()
-
-                words_tab = shell.locator('[data-v6-tab="words"]')
-                words_tab.focus()
-                page.keyboard.press('ArrowRight')
-                expect(shell.locator('[data-v6-tab="progress"]')).to_have_attribute('aria-selected', 'true')
-                page.keyboard.press('End')
+                expect(page.locator('link[data-typing-coach-v7-style]')).to_have_count(1)
+                overview_action = shell.locator('[data-v7-open-plan]')
+                expect(overview_action).to_be_visible()
+                expect(overview_action).to_have_text('OPEN TRAINING PLAN')
+                overview_action.click()
                 expect(shell.locator('[data-v6-tab="practice"]')).to_have_attribute('aria-selected', 'true')
-                practice_panel = shell.locator('[data-v6-panel="practice"]')
-                expect(practice_panel).to_be_visible()
-                assert practice_panel.locator('[data-coach-practice-type]').count() >= 2
-                expect(practice_panel).to_contain_text('Personalized training')
 
-                primary = practice_panel.locator('.typing-coach-drill-card.is-primary [data-coach-practice-type]')
-                expect(primary).to_have_count(1)
-                primary.evaluate('element => element.click()')
+                panel = shell.locator('[data-v6-panel="practice"]')
+                coach = panel.locator('[data-typing-coach-v7]')
+                expect(coach).to_be_visible()
+                expect(coach).to_contain_text('Adaptive Training Plan')
+                expect(coach).to_contain_text("Today's plan")
+                expect(coach.locator('[data-v7-step]')).to_have_count(3)
+                expect(coach.locator('[data-v7-step="focus"] [data-v7-start-step]')).to_be_enabled()
+                expect(coach.locator('[data-v7-step="reinforce"] [data-v7-start-step]')).to_be_disabled()
+                expect(coach.locator('[data-v7-retest]')).to_be_disabled()
+
+                coach.locator('[data-v7-step="focus"] [data-v7-start-step]').click()
                 overlay = page.locator('[data-typing-coach-practice-overlay]')
                 expect(overlay).to_be_visible(timeout=5000)
                 expect(overlay.locator('[data-coach-practice-root] .practice-lab-shell')).to_be_visible(timeout=10000)
-                active_cycle = page.evaluate("""async () => {
-                  const { loadActiveTypingCoachCycle } = await import('./js/speedTestCoachV6.js');
-                  return loadActiveTypingCoachCycle();
-                }""")
-                assert active_cycle and active_cycle['drill']['target'], active_cycle
+                first_drill = complete_current_v7_practice(page)
+                expect(coach.locator('[data-v7-step="focus"]')).to_contain_text('Complete')
+                expect(coach.locator('[data-v7-step="reinforce"] [data-v7-start-step]')).to_be_enabled()
 
-                overlay.locator('.typing-coach-practice-chrome [data-coach-retest-original]').click()
+                coach.locator('[data-v7-step="reinforce"] [data-v7-start-step]').click()
+                expect(overlay).to_be_visible(timeout=5000)
+                expect(overlay.locator('[data-coach-practice-root] .practice-lab-shell')).to_be_visible(timeout=10000)
+                second_drill = complete_current_v7_practice(page)
+                expect(coach.locator('[data-v7-step="reinforce"]')).to_contain_text('Complete')
+                expect(coach.locator('[data-v7-retest]')).to_be_enabled()
+
+                coach.locator('[data-v7-retest]').click()
                 expect(page.locator('#speed-test-word-viewport')).to_be_visible(timeout=5000)
                 config_id = page.evaluate("""async () => {
                   const { getCurrentSpeedTest } = await import('./js/speedTest.js');
                   return getCurrentSpeedTest().config.configId;
                 }""")
                 assert config_id == 'words-10', config_id
-                retest_words = type_current_words(page, make_first_mistake=False, delay=10 if touch else 14)
-                assert len(retest_words) == 10
-                expect(page.locator('[data-typing-coach-comparison]').first).to_be_visible(timeout=10000)
-                expect(page.locator('[data-typing-coach-comparison]').first).to_contain_text('Before → retest')
+                type_current_words(page, make_first_mistake=False, delay=10 if touch else 14)
+                results = page.locator('[data-speed-results-v6]')
+                results.locator('[data-v6-tab="practice"]').click()
+                expect(results.locator('[data-v6-tab="practice"]')).to_have_attribute('aria-selected', 'true')
+                expect(page.locator('[data-typing-coach-v7-complete]')).to_be_visible(timeout=10000)
+                expect(page.locator('[data-typing-coach-v7-complete]')).to_contain_text('Baseline → retest')
+
+                stored = page.evaluate("""async () => {
+                  const v7 = await import('./js/speedTestCoachV7.js');
+                  return { plan: v7.loadTypingCoachV7Plan(), history: v7.getTypingCoachV7History() };
+                }""")
+                assert stored['plan']['status'] == 'completed', stored
+                assert stored['plan']['retestSessionId'], stored
+                assert len(stored['history']) >= 1, stored
 
                 overflow = page.evaluate("""() => ({
                   page: document.documentElement.scrollWidth - document.documentElement.clientWidth,
                   panel: document.querySelector('.speed-results-panel').scrollWidth
                     - document.querySelector('.speed-results-panel').clientWidth,
-                  v6: document.querySelector('[data-speed-results-v6]').scrollWidth
-                    - document.querySelector('[data-speed-results-v6]').clientWidth,
+                  v7: document.querySelector('[data-typing-coach-v7]').scrollWidth
+                    - document.querySelector('[data-typing-coach-v7]').clientWidth,
                 })""")
                 assert overflow['page'] <= 1, overflow
                 assert overflow['panel'] <= 1, overflow
-                assert overflow['v6'] <= 1, overflow
+                assert overflow['v7'] <= 1, overflow
 
                 page.screenshot(
-                    path=str(ARTIFACTS / f'typing-coach-v6-{width}x{height}.png'),
+                    path=str(ARTIFACTS / f'typing-coach-v7-{width}x{height}.png'),
                     full_page=True,
                 )
                 assert not errors, errors
@@ -142,19 +170,20 @@ def main():
                     'viewport': f'{width}x{height}',
                     'touch': touch,
                     'first_word': first_words[0],
-                    'practice_target': active_cycle['drill']['target'],
+                    'first_drill': first_drill['drillType'],
+                    'second_drill': second_drill['drillType'],
                     'overflow': overflow,
                 })
                 context.close()
             browser.close()
         report['success'] = True
-        print('PASS: Typing Coach & Results 2.0 V6 certified on desktop and mobile.', flush=True)
+        print('PASS: Typing Coach V7 adaptive training plan certified on desktop and mobile.', flush=True)
     except Exception:
         report['error'] = traceback.format_exc()
         print(report['error'], flush=True)
         raise
     finally:
-        (ARTIFACTS / 'typing-coach-v6.json').write_text(json.dumps(report, indent=2))
+        (ARTIFACTS / 'typing-coach-v7.json').write_text(json.dumps(report, indent=2))
         server.shutdown()
         server.server_close()
 
