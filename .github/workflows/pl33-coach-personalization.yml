@@ -20,9 +20,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Audit Coach record-version assertions
-        shell: bash
-        run: grep -RIn "PRACTICE_RECORD_VERSIONS.coachPlan" tests || true
       - name: Run PL33 Coach Personalization certification
         run: node --test tests/practice-coach-personalization-*.test.js
       - name: Run full WordStrike regression suite
