@@ -8,13 +8,15 @@ import {
 
 export * from "./practiceConstantsV31.js";
 
-export const PRACTICE_DATABASE_VERSION = 10;
+export const PRACTICE_DATABASE_VERSION = 11;
 
 export const PRACTICE_RECORD_VERSIONS = Object.freeze({
   ...PRACTICE_RECORD_VERSIONS_V31,
   coachPlan: 2,
   treatmentEpisode: 1,
   treatmentResponseState: 1,
+  physicalTelemetryStat: 1,
+  physicalTelemetrySession: 1,
 });
 
 export const PRACTICE_LIMITS = Object.freeze({
@@ -27,6 +29,14 @@ export const PRACTICE_LIMITS = Object.freeze({
   treatmentClosedDays: 365,
   treatmentInvalidDays: 30,
   treatmentPreparedTtlMs: 24 * 60 * 60 * 1000,
+  physicalTelemetryStatsPerContext: 2304,
+  physicalTelemetryKeyStatsPerContext: 128,
+  physicalTelemetryTransitionStatsPerContext: 2048,
+  physicalTelemetryModifierStatsPerContext: 128,
+  physicalTelemetrySessionMarkersPerProfile: 500,
+  physicalTelemetrySessionMarkerDays: 180,
+  physicalTelemetryRecentSamples: 32,
+  physicalTelemetryStatBytes: 8 * 1024,
 });
 
 const existingSessionIndexes = PRACTICE_STORE_DEFINITIONS_V31.sessionSummaries.indexes;
@@ -64,6 +74,27 @@ export const PRACTICE_STORE_DEFINITIONS = Object.freeze({
       Object.freeze({ name: "outcomeKey", keyPath: "outcomeKey" }),
       Object.freeze({ name: "delayBucket", keyPath: "delayBucket" }),
       Object.freeze({ name: "updatedAt", keyPath: "updatedAt" }),
+    ]),
+  }),
+  physicalTelemetryStats: Object.freeze({
+    keyPath: "physicalTelemetryStatId",
+    indexes: Object.freeze([
+      Object.freeze({ name: "profileId", keyPath: "profileId" }),
+      Object.freeze({ name: "contextId", keyPath: "contextId" }),
+      Object.freeze({ name: "entityType", keyPath: "entityType" }),
+      Object.freeze({ name: "updatedAt", keyPath: "updatedAt" }),
+      Object.freeze({ name: "profileContextEntityType", keyPath: ["profileId", "contextId", "entityType"] }),
+    ]),
+  }),
+  physicalTelemetrySessions: Object.freeze({
+    keyPath: "sessionId",
+    indexes: Object.freeze([
+      Object.freeze({ name: "profileId", keyPath: "profileId" }),
+      Object.freeze({ name: "contextId", keyPath: "contextId" }),
+      Object.freeze({ name: "status", keyPath: "status" }),
+      Object.freeze({ name: "completedAt", keyPath: "completedAt" }),
+      Object.freeze({ name: "appliedAt", keyPath: "appliedAt" }),
+      Object.freeze({ name: "profileCompletedAt", keyPath: ["profileId", "completedAt"] }),
     ]),
   }),
 });
