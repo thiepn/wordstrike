@@ -28,8 +28,19 @@ export function createPracticeSessionEngine(options = {}) {
   const logger = trackingLogger(options);
   const treatment = createPracticeTreatmentService({ repository, profileId, contextId, sessionId, wallClock, logger });
   let core = null;
+  let postCanonicalCommit = async () => {};
 
-  const afterCanonicalCommit = async (payload) => {
+  core = createPracticeSessionEngineV31({
+    ...options,
+    repository: sidecarRepository(repository, async (payload, result) => postCanonicalCommit(payload, result)),
+  });
+
+  const complete = async (reason) => {
+    const result = await core.complete(reason);
+    return result;
+  };
+
+  postCanonicalCommit = async (payload) => {
     try {
       await treatment.flush();
       await treatment.afterCanonicalCommit({
@@ -40,11 +51,6 @@ export function createPracticeSessionEngine(options = {}) {
       logger?.warn?.("Treatment tracking failed after canonical Practice commit", { cause });
     }
   };
-
-  core = createPracticeSessionEngineV31({
-    ...options,
-    repository: sidecarRepository(repository, afterCanonicalCommit),
-  });
 
   const unsubscribeTracking = core.subscribe((snapshot, event) => {
     try { treatment.observeProgress(snapshot, event); }
@@ -66,8 +72,6 @@ export function createPracticeSessionEngine(options = {}) {
     }
     return prepared;
   };
-
-  const complete = async (reason) => core.complete(reason);
 
   const abandon = async (reason = "manual-stop") => {
     const result = await core.abandon(reason);
