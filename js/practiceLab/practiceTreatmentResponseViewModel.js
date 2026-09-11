@@ -62,6 +62,7 @@ function cardFromState(state, episode) {
     treatmentFamilyKey: state.treatmentFamilyKey,
     treatmentTitle: titleFor(episode),
     protocolVariant: episode?.treatment?.protocolVariant ?? null,
+    targetEntityType: episode?.treatment?.targetEntityType ?? state.targetEntityType ?? null,
     targetLabel: formatTarget(episode, state),
     outcomeKey: state.outcomeKey,
     outcomeLabel: OUTCOME_LABELS[state.outcomeKey] ?? state.outcomeKey,
