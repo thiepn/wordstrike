@@ -22,3 +22,5 @@ jobs:
           node-version: 22
       - name: Run PL33 Coach Personalization certification
         run: node --test tests/practice-coach-personalization-*.test.js
+      - name: Run full WordStrike regression suite
+        run: npm test
