@@ -23,9 +23,12 @@ assert.equal(auth.experimental, undefined,
   "Browser-only Google OAuth must not depend on PKCE verifier state");
 
 const index = readFileSync(new URL("../index.html", import.meta.url), "utf8");
+const appBootstrap = readFileSync(new URL("../js/appBootstrap.js", import.meta.url), "utf8");
 assert.match(index, /@supabase\/supabase-js@2\.116\.0/,
   "Production must load the certified Supabase browser SDK");
-assert.match(index, /js\/main\.js\?v=20260910f/,
+assert.match(index, /js\/appBootstrap\.js\?v=20260911v8/,
   "Auth-facing application entry point should stay cache-busted after later releases");
+assert.match(appBootstrap, /import "\.\/main\.js";/,
+  "The semantic application bootstrap must continue loading the auth-owning main module");
 
 console.log("Google OAuth client uses current Supabase JS with the client-native implicit flow.");
