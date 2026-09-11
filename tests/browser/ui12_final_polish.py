@@ -176,7 +176,23 @@ def certify_selection_isolation(browser, browser_name, base, evidence):
     open_title(page, base)
 
     scope = page.evaluate("""() => {
-      const sheet = [...document.styleSheets].find((candidate) => candidate.href?.endsWith('/styles/screens/ui12-global-polish.css'));
+      const target = '/styles/screens/ui12-global-polish.css';
+      const findSheet = (sheet, seen = new Set()) => {
+        if (!sheet || seen.has(sheet)) return null;
+        seen.add(sheet);
+        if (sheet.href?.endsWith(target)) return sheet;
+        let rules = [];
+        try { rules = [...(sheet.cssRules || [])]; } catch { return null; }
+        for (const rule of rules) {
+          if (!rule.styleSheet) continue;
+          const found = findSheet(rule.styleSheet, seen);
+          if (found) return found;
+        }
+        return null;
+      };
+      const sheet = [...document.styleSheets]
+        .map((candidate) => findSheet(candidate))
+        .find(Boolean);
       const selectors = [...(sheet?.cssRules || [])]
         .filter((rule) => rule.selectorText?.includes('::selection'))
         .flatMap((rule) => rule.selectorText.split(',').map((selector) => selector.trim()));
