@@ -59,7 +59,7 @@ async function contaminationFor(repository, targetEpisode, candidate, allEpisode
   const treatmentEnd = time(targetEpisode.treatment?.completedAt);
   const outcomeTime = time(candidate.observedAt);
   const interveningTreatmentEpisodes = (allEpisodes ?? []).filter((later) => {
-    if (!later || later.treatmentEpisodeId === targetEpisode.treatmentEpisodeId || later.treatment?.treatmentSessionId === candidate.sessionId || later.status === "invalid") return false;
+    if (!later || later.treatmentEpisodeId === targetEpisode.treatmentEpisodeId || later.treatment?.treatmentSessionId === candidate.sessionId) return false;
     const exposure = time(later.treatment?.exposureStartedAt);
     return exposure != null && treatmentEnd != null && outcomeTime != null && exposure > treatmentEnd && exposure < outcomeTime;
   });
@@ -129,7 +129,15 @@ function preservesPriorRetestSlot(prior, newEpisode, slot, exposedAt) {
   return baselineObservedAt != null && exposure != null && baselineObservedAt < exposure;
 }
 
-export async function markPracticeTreatmentInterference({ repository, newEpisode, exposedAt } = {}) {
+function preservesHybridMeasurementSlot(prior, newEpisode, slot) {
+  return slot?.measurementGrade === "hybrid"
+    && prior.treatment?.treatmentClass === "hybrid"
+    && newEpisode.treatment?.treatmentClass === "hybrid"
+    && prior.treatment?.treatmentFamilyKey === newEpisode.treatment?.treatmentFamilyKey
+    && prior.treatment?.outcomeDomain === newEpisode.treatment?.outcomeDomain;
+}
+
+export async function markPracticeTreatmentInterference({ repository, newEpisode, exposedAt, preserveCompatibleMeasurement = true } = {}) {
   if (!repository || !newEpisode || !exposedAt) return { contaminated: 0 };
   const episodes = await repository.listTreatmentEpisodes(newEpisode.profileId, { contextId: newEpisode.contextId, limit: 500 });
   let contaminated = 0;
@@ -147,6 +155,7 @@ export async function markPracticeTreatmentInterference({ repository, newEpisode
     for (const slot of prior.outcomes ?? []) {
       if (slot.status !== "pending") continue;
       if (preservesPriorRetestSlot(prior, newEpisode, slot, exposedAt)) continue;
+      if (preserveCompatibleMeasurement && preservesHybridMeasurementSlot(prior, newEpisode, slot)) continue;
       next = contaminatePracticeTreatmentOutcomeSlot(next, slot.outcomeKey, "superseded-by-later-treatment", exposedAt);
     }
     if (next !== prior) { await repository.saveTreatmentEpisode(next); contaminated += 1; }
