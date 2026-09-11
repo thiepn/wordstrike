@@ -29,13 +29,13 @@ function fakeUpgradeDatabase(initialNames) {
   };
 }
 
-test("PL14 performance-state contract remains intact inside the current PL25 DB/session envelope", () => {
+test("PL14 performance-state contract remains intact inside the current PL33 DB/session envelope", () => {
   assert.equal(PRACTICE_DATABASE_VERSION, 10);
   assert.equal(PRACTICE_RECORD_VERSIONS.performanceState, 1);
   assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 13);
   assert.equal(PRACTICE_RECORD_VERSIONS.learningState, 1);
   assert.equal(PRACTICE_RECORD_VERSIONS.evaluationState, 1);
-  assert.equal(PRACTICE_RECORD_VERSIONS.coachPlan, 1);
+  assert.equal(PRACTICE_RECORD_VERSIONS.coachPlan, 2);
   assert.equal(PRACTICE_RECORD_VERSIONS.reviewItem, 3);
   assert.equal(PRACTICE_LIMITS.performanceStateBytes, 64 * 1024);
   assert.deepEqual(PRACTICE_STORE_DEFINITIONS.performanceStates, {
