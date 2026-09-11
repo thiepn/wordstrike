@@ -21,7 +21,7 @@ const descriptor = Object.freeze({
   supportedCompletionModes: Object.freeze(["content", "manual"]), resumable: true,
 });
 
-test("Phase 0 foundation constants remain intact inside the current PL32 storage envelope", async () => {
+test("Phase 0 foundation constants remain intact inside the current PL33 storage envelope", async () => {
   assert.equal(PRACTICE_MANIFEST_VERSION, 1);
   assert.equal(PRACTICE_DATABASE_VERSION, 10);
   assert.equal(PRACTICE_RECORD_VERSIONS.profile, 3);
@@ -29,7 +29,7 @@ test("Phase 0 foundation constants remain intact inside the current PL32 storage
   assert.equal(PRACTICE_RECORD_VERSIONS.learningState, 1);
   assert.equal(PRACTICE_RECORD_VERSIONS.reviewItem, 3);
   assert.equal(PRACTICE_RECORD_VERSIONS.evaluationState, 1);
-  assert.equal(PRACTICE_RECORD_VERSIONS.coachPlan, 1);
+  assert.equal(PRACTICE_RECORD_VERSIONS.coachPlan, 2);
   assert.equal(PRACTICE_STORE_NAMES_V31.length, 16);
   assert.equal(PRACTICE_STORE_NAMES.length, 18);
   for (const storeName of PRACTICE_STORE_NAMES_V31) assert.equal(PRACTICE_STORE_NAMES.includes(storeName), true, `${storeName} must remain present`);
