@@ -68,7 +68,7 @@ assert.doesNotMatch(index, /<link[^>]+typing-performance-v2\.css/,
   "V2 results styling must not be globally loaded on unrelated screens");
 assert.match(index, /js\/appBootstrap\.js\?v=20260911v8/,
   "V2 should load through the semantic V8 application bootstrap");
-assert.match(resultsFeature, /import "\.\/speedTestPerformanceV2\.js";/,
+assert.match(resultsFeature, /speedTestPerformanceV2\.js/,
   "the semantic results feature must retain Typing Performance V2");
 assert.doesNotMatch(index, /speedTestPerformanceV2\.js\?v=20260910b/,
   "historical V2 scripts must not return directly to index.html");

@@ -43,7 +43,7 @@ assert.match(index, /js\/appBootstrap\.js\?v=20260911v8/,
   "V8 should load Typing performance behavior through the semantic application bootstrap");
 assert.match(appCss, /\.\/screens\/typing-performance-v1\.css\?v=20260910a/,
   "the semantic stylesheet boundary must retain Typing performance V1 styling");
-assert.match(resultsFeature, /import "\.\/speedTestPerformanceV1\.js";/,
+assert.match(resultsFeature, /speedTestPerformanceV1\.js/,
   "the semantic results feature must retain Typing performance V1 behavior");
 assert.doesNotMatch(index, /typing-performance-v1\.css\?v=20260910a/,
   "historical performance CSS must not return to index.html");

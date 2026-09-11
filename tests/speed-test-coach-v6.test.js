@@ -144,7 +144,7 @@ const index = readFileSync(new URL("../index.html", import.meta.url), "utf8");
 const resultsFeature = readFileSync(new URL("../js/speedTestResultsFeature.js", import.meta.url), "utf8");
 assert.match(index, /js\/appBootstrap\.js\?v=20260911v8/,
   "V6 should load through the semantic V8 application bootstrap");
-assert.match(resultsFeature, /import "\.\/speedTestResultsV6b\.js";/,
+assert.match(resultsFeature, /speedTestResultsV6b\.js/,
   "V6 coach results must remain in the semantic results feature chain");
 assert.doesNotMatch(resultsFeature, /import "\.\/speedTestResultsV6\.js";/,
   "The removed V6 compatibility wrapper must not return");

@@ -1,8 +1,10 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
-const [index, presentation, css, renderer, endlessMode, config, workflow, modes] = await Promise.all([
+const [index, appCss, presentationBootstrap, presentation, css, renderer, endlessMode, config, workflow, modes] = await Promise.all([
   readFile(new URL("../index.html", import.meta.url), "utf8"),
+  readFile(new URL("../styles/app.css", import.meta.url), "utf8"),
+  readFile(new URL("../js/presentationBootstrap.js", import.meta.url), "utf8"),
   readFile(new URL("../js/endlessGameplayPresentation.js", import.meta.url), "utf8"),
   readFile(new URL("../styles/screens/endless-gameplay.css", import.meta.url), "utf8"),
   readFile(new URL("../js/renderer.js", import.meta.url), "utf8"),
@@ -12,10 +14,12 @@ const [index, presentation, css, renderer, endlessMode, config, workflow, modes]
   readFile(new URL("../js/modes.js", import.meta.url), "utf8"),
 ]);
 
-assert.equal((index.match(/styles\/screens\/endless-gameplay\.css/g) || []).length, 1);
-assert.equal((index.match(/js\/endlessGameplayPresentation\.js/g) || []).length, 1);
-assert.match(index, /campaign-gameplay-input\.css[\s\S]*endless-gameplay\.css[\s\S]*practiceLabV20\.css/);
-assert.match(index, /campaignGameplayPresentation\.js[\s\S]*endlessGameplayPresentation\.js/);
+assert.match(index, /styles\/app\.css\?v=20260911v8/);
+assert.doesNotMatch(index, /styles\/screens\/endless-gameplay\.css|js\/endlessGameplayPresentation\.js/);
+assert.equal((appCss.match(/\.\/screens\/endless-gameplay\.css/g) || []).length, 1);
+assert.match(appCss, /campaign-gameplay-input\.css[\s\S]*endless-gameplay\.css[\s\S]*boss-gameplay\.css/);
+assert.equal((presentationBootstrap.match(/endlessGameplayPresentation\.js/g) || []).length, 1);
+assert.match(presentationBootstrap, /campaignGameplayPresentation\.js[\s\S]*endlessGameplayPresentation\.js[\s\S]*bossGameplayPresentation\.js/);
 
 assert.match(presentation, /import \{ ENDLESS_CONFIG, getEndlessWordsPerStage \} from "\.\/endlessConfig\.js"/);
 assert.match(presentation, /import \{ getCurrentEndless \} from "\.\/endlessMode\.js"/);
@@ -105,4 +109,4 @@ assert.match(workflow, /browser-artifacts\/ui6-endless-gameplay\//);
 assert.match(modes, /PRACTICE: "practice"/);
 assert.match(modes, /id: MODE_IDS\.PRACTICE,[\s\S]*enabled: false,[\s\S]*status: "coming-soon",[\s\S]*route: null/);
 
-console.log("UI6 Endless gameplay source contracts passed: presentation-only HUD/Core/pressure/risk/stage/input treatment, reduced motion, mode isolation, and Practice exclusion.");
+console.log("UI6 Endless gameplay source contracts passed: semantic V8 resource ownership, presentation-only HUD/Core/pressure/risk/stage/input treatment, reduced motion, mode isolation, and Practice exclusion.");

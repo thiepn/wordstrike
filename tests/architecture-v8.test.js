@@ -53,13 +53,13 @@ for (const token of appImportOrder) {
 }
 
 const resultsImportOrder = [
-  'import "./speedTestPerformanceV1.js";',
-  'import "./speedTestPerformanceV2.js";',
-  'import "./speedTestPerformanceV3.js";',
-  'import "./speedTestPerformanceV4.js";',
-  'import "./speedTestPerformanceV5.js";',
-  'import "./speedTestResultsV6b.js";',
-  'import "./speedTestResultsV7.js";',
+  "speedTestPerformanceV1.js",
+  "speedTestPerformanceV2.js",
+  "speedTestPerformanceV3.js",
+  "speedTestPerformanceV4.js",
+  "speedTestPerformanceV5.js",
+  "speedTestResultsV6b.js",
+  "speedTestResultsV7.js",
 ];
 previousIndex = -1;
 for (const token of resultsImportOrder) {

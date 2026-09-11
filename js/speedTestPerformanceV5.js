@@ -464,7 +464,7 @@ function bindV5Interactions(section) {
   });
 }
 
-function enhanceV5() {
+export function syncSpeedTestPerformanceV5() {
   const base = document.querySelector("#app .speed-results-screen [data-speed-performance]");
   if (!base || base.dataset.performanceV5 === "true") return;
   const v4 = document.querySelector("#app .speed-results-screen [data-speed-performance-v4]");
@@ -492,15 +492,3 @@ function enhanceV5() {
   base.dataset.performanceV5 = "true";
 }
 
-function install() {
-  const root = document.querySelector("#app");
-  if (!root) return;
-  enhanceV5();
-  const observer = new MutationObserver(enhanceV5);
-  observer.observe(root, { childList: true, subtree: true });
-}
-
-if (typeof document !== "undefined") {
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", install, { once: true });
-  else install();
-}

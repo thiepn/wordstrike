@@ -1,8 +1,10 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
-const [index, presentation, css, inputCss, renderer, workflow, modes, visualTest] = await Promise.all([
+const [index, appCss, presentationBootstrap, presentation, css, inputCss, renderer, workflow, modes, visualTest] = await Promise.all([
   readFile(new URL("../index.html", import.meta.url), "utf8"),
+  readFile(new URL("../styles/app.css", import.meta.url), "utf8"),
+  readFile(new URL("../js/presentationBootstrap.js", import.meta.url), "utf8"),
   readFile(new URL("../js/campaignGameplayPresentation.js", import.meta.url), "utf8"),
   readFile(new URL("../styles/screens/campaign-gameplay.css", import.meta.url), "utf8"),
   readFile(new URL("../styles/screens/campaign-gameplay-input.css", import.meta.url), "utf8"),
@@ -12,11 +14,14 @@ const [index, presentation, css, inputCss, renderer, workflow, modes, visualTest
   readFile(new URL("./browser/ui5_campaign_visual.py", import.meta.url), "utf8"),
 ]);
 
-assert.equal((index.match(/styles\/screens\/campaign-gameplay\.css/g) || []).length, 1);
-assert.equal((index.match(/styles\/screens\/campaign-gameplay-input\.css/g) || []).length, 1);
-assert.match(index, /campaign-progression\.css[\s\S]*campaign-gameplay\.css[\s\S]*campaign-gameplay-input\.css[\s\S]*practiceLabV20\.css/);
-assert.equal((index.match(/js\/campaignGameplayPresentation\.js/g) || []).length, 1);
-assert.match(index, /js\/main\.js[\s\S]*js\/campaignGameplayPresentation\.js/);
+assert.match(index, /styles\/app\.css\?v=20260911v8/);
+assert.doesNotMatch(index, /styles\/screens\/campaign-gameplay(?:-input)?\.css/);
+assert.equal((appCss.match(/\.\/screens\/campaign-gameplay\.css/g) || []).length, 1);
+assert.equal((appCss.match(/\.\/screens\/campaign-gameplay-input\.css/g) || []).length, 1);
+assert.match(appCss, /campaign-progression\.css[\s\S]*campaign-gameplay\.css[\s\S]*campaign-gameplay-input\.css[\s\S]*endless-gameplay\.css/);
+assert.doesNotMatch(index, /js\/campaignGameplayPresentation\.js/);
+assert.equal((presentationBootstrap.match(/campaignGameplayPresentation\.js/g) || []).length, 1);
+assert.match(presentationBootstrap, /campaignGameplayPresentation\.js[\s\S]*endlessGameplayPresentation\.js/);
 
 assert.match(presentation, /import \{ appState \} from "\.\/state\.js"/);
 assert.match(presentation, /\.game-screen:not\(\.endless-screen\):not\(\.boss-screen\)/);
@@ -101,4 +106,4 @@ assert.match(visualTest, /390x360/);
 assert.match(modes, /PRACTICE: "practice"/);
 assert.match(modes, /id: MODE_IDS\.PRACTICE,[\s\S]*enabled: false,[\s\S]*status: "coming-soon",[\s\S]*route: null/);
 
-console.log("UI5 Campaign gameplay source contracts passed: real Campaign control binding, scoped HUD/Core/word/input presentation, desktop/mobile keyboard visibility, clean visual evidence, short-mobile layout, renderer feedback, reduced motion, mode isolation, and Practice exclusion.");
+console.log("UI5 Campaign gameplay source contracts passed: semantic V8 resource ownership, real Campaign control binding, scoped HUD/Core/word/input presentation, desktop/mobile keyboard visibility, clean visual evidence, short-mobile layout, renderer feedback, reduced motion, mode isolation, and Practice exclusion.");

@@ -59,7 +59,7 @@ assert.deepEqual(resampleWpmSeries([{ wpm: 50 }, { wpm: 100 }], 3), [50, 75, 100
 const index = readFileSync(new URL("../index.html", import.meta.url), "utf8");
 const resultsFeature = readFileSync(new URL("../js/speedTestResultsFeature.js", import.meta.url), "utf8");
 assert.match(index, /js\/appBootstrap\.js\?v=20260911v8/);
-assert.match(resultsFeature, /import "\.\/speedTestPerformanceV3\.js";/,
+assert.match(resultsFeature, /speedTestPerformanceV3\.js/,
   "the semantic results feature must retain Typing Performance V3");
 assert.doesNotMatch(index, /speedTestPerformanceV3\.js\?v=20260911a/,
   "historical V3 scripts must not return directly to index.html");

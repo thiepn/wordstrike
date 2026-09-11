@@ -34,7 +34,6 @@ const signed = (value, suffix = "") => {
 let practiceOverlay = null;
 let practiceController = null;
 let practiceRegistry = null;
-let practiceObserver = null;
 let practiceAutoStartIssued = false;
 let practiceTargetFilled = false;
 let accuracyTypeIssued = false;
@@ -51,9 +50,7 @@ function ensureStyles() {
   return link;
 }
 
-function closePracticeOverlay() {
-  practiceObserver?.disconnect?.();
-  practiceObserver = null;
+export function closeTypingCoachV6PracticeOverlay() {
   practiceController?.unmount?.();
   practiceRegistry?.destroy?.();
   practiceController = null;
@@ -67,7 +64,7 @@ function closePracticeOverlay() {
 
 function retryOriginalTest() {
   markTypingCoachRetestRequested();
-  closePracticeOverlay();
+  closeTypingCoachV6PracticeOverlay();
   document.querySelector('#app .speed-results-screen [data-action="retry"]')?.click?.();
 }
 
@@ -102,7 +99,7 @@ function injectRetestContext(root, cycle) {
   bar.querySelector("[data-coach-retest-original]")?.addEventListener("click", retryOriginalTest);
 }
 
-function driveCoachPractice() {
+export function syncTypingCoachV6PracticeOverlay() {
   const cycle = loadActiveTypingCoachCycle();
   const root = practiceOverlay?.querySelector("[data-coach-practice-root]");
   if (!cycle || !root) return;
@@ -137,7 +134,7 @@ function driveCoachPractice() {
 function openCoachPractice(plan, drillType) {
   const cycle = activateTypingCoachPlan(plan, drillType);
   if (!cycle) return false;
-  closePracticeOverlay();
+  closeTypingCoachV6PracticeOverlay();
   ensureStyles();
 
   const overlay = document.createElement("div");
@@ -148,20 +145,18 @@ function openCoachPractice(plan, drillType) {
   practiceOverlay = overlay;
   overlay.addEventListener("click", (event) => event.stopPropagation());
   overlay.addEventListener("keydown", (event) => event.stopPropagation());
-  overlay.querySelector("[data-coach-close-practice]")?.addEventListener("click", closePracticeOverlay);
+  overlay.querySelector("[data-coach-close-practice]")?.addEventListener("click", closeTypingCoachV6PracticeOverlay);
   overlay.querySelector("[data-coach-retest-original]")?.addEventListener("click", retryOriginalTest);
 
   const root = overlay.querySelector("[data-coach-practice-root]");
   const featureGate = createPracticeFeatureGate({ publicEnabled: true });
   practiceRegistry = createPracticeExperimentRegistry({ featureGate });
-  practiceController = createPracticeLabController({ root, featureGate, experimentRegistry: practiceRegistry, appNavigation: { exit: closePracticeOverlay } });
+  practiceController = createPracticeLabController({ root, featureGate, experimentRegistry: practiceRegistry, appNavigation: { exit: closeTypingCoachV6PracticeOverlay } });
   practiceAutoStartIssued = false;
   practiceTargetFilled = false;
   accuracyTypeIssued = false;
-  practiceObserver = new MutationObserver(driveCoachPractice);
-  practiceObserver.observe(root, { childList: true, subtree: true, attributes: true, attributeFilter: ["disabled", "aria-disabled"] });
   practiceController.mount(createPracticeLabRoute(PRACTICE_LAB_ROUTES.EXPERIMENT_DETAIL, { experimentId: cycle.drill.experimentId }));
-  driveCoachPractice();
+  syncTypingCoachV6PracticeOverlay();
   return true;
 }
 
@@ -221,7 +216,7 @@ function bindResultInteractions(shell, plan) {
   });
 }
 
-function enhanceResultsV6() {
+export function syncSpeedTestResultsV6() {
   const screen = document.querySelector("#app .speed-results-screen");
   const base = screen?.querySelector("[data-speed-performance]");
   const v5 = screen?.querySelector("[data-speed-performance-v5]");
@@ -258,16 +253,3 @@ function enhanceResultsV6() {
   base.dataset.performanceV6 = "true";
 }
 
-function install() {
-  const root = document.querySelector("#app");
-  if (!root) return;
-  enhanceResultsV6();
-  const observer = new MutationObserver(enhanceResultsV6);
-  observer.observe(root, { childList: true, subtree: true });
-  window.addEventListener("pagehide", closePracticeOverlay, { once: true });
-}
-
-if (typeof document !== "undefined") {
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", install, { once: true });
-  else install();
-}

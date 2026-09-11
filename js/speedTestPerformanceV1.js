@@ -212,7 +212,7 @@ function wireGraph(section, timeline, averageWpm = 0) {
   });
 }
 
-function enhanceSpeedTestResults() {
+export function syncSpeedTestPerformanceV1() {
   const screen = document.querySelector("#app .speed-results-screen");
   const panel = screen?.querySelector?.(".speed-results-panel");
   if (!panel || panel.querySelector("[data-speed-performance]")) return;
@@ -236,22 +236,6 @@ function enhanceSpeedTestResults() {
   else if (menu) menu.insertAdjacentElement("beforebegin", section);
   else panel.append(section);
   wireGraph(section, timeline, result.wpm ?? 0);
-}
-
-function installEnhancer() {
-  const root = document.querySelector("#app");
-  if (!root) return;
-  enhanceSpeedTestResults();
-  const observer = new MutationObserver(() => enhanceSpeedTestResults());
-  observer.observe(root, { childList: true, subtree: true });
-}
-
-if (typeof document !== "undefined") {
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", installEnhancer, { once: true });
-  } else {
-    installEnhancer();
-  }
 }
 
 export { graphMarkup as speedTestPerformanceGraphMarkup };

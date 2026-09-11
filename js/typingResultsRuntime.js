@@ -1,13 +1,17 @@
 // WORDSTRIKE V12 — explicit Typing Test results runtime.
 //
-// The historical V1-V7 result layers are treated as idempotent compatibility
-// feature steps. V12 owns when those steps run, when the Results screen is
+// The V1-V7 result layers expose native idempotent feature functions. V13 owns
+// their invocation. V12 owns when those steps run, when the Results screen is
 // mounted, and when scoped Coach-overlay observation/listeners are released.
 
 import { getCurrentSpeedTest } from "./speedTest.js";
-import { runSpeedTestResultsObserverCallbacks } from "./speedTestResultsObserverHub.js";
+import {
+  closeSpeedTestResultsTransientFeatures,
+  handleSpeedTestResultsDocumentClick,
+  runSpeedTestResultsFeatures,
+} from "./speedTestResultsFeature.js";
 
-export const TYPING_RESULTS_RUNTIME_VERSION = 12;
+export const TYPING_RESULTS_RUNTIME_VERSION = 13;
 
 const RESULTS_SELECTOR = "#app .speed-results-screen";
 const PRACTICE_OVERLAY_SELECTOR = "[data-typing-coach-practice-overlay]";
@@ -57,7 +61,9 @@ function reportRuntimeError(error) {
 }
 
 export function createTypingResultsRuntime({
-  dispatchFeatures = runSpeedTestResultsObserverCallbacks,
+  dispatchFeatures = runSpeedTestResultsFeatures,
+  handleFeatureClick = handleSpeedTestResultsDocumentClick,
+  destroyFeatures = closeSpeedTestResultsTransientFeatures,
   resolveContext = defaultResolveContext,
   resolveOverlay = defaultResolveOverlay,
   MutationObserverImpl = null,
@@ -108,15 +114,24 @@ export function createTypingResultsRuntime({
     return true;
   }
 
+  function handleDocumentClick(event) {
+    try {
+      handleFeatureClick?.(event);
+    } catch (error) {
+      onError?.(error);
+    }
+    queueSync();
+  }
+
   function removeDocumentClickListener() {
     if (!documentClickListenerActive) return;
-    eventTarget?.removeEventListener?.("click", queueSync, true);
+    eventTarget?.removeEventListener?.("click", handleDocumentClick, true);
     documentClickListenerActive = false;
   }
 
   function ensureDocumentClickListener() {
     if (documentClickListenerActive || !eventTarget?.addEventListener) return;
-    eventTarget.addEventListener("click", queueSync, true);
+    eventTarget.addEventListener("click", handleDocumentClick, true);
     documentClickListenerActive = true;
   }
 
@@ -144,7 +159,8 @@ export function createTypingResultsRuntime({
     diagnostics.overlayObserverCreations += 1;
   }
 
-  function closeLegacyPracticeOverlay() {
+  function closeActivePracticeOverlay() {
+    destroyFeatures?.();
     const overlay = resolveOverlay?.();
     const close = overlay?.querySelector?.("[data-coach-close-practice]");
     if (typeof close?.click === "function") close.click();
@@ -155,7 +171,7 @@ export function createTypingResultsRuntime({
     destroying = true;
     removeDocumentClickListener();
     disconnectOverlayObserver();
-    closeLegacyPracticeOverlay();
+    closeActivePracticeOverlay();
     mounted = false;
     sessionId = null;
     syncQueued = false;

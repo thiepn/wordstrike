@@ -2,18 +2,22 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { moveLevelGridSelection } from "../js/state.js";
 
-const [ui, css, legacyCss, systemCss, index, main, modes] = await Promise.all([
+const [ui, css, legacyCss, systemCss, index, appCss, main, modes] = await Promise.all([
   readFile(new URL("../js/ui.js", import.meta.url), "utf8"),
   readFile(new URL("../styles/screens/campaign-progression.css", import.meta.url), "utf8"),
   readFile(new URL("../style.css", import.meta.url), "utf8"),
   readFile(new URL("../styles/ui-system.css", import.meta.url), "utf8"),
   readFile(new URL("../index.html", import.meta.url), "utf8"),
+  readFile(new URL("../styles/app.css", import.meta.url), "utf8"),
   readFile(new URL("../js/main.js", import.meta.url), "utf8"),
   readFile(new URL("../js/modes.js", import.meta.url), "utf8"),
 ]);
 
-assert.equal((index.match(/styles\/screens\/mode-select\.css/g) || []).length, 1);
-assert.match(index, /styles\/screens\/mode-select\.css[\s\S]*styles\/screens\/campaign-progression\.css/);
+assert.match(index, /styles\/app\.css\?v=20260911v8/);
+assert.doesNotMatch(index, /styles\/screens\/(?:mode-select|campaign-progression)\.css/);
+assert.equal((appCss.match(/\.\/screens\/mode-select\.css/g) || []).length, 1);
+assert.equal((appCss.match(/\.\/screens\/campaign-progression\.css/g) || []).length, 1);
+assert.match(appCss, /\.\/screens\/mode-select\.css[\s\S]*\.\/screens\/campaign-progression\.css/);
 
 assert.match(ui, /class="screen level-screen campaign-progress-screen/);
 assert.match(ui, /class="campaign-progress-shell"/);
@@ -58,4 +62,4 @@ assert.equal(moveLevelGridSelection(17, "ArrowRight", 17, 5), 17);
 assert.match(modes, /PRACTICE: "practice"/);
 assert.match(modes, /id: MODE_IDS\.PRACTICE,[\s\S]*enabled: false,[\s\S]*status: "coming-soon",[\s\S]*route: null/);
 
-console.log("UI4 Campaign progression source contracts passed: route sectors, boss identity, responsive keyboard geometry, legacy retirement, and Practice exclusion.");
+console.log("UI4 Campaign progression source contracts passed: semantic V8 stylesheet ownership, route sectors, boss identity, responsive keyboard geometry, legacy retirement, and Practice exclusion.");
