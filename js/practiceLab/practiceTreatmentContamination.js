@@ -27,16 +27,16 @@ export function classifyPracticeTreatmentContamination({ episode, interveningTre
   const directStatId = episode.treatment?.targetStatId ?? null;
   const related = new Set(episode.treatmentContext?.relatedTargetIds ?? []);
   for (const later of interveningTreatmentEpisodes) {
-    if (!later || later.treatmentEpisodeId === episode.treatmentEpisodeId || later.status === "invalid") continue;
+    if (!later || later.treatmentEpisodeId === episode.treatmentEpisodeId || !later.treatment?.exposureStartedAt) continue;
     if (targeted) {
       const laterTarget = later.treatment?.targetStatId ?? null;
       if (laterTarget && laterTarget === directStatId) raise("material", "same-target-practiced-again");
       else if (laterTarget && related.has(laterTarget)) raise("material", "related-explanatory-target-practiced");
       else raise("background", "unrelated-target-practice");
     } else if (later.treatment?.outcomeDomain === episode.treatment?.outcomeDomain) {
-      raise("material", "same-outcome-domain-treatment");
+      raise("material", later.status === "invalid" ? "same-outcome-domain-incomplete-treatment" : "same-outcome-domain-treatment");
     } else {
-      raise("background", "different-outcome-domain-practice");
+      raise("background", later.status === "invalid" ? "different-domain-incomplete-treatment" : "different-outcome-domain-practice");
     }
   }
 
