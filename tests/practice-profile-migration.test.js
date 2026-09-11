@@ -70,7 +70,7 @@ const legacyRecordVersions = {
   reviewItem: 3,
   evaluationState: 1,
   assessmentRun: 1,
-  coachPlan: 1,
+  coachPlan: 2,
   customText: 1,
   preset: 1,
   checkpoint: 3,
@@ -84,4 +84,4 @@ assert.deepEqual(
   { treatmentEpisode: 1, treatmentResponseState: 1 },
 );
 
-console.log("Practice profile migration, canonical day key, repository upgrade, and PL32 version envelope passed.");
+console.log("Practice profile migration, canonical day key, repository upgrade, and PL33 version envelope passed.");
