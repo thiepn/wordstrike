@@ -137,11 +137,21 @@ export function analyzePracticeWeaknessBossFoundationResult({ plan, contentPlan,
       maxCleanTargetStreak: maxCleanStreak(battleRecords),
     },
   };
-  return analyzePracticeWeaknessBossResult({
+  const result = analyzePracticeWeaknessBossResult({
     plan,
     gameplay,
     openingProbe: probeFromObservation(observation, "opening"),
     finalProbe: probeFromObservation(observation, "final"),
     completed,
+  });
+  return freezeDeep({
+    beforeMetrics: result.openingProbe,
+    afterMetrics: result.finalProbe,
+    transferMetrics: null,
+    fatigueSummary: null,
+    trainingQuality: result,
+    recommendationIds: [],
+    reviewItemChanges: [],
+    interpretation: "Same-session challenge comparison only; not mastery, retention, or transfer evidence.",
   });
 }
