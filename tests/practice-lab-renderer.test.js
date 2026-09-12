@@ -12,14 +12,16 @@ const gate = createPracticeFeatureGate({ developerMode: true });
 test("home renderer exposes semantic sections, honest empty states, native controls, and all catalog cards", () => {
   const registry = createPracticeExperimentRegistry({ featureGate: gate });
   const target = root();
-  renderPracticeLab(target, buildPracticeHomeViewModel({ registry, featureGate: gate }));
+  const viewModel = buildPracticeHomeViewModel({ registry, featureGate: gate });
+  renderPracticeLab(target, viewModel);
   assert.match(target.innerHTML, /<header class="practice-lab-header">/);
   assert.match(target.innerHTML, /<main>/);
   assert.match(target.innerHTML, /Today&#39;s Training/i);
   assert.match(target.innerHTML, /NO SKILL PROFILE YET/i);
   assert.match(target.innerHTML, /RECOMMENDATIONS NEED DATA/i);
   assert.match(target.innerHTML, /disabled aria-disabled="true"/);
-  assert.equal((target.innerHTML.match(/data-experiment-id=/g) || []).length, 17);
+  const visibleCatalogCardCount = viewModel.categories.reduce((count, category) => count + category.experiments.length, 0);
+  assert.equal((target.innerHTML.match(/data-experiment-id=/g) || []).length, visibleCatalogCardCount);
   assert.doesNotMatch(target.innerHTML, /implementationPrompt|Prompt 6/);
 });
 
