@@ -25,6 +25,7 @@ const DEFINITIONS = Object.freeze({
   "combination-repair": Object.freeze({ title: "Combination Repair", treatmentClass: "targeted", outcomeDomain: "entity-target", variant: oneDose }),
   "problem-words": Object.freeze({ title: "Problem Words", treatmentClass: "targeted", outcomeDomain: "entity-target", variant: oneDose }),
   "accuracy-control": Object.freeze({ title: "Accuracy & Recovery", treatmentClass: "targeted", outcomeDomain: "entity-target", variant: oneDose }),
+  "weakness-boss": Object.freeze({ title: "Weakness Boss", treatmentClass: "targeted", outcomeDomain: "entity-target", variant: fixed("one-boss-dose-v1") }),
   "real-text": Object.freeze({ title: "Real Text Practice", treatmentClass: "broad", outcomeDomain: "cold-natural-text", variant: durationVariant }),
   "common-words": Object.freeze({ title: "Common Words Practice", treatmentClass: "broad", outcomeDomain: "common-words", variant: wordVariant, requiredFlow: "practice" }),
   "consistency-trainer": Object.freeze({ title: "Consistency Trainer", treatmentClass: "hybrid", outcomeDomain: "consistency", variant: durationVariant }),
