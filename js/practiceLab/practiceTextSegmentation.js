@@ -23,6 +23,11 @@ export function segmentPracticeGraphemes(text, { segmenter = null } = {}) {
   return Object.freeze(createPracticeSegmenter(segmenter)(String(text)));
 }
 
+// PL31 uses this explicit semantic alias for user-authored text projection and bounded rendering.
+export function splitGraphemes(text, options = {}) {
+  return segmentPracticeGraphemes(text, options);
+}
+
 export function isPracticeWordLikeGrapheme(grapheme) {
   return typeof grapheme === "string" && grapheme.length > 0 && WORD_LIKE_GRAPHEME.test(grapheme);
 }

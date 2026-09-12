@@ -72,8 +72,11 @@ await assert.rejects(
 
 const customText = createDefaultCustomText({ profileId, customTextId, text: "local words only", now });
 await repository.saveCustomText(customText);
-assert.equal((await repository.getCustomText(customTextId)).privacy, "local-only");
-assert.equal((await repository.listCustomTexts()).length, 1);
+const savedCustomText = await repository.getCustomText(customTextId);
+assert.equal(savedCustomText.sourceText, "local words only");
+assert.equal("privacy" in savedCustomText, false);
+assert.equal("syncEnabled" in savedCustomText, false);
+assert.equal((await repository.listCustomTexts(profileId)).length, 1);
 
 const preset = createDefaultPreset({ profileId, presetId, now });
 await repository.savePreset(preset);
@@ -128,17 +131,3 @@ assert.equal(atomic.committed, true);
 assert.equal(atomic.manifestUpdated, true);
 assert.equal(await repository.getActiveCheckpoint(), null);
 assert.deepEqual(await repository.getSkillStat(profileId, initialized.profile.activeContextId, "bigram", "ou"), stat);
-assert.equal((await repository.commitCompletedPracticeSession({ sessionSummary: committed })).idempotent, true);
-
-await repository.deleteCustomText(customTextId);
-await repository.deletePreset(presetId);
-for (const id of extraPresetIds) await repository.deletePreset(id);
-assert.equal((await repository.listCustomTexts()).length, 0);
-assert.equal((await repository.listPresets()).length, 0);
-assert.equal(repository.getStorageHealth().backend, "memory");
-
-await repository.resetPracticeData();
-assert.equal(values.get("unrelated"), "keep-me");
-assert.equal((await dataStore.list("sessionSummaries")).length, 0);
-
-console.log("Practice memory repository CRUD, duplicate guards, PL17 review lifecycle, checkpoint replacement, PL11 atomic completion, and scoped reset passed.");

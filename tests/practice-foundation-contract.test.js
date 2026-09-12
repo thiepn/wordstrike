@@ -22,7 +22,7 @@ const descriptor = Object.freeze({
 
 test("Phase 0 foundation constants remain intact inside the current PL25 storage envelope", async () => {
   assert.equal(PRACTICE_MANIFEST_VERSION, 1);
-  assert.equal(PRACTICE_DATABASE_VERSION, 8);
+  assert.equal(PRACTICE_DATABASE_VERSION, 9);
   assert.equal(PRACTICE_RECORD_VERSIONS.profile, 3);
   assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 13);
   assert.equal(PRACTICE_RECORD_VERSIONS.learningState, 1);

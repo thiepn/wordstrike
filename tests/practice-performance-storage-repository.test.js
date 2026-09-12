@@ -30,7 +30,7 @@ function fakeUpgradeDatabase(initialNames) {
 }
 
 test("PL14 performance-state contract remains intact inside the current PL25 DB/session envelope", () => {
-  assert.equal(PRACTICE_DATABASE_VERSION, 8);
+  assert.equal(PRACTICE_DATABASE_VERSION, 9);
   assert.equal(PRACTICE_RECORD_VERSIONS.performanceState, 1);
   assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 13);
   assert.equal(PRACTICE_RECORD_VERSIONS.learningState, 1);

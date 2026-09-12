@@ -81,7 +81,7 @@ function validObservation(index = 1) {
 }
 
 test("PL13 ability contracts remain intact inside the PL25 storage/session/foundation envelope", () => {
-  assert.equal(PRACTICE_DATABASE_VERSION, 8);
+  assert.equal(PRACTICE_DATABASE_VERSION, 9);
   assert.equal(PRACTICE_RECORD_VERSIONS.abilityState, 1);
   assert.equal(PRACTICE_RECORD_VERSIONS.skillStat, 3);
   assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 13);

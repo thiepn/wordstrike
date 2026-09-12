@@ -1,0 +1,2 @@
+import { PRACTICE_CUSTOM_TEXT_TIMED_DURATIONS_MS, requiredPracticeCustomTextTimedGraphemes } from "./practiceCustomTextConstants.js";
+export function getPracticeCustomTextTimedAvailability(graphemeCount) { const count = Number(graphemeCount) || 0; return Object.freeze(PRACTICE_CUSTOM_TEXT_TIMED_DURATIONS_MS.map((durationMs) => Object.freeze({ durationMs, requiredGraphemes: requiredPracticeCustomTextTimedGraphemes(durationMs), available: count >= requiredPracticeCustomTextTimedGraphemes(durationMs) }))); }
