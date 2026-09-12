@@ -143,7 +143,7 @@ test("PL37 source and docs explicitly preserve training-only generation and no-p
   const generator = fs.readFileSync(path.join(practiceDir, "practiceWeaknessBossGenerator.js"), "utf8");
   const learning = fs.readFileSync(path.join(practiceDir, "practiceWeaknessBossLearning.js"), "utf8");
   const canonicalDoc = fs.readFileSync(path.join(here, "../docs/PRACTICE_LAB_WEAKNESS_BOSS.md"), "utf8");
-  assert.match(generator, /partition !== "training"/);
+  assert.match(generator, /item\?\.partition === "training"/);
   assert.match(generator, /partition: "training"/);
   assert.match(learning, /fullProtocolObserved/);
   assert.match(learning, /battleRecords\.length === quotas\.battle/);
