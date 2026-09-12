@@ -70,10 +70,12 @@ export function resolvePracticeTreatmentIdentity({ experiment, configuration = {
   if (definition.responseDimensions && !responseDimensions) return null;
   const experimentVersion = experiment?.version ?? null;
   if (!Number.isFinite(experimentVersion) && typeof experimentVersion !== "string") return null;
-  const versions = versionFingerprint(configuration);
-  const familyInput = canonical({ experimentId, experimentVersion, versions, flow: flow ?? "default", protocolVariant, responseDimensions });
-  const protocolInput = canonical({ registryVersion: PRACTICE_TREATMENT_REGISTRY_VERSION, ...familyInput });
   const target = definition.treatmentClass === "targeted" ? directTarget(contentPlan) : null;
+  const versions = versionFingerprint(configuration);
+  const bossEntityType = experimentId === "weakness-boss" ? target?.entityType ?? null : null;
+  if (experimentId === "weakness-boss" && !["key", "bigram", "trigram", "word"].includes(bossEntityType)) return null;
+  const familyInput = canonical({ experimentId, experimentVersion, versions, flow: flow ?? "default", protocolVariant, responseDimensions, ...(experimentId === "weakness-boss" ? { targetEntityType: bossEntityType } : {}) });
+  const protocolInput = canonical({ registryVersion: PRACTICE_TREATMENT_REGISTRY_VERSION, ...familyInput });
   return freezeDeep({ registryVersion: PRACTICE_TREATMENT_REGISTRY_VERSION, experimentId, experimentVersion, title: definition.title, treatmentClass: definition.treatmentClass, outcomeDomain: definition.outcomeDomain, flow: flow ?? "default", protocolVariant, protocolFingerprint: hashPracticeContent(JSON.stringify(protocolInput)), treatmentFamilyKey: `${experimentId}:${hashPracticeContent(JSON.stringify(familyInput))}`, assignmentKind: coachBinding ? "coach" : "manual", targetEntityType: target?.entityType ?? null, targetEntityKey: target?.entityKey ?? null, doseDescriptor: protocolVariant, responseDimensions, materialVersions: versions });
 }
 export function isPracticeTreatmentSession(input = {}) { return resolvePracticeTreatmentIdentity(input) != null; }
