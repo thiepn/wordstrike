@@ -3,6 +3,10 @@ import fs from "node:fs";
 import test from "node:test";
 
 const source = fs.readFileSync(new URL("../js/supabaseClient.js", import.meta.url), "utf8");
+const presentationSource = fs.readFileSync(
+  new URL("../js/thiepnAccountPresentation.js", import.meta.url),
+  "utf8",
+);
 
 test("THIEPN Account uses the shared Supabase project storage key", () => {
   assert.match(source, /SUPABASE_AUTH_STORAGE_KEY\s*=\s*["']sb-hycegznamzjhwinegaai-auth-token["']/);
@@ -18,4 +22,11 @@ test("WordStrike preserves one-time migration from its same-project legacy key",
 test("shared THIEPN Account storage is configured on the Supabase client", () => {
   assert.match(source, /storageKey:\s*SUPABASE_AUTH_STORAGE_KEY/);
   assert.match(source, /prepareSharedAuthStorage\(\)/);
+});
+
+test("THIEPN Account presentation enhancer is idempotent under its MutationObserver", () => {
+  assert.match(
+    presentationSource,
+    /heading\s*&&\s*heading\.textContent\s*!==\s*["']THIEPN ACCOUNT["']/,
+  );
 });
