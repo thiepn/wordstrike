@@ -20,7 +20,6 @@ const freezeDeep = (value) => {
 };
 const clamp = (value, min = 0, max = 100) => Math.max(min, Math.min(max, Number(value) || 0));
 const finite = (value) => Number.isFinite(Number(value));
-const STATUS_RANK = Object.freeze({ confirmed: 2, likely: 1 });
 const TYPE_RANK = Object.freeze({ key: 0, bigram: 1, trigram: 2, word: 3 });
 const SATURATION = Object.freeze({
   "insufficient-data": 0.75,
@@ -35,9 +34,20 @@ const BOSS_MODIFIER_POLICY = Object.freeze({
   ...PRACTICE_COACH_POLICY_V1,
   saturationModifier: SATURATION,
 });
+const TARGET_KEY_PATTERNS = Object.freeze({
+  key: /^[a-z]$/,
+  bigram: /^[a-z]{2}$/,
+  trigram: /^[a-z]{3}$/,
+  word: /^[a-z]{2,24}$/,
+});
 
 function fromMap(source, key) {
   return source instanceof Map ? source.get(key) : source?.[key];
+}
+
+export function isPracticeWeaknessBossTargetKey(entityType, entityKey) {
+  const pattern = TARGET_KEY_PATTERNS[entityType];
+  return Boolean(pattern && typeof entityKey === "string" && pattern.test(entityKey));
 }
 
 function hierarchyStatus(candidate) {
@@ -133,6 +143,7 @@ export function buildPracticeWeaknessBossCandidates({
   const output = [];
   for (const candidate of initial) {
     if (!PRACTICE_WEAKNESS_BOSS_ENTITY_TYPES.includes(candidate?.entityType)) continue;
+    if (!isPracticeWeaknessBossTargetKey(candidate.entityType, candidate.entityKey)) continue;
     if (!["likely", "confirmed"].includes(candidate?.status)) continue;
     const hierarchy = hierarchyStatus(candidate);
     if (!["independent", "partial"].includes(hierarchy)) continue;
