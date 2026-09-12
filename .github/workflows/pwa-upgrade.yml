@@ -55,7 +55,39 @@ jobs:
                       if rel not in shell:
                           shell.append(rel)
 
-          sw = f'''const CACHE_PREFIX = "wordstrike-pwa-";\nconst CACHE_NAME = `${{CACHE_PREFIX}}v1`;\nconst APP_SHELL = {json.dumps(shell, indent=2)};\n\nself.addEventListener("install", event => {{\n  event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL)));\n  self.skipWaiting();\n}});\n\nself.addEventListener("activate", event => {{\n  event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(key => key.startsWith(CACHE_PREFIX) && key !== CACHE_NAME).map(key => caches.delete(key)))).then(() => self.clients.claim()));\n}});\n\nself.addEventListener("fetch", event => {{\n  const request = event.request;\n  if (request.method !== "GET") return;\n  const url = new URL(request.url);\n  if (url.origin !== self.location.origin) return;\n  if (request.mode === "navigate") {{\n    event.respondWith(fetch(request).then(response => {{\n      if (response && response.ok) {{\n        const copy = response.clone();\n        caches.open(CACHE_NAME).then(cache => cache.put("./index.html", copy));\n      }}\n      return response;\n    }}).catch(() => caches.match("./index.html").then(hit => hit || caches.match("./"))));\n    return;\n  }}\n  event.respondWith(caches.match(request).then(cached => cached || fetch(request).then(response => {{\n    if (response && response.ok) {{\n      const copy = response.clone();\n      caches.open(CACHE_NAME).then(cache => cache.put(request, copy));\n    }}\n    return response;\n  }})));\n}});\n'''
+          sw = 'const CACHE_PREFIX = "wordstrike-pwa-";\nconst CACHE_NAME = CACHE_PREFIX + "v1";\nconst APP_SHELL = ' + json.dumps(shell, indent=2) + ';\n\n' + r'''self.addEventListener("install", event => {
+  event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL)));
+  self.skipWaiting();
+});
+
+self.addEventListener("activate", event => {
+  event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(key => key.startsWith(CACHE_PREFIX) && key !== CACHE_NAME).map(key => caches.delete(key)))).then(() => self.clients.claim()));
+});
+
+self.addEventListener("fetch", event => {
+  const request = event.request;
+  if (request.method !== "GET") return;
+  const url = new URL(request.url);
+  if (url.origin !== self.location.origin) return;
+  if (request.mode === "navigate") {
+    event.respondWith(fetch(request).then(response => {
+      if (response && response.ok) {
+        const copy = response.clone();
+        caches.open(CACHE_NAME).then(cache => cache.put("./index.html", copy));
+      }
+      return response;
+    }).catch(() => caches.match("./index.html").then(hit => hit || caches.match("./"))));
+    return;
+  }
+  event.respondWith(caches.match(request).then(cached => cached || fetch(request).then(response => {
+    if (response && response.ok) {
+      const copy = response.clone();
+      caches.open(CACHE_NAME).then(cache => cache.put(request, copy));
+    }
+    return response;
+  })));
+});
+'''
           (root / 'sw.js').write_text(sw, encoding='utf-8')
 
           index = root / 'index.html'
