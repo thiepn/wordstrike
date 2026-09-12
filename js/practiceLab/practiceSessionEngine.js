@@ -6,6 +6,8 @@ import {
   createPracticeTreatmentService,
   reconcilePracticeTreatmentTracking,
 } from "./practiceTreatmentService.js";
+import { createPracticeWeaknessBossTreatmentService } from "./practiceWeaknessBossTreatment.js";
+import { PRACTICE_WEAKNESS_BOSS_EXPERIMENT_ID } from "./practiceWeaknessBossConstants.js";
 import { createPracticeIndexedDbStore } from "./practiceIndexedDbStore.js";
 import { createPracticePhysicalTelemetryRepositoryFacade } from "./practicePhysicalTelemetryService.js";
 import { createPracticePhysicalTelemetryRuntime } from "./practicePhysicalTelemetryRuntime.js";
@@ -30,7 +32,9 @@ export function createPracticeSessionEngine(options = {}) {
   const { repository, profileId, contextId, sessionId, wallClock = () => new Date() } = options;
   if (!repository) throw new TypeError("Practice engine requires a repository");
   const logger = trackingLogger(options);
-  const treatment = createPracticeTreatmentService({ repository, profileId, contextId, sessionId, wallClock, logger });
+  const standardTreatment = createPracticeTreatmentService({ repository, profileId, contextId, sessionId, wallClock, logger });
+  const weaknessBossTreatment = createPracticeWeaknessBossTreatmentService({ repository, profileId, contextId, sessionId, wallClock, logger });
+  let activeTreatment = standardTreatment;
   const physicalDataStore = options.physicalTelemetryDataStore ?? createPracticeIndexedDbStore();
   const ownsPhysicalDataStore = options.physicalTelemetryDataStore == null;
   const physicalRepository = createPracticePhysicalTelemetryRepositoryFacade({ dataStore: physicalDataStore, now: wallClock });
@@ -63,8 +67,8 @@ export function createPracticeSessionEngine(options = {}) {
 
   postCanonicalCommit = async (payload) => {
     try {
-      await treatment.flush();
-      await treatment.afterCanonicalCommit({
+      await activeTreatment.flush();
+      await activeTreatment.afterCanonicalCommit({
         commitPayload: payload,
         retentionAnalysis: core?.getRetentionAnalysis?.() ?? null,
       });
@@ -81,16 +85,17 @@ export function createPracticeSessionEngine(options = {}) {
   };
 
   const unsubscribeTracking = core.subscribe((snapshot, event) => {
-    try { treatment.observeProgress(snapshot, event); }
+    try { activeTreatment.observeProgress(snapshot, event); }
     catch (cause) { logger?.warn?.("Treatment tracking progress hook failed", { cause }); }
     if (["paused", "resumed", "content-appended", "restored"].includes(event)) physical.resetTimingContinuity();
   });
 
   const prepare = async (args = {}) => {
+    activeTreatment = args.experiment?.id === PRACTICE_WEAKNESS_BOSS_EXPERIMENT_ID ? weaknessBossTreatment : standardTreatment;
     const prepared = await core.prepare(args);
     preparedContentPlan = args.contentPlan ?? null;
     try {
-      await treatment.prepare({
+      await activeTreatment.prepare({
         experiment: args.experiment,
         configuration: args.configuration ?? {},
         preparedContentPlan: args.contentPlan,
@@ -133,7 +138,7 @@ export function createPracticeSessionEngine(options = {}) {
   const abandon = async (reason = "manual-stop") => {
     try {
       const result = await core.abandon(reason);
-      try { await treatment.abandon("abandoned-before-treatment"); }
+      try { await activeTreatment.abandon("abandoned-before-treatment"); }
       catch (cause) { logger?.warn?.("Treatment tracking abandonment hook failed", { cause }); }
       return result;
     } finally {
@@ -158,7 +163,7 @@ export function createPracticeSessionEngine(options = {}) {
     complete,
     abandon,
     destroy,
-    getTreatmentEpisode() { return treatment.getEpisode(); },
+    getTreatmentEpisode() { return activeTreatment.getEpisode(); },
     getPhysicalTelemetryDiagnostics() { return physical.getDiagnostics(); },
   });
 }
