@@ -55,16 +55,18 @@ export function createPracticePhysicalTelemetryAccumulator() {
 
   function recordProcessedInput({ physicalEvent = null, processedInput = null, timingResidualMs = null, timingClassification = null } = {}) {
     if (!processedInput || !insertionType(processedInput.type) || processedInput.accepted === false) return false;
+    if (physicalEvent?.repeat || physicalEvent?.composing || physicalEvent?.dead || physicalEvent?.commandShortcut) {
+      if (physicalEvent.repeat) excludedRepeatCount += 1;
+      else if (physicalEvent.composing) excludedCompositionCount += 1;
+      else if (physicalEvent.dead) excludedDeadKeyCount += 1;
+      else excludedShortcutCount += 1;
+      resetTimingContinuity();
+      return false;
+    }
     eligibleTextEventCount += 1;
     if (!physicalEvent || !isPracticePhysicalTelemetryEventEligible(physicalEvent)) {
-      if (physicalEvent?.repeat) excludedRepeatCount += 1;
-      else if (physicalEvent?.composing) excludedCompositionCount += 1;
-      else if (physicalEvent?.dead) excludedDeadKeyCount += 1;
-      else if (physicalEvent?.commandShortcut) excludedShortcutCount += 1;
-      else excludedCodeCount += 1;
-      priorCanonicalInsertion = processedInput.event ?? null;
-      priorPhysicalSuccess = null;
-      correctionSincePrior = false;
+      excludedCodeCount += 1;
+      resetTimingContinuity();
       return false;
     }
     validCodeEventCount += 1;
