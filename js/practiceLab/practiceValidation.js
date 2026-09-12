@@ -16,6 +16,7 @@ import { validatePracticeAssessmentRun } from "./practiceAssessmentRun.js";
 import { PRACTICE_ASSESSMENT_PROTOCOL_VERSION } from "./practiceAssessmentConstants.js";
 import { validatePracticeCoachBlockBinding } from "./practiceCoachBlockBinding.js";
 import { validatePracticeCustomTextRecord } from "./practiceCustomTextValidation.js";
+import { validatePracticeResearchBinding } from "./practiceResearchBinding.js";
 
 export const validateReviewItem = validatePracticeReviewItemV3;
 export const validateAssessmentRun = validatePracticeAssessmentRun;
@@ -90,6 +91,11 @@ export function validateSessionSummary(summary) {
   else if (summary.coachBinding != null) {
     const coach = validatePracticeCoachBlockBinding(summary.coachBinding);
     errors.push(...coach.errors.map((entry) => ({ ...entry, path: `coachBinding.${entry.path}` })));
+  }
+  if (!Object.hasOwn(summary, "researchBinding")) errors.push({ path: "researchBinding", code: "REQUIRED", message: "researchBinding must be present" });
+  else if (summary.researchBinding != null) {
+    const research = validatePracticeResearchBinding(summary.researchBinding);
+    errors.push(...research.errors.map((entry) => ({ path: "researchBinding", code: "INVALID_RESEARCH_BINDING", message: String(entry) })));
   }
   return { valid: errors.length === 0, errors };
 }
