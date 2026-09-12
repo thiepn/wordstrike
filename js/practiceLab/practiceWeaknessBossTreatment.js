@@ -15,7 +15,7 @@ import {
 } from "./practiceTreatmentOutcomeRegistry.js";
 import { resolvePracticeTreatmentIdentity } from "./practiceTreatmentRegistry.js";
 import { linkPracticeTreatmentOutcomeCandidate, markPracticeTreatmentInterference } from "./practiceTreatmentLinker.js";
-import { PRACTICE_WEAKNESS_BOSS_EXPERIMENT_ID } from "./practiceWeaknessBossConstants.js";
+import { PRACTICE_WEAKNESS_BOSS_EXPERIMENT_ID, PRACTICE_WEAKNESS_BOSS_MIN_QUALITY_COVERAGE } from "./practiceWeaknessBossConstants.js";
 
 const unique = (values) => [...new Set((values ?? []).filter(Boolean))];
 const finite = Number.isFinite;
@@ -25,8 +25,12 @@ const nowIso = (wallClock) => {
   return date.toISOString();
 };
 
+function phaseRange(contentPlan, phaseId) {
+  return (contentPlan?.metadata?.weaknessBoss?.phaseRanges ?? []).find((range) => range?.id === phaseId) ?? null;
+}
+
 function openingRange(contentPlan) {
-  return (contentPlan?.metadata?.weaknessBoss?.phaseRanges ?? []).find((range) => range?.id === "opening-probe") ?? null;
+  return phaseRange(contentPlan, "opening-probe");
 }
 
 function probeIdentity(identity, contentPlan) {
@@ -51,9 +55,11 @@ function acquisitionMetrics(commitPayload, episode) {
   const observation = matching?.observation;
   if (!observation) return null;
   const metrics = observation.metrics?.entry ?? {};
+  const qualityCoverage = finite(observation.phaseCoverage?.entryQualityCoverage) ? observation.phaseCoverage.entryQualityCoverage : null;
+  if (!finite(observation.entryQuality) || !finite(qualityCoverage) || qualityCoverage + 1e-12 < PRACTICE_WEAKNESS_BOSS_MIN_QUALITY_COVERAGE) return null;
   return {
-    quality: finite(observation.entryQuality) ? observation.entryQuality : null,
-    qualityCoverage: finite(observation.phaseCoverage?.entryQualityCoverage) ? observation.phaseCoverage.entryQualityCoverage : null,
+    quality: observation.entryQuality,
+    qualityCoverage,
     opportunityCount: Number.isInteger(observation.phaseCoverage?.entryOpportunityCount) ? observation.phaseCoverage.entryOpportunityCount : 0,
     firstPassAccuracy: metrics.accuracy ?? metrics.firstPassAccuracy ?? null,
     normalizedResidualMedianMs: metrics.normalizedResidualMedianMs ?? null,
@@ -121,17 +127,19 @@ export function createPracticeWeaknessBossTreatmentService({ repository, profile
 
   function observeProgress(snapshot) {
     if (!episode || episode.status !== "prepared" || !identity) return;
-    const range = openingRange(contentPlan);
-    if (!range || !Number.isInteger(snapshot?.cursorIndex)) return;
+    const opening = openingRange(contentPlan);
+    const exposure = phaseRange(contentPlan, "break-guard");
+    if (!opening || !exposure || !Number.isInteger(snapshot?.cursorIndex)) return;
     const stamp = nowIso(wallClock);
     void serial(async () => {
       let next = episode;
       let startedExposure = false;
-      if (!baselineObservedAt && snapshot.cursorIndex >= range.endIndex) {
+      if (!baselineObservedAt && snapshot.cursorIndex >= opening.endIndex) {
         baselineObservedAt = stamp;
         next = updatePracticeTreatmentEpisode(next, { baseline: { ...next.baseline, observedAt: stamp } }, stamp);
       }
-      if (!next.treatment?.exposureStartedAt && baselineObservedAt && snapshot.cursorIndex > range.endIndex) {
+      // Exposure begins only after the first Break Guard character is accepted.
+      if (!next.treatment?.exposureStartedAt && baselineObservedAt && snapshot.cursorIndex > exposure.startIndex) {
         next = markPracticeTreatmentExposureStarted(next, stamp);
         startedExposure = true;
       }
@@ -180,6 +188,7 @@ export function createPracticeWeaknessBossTreatmentService({ repository, profile
       next = updatePracticeTreatmentEpisode(next, { treatment: { ...next.treatment, completedLocalDayKey: summary.localDayKey ?? null } }, summary.completedAtUtc);
       const fullProtocol = summary.status === "completed"
         && summary.completionReason === "content-complete"
+        && metrics != null
         && (commitPayload.learningObservationDeltas ?? []).some((delta) => delta?.kind === "acquisition" && delta?.statId === next.treatment.targetStatId && delta?.observation?.doseUnits === 1);
       next = fullProtocol
         ? finalizePracticeTreatmentEpisode(next, { completedAt: summary.completedAtUtc, actualDurationMs: summary.activeDurationMs, treatmentExposureEligible: Boolean(next.treatment?.exposureStartedAt) })
