@@ -10,6 +10,10 @@ const registryFacade = await readFile(
   new URL("../js/practiceLab/practiceExperimentRegistry.js", import.meta.url),
   "utf8",
 );
+const controllerRuntimeV37 = await readFile(
+  new URL("../js/practiceLab/practiceLabControllerRuntimeV37.js", import.meta.url),
+  "utf8",
+);
 const controllerRuntimeV36 = await readFile(
   new URL("../js/practiceLab/practiceLabControllerRuntimeV36.js", import.meta.url),
   "utf8",
@@ -33,11 +37,12 @@ assert.match(main, /from "\.\/practiceLab\/practiceLabController\.js"/);
 assert.doesNotMatch(main, /practice(?:LabController|ExperimentRegistry)Runtime(?:V\d+)?\.js/);
 assert.doesNotMatch(main, /practice(?:WeakKeys|CombinationRepair|TreatmentResponse)/);
 
-assert.match(controllerFacade, /import\("\.\/practiceLabControllerRuntimeV36\.js"\)/);
+assert.match(controllerFacade, /import\("\.\/practiceLabControllerRuntimeV37\.js"\)/);
 assert.match(controllerFacade, /import\("\.\/practiceExperimentRegistryRuntime\.js"\)/);
 assert.match(controllerFacade, /import\("\.\/practiceCombinationRepairExperiment\.js"\)/);
 assert.match(controllerFacade, /import\("\.\/practiceWeakKeysExperiment\.js"\)/);
 assert.match(controllerFacade, /import\("\.\/practiceCustomTextExperiment\.js"\)/);
+assert.match(controllerFacade, /import\("\.\/practiceWeaknessBossExperiment\.js"\)/);
 assert.doesNotMatch(controllerFacade, /from "\.\/practiceLab(?:ViewModel|Renderer|Routes)(?:V\d+)?\.js"/);
 assert.doesNotMatch(controllerFacade, /from "\.\/practice(?:SessionEngine|Repository|IndexedDbStore|ManifestStore|TreatmentResponseRuntime)\.js"/);
 
@@ -45,6 +50,10 @@ assert.match(registryFacade, /import\("\.\/practiceExperimentRegistryRuntime\.js
 assert.doesNotMatch(registryFacade, /from "\.\/practiceSessionContract\.js"/);
 assert.doesNotMatch(registryFacade, /from "\.\/practiceExperimentCatalog\.js"/);
 
+assert.match(controllerRuntimeV37, /from "\.\/practiceLabControllerRuntimeV36\.js"/);
+assert.match(controllerRuntimeV37, /from "\.\/practiceLabRendererV37\.js"/);
+assert.match(controllerRuntimeV37, /import\("\.\/practiceWeaknessBossSessionHost\.js"\)/);
+assert.doesNotMatch(controllerRuntimeV37, /from "\.\/practice(?:SessionEngine|Repository|IndexedDbStore|ManifestStore)\.js"/);
 assert.match(controllerRuntimeV36, /from "\.\/practiceLabControllerRuntimeV32\.js"/);
 assert.match(controllerRuntimeV36, /from "\.\/practiceLabRendererV36\.js"/);
 assert.match(controllerRuntimeV36, /import\("\.\/practicePhysicalTelemetryViewRuntime\.js"\)/);
@@ -64,4 +73,4 @@ const browserStaticPracticeImports = [
 ].map((match) => match[1]);
 assert.deepEqual(browserStaticPracticeImports, ["./practiceExperimentRegistry.js"]);
 
-console.log("Practice Lab heavy runtime remains outside the normal browser static graph; PL36 Physical Keyboard wraps V32 lazily and loads telemetry persistence only on demand.");
+console.log("Practice Lab heavy runtime remains outside the normal browser static graph; PL37 Weakness Boss wraps V36 lazily and loads Boss session runtime only on demand.");
