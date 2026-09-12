@@ -8,15 +8,19 @@ import {
 
 export * from "./practiceConstantsV31.js";
 
-export const PRACTICE_DATABASE_VERSION = 11;
+export const PRACTICE_DATABASE_VERSION = 12;
 
 export const PRACTICE_RECORD_VERSIONS = Object.freeze({
   ...PRACTICE_RECORD_VERSIONS_V31,
+  sessionSummary: 14,
   coachPlan: 2,
   treatmentEpisode: 1,
   treatmentResponseState: 1,
   physicalTelemetryStat: 1,
   physicalTelemetrySession: 1,
+  researchEnrollment: 1,
+  researchAssignment: 1,
+  researchAnalysisState: 1,
 });
 
 export const PRACTICE_LIMITS = Object.freeze({
@@ -37,10 +41,17 @@ export const PRACTICE_LIMITS = Object.freeze({
   physicalTelemetrySessionMarkerDays: 180,
   physicalTelemetryRecentSamples: 32,
   physicalTelemetryStatBytes: 8 * 1024,
+  researchEnrollmentsPerProfile: 32,
+  researchAssignmentsPerProfile: 256,
+  researchAnalysisStatesPerProfile: 64,
+  researchAssignmentBytes: 48 * 1024,
+  researchCompletedDays: 365,
+  researchTechnicalInvalidDays: 90,
 });
 
 const existingSessionIndexes = PRACTICE_STORE_DEFINITIONS_V31.sessionSummaries.indexes;
 const hasProfileContextCompleted = existingSessionIndexes.some((index) => index.name === "profileContextCompletedAt");
+const hasResearchAssignment = existingSessionIndexes.some((index) => index.name === "researchAssignmentId");
 
 export const PRACTICE_STORE_DEFINITIONS = Object.freeze({
   ...PRACTICE_STORE_DEFINITIONS_V31,
@@ -49,6 +60,7 @@ export const PRACTICE_STORE_DEFINITIONS = Object.freeze({
     indexes: Object.freeze([
       ...existingSessionIndexes,
       ...(hasProfileContextCompleted ? [] : [Object.freeze({ name: "profileContextCompletedAt", keyPath: ["profileId", "contextId", "completedAtUtc"] })]),
+      ...(hasResearchAssignment ? [] : [Object.freeze({ name: "researchAssignmentId", keyPath: "researchBinding.researchAssignmentId" })]),
     ]),
   }),
   treatmentEpisodes: Object.freeze({
@@ -95,6 +107,41 @@ export const PRACTICE_STORE_DEFINITIONS = Object.freeze({
       Object.freeze({ name: "completedAt", keyPath: "completedAt" }),
       Object.freeze({ name: "appliedAt", keyPath: "appliedAt" }),
       Object.freeze({ name: "profileCompletedAt", keyPath: ["profileId", "completedAt"] }),
+    ]),
+  }),
+  researchEnrollments: Object.freeze({
+    keyPath: "researchEnrollmentId",
+    indexes: Object.freeze([
+      Object.freeze({ name: "profileId", keyPath: "profileId" }),
+      Object.freeze({ name: "contextId", keyPath: "contextId" }),
+      Object.freeze({ name: "status", keyPath: "status" }),
+      Object.freeze({ name: "studyId", keyPath: "studyId" }),
+      Object.freeze({ name: "profileContextStudyVersion", keyPath: ["profileId", "contextId", "studyId", "studyVersion"], options: { unique: true } }),
+      Object.freeze({ name: "updatedAt", keyPath: "updatedAt" }),
+    ]),
+  }),
+  researchAssignments: Object.freeze({
+    keyPath: "researchAssignmentId",
+    indexes: Object.freeze([
+      Object.freeze({ name: "researchEnrollmentId", keyPath: "researchEnrollmentId" }),
+      Object.freeze({ name: "profileId", keyPath: "profileId" }),
+      Object.freeze({ name: "contextId", keyPath: "contextId" }),
+      Object.freeze({ name: "status", keyPath: "status" }),
+      Object.freeze({ name: "targetStatId", keyPath: "target.statId" }),
+      Object.freeze({ name: "localDayKey", keyPath: "localDayKey" }),
+      Object.freeze({ name: "enrollmentSequence", keyPath: ["researchEnrollmentId", "assignmentIndex"], options: { unique: true } }),
+      Object.freeze({ name: "profileContextDay", keyPath: ["profileId", "contextId", "localDayKey"] }),
+      Object.freeze({ name: "createdAt", keyPath: "createdAt" }),
+    ]),
+  }),
+  researchAnalysisStates: Object.freeze({
+    keyPath: "researchAnalysisStateId",
+    indexes: Object.freeze([
+      Object.freeze({ name: "researchEnrollmentId", keyPath: "researchEnrollmentId", options: { unique: true } }),
+      Object.freeze({ name: "profileId", keyPath: "profileId" }),
+      Object.freeze({ name: "contextId", keyPath: "contextId" }),
+      Object.freeze({ name: "studyId", keyPath: "studyId" }),
+      Object.freeze({ name: "updatedAt", keyPath: "updatedAt" }),
     ]),
   }),
 });
