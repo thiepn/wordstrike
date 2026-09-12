@@ -13,12 +13,14 @@ const readAheadLongDescription = "An experimental visual-preview exercise that k
 const WEAKNESS_BOSS_CAPABILITIES = Object.freeze(["auto-target", "candidate-select", "fixed-dose", "boss-ui", "same-session-probe", "treatment-tracking"]);
 const weaknessBoss = Object.freeze({
   id: "weakness-boss",
-  name: "Weakness Boss",
+  version: 1,
+  title: "Weakness Boss",
+  shortTitle: "Boss",
   description: "Face one of your strongest currently measured weaknesses in a focused Practice challenge.",
   longDescription: "Weakness Boss turns one current PL12 limiter into a fixed-dose Practice encounter. The target is selected from existing Practice evidence, not from a new weakness model. Boss HP represents protocol progress only and Boss defeat does not establish mastery, retention, transfer, or a permanent fix.",
   category: "advanced",
-  icon: "target",
-  accent: "precision",
+  iconKey: "target",
+  accentKey: "precision",
   status: "preview",
   requiresAssessment: false,
   requiresPracticeData: true,
@@ -30,6 +32,8 @@ const weaknessBoss = Object.freeze({
   capabilities: WEAKNESS_BOSS_CAPABILITIES,
   tags: Object.freeze(["adaptive", "weakness", "fixed-dose", "experimental"]),
   primarySkill: "current limiter practice",
+  implementationPrompt: 37,
+  displayOrder: 60,
 });
 
 export const PRACTICE_EXPERIMENT_CATALOG = Object.freeze([
