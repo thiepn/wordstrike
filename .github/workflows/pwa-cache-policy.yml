@@ -27,7 +27,7 @@ jobs:
             }
             return response;
           })));
-          });'''
+          });'''.replace('          if (response', '    if (response').replace('            const copy', '      const copy').replace('            caches.open', '      caches.open').replace('          }\n            return', '    }\n    return').replace('          })));', '  })));').replace('          });', '});')
           new = '''  event.respondWith(fetch(request).then(response => {
             if (response && response.ok) {
               const copy = response.clone();
@@ -35,7 +35,7 @@ jobs:
             }
             return response;
           }).catch(() => caches.match(request)));
-          });'''
+          });'''.replace('          if (response', '    if (response').replace('            const copy', '      const copy').replace('            caches.open', '      caches.open').replace('          }\n            return', '    }\n    return').replace('          }).catch', '  }).catch').replace('          });', '});')
           if text.count(old) != 1:
               raise SystemExit('Expected cache-first handler not found exactly once')
           text = text.replace(old, new)
