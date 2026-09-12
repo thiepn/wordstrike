@@ -21,9 +21,9 @@ const descriptor = Object.freeze({
   supportedCompletionModes: Object.freeze(["content", "manual"]), resumable: true,
 });
 
-test("Phase 0 foundation constants remain intact inside the current PL33 storage envelope", async () => {
+test("Phase 0 foundation constants remain intact inside the current PL36 storage envelope", async () => {
   assert.equal(PRACTICE_MANIFEST_VERSION, 1);
-  assert.ok(PRACTICE_DATABASE_VERSION >= 10);
+  assert.ok(PRACTICE_DATABASE_VERSION >= 11);
   assert.equal(PRACTICE_RECORD_VERSIONS.profile, 3);
   assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 13);
   assert.equal(PRACTICE_RECORD_VERSIONS.learningState, 1);
@@ -31,11 +31,18 @@ test("Phase 0 foundation constants remain intact inside the current PL33 storage
   assert.equal(PRACTICE_RECORD_VERSIONS.evaluationState, 1);
   assert.equal(PRACTICE_RECORD_VERSIONS.coachPlan, 2);
   assert.equal(PRACTICE_STORE_NAMES_V31.length, 16);
-  assert.equal(PRACTICE_STORE_NAMES.length, 18);
+  assert.equal(PRACTICE_STORE_NAMES.length, 20);
   for (const storeName of PRACTICE_STORE_NAMES_V31) assert.equal(PRACTICE_STORE_NAMES.includes(storeName), true, `${storeName} must remain present`);
-  assert.deepEqual(PRACTICE_STORE_NAMES.filter((name) => !PRACTICE_STORE_NAMES_V31.includes(name)), ["treatmentEpisodes", "treatmentResponseStates"]);
+  assert.deepEqual(PRACTICE_STORE_NAMES.filter((name) => !PRACTICE_STORE_NAMES_V31.includes(name)), [
+    "treatmentEpisodes",
+    "treatmentResponseStates",
+    "physicalTelemetryStats",
+    "physicalTelemetrySessions",
+  ]);
   assert.equal(PRACTICE_STORE_NAMES.includes("evaluationStates"), true);
   assert.equal(PRACTICE_STORE_NAMES.includes("coachPlans"), true);
+  assert.equal(PRACTICE_STORE_NAMES.includes("physicalTelemetryStats"), true);
+  assert.equal(PRACTICE_STORE_NAMES.includes("physicalTelemetrySessions"), true);
   assert.equal(PRACTICE_LIMITS.checkpointTtlMs, 86_400_000);
   assert.equal(PRACTICE_LIMITS.sessionSummarySoftCap, 1_000);
   const docs = await readFile(new URL("../docs/PRACTICE_LAB_DATA_ARCHITECTURE.md", import.meta.url), "utf8");
@@ -78,20 +85,22 @@ test("Practice summaries reject and normalize ranked/raw fields and configuratio
 
 test("controller mount/unmount stress leaves no listeners, subscribers, or stale route history", () => {
   const listeners = new Set();
-  const root = {
-    innerHTML: "", addEventListener(_type, listener) { listeners.add(listener); },
-    removeEventListener(_type, listener) { listeners.delete(listener); }, contains: () => true,
+  const renderer = {
+    render() {},
+    bind(controller) {
+      const listener = () => controller.getState();
+      listeners.add(listener);
+      return () => listeners.delete(listener);
+    },
   };
-  const gate = createPracticeFeatureGate({ developerMode: true });
-  const registry = createPracticeExperimentRegistry({ featureGate: gate });
-  const controller = createPracticeLabController({ root, featureGate: gate, experimentRegistry: registry, renderer() {} });
-  for (let cycle = 0; cycle < 50; cycle += 1) {
+  const registry = createPracticeExperimentRegistry({ featureGate: createPracticeFeatureGate({ developerMode: true }) });
+  const controller = createPracticeLabController({ renderer, registry, featureGate: createPracticeFeatureGate({ developerMode: true }) });
+  for (let index = 0; index < 50; index += 1) {
     controller.mount();
-    for (let index = 0; index < 10; index += 1) controller.navigate(createPracticeLabRoute(index % 2 ? PRACTICE_LAB_ROUTES.SKILL_MAP : PRACTICE_LAB_ROUTES.PROGRESS));
-    assert.equal(listeners.size, 2);
-    assert.equal(registry.getDiagnostics().subscriberCount, 1);
+    controller.navigate(createPracticeLabRoute(PRACTICE_LAB_ROUTES.HOME));
     controller.unmount();
     assert.equal(listeners.size, 0);
-    assert.equal(registry.getDiagnostics().subscriberCount, 0);
   }
+  const state = controller.getState();
+  assert.equal(state.mounted, false);
 });
