@@ -1,0 +1,82 @@
+name: Temporary PWA Upgrade
+
+on:
+  push:
+    branches: [pwa-upgrade-worker]
+    paths:
+      - '.github/workflows/pwa-upgrade.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  upgrade:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install --disable-pip-version-check pillow
+      - name: Complete PWA support
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from PIL import Image
+          import json
+
+          root = Path('.')
+          icons = root / 'assets' / 'icons'
+          source = Image.open(icons / 'icon-512.png').convert('RGBA')
+          mask = Image.new('RGBA', (512,512), '#0A0E14')
+          safe = source.copy()
+          safe.thumbnail((384,384), Image.Resampling.LANCZOS)
+          mask.alpha_composite(safe, ((512-safe.width)//2, (512-safe.height)//2))
+          mask.convert('RGB').save(icons / 'icon-maskable-512.png', 'PNG', optimize=True)
+
+          manifest_path = root / 'manifest.webmanifest'
+          manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
+          manifest['display'] = 'standalone'
+          manifest['orientation'] = 'any'
+          manifest['categories'] = ['games', 'education']
+          manifest['icons'] = [
+            {'src':'./assets/icons/icon-192.png','sizes':'192x192','type':'image/png','purpose':'any'},
+            {'src':'./assets/icons/icon-512.png','sizes':'512x512','type':'image/png','purpose':'any'},
+            {'src':'./assets/icons/icon-maskable-512.png','sizes':'512x512','type':'image/png','purpose':'maskable'}
+          ]
+          manifest_path.write_text(json.dumps(manifest, indent=2) + '\n', encoding='utf-8')
+
+          shell = ['./','./index.html','./manifest.webmanifest']
+          for pattern in ['js/**/*.js','styles/**/*.css','data/**/*','assets/icons/*','*.css']:
+              for p in sorted(root.glob(pattern)):
+                  if p.is_file():
+                      rel = './' + p.as_posix()
+                      if rel not in shell:
+                          shell.append(rel)
+
+          sw = f'''const CACHE_PREFIX = "wordstrike-pwa-";\nconst CACHE_NAME = `${{CACHE_PREFIX}}v1`;\nconst APP_SHELL = {json.dumps(shell, indent=2)};\n\nself.addEventListener("install", event => {{\n  event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL)));\n  self.skipWaiting();\n}});\n\nself.addEventListener("activate", event => {{\n  event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(key => key.startsWith(CACHE_PREFIX) && key !== CACHE_NAME).map(key => caches.delete(key)))).then(() => self.clients.claim()));\n}});\n\nself.addEventListener("fetch", event => {{\n  const request = event.request;\n  if (request.method !== "GET") return;\n  const url = new URL(request.url);\n  if (url.origin !== self.location.origin) return;\n  if (request.mode === "navigate") {{\n    event.respondWith(fetch(request).then(response => {{\n      if (response && response.ok) {{\n        const copy = response.clone();\n        caches.open(CACHE_NAME).then(cache => cache.put("./index.html", copy));\n      }}\n      return response;\n    }}).catch(() => caches.match("./index.html").then(hit => hit || caches.match("./"))));\n    return;\n  }}\n  event.respondWith(caches.match(request).then(cached => cached || fetch(request).then(response => {{\n    if (response && response.ok) {{\n      const copy = response.clone();\n      caches.open(CACHE_NAME).then(cache => cache.put(request, copy));\n    }}\n    return response;\n  }})));\n}});\n'''
+          (root / 'sw.js').write_text(sw, encoding='utf-8')
+
+          index = root / 'index.html'
+          html = index.read_text(encoding='utf-8')
+          if 'name="mobile-web-app-capable"' not in html:
+              html = html.replace('<meta name="theme-color" content="#0A0E14">', '<meta name="theme-color" content="#0A0E14">\n    <meta name="mobile-web-app-capable" content="yes">\n    <meta name="apple-mobile-web-app-capable" content="yes">\n    <meta name="apple-mobile-web-app-title" content="WORDSTRIKE">', 1)
+          register = '''\n    <script>\n      if ("serviceWorker" in navigator) {\n        window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js").catch(() => {}));\n      }\n    </script>\n'''
+          if 'navigator.serviceWorker.register("./sw.js")' not in html:
+              html = html.replace('  </body>', register + '  </body>', 1)
+          index.write_text(html, encoding='utf-8')
+
+          assert 'rel="manifest"' in html
+          assert 'navigator.serviceWorker.register("./sw.js")' in html
+          assert Image.open(icons/'icon-maskable-512.png').size == (512,512)
+          assert len(shell) > 10
+          print(f'WORDSTRIKE PWA validation passed with {len(shell)} precached assets')
+          PY
+      - name: Commit generated PWA upgrade
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html manifest.webmanifest sw.js assets/icons/icon-maskable-512.png
+          git commit -m "Complete installable PWA support" || exit 0
+          git push origin HEAD:pwa-upgrade-worker
