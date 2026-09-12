@@ -2,27 +2,37 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { PRACTICE_LAB_ROUTES, PRACTICE_LAB_PUBLIC_ROUTES, createPracticeLabRoute, normalizePracticeLabRoute } from "../js/practiceLab/practiceLabRoutes.js";
+import { renderPracticePhysicalKeyboardPage } from "../js/practiceLab/practiceLabRendererV36.js";
 
-import { renderPracticePhysicalTelemetryPage } from "../js/practiceLab/practicePhysicalTelemetryUi.js";
+assert.equal(PRACTICE_LAB_ROUTES.PHYSICAL_KEYBOARD, "physical-keyboard");
+assert.ok(PRACTICE_LAB_PUBLIC_ROUTES.includes(PRACTICE_LAB_ROUTES.PHYSICAL_KEYBOARD));
+const normalized = normalizePracticeLabRoute(createPracticeLabRoute(PRACTICE_LAB_ROUTES.PHYSICAL_KEYBOARD), { featureGate: { canAccess: () => true } });
+assert.equal(normalized.name, PRACTICE_LAB_ROUTES.PHYSICAL_KEYBOARD);
 
 const root = {
   innerHTML: "",
   querySelector() { return null; },
 };
-
-renderPracticePhysicalTelemetryPage(root, {
-  enabled: false,
-  contextEligible: true,
-  hasHistoricalData: true,
-  coverage: { eligibleTextEventCount: 100, validCodeEventCount: 90, validCodeCoverage: 0.9, persisted: true },
-  evidenceConfidence: { label: "moderate", score: 0.6 },
-  keyStats: [{ entityKey: "KeyT", attempts: 50, observedMisstrikeOriginRate: 0.04, averageNormalizedResidualMs: 20 }],
-  transitionStats: [{ entityKey: "KeyT→KeyH", attempts: 30, averageNormalizedResidualMs: 35 }],
-  modifierStats: [{ entityKey: "shift-left:letter", attempts: 20, observedMisstrikeOriginRate: 0.05 }],
+renderPracticePhysicalKeyboardPage(root, {
+  status: "ready",
+  availability: { enabled: true, contextEligible: true, inputMethod: "physical" },
+  snapshot: {
+    coverage: { eligibleSessions: 2, physicalKeyActivations: 80, physicalCodesObserved: 2, transitionsObserved: 1, latestTelemetryDate: "2026-09-12T00:00:00.000Z" },
+    keys: [{ entityKey: "KeyA", observation: { activationCount: 50 }, observedMisstrikeOriginRate: 0.02, medianResidualMs: 4, disfluencyRate: 0.1, confidence: "medium" }],
+    transitions: [{ entityKey: "KeyA>KeyB", observation: { timingEligibleCount: 30 }, medianResidualMs: 8, disfluencyRate: 0.1, confidence: "medium" }],
+    modifierRoutes: [{ entityKey: "uppercase-letter|shift|left", observation: { opportunityCount: 12, timingEligibleCount: 10 }, medianResidualMs: 3, confidence: "low" }],
+  },
+  hasStoredData: true,
 });
-
 assert.match(root.innerHTML, /Physical Keyboard/);
-assert.match(root.innerHTML, /local/i);
+assert.match(root.innerHTML, /Local only/);
+assert.match(root.innerHTML, /Physical code/);
+assert.match(root.innerHTML, /KeyA/);
+assert.match(root.innerHTML, /KeyB/);
+assert.match(root.innerHTML, /Modifier Patterns/);
+assert.match(root.innerHTML, /data-practice-physical-toggle/);
+assert.match(root.innerHTML, /data-practice-physical-clear/);
 assert.match(root.innerHTML, /does not save raw physical keystroke sequences/i);
 assert.doesNotMatch(root.innerHTML, />Physical accuracy</i);
 
