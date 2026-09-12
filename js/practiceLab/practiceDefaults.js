@@ -30,9 +30,11 @@ export function createDefaultSessionSummary(options = {}) {
   const summary = createDefaultSessionSummaryV17(options);
   return {
     ...summary,
+    recordVersion: PRACTICE_RECORD_VERSIONS.sessionSummary,
     evaluationSummary: summary.evaluationSummary ?? null,
     assessmentBinding: summary.assessmentBinding ?? null,
     coachBinding: summary.coachBinding ?? null,
+    researchBinding: summary.researchBinding ?? null,
   };
 }
 
