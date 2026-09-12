@@ -1,5 +1,5 @@
 const CACHE_PREFIX = "wordstrike-pwa-";
-const CACHE_NAME = CACHE_PREFIX + "v1";
+const CACHE_NAME = CACHE_PREFIX + "v2";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -653,11 +653,11 @@ self.addEventListener("fetch", event => {
     }).catch(() => caches.match("./index.html").then(hit => hit || caches.match("./"))));
     return;
   }
-  event.respondWith(caches.match(request).then(cached => cached || fetch(request).then(response => {
-    if (response && response.ok) {
-      const copy = response.clone();
-      caches.open(CACHE_NAME).then(cache => cache.put(request, copy));
-    }
-    return response;
-  })));
+  event.respondWith(fetch(request).then(response => {
+  if (response && response.ok) {
+    const copy = response.clone();
+    caches.open(CACHE_NAME).then(cache => cache.put(request, copy));
+  }
+  return response;
+}).catch(() => caches.match(request)));
 });
