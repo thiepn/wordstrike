@@ -1,0 +1,31 @@
+name: PL38 Research A-B
+
+on:
+  push:
+    branches: [pl38-research-ab]
+  pull_request:
+    paths:
+      - 'js/practiceLab/**'
+      - 'tests/pl38-research-ab.test.js'
+      - 'docs/PRACTICE_LAB_RESEARCH_AB_INFRASTRUCTURE.md'
+      - 'package.json'
+      - '.github/workflows/pl38-research-ab.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  certify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: PL38 focused certification
+        run: npm run test:pl38-research-ab
+      - name: PL8-PL37 critical Practice regressions
+        run: node --test tests/practice-latency-*.test.js tests/practice-normalization-*.test.js tests/practice-treatment-response*-pl32.test.js tests/practice-coach-personalization-*.test.js tests/practice-read-ahead*-pl34.test.js tests/practice-metronome*-pl35.test.js tests/practice-physical-telemetry*-pl36.test.js tests/practice-weakness-boss*-pl37.test.js
+      - name: Full WordStrike regression suite
+        run: npm test
