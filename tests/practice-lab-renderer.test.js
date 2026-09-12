@@ -20,8 +20,10 @@ test("home renderer exposes semantic sections, honest empty states, native contr
   assert.match(target.innerHTML, /NO SKILL PROFILE YET/i);
   assert.match(target.innerHTML, /RECOMMENDATIONS NEED DATA/i);
   assert.match(target.innerHTML, /disabled aria-disabled="true"/);
+  assert.match(target.innerHTML, /data-practice-action="open-experiment" data-experiment-id="full-assessment"/);
   const visibleCatalogCardCount = viewModel.categories.reduce((count, category) => count + category.experiments.length, 0);
-  assert.equal((target.innerHTML.match(/data-experiment-id=/g) || []).length, visibleCatalogCardCount);
+  const renderedCatalogCardCount = (target.innerHTML.match(/class="practice-lab-text-button" data-practice-action="open-experiment" data-experiment-id=/g) || []).length;
+  assert.equal(renderedCatalogCardCount, visibleCatalogCardCount);
   assert.doesNotMatch(target.innerHTML, /implementationPrompt|Prompt 6/);
 });
 
