@@ -85,22 +85,20 @@ test("Practice summaries reject and normalize ranked/raw fields and configuratio
 
 test("controller mount/unmount stress leaves no listeners, subscribers, or stale route history", () => {
   const listeners = new Set();
-  const renderer = {
-    render() {},
-    bind(controller) {
-      const listener = () => controller.getState();
-      listeners.add(listener);
-      return () => listeners.delete(listener);
-    },
+  const root = {
+    innerHTML: "", addEventListener(_type, listener) { listeners.add(listener); },
+    removeEventListener(_type, listener) { listeners.delete(listener); }, contains: () => true,
   };
-  const registry = createPracticeExperimentRegistry({ featureGate: createPracticeFeatureGate({ developerMode: true }) });
-  const controller = createPracticeLabController({ renderer, registry, featureGate: createPracticeFeatureGate({ developerMode: true }) });
-  for (let index = 0; index < 50; index += 1) {
+  const gate = createPracticeFeatureGate({ developerMode: true });
+  const registry = createPracticeExperimentRegistry({ featureGate: gate });
+  const controller = createPracticeLabController({ root, featureGate: gate, experimentRegistry: registry, renderer() {} });
+  for (let cycle = 0; cycle < 50; cycle += 1) {
     controller.mount();
-    controller.navigate(createPracticeLabRoute(PRACTICE_LAB_ROUTES.HOME));
+    for (let index = 0; index < 10; index += 1) controller.navigate(createPracticeLabRoute(index % 2 ? PRACTICE_LAB_ROUTES.SKILL_MAP : PRACTICE_LAB_ROUTES.PROGRESS));
+    assert.equal(listeners.size, 2);
+    assert.equal(registry.getDiagnostics().subscriberCount, 1);
     controller.unmount();
     assert.equal(listeners.size, 0);
+    assert.equal(registry.getDiagnostics().subscriberCount, 0);
   }
-  const state = controller.getState();
-  assert.equal(state.mounted, false);
 });
