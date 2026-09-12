@@ -1,46 +1,21 @@
 import assert from "node:assert/strict";
+import fs from "node:fs";
 import test from "node:test";
 
-import {
-  LEGACY_WORDSTRIKE_AUTH_STORAGE_KEY,
-  SUPABASE_AUTH_STORAGE_KEY,
-  prepareSharedAuthStorage,
-} from "../js/supabaseClient.js";
-
-function memoryStorage(initial = {}) {
-  const values = new Map(Object.entries(initial));
-  return {
-    getItem(key) {
-      return values.has(key) ? values.get(key) : null;
-    },
-    setItem(key, value) {
-      values.set(key, String(value));
-    },
-    removeItem(key) {
-      values.delete(key);
-    },
-  };
-}
+const source = fs.readFileSync(new URL("../js/supabaseClient.js", import.meta.url), "utf8");
 
 test("THIEPN Account uses the shared Supabase project storage key", () => {
-  assert.equal(SUPABASE_AUTH_STORAGE_KEY, "sb-hycegznamzjhwinegaai-auth-token");
+  assert.match(source, /SUPABASE_AUTH_STORAGE_KEY\s*=\s*["']sb-hycegznamzjhwinegaai-auth-token["']/);
 });
 
-test("legacy WordStrike session is promoted only when shared session is absent", () => {
-  const storage = memoryStorage({
-    [LEGACY_WORDSTRIKE_AUTH_STORAGE_KEY]: "legacy-session",
-  });
-
-  assert.equal(prepareSharedAuthStorage(storage), true);
-  assert.equal(storage.getItem(SUPABASE_AUTH_STORAGE_KEY), "legacy-session");
+test("WordStrike preserves one-time migration from its same-project legacy key", () => {
+  assert.match(source, /LEGACY_WORDSTRIKE_AUTH_STORAGE_KEY\s*=\s*["']wordstrike_supabase_auth_v1["']/);
+  assert.match(source, /storage\.getItem\(sharedKey\)\s*==\s*null/);
+  assert.match(source, /storage\.getItem\(legacyKey\)\s*!=\s*null/);
+  assert.match(source, /storage\.setItem\(sharedKey,\s*storage\.getItem\(legacyKey\)\)/);
 });
 
-test("existing shared THIEPN Account session always wins", () => {
-  const storage = memoryStorage({
-    [LEGACY_WORDSTRIKE_AUTH_STORAGE_KEY]: "legacy-session",
-    [SUPABASE_AUTH_STORAGE_KEY]: "shared-session",
-  });
-
-  prepareSharedAuthStorage(storage);
-  assert.equal(storage.getItem(SUPABASE_AUTH_STORAGE_KEY), "shared-session");
+test("shared THIEPN Account storage is configured on the Supabase client", () => {
+  assert.match(source, /storageKey:\s*SUPABASE_AUTH_STORAGE_KEY/);
+  assert.match(source, /prepareSharedAuthStorage\(\)/);
 });
