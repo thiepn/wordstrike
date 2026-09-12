@@ -59,6 +59,7 @@ assert.match(html, /rel="icon" type="image\/png" href="\.\/assets\/icons\/favico
 assert.match(html, /rel="apple-touch-icon" href="\.\/assets\/icons\/apple-touch-icon\.png"/);
 assert.equal((html.match(/rel="manifest"/g) || []).length, 1);
 assert.match(html, /href="\.\/manifest\.webmanifest"/);
+assert.match(html, /navigator\.serviceWorker\.register\("\.\/sw\.js"\)/);
 assert.doesNotMatch(html, /href="\/assets\//);
 
 const manifest = JSON.parse(await readFile(new URL("../manifest.webmanifest", import.meta.url), "utf8"));
@@ -66,10 +67,12 @@ assert.equal(manifest.id, "./");
 assert.equal(manifest.name, "WORDSTRIKE");
 assert.equal(manifest.start_url, "./");
 assert.equal(manifest.scope, "./");
+assert.equal(manifest.display, "standalone");
 assert.match(manifest.description, /local-first browser typing game/i);
 assert.deepEqual(manifest.icons, [
-  { src: "./assets/icons/icon-192.png", sizes: "192x192", type: "image/png" },
-  { src: "./assets/icons/icon-512.png", sizes: "512x512", type: "image/png" },
+  { src: "./assets/icons/icon-192.png", sizes: "192x192", type: "image/png", purpose: "any" },
+  { src: "./assets/icons/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any" },
+  { src: "./assets/icons/icon-maskable-512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
 ]);
 for (const path of [
   "../assets/branding/wordstrike-logo.webp",
@@ -78,8 +81,10 @@ for (const path of [
   "../assets/icons/apple-touch-icon.png",
   "../assets/icons/icon-192.png",
   "../assets/icons/icon-512.png",
+  "../assets/icons/icon-maskable-512.png",
+  "../sw.js",
 ]) {
   await access(new URL(path, import.meta.url));
 }
 
-console.log("Main-menu branding, canonical metadata, favicons, manifest identity, responsive Title CSS, and relative assets passed.");
+console.log("Main-menu branding, canonical metadata, favicons, PWA manifest/service-worker identity, responsive Title CSS, and relative assets passed.");
