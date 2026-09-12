@@ -89,6 +89,27 @@ assert.equal(delta.keys.find((item) => item.entityKey === "KeyA").firstPassError
 assert.equal(JSON.stringify(delta).includes('"key"'), false, "raw KeyboardEvent.key must not be persisted in aggregate delta");
 assert.equal(JSON.stringify(delta).includes("q>"), false, "textual character sequences must not become transition identities");
 
+const coverageInput = { type: "character", accepted: true, expected: "a", correctness: "correct", isFirstAttempt: true, event: { type: "character", correctness: "correct", isFirstAttempt: true, timingSegmentId: 1, latencyFromPriorInsertionMs: null } };
+const coverageAccumulator = createPracticePhysicalTelemetryAccumulator();
+for (const excluded of [
+  normalizePracticePhysicalKeyEvent(fakeEvent({ repeat: true }), tracker, 300),
+  normalizePracticePhysicalKeyEvent(fakeEvent({ isComposing: true }), tracker, 301),
+  normalizePracticePhysicalKeyEvent(fakeEvent({ key: "Dead" }), tracker, 302),
+  normalizePracticePhysicalKeyEvent(fakeEvent({ ctrlKey: true }), tracker, 303),
+]) coverageAccumulator.recordProcessedInput({ physicalEvent: excluded, processedInput: coverageInput });
+let coverageDelta = coverageAccumulator.snapshotDelta();
+assert.equal(coverageDelta.eligibleTextEventCount, 0, "repeat/composition/dead/shortcut events must be excluded before the code-coverage denominator");
+assert.equal(coverageDelta.validCodeEventCount, 0);
+coverageAccumulator.recordProcessedInput({ physicalEvent: null, processedInput: coverageInput });
+coverageDelta = coverageAccumulator.snapshotDelta();
+assert.equal(coverageDelta.eligibleTextEventCount, 1, "missing physical code must reduce code coverage");
+assert.equal(coverageDelta.validCodeEventCount, 0);
+coverageAccumulator.recordProcessedInput({ physicalEvent: physicalA, processedInput: coverageInput });
+coverageDelta = coverageAccumulator.snapshotDelta();
+assert.equal(coverageDelta.eligibleTextEventCount, 2);
+assert.equal(coverageDelta.validCodeEventCount, 1);
+assert.equal(coverageDelta.codeCoverage, 0.5);
+
 assert.equal(calculatePracticePhysicalTelemetryConfidence({ entityType: "physical-key", observation: { activationCount: 20, distinctSessionCount: 2 } }), "low");
 assert.equal(calculatePracticePhysicalTelemetryConfidence({ entityType: "physical-key", observation: { activationCount: 150, distinctSessionCount: 5 } }), "high");
 assert.equal(calculatePracticePhysicalTelemetryConfidence({ entityType: "physical-transition", observation: { timingEligibleCount: 30, distinctSessionCount: 3 } }), "medium");
