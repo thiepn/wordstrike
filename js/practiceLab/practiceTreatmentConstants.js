@@ -8,7 +8,7 @@ export const PRACTICE_TREATMENT_RESPONSE_MODEL_VERSION = 1;
 export const PRACTICE_TREATMENT_RESPONSE_STATE_VERSION = 1;
 
 export const PRACTICE_TREATMENT_CLASSES = Object.freeze(["targeted", "broad", "hybrid"]);
-export const PRACTICE_TREATMENT_ASSIGNMENT_KINDS = Object.freeze(["manual", "coach"]);
+export const PRACTICE_TREATMENT_ASSIGNMENT_KINDS = Object.freeze(["manual", "coach", "randomized"]);
 export const PRACTICE_TREATMENT_EPISODE_STATUSES = Object.freeze(["prepared", "tracking", "closed", "invalid"]);
 export const PRACTICE_TREATMENT_BASELINE_STATUSES = Object.freeze(["pending", "available", "missing", "ineligible"]);
 export const PRACTICE_TREATMENT_OUTCOME_STATUSES = Object.freeze(["pending", "observed", "contaminated", "expired", "incompatible", "not-applicable"]);
