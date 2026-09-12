@@ -145,7 +145,9 @@ function enhance() {
   if (!root) return;
   root.querySelectorAll(".global-account").forEach((account) => {
     const heading = account.querySelector("#global-account-heading");
-    if (heading) heading.textContent = "THIEPN ACCOUNT";
+    if (heading && heading.textContent !== "THIEPN ACCOUNT") {
+      heading.textContent = "THIEPN ACCOUNT";
+    }
     const content = account.querySelector("#global-account-content");
     if (!content) return;
     enhanceSignedOut(content);
