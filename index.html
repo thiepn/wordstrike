@@ -63,7 +63,8 @@
     <script type="module" src="js/ui12GlobalPresentation.js"></script>
 
     <script>
-      if ("serviceWorker" in navigator) {
+      const canRegisterPwa = location.protocol === "https:" || location.hostname === "localhost";
+      if ("serviceWorker" in navigator && canRegisterPwa) {
         window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js").catch(() => {}));
       }
     </script>
