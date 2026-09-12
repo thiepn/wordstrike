@@ -49,6 +49,7 @@ export function createPracticeSessionEngine(options = {}) {
   let postCanonicalCommit = async () => {};
   let preparedContentPlan = null;
   let physicalAvailable = true;
+  let physicalEligible = false;
 
   core = createPracticeSessionEngineV31({
     ...options,
@@ -70,7 +71,7 @@ export function createPracticeSessionEngine(options = {}) {
     } catch (cause) {
       logger?.warn?.("Treatment tracking failed after canonical Practice commit", { cause });
     }
-    if (physicalAvailable) {
+    if (physicalAvailable && physicalEligible) {
       try {
         await physical.afterCanonicalCommit({ sessionSummary: payload.sessionSummary, contentPlan: preparedContentPlan });
       } catch (cause) {
@@ -100,11 +101,15 @@ export function createPracticeSessionEngine(options = {}) {
       logger?.warn?.("Treatment tracking unavailable for prepared Practice session", { cause });
     }
     try {
-      await physicalDataStore.open();
-      await physical.prepare({ contentPlan: args.contentPlan });
-      await reconcilePracticePhysicalTelemetry({ repository: physicalRepository, profileId });
+      const eligibility = await physical.prepare({ contentPlan: args.contentPlan });
+      physicalEligible = eligibility?.eligible === true;
+      if (physicalEligible) {
+        await physicalDataStore.open();
+        await reconcilePracticePhysicalTelemetry({ repository: physicalRepository, profileId });
+      }
     } catch (cause) {
       physicalAvailable = false;
+      physicalEligible = false;
       logger?.warn?.("Physical telemetry unavailable for prepared Practice session", { cause });
     }
     return prepared;
@@ -112,13 +117,13 @@ export function createPracticeSessionEngine(options = {}) {
 
   const start = (...args) => {
     const started = core.start(...args);
-    if (physicalAvailable) physical.start();
+    if (physicalAvailable && physicalEligible) physical.start();
     return started;
   };
 
   const handleInput = (rawInput) => {
     const outcome = core.handleInput(rawInput);
-    if (physicalAvailable) {
+    if (physicalAvailable && physicalEligible) {
       try { physical.observeCanonicalInput(rawInput, outcome, core.getSnapshot?.() ?? null); }
       catch (cause) { logger?.warn?.("Physical telemetry input hook failed", { cause }); }
     }
