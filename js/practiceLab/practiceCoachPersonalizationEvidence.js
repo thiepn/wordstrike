@@ -15,6 +15,7 @@ const freezeDeep = (value) => {
 };
 const DEPTH_RANK = Object.freeze({ high: 2, medium: 1, low: 0, insufficient: -1 });
 const GRADE_RANK = Object.freeze({ "prospective-recorded-clean": 2, "hybrid-measurement": 1, confounded: 0 });
+const PL37_BOSS_FAMILY_PREFIX = "weakness-boss:";
 
 function observedMs(sample) { return Date.parse(sample?.observedAt ?? ""); }
 function recentEligibleSamples(state, nowMs) {
@@ -86,12 +87,16 @@ export function selectPracticeCoachResponseProfile({
   targetStatId,
   now = new Date(),
 } = {}) {
+  // PL37 v1 response history is intentionally observational only. Daily Coach
+  // personalization must not consume it until a later phase explicitly owns that policy.
+  if (typeof treatmentFamilyKey === "string" && treatmentFamilyKey.startsWith(PL37_BOSS_FAMILY_PREFIX)) return null;
   const nowMs = new Date(typeof now === "function" ? now() : now).getTime();
   if (!finite(nowMs)) return null;
   const compatible = (Array.isArray(responseStates) ? responseStates : []).filter((state) => state
     && state.profileId === profileId
     && state.contextId === contextId
     && state.treatmentFamilyKey === treatmentFamilyKey
+    && !String(state.treatmentFamilyKey).startsWith(PL37_BOSS_FAMILY_PREFIX)
     && state.targetEntityType === targetEntityType
     && state.responseModelVersion === PRACTICE_TREATMENT_RESPONSE_MODEL_VERSION
     && state.responseUnit === "quality-points"
