@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#0A0E14">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="WORDSTRIKE">
     <meta name="description" content="WORDSTRIKE is a local-first browser typing game with Campaign, Typing Test, Endless, Arcade Rush, statistics, and optional global leaderboards.">
     <meta property="og:title" content="WORDSTRIKE">
     <meta property="og:description" content="Precision typing under arcade pressure. Play Campaign, Typing Test, Endless, and Arcade Rush.">
@@ -58,5 +61,11 @@
     <script type="module" src="js/arcadeRushGameplayPresentation.js"></script>
     <script type="module" src="js/profileLeaderboardsSettingsPresentation.js"></script>
     <script type="module" src="js/ui12GlobalPresentation.js"></script>
+
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js").catch(() => {}));
+      }
+    </script>
   </body>
 </html>
