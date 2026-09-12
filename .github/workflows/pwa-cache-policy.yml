@@ -20,29 +20,28 @@ jobs:
           from pathlib import Path
           p = Path('sw.js')
           text = p.read_text(encoding='utf-8')
-          old = '''  event.respondWith(caches.match(request).then(cached => cached || fetch(request).then(response => {
-            if (response && response.ok) {
-              const copy = response.clone();
-              caches.open(CACHE_NAME).then(cache => cache.put(request, copy));
-            }
-            return response;
-          })));
-          });'''.replace('          if (response', '    if (response').replace('            const copy', '      const copy').replace('            caches.open', '      caches.open').replace('          }\n            return', '    }\n    return').replace('          })));', '  })));').replace('          });', '});')
-          new = '''  event.respondWith(fetch(request).then(response => {
+          needle = '  event.respondWith(caches.match(request).then(cached => cached || fetch(request).then(response => {'
+          start = text.rfind(needle)
+          if start < 0:
+              raise SystemExit('Cache-first runtime handler start not found')
+          end = text.find('\n});', start)
+          if end < 0:
+              raise SystemExit('Cache-first runtime handler end not found')
+          end += len('\n});')
+          replacement = '''  event.respondWith(fetch(request).then(response => {
             if (response && response.ok) {
               const copy = response.clone();
               caches.open(CACHE_NAME).then(cache => cache.put(request, copy));
             }
             return response;
           }).catch(() => caches.match(request)));
-          });'''.replace('          if (response', '    if (response').replace('            const copy', '      const copy').replace('            caches.open', '      caches.open').replace('          }\n            return', '    }\n    return').replace('          }).catch', '  }).catch').replace('          });', '});')
-          if text.count(old) != 1:
-              raise SystemExit('Expected cache-first handler not found exactly once')
-          text = text.replace(old, new)
+          });'''
+          replacement = '\n'.join(line[10:] if line.startswith('          ') else line for line in replacement.splitlines())
+          text = text[:start] + replacement + text[end:]
           text = text.replace('const CACHE_NAME = CACHE_PREFIX + "v1";', 'const CACHE_NAME = CACHE_PREFIX + "v2";', 1)
           p.write_text(text, encoding='utf-8')
           assert 'caches.match(request).then(cached => cached || fetch(request)' not in text
-          assert 'fetch(request).then(response =>' in text
+          assert 'const CACHE_NAME = CACHE_PREFIX + "v2";' in text
           print('Wordstrike runtime cache is network-first with offline fallback')
           PY
       - name: Commit cache policy
