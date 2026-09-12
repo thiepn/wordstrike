@@ -35,6 +35,17 @@ export function createPracticeSessionEngine(options = {}) {
   const standardTreatment = createPracticeTreatmentService({ repository, profileId, contextId, sessionId, wallClock, logger });
   const weaknessBossTreatment = createPracticeWeaknessBossTreatmentService({ repository, profileId, contextId, sessionId, wallClock, logger });
   let activeTreatment = standardTreatment;
+  // Preserve the PL32 source-level sidecar contract while allowing PL37 to select
+  // a treatment adapter before prepare. Every call still delegates to exactly one
+  // active treatment service for the current session.
+  const treatment = Object.freeze({
+    prepare: (...args) => activeTreatment.prepare(...args),
+    observeProgress: (...args) => activeTreatment.observeProgress(...args),
+    flush: (...args) => activeTreatment.flush(...args),
+    afterCanonicalCommit: (...args) => activeTreatment.afterCanonicalCommit(...args),
+    abandon: (...args) => activeTreatment.abandon(...args),
+    getEpisode: (...args) => activeTreatment.getEpisode(...args),
+  });
   const physicalDataStore = options.physicalTelemetryDataStore ?? createPracticeIndexedDbStore();
   const ownsPhysicalDataStore = options.physicalTelemetryDataStore == null;
   const physicalRepository = createPracticePhysicalTelemetryRepositoryFacade({ dataStore: physicalDataStore, now: wallClock });
@@ -61,14 +72,18 @@ export function createPracticeSessionEngine(options = {}) {
   });
 
   const complete = async (reason) => {
-    try { const result = await core.complete(reason); return result; }
-    finally { physical.stop(); }
+    try {
+      const result = await core.complete(reason);
+      return result;
+    } finally {
+      physical.stop();
+    }
   };
 
   postCanonicalCommit = async (payload) => {
     try {
-      await activeTreatment.flush();
-      await activeTreatment.afterCanonicalCommit({
+      await treatment.flush();
+      await treatment.afterCanonicalCommit({
         commitPayload: payload,
         retentionAnalysis: core?.getRetentionAnalysis?.() ?? null,
       });
@@ -85,7 +100,7 @@ export function createPracticeSessionEngine(options = {}) {
   };
 
   const unsubscribeTracking = core.subscribe((snapshot, event) => {
-    try { activeTreatment.observeProgress(snapshot, event); }
+    try { treatment.observeProgress(snapshot, event); }
     catch (cause) { logger?.warn?.("Treatment tracking progress hook failed", { cause }); }
     if (["paused", "resumed", "content-appended", "restored"].includes(event)) physical.resetTimingContinuity();
   });
@@ -95,7 +110,7 @@ export function createPracticeSessionEngine(options = {}) {
     const prepared = await core.prepare(args);
     preparedContentPlan = args.contentPlan ?? null;
     try {
-      await activeTreatment.prepare({
+      await treatment.prepare({
         experiment: args.experiment,
         configuration: args.configuration ?? {},
         preparedContentPlan: args.contentPlan,
@@ -138,7 +153,7 @@ export function createPracticeSessionEngine(options = {}) {
   const abandon = async (reason = "manual-stop") => {
     try {
       const result = await core.abandon(reason);
-      try { await activeTreatment.abandon("abandoned-before-treatment"); }
+      try { await treatment.abandon("abandoned-before-treatment"); }
       catch (cause) { logger?.warn?.("Treatment tracking abandonment hook failed", { cause }); }
       return result;
     } finally {
@@ -163,7 +178,7 @@ export function createPracticeSessionEngine(options = {}) {
     complete,
     abandon,
     destroy,
-    getTreatmentEpisode() { return activeTreatment.getEpisode(); },
+    getTreatmentEpisode() { return treatment.getEpisode(); },
     getPhysicalTelemetryDiagnostics() { return physical.getDiagnostics(); },
   });
 }
