@@ -118,7 +118,7 @@ assert.equal(PRACTICE_RECORD_VERSIONS.context, 1);
 assert.equal(PRACTICE_RECORD_VERSIONS.skillStat, 3);
 assert.equal(PRACTICE_RECORD_VERSIONS.abilityState, 1);
 assert.equal(PRACTICE_RECORD_VERSIONS.learningState, 1);
-assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 13);
+assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 14);
 assert.equal(PRACTICE_RECORD_VERSIONS.reviewItem, 3);
 assert.equal(PRACTICE_RECORD_VERSIONS.evaluationState, 1);
 assert.equal(PRACTICE_RECORD_VERSIONS.assessmentRun, 1);
