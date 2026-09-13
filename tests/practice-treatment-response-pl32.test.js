@@ -115,9 +115,9 @@ function targetRetestCandidate({
   });
 }
 
-test("PL32 database envelope is DB10 with dedicated stores and no session-summary bump", () => {
-  assert.ok(PRACTICE_DATABASE_VERSION >= 10);
-  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 13);
+test("PL32 dedicated treatment stores and response model remain frozen inside the current PL38 envelope", () => {
+  assert.ok(PRACTICE_DATABASE_VERSION >= 12);
+  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 14);
   assert.equal(PRACTICE_RECORD_VERSIONS.treatmentEpisode, 1);
   assert.equal(PRACTICE_RECORD_VERSIONS.treatmentResponseState, 1);
   assert.ok(PRACTICE_STORE_DEFINITIONS.treatmentEpisodes);
