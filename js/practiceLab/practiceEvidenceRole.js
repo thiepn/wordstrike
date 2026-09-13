@@ -9,6 +9,7 @@ import { getPracticeTrustedAccuracyRecoveryBinding } from "./practiceAccuracyRec
 import { getPracticeTrustedRealTextBinding } from "./practiceRealTextTrust.js";
 import { getPracticeTrustedRealTextColdTransferBinding } from "./practiceRealTextColdTransferTrust.js";
 import { getPracticeTrustedPaceLadderBinding } from "./practicePaceLadderTrust.js";
+import { getPracticeTrustedResearchBinding } from "./practiceResearchBinding.js";
 
 const PARTITION_TO_ROLE = Object.freeze({ training: "training", transfer: "transfer", benchmark: "benchmark", diagnostic: "diagnostic" });
 const PARTITION_TO_PURPOSE = Object.freeze({ training: "training", transfer: "cold-transfer", benchmark: "benchmark", diagnostic: "diagnostic" });
@@ -22,6 +23,7 @@ function resolveTrustedProblemWords(contentPlan) { const binding = getPracticeTr
 function resolveTrustedRealText(contentPlan) { const binding = getPracticeTrustedRealTextBinding(contentPlan); if (!binding || binding.experimentId !== "real-text" || binding.partition !== "training" || binding.evidenceRole !== "training" || binding.targetEntities?.length !== 0 || (contentPlan?.targetEntities?.length ?? 0) !== 0) return null; return "training"; }
 function resolveTrustedRealTextColdTransfer(contentPlan) { const binding = getPracticeTrustedRealTextColdTransferBinding(contentPlan); if (!binding || binding.kind !== "cold-transfer" || contentPlan?.metadata?.partition !== "transfer" || contentPlan?.metadata?.evaluationContentBindingHash !== binding.contentBindingHash || (contentPlan?.targetEntities?.length ?? 0) !== 0) return null; return "transfer"; }
 function resolveTrustedPaceLadder(contentPlan) { const binding = getPracticeTrustedPaceLadderBinding(contentPlan); if (!binding || binding.experimentId !== "pace-ladder" || binding.partition !== "diagnostic" || binding.evidenceRole !== "diagnostic" || (contentPlan?.targetEntities?.length ?? 0) !== 0 || contentPlan?.metadata?.sourceType !== "pace-ladder-diagnostic") return null; return "diagnostic"; }
+function resolveTrustedResearchProbe(contentPlan) { const binding = getPracticeTrustedResearchBinding(contentPlan); if (!binding || !["baseline", "followup"].includes(binding.phase) || contentPlan?.metadata?.sourceType !== "research-target-probe" || contentPlan?.metadata?.partition !== "diagnostic" || (contentPlan?.targetEntities?.length ?? 0) !== 1) return null; return "diagnostic"; }
 function resolveTrustedStaticPartition(contentPlan, language) {
   const runtime = resolvePracticeTypabilityRuntime({ language }); if (!runtime || !contentPlan) return null;
   const candidate = runtime.staticScoresBySessionContentHash?.[contentPlan.contentHash] ?? null; const metadata = contentPlan.metadata ?? {}; if (!candidate) return null;
@@ -38,6 +40,7 @@ export function resolvePracticeEvidenceRole({ contentPlan, context = null } = {}
   const realTextRole = resolveTrustedRealText(contentPlan); if (realTextRole) return realTextRole;
   const coldTransferRole = resolveTrustedRealTextColdTransfer(contentPlan); if (coldTransferRole) return coldTransferRole;
   const paceLadderRole = resolveTrustedPaceLadder(contentPlan); if (paceLadderRole) return paceLadderRole;
+  const researchProbeRole = resolveTrustedResearchProbe(contentPlan); if (researchProbeRole) return researchProbeRole;
   const language = baseLanguage(contentPlan?.metadata?.language ?? context?.dataLocale); const partition = resolveTrustedStaticPartition(contentPlan, language); const role = PARTITION_TO_ROLE[partition] ?? "unclassified";
   if (!PRACTICE_EVIDENCE_ROLES.includes(role)) return "unclassified"; return role;
 }
