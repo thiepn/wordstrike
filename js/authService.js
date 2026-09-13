@@ -46,9 +46,9 @@ export function createAuthService({
     session?.user ? session : null,
   );
 
-  const syncAccountPlatform = (session) => {
+  const syncAccountPlatform = (session, { clearWhenMissing = false } = {}) => {
     if (!session?.user) {
-      accountPlatform.clearSession?.();
+      if (clearWhenMissing) accountPlatform.clearSession?.();
       return null;
     }
     const normalized = accountPlatform.adoptSession?.(session) ?? session;
@@ -65,15 +65,15 @@ export function createAuthService({
       if (!client?.auth) return publish(freezeState("unavailable"));
       try {
         if (!authSubscription) {
-          const response = client.auth.onAuthStateChange?.((_event, session) => {
-            const normalized = syncAccountPlatform(session);
+          const response = client.auth.onAuthStateChange?.((event, session) => {
+            const normalized = syncAccountPlatform(session, { clearWhenMissing: event === "SIGNED_OUT" });
             publish(stateFromSession(normalized));
           });
           authSubscription = response?.data?.subscription ?? response?.subscription ?? null;
         }
         const { data, error } = await client.auth.getSession();
         if (error) return publish(freezeState("error", null, safeError()));
-        const normalized = syncAccountPlatform(data?.session ?? null);
+        const normalized = syncAccountPlatform(data?.session ?? null, { clearWhenMissing: true });
         return publish(stateFromSession(normalized));
       } catch {
         return publish(freezeState("error", null, safeError()));
