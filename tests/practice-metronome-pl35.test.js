@@ -23,9 +23,9 @@ import { getPracticeTreatmentResponseThreshold } from "../js/practiceLab/practic
 
 const DAY = 24 * 60 * 60 * 1000;
 
-test("PL35 freezes DB10 and experiment v1 without a storage migration", () => {
-  assert.ok(PRACTICE_DATABASE_VERSION >= 10);
-  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 13);
+test("PL35 experiment v1 remains frozen inside the current PL38 storage envelope", () => {
+  assert.ok(PRACTICE_DATABASE_VERSION >= 12);
+  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 14);
   assert.equal(PRACTICE_METRONOME_VERSION, 1);
   assert.equal(PRACTICE_METRONOME_ANALYSIS_VERSION, 1);
   assert.deepEqual(PRACTICE_METRONOME_DURATIONS_MS, [120000, 300000, 480000]);
