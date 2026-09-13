@@ -102,12 +102,15 @@ export function createPracticeResearchRepository({ dataStore, now = Date.now } =
 
   async function prune(profileId) {
     const enrollments=await listEnrollments(profileId);
-    const activeIds=new Set(enrollments.filter((item)=>["active","paused"].includes(item.status)).map((item)=>item.researchEnrollmentId));
+    // Assignment-level records are the audit trail for attrition, imbalance and exact
+    // original-block reconstruction. Preserve them while their enrollment exists;
+    // explicit Research deletion is the user-controlled removal path.
+    const retainedEnrollmentIds=new Set(enrollments.map((item)=>item.researchEnrollmentId));
     const assignments=(await dataStore.query("researchAssignments","profileId",profileId)).filter((item)=>validatePracticeResearchAssignment(item).valid);
     const cutoff=currentMs();
     const deleteIds=[];
     for (const item of assignments) {
-      if (activeIds.has(item.researchEnrollmentId) || !terminalAssignment(item)) continue;
+      if (retainedEnrollmentIds.has(item.researchEnrollmentId) || !terminalAssignment(item)) continue;
       const age=cutoff-Date.parse(item.closedAt??item.updatedAt??item.createdAt);
       const days=item.status==="technical-invalid"?PRACTICE_LIMITS.researchTechnicalInvalidDays:PRACTICE_LIMITS.researchCompletedDays;
       if (Number.isFinite(age)&&age>days*86_400_000) deleteIds.push(item.researchAssignmentId);
