@@ -28,10 +28,11 @@ import {
 } from "../js/practiceLab/practicePhysicalTelemetryPolicy.js";
 import { renderPracticePhysicalTelemetryPanel } from "../js/practiceLab/practicePhysicalTelemetryUi.js";
 
-assert.equal(PRACTICE_DATABASE_VERSION, 11);
+assert.equal(PRACTICE_DATABASE_VERSION, 12);
 assert.ok(PRACTICE_STORE_DEFINITIONS.physicalTelemetryStats);
 assert.ok(PRACTICE_STORE_DEFINITIONS.physicalTelemetrySessions);
-assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, PRACTICE_RECORD_VERSIONS_V31.sessionSummary, "PL36 must not bump session-summary version");
+assert.equal(PRACTICE_RECORD_VERSIONS_V31.sessionSummary, 13, "PL36 inherited the pre-PL38 session-summary v13 envelope");
+assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 14, "PL38 later adds only the trusted researchBinding field");
 assert.equal(createDefaultPracticeSettings().physicalKeyboardTelemetryEnabled, false);
 assert.equal(normalizePracticeSettings({ physicalKeyboardTelemetryEnabled: true }).physicalKeyboardTelemetryEnabled, true);
 assert.equal(normalizePracticeSettings({}).physicalKeyboardTelemetryEnabled, false);
@@ -147,4 +148,4 @@ for (const name of ["practiceAbilityEstimator.js", "practiceLearningService.js",
   const source = fs.readFileSync(path.join(here, "../js/practiceLab", name), "utf8");
   assert.doesNotMatch(source, /practicePhysical|physicalTelemetry/i, `${name} must not consume PL36 telemetry`);
 }
-console.log("PL36 physical keyboard telemetry core, privacy, eligibility, modifier, code, confidence, and UI contracts passed.");
+console.log("PL36 physical keyboard telemetry core, privacy, eligibility, modifier, code, confidence, and UI contracts passed inside the current PL38 envelope.");
