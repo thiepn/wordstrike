@@ -41,6 +41,7 @@ const DEFINITIONS = Object.freeze({
 export const PRACTICE_TREATMENT_EXCLUDED_EXPERIMENT_IDS = Object.freeze([
   "full-assessment", "common-words-check", "endurance-check", "punctuation-capitals-check", "numbers-symbols-check",
   "real-text-cold-transfer", "benchmark", "cold-transfer", "daily-coach-review", "retention-review", "custom-text",
+  "research-target-probe",
 ]);
 
 function flowOf(configuration = {}, contentPlan = null) {
@@ -58,10 +59,11 @@ function versionFingerprint(configuration = {}) {
 function directTarget(contentPlan) { return (contentPlan?.targetEntities ?? []).find((target) => target?.directTarget === true) ?? (contentPlan?.targetEntities ?? [])[0] ?? null; }
 export function getPracticeTreatmentDefinition(experimentId) { return DEFINITIONS[experimentId] ?? null; }
 export function listPracticeTreatmentDefinitions() { return Object.entries(DEFINITIONS).map(([experimentId, value]) => freezeDeep({ experimentId, ...value, variant: undefined, responseDimensions: undefined })); }
-export function resolvePracticeTreatmentIdentity({ experiment, configuration = {}, contentPlan = null, coachBinding = null } = {}) {
+export function resolvePracticeTreatmentIdentity({ experiment, configuration = {}, contentPlan = null, coachBinding = null, researchBinding = null } = {}) {
   const experimentId = experiment?.id ?? null;
   const definition = getPracticeTreatmentDefinition(experimentId);
   if (!definition || PRACTICE_TREATMENT_EXCLUDED_EXPERIMENT_IDS.includes(experimentId)) return null;
+  if (coachBinding && researchBinding) return null;
   const flow = flowOf(configuration, contentPlan);
   if (definition.requiredFlow && flow !== definition.requiredFlow) return null;
   const protocolVariant = definition.variant(configuration, contentPlan);
@@ -76,6 +78,23 @@ export function resolvePracticeTreatmentIdentity({ experiment, configuration = {
   if (experimentId === "weakness-boss" && !["key", "bigram", "trigram", "word"].includes(bossEntityType)) return null;
   const familyInput = canonical({ experimentId, experimentVersion, versions, flow: flow ?? "default", protocolVariant, responseDimensions, ...(experimentId === "weakness-boss" ? { targetEntityType: bossEntityType } : {}) });
   const protocolInput = canonical({ registryVersion: PRACTICE_TREATMENT_REGISTRY_VERSION, ...familyInput });
-  return freezeDeep({ registryVersion: PRACTICE_TREATMENT_REGISTRY_VERSION, experimentId, experimentVersion, title: definition.title, treatmentClass: definition.treatmentClass, outcomeDomain: definition.outcomeDomain, flow: flow ?? "default", protocolVariant, protocolFingerprint: hashPracticeContent(JSON.stringify(protocolInput)), treatmentFamilyKey: `${experimentId}:${hashPracticeContent(JSON.stringify(familyInput))}`, assignmentKind: coachBinding ? "coach" : "manual", targetEntityType: target?.entityType ?? null, targetEntityKey: target?.entityKey ?? null, doseDescriptor: protocolVariant, responseDimensions, materialVersions: versions });
+  return freezeDeep({
+    registryVersion: PRACTICE_TREATMENT_REGISTRY_VERSION,
+    experimentId,
+    experimentVersion,
+    title: definition.title,
+    treatmentClass: definition.treatmentClass,
+    outcomeDomain: definition.outcomeDomain,
+    flow: flow ?? "default",
+    protocolVariant,
+    protocolFingerprint: hashPracticeContent(JSON.stringify(protocolInput)),
+    treatmentFamilyKey: `${experimentId}:${hashPracticeContent(JSON.stringify(familyInput))}`,
+    assignmentKind: researchBinding ? "randomized" : coachBinding ? "coach" : "manual",
+    targetEntityType: target?.entityType ?? null,
+    targetEntityKey: target?.entityKey ?? null,
+    doseDescriptor: protocolVariant,
+    responseDimensions,
+    materialVersions: versions,
+  });
 }
 export function isPracticeTreatmentSession(input = {}) { return resolvePracticeTreatmentIdentity(input) != null; }
