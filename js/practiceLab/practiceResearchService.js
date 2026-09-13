@@ -6,7 +6,8 @@ import { createPracticeResearchAssignmentRecord, advancePracticeResearchEnrollme
 import { normalizePracticeResearchProbeResult, computePracticeResearchOutcome } from "./practiceResearchProbe.js";
 import { auditPracticeResearchContamination, isPracticeResearchPrimaryContaminationEligible } from "./practiceResearchContamination.js";
 import { recomputePracticeResearchAnalysis } from "./practiceResearchAnalysis.js";
-import { PRACTICE_RESEARCH_POLICY, PRACTICE_RESEARCH_STUDY_ID, PRACTICE_RESEARCH_STUDY_VERSION } from "./practiceResearchConstants.js";
+import { assertPracticeResearchBindingMatches } from "./practiceResearchBinding.js";
+import { PRACTICE_RESEARCH_POLICY, PRACTICE_RESEARCH_PROBE_CONTRACT, PRACTICE_RESEARCH_STUDY_ID, PRACTICE_RESEARCH_STUDY_VERSION } from "./practiceResearchConstants.js";
 
 const iso = (value) => new Date(value instanceof Date ? value.getTime() : value).toISOString();
 const dayKey = (value) => { const d=new Date(value); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; };
@@ -45,15 +46,24 @@ export function createPracticeResearchService({ dataStore = null, repository = n
     return persisted.assignment;
   }
 
-  async function beginBaseline(assignmentId) {
+  async function beginBaseline(assignmentId, sessionId = null) {
+    if (sessionId) return repo.reserveProbeSession(assignmentId,"baseline",sessionId);
     const record=await repo.getAssignment(assignmentId);
     if (!record || record.status!=="assigned") return record;
     return repo.saveAssignment(Object.freeze({...record,status:"baseline-active",updatedAt:iso(time())}));
   }
 
+  async function beginFollowup(assignmentId, sessionId) {
+    const record=await refreshAssignment(assignmentId);
+    if (!record || record.status!=="followup-ready") throw new TypeError("Practice Research follow-up is not ready");
+    return repo.reserveProbeSession(assignmentId,"followup",sessionId);
+  }
+
   async function recordBaseline(assignmentId, result) {
     const record=await repo.getAssignment(assignmentId);
-    if (!record || !["assigned","baseline-active"].includes(record.status)) throw new TypeError("Practice Research baseline is not expected");
+    if (!record) throw new TypeError("Practice Research baseline assignment not found");
+    if (record.baseline?.status==="valid" && !["assigned","baseline-active"].includes(record.status)) return record;
+    if (!["assigned","baseline-active"].includes(record.status)) throw new TypeError("Practice Research baseline is not expected");
     const baseline=normalizePracticeResearchProbeResult(result);
     if (baseline.status!=="valid") return repo.saveAssignment(Object.freeze({...record,baseline,status:"technical-invalid",analysisEligibility:"missing-baseline",closedAt:iso(time()),updatedAt:iso(time())}));
     return repo.saveAssignment(Object.freeze({...record,baseline,status:"baseline-complete",updatedAt:iso(time())}));
@@ -73,14 +83,16 @@ export function createPracticeResearchService({ dataStore = null, repository = n
   }
 
   async function startTreatment(assignmentId, sessionId = null) {
-    const record=await repo.getAssignment(assignmentId);
-    if (!record || record.status!=="treatment-revealed") throw new TypeError("Assigned Practice treatment is not ready");
-    return repo.saveAssignment(Object.freeze({...record,status:"treatment-active",treatment:Object.freeze({...record.treatment,status:"active",sessionId,exposureStartedAt:iso(time())}),updatedAt:iso(time())}));
+    if (!sessionId) throw new TypeError("Assigned Practice treatment requires a canonical sessionId");
+    return repo.reserveTreatmentSession(assignmentId,sessionId);
   }
 
   async function completeTreatment(assignmentId, sessionId = null) {
     const record=await repo.getAssignment(assignmentId);
-    if (!record || record.status!=="treatment-active") throw new TypeError("Assigned Practice treatment is not active");
+    if (!record) throw new TypeError("Assigned Practice treatment not found");
+    if (["followup-waiting","followup-ready","followup-complete","expired"].includes(record.status) && (!sessionId || record.treatment?.sessionId===sessionId)) return record;
+    if (record.status!=="treatment-active") throw new TypeError("Assigned Practice treatment is not active");
+    if (sessionId && record.treatment?.sessionId && sessionId!==record.treatment.sessionId) { const error=new Error("Practice Research treatment session mismatch"); error.code="PRACTICE_RESEARCH_SESSION_CONFLICT"; throw error; }
     const completedAt=time();
     return repo.saveAssignment(Object.freeze({...record,status:"followup-waiting",treatment:Object.freeze({...record.treatment,status:"complete",sessionId:sessionId??record.treatment.sessionId,completedAt:iso(completedAt)}),followupWindow:Object.freeze({notBefore:iso(completedAt.getTime()+PRACTICE_RESEARCH_POLICY.minimumFollowupMs),expiresAt:iso(completedAt.getTime()+PRACTICE_RESEARCH_POLICY.maximumFollowupMs),differentLocalDay:true}),analysisEligibility:"followup-missing",updatedAt:iso(completedAt)}));
   }
@@ -105,6 +117,8 @@ export function createPracticeResearchService({ dataStore = null, repository = n
   }
 
   async function recordFollowup(assignmentId, result, { contaminationEvents = null } = {}) {
+    const existing=await repo.getAssignment(assignmentId);
+    if (existing?.status==="followup-complete") return existing;
     let record=await refreshAssignment(assignmentId);
     if (!record || record.status!=="followup-ready") throw new TypeError("Practice Research follow-up is outside its precommitted ready window");
     const followup=normalizePracticeResearchProbeResult(result);
@@ -115,6 +129,43 @@ export function createPracticeResearchService({ dataStore = null, repository = n
     record=Object.freeze({...record,status:"followup-complete",primaryFollowup:Object.freeze({...followup,outcome}),secondaryOutcomes:outcome,contamination,analysisEligibility:valid?"eligible":(followup.status!=="valid"?"followup-missing":"contaminated"),closedAt:iso(time()),updatedAt:iso(time())});
     await repo.saveAssignment(record);
     await recompute(record.researchEnrollmentId);
+    return record;
+  }
+
+  async function boundCompletedSession(record, phase, sessionId, expectedExperimentId) {
+    if (!sessionId) return null;
+    const sessions=await repo.listAssignmentSessions(record.researchAssignmentId);
+    const candidates=sessions.filter((summary)=>summary?.sessionId===sessionId&&summary?.status==="completed"&&summary?.experimentId===expectedExperimentId);
+    for (const summary of candidates) {
+      try {
+        await assertPracticeResearchBindingMatches(summary.researchBinding,record,{phase,statId:record.target?.statId,cryptoImpl});
+        return summary;
+      } catch {}
+    }
+    return null;
+  }
+
+  async function reconcileAssignment(assignmentId) {
+    let record=await repo.getAssignment(assignmentId);
+    if (!record || assignmentTerminal(record)) return record;
+    if (record.status==="baseline-active" && record.baselineSessionId) {
+      const summary=await boundCompletedSession(record,"baseline",record.baselineSessionId,PRACTICE_RESEARCH_PROBE_CONTRACT.experimentId);
+      if (summary) {
+        record=await recordBaseline(assignmentId,{...(summary.beforeMetrics??{}),completedAt:summary.completedAtUtc??iso(time())});
+        if (record?.baseline?.status==="valid") record=await revealTreatment(assignmentId);
+      }
+      return record;
+    }
+    if (record.status==="treatment-active" && record.treatment?.sessionId) {
+      const summary=await boundCompletedSession(record,"treatment",record.treatment.sessionId,record.treatment.experimentId);
+      if (summary) record=await completeTreatment(assignmentId,summary.sessionId);
+      return record;
+    }
+    if (record.status==="followup-ready" && record.followupSessionId) {
+      const summary=await boundCompletedSession(record,"followup",record.followupSessionId,PRACTICE_RESEARCH_PROBE_CONTRACT.experimentId);
+      if (summary) record=await recordFollowup(assignmentId,{...(summary.beforeMetrics??{}),completedAt:summary.completedAtUtc??iso(time())});
+      return record;
+    }
     return record;
   }
 
@@ -142,7 +193,9 @@ export function createPracticeResearchService({ dataStore = null, repository = n
     let assignments=await repo.listAssignments(researchEnrollmentId);
     let active=assignments.find((item)=>!assignmentTerminal(item))??null;
     if (active) {
+      await reconcileAssignment(active.researchAssignmentId);
       await refreshAssignment(active.researchAssignmentId);
+      await reconcileAssignment(active.researchAssignmentId);
       assignments=await repo.listAssignments(researchEnrollmentId);
       active=assignments.find((item)=>!assignmentTerminal(item))??null;
     }
@@ -150,5 +203,5 @@ export function createPracticeResearchService({ dataStore = null, repository = n
     return Object.freeze({enrollment,assignments:Object.freeze(assignments),activeAssignment:active,analysis});
   }
 
-  return Object.freeze({enroll,createAssignment,beginBaseline,recordBaseline,revealTreatment,declineTreatment,startTreatment,completeTreatment,getFollowupState,refreshAssignment,recordFollowup,recompute,setEnrollmentStatus,snapshot,deleteResearchRecords:(id)=>repo.deleteEnrollmentResearch(id),close(){ownedStore?.close?.();}});
+  return Object.freeze({enroll,createAssignment,beginBaseline,beginFollowup,recordBaseline,revealTreatment,declineTreatment,startTreatment,completeTreatment,getFollowupState,refreshAssignment,recordFollowup,reconcileAssignment,recompute,setEnrollmentStatus,snapshot,deleteResearchRecords:(id)=>repo.deleteEnrollmentResearch(id),close(){ownedStore?.close?.();}});
 }
