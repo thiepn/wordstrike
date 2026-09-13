@@ -28,5 +28,6 @@ test("PL38 controller explicitly consumes abandoned probes and prevents randomiz
   assert.match(source, /A started baseline\/follow-up measurement consumes this assignment outcome/);
   assert.match(source, /onRepeat: finish/);
   assert.doesNotMatch(source, /onRepeat\(\)[\s\S]{0,180}startTreatment\(/);
-  assert.match(source, /declined randomized assignment[\s\S]*not be rerolled/i);
+  assert.match(source, /Decline this revealed randomized assignment\?/);
+  assert.match(source, /It will not be rerolled or replaced today\./);
 });
