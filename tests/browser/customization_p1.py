@@ -44,6 +44,16 @@ def context_for(browser,base,width=1440,height=900):
 def open_title(page,base):
  page.goto(base+'?seed=711')
  expect(page.locator('.title-screen')).to_be_visible(timeout=10000)
+ # The title artwork can be loaded asynchronously after the route itself is visible.
+ # Exact pixel comparison is only meaningful once visible title images and fonts settle.
+ page.wait_for_function("""() => [...document.querySelectorAll('.title-screen img')]
+  .every(img => img.complete && img.naturalWidth > 0)""",timeout=10000)
+ page.evaluate("""async () => {
+  if (document.fonts?.ready) await document.fonts.ready;
+  await Promise.all([...document.querySelectorAll('.title-screen img')]
+   .map(img => img.decode ? img.decode().catch(() => {}) : Promise.resolve()));
+  await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+ }""")
 
 def open_settings(page):
  page.locator('[data-action="settings"]').click()
