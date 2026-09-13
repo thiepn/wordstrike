@@ -1,19 +1,18 @@
 import { SUPABASE_CONFIG, hasValidSupabaseConfig } from "./supabaseConfig.js";
 
 export const SUPABASE_AUTH_STORAGE_KEY = "sb-hycegznamzjhwinegaai-auth-token";
-export const LEGACY_WORDSTRIKE_AUTH_STORAGE_KEY = "wordstrike_supabase_auth_v1";
+export const RETIRED_WORDSTRIKE_AUTH_STORAGE_KEY = "wordstrike_supabase_auth_v1";
 
 let clientSingleton = null;
 
-export function prepareSharedAuthStorage(storage = globalThis.localStorage) {
-  if (!storage?.getItem || !storage?.setItem) return false;
+export function cleanupRetiredAuthStorage(storage = globalThis.localStorage) {
+  if (!storage?.removeItem) return false;
   try {
+    // A6: migration is over. WordStrike must never promote an app-specific
+    // access/refresh token into THIEPN Account storage. Remove only the retired
+    // auth artifacts; application/game data is intentionally untouched.
     for (const suffix of ["", "-code-verifier", "-user"]) {
-      const sharedKey = `${SUPABASE_AUTH_STORAGE_KEY}${suffix}`;
-      const legacyKey = `${LEGACY_WORDSTRIKE_AUTH_STORAGE_KEY}${suffix}`;
-      if (storage.getItem(sharedKey) == null && storage.getItem(legacyKey) != null) {
-        storage.setItem(sharedKey, storage.getItem(legacyKey));
-      }
+      storage.removeItem(`${RETIRED_WORDSTRIKE_AUTH_STORAGE_KEY}${suffix}`);
     }
     return true;
   } catch {
@@ -28,9 +27,7 @@ export function getSupabaseClient({
   if (clientSingleton) return clientSingleton;
   if (!hasValidSupabaseConfig(config) || typeof sdk?.createClient !== "function") return null;
   try {
-    // The legacy WordStrike session was issued by this exact Supabase project,
-    // so it is safe to promote once when no shared THIEPN Account session exists.
-    prepareSharedAuthStorage();
+    cleanupRetiredAuthStorage();
     clientSingleton = sdk.createClient(config.url, config.publishableKey, {
       auth: {
         // WordStrike is a client-only static site. Use Supabase's browser-native
