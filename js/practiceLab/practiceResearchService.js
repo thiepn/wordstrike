@@ -139,9 +139,13 @@ export function createPracticeResearchService({ dataStore = null, repository = n
   async function snapshot(researchEnrollmentId) {
     const enrollment=await repo.getEnrollment(researchEnrollmentId);
     if (!enrollment) return null;
-    const assignments=await repo.listAssignments(researchEnrollmentId);
-    const active=assignments.find((item)=>!assignmentTerminal(item))??null;
-    if (active) await refreshAssignment(active.researchAssignmentId);
+    let assignments=await repo.listAssignments(researchEnrollmentId);
+    let active=assignments.find((item)=>!assignmentTerminal(item))??null;
+    if (active) {
+      await refreshAssignment(active.researchAssignmentId);
+      assignments=await repo.listAssignments(researchEnrollmentId);
+      active=assignments.find((item)=>!assignmentTerminal(item))??null;
+    }
     const analysis=await repo.getAnalysisState(researchEnrollmentId)??await recompute(researchEnrollmentId);
     return Object.freeze({enrollment,assignments:Object.freeze(assignments),activeAssignment:active,analysis});
   }
