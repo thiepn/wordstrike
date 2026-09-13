@@ -26,6 +26,6 @@
     "test:pl35-metronome": "node --test tests/practice-metronome*-pl35.test.js",
     "test:pl36-physical-telemetry": "node --test tests/practice-physical-telemetry*-pl36.test.js",
     "test:pl37-weakness-boss": "node --test tests/practice-weakness-boss*-pl37.test.js",
-    "test:pl38-research-ab": "node --test tests/pl38-research-ab.test.js"
+    "test:pl38-research-ab": "node --test tests/*pl38*.test.js"
   }
 }
