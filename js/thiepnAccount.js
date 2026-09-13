@@ -68,7 +68,7 @@ export async function markWordstrikeAccountActivity(session) {
   if (!userId || activityMarkedForUserId === userId) return null;
 
   try {
-    const result = await accountClient.recordAppActivity({ appId: WORDSTRIKE_PLATFORM_APP_ID }, normalized);
+    const result = await accountClient.recordAppActivity({ appId: WORDSTRIKE_PLATFORM_APP_ID });
     activityMarkedForUserId = userId;
     return result;
   } catch (error) {
