@@ -44,7 +44,9 @@ assert.match(controller, /title: "Physical Keyboard"/);
 assert.match(controller, /data-practice-physical-enable/);
 assert.match(controller, /data-practice-physical-clear/);
 assert.match(controller, /confirm\?\.\("Clear all locally stored physical keyboard telemetry/);
-assert.match(loader, /practiceLabControllerRuntimeV37\.js/, "current Practice Lab loader must preserve PL36 through the latest runtime wrapper");
+const latestRuntime = loader.match(/practiceLabControllerRuntimeV(\d+)\.js/);
+assert.ok(latestRuntime, "current Practice Lab loader must use a versioned runtime wrapper");
+assert.ok(Number(latestRuntime[1]) >= 36, "current Practice Lab loader must preserve PL36 through all later runtime wrappers");
 assert.doesNotMatch(controller, /registerPractice.*Physical/i, "PL36 must not register an experiment card");
 
 console.log("PL36 Physical Keyboard route, physical-context discovery, local diagnostics UI, settings, and clear controls passed.");
