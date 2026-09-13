@@ -11,6 +11,7 @@ import {
 const encoder = new TextEncoder();
 const FORBIDDEN = new Set(["sourceText","passageText","typedText","typedBuffer","eventTrace","rawEvents","wrongStrings","physicalTelemetry","customText","contentPlan"]);
 const text = (value, max=600) => typeof value === "string" && value.length > 0 && value.length <= max;
+const nullableText = (value, max=600) => value == null || text(value,max);
 const iso = (value) => value == null || (typeof value === "string" && Number.isFinite(Date.parse(value)));
 function forbidden(value, path="record", errors=[], depth=0) {
   if (!value || typeof value !== "object" || depth > 8) return errors;
@@ -43,6 +44,7 @@ export function validatePracticeResearchAssignment(record) {
   if (!PRACTICE_RESEARCH_ASSIGNMENT_STATUSES.includes(record.status)) errors.push("status-invalid");
   if (!PRACTICE_RESEARCH_ENTITY_TYPES.includes(record.stratum) || record.target?.entityType !== record.stratum || !text(record.target?.statId) || !text(record.target?.entityKey)) errors.push("target-invalid");
   if (!Number.isInteger(record.assignmentIndex) || record.assignmentIndex < 0 || !Number.isInteger(record.blockIndex) || ![0,1,2,3].includes(record.blockPosition)) errors.push("randomization-position-invalid");
+  if (!nullableText(record.baselineSessionId) || !nullableText(record.followupSessionId) || !nullableText(record.treatment?.sessionId)) errors.push("sessionId-invalid");
   if (!PRACTICE_RESEARCH_CONTAMINATION_LEVELS.includes(record.contamination?.level ?? "none")) errors.push("contamination-invalid");
   if (!PRACTICE_RESEARCH_ANALYSIS_ELIGIBILITY.includes(record.analysisEligibility)) errors.push("analysisEligibility-invalid");
   if (!iso(record.createdAt) || !iso(record.updatedAt) || !iso(record.closedAt)) errors.push("time-invalid");
