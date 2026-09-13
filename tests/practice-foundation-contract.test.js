@@ -21,28 +21,37 @@ const descriptor = Object.freeze({
   supportedCompletionModes: Object.freeze(["content", "manual"]), resumable: true,
 });
 
-test("Phase 0 foundation constants remain intact inside the current PL36 storage envelope", async () => {
+test("Phase 0 foundation constants remain intact inside the current PL38 storage envelope", async () => {
   assert.equal(PRACTICE_MANIFEST_VERSION, 1);
-  assert.ok(PRACTICE_DATABASE_VERSION >= 11);
+  assert.ok(PRACTICE_DATABASE_VERSION >= 12);
   assert.equal(PRACTICE_RECORD_VERSIONS.profile, 3);
-  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 13);
+  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 14);
   assert.equal(PRACTICE_RECORD_VERSIONS.learningState, 1);
   assert.equal(PRACTICE_RECORD_VERSIONS.reviewItem, 3);
   assert.equal(PRACTICE_RECORD_VERSIONS.evaluationState, 1);
   assert.equal(PRACTICE_RECORD_VERSIONS.coachPlan, 2);
+  assert.equal(PRACTICE_RECORD_VERSIONS.researchEnrollment, 1);
+  assert.equal(PRACTICE_RECORD_VERSIONS.researchAssignment, 1);
+  assert.equal(PRACTICE_RECORD_VERSIONS.researchAnalysisState, 1);
   assert.equal(PRACTICE_STORE_NAMES_V31.length, 16);
-  assert.equal(PRACTICE_STORE_NAMES.length, 20);
+  assert.equal(PRACTICE_STORE_NAMES.length, 23);
   for (const storeName of PRACTICE_STORE_NAMES_V31) assert.equal(PRACTICE_STORE_NAMES.includes(storeName), true, `${storeName} must remain present`);
   assert.deepEqual(PRACTICE_STORE_NAMES.filter((name) => !PRACTICE_STORE_NAMES_V31.includes(name)), [
     "treatmentEpisodes",
     "treatmentResponseStates",
     "physicalTelemetryStats",
     "physicalTelemetrySessions",
+    "researchEnrollments",
+    "researchAssignments",
+    "researchAnalysisStates",
   ]);
   assert.equal(PRACTICE_STORE_NAMES.includes("evaluationStates"), true);
   assert.equal(PRACTICE_STORE_NAMES.includes("coachPlans"), true);
   assert.equal(PRACTICE_STORE_NAMES.includes("physicalTelemetryStats"), true);
   assert.equal(PRACTICE_STORE_NAMES.includes("physicalTelemetrySessions"), true);
+  assert.equal(PRACTICE_STORE_NAMES.includes("researchEnrollments"), true);
+  assert.equal(PRACTICE_STORE_NAMES.includes("researchAssignments"), true);
+  assert.equal(PRACTICE_STORE_NAMES.includes("researchAnalysisStates"), true);
   assert.equal(PRACTICE_LIMITS.checkpointTtlMs, 86_400_000);
   assert.equal(PRACTICE_LIMITS.sessionSummarySoftCap, 1_000);
   const docs = await readFile(new URL("../docs/PRACTICE_LAB_DATA_ARCHITECTURE.md", import.meta.url), "utf8");
