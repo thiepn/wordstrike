@@ -12,6 +12,7 @@ import { createPracticeIndexedDbStore } from "./practiceIndexedDbStore.js";
 import { createPracticePhysicalTelemetryRepositoryFacade } from "./practicePhysicalTelemetryService.js";
 import { createPracticePhysicalTelemetryRuntime } from "./practicePhysicalTelemetryRuntime.js";
 import { reconcilePracticePhysicalTelemetry } from "./practicePhysicalTelemetryReconciliation.js";
+import { getPracticeTrustedResearchBinding } from "./practiceResearchBinding.js";
 
 function trackingLogger(options) {
   return options?.logger ?? console;
@@ -107,6 +108,7 @@ export function createPracticeSessionEngine(options = {}) {
 
   const prepare = async (args = {}) => {
     activeTreatment = args.experiment?.id === PRACTICE_WEAKNESS_BOSS_EXPERIMENT_ID ? weaknessBossTreatment : standardTreatment;
+    const researchBinding = getPracticeTrustedResearchBinding(args.contentPlan);
     const prepared = await core.prepare(args);
     preparedContentPlan = args.contentPlan ?? null;
     try {
@@ -119,6 +121,11 @@ export function createPracticeSessionEngine(options = {}) {
       await reconcilePracticeTreatmentTracking({ repository, profileId, contextId, now: wallClock });
     } catch (cause) {
       logger?.warn?.("Treatment tracking unavailable for prepared Practice session", { cause });
+    }
+    if (researchBinding) {
+      // PL38 is a local research sidecar and must not consume or persist PL36 physical telemetry.
+      physicalEligible = false;
+      return prepared;
     }
     try {
       const eligibility = await physical.prepare({ contentPlan: args.contentPlan });
