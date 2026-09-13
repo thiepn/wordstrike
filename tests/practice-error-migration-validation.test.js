@@ -25,9 +25,9 @@ function emptyErrorSummary() {
   }).sessionSummary;
 }
 
-test("PL9 contracts remain intact inside the current PL33 storage/session envelope", () => {
-  assert.ok(PRACTICE_DATABASE_VERSION >= 10);
-  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 13);
+test("PL9 contracts remain intact inside the current PL38 storage/session envelope", () => {
+  assert.equal(PRACTICE_DATABASE_VERSION, 12);
+  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 14);
   assert.equal(PRACTICE_RECORD_VERSIONS.reviewItem, 3);
   assert.equal(PRACTICE_RECORD_VERSIONS.evaluationState, 1);
   assert.equal(PRACTICE_RECORD_VERSIONS.assessmentRun, 1);
@@ -39,7 +39,7 @@ test("PL9 contracts remain intact inside the current PL33 storage/session envelo
   assert.equal(PRACTICE_RECORD_VERSIONS.profile, 3);
 });
 
-test("PL9 v3 error migration remains intact through the current PL25 v13 wrapper", () => {
+test("PL9 v3 error migration remains intact through the current PL38 v14 wrapper", () => {
   const current = createDefaultSessionSummary({ now });
   const legacy = { ...current, recordVersion: 3 };
   delete legacy.errorSummary;
@@ -52,12 +52,13 @@ test("PL9 v3 error migration remains intact through the current PL25 v13 wrapper
   delete legacy.evaluationSummary;
   delete legacy.assessmentBinding;
   delete legacy.coachBinding;
+  delete legacy.researchBinding;
   const original = structuredClone(legacy);
   const migrated = migratePracticeRecord("sessionSummary", legacy);
   assert.equal(migrated.ok, true);
   assert.equal(migrated.fromVersion, 3);
-  assert.equal(migrated.toVersion, 13);
-  assert.deepEqual(migrated.steps, ["sessionSummary:3->4", "sessionSummary:4->5", "sessionSummary:5->6", "sessionSummary:6->7", "sessionSummary:7->8", "sessionSummary:8->9", "sessionSummary:9->10", "sessionSummary:10->11", "sessionSummary:11->12", "sessionSummary:12->13"]);
+  assert.equal(migrated.toVersion, 14);
+  assert.deepEqual(migrated.steps, ["sessionSummary:3->4", "sessionSummary:4->5", "sessionSummary:5->6", "sessionSummary:6->7", "sessionSummary:7->8", "sessionSummary:8->9", "sessionSummary:9->10", "sessionSummary:10->11", "sessionSummary:11->12", "sessionSummary:12->13", "sessionSummary:13->14"]);
   assert.equal(migrated.value.errorSummary, null);
   assert.equal(migrated.value.normalizationSummary, null);
   assert.equal(migrated.value.skillEvidenceSummary, null);
@@ -68,10 +69,11 @@ test("PL9 v3 error migration remains intact through the current PL25 v13 wrapper
   assert.equal(migrated.value.evaluationSummary, null);
   assert.equal(migrated.value.assessmentBinding, null);
   assert.equal(migrated.value.coachBinding, null);
+  assert.equal(migrated.value.researchBinding, null);
   assert.deepEqual(legacy, original);
 });
 
-test("PL9 preserves the full historical session migration chain through PL25", () => {
+test("PL9 preserves the full historical session migration chain through PL38", () => {
   const current = createDefaultSessionSummary({ now });
   const v1 = { ...current, recordVersion: 1 };
   delete v1.contextId;
@@ -86,9 +88,11 @@ test("PL9 preserves the full historical session migration chain through PL25", (
   delete v1.evaluationSummary;
   delete v1.assessmentBinding;
   delete v1.coachBinding;
+  delete v1.researchBinding;
   const migrated = migratePracticeRecord("sessionSummary", v1);
   assert.equal(migrated.ok, true);
-  assert.deepEqual(migrated.steps, ["sessionSummary:1->2", "sessionSummary:2->3", "sessionSummary:3->4", "sessionSummary:4->5", "sessionSummary:5->6", "sessionSummary:6->7", "sessionSummary:7->8", "sessionSummary:8->9", "sessionSummary:9->10", "sessionSummary:10->11", "sessionSummary:11->12", "sessionSummary:12->13"]);
+  assert.deepEqual(migrated.steps, ["sessionSummary:1->2", "sessionSummary:2->3", "sessionSummary:3->4", "sessionSummary:4->5", "sessionSummary:5->6", "sessionSummary:6->7", "sessionSummary:7->8", "sessionSummary:8->9", "sessionSummary:9->10", "sessionSummary:10->11", "sessionSummary:11->12", "sessionSummary:12->13", "sessionSummary:13->14"]);
+  assert.equal(migrated.value.recordVersion, 14);
   assert.equal(migrated.value.fluencySummary, null);
   assert.equal(migrated.value.errorSummary, null);
   assert.equal(migrated.value.normalizationSummary, null);
@@ -100,6 +104,7 @@ test("PL9 preserves the full historical session migration chain through PL25", (
   assert.equal(migrated.value.evaluationSummary, null);
   assert.equal(migrated.value.assessmentBinding, null);
   assert.equal(migrated.value.coachBinding, null);
+  assert.equal(migrated.value.researchBinding, null);
 });
 
 test("PL9 validates fixed episode counts, rates, removal relationships and nullability", () => {
