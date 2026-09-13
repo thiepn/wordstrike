@@ -5,6 +5,8 @@
   "type": "module",
   "scripts": {
     "test": "node scripts/runTests.mjs",
+    "check:account-platform": "node scripts/checkThiepnAccountPlatform.mjs",
+    "audit:account-platform": "npm run check:account-platform && npm test",
     "build:practice-corpus": "node scripts/buildPracticeCorpus.mjs",
     "validate:practice-corpus": "node scripts/buildPracticeCorpus.mjs --validate",
     "build:practice-indexes": "node scripts/buildPracticeIndexes.mjs",
