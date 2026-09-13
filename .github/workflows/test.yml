@@ -22,6 +22,9 @@ jobs:
         with:
           node-version: 22
 
+      - name: THIEPN Account platform contract
+        run: npm run check:account-platform
+
       - name: Run tests
         shell: bash
         run: |
