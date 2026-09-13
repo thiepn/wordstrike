@@ -188,13 +188,15 @@ export function createPracticeResearchRuntime({
     await ensureInitialized();
     let assignment = await researchRepo.getAssignment(assignmentId);
     if (!assignment) throw new TypeError("Practice Research assignment not found");
-    if (phase === "baseline") assignment = await service.beginBaseline(assignmentId);
-    else assignment = await service.refreshAssignment(assignmentId);
+    const sessionId = createPracticeSessionId();
+    if (phase === "baseline") assignment = await service.beginBaseline(assignmentId, sessionId);
+    else if (phase === "followup") assignment = await service.beginFollowup(assignmentId, sessionId);
+    else throw new TypeError("Unsupported Practice Research probe phase");
     if (phase === "baseline" && assignment.status !== "baseline-active") throw new TypeError("Baseline probe is not available in this assignment state");
     if (phase === "followup" && assignment.status !== "followup-ready") throw new TypeError("Follow-up probe is not ready");
     const binding = await createPracticeResearchBinding(assignment, phase, cryptoImpl);
     await assertPracticeResearchBindingMatches(binding, assignment, { phase, statId: assignment.target.statId, cryptoImpl });
-    return createPreparedPracticeResearchProbeSession({ assignment, phase, binding });
+    return createPreparedPracticeResearchProbeSession({ assignment, phase, binding, sessionId });
   }
 
   async function completeProbe(assignmentId, phase, finalResult) {
@@ -217,14 +219,19 @@ export function createPracticeResearchRuntime({
     const registration = experimentRegistry.getRegistration(assignment.treatment.experimentId);
     if (!registration?.setupFactory || !registration?.sessionFactory) throw new TypeError("Assigned canonical Practice treatment is unavailable");
     const sessionId = createPracticeSessionId();
-    const prepared = await registration.setupFactory(treatmentSetupArgs(assignment, sessionId));
-    const session = await registration.sessionFactory(prepared);
-    if (!sessionMatchesTarget(session, assignment)) throw new TypeError("Assigned treatment prepared a mismatched target");
-    const binding = await createPracticeResearchBinding(assignment, "treatment", cryptoImpl);
-    await assertPracticeResearchBindingMatches(binding, assignment, { phase: "treatment", statId: assignment.target.statId, cryptoImpl });
-    trustPracticeResearchContentPlan(session.contentPlan, binding);
     assignment = await service.startTreatment(assignmentId, sessionId);
-    return freezeDeep({ assignment, experimentId: assignment.treatment.experimentId, sessionId, binding, session });
+    try {
+      const prepared = await registration.setupFactory(treatmentSetupArgs(assignment, sessionId));
+      const session = await registration.sessionFactory(prepared);
+      if (!sessionMatchesTarget(session, assignment)) throw new TypeError("Assigned treatment prepared a mismatched target");
+      const binding = await createPracticeResearchBinding(assignment, "treatment", cryptoImpl);
+      await assertPracticeResearchBindingMatches(binding, assignment, { phase: "treatment", statId: assignment.target.statId, cryptoImpl });
+      trustPracticeResearchContentPlan(session.contentPlan, binding);
+      return freezeDeep({ assignment, experimentId: assignment.treatment.experimentId, sessionId, binding, session });
+    } catch (error) {
+      try { await abandonTreatment(assignmentId, "treatment-prepare-failed"); } catch {}
+      throw error;
+    }
   }
 
   async function completeTreatment(assignmentId, finalResult) {
