@@ -162,8 +162,13 @@ test("PL37 is a distinct advanced catalog experiment and PL32 targeted family ex
   assert.equal(one.protocolFingerprint, two.protocolFingerprint);
 });
 
-test("PL37 preserves frozen storage, session record, and foundation versions", () => {
-  assert.equal(PRACTICE_DATABASE_VERSION, 11);
-  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 13);
+test("PL37 Boss protocol remains frozen inside the current PL38 storage/session envelope", () => {
+  assert.equal(PRACTICE_DATABASE_VERSION, 12);
+  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 14);
   assert.equal(PRACTICE_FOUNDATION_ANALYSIS_VERSION, 10);
+  assert.equal(PRACTICE_WEAKNESS_BOSS_VERSION, 1);
+  assert.equal(PRACTICE_WEAKNESS_BOSS_POLICY_VERSION, 1);
+  assert.equal(PRACTICE_WEAKNESS_BOSS_GENERATOR_VERSION, 1);
+  assert.equal(PRACTICE_WEAKNESS_BOSS_PROBE_VERSION, 1);
+  assert.equal(PRACTICE_WEAKNESS_BOSS_GAMEPLAY_VERSION, 1);
 });
