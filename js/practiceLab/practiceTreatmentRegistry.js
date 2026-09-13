@@ -1,5 +1,6 @@
 import { hashPracticeContent } from "./practiceIds.js";
 import { PRACTICE_TREATMENT_REGISTRY_VERSION } from "./practiceTreatmentConstants.js";
+import { getPracticeTrustedResearchBinding } from "./practiceResearchBinding.js";
 
 const freezeDeep = (value) => {
   if (!value || typeof value !== "object" || Object.isFrozen(value)) return value;
@@ -59,10 +60,11 @@ function versionFingerprint(configuration = {}) {
 function directTarget(contentPlan) { return (contentPlan?.targetEntities ?? []).find((target) => target?.directTarget === true) ?? (contentPlan?.targetEntities ?? [])[0] ?? null; }
 export function getPracticeTreatmentDefinition(experimentId) { return DEFINITIONS[experimentId] ?? null; }
 export function listPracticeTreatmentDefinitions() { return Object.entries(DEFINITIONS).map(([experimentId, value]) => freezeDeep({ experimentId, ...value, variant: undefined, responseDimensions: undefined })); }
-export function resolvePracticeTreatmentIdentity({ experiment, configuration = {}, contentPlan = null, coachBinding = null, researchBinding = null } = {}) {
+export function resolvePracticeTreatmentIdentity({ experiment, configuration = {}, contentPlan = null, coachBinding = null } = {}) {
   const experimentId = experiment?.id ?? null;
   const definition = getPracticeTreatmentDefinition(experimentId);
   if (!definition || PRACTICE_TREATMENT_EXCLUDED_EXPERIMENT_IDS.includes(experimentId)) return null;
+  const researchBinding = getPracticeTrustedResearchBinding(contentPlan);
   if (coachBinding && researchBinding) return null;
   const flow = flowOf(configuration, contentPlan);
   if (definition.requiredFlow && flow !== definition.requiredFlow) return null;
