@@ -23,7 +23,7 @@ export function evaluatePracticeResearchTargetEligibility(candidate, { now = Dat
   if (!["likely", "confirmed"].includes(candidate?.weaknessStatus)) reasons.push("weakness-status");
   if (!["independent", "partial"].includes(candidate?.hierarchyStatus)) reasons.push("hierarchy-status");
   if (candidate?.stableAnchor === true) reasons.push("stable-anchor");
-  if (["supported", "resolved"].includes(candidate?.saturationStatus) === false) reasons.push("saturation");
+  if (["supported", "resolved"].includes(candidate?.saturationStatus)) reasons.push("saturation");
   if (!(Number(candidate?.learningHeadroom) > 0)) reasons.push("no-learning-headroom");
   if (!(Number(candidate?.bossTargetUtility) >= 35)) reasons.push("boss-utility");
   if (candidate?.bossContentReady !== true) reasons.push("boss-content-unavailable");
