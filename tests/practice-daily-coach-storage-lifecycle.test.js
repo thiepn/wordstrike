@@ -54,9 +54,9 @@ function activateFirst(plan) {
   return value;
 }
 
-test("PL25 storage behavior remains intact inside the current DB10 Coach v2 envelope", () => {
-  assert.ok(PRACTICE_DATABASE_VERSION >= 10);
-  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 13);
+test("PL25 storage behavior remains intact inside the current PL38 DB12/session14 Coach v2 envelope", () => {
+  assert.equal(PRACTICE_DATABASE_VERSION, 12);
+  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 14);
   assert.equal(PRACTICE_RECORD_VERSIONS.coachPlan, 2);
   assert.equal(PRACTICE_STORE_DEFINITIONS.coachPlans.keyPath, "coachPlanId");
   const unique = PRACTICE_STORE_DEFINITIONS.coachPlans.indexes.find((index) => index.name === "profileContextDay");
@@ -91,15 +91,17 @@ test("PL25 memory store resolves nested dotted key paths like IndexedDB for coac
   assert.equal(matches[0].coachBinding.coachPlanId, coachPlanId);
 });
 
-test("PL25 sessionSummary v12 migrates exactly once to v13 with nullable coachBinding", () => {
+test("PL25 v12 summary still gains nullable coachBinding at v13 before PL38 adds nullable researchBinding at v14", () => {
   const current = createDefaultSessionSummary({ profileId, contextId, now });
   const historical = { ...current, recordVersion: 12 };
   delete historical.coachBinding;
+  delete historical.researchBinding;
   const migration = migratePracticeRecord("sessionSummary", historical);
   assert.equal(migration.ok, true, migration.error?.message);
-  assert.deepEqual(migration.steps, ["sessionSummary:12->13"]);
-  assert.equal(migration.value.recordVersion, 13);
+  assert.deepEqual(migration.steps, ["sessionSummary:12->13", "sessionSummary:13->14"]);
+  assert.equal(migration.value.recordVersion, 14);
   assert.equal(migration.value.coachBinding, null);
+  assert.equal(migration.value.researchBinding, null);
 });
 
 test("PL25 repository keeps one canonical Coach plan per profile/context/local day", async () => {
