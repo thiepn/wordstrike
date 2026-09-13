@@ -4,7 +4,7 @@ import {
 } from "./practiceExperimentRegistry.js";
 
 const IS_NODE_RUNTIME = Boolean(globalThis.process?.versions?.node);
-const nodeRuntime = IS_NODE_RUNTIME ? await import("./practiceLabControllerRuntimeV37.js") : null;
+const nodeRuntime = IS_NODE_RUNTIME ? await import("./practiceLabControllerRuntimeV38.js") : null;
 
 export const PRACTICE_LAB_ONBOARDING_VERSION = 1;
 
@@ -16,7 +16,7 @@ export function createPracticeLabController(options = {}) {
   const loadRuntime = () => {
     if (runtimePromise) return runtimePromise;
     runtimePromise = Promise.all([
-      import("./practiceExperimentRegistryRuntime.js"), import("./practiceLabControllerRuntimeV37.js"),
+      import("./practiceExperimentRegistryRuntime.js"), import("./practiceLabControllerRuntimeV38.js"),
       import("./practiceCombinationRepairExperiment.js"), import("./practiceWeakKeysExperiment.js"), import("./practiceProblemWordsExperiment.js"), import("./practiceAccuracyRecoveryExperiment.js"), import("./practiceRealTextExperiment.js"), import("./practicePaceLadderExperiment.js"), import("./practiceBurstSprintsExperiment.js"), import("./practiceCommonWordsExperiment.js"), import("./practiceConsistencyExperiment.js"), import("./practiceEnduranceExperiment.js"), import("./practicePunctuationCapitalsExperiment.js"), import("./practiceNumbersSymbolsExperiment.js"), import("./practiceCustomTextExperiment.js"), import("./practiceWeaknessBossExperiment.js"),
     ]).then(([registryModule, controllerModule, combinationRepairModule, weakKeysModule, problemWordsModule, accuracyRecoveryModule, realTextModule, paceLadderModule, burstSprintsModule, commonWordsModule, consistencyModule, enduranceModule, punctuationCapitalsModule, numbersSymbolsModule, customTextModule, weaknessBossModule]) => {
       const lazyRegistry = getPracticeRegistryLazyState(experimentRegistry); if (lazyRegistry?.destroyed) return null;
