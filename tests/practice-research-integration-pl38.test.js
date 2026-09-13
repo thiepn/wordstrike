@@ -8,6 +8,7 @@ import {
 } from "../js/practiceLab/practiceResearchBinding.js";
 import {
   PRACTICE_RESEARCH_PROBE_EXPERIMENT,
+  buildPracticeResearchProbeContentPlan,
   createPreparedPracticeResearchProbeSession,
 } from "../js/practiceLab/practiceResearchProbeExperiment.js";
 import { resolvePracticeEvidenceRole } from "../js/practiceLab/practiceEvidenceRole.js";
@@ -33,6 +34,14 @@ function targetedPlan() {
     completion: { mode: "content", value: null },
     metadata: { sourceType: "generated", partition: "training", language: "en" },
   });
+}
+
+function countOccurrences(text, needle) {
+  let count = 0;
+  for (let index = 0; index <= text.length - needle.length; index += 1) {
+    if (text.slice(index, index + needle.length) === needle) count += 1;
+  }
+  return count;
 }
 
 test("PL38 randomized assignment identity is derived only from trusted content-plan binding", async () => {
@@ -74,6 +83,14 @@ test("PL38 common probe is a valid hidden diagnostic session and never a PL32 tr
   assert.equal(prepared.contentPlan.metadata.sourceType, "research-target-probe");
   assert.equal(prepared.contentPlan.metadata.researchProbe.targetSpans.length, 12);
   assert.equal(prepared.contentPlan.metadata.researchProbe.targetOpportunityQuota, 12);
+  assert.equal(prepared.contentPlan.metadata.researchProbe.familyIds.length, 1);
+  assert.match(prepared.contentPlan.metadata.researchProbe.familyIds[0], /^ws-research-probe-baseline-/);
+  assert.equal(prepared.contentPlan.metadata.researchProbeMaterial.familyId, prepared.contentPlan.metadata.researchProbe.familyIds[0]);
+  assert.equal(typeof prepared.contentPlan.metadata.researchProbeMaterial.materialHash, "string");
+  assert.equal(prepared.contentPlan.metadata.researchProbe.difficultyIndex, null);
+  assert.equal(prepared.contentPlan.metadata.researchProbe.weightedFeatureRms, null);
+  assert.equal(prepared.contentPlan.metadata.researchProbe.positionProfileTvd, null);
+  assert.equal(prepared.contentPlan.metadata.researchProbe.geometryTvd, null);
   assert.equal(prepared.configuration.liveWpm, false);
   assert.equal(prepared.configuration.aggregateAccuracy, false);
   assert.equal(prepared.configuration.targetCues, false);
@@ -81,4 +98,26 @@ test("PL38 common probe is a valid hidden diagnostic session and never a PL32 tr
   assert.equal(resolvePracticeEvidenceRole({ contentPlan: prepared.contentPlan }), "diagnostic");
   assert.deepEqual(getPracticeTrustedResearchBinding(prepared.contentPlan), baselineBinding);
   assert.equal(resolvePracticeTreatmentIdentity({ experiment: prepared.experiment, configuration: prepared.configuration, contentPlan: prepared.contentPlan }), null);
+});
+
+test("PL38 probe material gives exact target opportunities and disjoint baseline/follow-up families", () => {
+  const fixtures = [
+    { entityType: "key", statId: "stat:key:k", entityKey: "k", quota: 12 },
+    { entityType: "bigram", statId: "stat:bigram:st", entityKey: "st", quota: 8 },
+    { entityType: "trigram", statId: "stat:trigram:cal", entityKey: "cal", quota: 6 },
+    { entityType: "word", statId: "stat:word:calm", entityKey: "calm", quota: 4 },
+  ];
+  for (const fixture of fixtures) {
+    const baseline = buildPracticeResearchProbeContentPlan({ target: fixture, phase: "baseline", sessionId: `practice-session_pl38-${fixture.entityType}-baseline` });
+    const followup = buildPracticeResearchProbeContentPlan({ target: fixture, phase: "followup", sessionId: `practice-session_pl38-${fixture.entityType}-followup` });
+    assert.equal(baseline.contentPlan.metadata.partition, "diagnostic");
+    assert.equal(followup.contentPlan.metadata.partition, "diagnostic");
+    assert.equal(baseline.contentPlan.metadata.researchProbe.targetSpans.length, fixture.quota);
+    assert.equal(followup.contentPlan.metadata.researchProbe.targetSpans.length, fixture.quota);
+    assert.equal(countOccurrences(baseline.contentPlan.text, fixture.entityKey), fixture.quota);
+    assert.equal(countOccurrences(followup.contentPlan.text, fixture.entityKey), fixture.quota);
+    assert.notEqual(baseline.probePlan.familyIds[0], followup.probePlan.familyIds[0]);
+    assert.match(baseline.probePlan.familyIds[0], /^ws-research-probe-baseline-/);
+    assert.match(followup.probePlan.familyIds[0], /^ws-research-probe-followup-/);
+  }
 });
