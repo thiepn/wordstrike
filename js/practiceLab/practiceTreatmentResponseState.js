@@ -171,6 +171,16 @@ export function mergePracticeTreatmentResponseSample(state, sample, now = sample
   return freezeDeep({ ...next, summary: summarize(next) });
 }
 
+export function removePracticeTreatmentResponseSamples(state, treatmentEpisodeIds, now = new Date().toISOString()) {
+  if (!state || !Array.isArray(state.samples)) return state;
+  const ids = treatmentEpisodeIds instanceof Set ? treatmentEpisodeIds : new Set(treatmentEpisodeIds ?? []);
+  if (!ids.size) return state;
+  const samples = state.samples.filter((sample) => !ids.has(sample?.treatmentEpisodeId));
+  if (samples.length === state.samples.length) return state;
+  const next = { ...state, samples, updatedAt: now };
+  return freezeDeep({ ...next, summary: summarize(next) });
+}
+
 export function incrementPracticeTreatmentContaminatedCount(state, now = new Date().toISOString()) {
   if (!state) return state;
   return freezeDeep({ ...state, updatedAt: now, summary: summarize(state) });
