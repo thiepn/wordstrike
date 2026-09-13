@@ -18,9 +18,9 @@ import {
 } from "../js/practiceLab/practiceCoachConstants.js";
 import { createPracticeCoachReviewDescriptor } from "../js/practiceLab/practiceCoachReview.js";
 
-test("PL33 keeps DB10/session13/foundation10 while Coach uses the v2 personalization envelope", () => {
-  assert.ok(PRACTICE_DATABASE_VERSION >= 10);
-  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 13);
+test("PL33 Coach v2 personalization remains stable inside the current PL38 DB12/session14/foundation10 envelope", () => {
+  assert.equal(PRACTICE_DATABASE_VERSION, 12);
+  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 14);
   assert.equal(PRACTICE_RECORD_VERSIONS.coachPlan, 2);
   assert.equal(PRACTICE_RECORD_VERSIONS.skillStat, 3);
   assert.equal(PRACTICE_RECORD_VERSIONS.learningState, 1);
