@@ -12,10 +12,9 @@ import {
   PRACTICE_RESEARCH_PROBE_VERSION,
 } from "./practiceResearchConstants.js";
 import { trustPracticeResearchContentPlan } from "./practiceResearchBinding.js";
+import { selectPracticeResearchProbeMaterial } from "./practiceResearchProbeMaterial.js";
 
 const INSERTION_TYPES = new Set(["character", "space"]);
-const BASELINE_WORDS = Object.freeze(["calm", "river", "stone", "light", "field", "green", "music", "north", "clear", "soft", "plain", "fresh", "small", "bright", "steady", "open"]);
-const FOLLOWUP_WORDS = Object.freeze(["warm", "ocean", "trail", "glow", "meadow", "amber", "sound", "south", "clean", "gentle", "simple", "crisp", "quiet", "silver", "smooth", "broad"]);
 const finite = Number.isFinite;
 const freezeDeep = (value) => {
   if (!value || typeof value !== "object" || Object.isFrozen(value)) return value;
@@ -24,30 +23,20 @@ const freezeDeep = (value) => {
 };
 const correct = (event) => event?.correctness === "correct" || event?.correctness === true;
 
-function safeNeutralWords(targetKey, phase) {
+function selectNeutralCarrierWords(material, targetKey) {
   const needle = String(targetKey ?? "").toLowerCase();
-  const source = phase === "baseline" ? BASELINE_WORDS : FOLLOWUP_WORDS;
-  const clean = source.filter((word) => !word.includes(needle));
-  if (clean.length >= 6) return clean;
-  const letters = "abcdefghijklmnopqrstuvwxyz".split("").filter((letter) => !needle.includes(letter));
-  const fallback = [];
-  for (let index = 0; index < Math.max(6, clean.length); index += 1) {
-    const a = letters[index % letters.length] ?? "x";
-    const b = letters[(index + 3) % letters.length] ?? "v";
-    const c = letters[(index + 7) % letters.length] ?? "j";
-    const d = letters[(index + 11) % letters.length] ?? "z";
-    fallback.push(`${a}${b}${c}${d}`);
-  }
-  return [...clean, ...fallback].filter((word) => !word.includes(needle)).slice(0, 16);
+  const clean = material.words.filter((word) => !word.includes(needle));
+  if (clean.length < 6) throw new Error("Practice Research diagnostic material cannot provide enough target-free carrier words");
+  return clean;
 }
 
 export function buildPracticeResearchProbeContentPlan({ target, phase, sessionId = createPracticeSessionId() } = {}) {
   const probePlan = createPracticeResearchProbePlan({ target, phase });
+  const material = selectPracticeResearchProbeMaterial({ target, phase });
   const segment = createPracticeSegmenter();
-  const neutral = safeNeutralWords(target.entityKey, phase);
+  const neutral = selectNeutralCarrierWords(material, target.entityKey);
   const pieces = [];
   const targetSpans = [];
-  const familyIds = [];
   let cursor = 0;
   for (let index = 0; index < probePlan.targetOpportunityQuota; index += 1) {
     const left = `${neutral[(index * 3) % neutral.length]} ${neutral[(index * 3 + 1) % neutral.length]} ${neutral[(index * 3 + 2) % neutral.length]}`;
@@ -61,11 +50,10 @@ export function buildPracticeResearchProbeContentPlan({ target, phase, sessionId
     const endIndex = cursor;
     pieces.push(` ${right}`);
     cursor += segment(` ${right}`).length;
-    const familyId = `research-probe:${phase}:${target.entityType}:${index + 1}`;
-    familyIds.push(familyId);
-    targetSpans.push(Object.freeze({ startIndex, endIndex, familyId }));
+    targetSpans.push(Object.freeze({ startIndex, endIndex, familyId: material.familyId }));
   }
   const text = pieces.join("");
+  const familyIds = Object.freeze([material.familyId]);
   const contentPlan = createPracticeContentPlan({
     contentId: `practice-content_research-probe-${phase}-${String(sessionId).replace(/[^a-z0-9._-]/gi, "-")}`,
     contentGeneratorVersion: PRACTICE_RESEARCH_PROBE_VERSION,
@@ -74,19 +62,26 @@ export function buildPracticeResearchProbeContentPlan({ target, phase, sessionId
     completion: { mode: "content", value: null },
     metadata: {
       sourceType: "research-target-probe",
-      partition: "diagnostic",
+      partition: material.partition,
       language: "en",
+      sourceId: material.sourceId,
+      researchProbeMaterial: {
+        materialVersion: material.materialVersion,
+        familyId: material.familyId,
+        sourceId: material.sourceId,
+        materialHash: material.materialHash,
+      },
       researchProbe: {
         phase,
         target: { entityType: target.entityType, entityKey: target.entityKey, statId: target.statId },
         targetOpportunityQuota: probePlan.targetOpportunityQuota,
         targetSpans,
         familyIds,
-        difficultyIndex: 0.5,
-        weightedFeatureRms: 0,
-        positionProfileTvd: 0,
-        geometryTvd: 0,
-        launchContextTvd: 0,
+        difficultyIndex: null,
+        weightedFeatureRms: null,
+        positionProfileTvd: null,
+        geometryTvd: null,
+        launchContextTvd: null,
       },
     },
   });
