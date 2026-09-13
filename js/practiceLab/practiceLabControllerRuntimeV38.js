@@ -48,6 +48,15 @@ export function createPracticeLabController(options = {}) {
     return runtimePromise;
   }
 
+  function releaseOwnedRuntime(activeRuntime = runtime) {
+    if (!ownsRuntime || !activeRuntime) return;
+    try { activeRuntime.close?.(); } catch (error) { logger?.warn?.("PL38 Research runtime close failed", error); }
+    if (runtime === activeRuntime) {
+      runtime = null;
+      runtimePromise = null;
+    }
+  }
+
   function attach() {
     if (listeners || !mounted || !isResearchRoute() || host) return;
     root?.addEventListener?.("click", click, true);
@@ -147,7 +156,7 @@ export function createPracticeLabController(options = {}) {
       if (mounted) setState({ errorCode: error?.code ?? "PRACTICE_RESEARCH_PROBE_FINALIZE_FAILED" });
     }
     if (mounted && isResearchRoute()) await load();
-    else if (!mounted && ownsRuntime) activeRuntime.close?.();
+    else if (!mounted) releaseOwnedRuntime(activeRuntime);
   }
 
   async function startProbe(phase) {
@@ -155,10 +164,14 @@ export function createPracticeLabController(options = {}) {
     if (!assignment || host || !mounted || !isResearchRoute()) return false;
     const epoch = ++actionEpoch;
     setState({ errorCode: null });
+    let research = null;
     try {
-      const research = await ensureRuntime();
+      research = await ensureRuntime();
       const session = await research.prepareProbe(assignment.researchAssignmentId, phase);
-      if (!mounted || epoch !== actionEpoch || !isResearchRoute()) return false;
+      if (!mounted || epoch !== actionEpoch || !isResearchRoute()) {
+        try { await research.completeProbe(assignment.researchAssignmentId, phase, null); } catch {}
+        return false;
+      }
       const module = await import("./practiceResearchProbeSessionHost.js");
       detach();
       host = await module.mountPracticeResearchProbeSession({
@@ -179,6 +192,9 @@ export function createPracticeLabController(options = {}) {
       return true;
     } catch (error) {
       logger?.warn?.(`PL38 ${phase} probe start failed`, error);
+      if (research) {
+        try { await research.completeProbe(assignment.researchAssignmentId, phase, null); } catch {}
+      }
       if (mounted && epoch === actionEpoch) setState({ errorCode: error?.code ?? "PRACTICE_RESEARCH_PROBE_UNAVAILABLE" });
       return false;
     }
@@ -214,7 +230,7 @@ export function createPracticeLabController(options = {}) {
       if (mounted) setState({ errorCode: error?.code ?? "PRACTICE_RESEARCH_TREATMENT_FINALIZE_FAILED" });
     }
     if (mounted && isResearchRoute()) await load();
-    else if (!mounted && ownsRuntime) activeRuntime.close?.();
+    else if (!mounted) releaseOwnedRuntime(activeRuntime);
   }
 
   async function startTreatment() {
@@ -345,12 +361,7 @@ export function createPracticeLabController(options = {}) {
       const activeHost = host;
       host = null;
       if (activeHost) void activeHost.exit?.();
-      else if (ownsRuntime) runtime?.close?.();
-      runtime = options.researchRuntime ?? runtime;
-      if (!activeHost && ownsRuntime) {
-        runtime = null;
-        runtimePromise = null;
-      }
+      else releaseOwnedRuntime();
       return base.unmount();
     },
   });
