@@ -1,4 +1,5 @@
 import { PRACTICE_LIMITS } from "./practiceConstants.js";
+import { deletePracticeResearchEnrollmentRecords } from "./practiceResearchDeletion.js";
 import { validatePracticeResearchAnalysisState, validatePracticeResearchAssignment, validatePracticeResearchEnrollment } from "./practiceResearchValidation.js";
 
 function assertValid(kind, record, validator) {
@@ -44,16 +45,13 @@ export function createPracticeResearchRepository({ dataStore, now = Date.now } =
 
   async function deleteEnrollmentResearch(researchEnrollmentId) {
     const enrollment=await getEnrollment(researchEnrollmentId);
-    if (!enrollment) return {deleted:false,sessionIds:[]};
-    const assignments=await listAssignments(researchEnrollmentId);
-    const sessions=await dataStore.query("sessionSummaries","researchAssignmentId",null).catch(()=>[]);
-    await dataStore.runTransaction(["researchEnrollments","researchAssignments","researchAnalysisStates"],"readwrite",async(transaction)=>{
-      for (const assignment of assignments) await transaction.delete("researchAssignments",assignment.researchAssignmentId);
-      const analyses=await transaction.query("researchAnalysisStates","researchEnrollmentId",researchEnrollmentId);
-      for (const analysis of analyses) await transaction.delete("researchAnalysisStates",analysis.researchAnalysisStateId);
-      await transaction.delete("researchEnrollments",researchEnrollmentId);
-    });
-    return {deleted:true,assignmentIds:assignments.map((item)=>item.researchAssignmentId),sessionIds:sessions.filter((item)=>item.researchBinding?.researchEnrollmentId===researchEnrollmentId).map((item)=>item.sessionId)};
+    if (!enrollment) return {deleted:false,assignmentIds:[],sessionIds:[],treatmentEpisodeIds:[],responseStateIdsUpdated:[],responseStateIdsDeleted:[]};
+    const value=currentMs();
+    const updatedAt=Number.isFinite(value)?new Date(value).toISOString():new Date().toISOString();
+    return dataStore.runTransaction([
+      "researchEnrollments","researchAssignments","researchAnalysisStates",
+      "sessionSummaries","treatmentEpisodes","treatmentResponseStates",
+    ],"readwrite",(transaction)=>deletePracticeResearchEnrollmentRecords({transaction,enrollment,researchEnrollmentId,updatedAt}));
   }
 
   async function prune(profileId) {
