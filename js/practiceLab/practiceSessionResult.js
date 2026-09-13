@@ -2,6 +2,7 @@ import { createDefaultSessionSummary } from "./practiceDefaults.js";
 import { toPracticeUtcIso } from "./practiceTime.js";
 import { validateSessionSummary } from "./practiceValidation.js";
 import { validatePracticeLearningEvidenceSummary } from "./practiceLearningValidation.js";
+import { getPracticeTrustedResearchBinding } from "./practiceResearchBinding.js";
 import {
   PRACTICE_SESSION_ERROR_CODES,
 } from "./practiceSessionConstants.js";
@@ -43,7 +44,7 @@ export function buildPracticeSessionResult({
   const evaluationSummary = analysis?.__pl18EvaluationSummary ?? null;
   const assessmentBinding = analysis?.__pl19AssessmentBinding ?? null;
   const coachBinding = analysis?.__pl25CoachBinding ?? null;
-  const researchBinding = analysis?.__pl38ResearchBinding ?? null;
+  const researchBinding = analysis?.__pl38ResearchBinding ?? getPracticeTrustedResearchBinding(contentPlan) ?? null;
   const summary = createDefaultSessionSummary({
     sessionId,
     profileId,
