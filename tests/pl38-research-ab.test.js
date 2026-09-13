@@ -19,7 +19,7 @@ import { computeExactPracticeResearchRandomizationInference } from "../js/practi
 import { PRACTICE_DATABASE_VERSION, PRACTICE_RECORD_VERSIONS, PRACTICE_STORE_DEFINITIONS } from "../js/practiceLab/practiceConstants.js";
 
 const cryptoImpl = globalThis.crypto;
-const baseCandidate = (overrides={}) => ({ entityType:"key",statId:"stat:k",entityKey:"k",weaknessStatus:"confirmed",hierarchyStatus:"independent",stableAnchor:false,saturationStatus:"supported",learningHeadroom:10,bossTargetUtility:70,bossContentReady:true,focusedContentReady:true,canonicalTreatment:"weak-keys",retentionReviewState:"inactive",coachConflict:false,lastDirectPractisedAt:null,lastResearchAssignedAt:null,...overrides });
+const baseCandidate = (overrides={}) => ({ entityType:"key",statId:"stat:k",entityKey:"k",weaknessStatus:"confirmed",hierarchyStatus:"independent",stableAnchor:false,saturationStatus:"possible",learningHeadroom:10,bossTargetUtility:70,bossContentReady:true,focusedContentReady:true,canonicalTreatment:"weak-keys",retentionReviewState:"inactive",coachConflict:false,lastDirectPractisedAt:null,lastResearchAssignedAt:null,...overrides });
 
 test("PL38 storage/version envelope is DB12 + sessionSummary14 + three sidecar stores",()=>{
   assert.equal(PRACTICE_DATABASE_VERSION,12);
@@ -60,6 +60,7 @@ test("PL38 target selection happens before arm and enforces initial-study exclus
   const chosen=selectPracticeResearchTarget([baseCandidate({statId:"low",bossTargetUtility:40}),baseCandidate({statId:"high",bossTargetUtility:90})]);
   assert.equal(chosen.statId,"high");
   for (const candidate of [
+    baseCandidate({saturationStatus:"supported"}),
     baseCandidate({canonicalTreatment:"accuracy-control"}),
     baseCandidate({retentionReviewState:"due"}),
     baseCandidate({coachConflict:true}),
