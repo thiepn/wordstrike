@@ -2,6 +2,19 @@ import { PRACTICE_RESEARCH_PHASES, PRACTICE_RESEARCH_RANDOMIZATION_VERSION } fro
 
 const encoder = new TextEncoder();
 const text = (value) => typeof value === "string" && value.length > 0;
+const trusted = new WeakMap();
+
+function freezeBinding(binding) {
+  return Object.freeze({
+    studyId: binding.studyId,
+    studyVersion: binding.studyVersion,
+    researchEnrollmentId: binding.researchEnrollmentId,
+    researchAssignmentId: binding.researchAssignmentId,
+    armId: binding.armId,
+    phase: binding.phase,
+    assignmentHash: binding.assignmentHash,
+  });
+}
 
 function canonicalAssignmentPayload(assignment) {
   return JSON.stringify({
@@ -35,7 +48,7 @@ export function validatePracticeResearchBinding(binding) {
 
 export async function createPracticeResearchBinding(assignment, phase, cryptoImpl = globalThis.crypto) {
   if (!PRACTICE_RESEARCH_PHASES.includes(phase)) throw new TypeError("Unsupported Practice Research phase");
-  return Object.freeze({
+  return freezeBinding({
     studyId: assignment.studyId,
     studyVersion: assignment.studyVersion,
     researchEnrollmentId: assignment.researchEnrollmentId,
@@ -44,6 +57,18 @@ export async function createPracticeResearchBinding(assignment, phase, cryptoImp
     phase,
     assignmentHash: await computePracticeResearchAssignmentHash(assignment, cryptoImpl),
   });
+}
+
+export function trustPracticeResearchContentPlan(contentPlan, binding) {
+  if (!contentPlan || typeof contentPlan !== "object") throw new TypeError("Practice Research trust requires a content plan object");
+  const validation = validatePracticeResearchBinding(binding);
+  if (!validation.valid) throw new TypeError(`Invalid Practice Research binding: ${validation.errors.join(", ")}`);
+  trusted.set(contentPlan, freezeBinding(binding));
+  return contentPlan;
+}
+
+export function getPracticeTrustedResearchBinding(contentPlan) {
+  return contentPlan && typeof contentPlan === "object" ? trusted.get(contentPlan) ?? null : null;
 }
 
 export async function assertPracticeResearchBindingMatches(binding, assignment, { phase = null, armId = null, statId = null, cryptoImpl = globalThis.crypto } = {}) {
