@@ -9,9 +9,9 @@ legacyDb10.databaseVersion = 10;
 delete legacyDb10.settings.physicalKeyboardTelemetryEnabled;
 
 const migrated = normalizePracticeManifest(legacyDb10);
-assert.equal(PRACTICE_DATABASE_VERSION, 11);
-assert.equal(migrated.databaseVersion, 11);
-assert.equal(migrated.settings.physicalKeyboardTelemetryEnabled, false, "existing users must remain opted out after DB10 -> DB11 normalization");
+assert.equal(PRACTICE_DATABASE_VERSION, 12);
+assert.equal(migrated.databaseVersion, 12);
+assert.equal(migrated.settings.physicalKeyboardTelemetryEnabled, false, "existing users must remain opted out after PL36 DB10 -> DB11 and the later PL38 DB12 normalization");
 assert.equal(validatePracticeManifest(migrated).valid, true);
 assert.ok(PRACTICE_STORE_DEFINITIONS.physicalTelemetryStats);
 assert.ok(PRACTICE_STORE_DEFINITIONS.physicalTelemetrySessions);
@@ -22,4 +22,4 @@ const optedIn = structuredClone(current);
 optedIn.settings.physicalKeyboardTelemetryEnabled = true;
 assert.equal(normalizePracticeManifest(optedIn).settings.physicalKeyboardTelemetryEnabled, true, "explicit local opt-in must survive normalization");
 
-console.log("PL36 DB10 -> DB11 migration defaults and explicit opt-in preservation passed.");
+console.log("PL36 physical-telemetry opt-in defaults remain intact through current PL38 DB12 normalization.");
