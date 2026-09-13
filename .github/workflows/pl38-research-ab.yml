@@ -6,7 +6,7 @@ on:
   pull_request:
     paths:
       - 'js/practiceLab/**'
-      - 'tests/pl38-research-ab.test.js'
+      - 'tests/*pl38*.test.js'
       - 'docs/PRACTICE_LAB_RESEARCH_AB_INFRASTRUCTURE.md'
       - 'package.json'
       - '.github/workflows/pl38-research-ab.yml'
