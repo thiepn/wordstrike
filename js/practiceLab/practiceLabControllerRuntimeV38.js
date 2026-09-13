@@ -192,7 +192,7 @@ export function createPracticeLabController(options = {}) {
       return true;
     } catch (error) {
       logger?.warn?.(`PL38 ${phase} probe start failed`, error);
-      if (research) {
+      if (research && error?.code !== "PRACTICE_RESEARCH_SESSION_CONFLICT") {
         try { await research.completeProbe(assignment.researchAssignmentId, phase, null); } catch {}
       }
       if (mounted && epoch === actionEpoch) setState({ errorCode: error?.code ?? "PRACTICE_RESEARCH_PROBE_UNAVAILABLE" });
