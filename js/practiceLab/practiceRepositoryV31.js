@@ -37,6 +37,42 @@ export function createPracticeRepository(options = {}) {
     && record.profileId === scope.profileId
     && (!scope.contextId || record.contextId === scope.contextId));
 
+  async function getCustomText(customTextId, { profileId = null } = {}) {
+    const scope = await resolveActiveScope(profileId);
+    if (!scope) return null;
+    return custom.getCustomText(customTextId, { profileId: scope.profileId });
+  }
+
+  async function createCustomText(input) {
+    const scope = await resolveActiveScope(input?.profileId ?? null);
+    if (!scope) return null;
+    return custom.createCustomText({ ...input, profileId: scope.profileId });
+  }
+
+  async function updateCustomText(input) {
+    const scope = await resolveActiveScope(input?.profileId ?? null);
+    if (!scope) return null;
+    return custom.updateCustomText({ ...input, profileId: scope.profileId });
+  }
+
+  async function deleteCustomText(customTextId, { profileId = null } = {}) {
+    const scope = await resolveActiveScope(profileId);
+    if (!scope) return false;
+    return custom.deleteCustomText(customTextId, { profileId: scope.profileId });
+  }
+
+  async function deleteAllCustomTexts(profileId = null) {
+    const scope = await resolveActiveScope(profileId);
+    if (!scope) return 0;
+    return custom.deleteAllCustomTexts(scope.profileId);
+  }
+
+  async function markCustomTextPractised(input) {
+    const scope = await resolveActiveScope(input?.profileId ?? null);
+    if (!scope) return false;
+    return custom.markCustomTextPractised({ ...input, profileId: scope.profileId });
+  }
+
   async function getCoachPlan(coachPlanId, { profileId = null, contextId = null } = {}) {
     const scope = await resolveActiveScope(profileId, contextId);
     if (!scope) return null;
@@ -110,6 +146,15 @@ export function createPracticeRepository(options = {}) {
   return Object.freeze({
     ...core,
     ...custom,
+    getCustomText,
+    createCustomText,
+    createPracticeCustomText: createCustomText,
+    updateCustomText,
+    updatePracticeCustomText: updateCustomText,
+    deleteCustomText,
+    deletePracticeCustomText: deleteCustomText,
+    deleteAllCustomTexts,
+    markCustomTextPractised,
     getCoachPlan,
     deleteCoachPlan,
     listCoachChildSessions,
