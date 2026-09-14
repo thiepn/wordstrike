@@ -1,12 +1,17 @@
 {
+  "schemaVersion": "1.0",
   "app": "wordstrike",
+  "displayName": "WORDSTRIKE",
+  "path": "/wordstrike/",
   "accountContract": "1.0",
+  "sdkContract": "1.x",
+  "integrationMode": "certified-legacy",
   "operationsVersion": "A7.1",
-  "degradedMode": "local-gameplay",
   "sessionAuthority": "thiepn-account",
+  "degradedMode": "local-gameplay",
   "health": {
-    "localGameplayWithoutOnlineServices": true,
-    "leaderboardsOptional": true,
-    "networkFailureLogsOutUser": false
+    "localGameplayPreservedOnBackendFailure": true,
+    "networkFailureLogsOutUser": false,
+    "onlineWritesRequireServerValidation": true
   }
 }
