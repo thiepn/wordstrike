@@ -1,0 +1,97 @@
+name: PL40 Final Practice Lab Release Certification
+
+on:
+  push:
+    branches: [pl40-final-release-certification]
+  pull_request:
+    paths:
+      - 'js/practiceLab/**'
+      - 'js/main.js'
+      - 'js/modes.js'
+      - 'data/**'
+      - 'tests/**'
+      - 'scripts/**'
+      - 'package.json'
+      - 'docs/PRACTICE_LAB*.md'
+      - '.github/workflows/pl40-final-release-certification.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  final-certification:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: PL40 release boundary contract
+        shell: bash
+        run: |
+          set -o pipefail
+          node --test tests/practice-final-release-pl40.test.js 2>&1 | tee pl40-release-contract.log
+
+      - name: Practice corpus and typability validation
+        shell: bash
+        run: |
+          set -o pipefail
+          npm run validate:practice-corpus 2>&1 | tee pl40-content-validation.log
+          npm run validate:practice-indexes 2>&1 | tee -a pl40-content-validation.log
+          npm run validate:practice-typability 2>&1 | tee -a pl40-content-validation.log
+          npm run validate:practice-sustained 2>&1 | tee -a pl40-content-validation.log
+          npm run validate:practice-special-domains 2>&1 | tee -a pl40-content-validation.log
+
+      - name: PL39 privacy security and migration integrity
+        shell: bash
+        run: |
+          set -o pipefail
+          npm run test:practice-integrity 2>&1 | tee pl40-integrity.log
+
+      - name: Full WordStrike regression suite
+        shell: bash
+        run: |
+          set -o pipefail
+          npm test 2>&1 | tee pl40-full-suite.log
+
+      - name: Retain PL40 certification logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pl40-final-certification-logs
+          path: |
+            pl40-release-contract.log
+            pl40-content-validation.log
+            pl40-integrity.log
+            pl40-full-suite.log
+          if-no-files-found: warn
+          retention-days: 14
+
+  browser-certification:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    container:
+      image: mcr.microsoft.com/playwright/python:v1.57.0-noble
+      options: --ipc=host
+    env:
+      HOME: /root
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install browser test dependencies
+        run: python3 -m pip install -r tests/browser/requirements.txt
+      - name: Non-Practice cross-mode regression
+        run: python3 tests/browser/non_practice_regressions.py
+      - name: Typing interaction regression
+        run: python3 tests/browser/typing_regressions.py
+      - name: Practice privacy and security regression
+        run: python3 tests/browser/practice_pl39_privacy_security.py
+      - name: Retain PL40 browser evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pl40-browser-certification-evidence
+          path: browser-artifacts/
+          if-no-files-found: warn
+          retention-days: 14
