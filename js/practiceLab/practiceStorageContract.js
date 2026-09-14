@@ -76,9 +76,7 @@ export function assertPracticeSerializable(value, { maxDepth = 64 } = {}) {
       if (!Number.isFinite(current)) throw serializabilityFailure(path, "NONFINITE_NUMBER", type);
       return;
     }
-    if (type === "undefined" || type === "function" || type === "symbol" || type === "bigint") {
-      throw serializabilityFailure(path, "UNSUPPORTED_TYPE", type);
-    }
+    if (type === "undefined" || type === "function" || type === "symbol" || type === "bigint") throw serializabilityFailure(path, "UNSUPPORTED_TYPE", type);
     if (type !== "object") throw serializabilityFailure(path, "UNSUPPORTED_TYPE", type);
     if (stack.has(current)) throw serializabilityFailure(path, "CYCLIC_VALUE", type);
     if (!Array.isArray(current)) {
@@ -99,7 +97,8 @@ export function assertPracticeSerializable(value, { maxDepth = 64 } = {}) {
 
 export function clonePracticeValue(value) {
   if (value == null) return value;
-  assertPracticeSerializable(value);
-  if (typeof globalThis.structuredClone === "function") return globalThis.structuredClone(value);
+  if (typeof globalThis.structuredClone === "function") {
+    try { return globalThis.structuredClone(value); } catch { /* fall through */ }
+  }
   return JSON.parse(JSON.stringify(value));
 }
