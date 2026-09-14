@@ -1,0 +1,12 @@
+{
+  "app": "wordstrike",
+  "accountContract": "1.0",
+  "operationsVersion": "A7.1",
+  "degradedMode": "local-gameplay",
+  "sessionAuthority": "thiepn-account",
+  "health": {
+    "localGameplayWithoutOnlineServices": true,
+    "leaderboardsOptional": true,
+    "networkFailureLogsOutUser": false
+  }
+}
