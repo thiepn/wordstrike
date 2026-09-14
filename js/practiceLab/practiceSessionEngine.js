@@ -9,7 +9,7 @@ import {
 import { createPracticeWeaknessBossTreatmentService } from "./practiceWeaknessBossTreatment.js";
 import { PRACTICE_WEAKNESS_BOSS_EXPERIMENT_ID } from "./practiceWeaknessBossConstants.js";
 import { createPracticeIndexedDbStore } from "./practiceIndexedDbStore.js";
-import { createPracticePhysicalTelemetryRepositoryFacade } from "./practicePhysicalTelemetryService.js";
+import { createScopedPracticePhysicalTelemetryRepository } from "./practicePhysicalTelemetryScopedRepository.js";
 import { createPracticePhysicalTelemetryRuntime } from "./practicePhysicalTelemetryRuntime.js";
 import { reconcilePracticePhysicalTelemetry } from "./practicePhysicalTelemetryReconciliation.js";
 import { getPracticeTrustedResearchBinding } from "./practiceResearchBinding.js";
@@ -52,7 +52,11 @@ export function createPracticeSessionEngine(options = {}) {
   });
   const physicalDataStore = options.physicalTelemetryDataStore ?? createPracticeIndexedDbStore();
   const ownsPhysicalDataStore = options.physicalTelemetryDataStore == null;
-  const physicalRepository = createPracticePhysicalTelemetryRepositoryFacade({ dataStore: physicalDataStore, now: wallClock });
+  const physicalRepository = createScopedPracticePhysicalTelemetryRepository({
+    dataStore: physicalDataStore,
+    now: wallClock,
+    scopeProvider: () => Object.freeze({ profileId, contextId }),
+  });
   const physical = createPracticePhysicalTelemetryRuntime({
     repository,
     telemetryRepository: physicalRepository,
