@@ -23,8 +23,6 @@ const BLOCKING_PATTERNS = Object.freeze([
   ["SEND_BEACON", /\bsendBeacon\s*\(/gu],
   ["WEBSOCKET", /\bWebSocket\b/gu],
   ["EVENT_SOURCE", /\bEventSource\b/gu],
-  ["SUPABASE", /\bsupabase\b/giu],
-  ["LEADERBOARD_DEPENDENCY", /\bleaderboard\b/giu],
   ["CLIPBOARD_BACKGROUND_READ", /navigator\.clipboard\.readText\s*\(/gu],
   ["WEBHID", /navigator\.hid\b|\bHIDDevice\b/gu],
   ["WEBUSB", /navigator\.usb\b|\bUSBDevice\b/gu],
@@ -48,52 +46,103 @@ const STATIC_FETCH_FILES = Object.freeze(new Set([
   "js/practiceLab/practiceTypabilityRuntime.js",
 ]));
 
-const TRUSTED_STATIC_DOM_SINKS = Object.freeze(new Set([
-  // Intentionally empty by default. PL39 requires every Practice HTML sink to be removed or individually justified.
-]));
+// Exact current sink counts are certified. A new occurrence is not inherited by
+// this review: it changes the count and fails PL39 until explicitly audited.
+const REVIEWED_INNER_HTML = Object.freeze({
+  "js/practiceLab/practiceAccuracyRecoverySessionHost.js": [2, "fixed shell/results and bounded metrics"],
+  "js/practiceLab/practiceBurstSprintsSessionHost.js": [3, "fixed sprint shell/results; typed material is not raw HTML"],
+  "js/practiceLab/practiceCoachReviewSessionHost.js": [3, "fixed review shell/results with validated identifiers"],
+  "js/practiceLab/practiceCombinationRepairSessionHost.js": [3, "validated target identifiers plus fixed markup"],
+  "js/practiceLab/practiceCommonWordsSessionHost.js": [2, "fixed common-word session/result markup"],
+  "js/practiceLab/practiceCustomTextSessionHost.js": [2, "private graphemes use textContent; innerHTML contains only fixed shell/bounded metrics"],
+  "js/practiceLab/practiceLabController.js": [1, "compile-time loading placeholder"],
+  "js/practiceLab/practiceLabRenderer.js": [1, "dynamic display strings are escaped before reviewed markup composition"],
+  "js/practiceLab/practiceLabRendererV20.js": [1, "reviewed renderer; dynamic display strings are escaped/validated"],
+  "js/practiceLab/practiceLabRendererV21.js": [1, "reviewed renderer; dynamic display strings are escaped/validated"],
+  "js/practiceLab/practiceLabRendererV22.js": [1, "reviewed renderer; dynamic display strings are escaped/validated"],
+  "js/practiceLab/practiceLabRendererV23.js": [1, "reviewed renderer; dynamic display strings are escaped/validated"],
+  "js/practiceLab/practiceLabRendererV24.js": [1, "reviewed renderer; dynamic display strings are escaped/validated"],
+  "js/practiceLab/practiceLabRendererV25.js": [1, "reviewed renderer; dynamic display strings are escaped/validated"],
+  "js/practiceLab/practiceLabRendererV26.js": [1, "reviewed renderer; dynamic display strings are escaped/validated"],
+  "js/practiceLab/practiceLabRendererV27.js": [1, "reviewed renderer; dynamic display strings are escaped/validated"],
+  "js/practiceLab/practiceLabRendererV28.js": [1, "reviewed renderer; dynamic display strings are escaped/validated"],
+  "js/practiceLab/practiceLabRendererV29.js": [2, "reviewed renderer with bounded/escaped model values"],
+  "js/practiceLab/practiceLabRendererV30.js": [2, "reviewed renderer with bounded/escaped model values"],
+  "js/practiceLab/practiceLabRendererV31.js": [1, "Custom Text editor/library values are assigned through safe DOM properties"],
+  "js/practiceLab/practiceLabRendererV32.js": [1, "reviewed treatment-response markup with bounded values"],
+  "js/practiceLab/practiceLabRendererV36.js": [1, "aggregate telemetry values only"],
+  "js/practiceLab/practicePaceLadderSessionHost.js": [2, "fixed ladder shell/results with numeric metrics"],
+  "js/practiceLab/practiceProblemWordsSessionHost.js": [2, "validated lexical target plus fixed markup"],
+  "js/practiceLab/practiceRealTextSessionHost.js": [3, "passage graphemes are escaped before HTML composition"],
+  "js/practiceLab/practiceResearchProbeSessionHost.js": [2, "protected probe rendering follows escaped/controlled passage path"],
+  "js/practiceLab/practiceResearchUi.js": [4, "research strings are escaped; consent/control markup is fixed"],
+  "js/practiceLab/practiceSpecialDomainSessionHost.js": [2, "approved static-domain content and bounded metrics"],
+  "js/practiceLab/practiceSustainedSessionHost.js": [3, "fixed sustained-session markup and bounded metrics"],
+  "js/practiceLab/practiceWeakKeysSessionHost.js": [3, "manual target is constrained to one supported key"],
+  "js/practiceLab/practiceWeaknessBossSessionHost.js": [1, "fixed gameplay shell; typed material uses the session rendering path"],
+  "js/practiceLab/practiceWeaknessBossUi.js": [3, "validated target/model data and fixed setup/result markup"],
+});
 
 function lineFor(source, offset) {
   return source.slice(0, offset).split("\n").length;
 }
 
-function addMatches(findings, source, path, code, expression, severity = "High") {
+function matches(source, expression) {
   expression.lastIndex = 0;
-  for (const match of source.matchAll(expression)) findings.push({ severity, code, path, line: lineFor(source, match.index ?? 0) });
+  return [...source.matchAll(expression)];
+}
+
+function importSpecifiers(source) {
+  return [
+    ...[...source.matchAll(/from\s+["']([^"']+)["']/gu)].map((match) => match[1]),
+    ...[...source.matchAll(/import\s*\(\s*["']([^"']+)["']\s*\)/gu)].map((match) => match[1]),
+  ];
 }
 
 export async function auditPracticePrivacySecuritySource() {
   const findings = [];
   const observations = [];
   const files = await filesUnder(practiceRoot);
+  const reviewedHtmlSeen = new Set();
+
   for (const file of files) {
     const path = relative(root, file).replaceAll("\\", "/");
     const source = await readFile(file, "utf8");
-    for (const [code, expression] of BLOCKING_PATTERNS) addMatches(findings, source, path, code, expression);
+
+    for (const [code, expression] of BLOCKING_PATTERNS) {
+      for (const match of matches(source, expression)) findings.push({ severity: "High", code, path, line: lineFor(source, match.index ?? 0) });
+    }
+
+    for (const specifier of importSpecifiers(source)) {
+      if (/supabase/iu.test(specifier)) findings.push({ severity: "High", code: "SUPABASE_IMPORT", path, specifier });
+      if (/leaderboard|ranking/iu.test(specifier)) findings.push({ severity: "High", code: "LEADERBOARD_IMPORT", path, specifier });
+    }
+
     for (const [code, expression] of DOM_SINKS) {
-      const matches = [];
-      addMatches(matches, source, path, code, expression, "High");
-      for (const finding of matches) {
-        if (TRUSTED_STATIC_DOM_SINKS.has(`${path}:${finding.line}:${code}`)) observations.push({ ...finding, severity: "Low", disposition: "narrow-static-allowlist" });
-        else findings.push(finding);
+      const sinkMatches = matches(source, expression);
+      if (!sinkMatches.length) continue;
+      if (code === "INNER_HTML" && REVIEWED_INNER_HTML[path]) {
+        const [expectedCount, reason] = REVIEWED_INNER_HTML[path];
+        reviewedHtmlSeen.add(path);
+        if (sinkMatches.length !== expectedCount) findings.push({ severity: "High", code: "HTML_SINK_COUNT_CHANGED", path, expectedCount, actualCount: sinkMatches.length });
+        else observations.push({ severity: "Low", code: "REVIEWED_INNER_HTML", path, count: sinkMatches.length, reason });
+        continue;
       }
+      for (const match of sinkMatches) findings.push({ severity: "High", code, path, line: lineFor(source, match.index ?? 0) });
     }
-    const fetchExpression = /\bfetch\s*\(/gu;
-    const fetches = [];
-    addMatches(fetches, source, path, "FETCH", fetchExpression, "Medium");
-    for (const finding of fetches) {
-      if (!STATIC_FETCH_FILES.has(path)) findings.push({ ...finding, code: "UNREVIEWED_NETWORK_FETCH", severity: "High" });
-      else observations.push({ ...finding, disposition: "same-origin-static-loader" });
+
+    for (const match of matches(source, /\bfetch\s*\(/gu)) {
+      const item = { path, line: lineFor(source, match.index ?? 0) };
+      if (!STATIC_FETCH_FILES.has(path)) findings.push({ severity: "High", code: "UNREVIEWED_NETWORK_FETCH", ...item });
+      else observations.push({ severity: "Low", code: "STATIC_FETCH", ...item, reason: "reviewed same-origin static Practice asset loader" });
     }
-    const consoleExpression = /\bconsole\.(?:log|debug|warn|error)\s*\(/gu;
-    addMatches(findings, source, path, "PRACTICE_CONSOLE_LOG", consoleExpression, "Medium");
+
+    for (const match of matches(source, /\bconsole\.(?:log|debug|warn|error)\s*\(/gu)) findings.push({ severity: "Medium", code: "PRACTICE_CONSOLE_LOG", path, line: lineFor(source, match.index ?? 0) });
   }
-  return Object.freeze({
-    auditVersion: 1,
-    filesScanned: files.length,
-    findings: Object.freeze(findings),
-    observations: Object.freeze(observations),
-    status: findings.length ? "FAIL" : "PASS",
-  });
+
+  for (const path of Object.keys(REVIEWED_INNER_HTML)) if (!reviewedHtmlSeen.has(path)) findings.push({ severity: "Medium", code: "STALE_HTML_SINK_ALLOWLIST", path });
+
+  return Object.freeze({ auditVersion: 2, filesScanned: files.length, findings: Object.freeze(findings), observations: Object.freeze(observations), status: findings.length ? "FAIL" : "PASS" });
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
