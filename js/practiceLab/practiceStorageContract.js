@@ -57,15 +57,49 @@ export function isQuotaExceededError(error) {
     || error?.code === PRACTICE_STORAGE_ERROR_CODES.QUOTA_EXCEEDED;
 }
 
-export function clonePracticeValue(value) {
-  if (value == null) return value;
-  if (typeof globalThis.structuredClone === "function") {
-    try {
-      return globalThis.structuredClone(value);
-    } catch {
-      // Fall through to JSON cloning so callers receive one consistent failure.
-    }
-  }
-  return JSON.parse(JSON.stringify(value));
+function serializabilityFailure(path, reason, valueType = null) {
+  return practiceStorageError(
+    PRACTICE_STORAGE_ERROR_CODES.VALIDATION_FAILED,
+    "Practice storage value is not canonically serializable",
+    { operation: "serialize", recordId: path || "record", recoverable: true, cause: { path: path || "record", reason, valueType } },
+  );
 }
 
+export function assertPracticeSerializable(value, { maxDepth = 64 } = {}) {
+  const stack = new WeakSet();
+  const visit = (current, path, depth) => {
+    if (depth > maxDepth) throw serializabilityFailure(path, "MAX_DEPTH");
+    if (current === null) return;
+    const type = typeof current;
+    if (type === "string" || type === "boolean") return;
+    if (type === "number") {
+      if (!Number.isFinite(current)) throw serializabilityFailure(path, "NONFINITE_NUMBER", type);
+      return;
+    }
+    if (type === "undefined" || type === "function" || type === "symbol" || type === "bigint") {
+      throw serializabilityFailure(path, "UNSUPPORTED_TYPE", type);
+    }
+    if (type !== "object") throw serializabilityFailure(path, "UNSUPPORTED_TYPE", type);
+    if (stack.has(current)) throw serializabilityFailure(path, "CYCLIC_VALUE", type);
+    if (!Array.isArray(current)) {
+      const prototype = Object.getPrototypeOf(current);
+      if (prototype !== Object.prototype && prototype !== null) throw serializabilityFailure(path, "NON_PLAIN_OBJECT", current?.constructor?.name ?? type);
+    }
+    stack.add(current);
+    if (Array.isArray(current)) {
+      for (let index = 0; index < current.length; index += 1) visit(current[index], `${path}[${index}]`, depth + 1);
+    } else {
+      for (const [key, entry] of Object.entries(current)) visit(entry, path ? `${path}.${key}` : key, depth + 1);
+    }
+    stack.delete(current);
+  };
+  visit(value, "", 0);
+  return value;
+}
+
+export function clonePracticeValue(value) {
+  if (value == null) return value;
+  assertPracticeSerializable(value);
+  if (typeof globalThis.structuredClone === "function") return globalThis.structuredClone(value);
+  return JSON.parse(JSON.stringify(value));
+}
