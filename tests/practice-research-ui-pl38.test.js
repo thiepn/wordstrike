@@ -14,14 +14,15 @@ const baseAssignment = Object.freeze({
   analysisEligibility: "followup-missing",
 });
 
-test("PL38 enrollment UI requires explicit consent and states the local randomized contract", () => {
+test("PL38 enrollment UI requires explicit consent and states the bounded local randomized contract", () => {
   const target = root();
   renderPracticeResearchPage(target, buildPracticeResearchViewModel({ status: "not-enrolled" }));
   assert.match(target.innerHTML, /I CONSENT AND ENROLL/);
   assert.match(target.innerHTML, /randomized between Focused Practice and Weakness Boss/i);
   assert.match(target.innerHTML, /benefit is not guaranteed/i);
-  assert.match(target.innerHTML, /stay on this device/i);
-  assert.match(target.innerHTML, /not uploaded to Supabase or remote analytics/i);
+  assert.match(target.innerHTML, /kept in local Practice storage/i);
+  assert.match(target.innerHTML, /WordStrike does not upload this Research data to external services/i);
+  assert.doesNotMatch(target.innerHTML, /stay on this device|never leaves your device|scientifically anonymous/i);
   assert.match(target.innerHTML, /data-research-action="back"/);
 });
 
