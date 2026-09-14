@@ -7,6 +7,7 @@ on:
     paths:
       - 'js/practiceLab/**'
       - 'tests/*pl39*.test.js'
+      - 'tests/browser/practice_pl39_privacy_security.py'
       - 'scripts/auditPracticePrivacySecurity.mjs'
       - 'scripts/testPracticeMigrations.mjs'
       - 'docs/PRACTICE_LAB_DATA_INVENTORY.md'
@@ -64,5 +65,28 @@ jobs:
             pl39-source-audit.log
             pl39-migrations.log
             pl39-full-suite.log
+          if-no-files-found: warn
+          retention-days: 14
+
+  browser-privacy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    container:
+      image: mcr.microsoft.com/playwright/python:v1.57.0-noble
+      options: --ipc=host
+    env:
+      HOME: /root
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install browser test dependencies
+        run: python3 -m pip install -r tests/browser/requirements.txt
+      - name: PL39 browser privacy, XSS, network, URL and cache certification
+        run: python3 tests/browser/practice_pl39_privacy_security.py
+      - name: Retain browser privacy evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pl39-browser-privacy-evidence
+          path: browser-artifacts/pl39-privacy-security/
           if-no-files-found: warn
           retention-days: 14
