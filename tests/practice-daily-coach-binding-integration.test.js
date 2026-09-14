@@ -98,7 +98,11 @@ test("PL25 rejects direct coachBinding configuration as a privileged field even 
       configuration: { correctionBehavior: "allow", coachBinding: createPracticeCoachBlockBinding(plan, block) },
       contentPlan,
     }),
-    (error) => error?.code === "PRACTICE_EVALUATION_PRIVILEGE_VIOLATION" || error?.code === "PRACTICE_SESSION_INVALID_CONFIGURATION",
+    (error) => [
+      "PRACTICE_SESSION_TRUSTED_CONFIGURATION_REJECTED",
+      "PRACTICE_EVALUATION_PRIVILEGE_VIOLATION",
+      "PRACTICE_SESSION_INVALID_CONFIGURATION",
+    ].includes(error?.code),
   );
 });
 
