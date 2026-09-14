@@ -12,20 +12,21 @@ const RAW_CONTENT_KEYS = Object.freeze(new Set(["sourceText"]));
 const allowedRawPath = (storeName, path) => storeName === "customTexts" && path === "sourceText";
 const plain = (value) => value == null || ["string", "number", "boolean"].includes(typeof value);
 
-function walk(value, visit, path = "", seen = new WeakSet()) {
-  if (plain(value)) { visit(value, path, null); return; }
-  if (typeof value !== "object") { visit(value, path, null); return; }
-  if (seen.has(value)) { visit(value, path, "cycle"); return; }
+function walk(value, visit, path = "", seen = new WeakSet(), key = null) {
+  visit(value, path, key);
+  if (plain(value) || typeof value !== "object") return;
+  if (seen.has(value)) { visit("[cycle]", path, "cycle"); return; }
   seen.add(value);
   if (Array.isArray(value)) {
-    value.forEach((entry, index) => walk(entry, visit, path ? `${path}[${index}]` : `[${index}]`, seen));
+    value.forEach((entry, index) => walk(entry, visit, path ? `${path}[${index}]` : `[${index}]`, seen, null));
+    seen.delete(value);
     return;
   }
-  for (const [key, entry] of Object.entries(value)) {
-    const nextPath = path ? `${path}.${key}` : key;
-    visit(entry, nextPath, key);
-    walk(entry, visit, nextPath, seen);
+  for (const [childKey, entry] of Object.entries(value)) {
+    const nextPath = path ? `${path}.${childKey}` : childKey;
+    walk(entry, visit, nextPath, seen, childKey);
   }
+  seen.delete(value);
 }
 
 function containsSentinel(value, sentinel) {
@@ -115,6 +116,7 @@ export async function auditPracticeRepositoryIntegrity(dataStore) {
   const profiles = new Map((all.profiles ?? []).map((record) => [record.profileId, record]));
   const contexts = new Map((all.contexts ?? []).map((record) => [record.contextId, record]));
   const enrollments = new Map((all.researchEnrollments ?? []).map((record) => [record.researchEnrollmentId, record]));
+  const inventory = getPracticeDataInventory();
 
   for (const context of all.contexts ?? []) {
     if (!profiles.has(context.profileId)) errors.push({ code: "ORPHAN_CONTEXT", storeName: "contexts", recordId: context.contextId });
@@ -123,7 +125,7 @@ export async function auditPracticeRepositoryIntegrity(dataStore) {
   for (const [storeName, records] of Object.entries(all)) {
     if (["meta", "profiles", "contexts", "quarantine"].includes(storeName)) continue;
     for (const record of records) {
-      const recordId = recordIdFor(storeName, record, getPracticeDataInventory());
+      const recordId = recordIdFor(storeName, record, inventory);
       if (record?.profileId && !profiles.has(record.profileId)) errors.push({ code: "ORPHAN_PROFILE_REFERENCE", storeName, recordId, profileId: record.profileId });
       if (record?.contextId) {
         const context = contexts.get(record.contextId);
@@ -144,9 +146,9 @@ export async function auditPracticeRepositoryIntegrity(dataStore) {
   const activeCoachKeys = new Set();
   for (const plan of all.coachPlans ?? []) {
     if (plan.status !== "active") continue;
-    const key = `${plan.profileId}|${plan.contextId}|${plan.localDayKey}`;
-    if (activeCoachKeys.has(key)) errors.push({ code: "DUPLICATE_ACTIVE_COACH_DAY", storeName: "coachPlans", recordId: plan.coachPlanId });
-    activeCoachKeys.add(key);
+    const keyValue = `${plan.profileId}|${plan.contextId}|${plan.localDayKey}`;
+    if (activeCoachKeys.has(keyValue)) errors.push({ code: "DUPLICATE_ACTIVE_COACH_DAY", storeName: "coachPlans", recordId: plan.coachPlanId });
+    activeCoachKeys.add(keyValue);
   }
 
   return Object.freeze({
