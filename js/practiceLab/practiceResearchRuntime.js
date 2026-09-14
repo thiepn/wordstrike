@@ -54,8 +54,15 @@ export function createPracticeResearchRuntime({
   const store = dataStore ?? createPracticeIndexedDbStore();
   const manifests = manifestStore ?? createPracticeManifestStore();
   const practiceRepo = practiceRepository ?? createPracticeRepository({ dataStore: store, manifestStore: manifests });
-  const researchRepo = researchRepository ?? createPracticeResearchRepository({ dataStore: store, now });
   let initialized = null;
+  const researchRepo = researchRepository ?? createPracticeResearchRepository({
+    dataStore: store,
+    now,
+    scopeProvider: () => initialized ? {
+      profileId: initialized.profile?.profileId ?? null,
+      contextId: initialized.context?.contextId ?? initialized.profile?.activeContextId ?? null,
+    } : null,
+  });
   let service = null;
 
   const time = () => {
