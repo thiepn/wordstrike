@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { createPracticeCoachPlanRecord } from "../js/practiceLab/practiceCoachPlan.js";
 import { createPracticeSessionEngine } from "../js/practiceLab/practiceSessionEngine.js";
 import { createPracticeSessionHarness } from "./practiceSessionFixtures.js";
 
@@ -27,4 +28,14 @@ test("PL39 concurrent Custom Text updates use revision compare-and-swap", async 
   const stored = await h.repository.getCustomText(initial.customTextId);
   assert.equal(stored.revision, 2);
   assert.ok(["candidate alpha", "candidate beta"].includes(stored.sourceText));
+});
+
+test("PL39 concurrent Coach creation keeps one canonical daily plan", async () => {
+  const h = await createPracticeSessionHarness({ suffix: "pl39-coach-concurrent" });
+  const make = (minutes, inputFingerprint) => createPracticeCoachPlanRecord({ profileId: h.profileId, contextId: h.contextId, localDayKey: "2026-07-05", requestedMinutes: minutes, inputFingerprint, blocks: [], now: h.time.wallClock });
+  const [a, b] = await Promise.all([h.repository.createCoachPlan(make(8, "first")), h.repository.createCoachPlan(make(12, "second"))]);
+  assert.equal([a, b].filter((entry) => entry.created === true).length, 1);
+  assert.equal([a, b].filter((entry) => entry.created === false).length, 1);
+  assert.equal(a.plan.coachPlanId, b.plan.coachPlanId);
+  assert.equal((await h.repository.listCoachPlans(h.profileId, { contextId: h.contextId })).length, 1);
 });
