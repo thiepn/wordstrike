@@ -13,9 +13,12 @@ assert.doesNotMatch(source, /from\s+["'][^"']*(supabase|leaderboard|pendingResul
 assert.doesNotMatch(source, /localStorage\.clear\s*\(/);
 
 const customText = createDefaultCustomText();
-assert.equal(customText.privacy, "local-only");
-assert.equal("syncEnabled" in customText, false);
-assert.equal("authId" in customText, false);
+for (const field of ["syncEnabled", "authId", "accessToken", "remoteId", "cloudId", "submissionPayload", "leaderboardEligible"]) {
+  assert.equal(field in customText, false, `${field} must not exist in persisted Custom Text records`);
+}
+assert.equal(typeof customText.sourceText, "string");
+assert.equal(typeof customText.sourceHash, "string");
+assert.equal(typeof customText.dataLocale, "string");
 
 const summary = createDefaultSessionSummary();
 for (const field of ["leaderboardEligible", "submissionPayload", "boardKey", "accessToken", "rawEvents", "eventTrace"]) {

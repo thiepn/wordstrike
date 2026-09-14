@@ -18,6 +18,7 @@
     "test:pl29-sustained": "node --test tests/practice-consistency-endurance-pl29.test.js",
     "build:practice-special-domains": "node scripts/buildPracticeSpecialDomains.mjs",
     "validate:practice-special-domains": "node scripts/buildPracticeSpecialDomains.mjs --validate",
-    "test:pl30-special-domains": "node --test tests/practice-special-domains-pl30.test.js"
+    "test:pl30-special-domains": "node --test tests/practice-special-domains-pl30.test.js",
+    "test:pl31-custom-text": "node --test tests/practice-custom-text-pl31.test.js"
   }
 }

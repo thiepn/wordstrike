@@ -11,9 +11,11 @@ import { validatePracticeEvaluationSummary } from "./practiceEvaluationValidatio
 import { validatePracticeAssessmentRun } from "./practiceAssessmentRun.js";
 import { PRACTICE_ASSESSMENT_PROTOCOL_VERSION } from "./practiceAssessmentConstants.js";
 import { validatePracticeCoachBlockBinding } from "./practiceCoachBlockBinding.js";
+import { validatePracticeCustomTextRecord } from "./practiceCustomTextValidation.js";
 
 export const validateReviewItem = validatePracticeReviewItemV3;
 export const validateAssessmentRun = validatePracticeAssessmentRun;
+export const validateCustomText = validatePracticeCustomTextRecord;
 
 export function validatePracticeAssessmentBinding(binding) {
   const errors = [];
@@ -31,27 +33,23 @@ export function validateSessionSummary(summary) {
   const legacy = validateLegacySessionSummary(summary);
   const errors = [...legacy.errors];
   if (!summary || typeof summary !== "object" || Array.isArray(summary)) return { valid: false, errors };
-  if (!Object.hasOwn(summary, "retentionReviewSummary")) {
-    errors.push({ path: "retentionReviewSummary", code: "REQUIRED", message: "retentionReviewSummary must be present" });
-  } else if (summary.retentionReviewSummary != null) {
+  if (!Object.hasOwn(summary, "retentionReviewSummary")) errors.push({ path: "retentionReviewSummary", code: "REQUIRED", message: "retentionReviewSummary must be present" });
+  else if (summary.retentionReviewSummary != null) {
     const retention = validatePracticeRetentionReviewSummary(summary.retentionReviewSummary);
     errors.push(...retention.errors.map((entry) => ({ ...entry, path: `retentionReviewSummary.${entry.path}` })));
   }
-  if (!Object.hasOwn(summary, "evaluationSummary")) {
-    errors.push({ path: "evaluationSummary", code: "REQUIRED", message: "evaluationSummary must be present" });
-  } else if (summary.evaluationSummary != null) {
+  if (!Object.hasOwn(summary, "evaluationSummary")) errors.push({ path: "evaluationSummary", code: "REQUIRED", message: "evaluationSummary must be present" });
+  else if (summary.evaluationSummary != null) {
     const evaluation = validatePracticeEvaluationSummary(summary.evaluationSummary);
     errors.push(...evaluation.errors.map((entry) => ({ ...entry, path: `evaluationSummary.${entry.path}` })));
   }
-  if (!Object.hasOwn(summary, "assessmentBinding")) {
-    errors.push({ path: "assessmentBinding", code: "REQUIRED", message: "assessmentBinding must be present" });
-  } else if (summary.assessmentBinding != null) {
+  if (!Object.hasOwn(summary, "assessmentBinding")) errors.push({ path: "assessmentBinding", code: "REQUIRED", message: "assessmentBinding must be present" });
+  else if (summary.assessmentBinding != null) {
     const assessment = validatePracticeAssessmentBinding(summary.assessmentBinding);
     errors.push(...assessment.errors.map((entry) => ({ ...entry, path: `assessmentBinding.${entry.path}` })));
   }
-  if (!Object.hasOwn(summary, "coachBinding")) {
-    errors.push({ path: "coachBinding", code: "REQUIRED", message: "coachBinding must be present" });
-  } else if (summary.coachBinding != null) {
+  if (!Object.hasOwn(summary, "coachBinding")) errors.push({ path: "coachBinding", code: "REQUIRED", message: "coachBinding must be present" });
+  else if (summary.coachBinding != null) {
     const coach = validatePracticeCoachBlockBinding(summary.coachBinding);
     errors.push(...coach.errors.map((entry) => ({ ...entry, path: `coachBinding.${entry.path}` })));
   }
