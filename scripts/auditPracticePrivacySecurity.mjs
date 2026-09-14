@@ -37,6 +37,13 @@ const DOM_SINKS = Object.freeze([
   ["DOM_PARSER", /\bDOMParser\b/gu],
 ]);
 
+const PRIVACY_OVERCLAIMS = Object.freeze([
+  ["PRIVACY_OVERCLAIM_NEVER_LEAVES_DEVICE", /never leaves (?:your|this) device/giu],
+  ["PRIVACY_OVERCLAIM_STAYS_ON_DEVICE", /stays? on (?:your|this) device/giu],
+  ["PRIVACY_OVERCLAIM_UNHACKABLE", /\bunhackable\b/giu],
+  ["PRIVACY_OVERCLAIM_SCIENTIFICALLY_ANONYMOUS", /scientifically anonymous/giu],
+]);
+
 const STATIC_FETCH_FILES = Object.freeze(new Set([
   "js/practiceLab/practiceCommonWordReference.js",
   "js/practiceLab/practiceCorpusRegistry.js",
@@ -113,6 +120,10 @@ export async function auditPracticePrivacySecuritySource() {
       for (const match of matches(source, expression)) findings.push({ severity: "High", code, path, line: lineFor(source, match.index ?? 0) });
     }
 
+    for (const [code, expression] of PRIVACY_OVERCLAIMS) {
+      for (const match of matches(source, expression)) findings.push({ severity: "Medium", code, path, line: lineFor(source, match.index ?? 0) });
+    }
+
     for (const specifier of importSpecifiers(source)) {
       if (/supabase/iu.test(specifier)) findings.push({ severity: "High", code: "SUPABASE_IMPORT", path, specifier });
       if (/leaderboard|ranking/iu.test(specifier)) findings.push({ severity: "High", code: "LEADERBOARD_IMPORT", path, specifier });
@@ -142,7 +153,7 @@ export async function auditPracticePrivacySecuritySource() {
 
   for (const path of Object.keys(REVIEWED_INNER_HTML)) if (!reviewedHtmlSeen.has(path)) findings.push({ severity: "Medium", code: "STALE_HTML_SINK_ALLOWLIST", path });
 
-  return Object.freeze({ auditVersion: 2, filesScanned: files.length, findings: Object.freeze(findings), observations: Object.freeze(observations), status: findings.length ? "FAIL" : "PASS" });
+  return Object.freeze({ auditVersion: 3, filesScanned: files.length, findings: Object.freeze(findings), observations: Object.freeze(observations), status: findings.length ? "FAIL" : "PASS" });
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
