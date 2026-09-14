@@ -14,6 +14,12 @@ function treatmentValidationError(kind, validation) {
   return error;
 }
 
+function treatmentScopeError() {
+  const error = new TypeError("Treatment record is outside the active Practice profile/context");
+  error.code = "PRACTICE_TREATMENT_SCOPE_VIOLATION";
+  return error;
+}
+
 function assertTreatmentEpisode(episode) {
   const validation = validatePracticeTreatmentEpisode(episode);
   if (!validation.valid) throw treatmentValidationError("Treatment Episode", validation);
@@ -35,26 +41,55 @@ export function createPracticeRepository(options = {}) {
   if (!dataStore) return core;
   const now = options.now ?? Date.now;
 
-  async function getTreatmentEpisode(treatmentEpisodeId) {
-    const record = await dataStore.get("treatmentEpisodes", treatmentEpisodeId);
-    return record && validEpisode(record) ? record : null;
+  async function resolveActiveTreatmentScope(requestedProfileId = null, requestedContextId = null) {
+    const active = await core.getPracticeProfile?.();
+    const activeProfileId = active?.profileId ?? null;
+    const activeContextId = active?.activeContextId ?? null;
+    if (!activeProfileId) return null;
+    if (requestedProfileId && requestedProfileId !== activeProfileId) return null;
+    if (requestedContextId && activeContextId && requestedContextId !== activeContextId) return null;
+    return Object.freeze({
+      profileId: requestedProfileId ?? activeProfileId,
+      contextId: requestedContextId ?? activeContextId,
+    });
   }
 
-  async function getTreatmentEpisodeBySession(treatmentSessionId) {
+  const inActiveTreatmentScope = (record, scope) => Boolean(record && scope
+    && record.profileId === scope.profileId
+    && (!scope.contextId || record.contextId === scope.contextId));
+
+  async function assertActiveTreatmentScope(record) {
+    const scope = await resolveActiveTreatmentScope(record?.profileId ?? null, record?.contextId ?? null);
+    if (!inActiveTreatmentScope(record, scope)) throw treatmentScopeError();
+    return scope;
+  }
+
+  async function getTreatmentEpisode(treatmentEpisodeId, { profileId = null, contextId = null } = {}) {
+    const scope = await resolveActiveTreatmentScope(profileId, contextId);
+    if (!scope) return null;
+    const record = await dataStore.get("treatmentEpisodes", treatmentEpisodeId);
+    return record && validEpisode(record) && inActiveTreatmentScope(record, scope) ? record : null;
+  }
+
+  async function getTreatmentEpisodeBySession(treatmentSessionId, { profileId = null, contextId = null } = {}) {
+    const scope = await resolveActiveTreatmentScope(profileId, contextId);
+    if (!scope) return null;
     const records = await dataStore.query("treatmentEpisodes", "treatmentSessionId", treatmentSessionId);
-    return records.find(validEpisode) ?? null;
+    return records.find((record) => validEpisode(record) && inActiveTreatmentScope(record, scope)) ?? null;
   }
 
   async function createTreatmentEpisode(episode) {
     assertTreatmentEpisode(episode);
+    await assertActiveTreatmentScope(episode);
     return dataStore.runTransaction(["treatmentEpisodes"], "readwrite", async (transaction) => {
       const existingById = await transaction.get("treatmentEpisodes", episode.treatmentEpisodeId);
       if (existingById) {
-        if (validEpisode(existingById)) return { created: false, episode: existingById };
+        if (validEpisode(existingById) && existingById.profileId === episode.profileId && existingById.contextId === episode.contextId) return { created: false, episode: existingById };
+        if (validEpisode(existingById)) throw treatmentScopeError();
         await transaction.delete("treatmentEpisodes", episode.treatmentEpisodeId);
       }
       const existing = await transaction.query("treatmentEpisodes", "treatmentSessionId", episode.treatment.treatmentSessionId);
-      const canonical = existing.find(validEpisode);
+      const canonical = existing.find((record) => validEpisode(record) && record.profileId === episode.profileId && record.contextId === episode.contextId);
       if (canonical) return { created: false, episode: canonical };
       for (const malformed of existing.filter((record) => !validEpisode(record))) {
         if (malformed?.treatmentEpisodeId) await transaction.delete("treatmentEpisodes", malformed.treatmentEpisodeId);
@@ -71,6 +106,7 @@ export function createPracticeRepository(options = {}) {
 
   async function saveTreatmentEpisode(episode) {
     assertTreatmentEpisode(episode);
+    await assertActiveTreatmentScope(episode);
     await dataStore.put("treatmentEpisodes", episode);
     return episode;
   }
@@ -99,13 +135,16 @@ export function createPracticeRepository(options = {}) {
       .slice(0, PRACTICE_LIMITS.treatmentOpenEpisodesPerContext);
   }
 
-  async function getTreatmentResponseState(treatmentResponseStateId) {
+  async function getTreatmentResponseState(treatmentResponseStateId, { profileId = null, contextId = null } = {}) {
+    const scope = await resolveActiveTreatmentScope(profileId, contextId);
+    if (!scope) return null;
     const state = await dataStore.get("treatmentResponseStates", treatmentResponseStateId);
-    return state && validState(state) ? state : null;
+    return state && validState(state) && inActiveTreatmentScope(state, scope) ? state : null;
   }
 
   async function saveTreatmentResponseState(state) {
     assertTreatmentResponseState(state);
+    await assertActiveTreatmentScope(state);
     await dataStore.put("treatmentResponseStates", state);
     return state;
   }
@@ -124,11 +163,16 @@ export function createPracticeRepository(options = {}) {
 
   async function saveTreatmentOutcomeAndResponseState(episode, state = null) {
     assertTreatmentEpisode(episode);
-    if (state) assertTreatmentResponseState(state);
+    await assertActiveTreatmentScope(episode);
+    if (state) {
+      assertTreatmentResponseState(state);
+      await assertActiveTreatmentScope(state);
+      if (state.profileId !== episode.profileId || state.contextId !== episode.contextId) throw treatmentScopeError();
+    }
     const stores = state ? ["treatmentEpisodes", "treatmentResponseStates"] : ["treatmentEpisodes"];
     return dataStore.runTransaction(stores, "readwrite", async (transaction) => {
       const current = await transaction.get("treatmentEpisodes", episode.treatmentEpisodeId);
-      if (!current || !validEpisode(current)) throw new TypeError("Treatment episode disappeared or became invalid before outcome attachment");
+      if (!current || !validEpisode(current) || current.profileId !== episode.profileId || current.contextId !== episode.contextId) throw new TypeError("Treatment episode disappeared or became invalid before outcome attachment");
       await transaction.put("treatmentEpisodes", episode);
       if (state) await transaction.put("treatmentResponseStates", state);
       return { episode, state };
