@@ -27,7 +27,7 @@ export function createPracticeLabController(options = {}) {
       for (const listener of pendingSubscribers) runtimeUnsubscribers.set(listener, runtimeController.subscribe(listener));
       if (mountRequested) runtimeController.mount(requestedRoute);
       return runtimeController;
-    }).catch((error) => { logger?.warn?.("Practice Lab lazy load failed", error); console.warn("Practice Lab could not be loaded.", error); if (mountRequested) appNavigation.exit?.(); return null; });
+    }).catch((error) => { logger?.warn?.("PRACTICE_LAZY_LOAD_FAILED", { code: "PRACTICE_LAZY_LOAD_FAILED", name: error?.name ?? "Error" }); if (mountRequested) appNavigation.exit?.(); return null; });
     return runtimePromise;
   };
   return Object.freeze({
