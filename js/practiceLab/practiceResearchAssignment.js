@@ -52,6 +52,12 @@ export function selectPracticeResearchTarget(candidates, { now = Date.now() } = 
 
 function assignmentId(enrollmentId, assignmentIndex) { return `research-assignment:${enrollmentId}:${String(assignmentIndex).padStart(3, "0")}`; }
 
+function serializableEligibilitySnapshot(target) {
+  return Object.freeze(Object.fromEntries(
+    Object.entries(target ?? {}).filter(([key, value]) => key !== "assignedArm" && value !== undefined),
+  ));
+}
+
 export async function createPracticeResearchAssignmentRecord({ enrollment, study, target, now = Date.now(), cryptoImpl = globalThis.crypto } = {}) {
   if (enrollment?.status !== "active") throw new TypeError("Practice Research enrollment is not active");
   if (!target?.statId || !target?.entityType || !target?.entityKey) throw new TypeError("Practice Research target must be frozen before randomization");
@@ -88,7 +94,7 @@ export async function createPracticeResearchAssignmentRecord({ enrollment, study
     status: "assigned",
     localDayKey: localDay(atMs),
     target: Object.freeze({ entityType: target.entityType, statId: target.statId, entityKey: target.entityKey }),
-    eligibilitySnapshot: Object.freeze({ ...target, assignedArm: undefined }),
+    eligibilitySnapshot: serializableEligibilitySnapshot(target),
     baselineSessionId: null,
     baseline: null,
     treatment: Object.freeze({ status: "pending", experimentId: randomization.assignedArm === "weakness-boss" ? "weakness-boss" : getPracticeResearchFocusedExperiment(target.entityType), sessionId: null, exposureStartedAt: null, completedAt: null }),
