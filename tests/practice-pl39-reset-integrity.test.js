@@ -4,7 +4,8 @@ import { PRACTICE_STORE_NAMES } from "../js/practiceLab/practiceConstants.js";
 import { createDefaultPracticeProfile, createDefaultSkillStat } from "../js/practiceLab/practiceDefaults.js";
 import { createDefaultPracticeContext } from "../js/practiceLab/practiceContext.js";
 import { createPracticeCustomTextRepository } from "../js/practiceLab/practiceCustomTextRepository.js";
-import { createSkillStatId } from "../js/practiceLab/practiceIds.js";
+import { createDefaultPracticeEvaluationState } from "../js/practiceLab/practiceEvaluationState.js";
+import { createPracticeEvaluationStateId, createSkillStatId } from "../js/practiceLab/practiceIds.js";
 import { createPracticeSessionHarness } from "./practiceSessionFixtures.js";
 
 const now = () => new Date("2026-09-14T00:00:00.000Z");
@@ -35,6 +36,8 @@ test("PL39 normal Practice reset is profile-scoped, preserves saved Custom Text,
   const skillB = statFor(profileB.profileId, contextB.contextId, "b");
   await harness.dataStore.put("skillStats", skillA);
   await harness.dataStore.put("skillStats", skillB);
+  const evaluationB = createDefaultPracticeEvaluationState({ profileId: profileB.profileId, now, historyStatus: "complete" });
+  await harness.dataStore.put("evaluationStates", evaluationB);
 
   const custom = createPracticeCustomTextRepository({ dataStore: harness.dataStore, now });
   const customA = await custom.createCustomText({ profileId: profileA.profileId, title: "A saved", sourceText: "saved text owned by profile A", dataLocale: "en" });
@@ -50,6 +53,20 @@ test("PL39 normal Practice reset is profile-scoped, preserves saved Custom Text,
   assert.deepEqual(await harness.dataStore.get("contexts", contextB.contextId), contextB);
   assert.equal((await custom.getCustomText(customA.customTextId, { profileId: profileA.profileId })).sourceText, customA.sourceText);
   assert.equal((await custom.getCustomText(customB.customTextId, { profileId: profileB.profileId })).sourceText, customB.sourceText);
+  assert.deepEqual(await harness.dataStore.get("evaluationStates", evaluationB.evaluationStateId), evaluationB, "Profile B exposure history must not be reset");
+});
+
+test("PL39 normal reset leaves a partial-history marker so protected exposure cannot become falsely cold again", async () => {
+  const harness = await createPracticeSessionHarness({ suffix: "pl39-reset-coldness" });
+  const before = await harness.repository.ensureEvaluationState(harness.profileId);
+  assert.equal(before.historyStatus, "complete");
+  await harness.repository.resetPracticeData();
+  const key = createPracticeEvaluationStateId(harness.profileId);
+  const persisted = await harness.dataStore.get("evaluationStates", key);
+  assert.ok(persisted, "reset must persist an exposure-history marker");
+  assert.equal(persisted.historyStatus, "partial");
+  const after = await harness.repository.ensureEvaluationState(harness.profileId);
+  assert.equal(after.historyStatus, "partial", "ensureEvaluationState must not recreate complete/fresh history after reset");
 });
 
 test("PL39 explicit full user-content wipe remains destructive across all Practice stores", async () => {
