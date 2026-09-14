@@ -4,6 +4,8 @@ import { applyPracticeDatabaseUpgrade } from "../js/practiceLab/practiceIndexedD
 import { migratePracticeRecord } from "../js/practiceLab/practiceMigrations.js";
 import { createDefaultSessionSummary } from "../js/practiceLab/practiceDefaults.js";
 
+const clone = (value) => structuredClone(value);
+
 function collection(map) {
   return {
     contains: (name) => map.has(name),
@@ -12,14 +14,14 @@ function collection(map) {
 }
 
 function makeStore(keyPath, indexes = [], rows = []) {
-  const indexMap = new Map(indexes.map((index) => [index.name, structuredClone(index)]));
+  const indexMap = new Map(indexes.map((index) => [index.name, clone(index)]));
   return {
     keyPath,
     rows,
     get indexNames() { return collection(indexMap); },
-    createIndex(name, nextKeyPath, options = {}) { indexMap.set(name, { name, keyPath: nextKeyPath, options: structuredClone(options) }); },
+    createIndex(name, nextKeyPath, options = {}) { indexMap.set(name, { name, keyPath: nextKeyPath, options: clone(options) }); },
     deleteIndex(name) { indexMap.delete(name); },
-    snapshot() { return { keyPath, indexes: [...indexMap.values()].map(structuredClone), rows: structuredClone(rows) }; },
+    snapshot() { return { keyPath, indexes: [...indexMap.values()].map((index) => clone(index)), rows: clone(rows) }; },
   };
 }
 
@@ -40,7 +42,7 @@ function storesForVersion(version) {
 
 function legacyIndexes(storeName, version) {
   const current = PRACTICE_STORE_DEFINITIONS[storeName]?.indexes ?? [];
-  const indexes = current.map(structuredClone);
+  const indexes = current.map((index) => clone(index));
   if (storeName === "customTexts" && version === 9) {
     indexes.push({ name: "lastUsedAt", keyPath: "lastUsedAt", options: {} });
     indexes.push({ name: "normalizedTitle", keyPath: "normalizedTitle", options: {} });
@@ -115,7 +117,7 @@ function certifySessionRecordMigrations() {
   const paths = [];
   for (let version = 1; version < PRACTICE_RECORD_VERSIONS.sessionSummary; version += 1) {
     const source = historicalSession(version);
-    const snapshot = structuredClone(source);
+    const snapshot = clone(source);
     const result = migratePracticeRecord("sessionSummary", source);
     assert.equal(result.ok, true, `sessionSummary v${version} migration failed: ${result.error?.message ?? "unknown"}`);
     assert.equal(result.toVersion, PRACTICE_RECORD_VERSIONS.sessionSummary);
