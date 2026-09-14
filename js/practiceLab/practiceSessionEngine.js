@@ -13,9 +13,12 @@ import { createPracticePhysicalTelemetryRepositoryFacade } from "./practicePhysi
 import { createPracticePhysicalTelemetryRuntime } from "./practicePhysicalTelemetryRuntime.js";
 import { reconcilePracticePhysicalTelemetry } from "./practicePhysicalTelemetryReconciliation.js";
 import { getPracticeTrustedResearchBinding } from "./practiceResearchBinding.js";
+import { assertPracticeTrustedConfigurationBoundary } from "./practiceTrustedConfigGuard.js";
 
 function trackingLogger(options) {
-  return options?.logger ?? console;
+  // Production Practice is silent by default. A bounded developer/test logger may
+  // still be injected explicitly without creating a routine console data sink.
+  return options?.logger ?? null;
 }
 
 function sidecarRepository(repository, afterCanonicalCommit) {
@@ -69,6 +72,7 @@ export function createPracticeSessionEngine(options = {}) {
 
   core = createPracticeSessionEngineV31({
     ...options,
+    logger,
     repository: sidecarRepository(repository, async (payload, result) => postCanonicalCommit(payload, result)),
   });
 
@@ -89,24 +93,25 @@ export function createPracticeSessionEngine(options = {}) {
         retentionAnalysis: core?.getRetentionAnalysis?.() ?? null,
       });
     } catch (cause) {
-      logger?.warn?.("Treatment tracking failed after canonical Practice commit", { cause });
+      logger?.warn?.("Treatment tracking failed after canonical Practice commit", { code: cause?.code ?? "PRACTICE_TREATMENT_SIDECAR_FAILED", name: cause?.name ?? "Error" });
     }
     if (physicalAvailable && physicalEligible) {
       try {
         await physical.afterCanonicalCommit({ sessionSummary: payload.sessionSummary, contentPlan: preparedContentPlan });
       } catch (cause) {
-        logger?.warn?.("Physical telemetry failed after canonical Practice commit", { cause });
+        logger?.warn?.("Physical telemetry failed after canonical Practice commit", { code: cause?.code ?? "PRACTICE_PHYSICAL_SIDECAR_FAILED", name: cause?.name ?? "Error" });
       }
     }
   };
 
   const unsubscribeTracking = core.subscribe((snapshot, event) => {
     try { treatment.observeProgress(snapshot, event); }
-    catch (cause) { logger?.warn?.("Treatment tracking progress hook failed", { cause }); }
+    catch (cause) { logger?.warn?.("Treatment tracking progress hook failed", { code: cause?.code ?? "PRACTICE_TREATMENT_PROGRESS_FAILED", name: cause?.name ?? "Error" }); }
     if (["paused", "resumed", "content-appended", "restored"].includes(event)) physical.resetTimingContinuity();
   });
 
   const prepare = async (args = {}) => {
+    assertPracticeTrustedConfigurationBoundary(args.configuration ?? {});
     activeTreatment = args.experiment?.id === PRACTICE_WEAKNESS_BOSS_EXPERIMENT_ID ? weaknessBossTreatment : standardTreatment;
     const researchBinding = getPracticeTrustedResearchBinding(args.contentPlan);
     const prepared = await core.prepare(args);
@@ -120,7 +125,7 @@ export function createPracticeSessionEngine(options = {}) {
       });
       await reconcilePracticeTreatmentTracking({ repository, profileId, contextId, now: wallClock });
     } catch (cause) {
-      logger?.warn?.("Treatment tracking unavailable for prepared Practice session", { cause });
+      logger?.warn?.("Treatment tracking unavailable for prepared Practice session", { code: cause?.code ?? "PRACTICE_TREATMENT_PREPARE_FAILED", name: cause?.name ?? "Error" });
     }
     if (researchBinding) {
       // PL38 is a local research sidecar and must not consume or persist PL36 physical telemetry.
@@ -137,7 +142,7 @@ export function createPracticeSessionEngine(options = {}) {
     } catch (cause) {
       physicalAvailable = false;
       physicalEligible = false;
-      logger?.warn?.("Physical telemetry unavailable for prepared Practice session", { cause });
+      logger?.warn?.("Physical telemetry unavailable for prepared Practice session", { code: cause?.code ?? "PRACTICE_PHYSICAL_PREPARE_FAILED", name: cause?.name ?? "Error" });
     }
     return prepared;
   };
@@ -152,7 +157,7 @@ export function createPracticeSessionEngine(options = {}) {
     const outcome = core.handleInput(rawInput);
     if (physicalAvailable && physicalEligible) {
       try { physical.observeCanonicalInput(rawInput, outcome, core.getSnapshot?.() ?? null); }
-      catch (cause) { logger?.warn?.("Physical telemetry input hook failed", { cause }); }
+      catch (cause) { logger?.warn?.("Physical telemetry input hook failed", { code: cause?.code ?? "PRACTICE_PHYSICAL_INPUT_FAILED", name: cause?.name ?? "Error" }); }
     }
     return outcome;
   };
@@ -161,7 +166,7 @@ export function createPracticeSessionEngine(options = {}) {
     try {
       const result = await core.abandon(reason);
       try { await treatment.abandon("abandoned-before-treatment"); }
-      catch (cause) { logger?.warn?.("Treatment tracking abandonment hook failed", { cause }); }
+      catch (cause) { logger?.warn?.("Treatment tracking abandonment hook failed", { code: cause?.code ?? "PRACTICE_TREATMENT_ABANDON_FAILED", name: cause?.name ?? "Error" }); }
       return result;
     } finally {
       physical.stop();
@@ -195,7 +200,7 @@ export async function restorePracticeSessionEngine(options = {}) {
   const { repository, profileId, contextId } = options;
   if (repository && profileId) {
     try { await reconcilePracticeTreatmentTracking({ repository, profileId, contextId, now: options.wallClock ?? Date.now }); }
-    catch (cause) { trackingLogger(options)?.warn?.("Treatment tracking reconciliation failed during restore", { cause }); }
+    catch (cause) { trackingLogger(options)?.warn?.("Treatment tracking reconciliation failed during restore", { code: cause?.code ?? "PRACTICE_TREATMENT_RECONCILIATION_FAILED", name: cause?.name ?? "Error" }); }
   }
   // PL36 intentionally does not reconstruct physical events from checkpoints/session summaries.
   return restored;
