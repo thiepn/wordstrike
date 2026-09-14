@@ -44,9 +44,9 @@ function readyIndex() {
   };
 }
 
-test("PL21 contracts remain intact inside the PL25 DB8/session13/foundation10 envelope", () => {
+test("PL21 contracts remain intact inside the current PL38 envelope", () => {
   assert.ok(PRACTICE_DATABASE_VERSION >= 10);
-  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 13);
+  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 14);
   assert.equal(PRACTICE_FOUNDATION_ANALYSIS_VERSION, 10);
 });
 
