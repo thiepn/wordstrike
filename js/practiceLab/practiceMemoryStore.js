@@ -48,6 +48,7 @@ function matchesQuery(value, query) {
 export function createPracticeMemoryStore({ initialData = {} } = {}) {
   let opened = false;
   let stores = new Map(PRACTICE_STORE_NAMES.map((name) => [name, new Map()]));
+  let transactionQueue = Promise.resolve();
 
   for (const [storeName, records] of Object.entries(initialData)) {
     if (!isPracticeStoreName(storeName)) continue;
@@ -117,6 +118,27 @@ export function createPracticeMemoryStore({ initialData = {} } = {}) {
     };
   };
 
+  async function performTransaction(storeNames, callback) {
+    const names = [...new Set(storeNames)];
+    names.forEach(ensureStore);
+    const working = new Map(stores);
+    for (const name of names) {
+      working.set(name, new Map([...stores.get(name)].map(([key, value]) => [key, clonePracticeValue(value)])));
+    }
+    try {
+      const outcome = await callback(apiFor(working));
+      stores = working;
+      return outcome;
+    } catch (cause) {
+      if (cause?.code) throw cause;
+      throw practiceStorageError(
+        PRACTICE_STORAGE_ERROR_CODES.TRANSACTION_FAILED,
+        "Practice memory transaction failed",
+        { operation: "transaction", recoverable: true, cause },
+      );
+    }
+  }
+
   return Object.freeze({
     kind: "memory",
     async open() {
@@ -147,27 +169,16 @@ export function createPracticeMemoryStore({ initialData = {} } = {}) {
     clearStore(storeName) {
       return apiFor().clearStore(storeName);
     },
-    async runTransaction(storeNames, _mode, callback) {
-      const names = [...new Set(storeNames)];
-      names.forEach(ensureStore);
-      const working = new Map(stores);
-      for (const name of names) {
-        working.set(name, new Map([...stores.get(name)].map(([key, value]) => [key, clonePracticeValue(value)])));
-      }
-      try {
-        const outcome = await callback(apiFor(working));
-        stores = working;
-        return outcome;
-      } catch (cause) {
-        if (cause?.code) throw cause;
-        throw practiceStorageError(
-          PRACTICE_STORAGE_ERROR_CODES.TRANSACTION_FAILED,
-          "Practice memory transaction failed",
-          { operation: "transaction", recoverable: true, cause },
-        );
-      }
+    runTransaction(storeNames, _mode, callback) {
+      const queued = transactionQueue.then(
+        () => performTransaction(storeNames, callback),
+        () => performTransaction(storeNames, callback),
+      );
+      transactionQueue = queued.then(() => undefined, () => undefined);
+      return queued;
     },
     async deleteDatabase() {
+      await transactionQueue;
       stores = new Map(PRACTICE_STORE_NAMES.map((name) => [name, new Map()]));
       opened = false;
       return true;
