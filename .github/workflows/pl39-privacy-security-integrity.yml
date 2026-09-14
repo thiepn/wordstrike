@@ -33,6 +33,11 @@ jobs:
         run: |
           set -o pipefail
           npm run audit:practice-privacy-security 2>&1 | tee pl39-source-audit.log
+      - name: PL39 database and record migrations
+        shell: bash
+        run: |
+          set -o pipefail
+          npm run test:practice-migrations 2>&1 | tee pl39-migrations.log
       - name: PL39 focused integrity certification
         run: npm run test:pl39-integrity
       - name: PL31-PL38 sensitive subsystem regressions
@@ -57,6 +62,7 @@ jobs:
           name: pl39-certification-logs
           path: |
             pl39-source-audit.log
+            pl39-migrations.log
             pl39-full-suite.log
           if-no-files-found: warn
           retention-days: 14
