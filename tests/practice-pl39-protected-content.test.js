@@ -2,12 +2,12 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { PRACTICE_INDEX_REVERSE_PARTITIONS } from "../js/practiceLab/practiceIndexConstants.js";
-import { evaluatePracticeEvaluationIntegrity } from "../js/practiceLab/practiceEvaluationIntegrity.js";
-import { createDefaultPracticeEvaluationState } from "../js/practiceLab/practiceEvaluationState.js";
+import { applyPracticeEvaluationConfigurationOverrides, evaluatePracticeEvaluationIntegrity } from "../js/practiceLab/practiceEvaluationIntegrity.js";
+import { PRACTICE_EVALUATION_PROTOCOL_V1 } from "../js/practiceLab/practiceEvaluationConstants.js";
 
 const profileId = "practice-profile_pl39-protected-profile-12345678";
 const contextId = "practice-context_pl39-protected-context-12345678";
-const hash = "a".repeat(64);
+const sessionId = "practice-session_pl39-protected-session-12345678";
 
 test("PL39 protected partitions have no target reverse-index lookup surface", async () => {
   assert.deepEqual(PRACTICE_INDEX_REVERSE_PARTITIONS, ["training", "diagnostic"]);
@@ -18,46 +18,54 @@ test("PL39 protected partitions have no target reverse-index lookup surface", as
 });
 
 test("PL39 partial exposure history can never satisfy strict cold verification", () => {
-  const evaluationState = createDefaultPracticeEvaluationState({ profileId, historyStatus: "partial", now: () => new Date("2026-09-14T00:00:00.000Z") });
   const binding = Object.freeze({
-    evaluationReservationId: "practice-evaluation-reservation_pl39-protected-12345678",
-    measurementKind: "cold-transfer",
-    poolId: "pool-pl39",
-    suiteId: null,
-    unitId: "unit-pl39",
-    formId: null,
-    familyId: "family-pl39",
-    contentHash: hash,
-    expectedHash: hash,
-    artifactHash: hash,
-    claimedAt: "2026-09-14T00:01:00.000Z",
-    freshnessAtClaim: "fresh",
+    frameworkVersion: 1,
+    reservationId: "practice-evaluation-reservation_pl39-protected-12345678",
+    profileId,
     contextId,
+    sessionId,
+    kind: "cold-transfer",
+    protocolId: PRACTICE_EVALUATION_PROTOCOL_V1["cold-transfer"].protocolId,
+    protocolVersion: 1,
+    suiteId: null,
+    suiteVersion: null,
+    formId: null,
+    formVersion: null,
+    poolId: "pool-pl39",
+    poolVersion: 1,
+    unitId: "unit-pl39",
+    unitVersion: 1,
+    exposureOrdinal: 1,
+    freshnessStatus: "fresh",
+    reservedAtUtc: "2026-09-14T00:00:00.000Z",
+    claimedAtUtc: "2026-09-14T00:01:00.000Z",
+    contentBindingHash: "pl39-binding-hash",
+  });
+  const plan = Object.freeze({
+    kind: "cold-transfer",
+    binding,
+    measurementProtocol: PRACTICE_EVALUATION_PROTOCOL_V1["cold-transfer"],
   });
   const contentPlan = Object.freeze({
-    contentId: "practice-content_pl39-protected",
-    contentHash: hash,
-    metadata: Object.freeze({ partition: "transfer", evaluationBinding: binding }),
+    targetEntities: Object.freeze([]),
+    completion: Object.freeze({ mode: "duration", value: 60_000 }),
+    metadata: Object.freeze({ partition: "transfer", evaluationContentBindingHash: binding.contentBindingHash }),
   });
   const session = Object.freeze({
     profileId,
     contextId,
-    status: "completed",
-    completionReason: "content-complete",
-    typedCharacterCount: 100,
-    accuracy: 99,
-    contentHash: hash,
+    sessionId,
+    completionReason: "time-complete",
+    pausedDurationMs: 0,
+    configuration: applyPracticeEvaluationConfigurationOverrides({}, "cold-transfer"),
   });
-  const artifacts = Object.freeze({
-    getExpectedHash: () => hash,
-    getPoolHash: () => hash,
-    getSuiteHash: () => hash,
-  });
-  const result = evaluatePracticeEvaluationIntegrity({ session, contentPlan, evaluationState, artifacts, measurementKind: "cold-transfer", now: "2026-09-14T00:02:00.000Z" });
-  assert.equal(result.coldVerification, false);
-  assert.equal(result.standardized, false);
+  const result = evaluatePracticeEvaluationIntegrity({ plan, session, contentPlan, historyStatus: "partial" });
   assert.equal(result.status, "nonstandard");
-  assert.ok(result.reasons.includes("history-status-partial"), JSON.stringify(result.reasons));
+  assert.equal(result.coldVerificationEligible, false);
+  assert.equal(result.transferEvidenceEligible, false);
+  assert.equal(result.skillEvidenceEligible, false);
+  assert.equal(result.abilityEligible, false);
+  assert.ok(result.reasons.includes("history-partial"), JSON.stringify(result.reasons));
 });
 
 test("PL39 protected-content state stores only bounded identifiers/hashes, never passage text", async () => {
