@@ -4,6 +4,7 @@ import {
 } from "./practiceConstants.js";
 import {
   PRACTICE_STORAGE_ERROR_CODES,
+  assertPracticeSerializable,
   clonePracticeValue,
   getPracticeStoreKey,
   isPracticeStoreName,
@@ -74,6 +75,7 @@ export function createPracticeMemoryStore({ initialData = {} } = {}) {
         return clonePracticeValue(getStore(storeName).get(serializeKey(key)) ?? null);
       },
       async put(storeName, record) {
+        assertPracticeSerializable(record);
         const key = getPracticeStoreKey(storeName, record);
         if (key == null || (Array.isArray(key) && key.some((entry) => entry == null))) throw new TypeError(`Missing key for ${storeName}`);
         const serializedKey = serializeKey(key);
