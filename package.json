@@ -28,7 +28,8 @@
     "test:pl37-weakness-boss": "node --test tests/practice-weakness-boss*-pl37.test.js",
     "test:pl38-research-ab": "node --test tests/*pl38*.test.js",
     "audit:practice-privacy-security": "node scripts/auditPracticePrivacySecurity.mjs",
+    "test:practice-migrations": "node scripts/testPracticeMigrations.mjs",
     "test:pl39-integrity": "node --test tests/*pl39*.test.js",
-    "test:practice-integrity": "node scripts/auditPracticePrivacySecurity.mjs && node --test tests/*pl39*.test.js"
+    "test:practice-integrity": "node scripts/auditPracticePrivacySecurity.mjs && node scripts/testPracticeMigrations.mjs && node --test tests/*pl39*.test.js"
   }
 }
