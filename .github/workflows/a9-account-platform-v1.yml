@@ -1,0 +1,33 @@
+name: A9 Account Platform v1
+
+on:
+  pull_request:
+    paths:
+      - '.well-known/thiepn-account-release.json'
+      - '.well-known/thiepn-app.json'
+      - '.github/workflows/a9-account-platform-v1.yml'
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  release-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+      - name: Verify WORDSTRIKE Platform v1 release metadata
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const app=JSON.parse(fs.readFileSync('.well-known/thiepn-app.json','utf8'));
+          const release=JSON.parse(fs.readFileSync('.well-known/thiepn-account-release.json','utf8'));
+          if(release.platformRelease!=='1.0.0')throw new Error('Unexpected platform release.');
+          if(release.platformCommit!=='169e083f268e895cd44d8a5fe706ba5d4532bfa2')throw new Error('Unexpected platform release commit.');
+          for(const key of ['accountContract','sdkContract','integrationMode'])if(release[key]!==app[key])throw new Error(`Release contract mismatch: ${key}`);
+          console.log('WORDSTRIKE Platform v1 release metadata passed.');
+          NODE
