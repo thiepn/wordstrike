@@ -14,3 +14,17 @@ test("PL39 concurrent completion is idempotent", async () => {
   assert.equal((await h.repository.listSessionSummaries()).length, 1);
   assert.equal((await h.repository.getPracticeProfile()).totalCompletedSessions, 1);
 });
+
+test("PL39 concurrent Custom Text updates use revision compare-and-swap", async () => {
+  const h = await createPracticeSessionHarness({ suffix: "pl39-custom-concurrent" });
+  const initial = await h.repository.createCustomText({ profileId: h.profileId, title: "Draft", sourceText: "initial text", dataLocale: "en" });
+  const update = (sourceText) => h.repository.updateCustomText({ customTextId: initial.customTextId, profileId: h.profileId, expectedRevision: initial.revision, sourceText });
+  const result = await Promise.allSettled([update("candidate alpha"), update("candidate beta")]);
+  assert.equal(result.filter((entry) => entry.status === "fulfilled").length, 1);
+  assert.equal(result.filter((entry) => entry.status === "rejected").length, 1);
+  const rejected = result.find((entry) => entry.status === "rejected");
+  assert.match(String(rejected.reason?.code ?? rejected.reason?.message), /CONFLICT/i);
+  const stored = await h.repository.getCustomText(initial.customTextId);
+  assert.equal(stored.revision, 2);
+  assert.ok(["candidate alpha", "candidate beta"].includes(stored.sourceText));
+});
