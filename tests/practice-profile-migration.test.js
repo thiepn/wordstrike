@@ -57,13 +57,13 @@ assert.equal(initialized.profile.recordVersion, 3);
 assert.equal(initialized.profile.lastTrainingDayKey, null);
 assert.deepEqual(await dataStore.get("profiles", profileId), initialized.profile);
 
-assert.ok(PRACTICE_DATABASE_VERSION >= 11);
+assert.ok(PRACTICE_DATABASE_VERSION >= 12);
 assert.equal(PRACTICE_MANIFEST_VERSION, 1);
 const legacyRecordVersions = {
   context: 1,
   profile: 3,
   skillStat: 3,
-  sessionSummary: 13,
+  sessionSummary: 14,
   abilityState: 1,
   performanceState: 1,
   learningState: 1,
@@ -86,7 +86,10 @@ assert.deepEqual(
     treatmentResponseState: 1,
     physicalTelemetryStat: 1,
     physicalTelemetrySession: 1,
+    researchEnrollment: 1,
+    researchAssignment: 1,
+    researchAnalysisState: 1,
   },
 );
 
-console.log("Practice profile migration, canonical day key, repository upgrade, and PL36 version envelope passed.");
+console.log("Practice profile migration, canonical day key, repository upgrade, and PL38 version envelope passed.");
