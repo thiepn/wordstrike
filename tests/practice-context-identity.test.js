@@ -194,5 +194,8 @@ const retention = buildPracticeRetentionPlan({ reviewItems: [aReview, bReview], 
 assert.equal(retention.reviewItems.length, 0);
 
 await repository.resetPracticeData();
-assert.equal((await dataStore.list("contexts")).length, 0);
+const contextsAfterReset = await dataStore.list("contexts");
+assert.equal(contextsAfterReset.some((record) => record.contextId === contextB.contextId), false);
+assert.equal(contextsAfterReset.some((record) => record.contextId === foreignContext.contextId && record.profileId === profileB), true);
+assert.equal(contextsAfterReset.some((record) => record.contextId === defaultA && record.profileId === profileA), true);
 console.log("PL5 context identity, migrations, ownership, isolation, history, checkpoint, commit, retention, and reset passed.");
