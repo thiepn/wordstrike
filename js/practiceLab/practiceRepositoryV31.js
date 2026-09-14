@@ -22,6 +22,56 @@ export function createPracticeRepository(options = {}) {
   const core = createPracticeRepositoryV30({ ...options, dataStore });
   const custom = createPracticeCustomTextRepositoryFacade({ dataStore, now });
 
+  async function resolveActiveScope(requestedProfileId = null, requestedContextId = null) {
+    const active = await core.getPracticeProfile?.();
+    const activeProfileId = active?.profileId ?? null;
+    if (!activeProfileId) return null;
+    if (requestedProfileId && requestedProfileId !== activeProfileId) return null;
+    return Object.freeze({
+      profileId: requestedProfileId ?? activeProfileId,
+      contextId: requestedContextId ?? null,
+    });
+  }
+
+  const inScope = (record, scope) => Boolean(record && scope
+    && record.profileId === scope.profileId
+    && (!scope.contextId || record.contextId === scope.contextId));
+
+  async function getCoachPlan(coachPlanId, { profileId = null, contextId = null } = {}) {
+    const scope = await resolveActiveScope(profileId, contextId);
+    if (!scope) return null;
+    const record = await core.getCoachPlan(coachPlanId);
+    return inScope(record, scope) ? record : null;
+  }
+
+  async function deleteCoachPlan(coachPlanId, { profileId = null, contextId = null } = {}) {
+    const plan = await getCoachPlan(coachPlanId, { profileId, contextId });
+    if (!plan) return false;
+    return dataStore.delete("coachPlans", coachPlanId);
+  }
+
+  async function listCoachChildSessions(coachPlanId, { profileId = null, contextId = null } = {}) {
+    const plan = await getCoachPlan(coachPlanId, { profileId, contextId });
+    if (!plan) return [];
+    const sessions = await core.listCoachChildSessions(coachPlanId);
+    return sessions.filter((record) => record.profileId === plan.profileId && record.contextId === plan.contextId);
+  }
+
+  async function getAssessmentRun(assessmentRunId, { profileId = null, contextId = null } = {}) {
+    const scope = await resolveActiveScope(profileId, contextId);
+    if (!scope) return null;
+    const record = await core.getAssessmentRun(assessmentRunId);
+    return inScope(record, scope) ? record : null;
+  }
+
+  async function deleteReviewItem(reviewItemId, { profileId = null, contextId = null } = {}) {
+    const scope = await resolveActiveScope(profileId, contextId);
+    if (!scope) return false;
+    const record = await dataStore.get("reviewItems", reviewItemId);
+    if (!inScope(record, scope)) return false;
+    return dataStore.delete("reviewItems", reviewItemId);
+  }
+
   async function resetActiveProfileData(profileId) {
     const stores = [...PROFILE_RESET_STORES, "meta"];
     await dataStore.runTransaction(stores, "readwrite", async (transaction) => {
@@ -60,6 +110,11 @@ export function createPracticeRepository(options = {}) {
   return Object.freeze({
     ...core,
     ...custom,
+    getCoachPlan,
+    deleteCoachPlan,
+    listCoachChildSessions,
+    getAssessmentRun,
+    deleteReviewItem,
     resetPracticeData,
   });
 }
