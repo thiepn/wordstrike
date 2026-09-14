@@ -133,6 +133,8 @@ test("PL31 retention and ordinary reset code do not prune Custom Text", () => {
   const retentionBody = legacyRepository.slice(legacyRepository.indexOf("const runRetention"), legacyRepository.indexOf("const writeWithQuotaRecovery"));
   assert.equal(retentionBody.includes("customTexts"), false);
   assert.match(repositoryV31, /deleteUserContent/);
-  assert.match(repositoryV31, /rawCustomTexts/);
+  assert.match(repositoryV31, /PROFILE_RESET_STORES/);
+  assert.match(repositoryV31, /resetActiveProfileData/);
+  assert.match(repositoryV31, /!\["meta", "customTexts"\]\.includes\(storeName\)/);
   assert.match(currentWrapper, /createPracticeRepositoryV31/);
 });
