@@ -61,93 +61,42 @@ const researchTarget = {
 
 test("PL39 direct-ID surfaces reject valid records owned by another Practice profile/context", async () => {
   const harness = await createPracticeSessionHarness({ suffix: "pl39-isolation" });
-
-  // Custom Text: inject a valid foreign row through the low-level store-facing repository,
-  // then attack through the active-profile repository wrapper.
   const rawCustom = createPracticeCustomTextRepository({ dataStore: harness.dataStore, now: fixedNow });
-  const foreignCustom = await rawCustom.createCustomText({
-    profileId: FOREIGN_PROFILE,
-    title: "Foreign private text",
-    sourceText: "foreign profile sentinel content",
-    dataLocale: "en",
-  });
+  const foreignCustom = await rawCustom.createCustomText({ profileId: FOREIGN_PROFILE, title: "Foreign private text", sourceText: "foreign profile sentinel content", dataLocale: "en" });
   assert.equal(await harness.repository.getCustomText(foreignCustom.customTextId), null);
   assert.equal(await harness.repository.deleteCustomText(foreignCustom.customTextId), false);
   assert.equal((await harness.dataStore.get("customTexts", foreignCustom.customTextId)).sourceText, foreignCustom.sourceText);
 
-  // Coach plan: a raw foreign plan ID cannot be resolved or deleted through the active profile.
-  const foreignCoach = createPracticeCoachPlanRecord({
-    profileId: FOREIGN_PROFILE,
-    contextId: FOREIGN_CONTEXT,
-    localDayKey: "2026-09-14",
-    requestedMinutes: 5,
-    inputFingerprint: "pl39-foreign-plan",
-    blocks: [],
-    now: fixedNow,
-  });
+  const foreignCoach = createPracticeCoachPlanRecord({ profileId: FOREIGN_PROFILE, contextId: FOREIGN_CONTEXT, localDayKey: "2026-09-14", requestedMinutes: 5, inputFingerprint: "pl39-foreign-plan", blocks: [], now: fixedNow });
   await harness.dataStore.put("coachPlans", foreignCoach);
   assert.equal(await harness.repository.getCoachPlan(foreignCoach.coachPlanId), null);
   assert.equal(await harness.repository.deleteCoachPlan(foreignCoach.coachPlanId), false);
   assert.deepEqual(await harness.dataStore.get("coachPlans", foreignCoach.coachPlanId), foreignCoach);
 
-  // Treatment episode: direct ID is active-profile/context scoped.
   const foreignTreatment = foreignTreatmentEpisode();
   await harness.dataStore.put("treatmentEpisodes", foreignTreatment);
   assert.equal(await harness.repository.getTreatmentEpisode(foreignTreatment.treatmentEpisodeId), null);
   assert.deepEqual(await harness.dataStore.get("treatmentEpisodes", foreignTreatment.treatmentEpisodeId), foreignTreatment);
 
-  // Physical telemetry stat: the production scoped facade refuses a foreign raw stat ID.
   const foreignPhysical = mergePracticePhysicalTelemetryStat(null, {
     profileId: FOREIGN_PROFILE,
     contextId: FOREIGN_CONTEXT,
     entityType: "physical-key",
     entityKey: "KeyK",
-    delta: {
-      activationCount: 2,
-      firstPassActivationCount: 2,
-      firstPassCorrectActivationCount: 2,
-      firstPassErrorOriginCount: 0,
-      timingEligibleCount: 1,
-      fluentCount: 1,
-      disfluentCount: 0,
-      residualSamples: [4],
-      fluentLatencySamples: [90],
-    },
+    delta: { activationCount: 2, firstPassActivationCount: 2, firstPassCorrectActivationCount: 2, firstPassErrorOriginCount: 0, timingEligibleCount: 1, fluentCount: 1, disfluentCount: 0, residualSamples: [4], fluentLatencySamples: [90] },
     nowUtc: fixedNowIso,
   });
   await harness.dataStore.put("physicalTelemetryStats", foreignPhysical);
-  const scopedPhysical = createScopedPracticePhysicalTelemetryRepository({
-    dataStore: harness.dataStore,
-    now: fixedNow,
-    scopeProvider: () => ({ profileId: harness.profileId, contextId: harness.contextId }),
-  });
+  const scopedPhysical = createScopedPracticePhysicalTelemetryRepository({ dataStore: harness.dataStore, now: fixedNow, scopeProvider: () => ({ profileId: harness.profileId, contextId: harness.contextId }) });
   assert.equal(await scopedPhysical.getPhysicalTelemetryStat(foreignPhysical.physicalTelemetryStatId), null);
   assert.deepEqual(await harness.dataStore.get("physicalTelemetryStats", foreignPhysical.physicalTelemetryStatId), foreignPhysical);
 
-  // Research enrollment + assignment: direct IDs cannot cross the active scope.
   const study = await practiceResearchStudyRegistry.getBound(PRACTICE_RESEARCH_STUDY_ID, 1, globalThis.crypto);
-  const foreignEnrollment = createPracticeResearchEnrollment({
-    profileId: FOREIGN_PROFILE,
-    contextId: FOREIGN_CONTEXT,
-    study,
-    consented: true,
-    cryptoImpl: globalThis.crypto,
-    now: fixedNow,
-  });
-  const foreignAssignment = await createPracticeResearchAssignmentRecord({
-    enrollment: foreignEnrollment,
-    study,
-    target: researchTarget,
-    cryptoImpl: globalThis.crypto,
-    now: fixedNow,
-  });
+  const foreignEnrollment = createPracticeResearchEnrollment({ profileId: FOREIGN_PROFILE, contextId: FOREIGN_CONTEXT, study, consented: true, cryptoImpl: globalThis.crypto, now: fixedNow() });
+  const foreignAssignment = await createPracticeResearchAssignmentRecord({ enrollment: foreignEnrollment, study, target: researchTarget, cryptoImpl: globalThis.crypto, now: fixedNow() });
   await harness.dataStore.put("researchEnrollments", foreignEnrollment);
   await harness.dataStore.put("researchAssignments", foreignAssignment);
-  const scopedResearch = createPracticeResearchRepository({
-    dataStore: harness.dataStore,
-    now: fixedNow,
-    scopeProvider: () => ({ profileId: harness.profileId, contextId: harness.contextId }),
-  });
+  const scopedResearch = createPracticeResearchRepository({ dataStore: harness.dataStore, now: fixedNow, scopeProvider: () => ({ profileId: harness.profileId, contextId: harness.contextId }) });
   assert.equal(await scopedResearch.getEnrollment(foreignEnrollment.researchEnrollmentId), null);
   assert.equal(await scopedResearch.getAssignment(foreignAssignment.researchAssignmentId), null);
   assert.deepEqual(await harness.dataStore.get("researchEnrollments", foreignEnrollment.researchEnrollmentId), foreignEnrollment);
