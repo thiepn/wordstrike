@@ -52,6 +52,5 @@ test("PL39 public Practice engine rejects forged measurement, Coach, Treatment, 
       field,
     );
     assert.equal(engine.getSnapshot().lifecycleState, "created", `${field} must be rejected before session prepare mutates lifecycle`);
-    engine.destroy();
   }
 });
