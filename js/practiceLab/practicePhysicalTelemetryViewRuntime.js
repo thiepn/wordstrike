@@ -1,7 +1,7 @@
 import { createPracticeIndexedDbStore } from "./practiceIndexedDbStore.js";
 import { createPracticeManifestStore } from "./practiceManifestStore.js";
 import { createPracticeRepository } from "./practiceRepository.js";
-import { createPracticePhysicalTelemetryRepositoryFacade } from "./practicePhysicalTelemetryService.js";
+import { createScopedPracticePhysicalTelemetryRepository } from "./practicePhysicalTelemetryScopedRepository.js";
 import { getPracticePhysicalTelemetryAvailability } from "./practicePhysicalTelemetryAvailability.js";
 import { setPracticePhysicalTelemetryEnabled } from "./practicePhysicalTelemetrySettings.js";
 
@@ -17,10 +17,19 @@ export function createPracticePhysicalTelemetryViewRuntime({
   if (!repository && !store) throw new TypeError("Physical telemetry view runtime requires a data store");
   const localManifestStore = manifestStore ?? createPracticeManifestStore();
   const repo = repository ?? createPracticeRepository({ dataStore: store, manifestStore: localManifestStore, now });
-  const telemetry = store ? createPracticePhysicalTelemetryRepositoryFacade({ dataStore: store, now }) : null;
   let initializedPromise = null;
-
   const initialize = () => initializedPromise ??= repo.initializePracticeStorage();
+  const telemetry = store ? createScopedPracticePhysicalTelemetryRepository({
+    dataStore: store,
+    now,
+    scopeProvider: async () => {
+      const initialized = await initialize();
+      return Object.freeze({
+        profileId: initialized.profile.profileId,
+        contextId: initialized.context.contextId,
+      });
+    },
+  }) : null;
 
   async function getState() {
     const initialized = await initialize();
