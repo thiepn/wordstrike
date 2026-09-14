@@ -1,9 +1,11 @@
 # Practice Lab PL40 — Final Release Certification
 
 **Date:** 2026-09-14  
-**Status:** CERTIFICATION IN PROGRESS  
+**Status:** PASS  
 **Branch:** `pl40-final-release-certification`  
-**Base phase:** PL39 — Privacy, Security & Data Integrity
+**Base phase:** PL39 — Privacy, Security & Data Integrity  
+**Certified source:** `d4f707e059f53dd11cb2e0bb6d49d6f7068b197f`  
+**Certification run:** `34883477296`
 
 ## Purpose
 
@@ -13,61 +15,67 @@ PL40 does **not** launch Practice Lab publicly.
 
 ## Frozen release boundary
 
-The following contracts are release blockers:
+The following contracts are release blockers and passed certification:
 
 - `PRACTICE_LAB_PUBLIC_ENABLED` remains `false`.
 - The canonical Practice Lab mode remains registered but disabled.
 - The canonical mode status remains `coming-soon`.
 - The canonical public route remains `null`.
 - Developer preview access remains explicit and isolated from the canonical mode definition.
-- No PL40 change may alter gameplay, scoring, curriculum, corpus semantics, persistence schemas, migration behavior, privacy behavior, or production navigation.
-- No PL40 change may merge the Practice Lab stack into `main` or expose it as a normal production mode.
+- PL40 does not alter gameplay, scoring, curriculum, corpus semantics, persistence schemas, migration behavior, privacy behavior, or production navigation.
+- PL40 does not merge the Practice Lab stack into `main` or expose it as a normal production mode.
 
 ## Certification gates
 
-A PL40 PASS requires all of the following on the PL40 implementation commit:
+All required gates passed on certification run `34883477296`.
 
-1. **Release-boundary contract**
+1. **Release-boundary contract — PASS**
    - `tests/practice-final-release-pl40.test.js`
    - Public feature gate is closed.
    - Canonical mode metadata remains disabled/coming-soon/unrouted.
    - Developer preview resolution does not mutate canonical mode metadata.
    - All cumulative Practice Lab validation and integrity entry points remain present.
 
-2. **Generated/content integrity**
+2. **Generated/content integrity — PASS**
    - `validate:practice-corpus`
    - `validate:practice-indexes`
    - `validate:practice-typability`
    - `validate:practice-sustained`
    - `validate:practice-special-domains`
 
-3. **Privacy, security, migration and storage integrity**
+3. **Privacy, security, migration and storage integrity — PASS**
    - Full PL39 `test:practice-integrity` gate.
    - Static privacy/security audit.
    - Database and record migrations.
    - Focused PL39 integrity tests.
 
-4. **Full repository regression suite**
+4. **Full repository regression suite — PASS**
    - `npm test`
-   - This includes the cumulative Practice Lab unit/integration suite and the new PL40 release contract.
+   - The cumulative WordStrike suite, including the PL40 release contract, completed successfully.
 
-5. **Real-browser regression certification**
+5. **Real-browser regression certification — PASS**
    - `tests/browser/non_practice_regressions.py`
    - `tests/browser/typing_regressions.py`
    - `tests/browser/practice_pl39_privacy_security.py`
-   - Existing production modes must remain selectable and operational while Practice Lab remains outside the enabled public mode set.
-   - Practice privacy, XSS, network, URL, cache and persistence protections remain intact.
+   - Existing production modes remained selectable and operational while Practice Lab stayed outside the enabled public mode set.
+   - Practice privacy, XSS, network, URL, cache and persistence protections remained intact.
 
 ## CI evidence
 
 Workflow: `.github/workflows/pl40-final-release-certification.yml`
 
-Implementation commits created for PL40 certification:
+Certified workflow run:
+
+- Run: `34883477296`
+- Certified source: `d4f707e059f53dd11cb2e0bb6d49d6f7068b197f`
+- `final-certification` job: `104108216556` — PASS
+- `browser-certification` job: `104108216814` — PASS
+
+PL40 implementation commits:
 
 - `ddb3b9829b7d2a50908e671fb8b223f5bbec6653` — PL40 final release contract tests
 - `53883fc947206b81ce948a81050ea8c19caff98f` — PL40 final release certification workflow
-
-The final PASS/FAIL status is recorded only after the workflow completes successfully on the PL40 implementation state.
+- `d4f707e059f53dd11cb2e0bb6d49d6f7068b197f` — certification gate documentation included in the certified source
 
 ## Allowed PL40 changes
 
@@ -82,4 +90,4 @@ Any new feature or product-behavior change belongs in a later phase and invalida
 
 ## Meaning of PASS
 
-A PL40 PASS means the cumulative Practice Lab implementation is technically certified as an internally complete, gated subsystem against the checks above. It does **not** mean Practice Lab is publicly released, enabled in production, or merged to `main`.
+PL40 PASS means the cumulative Practice Lab implementation is technically certified as an internally complete, gated subsystem against the checks above. It does **not** mean Practice Lab is publicly released, enabled in production, or merged to `main`.
