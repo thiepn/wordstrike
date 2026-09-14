@@ -1,7 +1,7 @@
 # Practice Lab PL39 — Privacy, Security & Data Integrity Certification
 
 **Branch:** `pl39-privacy-security-integrity`  
-**Certification status:** **PENDING — final full-matrix green run required**  
+**Certification status:** **PASS**  
 **Public release state:** Practice remains disabled by default (`PRACTICE_LAB_PUBLIC_ENABLED = false`).
 
 ## Scope
@@ -31,7 +31,7 @@ PL39 combines five independent evidence layers:
 4. **Browser E2E privacy/security harness** — real Chromium execution with XSS payloads, Custom Text sentinels, request interception, URL/history checks, Cache Storage/service-worker checks, console capture, and persisted-store inspection.
 5. **Regression certification** — sensitive PL31–PL38 subsystem suites followed by the complete WordStrike test suite.
 
-A PL39 PASS may be declared only when all five layers are green on the certification branch.
+A PL39 PASS requires all five layers to be green on the certification branch. That condition was met by workflow run `34842413372`.
 
 ## Privacy and network boundary
 
@@ -149,13 +149,13 @@ The migration harness verifies every supported database starting version **1 thr
 
 Session Summary record migration is tested from versions **1 through 13** to v14 without mutating source fixtures.
 
-Latest observed migration gate during PL39 work: **PASS**.
+Migration gate: **PASS** in workflow run `34842413372`, certification job `103970205823`.
 
 ## Browser evidence
 
-Latest observed browser-privacy job before final certification: **PASS** on workflow run `34842081251`, job `103969149243`.
+Browser privacy/XSS/network/cache certification: **PASS** in workflow run `34842413372`, browser job `103970205478`.
 
-That run verified real Chromium privacy/XSS/network/URL/cache behavior. The final certification status remains PENDING because the paired focused certification job exposed defects that were subsequently fixed and therefore requires a new full green run.
+The real Chromium harness verified Custom Text/private sentinel containment, protected-content containment, XSS literal rendering/non-execution, no Practice mutation requests, no sentinel leakage in requests or navigation state, no cache/service-worker leakage, and no console leak.
 
 ## Defects found and repaired
 
@@ -179,18 +179,24 @@ Static sink auditing reduces accidental expansion of attack surface but does not
 
 Non-Practice WordStrike modules have separate networking responsibilities; PL39 only certifies the Practice subsystem boundary.
 
-## Gate status
+## Final gate evidence
 
-| Gate | Current evidence |
-|---|---|
-| Static privacy/security + DOM/network/wording audit | PASS in run `34842081251` |
-| DB1–DB12 + record migration harness | PASS in run `34842081251` |
-| Browser privacy/XSS/network/cache harness | PASS — job `103969149243` |
-| Focused PL39 integrity suite | **Awaiting rerun after two fixes** |
-| PL31–PL38 sensitive regressions | Awaiting final run |
-| Full WordStrike regression suite | Awaiting final run |
-| Public Practice feature gate | OFF |
+Workflow run **`34842413372`** validated commit `81b8e86d0511778aaa702bc87e4f85ea7e5286ae` with both jobs green:
+
+- Certification job **`103970205823`** — PASS
+  - static privacy/security + DOM/network/privacy-wording audit
+  - DB1–DB12 and record migration harness
+  - focused PL39 integrity suite
+  - PL31–PL38 sensitive subsystem regressions
+  - full WordStrike regression suite
+  - final source-audit enforcement
+- Browser privacy job **`103970205478`** — PASS
+  - real Chromium privacy, XSS, network, URL, history, cache, service-worker, console, and storage checks
+
+The immediately preceding post-fix code run `34842322928` was also fully green (`certify` job `103969916024`; `browser-privacy` job `103969916278`).
+
+Public Practice feature gate: **OFF**.
 
 ### Final decision
 
-**PENDING.** Do not treat this document as a PL39 PASS until a post-fix workflow run has all certification and browser jobs green and the complete regression matrix has executed successfully.
+**PL39 — PASS.** The Privacy, Security & Data Integrity certification matrix is green on the PL39 branch. This certification does not enable Practice publicly and does not merge the branch into `main`.
