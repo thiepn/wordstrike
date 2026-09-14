@@ -79,7 +79,7 @@ test("PL39 persisted physical telemetry contains aggregates only, not event.key,
   const runtime = createPracticePhysicalTelemetryRuntime({ repository: repository(), telemetryRepository, profileId, contextId, sessionId, documentObject: doc, clock: () => clock });
   await runtime.prepare({ contentPlan: trainingPlan, evidenceRole: "training" });
   runtime.start();
-  for (let index = 0; index < 20; index += 1) {
+  for (let index = 0; index < 40; index += 1) {
     clock += 100;
     const code = index % 2 ? "KeyB" : "KeyA";
     const value = index % 2 ? "b" : "a";
