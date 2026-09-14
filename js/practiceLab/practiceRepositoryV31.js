@@ -2,6 +2,7 @@ import { createPracticeRepository as createPracticeRepositoryV30 } from "./pract
 import { PRACTICE_STORE_NAMES } from "./practiceConstants.js";
 import { getPracticeStoreKey } from "./practiceStorageContract.js";
 import { createPracticeCustomTextRepositoryFacade } from "./practiceCustomTextRepository.js";
+import { createDefaultPracticeEvaluationState } from "./practiceEvaluationState.js";
 
 const PROFILE_RESET_META_KEYS = Object.freeze(["pl5ContextIdentity", "manifestReconciliation"]);
 const PROFILE_RESET_STORES = Object.freeze(PRACTICE_STORE_NAMES.filter((storeName) => !["meta", "customTexts"].includes(storeName)));
@@ -17,8 +18,9 @@ export function createPracticeRepository(options = {}) {
   if (!options.dataStore) return createPracticeRepositoryV30(options);
 
   const dataStore = options.dataStore;
+  const now = options.now ?? Date.now;
   const core = createPracticeRepositoryV30({ ...options, dataStore });
-  const custom = createPracticeCustomTextRepositoryFacade({ dataStore, now: options.now ?? Date.now });
+  const custom = createPracticeCustomTextRepositoryFacade({ dataStore, now });
 
   async function resetActiveProfileData(profileId) {
     const stores = [...PROFILE_RESET_STORES, "meta"];
@@ -31,6 +33,14 @@ export function createPracticeRepository(options = {}) {
           if (key != null && (!Array.isArray(key) || key.every((entry) => entry != null))) await transaction.delete(storeName, key);
         }
       }
+      // A surviving database can no longer prove prior protected-content coldness
+      // after reset. Persist a conservative marker instead of allowing a missing
+      // state to be recreated as complete/fresh on the next measurement.
+      await transaction.put("evaluationStates", createDefaultPracticeEvaluationState({
+        profileId,
+        now,
+        historyStatus: "partial",
+      }));
       for (const key of PROFILE_RESET_META_KEYS) await transaction.delete("meta", key);
     });
   }
