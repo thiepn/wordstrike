@@ -15,40 +15,67 @@ function sessionConflict(message) {
   return error;
 }
 
-export function createPracticeResearchRepository({ dataStore, now = Date.now } = {}) {
+function scopeViolation() {
+  const error = new Error("Practice Research record is outside the active profile/context");
+  error.code = "PRACTICE_RESEARCH_SCOPE_VIOLATION";
+  return error;
+}
+
+export function createPracticeResearchRepository({ dataStore, now = Date.now, scopeProvider = null } = {}) {
   if (!dataStore) throw new TypeError("Practice Research repository requires the Practice data store");
   const currentMs = () => { const value = typeof now === "function" ? now() : now; return value instanceof Date ? value.getTime() : Number(value); };
   const currentIso = () => { const value=currentMs(); return Number.isFinite(value)?new Date(value).toISOString():new Date().toISOString(); };
 
-  async function getEnrollment(id) { const value=await dataStore.get("researchEnrollments",id); return value && validatePracticeResearchEnrollment(value).valid ? value : null; }
-  async function listEnrollments(profileId,{contextId=null,studyId=null}={}) { const values=await dataStore.query("researchEnrollments",contextId?"contextId":"profileId",contextId??profileId); return values.filter((item)=>validatePracticeResearchEnrollment(item).valid&&item.profileId===profileId&&(!contextId||item.contextId===contextId)&&(!studyId||item.studyId===studyId)); }
-  async function saveEnrollment(record) { assertValid("Research enrollment",record,validatePracticeResearchEnrollment); await dataStore.put("researchEnrollments",record); return record; }
-  async function getAssignment(id) { const value=await dataStore.get("researchAssignments",id); return value&&validatePracticeResearchAssignment(value).valid?value:null; }
-  async function listAssignments(researchEnrollmentId) { const values=await dataStore.query("researchAssignments","researchEnrollmentId",researchEnrollmentId); return values.filter((item)=>validatePracticeResearchAssignment(item).valid).sort((a,b)=>a.enrollmentAssignmentIndex-b.enrollmentAssignmentIndex||a.researchAssignmentId.localeCompare(b.researchAssignmentId)); }
-  async function saveAssignment(record) { assertValid("Research assignment",record,validatePracticeResearchAssignment); await dataStore.put("researchAssignments",record); return record; }
-  async function getAnalysisState(researchEnrollmentId) { const values=await dataStore.query("researchAnalysisStates","researchEnrollmentId",researchEnrollmentId); return values.find((item)=>validatePracticeResearchAnalysisState(item).valid)??null; }
-  async function saveAnalysisState(record) { assertValid("Research analysis",record,validatePracticeResearchAnalysisState); await dataStore.put("researchAnalysisStates",record); return record; }
-  async function listAssignmentSessions(researchAssignmentId) {
+  async function resolveScope({ profileId = null, contextId = null } = {}) {
+    const active = typeof scopeProvider === "function" ? await scopeProvider() : null;
+    if (active?.profileId) {
+      if (profileId && profileId !== active.profileId) return false;
+      if (contextId && active.contextId && contextId !== active.contextId) return false;
+      return Object.freeze({ profileId: active.profileId, contextId: contextId ?? active.contextId ?? null });
+    }
+    if (profileId || contextId) return Object.freeze({ profileId, contextId });
+    return null;
+  }
+  const inScope = (record, scope) => scope === null || Boolean(scope && record
+    && (!scope.profileId || record.profileId === scope.profileId)
+    && (!scope.contextId || record.contextId === scope.contextId));
+  async function assertScope(record) {
+    const scope = await resolveScope({ profileId: record?.profileId ?? null, contextId: record?.contextId ?? null });
+    if (!inScope(record, scope)) throw scopeViolation();
+  }
+
+  async function getEnrollment(id, options = {}) { const scope=await resolveScope(options); if(scope===false)return null; const value=await dataStore.get("researchEnrollments",id); return value&&validatePracticeResearchEnrollment(value).valid&&inScope(value,scope)?value:null; }
+  async function listEnrollments(profileId,{contextId=null,studyId=null}={}) { const scope=await resolveScope({profileId,contextId}); if(scope===false)return []; const values=await dataStore.query("researchEnrollments",contextId?"contextId":"profileId",contextId??profileId); return values.filter((item)=>validatePracticeResearchEnrollment(item).valid&&item.profileId===profileId&&(!contextId||item.contextId===contextId)&&(!studyId||item.studyId===studyId)&&inScope(item,scope)); }
+  async function saveEnrollment(record) { assertValid("Research enrollment",record,validatePracticeResearchEnrollment); await assertScope(record); await dataStore.put("researchEnrollments",record); return record; }
+  async function getAssignment(id, options = {}) { const scope=await resolveScope(options); if(scope===false)return null; const value=await dataStore.get("researchAssignments",id); return value&&validatePracticeResearchAssignment(value).valid&&inScope(value,scope)?value:null; }
+  async function listAssignments(researchEnrollmentId, options = {}) { const scope=await resolveScope(options); if(scope===false)return []; const values=await dataStore.query("researchAssignments","researchEnrollmentId",researchEnrollmentId); return values.filter((item)=>validatePracticeResearchAssignment(item).valid&&inScope(item,scope)).sort((a,b)=>a.enrollmentAssignmentIndex-b.enrollmentAssignmentIndex||a.researchAssignmentId.localeCompare(b.researchAssignmentId)); }
+  async function saveAssignment(record) { assertValid("Research assignment",record,validatePracticeResearchAssignment); await assertScope(record); await dataStore.put("researchAssignments",record); return record; }
+  async function getAnalysisState(researchEnrollmentId, options = {}) { const scope=await resolveScope(options); if(scope===false)return null; const values=await dataStore.query("researchAnalysisStates","researchEnrollmentId",researchEnrollmentId); return values.find((item)=>validatePracticeResearchAnalysisState(item).valid&&inScope(item,scope))??null; }
+  async function saveAnalysisState(record) { assertValid("Research analysis",record,validatePracticeResearchAnalysisState); await assertScope(record); await dataStore.put("researchAnalysisStates",record); return record; }
+  async function listAssignmentSessions(researchAssignmentId, options = {}) {
     if (!text(researchAssignmentId)) return [];
+    const scope=await resolveScope(options); if(scope===false)return [];
     const values=await dataStore.query("sessionSummaries","researchAssignmentId",researchAssignmentId).catch(()=>[]);
-    return values.filter((item)=>item?.researchBinding?.researchAssignmentId===researchAssignmentId);
+    return values.filter((item)=>item?.researchBinding?.researchAssignmentId===researchAssignmentId&&inScope(item,scope));
   }
 
   async function persistNewAssignment({ enrollment, assignment, updatedEnrollment }) {
     assertValid("Research enrollment",updatedEnrollment,validatePracticeResearchEnrollment);
     assertValid("Research assignment",assignment,validatePracticeResearchAssignment);
+    await assertScope(enrollment); await assertScope(assignment); await assertScope(updatedEnrollment);
     return dataStore.runTransaction(["researchEnrollments","researchAssignments"],"readwrite",async(transaction)=>{
       const canonicalEnrollment=await transaction.get("researchEnrollments",enrollment.researchEnrollmentId);
       if (!canonicalEnrollment || canonicalEnrollment.updatedAt!==enrollment.updatedAt || canonicalEnrollment.assignmentsCreated!==enrollment.assignmentsCreated) {
         const existing=await transaction.query("researchAssignments","enrollmentSequence",[enrollment.researchEnrollmentId,assignment.assignmentIndex]);
-        if (existing[0]&&validatePracticeResearchAssignment(existing[0]).valid) return {created:false,assignment:existing[0],enrollment:canonicalEnrollment};
+        if (existing[0]&&validatePracticeResearchAssignment(existing[0]).valid&&existing[0].profileId===assignment.profileId&&existing[0].contextId===assignment.contextId) return {created:false,assignment:existing[0],enrollment:canonicalEnrollment};
         const error=new Error("Practice Research enrollment changed during assignment creation"); error.code="PRACTICE_RESEARCH_ASSIGNMENT_RACE"; throw error;
       }
+      if (canonicalEnrollment.profileId!==assignment.profileId||canonicalEnrollment.contextId!==assignment.contextId) throw scopeViolation();
       const sameSlot=await transaction.query("researchAssignments","enrollmentSequence",[enrollment.researchEnrollmentId,assignment.assignmentIndex]);
-      if (sameSlot[0]&&validatePracticeResearchAssignment(sameSlot[0]).valid) return {created:false,assignment:sameSlot[0],enrollment:canonicalEnrollment};
+      if (sameSlot[0]&&validatePracticeResearchAssignment(sameSlot[0]).valid&&sameSlot[0].profileId===assignment.profileId&&sameSlot[0].contextId===assignment.contextId) return {created:false,assignment:sameSlot[0],enrollment:canonicalEnrollment};
       const day=await transaction.query("researchAssignments","profileContextDay",[assignment.profileId,assignment.contextId,assignment.localDayKey]);
       if (day.some((item)=>validatePracticeResearchAssignment(item).valid)) { const error=new Error("Practice Research daily randomized-assignment limit reached"); error.code="PRACTICE_RESEARCH_DAILY_LIMIT"; throw error; }
-      const active=(await transaction.query("researchAssignments","researchEnrollmentId",assignment.researchEnrollmentId)).filter((item)=>validatePracticeResearchAssignment(item).valid&&!terminalAssignment(item));
+      const active=(await transaction.query("researchAssignments","researchEnrollmentId",assignment.researchEnrollmentId)).filter((item)=>validatePracticeResearchAssignment(item).valid&&!terminalAssignment(item)&&item.profileId===assignment.profileId&&item.contextId===assignment.contextId);
       if (active.length) return {created:false,assignment:active[0],enrollment:canonicalEnrollment};
       await transaction.put("researchAssignments",assignment);
       await transaction.put("researchEnrollments",updatedEnrollment);
@@ -58,9 +85,10 @@ export function createPracticeResearchRepository({ dataStore, now = Date.now } =
 
   async function reserveProbeSession(researchAssignmentId, phase, sessionId) {
     if (!text(sessionId) || !["baseline","followup"].includes(phase)) throw new TypeError("Practice Research probe reservation requires phase and sessionId");
+    const scope=await resolveScope();
     return dataStore.runTransaction(["researchAssignments"],"readwrite",async(transaction)=>{
       const record=await transaction.get("researchAssignments",researchAssignmentId);
-      if (!record || !validatePracticeResearchAssignment(record).valid) throw new TypeError("Practice Research assignment not found");
+      if (!record || !validatePracticeResearchAssignment(record).valid || !inScope(record,scope)) throw new TypeError("Practice Research assignment not found");
       const field=phase==="baseline"?"baselineSessionId":"followupSessionId";
       const existing=record[field]??null;
       if (existing===sessionId) return record;
@@ -76,9 +104,10 @@ export function createPracticeResearchRepository({ dataStore, now = Date.now } =
 
   async function reserveTreatmentSession(researchAssignmentId, sessionId) {
     if (!text(sessionId)) throw new TypeError("Practice Research treatment reservation requires sessionId");
+    const scope=await resolveScope();
     return dataStore.runTransaction(["researchAssignments"],"readwrite",async(transaction)=>{
       const record=await transaction.get("researchAssignments",researchAssignmentId);
-      if (!record || !validatePracticeResearchAssignment(record).valid) throw new TypeError("Practice Research assignment not found");
+      if (!record || !validatePracticeResearchAssignment(record).valid || !inScope(record,scope)) throw new TypeError("Practice Research assignment not found");
       const existing=record.treatment?.sessionId??null;
       if (existing===sessionId) return record;
       if (existing) throw sessionConflict("Practice Research randomized treatment already has a reserved session");
@@ -90,8 +119,8 @@ export function createPracticeResearchRepository({ dataStore, now = Date.now } =
     });
   }
 
-  async function deleteEnrollmentResearch(researchEnrollmentId) {
-    const enrollment=await getEnrollment(researchEnrollmentId);
+  async function deleteEnrollmentResearch(researchEnrollmentId, options = {}) {
+    const enrollment=await getEnrollment(researchEnrollmentId, options);
     if (!enrollment) return {deleted:false,assignmentIds:[],sessionIds:[],treatmentEpisodeIds:[],responseStateIdsUpdated:[],responseStateIdsDeleted:[]};
     const updatedAt=currentIso();
     return dataStore.runTransaction([
@@ -102,9 +131,6 @@ export function createPracticeResearchRepository({ dataStore, now = Date.now } =
 
   async function prune(profileId) {
     const enrollments=await listEnrollments(profileId);
-    // Assignment-level records are the audit trail for attrition, imbalance and exact
-    // original-block reconstruction. Preserve them while their enrollment exists;
-    // explicit Research deletion is the user-controlled removal path.
     const retainedEnrollmentIds=new Set(enrollments.map((item)=>item.researchEnrollmentId));
     const assignments=(await dataStore.query("researchAssignments","profileId",profileId)).filter((item)=>validatePracticeResearchAssignment(item).valid);
     const cutoff=currentMs();
