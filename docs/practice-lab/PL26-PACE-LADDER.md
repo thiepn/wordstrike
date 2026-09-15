@@ -110,7 +110,7 @@ Rows may expose target pace, observed gross pace, first-pass accuracy, correctio
 
 ## Treatment identity and history
 
-Canonical PL26 uses experiment/protocol/policy version 2 and PL32 treatment-family variant `ladder-canonical-v2`. Historical v1 sessions remain under their old protocol identity. They are not migrated, reinterpreted, pooled with v2 response history, or launchable as new sessions.
+Canonical PL26 uses experiment/protocol/policy version 2 and PL32 treatment-family variant `pace-ladder-canonical-v2`. Historical v1 sessions remain under their old protocol identity. They are not migrated, reinterpreted, pooled with v2 response history, or launchable as new sessions.
 
 ## Content
 
