@@ -1,0 +1,44 @@
+name: Campaign Speed Unlock UX CI
+
+on:
+  push:
+    branches:
+      - feature/campaign-speed-unlock-ux
+
+permissions:
+  contents: write
+
+jobs:
+  patch-test-commit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: feature/campaign-speed-unlock-ux
+          fetch-depth: 0
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Apply UX hardening patch if needed
+        shell: bash
+        run: |
+          if [ ! -f tests/campaign-speed-unlock-ux.test.js ]; then
+            python scripts/applyCampaignSpeedUnlockUxPatch.py
+          fi
+      - name: Run full test suite
+        run: npm test
+      - name: Commit tested patch if changed
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add js/ui.js js/main.js js/campaignGameplayPresentation.js tests/campaign-speed-unlock-ux.test.js
+          git diff --cached --check
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git commit -m "[campaign-speed-ux] apply patch"
+          git push origin HEAD:feature/campaign-speed-unlock-ux
