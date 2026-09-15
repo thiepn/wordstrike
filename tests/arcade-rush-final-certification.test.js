@@ -81,13 +81,14 @@ const PUBLIC_MODE_IDS = [
   "flow",
   "practice",
 ];
-// Flow persistence starts with the Flow gameplay/persistence phase. Phase 0 keeps
-// the existing schema stable while retaining retired Arcade Rush records.
+// Phase 0 reserves an empty Flow summary in schema v2 so later Flow phases do not
+// need a storage-shape migration merely to begin recording results.
 const PERSISTED_MODE_IDS = [
   "campaign",
   "speed-test",
   "endless",
   "arcade-rush",
+  "flow",
   "practice",
 ];
 const LEGACY_BOARD_KEYS = [
@@ -99,7 +100,7 @@ const LEGACY_BOARD_KEYS = [
 ];
 
 // 1. Phase 0 public registry: Flow owns the public slot while Arcade Rush is
-// retained only as a hidden legacy definition for old saves/results.
+// retained only as a hidden legacy definition for old saves/results/diagnostics.
 assert.deepEqual(getRegisteredModes().map(({ id }) => id), REGISTERED_MODE_IDS);
 assert.deepEqual(getAllModes().map(({ id }) => id), PUBLIC_MODE_IDS);
 assert.equal(Object.hasOwn(MODE_IDS, "DAILY"), false);
@@ -116,7 +117,7 @@ assert.deepEqual(
   },
   {
     id: "arcade-rush",
-    enabled: false,
+    enabled: true,
     visible: false,
     status: "retired",
     route: null,
@@ -172,14 +173,16 @@ assert.equal(ARCADE_RUSH_BOSS_ID, "core-breaker");
 assert.equal(ARCADE_RUSH_BOSS_VERSION, 1);
 assert.equal(ARCADE_RUSH_BOSS_MAX_HP, 8);
 
-// 3. Schema-v2 persistence remains stable in Phase 0: historical Rush records
-// survive the public retirement, while Flow has not begun recording runs yet.
+// 3. Schema-v2 persistence stays compatible: historical Rush records survive,
+// while Flow only has a zeroed reserved summary and records no Phase-0 runs.
 assert.equal(MODE_DATA_SCHEMA_VERSION, 2);
 assert.equal(MODE_DATA_STORAGE_KEY, "wordstrike_mode_data_v2");
 const defaults = createDefaultModeData();
 assert.deepEqual(Object.keys(defaults.modes), PERSISTED_MODE_IDS);
 assert.deepEqual(defaults.modes[MODE_IDS.ARCADE_RUSH].records, createDefaultArcadeRushRecords());
-assert.equal(Object.hasOwn(defaults.modes, MODE_IDS.FLOW), false);
+assert.ok(defaults.modes[MODE_IDS.FLOW]);
+assert.equal(defaults.modes[MODE_IDS.FLOW].completedSessions, 0);
+assert.equal(defaults.modes[MODE_IDS.FLOW].failedSessions, 0);
 assert.equal(Object.hasOwn(defaults.modes, "daily"), false);
 const migrated = migrateModeDataToV2({
   schemaVersion: 1,
@@ -200,6 +203,7 @@ assert.equal(migrated.modes.campaign.highestScore, 321);
 assert.equal(Object.hasOwn(migrated.modes, "daily"), false);
 assert.equal(migrated.recentSessions.some(({ modeId }) => modeId === "daily"), false);
 assert.ok(migrated.modes[MODE_IDS.ARCADE_RUSH]);
+assert.ok(migrated.modes[MODE_IDS.FLOW]);
 
 const originalLocalStorage = Object.getOwnPropertyDescriptor(globalThis, "localStorage");
 const values = new Map([["wordstrike_daily_legacy_v1", JSON.stringify({ obsolete: true })]]);
