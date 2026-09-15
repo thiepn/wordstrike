@@ -1,0 +1,55 @@
+name: Repair UI Certification Chain
+
+on:
+  push:
+    branches: ["fix/ui4-campaign-certification"]
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/ui4-campaign-certification
+          fetch-depth: 0
+      - name: Repair stale Campaign certification fixtures
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          changed = []
+          for path in sorted(Path('tests/browser').glob('ui*.py')):
+              text = path.read_text()
+              updated = text.replace('campaign:1', 'campaign:2')
+              if updated != text:
+                  path.write_text(updated)
+                  changed.append(str(path))
+
+          boss_old = "levels:{1:{grade:'A',bestWPM:82,bestAccuracy:98,bestScore:4000,completed:true}}"
+          boss_new = "levels:Object.fromEntries(Array.from({length:9},(_,index)=>[index+1,{grade:'A',bestWPM:82,bestAccuracy:98,bestScore:4000+index,completed:true}]))"
+          for name in ('ui7_boss_gameplay.py', 'ui7_boss_visual.py'):
+              path = Path('tests/browser') / name
+              text = path.read_text()
+              if boss_old not in text:
+                  raise AssertionError(f'{path}: expected legacy sparse boss progress fixture')
+              path.write_text(text.replace(boss_old, boss_new, 1))
+              if str(path) not in changed:
+                  changed.append(str(path))
+
+          if not changed:
+              raise AssertionError('Expected at least one stale UI certification fixture')
+          print('Repaired:', ', '.join(changed))
+          PY
+      - name: Commit repairs and remove temporary workflow
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/repair-ui-certification-chain.yml
+          git add tests/browser
+          git commit -m "Repair Campaign UI certification fixtures"
+          git push origin HEAD:fix/ui4-campaign-certification
