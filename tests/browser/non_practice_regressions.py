@@ -20,7 +20,7 @@ ARTIFACTS = ROOT / "browser-artifacts" / "non-practice"
 
 SEED_STORAGE = """() => {
   for (const [id, version] of Object.entries({
-    general:3, campaign:1, typing:1, endless:1, boss:1, leaderboards:1, 'arcade-rush':1
+    general:3, campaign:2, typing:1, endless:1, boss:1, leaderboards:1, 'arcade-rush':1
   })) localStorage.setItem(`wordstrike.onboarding.${id}.v${version}`, 'seen');
   if (!localStorage.getItem('wordstrike_save')) localStorage.setItem('wordstrike_save', JSON.stringify({
     currentFurthestLevel: 10,

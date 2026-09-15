@@ -19,7 +19,7 @@ ACCENTS = {"cyan": "#00fff2", "blue": "#70a7ff", "violet": "#b2a0ff", "magenta":
 # DOMRect subtraction in Firefox can report 44 CSS px as 43.99998474121094.
 MIN_TARGET = 44 - 0.01
 SEED = """(() => {
- for (const [id,version] of Object.entries({general:3,campaign:1,typing:1,endless:1,boss:1,leaderboards:1,'arcade-rush':1}))
+ for (const [id,version] of Object.entries({general:3,campaign:2,typing:1,endless:1,boss:1,leaderboards:1,'arcade-rush':1}))
   localStorage.setItem(`wordstrike.onboarding.${id}.v${version}`, 'seen');
  if (!localStorage.getItem('wordstrike_save')) localStorage.setItem('wordstrike_save', JSON.stringify({
   currentFurthestLevel:10,levels:{1:{grade:'A',bestAccuracy:97,bestWPM:72,bestScore:4000}},
@@ -224,13 +224,15 @@ def default_equivalence(browser,name,base,baseline_base,checks):
   page.locator('[data-action="modes"]').click();expect(page.locator('.mode-select-screen')).to_be_visible()
   modes=page.screenshot(animations='disabled',caret='hide')
   page.locator('[data-mode-id="campaign"]').click();expect(page.locator('.campaign-progress-screen')).to_be_visible()
-  campaign=page.screenshot(animations='disabled',caret='hide')
-  outputs.append([title,modes,campaign]);context.close()
- for i,label in enumerate(['title','mode-select','campaign-route']):
+  # Campaign Route intentionally evolves with Campaign features and has its own
+  # browser certifications. P1 only freezes global surfaces that customization
+  # itself promises to leave pixel-identical.
+  outputs.append([title,modes]);context.close()
+ for i,label in enumerate(['title','mode-select']):
   (ARTIFACTS/f'{name}-default-{label}-before.png').write_bytes(outputs[0][i])
   (ARTIFACTS/f'{name}-default-{label}-after.png').write_bytes(outputs[1][i])
   assert outputs[0][i]==outputs[1][i],f'{name}: default {label} changed pixels'
- checks.append({'browser':name,'case':'default screenshot equivalence','screens':['title','mode-select','campaign-route']})
+ checks.append({'browser':name,'case':'default screenshot equivalence','screens':['title','mode-select']})
 
 def main():
  ARTIFACTS.mkdir(parents=True,exist_ok=True)
