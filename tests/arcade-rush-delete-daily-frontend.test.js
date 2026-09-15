@@ -27,19 +27,29 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = dirname(HERE);
 const pathFromRoot = (...parts) => join(ROOT, ...parts);
 
-const EXPECTED_MODE_IDS = [
+const EXPECTED_REGISTERED_MODE_IDS = [
   "campaign",
   "speed-test",
   "endless",
   "arcade-rush",
+  "flow",
+  "practice",
+];
+const EXPECTED_PUBLIC_MODE_IDS = [
+  "campaign",
+  "speed-test",
+  "endless",
+  "flow",
   "practice",
 ];
 
 assert.equal(Object.hasOwn(MODE_IDS, "DAILY"), false);
-assert.deepEqual(getRegisteredModes().map(({ id }) => id), EXPECTED_MODE_IDS);
-assert.deepEqual(getAllModes().map(({ id }) => id), EXPECTED_MODE_IDS);
+assert.deepEqual(getRegisteredModes().map(({ id }) => id), EXPECTED_REGISTERED_MODE_IDS);
+assert.deepEqual(getAllModes().map(({ id }) => id), EXPECTED_PUBLIC_MODE_IDS);
 assert.equal(getModeDefinition("daily"), null);
-assert.equal(getModeDefinition(MODE_IDS.ARCADE_RUSH)?.visible, true);
+assert.equal(getModeDefinition(MODE_IDS.ARCADE_RUSH)?.visible, false);
+assert.equal(getModeDefinition(MODE_IDS.ARCADE_RUSH)?.enabled, false);
+assert.equal(getModeDefinition(MODE_IDS.FLOW)?.visible, true);
 
 assert.equal(Object.hasOwn(Screens, "DAILY_READY"), false);
 assert.equal(Object.hasOwn(Screens, "DAILY_RESULTS"), false);
@@ -174,6 +184,7 @@ for (const file of activeFrontendFiles) {
 
 const readme = await readFile(pathFromRoot("README.md"), "utf8");
 assert.doesNotMatch(readme, /\*\*Daily Strike\*\*|### Daily Strike|DAILY_STRIKE\.md/);
-assert.match(readme, /\*\*Arcade Rush\*\*/);
+assert.match(readme, /\*\*Flow\*\*/);
+assert.doesNotMatch(readme, /\*\*Arcade Rush\*\*/);
 
-console.log("AR16 Daily frontend deletion, local cleanup, and safe legacy redirects passed.");
+console.log("AR16 Daily deletion plus Flow Phase 0 mode retirement contracts passed.");
