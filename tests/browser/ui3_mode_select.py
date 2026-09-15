@@ -14,7 +14,7 @@ ARTIFACTS = ROOT / "browser-artifacts" / "ui3-mode-select"
 
 ONBOARDING_SEED = """(() => {
   for (const [id, version] of Object.entries({
-    general:3, campaign:2, typing:1, endless:1, boss:1, leaderboards:1, 'arcade-rush':1
+    general:3, campaign:2, typing:1, endless:1, boss:1, leaderboards:1
   })) localStorage.setItem(`wordstrike.onboarding.${id}.v${version}`, 'seen');
 })();"""
 
@@ -29,7 +29,8 @@ VIEWPORTS = [
     (390, 360, "mobile-keyboard-height"),
 ]
 
-ACTIVE_IDS = ["campaign", "speed-test", "endless", "arcade-rush"]
+ACTIVE_IDS = ["campaign", "speed-test", "endless"]
+PUBLIC_IDS = ["campaign", "speed-test", "endless", "flow", "practice"]
 
 
 class QuietHandler(SimpleHTTPRequestHandler):
@@ -76,10 +77,18 @@ def assert_mode_select(page):
     expect(page.locator(".mode-showcase")).to_be_visible()
     expect(page.locator(".mode-options")).to_be_visible()
     assert page.locator("[data-mode-index]").count() == 5
+    public = page.locator("[data-mode-index]").evaluate_all(
+        "els => els.map(el => el.dataset.modeId)"
+    )
+    assert public == PUBLIC_IDS, public
     active = page.locator("button.mode-option.available").evaluate_all(
         "els => els.map(el => el.dataset.modeId)"
     )
     assert active == ACTIVE_IDS, active
+    assert page.locator('[data-mode-id="arcade-rush"]').count() == 0
+    flow = page.locator('article[data-mode-id="flow"]')
+    assert flow.count() == 1
+    assert flow.get_attribute("aria-disabled") == "true"
     practice = page.locator('article[data-mode-id="practice"]')
     assert practice.count() == 1
     assert practice.get_attribute("aria-disabled") == "true"
@@ -131,9 +140,10 @@ def inspect_foundation(browser, base, browser_name, evidence):
     page.locator('[data-mode-id="speed-test"]').hover()
     expect(page.locator(".mode-showcase-heading h2")).to_have_text("Typing Test")
     assert page.locator(".mode-motif-typing").count() == 1
-    page.locator('[data-mode-id="arcade-rush"]').hover()
-    expect(page.locator(".mode-showcase-heading h2")).to_have_text("Arcade Rush")
-    assert page.locator(".mode-motif-rush").count() == 1
+    page.locator('article[data-mode-id="flow"]').hover()
+    expect(page.locator(".mode-showcase-heading h2")).to_have_text("Flow")
+    assert page.locator(".mode-motif-neutral").count() == 1
+    expect(page.locator(".mode-showcase-command")).to_contain_text("Not available yet")
     page.locator('article[data-mode-id="practice"]').hover()
     expect(page.locator(".mode-showcase-heading h2")).to_have_text("Practice Lab")
     assert page.locator(".mode-motif-neutral").count() == 1
@@ -144,7 +154,7 @@ def inspect_foundation(browser, base, browser_name, evidence):
     expect(page.locator(".mode-showcase-heading h2")).to_have_text("Campaign")
     page.screenshot(path=str(ARTIFACTS / f"{browser_name}-ui3-desktop.png"), full_page=True)
 
-    evidence.append({"browser": browser_name, "case": "foundation and visual identity", **initial})
+    evidence.append({"browser": browser_name, "case": "Flow-era foundation and visual identity", **initial})
     assert_no_errors(errors, f"{browser_name} foundation")
     context.close()
 
@@ -157,7 +167,7 @@ def inspect_keyboard_and_routes(browser, base, browser_name, evidence):
     expected = [
         ("ArrowRight", "1", "Typing Test"),
         ("ArrowDown", "2", "Endless"),
-        ("ArrowRight", "3", "Arcade Rush"),
+        ("ArrowRight", "3", "Flow"),
         ("ArrowDown", "4", "Practice Lab"),
         ("ArrowRight", "5", "Main Menu"),
         ("ArrowDown", "0", "Campaign"),
@@ -178,17 +188,25 @@ def inspect_keyboard_and_routes(browser, base, browser_name, evidence):
         "campaign": ".level-screen",
         "speed-test": ".speed-test-screen",
         "endless": ".endless-ready-screen",
-        "arcade-rush": '[data-rush-view="ready"]',
     }
     for mode_id, destination in route_expectations.items():
         open_modes(page, base)
         page.locator(f'[data-mode-id="{mode_id}"]').click()
         expect(page.locator(destination)).to_be_visible()
 
+    # Disabled Flow/Practice cards may be selected for explanation, but Enter/click
+    # must not borrow another mode's gameplay route.
+    for mode_id in ("flow", "practice"):
+        open_modes(page, base)
+        card = page.locator(f'[data-mode-id="{mode_id}"]')
+        card.click(force=True)
+        expect(page.locator(".mode-select-screen")).to_be_visible()
+
     evidence.append({
         "browser": browser_name,
-        "case": "six-position keyboard wrap and four public route destinations",
+        "case": "six-position keyboard wrap, three public routes, Flow/Practice disabled",
         "activeModes": ACTIVE_IDS,
+        "publicModes": PUBLIC_IDS,
     })
     assert_no_errors(errors, f"{browser_name} keyboard/routes")
     context.close()

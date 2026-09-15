@@ -66,14 +66,32 @@ const ROOT = dirname(HERE);
 const rootPath = (...parts) => join(ROOT, ...parts);
 const readRoot = (...parts) => readFile(rootPath(...parts), "utf8");
 
-const ACTIVE_MODE_IDS = [
+const REGISTERED_MODE_IDS = [
   "campaign",
   "speed-test",
   "endless",
   "arcade-rush",
+  "flow",
   "practice",
 ];
-const ACTIVE_BOARD_KEYS = [
+const PUBLIC_MODE_IDS = [
+  "campaign",
+  "speed-test",
+  "endless",
+  "flow",
+  "practice",
+];
+// Phase 0 reserves an empty Flow summary in schema v2 so later Flow phases do not
+// need a storage-shape migration merely to begin recording results.
+const PERSISTED_MODE_IDS = [
+  "campaign",
+  "speed-test",
+  "endless",
+  "arcade-rush",
+  "flow",
+  "practice",
+];
+const LEGACY_BOARD_KEYS = [
   "campaign-highest-level-v1",
   "typing-60s-english200-v1",
   "typing-15s-english200-v1",
@@ -81,9 +99,10 @@ const ACTIVE_BOARD_KEYS = [
   "arcade-rush-v1",
 ];
 
-// 1. Final public registry and navigation surface.
-assert.deepEqual(getRegisteredModes().map(({ id }) => id), ACTIVE_MODE_IDS);
-assert.deepEqual(getAllModes().map(({ id }) => id), ACTIVE_MODE_IDS);
+// 1. Phase 0 public registry: Flow owns the public slot while Arcade Rush is
+// retained only as a hidden legacy definition for old saves/results/diagnostics.
+assert.deepEqual(getRegisteredModes().map(({ id }) => id), REGISTERED_MODE_IDS);
+assert.deepEqual(getAllModes().map(({ id }) => id), PUBLIC_MODE_IDS);
 assert.equal(Object.hasOwn(MODE_IDS, "DAILY"), false);
 assert.equal(getModeDefinition("daily"), null);
 const rushMode = getModeDefinition(MODE_IDS.ARCADE_RUSH);
@@ -99,14 +118,35 @@ assert.deepEqual(
   {
     id: "arcade-rush",
     enabled: true,
+    visible: false,
+    status: "retired",
+    route: null,
+    storesProgress: true,
+  },
+);
+const flowMode = getModeDefinition(MODE_IDS.FLOW);
+assert.deepEqual(
+  {
+    id: flowMode.id,
+    enabled: flowMode.enabled,
+    visible: flowMode.visible,
+    status: flowMode.status,
+    route: flowMode.route,
+    storesProgress: flowMode.storesProgress,
+  },
+  {
+    id: "flow",
+    enabled: false,
     visible: true,
-    status: "available",
-    route: "arcade-rush-ready",
+    status: "coming-soon",
+    route: null,
     storesProgress: true,
   },
 );
 assert.equal(isKnownScreen(Screens.ARCADE_RUSH_READY), true);
 assert.equal(isKnownScreen(Screens.ARCADE_RUSH_RESULTS), true);
+assert.equal(isKnownScreen(Screens.FLOW_READY), true);
+assert.equal(isKnownScreen(Screens.FLOW_RESULTS), true);
 assert.equal(Object.hasOwn(Screens, "DAILY_READY"), false);
 assert.equal(Object.hasOwn(Screens, "DAILY_RESULTS"), false);
 assert.equal(STATE_DOMAIN_NAMES.includes("arcadeRush"), true);
@@ -116,8 +156,8 @@ assert.equal(getStateDomain("daily"), null);
 assert.equal(getStateOwner("arcadeRushResult"), "arcadeRush");
 assert.equal(getStateOwner("dailyResult"), null);
 
-// 2. Frozen rules-v1 gameplay identity. This intentionally cross-checks AR10,
-// rather than duplicating its 1000-seed and balance simulations.
+// 2. Frozen rules-v1 legacy gameplay identity. This intentionally cross-checks
+// AR10 rather than duplicating its 1000-seed and balance simulations.
 assert.equal(ARCADE_RUSH_RULES_VERSION, 1);
 assert.equal(ARCADE_RUSH_RULES_STATUS, "FROZEN_V1");
 assert.equal(ARCADE_RUSH_GENERATOR_VERSION, 1);
@@ -133,13 +173,16 @@ assert.equal(ARCADE_RUSH_BOSS_ID, "core-breaker");
 assert.equal(ARCADE_RUSH_BOSS_VERSION, 1);
 assert.equal(ARCADE_RUSH_BOSS_MAX_HP, 8);
 
-// 3. Schema-v2 persistence, legacy Daily cleanup, exact-once terminal storage,
-// and statistics exposure.
+// 3. Schema-v2 persistence stays compatible: historical Rush records survive,
+// while Flow only has a zeroed reserved summary and records no Phase-0 runs.
 assert.equal(MODE_DATA_SCHEMA_VERSION, 2);
 assert.equal(MODE_DATA_STORAGE_KEY, "wordstrike_mode_data_v2");
 const defaults = createDefaultModeData();
-assert.deepEqual(Object.keys(defaults.modes), ACTIVE_MODE_IDS);
+assert.deepEqual(Object.keys(defaults.modes), PERSISTED_MODE_IDS);
 assert.deepEqual(defaults.modes[MODE_IDS.ARCADE_RUSH].records, createDefaultArcadeRushRecords());
+assert.ok(defaults.modes[MODE_IDS.FLOW]);
+assert.equal(defaults.modes[MODE_IDS.FLOW].completedSessions, 0);
+assert.equal(defaults.modes[MODE_IDS.FLOW].failedSessions, 0);
 assert.equal(Object.hasOwn(defaults.modes, "daily"), false);
 const migrated = migrateModeDataToV2({
   schemaVersion: 1,
@@ -160,6 +203,7 @@ assert.equal(migrated.modes.campaign.highestScore, 321);
 assert.equal(Object.hasOwn(migrated.modes, "daily"), false);
 assert.equal(migrated.recentSessions.some(({ modeId }) => modeId === "daily"), false);
 assert.ok(migrated.modes[MODE_IDS.ARCADE_RUSH]);
+assert.ok(migrated.modes[MODE_IDS.FLOW]);
 
 const originalLocalStorage = Object.getOwnPropertyDescriptor(globalThis, "localStorage");
 const values = new Map([["wordstrike_daily_legacy_v1", JSON.stringify({ obsolete: true })]]);
@@ -240,7 +284,7 @@ try {
   assert.equal(devSuccess.modeData.recordEligible, false);
   assert.equal(recordCompletedSession(devSuccess), false);
 
-  // 4. Client leaderboard payload and server eligibility line up.
+  // 4. Legacy client leaderboard payload and server eligibility remain coherent.
   assert.equal(LEADERBOARD_BOARDS.ARCADE_RUSH, "arcade-rush-v1");
   assert.equal(Object.hasOwn(LEADERBOARD_BOARDS, "DAILY"), false);
   assert.equal(Object.hasOwn(LEADERBOARD_CATEGORIES, "DAILY"), false);
@@ -281,9 +325,10 @@ try {
   else delete globalThis.localStorage;
 }
 
-// 5. Final public leaderboard/server board contract and safe legacy redirects.
-assert.deepEqual(PUBLIC_BOARD_KEYS, ACTIVE_BOARD_KEYS);
-assert.deepEqual(SUPPORTED_BOARD_KEYS, ACTIVE_BOARD_KEYS);
+// 5. Backend board compatibility remains intact while the frontend no longer
+// exposes Arcade Rush as a normal leaderboard category.
+assert.deepEqual(PUBLIC_BOARD_KEYS, LEGACY_BOARD_KEYS);
+assert.deepEqual(SUPPORTED_BOARD_KEYS, LEGACY_BOARD_KEYS);
 assert.equal(validateLeaderboardRequest({ boardKey: "daily-strike-v1" }).code, "INVALID_BOARD");
 assert.equal(validateScoreSubmission({ boardKey: "daily-strike-v1" }).code, "INVALID_BOARD");
 assert.equal(getLeaderboardSelection("daily-strike-v1").selectedCategory, LEADERBOARD_CATEGORIES.ARCADE_RUSH);
@@ -298,8 +343,8 @@ assert.deepEqual(validateLeaderboardReturnState({
   typingDuration: 60,
 });
 
-// 6. Browser integration stays behind the app boundary; pure Arcade Rush modules
-// remain independent of app state, storage, leaderboard, backend, and Daily code.
+// 6. Legacy runtime integration stays behind the app boundary; pure Arcade Rush
+// modules remain independent of app state, storage, leaderboard, backend, and Daily code.
 const mainSource = await readRoot("js", "main.js");
 const appControllerSource = await readRoot("js", "arcadeRushAppController.js");
 const clickRoutingSource = await readRoot("js", "appClickRouting.js");
@@ -352,7 +397,8 @@ assert.match(workflow, /pull_request:/);
 assert.match(workflow, /^\s+(?:run:\s*)?npm test(?:\s|$)/m);
 const readme = await readRoot("README.md");
 assert.match(readme, /https:\/\/thiepn\.dev\/wordstrike\//);
-assert.match(readme, /\*\*Arcade Rush\*\*/);
+assert.match(readme, /\*\*Flow\*\*/);
+assert.doesNotMatch(readme, /\*\*Arcade Rush\*\*/);
 assert.doesNotMatch(readme, /\*\*Daily Strike\*\*|### Daily Strike/);
 
-console.log("AR17 final certification passed: Arcade Rush rules v1, public routing, storage, statistics, leaderboard, backend retirement, isolation, and deployment contracts are coherent.");
+console.log("Flow Phase 0 migration certification passed: Flow owns the public slot while Arcade Rush rules/data remain legacy-compatible.");

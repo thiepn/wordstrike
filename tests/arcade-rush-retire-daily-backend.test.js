@@ -84,9 +84,12 @@ assert.doesNotMatch(submitEdge, /scoreSubmissionLegacyDaily/);
 assert.doesNotMatch(submitEdge, /CHALLENGE_MISMATCH|Daily Strike/);
 assert.doesNotMatch(readEdge, /INVALID_CHALLENGE_DATE|Daily Strike/);
 
-// AR16 closes the frontend half of the retirement while preserving the backend archive above.
+// Flow Phase 0 keeps the backend archive intact while retiring Rush from public discovery.
 assert.equal(Object.hasOwn(MODE_IDS, "DAILY"), false);
 assert.equal(getModeDefinition("daily"), null);
-assert.equal(getModeDefinition(MODE_IDS.ARCADE_RUSH).visible, true);
+assert.equal(getModeDefinition(MODE_IDS.ARCADE_RUSH).visible, false);
+assert.equal(getModeDefinition(MODE_IDS.ARCADE_RUSH).status, "retired");
+assert.equal(getModeDefinition(MODE_IDS.FLOW).visible, true);
+assert.equal(getModeDefinition(MODE_IDS.FLOW).enabled, false);
 
-console.log("AR15 backend retirement remains intact after AR16 deletes the Daily frontend while preserving archived data.");
+console.log("AR15 backend retirement remains intact while Flow Phase 0 retires Rush from public discovery and preserves archived data.");

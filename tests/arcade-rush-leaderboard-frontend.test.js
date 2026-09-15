@@ -17,7 +17,7 @@ import { savePendingResultSubmission } from "../js/pendingResultSubmission.js";
 assert.equal(ARCADE_RUSH_LEADERBOARD_BOARD_KEY, "arcade-rush-v1");
 assert.equal(ARCADE_RUSH_LEADERBOARD_CATEGORY, "arcade-rush");
 assert.equal(ARCADE_RUSH_LEADERBOARD_RULES_VERSION, 1);
-// The AR13 query detector remains available for diagnostics after cutover.
+// Legacy diagnostics remain available while the retired mode data is preserved.
 assert.equal(isArcadeRushLeaderboardShadowEnabled("?dev=1"), true);
 assert.equal(isArcadeRushLeaderboardShadowEnabled("?dev=true&mode=arcade-rush"), true);
 assert.equal(isArcadeRushLeaderboardShadowEnabled("?dev=0"), false);
@@ -123,7 +123,7 @@ const { renderLeaderboards } = await import("../js/leaderboardUi.js");
 const signedOut = { status: "signed-out" };
 const noProfile = { status: "idle", profile: null };
 
-// AR14: Arcade Rush is the normal fourth tab without any developer option.
+// Phase 0: Arcade Rush is no longer discoverable in public leaderboard navigation.
 renderLeaderboards({
   status: "loading",
   selectedBoardKey: LEADERBOARD_BOARDS.CAMPAIGN,
@@ -131,9 +131,10 @@ renderLeaderboards({
   selectedTypingDuration: 60,
   entries: [],
 }, signedOut, noProfile);
-assert.match(app.html, /ARCADE RUSH/);
+assert.doesNotMatch(app.html, /ARCADE RUSH/);
 assert.doesNotMatch(app.html, /DAILY STRIKE/);
 
+// Historical boards remain renderable when addressed directly by a legacy return state.
 renderLeaderboards({
   status: "ready",
   selectedBoardKey: LEADERBOARD_BOARDS.ARCADE_RUSH,
@@ -146,9 +147,8 @@ renderLeaderboards({
   }],
   viewer: null,
 }, signedOut, noProfile);
-assert.match(app.html, /ARCADE RUSH/);
 assert.doesNotMatch(app.html, /DAILY STRIKE/);
-assert.match(app.html, /RULES V1 \/\/ COMPLETED RUNS ONLY \/\/ ALL-TIME/);
+assert.match(app.html, /LEGACY BOARD \/\/ RETIRED MODE \/\/ ALL-TIME/);
 assert.match(app.html, /91,234/);
 assert.match(app.html, /98\.7%/);
 assert.match(app.html, /4:07\.0/);
@@ -181,4 +181,4 @@ assert.match(adapterSource, /leaderboardAvailable: true/);
 assert.match(mainSource, /leaderboard-select-arcade-rush/);
 assert.match(mainSource, /prepareAutomaticResultSubmission\("arcade-rush", result\)/);
 
-console.log("Arcade Rush AR11 board/payload contracts remain valid after the AR14 public cutover.");
+console.log("Legacy Arcade Rush board/payload contracts remain valid after Flow Phase 0 retirement.");

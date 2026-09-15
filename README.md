@@ -24,7 +24,7 @@
 
 ## WORDSTRIKE
 
-**WORDSTRIKE** is a browser typing game that combines conventional speed testing with arcade-style target pressure.
+**WORDSTRIKE** is a browser typing game that combines conventional speed testing with arcade-style target pressure and natural continuous-text practice.
 
 The core game is local-first: campaign progress, personal records, settings, and statistics are stored in the browser. An optional online layer adds Google sign-in, public usernames, and global leaderboards through Supabase.
 
@@ -37,7 +37,7 @@ The core game is local-first: campaign progress, personal records, settings, and
 | **Campaign** | Defend the core through 100 progressively harder levels with a boss encounter every tenth level. |
 | **Typing Test** | Measure WPM, raw WPM, accuracy, corrections, and errors using the curated English 200 word set. |
 | **Endless** | Survive escalating stages with limited core integrity and increasing word pressure. |
-| **Arcade Rush** | Complete six escalating waves and defeat Core Breaker in a finite score-attack run. |
+| **Flow** | Natural continuous-text typing built around complete sentences, punctuation, rhythm, and realistic correction. Flow is being introduced in phases and is not playable yet. |
 | **Practice Lab** | Experimental training architecture; currently not exposed as a normal production mode. |
 
 ---
@@ -82,14 +82,18 @@ Campaign grades:
 - survival, word, combo, and stage-clear scoring
 - local personal records
 
-### Arcade Rush
+### Flow
 
-- six escalating normal waves
-- five persistent Core Integrity
-- deterministic per-run vocabulary and trajectories
-- Core Breaker final boss
-- combo, accuracy, perfect-wave, integrity, and boss-time scoring
-- local personal records and an all-time global leaderboard
+Flow is replacing the retired finite score-attack mode. Its Phase 0 foundation separates it from the existing word-target gameplay instead of relabeling an old mode.
+
+Planned core identity:
+
+- continuous real-world text rather than isolated word targets
+- complete sentences, spaces, capitalization, punctuation, quotations, and numbers
+- realistic correction and backspace behavior
+- dedicated rhythm/cadence and Flow-state analysis
+- natural-language categories and language-based difficulty
+- isolated Flow configuration, run state, and screen architecture
 
 ---
 
@@ -106,7 +110,6 @@ The browser stores a local player profile and gameplay history used for:
 - lifetime playtime and session totals
 - weighted accuracy and WPM
 - recent-session history
-- Arcade Rush personal records and completion statistics
 
 Local gameplay does **not** require an account.
 
@@ -114,15 +117,16 @@ Local gameplay does **not** require an account.
 
 Players can optionally sign in with Google through Supabase to use global leaderboards. Online leaderboard accounts use a separate public username.
 
-Current leaderboard categories include:
+Current public leaderboard categories include:
 
 - Campaign
 - Typing Test — 15 seconds
 - Typing Test — 60 seconds
 - Endless
-- Arcade Rush
 
 Score submissions are authenticated and server-validated before storage. Global leaderboards are an optional feature; local gameplay and local progress remain available without signing in.
+
+Historical data contracts for the retired mode are kept internally during the Flow migration so old local records and pending submissions are not destructively discarded.
 
 ---
 
@@ -174,8 +178,9 @@ wordstrike/
 │   ├── boss*.js
 │   ├── speedTest*.js
 │   ├── endless*.js
-│   ├── arcadeRush/
-│   ├── arcadeRush*.js
+│   ├── flow/
+│   ├── arcadeRush/        # retired-mode compatibility during migration
+│   ├── arcadeRush*.js     # retired-mode compatibility during migration
 │   ├── statistics*.js
 │   ├── leaderboard*.js
 │   └── practiceLab/
@@ -199,6 +204,7 @@ wordstrike/
 - centralized input routing
 - authenticated online leaderboard operations
 - static frontend deployment with no production build step
+- preserve historical data when retiring or replacing a mode
 
 ---
 
@@ -306,7 +312,8 @@ The project includes automated coverage across core gameplay and infrastructure,
 - input and target selection
 - scoring and session lifecycle
 - Typing Test generation and metrics
-- Endless and Arcade Rush
+- Endless gameplay
+- retired-mode migration and legacy-data compatibility
 - mobile viewport and software keyboard behavior
 - browser-storage failure handling
 - vocabulary quality and fallback behavior
@@ -328,7 +335,7 @@ Detailed implementation notes live in [`docs/`](./docs/), including:
 - [`BOSS_VOCABULARY.md`](./docs/BOSS_VOCABULARY.md)
 - [`TYPING_TEST.md`](./docs/TYPING_TEST.md)
 - [`ENDLESS_MODE.md`](./docs/ENDLESS_MODE.md)
-- [`ARCADE_RUSH_CONTRACT.md`](./docs/ARCADE_RUSH_CONTRACT.md)
+- [`ARCADE_RUSH_CONTRACT.md`](./docs/ARCADE_RUSH_CONTRACT.md) — retained as legacy implementation history during migration
 - [`PLAYER_PROFILE_AND_STATISTICS.md`](./docs/PLAYER_PROFILE_AND_STATISTICS.md)
 
 Practice Lab has additional architecture documents under the same directory.
@@ -337,4 +344,4 @@ Practice Lab has additional architecture documents under the same directory.
 
 ## Status
 
-WORDSTRIKE is under active development. The current production focus is hardening the existing game—reliability, performance, leaderboard integrity, accessibility, and maintainability—before expanding the feature surface further.
+WORDSTRIKE is under active development. Flow is currently in its migration/foundation phase: the retired mode is no longer part of normal public navigation, while its historical data contracts remain preserved until Flow's own typing engine and persistence paths replace them cleanly.
