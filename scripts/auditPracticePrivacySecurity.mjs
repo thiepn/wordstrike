@@ -57,7 +57,7 @@ const STATIC_FETCH_FILES = Object.freeze(new Set([
 // this review: it changes the count and fails PL39 until explicitly audited.
 const REVIEWED_INNER_HTML = Object.freeze({
   "js/practiceLab/practiceAccuracyRecoverySessionHost.js": [2, "fixed shell/results and bounded metrics"],
-  "js/practiceLab/practiceBurstSprintsSessionHost.js": [3, "fixed sprint shell/results; typed material is not raw HTML"],
+  "js/practiceLab/practiceBurstSprintsSessionHost.js": [1, "GC1 central shell helper; dynamic text is escaped and protocol/result metrics are bounded"],
   "js/practiceLab/practiceCoachReviewSessionHost.js": [3, "fixed review shell/results with validated identifiers"],
   "js/practiceLab/practiceCombinationRepairSessionHost.js": [3, "validated target identifiers plus fixed markup"],
   "js/practiceLab/practiceCommonWordsSessionHost.js": [2, "fixed common-word session/result markup"],
