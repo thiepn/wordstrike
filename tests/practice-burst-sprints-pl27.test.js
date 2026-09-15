@@ -73,8 +73,6 @@ test("PL27 selects top three adjusted logs, takes their median and applies exact
   const result=completeResult(); const selected=selectPracticeBurstEstimatorSprints(result,{difficultyAdjustmentLog:0});
   assert.deepEqual(selected.map(s=>s.sprintId),["sprint-5","sprint-2","sprint-3"]);
   const sigma=calculatePracticeBurstSessionSigma(selected,sigmas);
-  // Independent canonical expectation: top-three Y are ln(150), ln(140), ln(130).
-  // Their median is ln(140), so MAD is median(ln(150/140), 0, ln(140/130)) = ln(150/140).
   const expectedMad = Math.log(150 / 140);
   const expectedSpread = Math.max(1.4826 * expectedMad, .03);
   const expected=Math.sqrt(.12**2/2 + expectedSpread**2 + .04**2);
@@ -96,5 +94,5 @@ test("PL27 browser host encodes protocol-inactive preview/recovery, disabled inp
 test("PL27 catalog and PL32 treatment identity use canonical v2 and do not pool legacy history", () => {
   const catalog=getPracticeExperiment("burst-sprints"); assert.match(catalog.longDescription,/30-second warm-up/i); assert.match(catalog.description,/preview and recovery/i); assert.doesNotMatch(catalog.longDescription,/15-second/);
   const identity=resolvePracticeTreatmentIdentity({experiment:createPracticeBurstSprintsExperiment(),configuration:{protocolVersion:2,policyVersion:2,estimatorVersion:2},contentPlan:{targetEntities:[],metadata:{}}});
-  assert.equal(identity.protocolVariant,"six-sprint-warmup-preview-v2"); assert.notEqual(identity.treatmentFamilyKey,"burst-sprints:six-sprint-v1");
+  assert.equal(identity.protocolVariant,"burst-six-canonical-v2"); assert.notEqual(identity.treatmentFamilyKey,"burst-sprints:six-sprint-v1");
 });
