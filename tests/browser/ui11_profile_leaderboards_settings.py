@@ -14,7 +14,7 @@ ARTIFACTS = ROOT / "browser-artifacts" / "ui11-profile-leaderboards-settings"
 
 ONBOARDING_SEED = """(() => {
   for (const [id, version] of Object.entries({
-    general:3, campaign:1, typing:1, endless:1, boss:1, leaderboards:1, 'arcade-rush':1
+    general:3, campaign:1, typing:1, endless:1, boss:1, leaderboards:1
   })) localStorage.setItem(`wordstrike.onboarding.${id}.v${version}`, 'seen');
 })();"""
 
@@ -91,6 +91,7 @@ def inspect_profile(browser, base, browser_name, evidence):
         panelLabelledBy: panel.getAttribute('aria-labelledby'),
         activeTabs: tabs.querySelectorAll('[role="tab"][aria-selected="true"]').length,
         tabCount: tabs.querySelectorAll('[role="tab"]').length,
+        rushTabs: tabs.querySelectorAll('[data-stats-tab="4"]').length,
         backHeight: back.getBoundingClientRect().height,
         metricBackground: metric ? getComputedStyle(metric).backgroundColor : null,
         surface: screen.dataset.ui11Surface,
@@ -103,15 +104,18 @@ def inspect_profile(browser, base, browser_name, evidence):
     assert values["panelRole"] == "tabpanel", values
     assert values["panelLabelledBy"], values
     assert values["activeTabs"] == 1, values
-    assert values["tabCount"] == 7, values
+    assert values["tabCount"] == 6, values
+    assert values["rushTabs"] == 0, values
     assert values["backHeight"] >= 44, values
 
-    # The existing tab controller remains authoritative while UI11 supplies semantics.
+    # The existing tab controller remains authoritative while Phase 0 suppresses
+    # the retired Rush tab. Recent and Account retain their original tab ids.
     page.locator('[data-stats-tab="5"]').click()
     expect(page.locator('[data-stats-tab="5"]')).to_have_class("active")
     expect(page.locator('[data-stats-tab="5"]')).to_have_attribute("aria-selected", "true")
     expect(page.locator(".recent-filters")).to_have_attribute("aria-label", "Recent session filters")
     assert page.locator('.recent-filters button[aria-pressed="true"]').count() == 1
+    assert page.locator('[data-recent-filter="arcade-rush"]').count() == 0
 
     page.locator('[data-stats-tab="6"]').click()
     expect(page.locator('[data-stats-tab="6"]')).to_have_attribute("aria-selected", "true")
@@ -124,7 +128,7 @@ def inspect_profile(browser, base, browser_name, evidence):
     if browser_name == "chromium":
         page.screenshot(path=str(ARTIFACTS / "chromium-ui11-profile.png"), full_page=True)
 
-    evidence.append({"browser": browser_name, "case": "profile", **values})
+    evidence.append({"browser": browser_name, "case": "profile with retired Rush surfaces suppressed", **values})
     assert_no_errors(errors, f"{browser_name} profile")
     context.close()
 
@@ -145,6 +149,7 @@ def inspect_leaderboards(browser, base, browser_name, evidence):
         panelBackground: getComputedStyle(panel).backgroundColor,
         selectedTabs: tabs.querySelectorAll('[role="tab"][aria-selected="true"]').length,
         tabCount: tabs.querySelectorAll('[role="tab"]').length,
+        rushTabs: tabs.querySelectorAll('[data-action="leaderboard-select-arcade-rush"]').length,
         backHeight: back.getBoundingClientRect().height,
         live: content.getAttribute('aria-live'),
       };
@@ -152,21 +157,23 @@ def inspect_leaderboards(browser, base, browser_name, evidence):
     assert values["overflow"] <= 1, values
     assert values["panelBorder"] == "0px", values
     assert values["selectedTabs"] == 1, values
-    assert values["tabCount"] == 4, values
+    assert values["tabCount"] == 3, values
+    assert values["rushTabs"] == 0, values
     assert values["backHeight"] >= 44, values
     assert values["live"] == "polite", values
 
-    # Existing category routing remains live and the selected state remains semantic.
+    # Existing public category routing remains live and semantically selected.
     page.locator('[data-action="leaderboard-select-typing"]').click()
     expect(page.locator('[data-action="leaderboard-select-typing"]')).to_have_attribute("aria-selected", "true")
     expect(page.locator(".leaderboard-duration-tabs")).to_be_visible()
-    page.locator('[data-action="leaderboard-select-arcade-rush"]').click()
-    expect(page.locator('[data-action="leaderboard-select-arcade-rush"]')).to_have_attribute("aria-selected", "true")
+    page.locator('[data-action="leaderboard-select-endless"]').click()
+    expect(page.locator('[data-action="leaderboard-select-endless"]')).to_have_attribute("aria-selected", "true")
+    assert page.locator('[data-action="leaderboard-select-arcade-rush"]').count() == 0
 
     if browser_name == "chromium":
         page.screenshot(path=str(ARTIFACTS / "chromium-ui11-leaderboards.png"), full_page=True)
 
-    evidence.append({"browser": browser_name, "case": "leaderboards", **values})
+    evidence.append({"browser": browser_name, "case": "public leaderboards with retired Rush category suppressed", **values})
     assert_no_errors(errors, f"{browser_name} leaderboards")
     context.close()
 
@@ -193,6 +200,7 @@ def inspect_settings(browser, base, browser_name, evidence):
         backHeight: back.getBoundingClientRect().height,
         accountSection: Boolean(document.querySelector('[data-ui11-section="account"]')),
         tutorialSection: Boolean(document.querySelector('[data-ui11-section="tutorials"]')),
+        rushTutorials: document.querySelectorAll('[data-tutorial-id="arcade-rush"]').length,
         surface: screen.dataset.ui11Surface,
       };
     }""")
@@ -204,6 +212,7 @@ def inspect_settings(browser, base, browser_name, evidence):
     assert values["backHeight"] >= 44, values
     assert values["accountSection"], values
     assert values["tutorialSection"], values
+    assert values["rushTutorials"] == 0, values
 
     # Clicking a real existing setting still changes the underlying setting and rerenders the switch state.
     strict = page.locator('[data-setting="strictMode"]')
@@ -214,7 +223,7 @@ def inspect_settings(browser, base, browser_name, evidence):
     if browser_name == "chromium":
         page.screenshot(path=str(ARTIFACTS / "chromium-ui11-settings.png"), full_page=True)
 
-    evidence.append({"browser": browser_name, "case": "settings", **values, "strictBefore": before})
+    evidence.append({"browser": browser_name, "case": "settings with retired Rush tutorial suppressed", **values, "strictBefore": before})
     assert_no_errors(errors, f"{browser_name} settings")
     context.close()
 
