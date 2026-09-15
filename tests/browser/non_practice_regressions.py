@@ -80,7 +80,7 @@ def title_and_shell_checks(browser, base, browser_name, checks):
     assert page.locator('[data-mode-id="arcade-rush"]').count() == 0
     flow = page.locator('[data-mode-id="flow"]')
     expect(flow).to_be_visible()
-    expect(flow).to_be_disabled()
+    expect(flow).to_have_attribute("aria-disabled", "true")
     assert overflow(page) <= 1
     checks.append({"browser": browser_name, "case": "Flow migration metadata and public mode navigation"})
     assert_no_errors(errors, "title/modes")
