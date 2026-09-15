@@ -138,6 +138,7 @@ import {
   resolveAppClickAction,
 } from "./appClickRouting.js";
 import { createGlobalKeyboardController } from "./appKeyboardController.js";
+import { createNativeBackNavigation, createWordStrikeBackHandler } from "./nativeBackNavigation.js";
 import {
   getAuthState,
   initializeAuth,
@@ -1432,6 +1433,28 @@ function inspectDevLevel(levelNumber) {
   input?.focus();
 }
 
+const handleNativeBack = createWordStrikeBackHandler({
+  state: appState,
+  onboardingController,
+  getSpeedTestState: getCurrentSpeedTest,
+  backPracticeLab: () => practiceLabController?.back(),
+  cancelProfileNameEdit,
+  openTitle,
+  openModeSelect,
+  openLevelSelect,
+  openEndlessReady,
+  openArcadeRushReady,
+  resetSpeedTestAttempt,
+  pauseGame,
+  pauseTypingTest,
+  backFromSettings,
+});
+
+const nativeBackNavigation = createNativeBackNavigation({
+  windowRef: window,
+  onBack: handleNativeBack,
+});
+
 const handleGlobalKeydown = createGlobalKeyboardController({
   state: appState,
   currentTimeMs,
@@ -1568,6 +1591,7 @@ async function bootstrap() {
     loadCommonWordBank(),
   ]);
   document.addEventListener("keydown", handleGlobalKeydown);
+  nativeBackNavigation.mount();
   const appRoot = document.querySelector("#app");
   attachAppClickListener(appRoot, handleAppClick);
   appRoot?.addEventListener("input", handleAppInput);
