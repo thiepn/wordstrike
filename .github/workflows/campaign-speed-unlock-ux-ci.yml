@@ -28,6 +28,21 @@ jobs:
           if [ ! -f tests/campaign-speed-unlock-ux.test.js ]; then
             python scripts/applyCampaignSpeedUnlockUxPatch.py
           fi
+      - name: Normalize UX source-contract assertion
+        shell: bash
+        run: |
+          if [ -f tests/campaign-speed-unlock-ux.test.js ]; then
+            python - <<'PY'
+          from pathlib import Path
+          path = Path("tests/campaign-speed-unlock-ux.test.js")
+          text = path.read_text()
+          text = text.replace(
+              'assert.match(presentation, /campaign-node\\.has-speed-unlock:focus \\.campaign-speed-unlock-tooltip/);',
+              'assert.ok(presentation.includes(".campaign-node.has-speed-unlock:focus .campaign-speed-unlock-tooltip"));',
+          )
+          path.write_text(text)
+          PY
+          fi
       - name: Run full test suite
         run: npm test
       - name: Commit tested patch if changed
