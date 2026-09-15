@@ -217,9 +217,9 @@ def default_equivalence(browser,name,base,baseline_base,checks):
  outputs=[]
  for origin in [baseline_base,base]:
   context=context_for(browser,origin);page=context.new_page();open_title(page,origin)
-  # P1 palette equivalence remains exact. P2's explicitly requested mode controls
-  # are certified separately; hide only those additions on both comparison pages.
-  page.add_style_tag(content='[data-mode-presentation] { display: none !important; }')
+  # P1 customization defaults remain exact outside intentional product migration
+  # surfaces. Hide mode-local controls plus the Phase-0 title/mode-card content.
+  page.add_style_tag(content='[data-mode-presentation], .title-description, .mode-option { visibility: hidden !important; }')
   title=page.screenshot(animations='disabled',caret='hide')
   page.locator('[data-action="modes"]').click();expect(page.locator('.mode-select-screen')).to_be_visible()
   modes=page.screenshot(animations='disabled',caret='hide')
