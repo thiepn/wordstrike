@@ -74,23 +74,8 @@ jobs:
             }
             return false;
           }
-
-          export function getHighestCampaignAccessibleLevel(
-            save,
-            speedUnlockLevel = getCampaignSpeedUnlockLevel(),
-          ) {
-            let highest = 1;
-            for (let level = 2; level <= 100; level += 1) {
-              if (isCampaignLevelAccessible(save, level, speedUnlockLevel)) highest = level;
-            }
-            return highest;
-          }
           '''
           s = once(s, anchor, helpers, "storage helpers")
-          s = once(s,
-              'return Math.max(progressLevel, getCampaignSpeedUnlockLevel());',
-              'return getHighestCampaignAccessibleLevel(save);',
-              "highest accessible getter")
           storage.write_text(s)
 
           main = Path("js/main.js")
@@ -123,8 +108,8 @@ jobs:
               "node access")
           s = once(s,
               '<div class="campaign-progress-count">UNLOCKED <strong>${devMode ? 100 : furthestLevel}</strong><span>/ 100</span></div>',
-              '<div class="campaign-progress-count">HIGHEST ACCESS <strong>${devMode ? 100 : furthestLevel}</strong><span>/ 100</span></div>',
-              "access copy")
+              '<div class="campaign-progress-count">ROUTE REACH <strong>${devMode ? 100 : furthestLevel}</strong><span>/ 100</span></div>',
+              "route reach copy")
           ui.write_text(s)
           PY
 
@@ -181,6 +166,13 @@ jobs:
             updateLevelResult(save, 1, pass);
             assert.equal(isCampaignLevelAccessible(save, 2, 1), true);
             assert.equal(isCampaignLevelAccessible(save, 3, 1), false);
+          }
+
+          {
+            const save = createDefaultSave();
+            save.currentFurthestLevel = 41;
+            assert.equal(save.currentFurthestLevel, 41, "legacy/high-water progress remains intact");
+            assert.equal(isCampaignLevelAccessible(save, 40, 31), false, "high-water scalar does not authorize a level");
           }
 
           console.log("Campaign checkpoint-only access and sequential continuation tests passed.");
