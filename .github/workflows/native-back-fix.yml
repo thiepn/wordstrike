@@ -1,0 +1,432 @@
+name: Native Back Navigation Fix
+
+on:
+  push:
+    branches:
+      - fix/native-back-navigation
+
+permissions:
+  contents: write
+
+jobs:
+  patch-test-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/native-back-navigation
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Implement native back navigation
+        shell: bash
+        run: |
+          cat > js/nativeBackNavigation.js <<'EOF'
+          import { Screens } from "./appScreens.js";
+
+          export const NATIVE_BACK_STATE_KEY = "__wordstrikeNativeBack";
+          const ROOT_STATE = "root";
+          const GUARD_STATE = "guard";
+
+          function invoke(action) {
+            if (typeof action === "function") action();
+            return true;
+          }
+
+          export function createWordStrikeBackHandler({
+            state,
+            onboardingController,
+            getSpeedTestState,
+            backPracticeLab,
+            cancelProfileNameEdit,
+            openTitle,
+            openModeSelect,
+            openLevelSelect,
+            openEndlessReady,
+            openArcadeRushReady,
+            resetSpeedTestAttempt,
+            pauseGame,
+            pauseTypingTest,
+            backFromSettings,
+          } = {}) {
+            if (!state || typeof state !== "object") {
+              throw new TypeError("Native back navigation requires app state");
+            }
+
+            return function handleWordStrikeBack() {
+              if (onboardingController?.getState?.()) {
+                onboardingController.close?.();
+                return true;
+              }
+
+              if (
+                state.profileEditing &&
+                (state.screen === Screens.PROFILE_STATS || state.screen === Screens.SETTINGS)
+              ) {
+                return invoke(cancelProfileNameEdit);
+              }
+
+              switch (state.screen) {
+                case Screens.TITLE:
+                  return false;
+                case Screens.MODE_SELECT:
+                case Screens.PROFILE_STATS:
+                case Screens.LEADERBOARDS:
+                  return invoke(openTitle);
+                case Screens.PRACTICE_LAB:
+                  return typeof backPracticeLab === "function"
+                    ? backPracticeLab() !== false
+                    : invoke(openModeSelect);
+                case Screens.ENDLESS_READY:
+                  return invoke(openModeSelect);
+                case Screens.ENDLESS_RESULTS:
+                  return invoke(() => openEndlessReady?.("native-back"));
+                case Screens.ARCADE_RUSH_READY:
+                  return invoke(openModeSelect);
+                case Screens.ARCADE_RUSH_RESULTS:
+                  return invoke(() => openArcadeRushReady?.("native-back"));
+                case Screens.SPEED_TEST_RUN: {
+                  const speedTest = getSpeedTestState?.();
+                  if (speedTest?.phase === "ACTIVE") return invoke(pauseTypingTest);
+                  return invoke(openModeSelect);
+                }
+                case Screens.SPEED_TEST_RESULTS:
+                  return invoke(() => resetSpeedTestAttempt?.("change-test"));
+                case Screens.LEVEL_SELECT:
+                  return invoke(openModeSelect);
+                case Screens.PLAYING:
+                  return invoke(pauseGame);
+                case Screens.PAUSED: {
+                  if (getSpeedTestState?.()?.phase === "PAUSED") return invoke(openModeSelect);
+                  if (state.game?.mode === "endless") {
+                    return invoke(() => openEndlessReady?.("native-back"));
+                  }
+                  if (state.game?.mode === "arcade-rush") {
+                    return invoke(() => openArcadeRushReady?.("native-back"));
+                  }
+                  return invoke(() => openLevelSelect?.("native-back"));
+                }
+                case Screens.RESULTS:
+                  return invoke(() => openLevelSelect?.("native-back"));
+                case Screens.SETTINGS:
+                  return invoke(backFromSettings);
+                default:
+                  return false;
+              }
+            };
+          }
+
+          export function createNativeBackNavigation({ windowRef = globalThis.window, onBack } = {}) {
+            const history = windowRef?.history;
+            let mounted = false;
+            let baseState = null;
+
+            const arm = () => {
+              history.pushState({ ...baseState, [NATIVE_BACK_STATE_KEY]: GUARD_STATE }, "");
+            };
+
+            const handlePopState = (event) => {
+              if (!mounted || event?.state?.[NATIVE_BACK_STATE_KEY] !== ROOT_STATE) return;
+              let handled = false;
+              try {
+                handled = onBack?.() === true;
+              } catch (error) {
+                console.error("Native back navigation failed", error);
+                try { arm(); } catch {}
+                return;
+              }
+
+              if (handled) {
+                try { arm(); } catch {}
+                return;
+              }
+
+              mounted = false;
+              windowRef.removeEventListener?.("popstate", handlePopState);
+              history.back?.();
+            };
+
+            return Object.freeze({
+              mount() {
+                if (mounted) return true;
+                if (
+                  !history ||
+                  typeof history.replaceState !== "function" ||
+                  typeof history.pushState !== "function" ||
+                  typeof windowRef?.addEventListener !== "function"
+                ) return false;
+                try {
+                  const existingState = history.state && typeof history.state === "object"
+                    ? history.state
+                    : {};
+                  baseState = { ...existingState, [NATIVE_BACK_STATE_KEY]: ROOT_STATE };
+                  history.replaceState(baseState, "");
+                  arm();
+                  windowRef.addEventListener("popstate", handlePopState);
+                  mounted = true;
+                  return true;
+                } catch {
+                  baseState = null;
+                  return false;
+                }
+              },
+              destroy() {
+                if (!mounted) return false;
+                mounted = false;
+                windowRef.removeEventListener?.("popstate", handlePopState);
+                return true;
+              },
+              isMounted: () => mounted,
+            });
+          }
+          EOF
+
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path("js/main.js")
+          text = path.read_text()
+
+          def once(old, new, label):
+              global text
+              count = text.count(old)
+              if count != 1:
+                  raise AssertionError(f"{label}: expected 1 match, got {count}")
+              text = text.replace(old, new, 1)
+
+          import_anchor = 'import { createGlobalKeyboardController } from "./appKeyboardController.js";\n'
+          once(
+              import_anchor,
+              import_anchor + 'import { createNativeBackNavigation, createWordStrikeBackHandler } from "./nativeBackNavigation.js";\n',
+              "native back import",
+          )
+
+          keyboard_anchor = '''const handleGlobalKeydown = createGlobalKeyboardController({
+          '''
+          handler = '''const handleNativeBack = createWordStrikeBackHandler({
+            state: appState,
+            onboardingController,
+            getSpeedTestState: getCurrentSpeedTest,
+            backPracticeLab: () => practiceLabController?.back(),
+            cancelProfileNameEdit,
+            openTitle,
+            openModeSelect,
+            openLevelSelect,
+            openEndlessReady,
+            openArcadeRushReady,
+            resetSpeedTestAttempt,
+            pauseGame,
+            pauseTypingTest,
+            backFromSettings,
+          });
+
+          const nativeBackNavigation = createNativeBackNavigation({
+            windowRef: window,
+            onBack: handleNativeBack,
+          });
+
+          ''' + keyboard_anchor
+          once(keyboard_anchor, handler, "native back handler")
+
+          listener_anchor = '''  document.addEventListener("keydown", handleGlobalKeydown);
+            const appRoot = document.querySelector("#app");
+          '''
+          listener_replacement = '''  document.addEventListener("keydown", handleGlobalKeydown);
+            nativeBackNavigation.mount();
+            const appRoot = document.querySelector("#app");
+          '''
+          once(listener_anchor, listener_replacement, "native back mount")
+          path.write_text(text)
+          PY
+
+          cat > tests/native-back-navigation.test.js <<'EOF'
+          import assert from "node:assert/strict";
+          import { Screens } from "../js/appScreens.js";
+          import {
+            NATIVE_BACK_STATE_KEY,
+            createNativeBackNavigation,
+            createWordStrikeBackHandler,
+          } from "../js/nativeBackNavigation.js";
+
+          function createActions(calls) {
+            const record = (name) => (...args) => { calls.push([name, ...args]); return true; };
+            return {
+              cancelProfileNameEdit: record("cancel-edit"),
+              openTitle: record("title"),
+              openModeSelect: record("modes"),
+              openLevelSelect: record("levels"),
+              openEndlessReady: record("endless-ready"),
+              openArcadeRushReady: record("rush-ready"),
+              resetSpeedTestAttempt: record("typing-reset"),
+              pauseGame: record("pause-game"),
+              pauseTypingTest: record("pause-typing"),
+              backFromSettings: record("settings-back"),
+              backPracticeLab: record("practice-back"),
+            };
+          }
+
+          {
+            const calls = [];
+            const state = { screen: Screens.TITLE, profileEditing: false, game: null };
+            let speed = null;
+            const onboarding = { getState: () => null, close: () => calls.push(["tutorial-close"]) };
+            const handler = createWordStrikeBackHandler({
+              state,
+              onboardingController: onboarding,
+              getSpeedTestState: () => speed,
+              ...createActions(calls),
+            });
+
+            assert.equal(handler(), false, "title allows the browser/device to leave the app");
+            assert.deepEqual(calls, []);
+
+            state.screen = Screens.MODE_SELECT;
+            assert.equal(handler(), true);
+            assert.deepEqual(calls.pop(), ["title"]);
+
+            state.screen = Screens.LEVEL_SELECT;
+            handler();
+            assert.deepEqual(calls.pop(), ["modes"]);
+
+            state.screen = Screens.SPEED_TEST_RUN;
+            speed = { phase: "PREPARING" };
+            handler();
+            assert.deepEqual(calls.pop(), ["modes"]);
+
+            speed = { phase: "ACTIVE" };
+            handler();
+            assert.deepEqual(calls.pop(), ["pause-typing"]);
+
+            state.screen = Screens.SPEED_TEST_RESULTS;
+            handler();
+            assert.deepEqual(calls.pop(), ["typing-reset", "change-test"]);
+
+            state.screen = Screens.PLAYING;
+            state.game = { mode: "normal" };
+            speed = null;
+            handler();
+            assert.deepEqual(calls.pop(), ["pause-game"]);
+
+            state.screen = Screens.PAUSED;
+            handler();
+            assert.deepEqual(calls.pop(), ["levels", "native-back"]);
+
+            state.game = { mode: "endless" };
+            handler();
+            assert.deepEqual(calls.pop(), ["endless-ready", "native-back"]);
+
+            state.game = { mode: "arcade-rush" };
+            handler();
+            assert.deepEqual(calls.pop(), ["rush-ready", "native-back"]);
+
+            speed = { phase: "PAUSED" };
+            handler();
+            assert.deepEqual(calls.pop(), ["modes"]);
+
+            state.screen = Screens.RESULTS;
+            speed = null;
+            handler();
+            assert.deepEqual(calls.pop(), ["levels", "native-back"]);
+
+            state.screen = Screens.ENDLESS_RESULTS;
+            handler();
+            assert.deepEqual(calls.pop(), ["endless-ready", "native-back"]);
+
+            state.screen = Screens.ARCADE_RUSH_RESULTS;
+            handler();
+            assert.deepEqual(calls.pop(), ["rush-ready", "native-back"]);
+
+            state.screen = Screens.SETTINGS;
+            handler();
+            assert.deepEqual(calls.pop(), ["settings-back"]);
+
+            state.screen = Screens.PROFILE_STATS;
+            state.profileEditing = true;
+            handler();
+            assert.deepEqual(calls.pop(), ["cancel-edit"]);
+            state.profileEditing = false;
+
+            onboarding.getState = () => ({ tutorialId: "campaign" });
+            handler();
+            assert.deepEqual(calls.pop(), ["tutorial-close"]);
+          }
+
+          function createFakeWindow() {
+            const listeners = new Map();
+            const operations = [];
+            const history = {
+              state: { existing: "kept" },
+              replaceState(state) {
+                this.state = state;
+                operations.push(["replace", state]);
+              },
+              pushState(state) {
+                this.state = state;
+                operations.push(["push", state]);
+              },
+              back() { operations.push(["back"]); },
+            };
+            return {
+              history,
+              operations,
+              addEventListener(type, listener) { listeners.set(type, listener); },
+              removeEventListener(type, listener) {
+                if (listeners.get(type) === listener) listeners.delete(type);
+              },
+              emitPop(state) { listeners.get("popstate")?.({ state }); },
+              hasPopListener: () => listeners.has("popstate"),
+            };
+          }
+
+          {
+            const fakeWindow = createFakeWindow();
+            let backCalls = 0;
+            const navigation = createNativeBackNavigation({
+              windowRef: fakeWindow,
+              onBack: () => { backCalls += 1; return true; },
+            });
+            assert.equal(navigation.mount(), true);
+            assert.equal(navigation.isMounted(), true);
+            assert.equal(fakeWindow.history.state[NATIVE_BACK_STATE_KEY], "guard");
+            assert.equal(fakeWindow.operations[0][1].existing, "kept", "existing history state is preserved");
+
+            fakeWindow.emitPop({ [NATIVE_BACK_STATE_KEY]: "root" });
+            assert.equal(backCalls, 1);
+            assert.equal(fakeWindow.operations.at(-1)[0], "push", "handled app back immediately rearms the guard");
+
+            fakeWindow.emitPop({ unrelated: true });
+            assert.equal(backCalls, 1, "unrelated browser history events are ignored");
+            assert.equal(navigation.destroy(), true);
+            assert.equal(fakeWindow.hasPopListener(), false);
+          }
+
+          {
+            const fakeWindow = createFakeWindow();
+            const navigation = createNativeBackNavigation({
+              windowRef: fakeWindow,
+              onBack: () => false,
+            });
+            navigation.mount();
+            fakeWindow.emitPop({ [NATIVE_BACK_STATE_KEY]: "root" });
+            assert.equal(fakeWindow.operations.at(-1)[0], "back", "title/root back continues into real browser history");
+            assert.equal(navigation.isMounted(), false);
+            assert.equal(fakeWindow.hasPopListener(), false);
+          }
+
+          console.log("Native Android/browser Back navigation routing and history guard tests passed.");
+          EOF
+
+      - name: Run full test suite
+        run: npm test
+
+      - name: Commit tested implementation
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/native-back-fix.yml
+          git add js/main.js js/nativeBackNavigation.js tests/native-back-navigation.test.js
+          git commit -m "Support native browser and device back navigation"
+          git push origin HEAD:fix/native-back-navigation
