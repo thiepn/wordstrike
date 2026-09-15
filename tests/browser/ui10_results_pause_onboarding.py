@@ -17,7 +17,7 @@ ROOT = Path(__file__).resolve().parents[2]
 ARTIFACTS = ROOT / "browser-artifacts" / "ui10-results-pause-onboarding"
 
 SEED_STORAGE = """(() => {
-  for (const [id, version] of Object.entries({general:3,campaign:1,typing:1,endless:1,boss:1,leaderboards:1,'arcade-rush':1}))
+  for (const [id, version] of Object.entries({general:3,campaign:2,typing:1,endless:1,boss:1,leaderboards:1,'arcade-rush':1}))
     localStorage.setItem(`wordstrike.onboarding.${id}.v${version}`, 'seen');
 })();"""
 

@@ -14,7 +14,7 @@ ARTIFACTS = ROOT / "browser-artifacts" / "ui3-mode-select"
 
 ONBOARDING_SEED = """(() => {
   for (const [id, version] of Object.entries({
-    general:3, campaign:1, typing:1, endless:1, boss:1, leaderboards:1
+    general:3, campaign:2, typing:1, endless:1, boss:1, leaderboards:1
   })) localStorage.setItem(`wordstrike.onboarding.${id}.v${version}`, 'seen');
 })();"""
 
