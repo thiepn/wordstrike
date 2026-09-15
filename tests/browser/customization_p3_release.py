@@ -286,11 +286,11 @@ def certify_action_modes(browser, engine, base, checks):
         if engine == "chromium": screenshot(page, f"boss-{intensity}-desktop")
         context.close()
 
+        # Arcade Rush is retired from player discovery. Preserve this historical
+        # visual/customization certification through the explicit developer deep link.
         context = context_for(browser, base)
         page = context.new_page()
-        open_title(page, base)
-        page.locator('[data-action="modes"]').click()
-        page.locator('[data-mode-id="arcade-rush"]').click()
+        page.goto(base + "?dev=1&mode=arcade-rush&rushSeed=906")
         expect(page.locator('[data-rush-view="ready"]')).to_be_visible()
         panel = open_panel(page, "arcade-rush")
         select_mode(panel, "actionModeIntensity", intensity)
@@ -306,9 +306,9 @@ def certify_action_modes(browser, engine, base, checks):
         # must clip them, while the real document/body must never become scrollable.
         assert rush.evaluate("e => getComputedStyle(e).overflowX") in ("hidden", "clip")
         no_horizontal_overflow(page, include_screen=False)
-        if engine == "chromium": screenshot(page, f"arcade-rush-{intensity}-desktop")
+        if engine == "chromium": screenshot(page, f"arcade-rush-{intensity}-legacy-dev")
         context.close()
-    checks.append({"browser": engine, "case": "Boss/Rush focused+full player-facing states"})
+    checks.append({"browser": engine, "case": "Boss player states + retired Rush developer diagnostics"})
 
 
 def certify_cross_feature_edges(browser, engine, base, checks):
