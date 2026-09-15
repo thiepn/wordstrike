@@ -219,10 +219,11 @@ def default_equivalence(browser,name,base,baseline_base,checks):
   context=context_for(browser,origin);page=context.new_page();open_title(page,origin)
   # P1 customization defaults remain exact outside intentional product migration
   # surfaces. Hide mode-local controls plus the Phase-0 title/mode-card content.
-  page.add_style_tag(content='[data-mode-presentation], .title-description, .mode-option { visibility: hidden !important; }')
+  mask=page.add_style_tag(content='[data-mode-presentation], .title-description, .mode-option { visibility: hidden !important; }')
   title=page.screenshot(animations='disabled',caret='hide')
   page.locator('[data-action="modes"]').click();expect(page.locator('.mode-select-screen')).to_be_visible()
   modes=page.screenshot(animations='disabled',caret='hide')
+  mask.evaluate('el=>el.remove()')
   page.locator('[data-mode-id="campaign"]').click();expect(page.locator('.campaign-progress-screen')).to_be_visible()
   # Campaign Route intentionally evolves with Campaign features and has its own
   # browser certifications. P1 only freezes global surfaces that customization
