@@ -1,6 +1,6 @@
 export const ONBOARDING_VERSIONS = Object.freeze({
   general: 3,
-  campaign: 1,
+  campaign: 2,
   typing: 1,
   endless: 1,
   "arcade-rush": 1,
@@ -32,10 +32,11 @@ export const ONBOARDING_TUTORIALS = Object.freeze({
     ]),
   }),
   campaign: Object.freeze({
-    id: "campaign", version: 1, title: "CAMPAIGN GUIDE",
+    id: "campaign", version: 2, title: "CAMPAIGN GUIDE",
     steps: Object.freeze([
       step("PROTECT THE CORE", "Words move toward the center. Type them before they reach the core.", "approaching-word"),
       step("DON’T LET WORDS THROUGH", "Missed words damage core integrity. Complete the highlighted word before choosing another target.", "core-integrity"),
+      step("ALREADY A FAST TYPIST?", "Your best score in the 60-second Typing Test can unlock later Campaign starting levels.\n\n40 WPM unlocks Level 11. Every additional 10 WPM unlocks another ten levels, up to Level 91 at 120 WPM. Look for the speed icons on the Campaign Route.", "typing-options"),
       step("COMPLETE LEVELS", "Clear every incoming word to complete the level. Better speed and accuracy lead to better results.", "campaign-complete", "START LEVEL 1"),
     ]),
   }),
