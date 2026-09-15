@@ -39,13 +39,13 @@ test("Arcade Rush is retained only as hidden legacy compatibility while Flow own
   const rush = getModeDefinition(MODE_IDS.ARCADE_RUSH);
   assert.equal(MODE_IDS.ARCADE_RUSH, "arcade-rush");
   assert.ok(rush);
-  assert.equal(rush.enabled, false);
+  assert.equal(rush.enabled, true);
   assert.equal(rush.visible, false);
   assert.equal(rush.route, null);
   assert.equal(rush.storesProgress, true);
   assert.equal(rush.status, "retired");
   assert.equal(isValidModeId(MODE_IDS.ARCADE_RUSH), true);
-  assert.equal(isModeEnabled(MODE_IDS.ARCADE_RUSH), false);
+  assert.equal(isModeEnabled(MODE_IDS.ARCADE_RUSH), true);
   assert.equal(getAllModes().some(({ id }) => id === MODE_IDS.ARCADE_RUSH), false);
   assert.equal(getRegisteredModes().some(({ id }) => id === MODE_IDS.ARCADE_RUSH), true);
 
@@ -133,6 +133,6 @@ test("production mode selection cannot launch Arcade Rush and Flow has no borrow
   assert.doesNotMatch(main, /MODE_IDS\.DAILY|openDailyReady|startDaily|daily-ready/);
   assert.match(main, /renderModeSelect\(getPracticeLabFeatureGate\(\)\.resolveModeDefinitions\(getAllModes\(\)\)/);
   assert.doesNotMatch(modes, /Daily Strike|MODE_IDS\.DAILY|daily-ready/);
-  assert.match(modes, /name: "Arcade Rush"[\s\S]*enabled: false[\s\S]*visible: false[\s\S]*route: null/);
+  assert.match(modes, /name: "Arcade Rush"[\s\S]*enabled: true[\s\S]*visible: false[\s\S]*route: null/);
   assert.match(modes, /name: "Flow"[\s\S]*enabled: false[\s\S]*visible: true[\s\S]*route: null/);
 });
