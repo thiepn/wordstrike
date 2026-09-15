@@ -2,7 +2,7 @@ export const MODE_IDS = Object.freeze({
   CAMPAIGN: "campaign",
   SPEED_TEST: "speed-test",
   ENDLESS: "endless",
-  ARCADE_RUSH: "arcade-rush", // Legacy persistence / leaderboard compatibility only.
+  ARCADE_RUSH: "arcade-rush", // Legacy persistence / diagnostics compatibility only.
   FLOW: "flow",
   PRACTICE: "practice",
 });
@@ -47,15 +47,15 @@ const MODE_DEFINITIONS = Object.freeze([
     supportsSeed: true,
     storesProgress: true,
   }),
-  // Keep the legacy definition registered so historical saves, pending results,
-  // and leaderboard records can still be interpreted during the Flow migration.
-  // It is intentionally not exposed through Mode Select and cannot start a new run.
+  // Keep the legacy definition runtime-capable so historical diagnostics and
+  // explicit developer deep links can still exercise old data safely. Public
+  // discovery is controlled independently by `visible: false` and route: null.
   Object.freeze({
     id: MODE_IDS.ARCADE_RUSH,
     name: "Arcade Rush",
     shortLabel: "Retired",
     description: "Legacy mode retained for historical data compatibility.",
-    enabled: false,
+    enabled: true,
     visible: false,
     status: "retired",
     route: null,
