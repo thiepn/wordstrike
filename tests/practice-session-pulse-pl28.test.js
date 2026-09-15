@@ -119,11 +119,11 @@ function hostFixture(t, kind, overrides = {}) {
     async destroy() { destroyed++; },
     ...overrides,
   };
-  const accumulator = { markInterrupted() {}, finalize: () => ({ status: "interrupted", stages: [], sprints: [] }), getCurrentStage: () => null };
+  const accumulator = { markInterrupted() {}, markSprintStart() {}, finalize: () => ({ status: "interrupted", stages: [], sprints: [] }), getCurrentStage: () => null };
   const session = {
     sessionId: "session", profileId: "profile", contextId: "context",
     contentPlan: { text: "the quick brown fox" }, configuration: {},
-    plan: { totalActiveDurationMs: kind === "pace" ? 190_000 : 60_000, anchor: {} },
+    plan: { totalActiveDurationMs: kind === "pace" ? 190_000 : 90_000, anchor: {} },
     experiment: { paceAccumulator: accumulator, burstAccumulator: accumulator },
   };
   const mount = () => (kind === "pace" ? mountPracticePaceLadderSession : mountPracticeBurstSprintsSession)({
@@ -209,9 +209,9 @@ test("Pace Ladder cannot repaint or rearm when a slow tick resolves after exit",
   assert.equal(f.clock.pending.size, 0);
 });
 
-test("Burst Sprints cannot enter recovery after an in-flight pause is cancelled", async (t) => {
+test("Burst Sprints cannot enter protocol-inactive preview after an in-flight pause is cancelled", async (t) => {
   const pause = deferred(); const f = hostFixture(t, "burst", { pause: () => pause.promise });
-  const host = await f.mount(); f.snapshot.timing.activeDurationMs = 10_000;
+  const host = await f.mount(); f.snapshot.timing.activeDurationMs = 30_000;
   const pending = f.clock.next();
   assert.equal(f.clock.pending.size, 0);
   await host.exit(); f.root.innerHTML = "new screen";
@@ -220,25 +220,48 @@ test("Burst Sprints cannot enter recovery after an in-flight pause is cancelled"
   assert.equal(f.clock.pending.size, 0);
 });
 
-test("Burst Sprints preserves all six bouts and five full recovery intervals", async (t) => {
+test("Burst Sprints preserves canonical warm-up, six previews, six sprints and five 18s recoveries", async (t) => {
   let now = 1_000;
   t.mock.method(Date, "now", () => now);
   const f = hostFixture(t, "burst"); const host = await f.mount();
+
+  f.snapshot.timing.activeDurationMs = 30_000;
+  await f.clock.next();
+  assert.equal(host.getSnapshot().phase, "preview");
+  assert.equal(host.getSnapshot().previewRemainingMs, 2_000);
+  now += 1_999; await f.clock.next();
+  assert.equal(host.getSnapshot().phase, "preview");
+  now++; await f.clock.next();
+  assert.equal(host.getSnapshot().phase, "sprint");
+  assert.equal(host.getSnapshot().sprintOrdinal, 1);
+
   for (let ordinal = 1; ordinal <= 5; ordinal++) {
-    f.snapshot.timing.activeDurationMs = ordinal * 10_000;
+    f.snapshot.timing.activeDurationMs = 30_000 + ordinal * 10_000;
     await f.clock.next();
     assert.equal(host.getSnapshot().phase, "recovery");
-    assert.equal(host.getSnapshot().recoveryRemainingMs, 15_000);
-    now += 14_999; await f.clock.next();
-    assert.equal(host.getSnapshot().phase, "recovery");
+    assert.equal(host.getSnapshot().recoveryRemainingMs, 18_000);
     assert.equal(host.getSnapshot().sprintOrdinal, ordinal);
+
+    now += 17_999; await f.clock.next();
+    assert.equal(host.getSnapshot().phase, "recovery");
+    now++; await f.clock.next();
+    assert.equal(host.getSnapshot().phase, "preview");
+    assert.equal(host.getSnapshot().previewRemainingMs, 2_000);
+
+    now += 1_999; await f.clock.next();
+    assert.equal(host.getSnapshot().phase, "preview");
     now++; await f.clock.next();
     assert.equal(host.getSnapshot().phase, "sprint");
     assert.equal(host.getSnapshot().sprintOrdinal, ordinal + 1);
   }
-  f.snapshot.timing.activeDurationMs = 60_000;
+
+  f.snapshot.timing.activeDurationMs = 90_000;
   await f.clock.next();
+  assert.equal(host.getSnapshot().phase, "sprint", "sprint 6 has no following recovery");
+  assert.equal(host.getSnapshot().sprintOrdinal, 6);
+  assert.equal(host.getSnapshot().recoveryRemainingMs, 0);
   assert.equal(f.counts().ticks, 1);
+
   f.emit("completed"); await Promise.resolve();
   assert.equal(f.clock.pending.size, 0);
   assert.equal(f.counts().completes, 1);

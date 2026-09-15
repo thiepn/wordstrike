@@ -12,9 +12,12 @@ export function buildPracticePaceBand({ sustainableWpm, controlledStageWpms = []
   return freeze({ version: PRACTICE_PACE_GUIDE_VERSION, status: "available", recommendedPracticePaceWpm: sustainableWpm, recommendedPracticeBandWpm: [low, high] });
 }
 
-// Compatibility helper. This is protocol math only and is not shown as live chase feedback.
-export function getPracticePaceGuide({ targetWpm, elapsedMs, acceptedForwardCharacters } = {}) {
+export function getPracticePaceGuide({ targetWpm, elapsedMs, acceptedForwardCharacters, policy = PRACTICE_PACE_LADDER_POLICY_V1 } = {}) {
   if (!Number.isFinite(targetWpm) || targetWpm <= 0 || !Number.isFinite(elapsedMs) || elapsedMs < 0 || !Number.isInteger(acceptedForwardCharacters) || acceptedForwardCharacters < 0) throw new TypeError("Invalid Pace guide inputs");
   const targetCharactersPerSecond = targetWpm * 5 / 60;
-  return freeze({ version: PRACTICE_PACE_GUIDE_VERSION, targetCharactersPerSecond, expectedProgress: targetCharactersPerSecond * elapsedMs / 1000 });
+  const elapsedSeconds = elapsedMs / 1000;
+  const expectedProgress = targetCharactersPerSecond * elapsedSeconds;
+  const paceOffsetSeconds = targetCharactersPerSecond > 0 ? (acceptedForwardCharacters - expectedProgress) / targetCharactersPerSecond : 0;
+  const status = paceOffsetSeconds < -policy.paceBandSeconds ? "behind" : paceOffsetSeconds > policy.paceBandSeconds ? "ahead" : "on-pace";
+  return freeze({ version: PRACTICE_PACE_GUIDE_VERSION, targetCharactersPerSecond, expectedProgress, actualForwardProgress: acceptedForwardCharacters, paceOffsetSeconds, bandSeconds: policy.paceBandSeconds, status });
 }

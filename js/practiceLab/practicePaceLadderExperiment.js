@@ -2,7 +2,7 @@ import { createPracticePaceStageAccumulator } from "./practicePaceStageAccumulat
 import { buildPracticePaceLadderPerformanceMeasurement } from "./practicePaceLadderMeasurement.js";
 import { analyzePracticePaceLadderResult } from "./practicePaceLadderAnalyzer.js";
 import { createPracticePaceLadderRuntime } from "./practicePaceLadderRuntime.js";
-import { PRACTICE_PACE_LADDER_EXPERIMENT_ID, PRACTICE_PACE_LADDER_EXPERIMENT_VERSION, PRACTICE_PACE_LADDER_TOTAL_ACTIVE_DURATION_MS } from "./practicePaceLadderConstants.js";
+import { PRACTICE_PACE_LADDER_EXPERIMENT_ID, PRACTICE_PACE_LADDER_EXPERIMENT_VERSION, PRACTICE_PACE_LADDER_POLICY_VERSION, PRACTICE_PACE_LADDER_PROTOCOL_VERSION, PRACTICE_PACE_LADDER_TOTAL_ACTIVE_DURATION_MS } from "./practicePaceLadderConstants.js";
 
 export function createPracticePaceLadderExperiment(prepared = null) {
   const accumulator = prepared ? createPracticePaceStageAccumulator({ plan: prepared.plan }) : null;
@@ -15,9 +15,11 @@ export function createPracticePaceLadderExperiment(prepared = null) {
     defaultCorrectionBehavior: "allow",
     supportedCompletionModes: ["duration"],
     resumable: false,
+    abilityChannel: null,
+    retentionMeasurementKind: null,
     performanceMeasurementKind: "control-frontier",
     performanceReferenceChannel: "controlled-speed",
-    validateConfiguration(config) { return config?.timingMode === "on-start" && config?.correctionBehavior === "allow"; },
+    validateConfiguration(config) { return config?.timingMode === "on-start" && config?.correctionBehavior === "allow" && config?.protocolVersion === PRACTICE_PACE_LADDER_PROTOCOL_VERSION && config?.policyVersion === PRACTICE_PACE_LADDER_POLICY_VERSION; },
     validateContentPlan(content) { return content?.completion?.mode === "duration" && content.completion.value === PRACTICE_PACE_LADDER_TOTAL_ACTIVE_DURATION_MS && (content.targetEntities?.length ?? 0) === 0 && content.metadata?.sourceType === "pace-ladder-diagnostic" && content.metadata?.partition === "diagnostic" && content.metadata?.evaluationProtected === false && content.metadata?.coldTransfer === false; },
     onProcessedInput(event) { return accumulator?.recordProcessedInput(event) ?? false; },
     onClosedErrorEpisode(value) { return accumulator?.recordClosedErrorEpisode(value) ?? false; },
@@ -42,12 +44,12 @@ export function registerPracticePaceLadderExperiment(registry, { runtime = null 
   const paceRuntime = runtime ?? createPracticePaceLadderRuntime();
   return registry.register({
     experimentId: PRACTICE_PACE_LADDER_EXPERIMENT_ID,
-    implementationVersion: 1,
+    implementationVersion: PRACTICE_PACE_LADDER_EXPERIMENT_VERSION,
     descriptorFactory: () => createPracticePaceLadderExperiment(),
     setupFactory: (options = {}) => paceRuntime.prepare(options),
     sessionFactory(prepared) {
       if (prepared?.status !== "ready") throw Object.assign(new Error("Pace Ladder is unavailable"), { code: "PACE_LADDER_UNAVAILABLE" });
-      return Object.freeze({ ...prepared, experiment: createPracticePaceLadderExperiment(prepared), configuration: Object.freeze({ timingMode: "on-start", correctionBehavior: "allow", anchorWpm: prepared.plan.anchor.effectiveWpm }), contentPlan: prepared.contentPlan });
+      return Object.freeze({ ...prepared, experiment: createPracticePaceLadderExperiment(prepared), configuration: Object.freeze({ timingMode: "on-start", correctionBehavior: "allow", protocolVersion: PRACTICE_PACE_LADDER_PROTOCOL_VERSION, policyVersion: PRACTICE_PACE_LADDER_POLICY_VERSION, anchorSource: prepared.plan.anchor?.source ?? "in-session-reference" }), contentPlan: prepared.contentPlan });
     },
     runtime: paceRuntime,
   });
