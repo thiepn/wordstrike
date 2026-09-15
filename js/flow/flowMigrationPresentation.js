@@ -11,6 +11,10 @@ function updateTitleCopy(root) {
   if (description.textContent !== next) description.textContent = next;
 }
 
+function removeRetiredTutorialNavigation(root) {
+  root.querySelector('[data-tutorial-id="arcade-rush"]')?.remove();
+}
+
 function removeRetiredLeaderboardNavigation(root) {
   root.querySelector('[data-action="leaderboard-select-arcade-rush"]')?.remove();
 }
@@ -50,6 +54,7 @@ function enhance() {
   const root = appRoot();
   if (!root) return;
   updateTitleCopy(root);
+  removeRetiredTutorialNavigation(root);
   removeRetiredLeaderboardNavigation(root);
   removeRetiredStatisticsNavigation(root);
 }
