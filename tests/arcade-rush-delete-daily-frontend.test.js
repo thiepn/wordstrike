@@ -48,7 +48,7 @@ assert.deepEqual(getRegisteredModes().map(({ id }) => id), EXPECTED_REGISTERED_M
 assert.deepEqual(getAllModes().map(({ id }) => id), EXPECTED_PUBLIC_MODE_IDS);
 assert.equal(getModeDefinition("daily"), null);
 assert.equal(getModeDefinition(MODE_IDS.ARCADE_RUSH)?.visible, false);
-assert.equal(getModeDefinition(MODE_IDS.ARCADE_RUSH)?.enabled, false);
+assert.equal(getModeDefinition(MODE_IDS.ARCADE_RUSH)?.enabled, true);
 assert.equal(getModeDefinition(MODE_IDS.FLOW)?.visible, true);
 
 assert.equal(Object.hasOwn(Screens, "DAILY_READY"), false);
