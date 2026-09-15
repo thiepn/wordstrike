@@ -1,6 +1,8 @@
 import { appState } from "./state.js";
+import { CAMPAIGN_SPEED_UNLOCKS, getCampaignBest60SecondWpm } from "./storage.js";
 
 const CAMPAIGN_SCREEN_SELECTOR = ".game-screen:not(.endless-screen):not(.boss-screen)";
+const CAMPAIGN_ROUTE_SELECTOR = ".campaign-progress-screen";
 const MAX_INTEGRITY = 3;
 let syncQueued = false;
 
@@ -219,15 +221,85 @@ function enhanceCampaignScreen() {
   syncPresentation(screen);
 }
 
+function speedUnlockCopy(wpm, level, bestWpm) {
+  const threshold = `${wpm} WPM in the 60-second Typing Test`;
+  if (bestWpm >= wpm) {
+    return `${threshold} unlocks through Level ${level}. Your best: ${Math.round(bestWpm)} WPM.`;
+  }
+  if (bestWpm > 0) {
+    return `Score ${wpm} WPM in the 60-second Typing Test to unlock through Level ${level}. Your best: ${Math.round(bestWpm)} WPM.`;
+  }
+  return `Score ${wpm} WPM in the 60-second Typing Test to unlock through Level ${level}.`;
+}
+
+function buildSpeedUnlockBadge() {
+  const badge = document.createElement("span");
+  badge.className = "campaign-speed-unlock-badge";
+  badge.setAttribute("aria-hidden", "true");
+  badge.innerHTML = `
+    <svg viewBox="0 0 16 16" focusable="false" aria-hidden="true">
+      <path d="M9.35 1 3.8 8.42h3.55L6.65 15l5.55-7.42H8.65L9.35 1Z"></path>
+    </svg>`;
+  return badge;
+}
+
+function enhanceCampaignSpeedUnlocks() {
+  const screen = document.querySelector(CAMPAIGN_ROUTE_SELECTOR);
+  if (!screen) return;
+  const bestWpm = getCampaignBest60SecondWpm();
+
+  for (const { wpm, level } of CAMPAIGN_SPEED_UNLOCKS) {
+    const node = screen.querySelector(`.campaign-node[data-level="${level}"]`);
+    if (!node || node.dataset.speedUnlockDecorated === "true") continue;
+
+    node.dataset.speedUnlockDecorated = "true";
+    node.classList.add("has-speed-unlock");
+    node.classList.toggle("is-speed-unlocked", bestWpm >= wpm);
+
+    const copy = speedUnlockCopy(wpm, level, bestWpm);
+    const marker = node.querySelector(".campaign-node-marker");
+    marker?.append(buildSpeedUnlockBadge());
+
+    const tooltip = document.createElement("span");
+    tooltip.className = "campaign-speed-unlock-tooltip";
+    tooltip.setAttribute("role", "tooltip");
+    tooltip.textContent = copy;
+    node.append(tooltip);
+    node.title = copy;
+
+    const label = node.getAttribute("aria-label") || `Level ${level}`;
+    node.setAttribute("aria-label", `${label}. Typing Test speed unlock: ${wpm} WPM.`);
+  }
+}
+
+function injectSpeedUnlockStyles() {
+  if (document.getElementById("campaign-speed-unlock-styles")) return;
+  const style = document.createElement("style");
+  style.id = "campaign-speed-unlock-styles";
+  style.textContent = `
+    .campaign-node.has-speed-unlock .campaign-node-marker{overflow:visible}
+    .campaign-speed-unlock-badge{position:absolute;z-index:4;top:-6px;right:-7px;display:grid;place-items:center;width:17px;height:17px;border:1px solid rgb(118 132 144/48%);background:rgb(9 14 20/98%);color:rgb(151 166 178/72%);clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);box-shadow:0 0 0 2px rgb(var(--custom-bg-rgb,10 14 20)/88%)}
+    .campaign-speed-unlock-badge svg{width:9px;height:9px;fill:currentColor}
+    .campaign-node.is-speed-unlocked .campaign-speed-unlock-badge{border-color:rgb(var(--custom-accent-rgb,0 255 242)/72%);color:var(--color-accent);box-shadow:0 0 0 2px rgb(var(--custom-bg-rgb,10 14 20)/88%),0 0 12px rgb(var(--custom-accent-rgb,0 255 242)/20%)}
+    .campaign-speed-unlock-tooltip{position:absolute;z-index:50;left:50%;bottom:calc(100% + 8px);width:max-content;max-width:min(280px,78vw);padding:8px 10px;border:1px solid rgb(var(--custom-border-rgb,142 160 174)/32%);background:rgb(var(--custom-bg-rgb,10 14 20)/98%);color:var(--color-text-secondary);font-family:var(--font-ui);font-size:.68rem;font-weight:560;letter-spacing:.01em;line-height:1.4;text-align:left;text-transform:none;white-space:normal;box-shadow:0 12px 28px rgb(0 0 0/38%);opacity:0;visibility:hidden;pointer-events:none;transform:translate(-50%,4px);transition:opacity var(--motion-fast),transform var(--motion-fast),visibility var(--motion-fast)}
+    .campaign-node.has-speed-unlock:hover .campaign-speed-unlock-tooltip,.campaign-node.has-speed-unlock:focus-visible .campaign-speed-unlock-tooltip{opacity:1;visibility:visible;transform:translate(-50%,0)}
+    .campaign-node:disabled.has-speed-unlock:hover .campaign-speed-unlock-badge{border-color:rgb(118 132 144/58%);color:rgb(151 166 178/82%)}
+    @media (max-width:720px){.campaign-speed-unlock-tooltip{max-width:min(230px,72vw);font-size:.64rem}}
+  `;
+  document.head.append(style);
+}
+
 function queueSync() {
   if (syncQueued) return;
   syncQueued = true;
   requestAnimationFrame(() => {
     syncQueued = false;
     enhanceCampaignScreen();
+    enhanceCampaignSpeedUnlocks();
   });
 }
 
+injectSpeedUnlockStyles();
 const appRoot = document.querySelector("#app");
 if (appRoot) {
   new MutationObserver(queueSync).observe(appRoot, { childList: true, subtree: true });
