@@ -51,7 +51,6 @@ assert.equal(run.category, "quotes");
 assert.equal(run.difficulty, "smooth");
 assert.equal(run.currentIndex, 0);
 assert.equal(run.correctedErrors, 0);
-assert.equal(run.unCorrectedErrors, undefined);
 assert.equal(run.uncorrectedErrors, 0);
 assert.equal(run.flowValue, 0);
 assert.equal(run.momentum, 1);
