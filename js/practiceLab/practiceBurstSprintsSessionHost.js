@@ -51,10 +51,37 @@ export async function mountPracticeBurstSprintsSession({ root, session, onExit =
   const engine = (dependencies.engineFactory ?? createPracticeSessionEngine)({ repository, sessionId: session.sessionId, profileId: session.profileId, contextId: session.contextId, logger }); const wallNow = dependencies.wallNow ?? (() => Date.now());
   let finalResult = null, closed = false, unsubscribe = null, pulseLoop = null, interrupted = false, completing = false, phase = "warmup", sprintOrdinal = 0, inactiveEndsAt = null, inactiveStartedAt = null, protocolInactiveMs = 0, transitionPromise = null;
   const running = () => !closed && !interrupted && !completing && !finalResult; const inputEnabled = () => phase === "warmup" || phase === "sprint";
+  const inactiveRemainingMs = () => (phase === "preview" || phase === "recovery") ? Math.max(0, (inactiveEndsAt ?? wallNow()) - wallNow()) : 0;
+  const publicSnapshot = () => {
+    const remainingMs = inactiveRemainingMs();
+    const engineSnapshot = engine.getSnapshot();
+    return Object.freeze({
+      ...engineSnapshot,
+      phase,
+      sprintOrdinal,
+      recoveryRemainingMs: phase === "recovery" ? remainingMs : 0,
+      previewRemainingMs: phase === "preview" ? remainingMs : 0,
+      protocolInactiveMs,
+      burstProtocol: Object.freeze({ phase, sprintOrdinal, recoveryRemainingMs: phase === "recovery" ? remainingMs : 0, previewRemainingMs: phase === "preview" ? remainingMs : 0, protocolInactiveMs }),
+    });
+  };
   const focus = () => queueMicrotask(() => { if (running() && inputEnabled()) root.querySelector?.("[data-burst-input]")?.focus?.({ preventScroll: true }); });
   const cleanup = async (notify = true) => { if (closed) return; closed = true; pulseLoop?.stop(); unsubscribe?.(); root.removeEventListener("beforeinput", beforeInput); root.removeEventListener("keydown", keyDown); root.removeEventListener("click", click); globalThis.document?.removeEventListener?.("visibilitychange", visibilityChange); try { await engine.destroy(); } catch {} try { dataStore.close?.(); } catch {} if (notify) onExit(finalResult); };
   const interruptedArtifact = async () => { const snapshot = engine.getSnapshot(); const result = session.experiment.burstAccumulator?.finalize({ finalActiveDurationMs: snapshot.timing?.activeDurationMs ?? 0 }); const { analyzePracticeBurstSprintsResult } = await import("./practiceBurstSprintsAnalyzer.js"); return analyzePracticeBurstSprintsResult({ burstResult: result, plan: session.plan }).trainingQuality; };
-  const interrupt = async (reason = "manual-stop") => { if (!running()) return; interrupted = true; pulseLoop?.stop(); session.experiment.burstAccumulator?.markInterrupted(reason); try { await engine.interrupt(reason); } catch {} const artifact = await interruptedArtifact(); finalResult = { interrupted: true, artifact }; renderResult(root, artifact, true); };
+  const interrupt = async (reason = "manual-stop") => {
+    if (!running()) return;
+    interrupted = true;
+    pulseLoop?.stop();
+    if (inactiveStartedAt != null) { protocolInactiveMs += Math.max(0, wallNow() - inactiveStartedAt); inactiveStartedAt = null; }
+    session.experiment.burstAccumulator?.markInterrupted(reason);
+    try { await engine.interrupt(reason); } catch {}
+    if (closed) return;
+    const artifact = await interruptedArtifact();
+    if (closed) return;
+    finalResult = { interrupted: true, artifact, protocolInactiveMs };
+    phase = "interrupted";
+    renderResult(root, artifact, true);
+  };
   const beforeInput = (event) => { const target = event.target?.closest?.("[data-burst-input]"); if (!target || !running() || !root.contains?.(target)) return; if (!inputEnabled()) { event.preventDefault(); return; } event.preventDefault(); if (INSERT_TYPES.has(event.inputType) && typeof event.data === "string") for (const char of Array.from(event.data.normalize("NFC"))) engine.handleInput(normalizedInput(char === " " ? "space" : "character", char)); else if (event.inputType === "deleteContentBackward") engine.handleInput(normalizedInput("backspace", "")); else if (event.inputType === "deleteWordBackward") engine.handleInput(normalizedInput("word-delete", "")); target.value = ""; };
   const keyDown = (event) => { if (event.key === "Escape") { event.preventDefault(); void interrupt("manual-stop"); } else if (!inputEnabled() || ((event.ctrlKey || event.metaKey) && ["v", "x"].includes(String(event.key).toLowerCase()))) event.preventDefault(); };
   const click = (event) => { const button = event.target?.closest?.("[data-burst-session-action]"); if (!button || !root.contains?.(button)) return; if (button.dataset.burstSessionAction === "stop") void interrupt("manual-stop"); else if (button.dataset.burstSessionAction === "finish") void cleanup(); };
@@ -64,16 +91,16 @@ export async function mountPracticeBurstSprintsSession({ root, session, onExit =
   const startSprint = async () => { if (transitionPromise || phase !== "preview" || !running()) return; const now = wallNow(); if (inactiveStartedAt != null) protocolInactiveMs += Math.max(0, now - inactiveStartedAt); inactiveStartedAt = null; phase = "transition"; transitionPromise = engine.resume().then((snapshot) => { if (!running()) return; sprintOrdinal += 1; phase = "sprint"; inactiveEndsAt = null; session.experiment.burstAccumulator?.markSprintStart(sprintOrdinal); renderSprint(root, session, snapshot, sprintOrdinal); focus(); }).catch((error) => { logger?.warn?.("Burst sprint start failed", error); void interrupt("measurement-corruption"); }).finally(() => { transitionPromise = null; }); await transitionPromise; };
   async function pulse() {
     if (!running() || transitionPromise) return;
-    if (phase === "preview" || phase === "recovery") { const remaining = Math.max(0, (inactiveEndsAt ?? wallNow()) - wallNow()); if (phase === "preview") renderPreview(root, session, engine.getSnapshot(), sprintOrdinal + 1, remaining); else renderRecovery(root, sprintOrdinal, remaining); if (remaining <= 0) { if (phase === "recovery") switchInactive("preview", PRACTICE_BURST_PREVIEW_DURATION_MS); else await startSprint(); } return; }
+    if (phase === "preview" || phase === "recovery") { const remaining = inactiveRemainingMs(); if (phase === "preview") renderPreview(root, session, engine.getSnapshot(), sprintOrdinal + 1, remaining); else renderRecovery(root, sprintOrdinal, remaining); if (remaining <= 0) { if (phase === "recovery") switchInactive("preview", PRACTICE_BURST_PREVIEW_DURATION_MS); else await startSprint(); } return; }
     const snapshot = engine.getSnapshot(); const activeMs = snapshot.timing?.activeDurationMs ?? 0;
     if (phase === "warmup") { if (activeMs >= PRACTICE_BURST_WARMUP_DURATION_MS) { await startInactive("preview", PRACTICE_BURST_PREVIEW_DURATION_MS); return; } renderWarmup(root, session, snapshot); focus(); return; }
     if (phase === "sprint") { const end = PRACTICE_BURST_WARMUP_DURATION_MS + sprintOrdinal * PRACTICE_BURST_SPRINT_DURATION_MS; if (activeMs >= end && sprintOrdinal < PRACTICE_BURST_SPRINT_COUNT) { await startInactive("recovery", PRACTICE_BURST_RECOVERY_DURATION_MS); return; } if (sprintOrdinal === PRACTICE_BURST_SPRINT_COUNT && activeMs >= PRACTICE_BURST_TOTAL_ACTIVE_DURATION_MS) { await engine.tick(); return; } renderSprint(root, session, snapshot, sprintOrdinal); focus(); }
   }
   try {
     await engine.prepare({ experiment: session.experiment, configuration: session.configuration, contentPlan: session.contentPlan });
-    unsubscribe = engine.subscribe((snapshot, event) => { if (!running()) return; if (event === "completed") { completing = true; pulseLoop?.stop(); void engine.complete().then((result) => { if (closed || interrupted) return; finalResult = { ...result, protocolInactiveMs }; phase = "result"; renderResult(root, result.summary?.trainingQuality, false); }).catch((error) => { logger?.warn?.("Burst completion failed", error); void interrupt("measurement-corruption"); }); return; } if (snapshot.lifecycleState === "active" && phase === "warmup") { renderWarmup(root, session, snapshot); focus(); } });
+    unsubscribe = engine.subscribe((snapshot, event) => { if (!running()) return; if (event === "completed") { completing = true; pulseLoop?.stop(); void engine.complete().then((result) => { if (closed || interrupted) return; if (inactiveStartedAt != null) { protocolInactiveMs += Math.max(0, wallNow() - inactiveStartedAt); inactiveStartedAt = null; } finalResult = { ...result, protocolInactiveMs }; phase = "result"; renderResult(root, result.summary?.trainingQuality, false); }).catch((error) => { logger?.warn?.("Burst completion failed", error); void interrupt("measurement-corruption"); }); return; } if (snapshot.lifecycleState === "active" && phase === "warmup") { renderWarmup(root, session, snapshot); focus(); } });
     root.addEventListener("beforeinput", beforeInput); root.addEventListener("keydown", keyDown); root.addEventListener("click", click); globalThis.document?.addEventListener?.("visibilitychange", visibilityChange);
-    const start = await engine.start(); renderWarmup(root, session, start); focus(); pulseLoop = createPracticeSessionPulse({ ...dependencies.pulseTimers, intervalMs: 100, isActive: running, run: pulse, onError: (error) => { logger?.warn?.("Burst timer failed", error); return interrupt("measurement-corruption"); } }); pulseLoop.start(); visibilityChange();
+    const start = await engine.start(); renderWarmup(root, session, start); focus(); pulseLoop = createPracticeSessionPulse({ ...dependencies.pulseTimers, intervalMs: 50, isActive: running, run: pulse, onError: (error) => { logger?.warn?.("Burst timer failed", error); return interrupt("measurement-corruption"); } }); pulseLoop.start(); visibilityChange();
   } catch (error) { await cleanup(false); throw error; }
-  return Object.freeze({ stop: () => interrupt("manual-stop"), exit: cleanup, getSnapshot: () => Object.freeze({ ...engine.getSnapshot(), burstProtocol: { phase, sprintOrdinal, protocolInactiveMs } }) });
+  return Object.freeze({ stop: () => interrupt("manual-stop"), interrupt, exit: cleanup, getSnapshot: publicSnapshot });
 }
