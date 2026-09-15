@@ -128,19 +128,20 @@ const rushService = createLeaderboardService({
     } } };
   } } }),
 });
-// Legacy pre-cutover Daily selections still redirect safely to the public Rush board.
+// Legacy pre-cutover Daily selections still resolve directly to the hidden Rush board.
 await rushService.selectLeaderboardBoard(LEGACY_DAILY_BOARD_KEY);
 assert.deepEqual(rushCalls, [{ boardKey: LEADERBOARD_BOARDS.ARCADE_RUSH }]);
 assert.equal(rushService.getLeaderboardState().selectedBoardKey, LEADERBOARD_BOARDS.ARCADE_RUSH);
 assert.equal(rushService.getLeaderboardState().selectedCategory, "arcade-rush");
 assert.equal(rushService.getLeaderboardState().entries[0].durationMs, 250000);
+// Keyboard navigation is public-only: Endless wraps to Campaign and End lands on Endless.
 assert.equal(
   getLeaderboardKeyboardTarget({ selectedBoardKey: LEADERBOARD_BOARDS.ENDLESS }, "ArrowRight"),
-  LEADERBOARD_BOARDS.ARCADE_RUSH,
+  LEADERBOARD_BOARDS.CAMPAIGN,
 );
 assert.equal(
   getLeaderboardKeyboardTarget({ selectedBoardKey: LEADERBOARD_BOARDS.CAMPAIGN }, "End"),
-  LEADERBOARD_BOARDS.ARCADE_RUSH,
+  LEADERBOARD_BOARDS.ENDLESS,
 );
 
-console.log("Leaderboard service is lazy, stale-safe, rules-versioned, and redirects legacy Daily selections to Arcade Rush without a current Daily board.");
+console.log("Leaderboard service stays lazy and rules-versioned; legacy Daily can resolve to hidden Rush while public keyboard navigation excludes the retired board.");
