@@ -100,7 +100,7 @@ No sprint WPM, best-sprint result, ability update, or accuracy result is shown b
 
 ## Treatment identity and history
 
-The canonical v2 protocol has a new material PL32 treatment-family identity (`six-sprint-warmup-preview-v2`) and experiment/protocol version 2. Historical v1 sessions remain historical under the old `six-sprint-v1` identity. They are not migrated, reinterpreted, pooled with v2 response history, or launchable as new sessions.
+The canonical v2 protocol has a new material PL32 treatment-family identity (`burst-six-canonical-v2`) and experiment/protocol version 2. Historical v1 sessions remain historical under their stored v1 family/fingerprint identity. They are not migrated, reinterpreted, pooled with v2 response history, or launchable as new sessions.
 
 ## Content
 
