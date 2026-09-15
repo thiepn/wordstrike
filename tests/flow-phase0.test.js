@@ -25,7 +25,8 @@ const registeredModes = getRegisteredModes();
 const legacyRush = registeredModes.find((mode) => mode.id === MODE_IDS.ARCADE_RUSH);
 assert.ok(legacyRush, "Arcade Rush must remain registered for legacy data compatibility");
 assert.equal(legacyRush.visible, false);
-assert.equal(legacyRush.enabled, false);
+assert.equal(legacyRush.enabled, true, "retired Rush remains runtime-capable only for legacy developer diagnostics");
+assert.equal(legacyRush.route, null, "retired Rush must not expose a normal navigation route");
 
 assert.equal(FLOW_MODE_ID, MODE_IDS.FLOW);
 assert.deepEqual(normalizeFlowOptions({}), FLOW_DEFAULTS);
