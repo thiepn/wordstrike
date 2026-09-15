@@ -1,0 +1,226 @@
+name: Fix Campaign Checkpoint Access
+
+on:
+  push:
+    branches:
+      - fix/campaign-checkpoint-access
+
+permissions:
+  contents: write
+
+jobs:
+  patch-test-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: fix/campaign-checkpoint-access
+          fetch-depth: 0
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Apply checkpoint-only access fix
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          storage = Path('js/storage.js')
+          text = storage.read_text()
+          anchor = '''export function getCampaignSpeedUnlockLevel() {
+            return getCampaignSpeedUnlockLevelFromWpm(getCampaignBest60SecondWpm());
+          }
+          '''
+          insert = '''export function getCampaignSpeedUnlockLevel() {
+            return getCampaignSpeedUnlockLevelFromWpm(getCampaignBest60SecondWpm());
+          }
+
+          function normalizeCampaignLevel(value) {
+            return Math.max(1, Math.min(CAMPAIGN_TOTAL_LEVELS, Math.trunc(Number(value) || 1)));
+          }
+
+          function hasClearedCampaignLevel(save, levelNumber) {
+            const level = normalizeCampaignLevel(levelNumber);
+            const record = save?.levels?.[String(level)] ?? save?.levels?.[level];
+            return Boolean(record?.grade && record.grade !== "Fail");
+          }
+
+          function isCampaignSpeedCheckpointUnlocked(levelNumber, speedUnlockLevel) {
+            const level = normalizeCampaignLevel(levelNumber);
+            const speedLevel = normalizeCampaignLevel(speedUnlockLevel);
+            return CAMPAIGN_SPEED_UNLOCKS.some(
+              (checkpoint) => checkpoint.level === level && checkpoint.level <= speedLevel,
+            );
+          }
+
+          export function isCampaignLevelAccessible(
+            save,
+            levelNumber,
+            speedUnlockLevel = getCampaignSpeedUnlockLevel(),
+          ) {
+            const targetLevel = normalizeCampaignLevel(levelNumber);
+            if (targetLevel === 1) return true;
+
+            let previousAccessible = true;
+            for (let level = 2; level <= targetLevel; level += 1) {
+              const checkpointAccessible = isCampaignSpeedCheckpointUnlocked(level, speedUnlockLevel);
+              const sequentiallyAccessible = previousAccessible && hasClearedCampaignLevel(save, level - 1);
+              const accessible = checkpointAccessible || sequentiallyAccessible;
+              if (level === targetLevel) return accessible;
+              previousAccessible = accessible;
+            }
+            return false;
+          }
+
+          export function getHighestCampaignAccessibleLevel(
+            save,
+            speedUnlockLevel = getCampaignSpeedUnlockLevel(),
+          ) {
+            let highest = 1;
+            for (let level = 2; level <= CAMPAIGN_TOTAL_LEVELS; level += 1) {
+              if (isCampaignLevelAccessible(save, level, speedUnlockLevel)) highest = level;
+            }
+            return highest;
+          }
+          '''
+          assert anchor in text, 'storage speed-unlock anchor not found'
+          text = text.replace(anchor, insert, 1)
+          old_getter = '''      get() {
+                return Math.max(progressLevel, getCampaignSpeedUnlockLevel());
+              },'''
+          new_getter = '''      get() {
+                return getHighestCampaignAccessibleLevel(save);
+              },'''
+          assert old_getter in text, 'currentFurthestLevel getter not found'
+          text = text.replace(old_getter, new_getter, 1)
+          storage.write_text(text)
+
+          main = Path('js/main.js')
+          text = main.read_text()
+          old_state_import = '''  appState,
+            canLaunchLevel,
+            changeScreen,'''
+          new_state_import = '''  appState,
+            changeScreen,'''
+          assert old_state_import in text, 'main canLaunchLevel import not found'
+          text = text.replace(old_state_import, new_state_import, 1)
+          old_storage_import = '''  loadSave,
+            resetProgress,'''
+          new_storage_import = '''  isCampaignLevelAccessible,
+            loadSave,
+            resetProgress,'''
+          assert old_storage_import in text, 'main storage import anchor not found'
+          text = text.replace(old_storage_import, new_storage_import, 1)
+          old_launch = '''  const legitimatelyUnlocked = safeLevel <= appState.save.currentFurthestLevel;
+            if (!canLaunchLevel(appState.devMode, appState.save.currentFurthestLevel, safeLevel)) return;'''
+          new_launch = '''  const legitimatelyUnlocked = isCampaignLevelAccessible(appState.save, safeLevel);
+            if (!appState.devMode && !legitimatelyUnlocked) return;'''
+          assert old_launch in text, 'main launch guard not found'
+          text = text.replace(old_launch, new_launch, 1)
+          main.write_text(text)
+
+          ui = Path('js/ui.js')
+          text = ui.read_text()
+          import_anchor = '''import { getCampaignDifficultyLevel } from "./campaignDifficulty.js";
+          '''
+          import_replacement = '''import { getCampaignDifficultyLevel } from "./campaignDifficulty.js";
+          import { isCampaignLevelAccessible } from "./storage.js";
+          '''
+          assert import_anchor in text, 'ui import anchor not found'
+          text = text.replace(import_anchor, import_replacement, 1)
+          old_selected = '''  const selectedLocked = !devMode && safeSelected > furthestLevel;'''
+          new_selected = '''  const selectedLocked = !devMode && !isCampaignLevelAccessible(save, safeSelected);'''
+          assert old_selected in text, 'ui selected locked rule not found'
+          text = text.replace(old_selected, new_selected, 1)
+          old_sector = '''    const sectorLocked = !devMode && firstLevel > furthestLevel;'''
+          new_sector = '''    const sectorLocked = !devMode && sectorLevels.every(
+              (level) => !isCampaignLevelAccessible(save, level),
+            );'''
+          assert old_sector in text, 'ui sector locked rule not found'
+          text = text.replace(old_sector, new_sector, 1)
+          old_node = '''      const locked = !devMode && level > furthestLevel;'''
+          new_node = '''      const locked = !devMode && !isCampaignLevelAccessible(save, level);'''
+          assert old_node in text, 'ui node locked rule not found'
+          text = text.replace(old_node, new_node, 1)
+          old_count = '''<div class="campaign-progress-count">UNLOCKED <strong>${devMode ? 100 : furthestLevel}</strong><span>/ 100</span></div>'''
+          new_count = '''<div class="campaign-progress-count">HIGHEST ACCESS <strong>${devMode ? 100 : furthestLevel}</strong><span>/ 100</span></div>'''
+          assert old_count in text, 'ui access count copy not found'
+          text = text.replace(old_count, new_count, 1)
+          ui.write_text(text)
+
+          test = Path('tests/campaign-checkpoint-access.test.js')
+          test.write_text('''import assert from "node:assert/strict";
+          import {
+            createDefaultSave,
+            isCampaignLevelAccessible,
+            updateLevelResult,
+          } from "../js/storage.js";
+
+          const pass = {
+            grade: "A",
+            accuracy: 95,
+            wpm: 60,
+            score: 1000,
+            maxCombo: 10,
+            timeRemaining: 5,
+          };
+
+          {
+            const save = createDefaultSave();
+            const accessible = Array.from({ length: 31 }, (_, index) => index + 1)
+              .filter((level) => isCampaignLevelAccessible(save, level, 31));
+            assert.deepEqual(accessible, [1, 11, 21, 31]);
+          }
+
+          {
+            const save = createDefaultSave();
+            updateLevelResult(save, 31, pass);
+            assert.equal(isCampaignLevelAccessible(save, 32, 31), true);
+            assert.equal(isCampaignLevelAccessible(save, 22, 31), false);
+            assert.equal(isCampaignLevelAccessible(save, 30, 31), false);
+
+            updateLevelResult(save, 32, pass);
+            assert.equal(isCampaignLevelAccessible(save, 33, 31), true);
+            assert.equal(isCampaignLevelAccessible(save, 34, 31), false);
+          }
+
+          {
+            const save = createDefaultSave();
+            updateLevelResult(save, 21, pass);
+            assert.equal(isCampaignLevelAccessible(save, 22, 31), true);
+            assert.equal(isCampaignLevelAccessible(save, 23, 31), false);
+          }
+
+          {
+            const save = createDefaultSave();
+            updateLevelResult(save, 25, pass);
+            assert.equal(isCampaignLevelAccessible(save, 26, 31), false);
+          }
+
+          {
+            const save = createDefaultSave();
+            updateLevelResult(save, 1, pass);
+            assert.equal(isCampaignLevelAccessible(save, 2, 1), true);
+            assert.equal(isCampaignLevelAccessible(save, 3, 1), false);
+          }
+
+          console.log("Campaign checkpoint-only access and sequential continuation tests passed.");
+          ''')
+          PY
+
+      - name: Run full test suite
+        run: npm test
+
+      - name: Commit tested fix
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/fix-campaign-checkpoint-access.yml
+          git add js/storage.js js/main.js js/ui.js tests/campaign-checkpoint-access.test.js
+          git commit -m "Fix Campaign checkpoint-only speed access"
+          git push origin HEAD:fix/campaign-checkpoint-access
