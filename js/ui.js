@@ -5,6 +5,7 @@ import {
   generateLevel,
 } from "./levelGenerator.js";
 import { getCampaignDifficultyLevel } from "./campaignDifficulty.js";
+import { isCampaignLevelAccessible } from "./storage.js";
 import { generateBossEncounter } from "./bossGenerator.js";
 import { getSessionDiagnosticText } from "./campaignSession.js";
 import {
@@ -871,7 +872,7 @@ export function renderLevelSelect(
   const selectedResult = resultFor(safeSelected);
   const selectedCleared = isCleared(selectedResult);
   const selectedBoss = safeSelected % 10 === 0;
-  const selectedLocked = !devMode && safeSelected > furthestLevel;
+  const selectedLocked = !devMode && !isCampaignLevelAccessible(save, safeSelected);
   const selectedState = selectedCleared
     ? "cleared"
     : selectedLocked
@@ -902,7 +903,9 @@ export function renderLevelSelect(
     const sectorLevels = Array.from({ length: 10 }, (_, offset) => firstLevel + offset);
     const clearedCount = sectorLevels.filter((level) => isCleared(resultFor(level))).length;
     const sectorSelected = safeSelected >= firstLevel && safeSelected <= lastLevel;
-    const sectorLocked = !devMode && firstLevel > furthestLevel;
+    const sectorLocked = !devMode && sectorLevels.every(
+      (level) => !isCampaignLevelAccessible(save, level),
+    );
     const selectedBossInSector = sectorSelected && selectedBoss;
     const sectorStatus = clearedCount === 10
       ? "10 / 10 CLEAR"
@@ -913,7 +916,7 @@ export function renderLevelSelect(
       const result = resultFor(level);
       const cleared = isCleared(result);
       const boss = level % 10 === 0;
-      const locked = !devMode && level > furthestLevel;
+      const locked = !devMode && !isCampaignLevelAccessible(save, level);
       const developerAccess = devMode && level > furthestLevel;
       const frontier = !devMode && level === furthestLevel && !cleared;
       const classes = [
@@ -966,7 +969,7 @@ export function renderLevelSelect(
         <header class="campaign-progress-topline">
           ${screenBackButton()}
           <div class="campaign-progress-context"><strong>WORDSTRIKE</strong><span>CAMPAIGN ROUTE</span></div>
-          <div class="campaign-progress-count">UNLOCKED <strong>${devMode ? 100 : furthestLevel}</strong><span>/ 100</span></div>
+          <div class="campaign-progress-count">ROUTE REACH <strong>${devMode ? 100 : furthestLevel}</strong><span>/ 100</span></div>
         </header>
 
         <div class="campaign-progress-overview">

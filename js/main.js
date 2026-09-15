@@ -2,7 +2,6 @@ import { startModeCustomizationPresentation } from "./modeCustomizationPresentat
 import { startCustomizationPresentation } from "./customizationPresentation.js";
 import {
   appState,
-  canLaunchLevel,
   changeScreen,
   clearAttemptRuntime,
   isDevelopmentMode,
@@ -18,6 +17,7 @@ import {
 } from "./levelGenerator.js";
 import { generateBossEncounter } from "./bossGenerator.js";
 import {
+  isCampaignLevelAccessible,
   loadSave,
   resetProgress,
   updateLevelResult,
@@ -598,8 +598,8 @@ function backFromSettings() {
 
 function startLevel(levelNumber, source = "level-select") {
   const safeLevel = Math.max(1, Math.min(100, levelNumber));
-  const legitimatelyUnlocked = safeLevel <= appState.save.currentFurthestLevel;
-  if (!canLaunchLevel(appState.devMode, appState.save.currentFurthestLevel, safeLevel)) return;
+  const legitimatelyUnlocked = isCampaignLevelAccessible(appState.save, safeLevel);
+  if (!appState.devMode && !legitimatelyUnlocked) return;
   if (safeLevel % 10 === 0 && source !== "developer" && openAutomaticTutorial("boss", (choice) => {
     if (choice === "primary") startLevel(safeLevel, source);
   })) return;

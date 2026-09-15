@@ -50,6 +50,43 @@ export function getCampaignSpeedUnlockLevel() {
   return getCampaignSpeedUnlockLevelFromWpm(getCampaignBest60SecondWpm());
 }
 
+function normalizeCampaignLevel(value) {
+  return Math.max(1, Math.min(100, Math.trunc(Number(value) || 1)));
+}
+
+function hasClearedCampaignLevel(save, levelNumber) {
+  const level = normalizeCampaignLevel(levelNumber);
+  const record = save?.levels?.[String(level)] ?? save?.levels?.[level];
+  return Boolean(record?.grade && record.grade !== "Fail");
+}
+
+function isCampaignSpeedCheckpointUnlocked(levelNumber, speedUnlockLevel) {
+  const level = normalizeCampaignLevel(levelNumber);
+  const speedLevel = normalizeCampaignLevel(speedUnlockLevel);
+  return CAMPAIGN_SPEED_UNLOCKS.some(
+    (checkpoint) => checkpoint.level === level && checkpoint.level <= speedLevel,
+  );
+}
+
+export function isCampaignLevelAccessible(
+  save,
+  levelNumber,
+  speedUnlockLevel = getCampaignSpeedUnlockLevel(),
+) {
+  const targetLevel = normalizeCampaignLevel(levelNumber);
+  if (targetLevel === 1) return true;
+
+  let previousAccessible = true;
+  for (let level = 2; level <= targetLevel; level += 1) {
+    const checkpointAccessible = isCampaignSpeedCheckpointUnlocked(level, speedUnlockLevel);
+    const sequentiallyAccessible = previousAccessible && hasClearedCampaignLevel(save, level - 1);
+    const accessible = checkpointAccessible || sequentiallyAccessible;
+    if (level === targetLevel) return accessible;
+    previousAccessible = accessible;
+  }
+  return false;
+}
+
 function attachCampaignAvailability(save, campaignFurthestLevel = 1) {
   let progressLevel = normalizeCampaignFurthestLevel(campaignFurthestLevel);
   Object.defineProperties(save, {
