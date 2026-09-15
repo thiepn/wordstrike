@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - feature/campaign-speed-unlocks
+  workflow_dispatch:
 
 jobs:
   test:
