@@ -17,17 +17,22 @@ ARTIFACTS = ROOT / "browser-artifacts" / "ui4-campaign-progression"
 
 SEED = """(() => {
   for (const [id, version] of Object.entries({
-    general:3, campaign:1, typing:1, endless:1, boss:1, leaderboards:1, 'arcade-rush':1
+    general:3, campaign:2, typing:1, endless:1, boss:1, leaderboards:1, 'arcade-rush':1
   })) localStorage.setItem(`wordstrike.onboarding.${id}.v${version}`, 'seen');
+  const levels = {};
+  for (let level = 1; level <= 16; level += 1) {
+    levels[level] = {grade:'A',bestWPM:80,bestAccuracy:96,bestScore:4000+level,completed:true};
+  }
+  Object.assign(levels, {
+    1:{grade:'S',bestWPM:92.4,bestAccuracy:99.1,bestScore:4800,completed:true},
+    2:{grade:'A',bestWPM:86.2,bestAccuracy:97.8,bestScore:4200,completed:true},
+    3:{grade:'A',bestWPM:84.8,bestAccuracy:97.1,bestScore:4100,completed:true},
+    10:{grade:'B',bestWPM:78.6,bestAccuracy:94.2,bestScore:3900,completed:true},
+    11:{grade:'A',bestWPM:83.0,bestAccuracy:96.4,bestScore:4050,completed:true}
+  });
   localStorage.setItem('wordstrike_save', JSON.stringify({
     currentFurthestLevel: 17,
-    levels: {
-      1:{grade:'S',bestWPM:92.4,bestAccuracy:99.1,bestScore:4800,completed:true},
-      2:{grade:'A',bestWPM:86.2,bestAccuracy:97.8,bestScore:4200,completed:true},
-      3:{grade:'A',bestWPM:84.8,bestAccuracy:97.1,bestScore:4100,completed:true},
-      10:{grade:'B',bestWPM:78.6,bestAccuracy:94.2,bestScore:3900,completed:true},
-      11:{grade:'A',bestWPM:83.0,bestAccuracy:96.4,bestScore:4050,completed:true}
-    },
+    levels,
     settings:{strictMode:false,particles:true,screenShake:true,speedTestTimerPosition:'center',speedTestFontSize:'auto'}
   }));
 })();"""
