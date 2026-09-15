@@ -1,60 +1,35 @@
 import { buildPracticeBurstAbilityMeasurement } from "./practiceBurstSprintsMeasurement.js";
 
-const freezeDeep = (value) => {
-  if (!value || typeof value !== "object" || Object.isFrozen(value)) return value;
-  Object.values(value).forEach(freezeDeep);
-  return Object.freeze(value);
-};
+const freezeDeep = (value) => { if (!value || typeof value !== "object" || Object.isFrozen(value)) return value; Object.values(value).forEach(freezeDeep); return Object.freeze(value); };
 const round = (value, digits = 1) => Number.isFinite(value) ? Number(value.toFixed(digits)) : null;
 
-export function analyzePracticeBurstSprintsResult({ burstResult, plan, foundationAnalysis = null } = {}) {
-  const measurement = buildPracticeBurstAbilityMeasurement(burstResult);
-  const referenceWpm = Number.isFinite(plan?.referenceControlledWpm) && plan.referenceControlledWpm > 0 ? plan.referenceControlledWpm : null;
-  const reserveWpm = measurement && referenceWpm ? measurement.wpm - referenceWpm : null;
-  const reservePercent = measurement && referenceWpm ? (reserveWpm / referenceWpm) * 100 : null;
+export function analyzePracticeBurstSprintsResult({ burstResult, plan, foundationAnalysis = null, measurementOptions = {} } = {}) {
+  const measurement = buildPracticeBurstAbilityMeasurement(burstResult, measurementOptions);
   const eligible = (burstResult?.sprints ?? []).filter((sprint) => sprint?.eligible);
-  const mean = eligible.length ? eligible.reduce((sum, sprint) => sum + sprint.correctedWpm, 0) / eligible.length : null;
-  const variance = eligible.length && Number.isFinite(mean)
-    ? eligible.reduce((sum, sprint) => sum + (sprint.correctedWpm - mean) ** 2, 0) / eligible.length
-    : null;
-  const coefficientOfVariation = Number.isFinite(mean) && mean > 0 && Number.isFinite(variance) ? Math.sqrt(variance) / mean : null;
-
+  const bestObserved = eligible.length ? Math.max(...eligible.map((sprint) => sprint.burstEffectiveWpm).filter(Number.isFinite)) : null;
   const trainingQuality = freezeDeep({
-    artifactVersion: 1,
+    artifactVersion: 2,
     kind: "burst-sprints",
     status: burstResult?.status ?? "incomplete",
     validMeasurement: Boolean(measurement),
-    burstEstimateWpm: round(measurement?.wpm),
-    rawBurstEstimateWpm: round(measurement?.rawWpm),
+    bestObservedSprintWpm: round(bestObserved),
+    sessionBurstEstimateWpm: round(measurement?.adjustedWpm),
+    burstEstimateWpm: round(measurement?.adjustedWpm),
+    rawSessionBurstWpm: round(measurement?.wpm),
     burstAccuracy: round(measurement?.accuracy),
+    measurementSigmaLog: round(measurement?.measurementSigmaLog, 4),
+    sigmaIndividual: round(measurement?.sigmaIndividual, 4),
+    sigmaSpread: round(measurement?.sigmaSpread, 4),
     selectedSprintIds: measurement?.selectedSprintIds ?? [],
     selectedSprintWpms: measurement?.selectedSprintWpms?.map((value) => round(value)) ?? [],
     eligibleSprintCount: burstResult?.eligibleSprintCount ?? 0,
     completedSprintCount: burstResult?.completedSprintCount ?? 0,
-    referenceControlledWpm: round(referenceWpm),
-    burstReserveWpm: round(reserveWpm),
-    burstReservePercent: round(reservePercent),
-    eligibleSprintCv: round(coefficientOfVariation, 3),
-    abilityStatus: foundationAnalysis?.ability?.status ?? null,
-    abilityReasons: foundationAnalysis?.ability?.reasons ?? [],
-    sprints: (burstResult?.sprints ?? []).map((sprint) => freezeDeep({
-      sprintId: sprint.sprintId,
-      sprintOrdinal: sprint.sprintOrdinal,
-      correctedWpm: round(sprint.correctedWpm),
-      rawWpm: round(sprint.rawWpm),
-      strictAccuracy: round(sprint.strictAccuracy),
-      correctionOverheadRate: round(sprint.correctionOverheadRate, 3),
-      acceptedInsertions: sprint.acceptedInsertions,
-      completed: sprint.completed,
-      eligible: sprint.eligible,
-    })),
-    interpretation: measurement
-      ? "Burst estimate is the median of the three fastest eligible controlled 10-second sprints. It is not a single-sprint personal best."
-      : "No burst ability observation was admitted because the complete protocol did not contain at least three eligible controlled sprints.",
+    currentBurstAbilityWpm: round(foundationAnalysis?.ability?.observation?.adjustedWpm ?? foundationAnalysis?.ability?.sessionSummary?.adjustedWpm),
+    currentBurstAbilityStatus: foundationAnalysis?.ability?.status ?? null,
+    pl14BurstReserveWpm: round(foundationAnalysis?.performance?.burstReserve?.reserveWpm),
+    pl14BurstReserveStatus: foundationAnalysis?.performance?.burstReserve?.status ?? "not-owned-by-pl27",
+    sprints: (burstResult?.sprints ?? []).map((sprint) => freezeDeep({ sprintId: sprint.sprintId, sprintOrdinal: sprint.sprintOrdinal, grossForwardWpm: round(sprint.grossForwardWpm), burstEffectiveWpm: round(sprint.burstEffectiveWpm), firstPassAccuracy: round(sprint.firstPassAccuracy), correctionOverheadRate: round(sprint.correctionOverheadRate, 3), acceptedInsertions: sprint.acceptedInsertions, firstPassOpportunityCount: sprint.firstPassOpportunityCount, carryoverOpenError: sprint.carryoverOpenError, completed: sprint.completed, eligible: sprint.eligible })),
+    interpretation: measurement ? "Session burst is the median of the three highest valid PL10-adjusted Burst Effective log performances. Best observed sprint is descriptive only." : "No PL13 Burst observation was admitted because fewer than four of six sprints met the canonical measurement-validity floors.",
   });
-
-  return freezeDeep({
-    trainingQuality,
-    recommendationIds: measurement ? ["burst-control"] : ["burst-repeat-clean"],
-  });
+  return freezeDeep({ trainingQuality, recommendationIds: measurement ? ["burst-control"] : ["burst-repeat-clean"] });
 }
