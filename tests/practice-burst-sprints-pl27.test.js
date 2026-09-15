@@ -59,7 +59,7 @@ test("PL27 warm-up is excluded from Burst estimator and sprint validity uses can
   const warm = { type:"character", accepted:true, isFirstAttempt:true, correctness:"correct", relativeActiveTimestampMs:10_000 };
   for(let i=0;i<100;i++) acc.recordProcessedInput(warm);
   assert.equal(acc.getSnapshot(10_000).sprints.every(s=>s.acceptedInsertions===0), true);
-  const base={ type:"character", accepted:true, isFirstAttempt:true, correctness:"correct" };
+  const base={ type:"character", accepted:true,isFirstAttempt:true,correctness:"correct" };
   for(let i=0;i<30;i++) acc.recordProcessedInput({...base,relativeActiveTimestampMs:30_001+i});
   const result=acc.finalize({finalActiveDurationMs:90_000});
   assert.equal(result.sprints[0].acceptedInsertions,30); assert.equal(result.sprints[0].firstPassOpportunityCount,30); assert.equal(result.sprints[0].firstPassAccuracy,100);
@@ -72,7 +72,14 @@ test("PL27 carryover open error excludes the next sprint from ability estimator"
 test("PL27 selects top three adjusted logs, takes their median and applies exact sigma equation", () => {
   const result=completeResult(); const selected=selectPracticeBurstEstimatorSprints(result,{difficultyAdjustmentLog:0});
   assert.deepEqual(selected.map(s=>s.sprintId),["sprint-5","sprint-2","sprint-3"]);
-  const sigma=calculatePracticeBurstSessionSigma(selected,sigmas); const expected=Math.sqrt(.12**2/2 + .03**2 + .04**2); assert.ok(Math.abs(sigma.measurementSigmaLog-expected)<1e-12);
+  const sigma=calculatePracticeBurstSessionSigma(selected,sigmas);
+  // Independent canonical expectation: top-three Y are ln(150), ln(140), ln(130).
+  // Their median is ln(140), so MAD is median(ln(150/140), 0, ln(140/130)) = ln(150/140).
+  const expectedMad = Math.log(150 / 140);
+  const expectedSpread = Math.max(1.4826 * expectedMad, .03);
+  const expected=Math.sqrt(.12**2/2 + expectedSpread**2 + .04**2);
+  assert.ok(Math.abs(sigma.sigmaSpread-expectedSpread)<1e-12);
+  assert.ok(Math.abs(sigma.measurementSigmaLog-expected)<1e-12);
   const m=buildPracticeBurstAbilityMeasurement(result,{difficultyAdjustmentLog:0,individualSigmas:sigmas}); assert.ok(Math.abs(m.wpm-140)<1e-9); assert.ok(Math.abs(m.adjustedWpm-140)<1e-9); assert.notEqual(m.adjustedWpm,150); assert.equal(m.measurementVersion,PRACTICE_BURST_ESTIMATOR_VERSION);
   const only3={...result,eligibleSprintCount:3,sprints:result.sprints.map((s,i)=>({...s,eligible:i<3}))}; assert.equal(buildPracticeBurstAbilityMeasurement(only3,{individualSigmas:sigmas}),null);
 });
@@ -88,5 +95,6 @@ test("PL27 browser host encodes protocol-inactive preview/recovery, disabled inp
 
 test("PL27 catalog and PL32 treatment identity use canonical v2 and do not pool legacy history", () => {
   const catalog=getPracticeExperiment("burst-sprints"); assert.match(catalog.longDescription,/30-second warm-up/i); assert.match(catalog.description,/preview and recovery/i); assert.doesNotMatch(catalog.longDescription,/15-second/);
-  const d=createPracticeBurstSprintsExperiment(); const identity=resolvePracticeTreatmentIdentity({experiment:d,configuration:{protocolVersion:2,policyVersion:2,estimatorVersion:2},contentPlan:{targetEntities:[]}}); assert.equal(identity.protocolVariant,"burst-six-canonical-v2"); assert.notEqual(identity.protocolVariant,"six-sprint-v1");
+  const identity=resolvePracticeTreatmentIdentity({experiment:createPracticeBurstSprintsExperiment(),configuration:{protocolVersion:2,policyVersion:2,estimatorVersion:2},contentPlan:{targetEntities:[],metadata:{}}});
+  assert.equal(identity.protocolVariant,"six-sprint-warmup-preview-v2"); assert.notEqual(identity.treatmentFamilyKey,"burst-sprints:six-sprint-v1");
 });
