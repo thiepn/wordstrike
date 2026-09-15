@@ -29,16 +29,18 @@ jobs:
           python - <<'PY'
           from pathlib import Path
 
-          storage = Path('js/storage.js')
+          def replace_once(text, old, new, label):
+              if text.count(old) != 1:
+                  raise AssertionError(f"{label}: expected exactly one match, found {text.count(old)}")
+              return text.replace(old, new, 1)
+
+          storage = Path("js/storage.js")
           text = storage.read_text()
           anchor = '''export function getCampaignSpeedUnlockLevel() {
             return getCampaignSpeedUnlockLevelFromWpm(getCampaignBest60SecondWpm());
           }
           '''
-          insert = '''export function getCampaignSpeedUnlockLevel() {
-            return getCampaignSpeedUnlockLevelFromWpm(getCampaignBest60SecondWpm());
-          }
-
+          addition = anchor + '''
           function normalizeCampaignLevel(value) {
             return Math.max(1, Math.min(CAMPAIGN_TOTAL_LEVELS, Math.trunc(Number(value) || 1)));
           }
@@ -87,73 +89,69 @@ jobs:
             return highest;
           }
           '''
-          assert anchor in text, 'storage speed-unlock anchor not found'
-          text = text.replace(anchor, insert, 1)
-          old_getter = '''      get() {
-                return Math.max(progressLevel, getCampaignSpeedUnlockLevel());
-              },'''
-          new_getter = '''      get() {
-                return getHighestCampaignAccessibleLevel(save);
-              },'''
-          assert old_getter in text, 'currentFurthestLevel getter not found'
-          text = text.replace(old_getter, new_getter, 1)
+          text = replace_once(text, anchor, addition, "storage helper insertion")
+          text = replace_once(
+              text,
+              'return Math.max(progressLevel, getCampaignSpeedUnlockLevel());',
+              'return getHighestCampaignAccessibleLevel(save);',
+              "currentFurthestLevel getter",
+          )
           storage.write_text(text)
 
-          main = Path('js/main.js')
+          main = Path("js/main.js")
           text = main.read_text()
-          old_state_import = '''  appState,
-            canLaunchLevel,
-            changeScreen,'''
-          new_state_import = '''  appState,
-            changeScreen,'''
-          assert old_state_import in text, 'main canLaunchLevel import not found'
-          text = text.replace(old_state_import, new_state_import, 1)
-          old_storage_import = '''  loadSave,
-            resetProgress,'''
-          new_storage_import = '''  isCampaignLevelAccessible,
-            loadSave,
-            resetProgress,'''
-          assert old_storage_import in text, 'main storage import anchor not found'
-          text = text.replace(old_storage_import, new_storage_import, 1)
-          old_launch = '''  const legitimatelyUnlocked = safeLevel <= appState.save.currentFurthestLevel;
-            if (!canLaunchLevel(appState.devMode, appState.save.currentFurthestLevel, safeLevel)) return;'''
-          new_launch = '''  const legitimatelyUnlocked = isCampaignLevelAccessible(appState.save, safeLevel);
-            if (!appState.devMode && !legitimatelyUnlocked) return;'''
-          assert old_launch in text, 'main launch guard not found'
-          text = text.replace(old_launch, new_launch, 1)
+          text = replace_once(text, '  canLaunchLevel,\n', '', "remove scalar launch helper import")
+          text = replace_once(
+              text,
+              '  loadSave,\n',
+              '  isCampaignLevelAccessible,\n  loadSave,\n',
+              "add exact access import",
+          )
+          text = replace_once(
+              text,
+              '  const legitimatelyUnlocked = safeLevel <= appState.save.currentFurthestLevel;\n  if (!canLaunchLevel(appState.devMode, appState.save.currentFurthestLevel, safeLevel)) return;',
+              '  const legitimatelyUnlocked = isCampaignLevelAccessible(appState.save, safeLevel);\n  if (!appState.devMode && !legitimatelyUnlocked) return;',
+              "campaign launch guard",
+          )
           main.write_text(text)
 
-          ui = Path('js/ui.js')
+          ui = Path("js/ui.js")
           text = ui.read_text()
-          import_anchor = '''import { getCampaignDifficultyLevel } from "./campaignDifficulty.js";
-          '''
-          import_replacement = '''import { getCampaignDifficultyLevel } from "./campaignDifficulty.js";
-          import { isCampaignLevelAccessible } from "./storage.js";
-          '''
-          assert import_anchor in text, 'ui import anchor not found'
-          text = text.replace(import_anchor, import_replacement, 1)
-          old_selected = '''  const selectedLocked = !devMode && safeSelected > furthestLevel;'''
-          new_selected = '''  const selectedLocked = !devMode && !isCampaignLevelAccessible(save, safeSelected);'''
-          assert old_selected in text, 'ui selected locked rule not found'
-          text = text.replace(old_selected, new_selected, 1)
-          old_sector = '''    const sectorLocked = !devMode && firstLevel > furthestLevel;'''
-          new_sector = '''    const sectorLocked = !devMode && sectorLevels.every(
-              (level) => !isCampaignLevelAccessible(save, level),
-            );'''
-          assert old_sector in text, 'ui sector locked rule not found'
-          text = text.replace(old_sector, new_sector, 1)
-          old_node = '''      const locked = !devMode && level > furthestLevel;'''
-          new_node = '''      const locked = !devMode && !isCampaignLevelAccessible(save, level);'''
-          assert old_node in text, 'ui node locked rule not found'
-          text = text.replace(old_node, new_node, 1)
-          old_count = '''<div class="campaign-progress-count">UNLOCKED <strong>${devMode ? 100 : furthestLevel}</strong><span>/ 100</span></div>'''
-          new_count = '''<div class="campaign-progress-count">HIGHEST ACCESS <strong>${devMode ? 100 : furthestLevel}</strong><span>/ 100</span></div>'''
-          assert old_count in text, 'ui access count copy not found'
-          text = text.replace(old_count, new_count, 1)
+          text = replace_once(
+              text,
+              'import { getCampaignDifficultyLevel } from "./campaignDifficulty.js";\n',
+              'import { getCampaignDifficultyLevel } from "./campaignDifficulty.js";\nimport { isCampaignLevelAccessible } from "./storage.js";\n',
+              "campaign UI access import",
+          )
+          text = replace_once(
+              text,
+              '  const selectedLocked = !devMode && safeSelected > furthestLevel;',
+              '  const selectedLocked = !devMode && !isCampaignLevelAccessible(save, safeSelected);',
+              "selected mission access",
+          )
+          text = replace_once(
+              text,
+              '    const sectorLocked = !devMode && firstLevel > furthestLevel;',
+              '    const sectorLocked = !devMode && sectorLevels.every(\n      (level) => !isCampaignLevelAccessible(save, level),\n    );',
+              "sector access",
+          )
+          text = replace_once(
+              text,
+              '      const locked = !devMode && level > furthestLevel;',
+              '      const locked = !devMode && !isCampaignLevelAccessible(save, level);',
+              "mission node access",
+          )
+          text = replace_once(
+              text,
+              '<div class="campaign-progress-count">UNLOCKED <strong>${devMode ? 100 : furthestLevel}</strong><span>/ 100</span></div>',
+              '<div class="campaign-progress-count">HIGHEST ACCESS <strong>${devMode ? 100 : furthestLevel}</strong><span>/ 100</span></div>',
+              "campaign access label",
+          )
           ui.write_text(text)
+          PY
 
-          test = Path('tests/campaign-checkpoint-access.test.js')
-          test.write_text('''import assert from "node:assert/strict";
+          cat > tests/campaign-checkpoint-access.test.js <<'EOF'
+          import assert from "node:assert/strict";
           import {
             createDefaultSave,
             isCampaignLevelAccessible,
@@ -209,8 +207,7 @@ jobs:
           }
 
           console.log("Campaign checkpoint-only access and sequential continuation tests passed.");
-          ''')
-          PY
+          EOF
 
       - name: Run full test suite
         run: npm test
