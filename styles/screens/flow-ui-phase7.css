@@ -1,0 +1,517 @@
+/* =========================================================
+   WORDSTRIKE FLOW PHASE 7 — DEDICATED UI
+   Interface architecture only. Quiet Signal remains the visual language.
+   ========================================================= */
+
+.flow-phase1-screen[data-flow-ui-phase7="true"] {
+  --flow-ui-rule: rgb(241 239 232 / 12%);
+  --flow-ui-rule-strong: rgb(241 239 232 / 24%);
+  --flow-ui-selected: color-mix(in srgb, var(--flow-signal) 10%, transparent);
+}
+
+/* ---------- SETUP ---------- */
+
+.flow-ready-screen[data-flow-ui-phase7="true"] .flow-phase1-shell {
+  width: min(calc(100% - 48px), 1180px);
+  grid-template-columns: minmax(0, 1fr) minmax(230px, 0.34fr);
+  grid-template-areas:
+    "back back"
+    "kicker kicker"
+    "title brief"
+    "lead brief"
+    "setup setup"
+    "note note"
+    "start start";
+  column-gap: clamp(52px, 8vw, 118px);
+  row-gap: 22px;
+  align-content: start;
+  padding-top: clamp(32px, 5vw, 64px);
+  padding-bottom: clamp(36px, 6vw, 80px);
+}
+
+.flow-ready-screen[data-flow-ui-phase7="true"] .flow-setup {
+  grid-area: setup;
+}
+
+.flow-ready-screen[data-flow-ui-phase7="true"] .flow-phase1-note {
+  max-width: 78ch;
+}
+
+.flow-setup {
+  display: grid;
+  gap: 0;
+  margin-top: clamp(10px, 2vw, 24px);
+  border-top: 1px solid var(--flow-ui-rule-strong);
+  border-bottom: 1px solid var(--flow-ui-rule-strong);
+}
+
+.flow-setup-heading,
+.flow-setup-itinerary-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 20px;
+  color: var(--flow-ink-muted);
+  font-family: var(--flow-data-face);
+  font-size: 0.66rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.flow-setup-heading {
+  padding: 14px 0 12px;
+  border-bottom: 1px solid var(--flow-ui-rule);
+}
+
+.flow-setup-heading strong {
+  color: var(--flow-ink-soft);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+
+.flow-choice-group {
+  display: grid;
+  grid-template-columns: 150px minmax(0, 1fr);
+  gap: clamp(20px, 4vw, 54px);
+  margin: 0;
+  padding: 18px 0;
+  border: 0;
+  border-bottom: 1px solid var(--flow-ui-rule);
+  min-width: 0;
+}
+
+.flow-choice-group legend {
+  align-self: start;
+  padding: 12px 0 0;
+  color: var(--flow-ink-muted);
+  font-family: var(--flow-data-face);
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.flow-choice-row {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.flow-choice-row--length {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.flow-choice-row--categories {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.flow-choice-row--difficulty {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.flow-choice {
+  position: relative;
+  display: grid;
+  gap: 5px;
+  min-height: 54px;
+  padding: 10px 12px 10px 14px;
+  border: 0;
+  border-left: 1px solid var(--flow-ui-rule-strong);
+  border-radius: 0;
+  background: transparent;
+  color: var(--flow-ink-muted);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    color 150ms ease,
+    background-color 150ms ease,
+    border-color 150ms ease;
+}
+
+.flow-choice::before {
+  content: "";
+  position: absolute;
+  left: -1px;
+  top: 10px;
+  bottom: 10px;
+  width: 1px;
+  background: transparent;
+  transition: background-color 150ms ease, box-shadow 150ms ease;
+}
+
+.flow-choice span {
+  font-family: var(--flow-ui-face);
+  font-size: 0.88rem;
+  font-weight: 620;
+  letter-spacing: 0.01em;
+}
+
+.flow-choice small {
+  color: var(--flow-ink-muted);
+  font-family: var(--flow-data-face);
+  font-size: 0.62rem;
+  line-height: 1.45;
+}
+
+.flow-choice:hover,
+.flow-choice:focus-visible {
+  border-left-color: var(--flow-line-strong);
+  background: rgb(255 255 255 / 2.5%);
+  color: var(--flow-ink);
+  outline: none;
+}
+
+.flow-choice:focus-visible {
+  box-shadow: inset 0 0 0 1px var(--flow-ui-rule-strong);
+}
+
+.flow-choice.is-selected {
+  border-left-color: var(--flow-signal);
+  background: var(--flow-ui-selected);
+  color: var(--flow-ink);
+}
+
+.flow-choice.is-selected::before {
+  background: var(--flow-signal);
+  box-shadow: 0 0 14px var(--flow-signal-soft);
+}
+
+.flow-choice.is-selected small {
+  color: var(--flow-ink-soft);
+}
+
+.flow-setup-itinerary {
+  display: grid;
+  gap: 16px;
+  padding: 18px 0 20px;
+}
+
+.flow-setup-itinerary-heading small {
+  color: var(--flow-ink-soft);
+  letter-spacing: 0.08em;
+}
+
+/* ---------- CHAPTER / SESSION RAIL ---------- */
+
+.flow-session-rail {
+  display: grid;
+  grid-template-columns: minmax(130px, 0.24fr) minmax(0, 1fr);
+  gap: clamp(28px, 5vw, 64px);
+  align-items: center;
+  padding: 13px 0 15px;
+  border-top: 1px solid var(--flow-ui-rule);
+  border-bottom: 1px solid var(--flow-ui-rule);
+}
+
+.flow-run-header + .flow-session-rail {
+  margin-top: -20px;
+}
+
+.flow-session-rail-copy {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.flow-session-rail-copy span,
+.flow-session-rail-copy small {
+  color: var(--flow-ink-muted);
+  font-family: var(--flow-data-face);
+  font-size: 0.58rem;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.flow-session-rail-copy strong {
+  overflow: hidden;
+  color: var(--flow-ink-soft);
+  font-family: var(--flow-ui-face);
+  font-size: 0.83rem;
+  font-weight: 620;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.flow-itinerary-track {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(var(--flow-step-count, 6), minmax(0, 1fr));
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.flow-itinerary-track::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 8px;
+  height: 1px;
+  background: var(--flow-ui-rule-strong);
+}
+
+.flow-itinerary-step {
+  position: relative;
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  padding-right: 10px;
+  color: var(--flow-ink-muted);
+}
+
+.flow-itinerary-step::before {
+  content: "";
+  position: relative;
+  z-index: 1;
+  width: 7px;
+  height: 7px;
+  margin-top: 5px;
+  border: 1px solid var(--flow-line-strong);
+  border-radius: 50%;
+  background: var(--flow-bg-deep);
+}
+
+.flow-itinerary-step[data-state="complete"]::before {
+  border-color: var(--flow-signal);
+  background: var(--flow-signal);
+  box-shadow: 0 0 10px var(--flow-signal-soft);
+}
+
+.flow-itinerary-step[data-state="current"]::before {
+  width: 9px;
+  height: 9px;
+  margin-top: 4px;
+  border-color: var(--flow-signal);
+  background: var(--flow-bg-deep);
+  box-shadow: 0 0 12px var(--flow-signal-soft);
+}
+
+.flow-itinerary-index {
+  color: inherit;
+  font-family: var(--flow-data-face);
+  font-size: 0.55rem;
+  letter-spacing: 0.1em;
+}
+
+.flow-itinerary-name {
+  overflow: hidden;
+  color: inherit;
+  font-family: var(--flow-ui-face);
+  font-size: 0.66rem;
+  font-weight: 560;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.flow-itinerary-step[data-state="complete"],
+.flow-itinerary-step[data-state="current"] {
+  color: var(--flow-ink-soft);
+}
+
+.flow-itinerary-step[data-state="current"] .flow-itinerary-name {
+  color: var(--flow-ink);
+  font-weight: 680;
+}
+
+.flow-itinerary-step[data-state="current"] .flow-itinerary-index {
+  color: var(--flow-signal);
+}
+
+/* Quick uses three steps; let them breathe rather than occupy only half the rail. */
+.flow-itinerary-step:first-child:nth-last-child(3),
+.flow-itinerary-step:first-child:nth-last-child(3) ~ .flow-itinerary-step {
+  /* selector intentionally only marks quick-run tracks */
+}
+
+.flow-itinerary-track:has(.flow-itinerary-step:first-child:nth-last-child(3)) {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.flow-itinerary-track:has(.flow-itinerary-step:first-child:nth-last-child(6)) {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+
+.flow-run-screen[data-flow-ui-phase7="true"] .flow-chapter-strip[hidden] {
+  display: none;
+}
+
+/* ---------- CHAPTER TRANSITION UI ---------- */
+
+.flow-chapter-screen[data-flow-ui-phase7="true"] .flow-session-rail {
+  grid-column: 1 / -1;
+  align-self: start;
+  margin-bottom: clamp(8px, 2vw, 24px);
+}
+
+.flow-chapter-screen[data-flow-ui-phase7="true"] .flow-chapter-transition {
+  grid-template-areas:
+    "rail rail"
+    "index kicker"
+    "index title"
+    "index lead"
+    "index brief"
+    "index action"
+    "index note";
+}
+
+.flow-chapter-screen[data-flow-ui-phase7="true"] .flow-session-rail { grid-area: rail; }
+
+/* ---------- RESULTS UI ---------- */
+
+.flow-complete-screen[data-flow-ui-phase7="true"] .flow-session-rail {
+  margin: 4px 0 8px;
+}
+
+.flow-complete-screen[data-flow-ui-phase7="true"] .flow-itinerary-step[data-state="complete"] .flow-itinerary-name {
+  color: var(--flow-ink-soft);
+}
+
+.flow-complete-screen[data-flow-ui-phase7="true"] .flow-complete-actions {
+  align-items: stretch;
+}
+
+.flow-complete-screen[data-flow-ui-phase7="true"] [data-flow-ui-action="setup"] {
+  border-color: var(--flow-line-strong);
+}
+
+/* ---------- RESPONSIVE ---------- */
+
+@media (max-width: 900px) {
+  .flow-ready-screen[data-flow-ui-phase7="true"] .flow-phase1-shell {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "back"
+      "kicker"
+      "title"
+      "lead"
+      "brief"
+      "setup"
+      "note"
+      "start";
+  }
+
+  .flow-choice-group {
+    grid-template-columns: 118px minmax(0, 1fr);
+    gap: 22px;
+  }
+
+  .flow-choice-row--categories,
+  .flow-choice-row--difficulty {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .flow-session-rail {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .flow-session-rail-copy {
+    grid-template-columns: auto 1fr auto;
+    align-items: baseline;
+    gap: 10px;
+  }
+
+  .flow-session-rail-copy strong {
+    text-align: center;
+  }
+}
+
+@media (max-width: 640px) {
+  .flow-ready-screen[data-flow-ui-phase7="true"] .flow-phase1-shell {
+    width: min(calc(100% - 28px), 1180px);
+    padding-top: 20px;
+  }
+
+  .flow-choice-group {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    padding: 15px 0;
+  }
+
+  .flow-choice-group legend {
+    padding-top: 0;
+  }
+
+  .flow-choice-row--length {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .flow-choice-row--categories {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .flow-choice-row--difficulty {
+    grid-template-columns: 1fr;
+  }
+
+  .flow-choice {
+    min-height: 48px;
+    padding: 9px 9px 9px 12px;
+  }
+
+  .flow-choice-row--length .flow-choice small {
+    display: none;
+  }
+
+  .flow-setup-heading,
+  .flow-setup-itinerary-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .flow-session-rail {
+    padding: 10px 0 12px;
+  }
+
+  .flow-session-rail-copy {
+    grid-template-columns: 1fr auto;
+    gap: 4px 10px;
+  }
+
+  .flow-session-rail-copy strong {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    text-align: left;
+  }
+
+  .flow-session-rail-copy span {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .flow-session-rail-copy small {
+    grid-column: 2;
+    grid-row: 2;
+    text-align: right;
+  }
+
+  .flow-itinerary-name {
+    display: none;
+  }
+
+  .flow-itinerary-step {
+    padding-right: 0;
+  }
+
+  .flow-chapter-screen[data-flow-ui-phase7="true"] .flow-chapter-transition {
+    grid-template-areas:
+      "rail"
+      "index"
+      "kicker"
+      "title"
+      "lead"
+      "brief"
+      "action"
+      "note";
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flow-choice,
+  .flow-choice::before {
+    transition: none;
+  }
+}
