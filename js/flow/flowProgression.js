@@ -163,6 +163,12 @@ function max(previous, next, fallback = 0) {
   return Math.max(finite(previous, fallback), finite(next, fallback));
 }
 
+function focusPassageCount(plan) {
+  const canonical = plan?.adaptive?.targetedPassageCount;
+  const legacy = plan?.focusPassageCount;
+  return Math.max(0, Math.round(finite(canonical, finite(legacy))));
+}
+
 function milestoneEligible(id, progress, run) {
   const gameplay = run.snapshot?.gameplay || {};
   const cadence = run.snapshot?.cadence || {};
@@ -173,7 +179,7 @@ function milestoneEligible(id, progress, run) {
   if (id === "precision-98") return finite(gameplay.accuracyPercent) >= 98;
   if (id === "locked-in") return finite(cadence.cadenceScore, -1) >= 92;
   if (id === "high-flow") return finite(gameplay.averageFlow) >= 90;
-  if (id === "adaptive-run") return finite(run.plan?.focusPassageCount) > 0;
+  if (id === "adaptive-run") return focusPassageCount(run.plan) > 0;
   if (id === "modifier-run") return normalizeFlowModifierIds(run.plan?.modifiers || run.snapshot?.modifiers || []).length > 0;
   return false;
 }
@@ -190,7 +196,7 @@ export function recordFlowProgression({ sessionId, endedAt = Date.now(), snapsho
   const category = plan?.category || snapshot.category || "mixed";
   const difficulty = plan?.difficulty || snapshot.difficulty || "natural";
   const modifiers = normalizeFlowModifierIds(plan?.modifiers || snapshot.modifiers || []);
-  const focusPassages = Math.max(0, Math.round(finite(plan?.focusPassageCount)));
+  const focusPassages = focusPassageCount(plan);
   const weaknessProfile = sanitizeWeaknesses(buildFlowWeaknessProfile(snapshot));
 
   progress.completedRuns += 1;
@@ -283,7 +289,7 @@ export function createFlowSessionResult({ sessionId, endedAt = Date.now(), snaps
       difficulty: plan?.difficulty || snapshot?.difficulty || "natural",
       chapterCount: plan?.chapterCount || 1,
       passageCount: plan?.passageCount || 1,
-      focusPassageCount: plan?.focusPassageCount || 0,
+      focusPassageCount: focusPassageCount(plan),
       modifiers: normalizeFlowModifierIds(plan?.modifiers || snapshot?.modifiers || []),
     },
   };
