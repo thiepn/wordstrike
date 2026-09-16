@@ -74,7 +74,13 @@ const plan = {
   modifiers: ["precision"],
   chapterCount: 6,
   passageCount: 12,
-  focusPassageCount: 2,
+  adaptive: {
+    enabled: true,
+    targetedPassageCount: 2,
+    normalPassageCount: 10,
+    targetRatio: 0.167,
+    weaknesses: [{ key: "typo-pair", label: "e → r", score: 80, expected: "e", actual: "r" }],
+  },
 };
 
 const result = createFlowSessionResult({
@@ -92,6 +98,7 @@ assert.equal(result.accuracy, 98.46);
 assert.equal(result.activeDurationMs, 48000);
 assert.equal(result.characters.totalKeystrokes, 65);
 assert.equal(result.words.completed, 9);
+assert.equal(result.modeData.focusPassageCount, 2);
 
 const first = recordFlowSession({
   sessionId: "flow-phase11-session-1",
