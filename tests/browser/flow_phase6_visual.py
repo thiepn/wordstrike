@@ -66,6 +66,20 @@ def style_snapshot(page):
     }""")
 
 
+def finish_quick_run_from_second_chapter(page, plan):
+    page.locator('[data-flow-action="continue-chapter"]').click()
+    for index in range(2, len(plan['segments'])):
+        segment = plan['segments'][index]
+        expect(page.locator('[data-flow-view="run"]')).to_be_visible(timeout=10000)
+        page.keyboard.type(segment['text'])
+        if index == len(plan['segments']) - 1:
+            break
+        next_segment = plan['segments'][index + 1]
+        if next_segment['chapterIndex'] != segment['chapterIndex']:
+            expect(page.locator('[data-flow-view="chapter"]')).to_be_visible(timeout=10000)
+            page.locator('[data-flow-action="continue-chapter"]').click()
+
+
 def certify_visual_language(browser, browser_name, base, evidence):
     context = context_for(browser, base)
     page = context.new_page()
@@ -112,7 +126,7 @@ def certify_visual_language(browser, browser_name, base, evidence):
     assert run_geometry['hudBorderRadius'] == '0px', run_geometry
     assert run_geometry['overflow'] <= 1, run_geometry
 
-    # Build enough Flow to exercise the high-band visual hook.
+    # Build enough Flow to exercise the state-aware signal hook.
     first = plan['segments'][0]
     page.keyboard.type(first['text'][:90])
     meter_band = page.locator('[data-flow-meter]').get_attribute('data-flow-band')
@@ -146,14 +160,39 @@ def certify_visual_language(browser, browser_name, base, evidence):
 
     if browser_name == 'chromium':
         page.screenshot(path=str(ARTIFACTS / 'chromium-chapter.png'), full_page=True)
+        finish_quick_run_from_second_chapter(page, plan)
+        expect(page.locator('[data-flow-view="complete"]')).to_be_visible(timeout=10000)
+        result_style = page.evaluate("""() => {
+          const score = document.querySelector('.flow-final-score strong');
+          const metrics = document.querySelector('.flow-result-metrics');
+          const analysis = document.querySelector('.flow-natural-analysis');
+          return {
+            scoreFont: getComputedStyle(score).fontFamily,
+            scoreSize: parseFloat(getComputedStyle(score).fontSize),
+            metricsDisplay: getComputedStyle(metrics).display,
+            metricsRadius: getComputedStyle(metrics).borderRadius,
+            analysisRadius: getComputedStyle(analysis).borderRadius,
+            overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+          };
+        }""")
+        assert 'serif' in result_style['scoreFont'].lower() or 'georgia' in result_style['scoreFont'].lower(), result_style
+        assert result_style['scoreSize'] >= 60, result_style
+        assert result_style['metricsDisplay'] == 'grid', result_style
+        assert result_style['metricsRadius'] == '0px', result_style
+        assert result_style['analysisRadius'] == '0px', result_style
+        assert result_style['overflow'] <= 1, result_style
+        page.screenshot(path=str(ARTIFACTS / 'chromium-results.png'), full_page=True)
+    else:
+        result_style = None
 
     assert not errors, errors
     evidence.append({
         "browser": browser_name,
-        "case": "Quiet Signal ready/run/chapter visual hierarchy",
+        "case": "Quiet Signal ready/run/chapter/results visual hierarchy",
         "ready": ready_style,
         "run": run_geometry,
         "chapter": chapter_style,
+        "results": result_style,
     })
     context.close()
 
