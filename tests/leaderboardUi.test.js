@@ -9,15 +9,17 @@ const { renderLeaderboards } = await import("../js/leaderboardUi.js");
 const authOut = { status: "signed-out" };
 const profileNone = { status: "idle", profile: null };
 
-// A raw legacy return state still selects the replacement Arcade Rush tab, never a Daily tab.
+// A raw pre-cutover Daily return state must never recreate retired public tabs.
+// Normal application state resolves legacy Daily through the service before rendering.
 renderLeaderboards({ status: "loading", selectedBoard: "daily-strike-v1", entries: [] }, authOut, profileNone);
 assert.match(app.html, /GLOBAL LEADERBOARDS/);
-assert.match(app.html, /ARCADE RUSH/);
+assert.doesNotMatch(app.html, /leaderboard-select-arcade-rush/);
+assert.doesNotMatch(app.html, />ARCADE RUSH</);
 assert.doesNotMatch(app.html, />DAILY STRIKE</);
 assert.match(app.html, /ENDLESS/);
 assert.match(app.html, /Loading global rankings/);
-assert.match(app.html, /leaderboard-select-arcade-rush" aria-selected="true"/);
 
+// Direct historical Rush board reads remain renderable without restoring a public Rush tab.
 renderLeaderboards({
   status: "empty",
   selectedBoard: "arcade-rush-v1",
@@ -25,11 +27,12 @@ renderLeaderboards({
   board: { boardKey: "arcade-rush-v1", rulesVersion: 1 },
   entries: [], viewer: null,
 }, authOut, profileNone);
-assert.match(app.html, /RULES V1 \/\/ COMPLETED RUNS ONLY \/\/ ALL-TIME/);
+assert.match(app.html, /LEGACY BOARD \/\/ RETIRED MODE \/\/ ALL-TIME/);
 assert.match(app.html, /No ranked Arcade Rush results yet/);
 assert.match(app.html, /SIGN IN FOR GLOBAL RANKS/);
 assert.match(app.html, /CONTINUE WITH GOOGLE/);
-assert.match(app.html, /ARCADE RUSH/);
+assert.doesNotMatch(app.html, /leaderboard-select-arcade-rush/);
+assert.doesNotMatch(app.html, />ARCADE RUSH</);
 assert.doesNotMatch(app.html, /Daily Strike|UTC CHALLENGE/i);
 
 renderLeaderboards({
@@ -83,4 +86,4 @@ renderLeaderboards(
 assert.match(app.html, /Choose a public username to submit scores/);
 assert.match(app.html, /SET USERNAME/);
 
-console.log("Leaderboards screen covers the final public tabs, legacy selection normalization, Arcade Rush, loading, empty, offline, error, safe rows, and viewer rank.");
+console.log("Leaderboards screen keeps only Campaign/Typing/Endless public tabs while retaining direct legacy Rush board rendering, loading, empty, offline, error, safe rows, and viewer rank.");
