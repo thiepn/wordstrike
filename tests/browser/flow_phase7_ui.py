@@ -95,7 +95,7 @@ def certify_setup_and_run(browser, browser_name, base, evidence):
     # than exposing the previously resolved Standard / Mixed / Natural plan.
     draft_summary = page.locator('[data-flow-view="ready"] .flow-phase1-brief')
     expect(draft_summary).to_have_attribute('aria-label', 'Selected Flow run setup')
-    summary_text = draft_summary.inner_text()
+    summary_text = ' '.join(draft_summary.inner_text().split())
     for expected_text in ('~3 min', '3 chapters', '6 passages', 'Dialogue', 'Advanced'):
         assert expected_text in summary_text, (expected_text, summary_text)
     assert 'Standard run' not in summary_text, summary_text
