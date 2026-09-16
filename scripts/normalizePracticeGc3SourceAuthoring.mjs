@@ -29,7 +29,7 @@ for (const file of files) {
       partitionLock: family.partition,
       items: family.items.map((item) => ({
         contentId: item.contentId,
-        contentType: 'paragraph',
+        contentType: 'passage',
         text: item.text,
         reviewStatus: 'approved',
         metadata: { tags: item.tags ?? [] },
