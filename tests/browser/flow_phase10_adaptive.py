@@ -173,7 +173,9 @@ def certify_isolation_and_mobile(browser, browser_name, base, evidence):
     expect(page.locator('.title-screen')).to_be_visible(timeout=10000)
     page.locator('[data-action="modes"]').click()
     flow = page.locator('[data-mode-id="flow"]')
-    expect(flow).to_have_attribute('aria-disabled', 'true')
+    expect(flow).to_be_visible()
+    assert flow.get_attribute('aria-disabled') is None
+    assert flow.evaluate('el => el.tagName') == 'BUTTON'
     assert page.locator('[data-flow-adaptive]').count() == 0
     context.close()
 
@@ -191,10 +193,10 @@ def certify_isolation_and_mobile(browser, browser_name, base, evidence):
         assert geometry['overflow'] <= 1, geometry
         assert geometry['adaptiveWidth'] <= geometry['viewport'], geometry
         page.screenshot(path=str(ARTIFACTS / 'chromium-mobile-ready.png'), full_page=True)
-        evidence.append({"browser": browser_name, "case": "390px adaptive ready + Phase 9/public isolation", **geometry})
+        evidence.append({"browser": browser_name, "case": "390px adaptive ready + Phase 9/release isolation", **geometry})
         mobile.close()
     else:
-        evidence.append({"browser": browser_name, "case": "Phase 9/public isolation"})
+        evidence.append({"browser": browser_name, "case": "Phase 9/release isolation"})
 
 
 def main():
