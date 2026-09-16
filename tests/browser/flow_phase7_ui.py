@@ -207,16 +207,17 @@ def certify_phase_isolation(browser, browser_name, base, evidence):
     assert page.locator('[data-flow-ui="setup"]').count() == 0
     assert page.locator('[data-flow-ui="session-rail"]').count() == 0
 
-    # Public Mode Select is still gated and never receives dedicated Flow UI.
+    # Public Mode Select exposes released Flow but must not auto-mount Phase 7 UI.
     page.goto(base)
     expect(page.locator('.title-screen')).to_be_visible(timeout=10000)
     page.locator('[data-action="modes"]').click()
     flow = page.locator('[data-mode-id="flow"]')
     expect(flow).to_be_visible()
-    expect(flow).to_have_attribute('aria-disabled', 'true')
+    assert flow.get_attribute('aria-disabled') is None
+    assert flow.evaluate('el => el.tagName') == 'BUTTON'
     assert page.locator('[data-flow-ui="setup"]').count() == 0
 
-    evidence.append({"browser": browser_name, "case": "Phase 7 explicit gate preserves Phase 6 and public surfaces"})
+    evidence.append({"browser": browser_name, "case": "Phase 7 explicit developer gate remains isolated while released Flow is available"})
     context.close()
 
 
