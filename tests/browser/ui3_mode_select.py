@@ -29,7 +29,7 @@ VIEWPORTS = [
     (390, 360, "mobile-keyboard-height"),
 ]
 
-ACTIVE_IDS = ["campaign", "speed-test", "endless"]
+ACTIVE_IDS = ["campaign", "speed-test", "endless", "flow"]
 PUBLIC_IDS = ["campaign", "speed-test", "endless", "flow", "practice"]
 
 
@@ -86,9 +86,9 @@ def assert_mode_select(page):
     )
     assert active == ACTIVE_IDS, active
     assert page.locator('[data-mode-id="arcade-rush"]').count() == 0
-    flow = page.locator('article[data-mode-id="flow"]')
+    flow = page.locator('button[data-mode-id="flow"]')
     assert flow.count() == 1
-    assert flow.get_attribute("aria-disabled") == "true"
+    assert flow.get_attribute("aria-disabled") is None
     practice = page.locator('article[data-mode-id="practice"]')
     assert practice.count() == 1
     assert practice.get_attribute("aria-disabled") == "true"
@@ -140,10 +140,10 @@ def inspect_foundation(browser, base, browser_name, evidence):
     page.locator('[data-mode-id="speed-test"]').hover()
     expect(page.locator(".mode-showcase-heading h2")).to_have_text("Typing Test")
     assert page.locator(".mode-motif-typing").count() == 1
-    page.locator('article[data-mode-id="flow"]').hover()
+    page.locator('button[data-mode-id="flow"]').hover()
     expect(page.locator(".mode-showcase-heading h2")).to_have_text("Flow")
     assert page.locator(".mode-motif-neutral").count() == 1
-    expect(page.locator(".mode-showcase-command")).to_contain_text("Not available yet")
+    expect(page.locator(".mode-showcase-command")).to_contain_text("Launch Flow")
     page.locator('article[data-mode-id="practice"]').hover()
     expect(page.locator(".mode-showcase-heading h2")).to_have_text("Practice Lab")
     assert page.locator(".mode-motif-neutral").count() == 1
@@ -154,7 +154,7 @@ def inspect_foundation(browser, base, browser_name, evidence):
     expect(page.locator(".mode-showcase-heading h2")).to_have_text("Campaign")
     page.screenshot(path=str(ARTIFACTS / f"{browser_name}-ui3-desktop.png"), full_page=True)
 
-    evidence.append({"browser": browser_name, "case": "Flow-era foundation and visual identity", **initial})
+    evidence.append({"browser": browser_name, "case": "Flow release foundation and visual identity", **initial})
     assert_no_errors(errors, f"{browser_name} foundation")
     context.close()
 
@@ -194,17 +194,26 @@ def inspect_keyboard_and_routes(browser, base, browser_name, evidence):
         page.locator(f'[data-mode-id="{mode_id}"]').click()
         expect(page.locator(destination)).to_be_visible()
 
-    # Disabled Flow/Practice cards may be selected for explanation, but Enter/click
-    # must not borrow another mode's gameplay route.
-    for mode_id in ("flow", "practice"):
-        open_modes(page, base)
-        card = page.locator(f'[data-mode-id="{mode_id}"]')
-        card.click(force=True)
-        expect(page.locator(".mode-select-screen")).to_be_visible()
+    # Flow is a real public route in Phase 13.
+    open_modes(page, base)
+    page.locator('[data-mode-id="flow"]').click()
+    expect(page.locator('[data-flow-view="ready"]')).to_be_visible(timeout=15000)
+    assert "flowRelease=1" in page.url, page.url
+    assert "dev=1" not in page.url, page.url
+
+    # Escape returns to Mode Select and strips the release deep-link parameters.
+    page.keyboard.press("Escape")
+    expect(page.locator(".mode-select-screen")).to_be_visible(timeout=10000)
+    assert "flowRelease=1" not in page.url, page.url
+
+    # Practice remains disabled and must not borrow another mode's route.
+    practice = page.locator('[data-mode-id="practice"]')
+    practice.click(force=True)
+    expect(page.locator(".mode-select-screen")).to_be_visible()
 
     evidence.append({
         "browser": browser_name,
-        "case": "six-position keyboard wrap, three public routes, Flow/Practice disabled",
+        "case": "six-position keyboard wrap, four public routes, Practice disabled",
         "activeModes": ACTIVE_IDS,
         "publicModes": PUBLIC_IDS,
     })
