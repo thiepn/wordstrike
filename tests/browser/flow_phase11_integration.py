@@ -175,10 +175,11 @@ def certify_isolation(browser, browser_name, base, evidence):
     page.locator('[data-action="modes"]').click()
     flow = page.locator('[data-mode-id="flow"]')
     expect(flow).to_be_visible()
-    expect(flow).to_have_attribute('aria-disabled', 'true')
+    assert flow.get_attribute('aria-disabled') is None
+    assert flow.evaluate('el => el.tagName') == 'BUTTON'
     assert page.locator('[data-flow-integration-profile]').count() == 0
 
-    evidence.append({"browser": browser_name, "case": "Phase 11 gate preserves Phase 10 and public Flow"})
+    evidence.append({"browser": browser_name, "case": "Phase 11 remains isolated from Phase 10 while released public Flow stays available"})
     context.close()
 
 
