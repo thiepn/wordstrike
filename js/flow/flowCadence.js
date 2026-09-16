@@ -145,8 +145,9 @@ function typingDurationMs(run) {
   const start = Number(run?.startedAt);
   if (!Number.isFinite(start)) return 0;
   const raw = run?.rawKeystrokes || [];
-  const finalAt = Number.isFinite(Number(run?.completedAt))
-    ? Number(run.completedAt)
+  const completedAt = run?.completedAt;
+  const finalAt = completedAt != null && Number.isFinite(Number(completedAt))
+    ? Number(completedAt)
     : Number(raw.at(-1)?.at);
   if (!Number.isFinite(finalAt) || finalAt <= start) return 0;
   return Math.max(0, (finalAt - start) - deliberatePauseMs(run));
