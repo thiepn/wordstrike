@@ -99,8 +99,9 @@ const LEGACY_BOARD_KEYS = [
   "arcade-rush-v1",
 ];
 
-// 1. Phase 0 public registry: Flow owns the public slot while Arcade Rush is
-// retained only as a hidden legacy definition for old saves/results/diagnostics.
+// 1. Flow owns the public replacement slot while Arcade Rush remains a hidden
+// legacy definition for old saves/results/diagnostics. Phase 13 makes that Flow
+// slot launchable without changing Rush compatibility.
 assert.deepEqual(getRegisteredModes().map(({ id }) => id), REGISTERED_MODE_IDS);
 assert.deepEqual(getAllModes().map(({ id }) => id), PUBLIC_MODE_IDS);
 assert.equal(Object.hasOwn(MODE_IDS, "DAILY"), false);
@@ -136,10 +137,10 @@ assert.deepEqual(
   },
   {
     id: "flow",
-    enabled: false,
+    enabled: true,
     visible: true,
-    status: "coming-soon",
-    route: null,
+    status: "available",
+    route: "flow-release",
     storesProgress: true,
   },
 );
@@ -174,7 +175,7 @@ assert.equal(ARCADE_RUSH_BOSS_VERSION, 1);
 assert.equal(ARCADE_RUSH_BOSS_MAX_HP, 8);
 
 // 3. Schema-v2 persistence stays compatible: historical Rush records survive,
-// while Flow only has a zeroed reserved summary and records no Phase-0 runs.
+// while Flow has its reserved summary without requiring a storage-shape migration.
 assert.equal(MODE_DATA_SCHEMA_VERSION, 2);
 assert.equal(MODE_DATA_STORAGE_KEY, "wordstrike_mode_data_v2");
 const defaults = createDefaultModeData();
@@ -401,4 +402,4 @@ assert.match(readme, /\*\*Flow\*\*/);
 assert.doesNotMatch(readme, /\*\*Arcade Rush\*\*/);
 assert.doesNotMatch(readme, /\*\*Daily Strike\*\*|### Daily Strike/);
 
-console.log("Flow Phase 0 migration certification passed: Flow owns the public slot while Arcade Rush rules/data remain legacy-compatible.");
+console.log("Flow replacement certification passed: released Flow owns the public slot while Arcade Rush rules/data remain legacy-compatible.");
