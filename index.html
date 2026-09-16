@@ -6,14 +6,20 @@
     <script>
       (() => {
         // Diet Copilot and WORDSTRIKE share this Supabase project's Site URL.
-        // A Diet OAuth attempt writes an explicit same-origin session marker
-        // before leaving for Google. Only a marked callback is relayed here;
-        // WORDSTRIKE's own auth remains untouched.
+        // WORDSTRIKE deliberately uses implicit OAuth, whose result is returned
+        // in the URL fragment. Diet Copilot uses PKCE, whose result is returned
+        // in the query string. Therefore an unclaimed query-string auth result
+        // is deterministically a Diet web callback; only an explicit native
+        // marker is allowed to divert it to the Android callback.
         const TARGET_KEY = 'diet-copilot:oauth-target-v2';
         const FLOW_KEY = 'diet-copilot:oauth-flow-v2';
         const source = new URL(location.href);
-        const fragment = new URLSearchParams(source.hash.slice(1));
-        const value = key => source.searchParams.get(key) ?? fragment.get(key);
+        const value = key => source.searchParams.get(key);
+
+        const hasPkceResult = Boolean(
+          value('code') || value('error') || value('error_code') || value('error_description')
+        );
+        if (!hasPkceResult) return;
 
         let targetKind = null;
         let storedFlow = null;
@@ -22,15 +28,8 @@
           storedFlow = sessionStorage.getItem(FLOW_KEY);
         } catch {}
 
-        if (targetKind !== 'web' && targetKind !== 'native') return;
-
-        const hasResult = Boolean(
-          value('code') || value('error') || value('error_code') || value('error_description')
-        );
-        if (!hasResult) return;
-
         const target = new URL(
-          targetKind === 'web' ? '/diet/' : '/diet/native-auth-callback.html',
+          targetKind === 'native' ? '/diet/native-auth-callback.html' : '/diet/web-auth-callback.html',
           source.origin
         );
 
@@ -103,7 +102,6 @@
     <script type="module" src="js/speedTestPerformanceV4.js?v=20260911a"></script>
     <script type="module" src="js/speedTestPerformanceV5.js?v=20260911a"></script>
     <script type="module" src="js/speedTestResultsV6.js?v=20260911a"></script>
-    <script type="module" src="js/speedTestResultsV7.js?v=20260911a"></script>
     <script type="module" src="js/campaignGameplayPresentation.js"></script>
     <script type="module" src="js/endlessGameplayPresentation.js"></script>
     <script type="module" src="js/bossGameplayPresentation.js"></script>
