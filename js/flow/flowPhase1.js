@@ -10,10 +10,13 @@ import { FLOW_PHASES } from "./flowState.js";
 
 const root = () => document.querySelector("#app");
 const now = () => globalThis.performance?.now?.() ?? Date.now();
+const search = new URLSearchParams(globalThis.location?.search || "");
+const developerFlowRequested = search.get("dev") === "1" && search.get("mode") === "flow";
 
 let active = false;
+let dismissed = false;
 let view = "idle";
-let storedModeSelectNodes = [];
+let storedReturnNodes = [];
 let run = null;
 
 function escapeHtml(value) {
@@ -24,22 +27,22 @@ function escapeHtml(value) {
     .replaceAll('"', "&quot;");
 }
 
-function preserveModeSelect() {
+function preserveReturnSurface() {
   const app = root();
   if (!app) return false;
-  storedModeSelectNodes = [...app.childNodes];
-  return storedModeSelectNodes.length > 0;
+  storedReturnNodes = [...app.childNodes];
+  return storedReturnNodes.length > 0;
 }
 
-function restoreModeSelect() {
+function restoreReturnSurface() {
   const app = root();
   if (!app) return;
+  dismissed = true;
   active = false;
   view = "idle";
   run = null;
-  if (storedModeSelectNodes.length) app.replaceChildren(...storedModeSelectNodes);
-  storedModeSelectNodes = [];
-  app.querySelector('[data-mode-id="flow"]')?.focus?.({ preventScroll: true });
+  if (storedReturnNodes.length) app.replaceChildren(...storedReturnNodes);
+  storedReturnNodes = [];
 }
 
 function renderReady() {
@@ -50,7 +53,7 @@ function renderReady() {
     <section class="screen flow-phase1-screen flow-ready-screen" data-flow-view="ready">
       <main class="flow-phase1-shell">
         <button type="button" class="screen-back-button" data-flow-action="back">BACK</button>
-        <div class="flow-phase1-kicker">Natural typing engine · Phase 1</div>
+        <div class="flow-phase1-kicker">Natural typing engine · Phase 1 developer route</div>
         <h1>FLOW</h1>
         <p class="flow-phase1-lead">Type complete text exactly as written. Spaces, capitals, punctuation, apostrophes, quotation marks, numbers and corrections are all part of the run.</p>
         <div class="flow-phase1-brief" aria-label="Phase 1 session details">
@@ -59,10 +62,10 @@ function renderReady() {
           <span><strong>No score</strong> in Phase 1</span>
         </div>
         <button type="button" class="ui-button ui-button--primary flow-phase1-start" data-flow-action="start">START FLOW</button>
-        <p class="flow-phase1-note">This phase validates the typing engine only. Flow scoring, rhythm analysis and progression come later.</p>
+        <p class="flow-phase1-note">This phase validates the typing engine only. Public launch, Flow scoring, rhythm analysis and progression come later.</p>
       </main>
     </section>`;
-  app.querySelector('[data-flow-action="back"]')?.addEventListener("click", restoreModeSelect);
+  app.querySelector('[data-flow-action="back"]')?.addEventListener("click", restoreReturnSurface);
   app.querySelector('[data-flow-action="start"]')?.addEventListener("click", startRun);
   app.querySelector('[data-flow-action="start"]')?.focus?.({ preventScroll: true });
 }
@@ -97,7 +100,7 @@ function renderRun() {
         <textarea class="flow-input-capture" data-flow-input aria-label="Flow typing input" autocapitalize="off" autocomplete="off" autocorrect="off" spellcheck="false"></textarea>
       </main>
     </section>`;
-  app.querySelector('[data-flow-action="back"]')?.addEventListener("click", restoreModeSelect);
+  app.querySelector('[data-flow-action="back"]')?.addEventListener("click", restoreReturnSurface);
   const input = app.querySelector("[data-flow-input]");
   input?.addEventListener("beforeinput", handleBeforeInput);
   input?.addEventListener("input", () => { input.value = ""; });
@@ -159,12 +162,12 @@ function renderComplete() {
         </div>
         <div class="flow-complete-actions">
           <button type="button" class="ui-button ui-button--primary" data-flow-action="restart">TYPE AGAIN</button>
-          <button type="button" class="ui-button" data-flow-action="back">MODE SELECT</button>
+          <button type="button" class="ui-button" data-flow-action="back">BACK</button>
         </div>
       </main>
     </section>`;
   app.querySelector('[data-flow-action="restart"]')?.addEventListener("click", startRun);
-  app.querySelector('[data-flow-action="back"]')?.addEventListener("click", restoreModeSelect);
+  app.querySelector('[data-flow-action="back"]')?.addEventListener("click", restoreReturnSurface);
   app.querySelector('[data-flow-action="restart"]')?.focus?.({ preventScroll: true });
 }
 
@@ -183,38 +186,15 @@ function handleBeforeInput(event) {
   }
 }
 
-function launchFromModeSelect(event) {
-  const flowTarget = event.target?.closest?.('[data-mode-id="flow"]');
-  if (!flowTarget || !root()?.querySelector(".mode-select-screen")) return false;
-  event.preventDefault();
-  event.stopImmediatePropagation();
-  preserveModeSelect();
-  active = true;
-  view = "ready";
-  renderReady();
-  return true;
-}
-
-function handleDocumentClick(event) {
-  if (!active) launchFromModeSelect(event);
-}
-
 function handleDocumentKeydown(event) {
-  if (!active) {
-    if (event.key === "Enter" && document.activeElement?.matches?.('[data-mode-id="flow"]')) {
-      launchFromModeSelect(event);
-    }
-    return;
-  }
-
+  if (!active) return;
   if (event.key === "Escape") {
     event.preventDefault();
     event.stopImmediatePropagation();
-    restoreModeSelect();
+    restoreReturnSurface();
     return;
   }
-
-  if (view === "ready") {
+  if (view === "ready" || view === "complete") {
     if (event.key === "Enter") {
       event.preventDefault();
       event.stopImmediatePropagation();
@@ -222,16 +202,6 @@ function handleDocumentKeydown(event) {
     }
     return;
   }
-
-  if (view === "complete") {
-    if (event.key === "Enter") {
-      event.preventDefault();
-      event.stopImmediatePropagation();
-      startRun();
-    }
-    return;
-  }
-
   if (view !== "run" || !run) return;
   if (event.ctrlKey || event.metaKey || event.altKey || event.isComposing) return;
   if (event.key === "Backspace") {
@@ -249,12 +219,27 @@ function handleDocumentKeydown(event) {
   }
 }
 
-document.addEventListener("click", handleDocumentClick, true);
+function tryLaunchDeveloperFlow() {
+  if (!developerFlowRequested || active || dismissed) return;
+  const app = root();
+  if (!app || app.childNodes.length === 0) return;
+  preserveReturnSurface();
+  active = true;
+  view = "ready";
+  renderReady();
+}
+
 document.addEventListener("keydown", handleDocumentKeydown, true);
+if (developerFlowRequested) {
+  const app = root();
+  if (app) new MutationObserver(() => queueMicrotask(tryLaunchDeveloperFlow)).observe(app, { childList: true });
+  queueMicrotask(tryLaunchDeveloperFlow);
+}
 
 if (globalThis.window) {
   window.wordstrikeFlowPhase1 = Object.freeze({
     getSnapshot: () => getFlowTypingSnapshot(run),
     isActive: () => active,
+    developerRouteEnabled: developerFlowRequested,
   });
 }
