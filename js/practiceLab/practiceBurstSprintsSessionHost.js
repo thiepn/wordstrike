@@ -4,271 +4,103 @@ import { createPracticeManifestStore } from "./practiceManifestStore.js";
 import { createPracticeRepository } from "./practiceRepository.js";
 import { createPracticeSessionEngine } from "./practiceSessionEngine.js";
 import {
+  PRACTICE_BURST_PREVIEW_DURATION_MS,
   PRACTICE_BURST_RECOVERY_DURATION_MS,
   PRACTICE_BURST_SPRINT_COUNT,
   PRACTICE_BURST_SPRINT_DURATION_MS,
   PRACTICE_BURST_TOTAL_ACTIVE_DURATION_MS,
+  PRACTICE_BURST_WARMUP_DURATION_MS,
 } from "./practiceBurstSprintsConstants.js";
 
 const INSERT_TYPES = new Set(["insertText", "insertCompositionText"]);
-const escapeHtml = (value = "") => String(value).replace(/[&<>'"]/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[char]);
-const n = (value, digits = 1) => Number.isFinite(value) ? Number(value).toFixed(digits).replace(/\.0$/, "") : "—";
-const pct = (value) => Number.isFinite(value) ? `${n(value, 1)}%` : "—";
+const esc = (value = "") => String(value).replace(/[&<>'"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[c]);
+const num = (value, digits = 1) => Number.isFinite(value) ? Number(value).toFixed(digits).replace(/\.0$/, "") : "—";
+const pct = (value) => Number.isFinite(value) ? `${num(value, 1)}%` : "—";
 
 function textWindow(contentPlan, snapshot) {
-  const chars = Array.from(contentPlan.text);
-  const cursor = snapshot.cursorIndex ?? 0;
-  const errors = new Set(snapshot.errorPositions ?? []);
-  const start = Math.max(0, cursor - 120);
-  const end = Math.min(chars.length, cursor + 360);
-  return chars.slice(start, end).map((value, offset) => {
-    const index = start + offset;
-    const classes = ["practice-real-text-char"];
-    if (index < cursor) classes.push(errors.has(index) ? "is-error" : "is-typed");
-    if (index === cursor) classes.push("is-current");
-    return `<span class="${classes.join(" ")}">${value === " " ? "&nbsp;" : escapeHtml(value)}</span>`;
-  }).join("");
+  const chars = Array.from(contentPlan.text); const cursor = snapshot.cursorIndex ?? 0; const errors = new Set(snapshot.errorPositions ?? []); const start = Math.max(0, cursor - 120); const end = Math.min(chars.length, cursor + 360);
+  return chars.slice(start, end).map((value, offset) => { const index = start + offset; const classes = ["practice-real-text-char"]; if (index < cursor) classes.push(errors.has(index) ? "is-error" : "is-typed"); if (index === cursor) classes.push("is-current"); return `<span class="${classes.join(" ")}">${value === " " ? "&nbsp;" : esc(value)}</span>`; }).join("");
 }
-
-function renderSprint(root, session, snapshot, sprintOrdinal) {
-  const activeMs = snapshot.timing?.activeDurationMs ?? 0;
-  const sprintStart = (sprintOrdinal - 1) * PRACTICE_BURST_SPRINT_DURATION_MS;
-  const elapsed = Math.max(0, Math.min(PRACTICE_BURST_SPRINT_DURATION_MS, activeMs - sprintStart));
-  const remaining = Math.max(0, PRACTICE_BURST_SPRINT_DURATION_MS - elapsed);
-  const overall = Math.min(100, 100 * activeMs / PRACTICE_BURST_TOTAL_ACTIVE_DURATION_MS);
-  root.innerHTML = `<section class="screen practice-lab-screen" data-practice-view="burst-sprints-session"><div class="practice-lab-shell"><header class="practice-real-text-session-header"><div><div class="eyebrow">Burst Sprints · sprint ${sprintOrdinal} of ${PRACTICE_BURST_SPRINT_COUNT}</div><h1>Fast, but controlled</h1><p>${n(remaining / 1000, 1)} s remaining in this sprint</p></div><button type="button" data-burst-session-action="stop" aria-label="Stop Burst Sprints">STOP</button></header><div role="progressbar" aria-label="Burst Sprints active progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(overall)}"><div style="width:${overall}%"></div></div><p class="practice-lab-muted" aria-live="polite">Push above your sustainable pace without deliberately sacrificing control. Live WPM is hidden so the bout stays execution-focused.</p><section class="practice-real-text-typing" aria-label="Burst sprint passage" style="max-width:100%;overflow-wrap:anywhere">${textWindow(session.contentPlan, snapshot)}</section><textarea data-burst-input aria-label="Burst Sprints typing input" inputmode="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" style="position:fixed;left:-10000px;top:0;width:1px;height:1px;opacity:0"></textarea></div></section>`;
+function shell(root, body, view) { root.innerHTML = `<section class="screen practice-lab-screen" data-practice-view="${view}"><div class="practice-lab-shell">${body}</div></section>`; }
+function stopButton() { return `<button type="button" data-burst-session-action="stop" aria-label="Stop Burst Sprints">STOP</button>`; }
+function renderWarmup(root, session, snapshot) {
+  const remaining = Math.max(0, PRACTICE_BURST_WARMUP_DURATION_MS - (snapshot.timing?.activeDurationMs ?? 0));
+  shell(root, `<header><div class="eyebrow">Burst Sprints · warm-up</div><h1>Type naturally</h1><p>${num(remaining / 1000)} s remaining</p>${stopButton()}</header><p class="practice-lab-muted">Warm-up contributes ordinary diagnostic evidence, not Burst ability estimation.</p><section class="practice-real-text-typing">${textWindow(session.contentPlan, snapshot)}</section><textarea data-burst-input aria-label="Burst Sprints warm-up input" style="position:fixed;left:-10000px;top:0;width:1px;height:1px;opacity:0"></textarea>`, "burst-sprints-warmup");
 }
-
-function renderRecovery(root, sprintOrdinal, remainingMs) {
-  const nextSprint = Math.min(PRACTICE_BURST_SPRINT_COUNT, sprintOrdinal + 1);
-  root.innerHTML = `<section class="screen practice-lab-screen" data-practice-view="burst-sprints-recovery"><div class="practice-lab-shell"><header class="practice-real-text-session-header"><div><div class="eyebrow">Burst Sprints · recovery</div><h1>Release and reset</h1><p>${n(Math.max(0, remainingMs) / 1000, 1)} s until sprint ${nextSprint}</p></div><button type="button" data-burst-session-action="stop" aria-label="Stop Burst Sprints">STOP</button></header><section class="practice-lab-empty-state"><p>Do not type during recovery. The timer is excluded from active sprint measurement.</p><p class="practice-lab-muted">Sprint ${sprintOrdinal} complete · next: ${nextSprint} of ${PRACTICE_BURST_SPRINT_COUNT}</p></section></div></section>`;
+function renderPreview(root, session, snapshot, ordinal, remainingMs) {
+  shell(root, `<header><div class="eyebrow">Burst Sprints · preview ${ordinal} of ${PRACTICE_BURST_SPRINT_COUNT}</div><h1>Preview</h1><p>${num(Math.max(0, remainingMs) / 1000)} s</p>${stopButton()}</header><p class="practice-lab-muted">Input is disabled until the sprint begins.</p><section class="practice-real-text-typing" aria-label="Upcoming sprint text">${textWindow(session.contentPlan, snapshot)}</section>`, "burst-sprints-preview");
 }
-
-function renderRows(sprints = [], selected = new Set()) {
-  return sprints.map((sprint) => `<tr><th scope="row">${escapeHtml(sprint.sprintId)}</th><td>${n(sprint.correctedWpm, 1)}</td><td>${pct(sprint.strictAccuracy)}</td><td>${pct(Number.isFinite(sprint.correctionOverheadRate) ? sprint.correctionOverheadRate * 100 : null)}</td><td>${sprint.eligible ? "eligible" : "excluded"}</td><td>${selected.has(sprint.sprintId) ? "used" : "—"}</td></tr>`).join("");
+function renderSprint(root, session, snapshot, ordinal) {
+  const start = PRACTICE_BURST_WARMUP_DURATION_MS + (ordinal - 1) * PRACTICE_BURST_SPRINT_DURATION_MS; const active = snapshot.timing?.activeDurationMs ?? 0; const remaining = Math.max(0, PRACTICE_BURST_SPRINT_DURATION_MS - Math.max(0, active - start));
+  shell(root, `<header><div class="eyebrow">Burst Sprints · sprint ${ordinal} of ${PRACTICE_BURST_SPRINT_COUNT}</div><h1>Fast, but controlled</h1><p>${num(remaining / 1000)} s</p>${stopButton()}</header><p class="practice-lab-muted">No intermediate sprint result is shown.</p><section class="practice-real-text-typing">${textWindow(session.contentPlan, snapshot)}</section><textarea data-burst-input aria-label="Burst Sprints typing input" style="position:fixed;left:-10000px;top:0;width:1px;height:1px;opacity:0"></textarea>`, "burst-sprints-session");
 }
-
+function renderRecovery(root, ordinal, remainingMs) {
+  shell(root, `<header><div class="eyebrow">Burst Sprints · recovery after ${ordinal}</div><h1>Release and reset</h1><p>${num(Math.max(0, remainingMs) / 1000)} s</p>${stopButton()}</header><section class="practice-lab-empty-state"><p>Input is disabled. Upcoming sprint text is hidden during recovery.</p></section>`, "burst-sprints-recovery");
+}
+function rows(sprints = [], selected = new Set()) { return sprints.map((s) => `<tr><th>${esc(s.sprintId)}</th><td>${num(s.grossForwardWpm)}</td><td>${num(s.burstEffectiveWpm)}</td><td>${pct(s.firstPassAccuracy)}</td><td>${s.carryoverOpenError ? "carryover" : s.eligible ? "eligible" : "excluded"}</td><td>${selected.has(s.sprintId) ? "used" : "—"}</td></tr>`).join(""); }
 function renderResult(root, artifact, interrupted = false) {
   const selected = new Set(artifact?.selectedSprintIds ?? []);
-  const reserve = Number.isFinite(artifact?.burstReservePercent) ? `${artifact.burstReservePercent >= 0 ? "+" : ""}${n(artifact.burstReservePercent, 1)}%` : "—";
-  root.innerHTML = `<section class="screen practice-lab-screen" data-practice-view="burst-sprints-result"><div class="practice-lab-shell"><main class="practice-lab-detail"><div class="eyebrow">Burst Sprints ${interrupted ? "stopped" : "complete"}</div><h1>${interrupted ? "Incomplete sprint protocol" : "Burst ability diagnostic"}</h1><p role="status">${escapeHtml(artifact?.status ?? (interrupted ? "interrupted" : "incomplete"))}</p><dl class="practice-real-text-result-grid"><div><dt>Robust burst estimate</dt><dd>${n(artifact?.burstEstimateWpm, 1)} WPM</dd></div><div><dt>Estimate accuracy</dt><dd>${pct(artifact?.burstAccuracy)}</dd></div><div><dt>Eligible sprints</dt><dd>${artifact?.eligibleSprintCount ?? 0} / ${PRACTICE_BURST_SPRINT_COUNT}</dd></div><div><dt>Controlled-speed reference</dt><dd>${n(artifact?.referenceControlledWpm, 1)} WPM</dd></div><div><dt>Burst reserve</dt><dd>${reserve}</dd></div></dl><div style="overflow-x:auto;max-width:100%"><table><thead><tr><th>Sprint</th><th>Corrected WPM</th><th>Accuracy</th><th>Correction overhead</th><th>Eligibility</th><th>Estimator</th></tr></thead><tbody>${renderRows(artifact?.sprints, selected)}</tbody></table></div><div class="practice-lab-notice" role="note"><p>${escapeHtml(artifact?.interpretation ?? "No burst estimate was admitted.")}</p><p>The result is a short-form burst estimate under this six-bout protocol, not a universal maximum typing speed or a single lucky personal best.</p></div><button type="button" data-burst-session-action="finish">BACK TO BURST SPRINTS</button></main></div></section>`;
+  shell(root, `<main class="practice-lab-detail"><div class="eyebrow">Burst Sprints ${interrupted ? "stopped" : "complete"}</div><h1>${interrupted ? "Incomplete sprint protocol" : "Burst diagnostic"}</h1><dl class="practice-real-text-result-grid"><div><dt>Best observed sprint</dt><dd>${num(artifact?.bestObservedSprintWpm)} WPM</dd></div><div><dt>Session burst estimate</dt><dd>${num(artifact?.sessionBurstEstimateWpm)} WPM</dd></div><div><dt>Current PL13 Burst Ability</dt><dd>${num(artifact?.currentBurstAbilityWpm)} WPM</dd></div><div><dt>PL14 Burst Reserve</dt><dd>${num(artifact?.pl14BurstReserveWpm)} WPM</dd></div><div><dt>Eligible sprints</dt><dd>${artifact?.eligibleSprintCount ?? 0} / 6</dd></div></dl><table><thead><tr><th>Sprint</th><th>Gross</th><th>Burst effective</th><th>First-pass accuracy</th><th>Validity</th><th>Estimator</th></tr></thead><tbody>${rows(artifact?.sprints, selected)}</tbody></table><div class="practice-lab-notice"><p>${esc(artifact?.interpretation ?? "No burst estimate admitted.")}</p><p>The 75% floor is a measurement-validity rule, not a recommended typing accuracy target.</p></div><button type="button" data-burst-session-action="finish">BACK TO BURST SPRINTS</button></main>`, "burst-sprints-result");
 }
-
-function normalizedInput(type, value) {
-  return {
-    type,
-    value,
-    source: "browser-input",
-    monotonicTimestampMs: Math.max(0, globalThis.performance?.now?.() ?? Date.now()),
-    wallTimestampUtc: new Date().toISOString(),
-    modifiers: { ctrl: false, meta: false, alt: false, shift: false },
-  };
-}
+function normalizedInput(type, value) { return { type, value, source: "browser-input", monotonicTimestampMs: Math.max(0, globalThis.performance?.now?.() ?? Date.now()), wallTimestampUtc: new Date().toISOString(), modifiers: { ctrl: false, meta: false, alt: false, shift: false } }; }
 
 export async function mountPracticeBurstSprintsSession({ root, session, onExit = () => {}, logger = null, dependencies = {} } = {}) {
   if (!root?.addEventListener || !session?.experiment || !session?.contentPlan) throw new TypeError("Burst Sprints host requires a prepared session");
-  const dataStore = dependencies.dataStore ?? createPracticeIndexedDbStore();
-  const repository = dependencies.repository ?? createPracticeRepository({ dataStore, manifestStore: dependencies.manifestStore ?? createPracticeManifestStore() });
-  const initialized = dependencies.initialized ?? await repository.initializePracticeStorage();
+  const dataStore = dependencies.dataStore ?? createPracticeIndexedDbStore(); const repository = dependencies.repository ?? createPracticeRepository({ dataStore, manifestStore: dependencies.manifestStore ?? createPracticeManifestStore() }); const initialized = dependencies.initialized ?? await repository.initializePracticeStorage();
   if (initialized.context.contextId !== session.contextId || initialized.profile.profileId !== session.profileId) throw Object.assign(new Error("Practice context changed after Burst Sprints preparation"), { code: "PRACTICE_CONTEXT_MISMATCH" });
-  const engine = (dependencies.engineFactory ?? createPracticeSessionEngine)({ repository, sessionId: session.sessionId, profileId: session.profileId, contextId: session.contextId, logger });
-
-  let finalResult = null;
-  let closed = false;
-  let unsubscribe = null;
-  let pulseLoop = null;
-  let interrupted = false;
-  let completing = false;
-  let phase = "sprint";
-  let sprintOrdinal = 1;
-  let recoveryEndsAt = null;
-  let transitionPromise = null;
-
-  const running = () => !closed && !interrupted && !completing && !finalResult;
-  const focus = () => queueMicrotask(() => {
-    if (running() && phase === "sprint") root.querySelector?.("[data-burst-input]")?.focus?.({ preventScroll: true });
-  });
-  const cleanup = async (notify = true) => {
-    if (closed) return;
-    closed = true;
-    pulseLoop?.stop();
-    unsubscribe?.();
-    root.removeEventListener("beforeinput", beforeInput);
-    root.removeEventListener("keydown", keyDown);
-    root.removeEventListener("click", click);
-    globalThis.document?.removeEventListener?.("visibilitychange", visibilityChange);
-    try { await engine.destroy(); } catch {}
-    try { dataStore.close?.(); } catch {}
-    if (notify) onExit(finalResult);
+  const engine = (dependencies.engineFactory ?? createPracticeSessionEngine)({ repository, sessionId: session.sessionId, profileId: session.profileId, contextId: session.contextId, logger }); const wallNow = dependencies.wallNow ?? (() => Date.now());
+  let finalResult = null, closed = false, unsubscribe = null, pulseLoop = null, interrupted = false, completing = false, phase = "warmup", sprintOrdinal = 0, inactiveEndsAt = null, inactiveStartedAt = null, protocolInactiveMs = 0, transitionPromise = null;
+  const running = () => !closed && !interrupted && !completing && !finalResult; const inputEnabled = () => phase === "warmup" || phase === "sprint";
+  const inactiveRemainingMs = () => (phase === "preview" || phase === "recovery") ? Math.max(0, (inactiveEndsAt ?? wallNow()) - wallNow()) : 0;
+  const publicSnapshot = () => {
+    const remainingMs = inactiveRemainingMs();
+    const engineSnapshot = engine.getSnapshot();
+    return Object.freeze({
+      ...engineSnapshot,
+      phase,
+      sprintOrdinal,
+      recoveryRemainingMs: phase === "recovery" ? remainingMs : 0,
+      previewRemainingMs: phase === "preview" ? remainingMs : 0,
+      protocolInactiveMs,
+      burstProtocol: Object.freeze({ phase, sprintOrdinal, recoveryRemainingMs: phase === "recovery" ? remainingMs : 0, previewRemainingMs: phase === "preview" ? remainingMs : 0, protocolInactiveMs }),
+    });
   };
-
-  const buildInterruptedArtifact = async () => {
-    const snapshot = engine.getSnapshot();
-    const result = session.experiment.burstAccumulator?.finalize({ finalActiveDurationMs: snapshot.timing?.activeDurationMs ?? 0 });
-    const { analyzePracticeBurstSprintsResult } = await import("./practiceBurstSprintsAnalyzer.js");
-    return analyzePracticeBurstSprintsResult({ burstResult: result, plan: session.plan, foundationAnalysis: null }).trainingQuality;
-  };
-
+  const focus = () => queueMicrotask(() => { if (running() && inputEnabled()) root.querySelector?.("[data-burst-input]")?.focus?.({ preventScroll: true }); });
+  const cleanup = async (notify = true) => { if (closed) return; closed = true; pulseLoop?.stop(); unsubscribe?.(); root.removeEventListener("beforeinput", beforeInput); root.removeEventListener("keydown", keyDown); root.removeEventListener("click", click); globalThis.document?.removeEventListener?.("visibilitychange", visibilityChange); try { await engine.destroy(); } catch {} try { dataStore.close?.(); } catch {} if (notify) onExit(finalResult); };
+  const interruptedArtifact = async () => { const snapshot = engine.getSnapshot(); const result = session.experiment.burstAccumulator?.finalize({ finalActiveDurationMs: snapshot.timing?.activeDurationMs ?? 0 }); const { analyzePracticeBurstSprintsResult } = await import("./practiceBurstSprintsAnalyzer.js"); return analyzePracticeBurstSprintsResult({ burstResult: result, plan: session.plan }).trainingQuality; };
   const interrupt = async (reason = "manual-stop") => {
     if (!running()) return;
     interrupted = true;
     pulseLoop?.stop();
-    phase = "interrupted";
+    if (inactiveStartedAt != null) { protocolInactiveMs += Math.max(0, wallNow() - inactiveStartedAt); inactiveStartedAt = null; }
     session.experiment.burstAccumulator?.markInterrupted(reason);
     try { await engine.interrupt(reason); } catch {}
     if (closed) return;
-    const artifact = await buildInterruptedArtifact();
+    const artifact = await interruptedArtifact();
     if (closed) return;
-    finalResult = { interrupted: true, artifact };
+    finalResult = { interrupted: true, artifact, protocolInactiveMs };
+    phase = "interrupted";
     renderResult(root, artifact, true);
   };
-
-  const beforeInput = (event) => {
-    const target = event.target?.closest?.("[data-burst-input]");
-    if (!target || !running() || phase !== "sprint" || !root.contains?.(target)) return;
-    event.preventDefault();
-    const activeMs = engine.getSnapshot().timing?.activeDurationMs ?? 0;
-    const sprintEnd = sprintOrdinal * PRACTICE_BURST_SPRINT_DURATION_MS;
-    if (activeMs >= sprintEnd) return;
-    if (INSERT_TYPES.has(event.inputType) && typeof event.data === "string") {
-      for (const char of Array.from(event.data.normalize("NFC"))) engine.handleInput(normalizedInput(char === " " ? "space" : "character", char));
-    } else if (event.inputType === "deleteContentBackward") engine.handleInput(normalizedInput("backspace", ""));
-    else if (event.inputType === "deleteWordBackward") engine.handleInput(normalizedInput("word-delete", ""));
-    target.value = "";
-  };
-
-  const keyDown = (event) => {
-    if (event.key === "Escape") {
-      event.preventDefault();
-      void interrupt("manual-stop");
-    } else if ((event.ctrlKey || event.metaKey) && ["v", "x"].includes(String(event.key).toLowerCase())) event.preventDefault();
-  };
-
-  const click = (event) => {
-    const button = event.target?.closest?.("[data-burst-session-action]");
-    if (!button || !root.contains?.(button)) return;
-    if (button.dataset.burstSessionAction === "stop") void interrupt("manual-stop");
-    else if (button.dataset.burstSessionAction === "finish") void cleanup();
-  };
-
-  const visibilityChange = () => {
-    if (globalThis.document?.visibilityState === "hidden" && running()) void interrupt("visibility-hidden");
-  };
-
-  async function beginRecovery() {
-    if (transitionPromise || sprintOrdinal >= PRACTICE_BURST_SPRINT_COUNT || !running()) return;
-    phase = "transition";
-    transitionPromise = engine.pause("burst-recovery").then(() => {
-      if (!running()) return;
-      recoveryEndsAt = Date.now() + PRACTICE_BURST_RECOVERY_DURATION_MS;
-      phase = "recovery";
-      renderRecovery(root, sprintOrdinal, PRACTICE_BURST_RECOVERY_DURATION_MS);
-    }).catch((error) => {
-      logger?.warn?.("Burst Sprints recovery pause failed", error);
-      void interrupt("measurement-corruption");
-    }).finally(() => { transitionPromise = null; });
-    await transitionPromise;
-  }
-
-  async function endRecovery() {
-    if (transitionPromise || phase !== "recovery" || !running()) return;
-    phase = "transition";
-    transitionPromise = engine.resume().then((snapshot) => {
-      if (!running()) return;
-      sprintOrdinal += 1;
-      recoveryEndsAt = null;
-      phase = "sprint";
-      renderSprint(root, session, snapshot, sprintOrdinal);
-      focus();
-    }).catch((error) => {
-      logger?.warn?.("Burst Sprints recovery resume failed", error);
-      void interrupt("measurement-corruption");
-    }).finally(() => { transitionPromise = null; });
-    await transitionPromise;
-  }
-
+  const beforeInput = (event) => { const target = event.target?.closest?.("[data-burst-input]"); if (!target || !running() || !root.contains?.(target)) return; if (!inputEnabled()) { event.preventDefault(); return; } event.preventDefault(); if (INSERT_TYPES.has(event.inputType) && typeof event.data === "string") for (const char of Array.from(event.data.normalize("NFC"))) engine.handleInput(normalizedInput(char === " " ? "space" : "character", char)); else if (event.inputType === "deleteContentBackward") engine.handleInput(normalizedInput("backspace", "")); else if (event.inputType === "deleteWordBackward") engine.handleInput(normalizedInput("word-delete", "")); target.value = ""; };
+  const keyDown = (event) => { if (event.key === "Escape") { event.preventDefault(); void interrupt("manual-stop"); } else if (!inputEnabled() || ((event.ctrlKey || event.metaKey) && ["v", "x"].includes(String(event.key).toLowerCase()))) event.preventDefault(); };
+  const click = (event) => { const button = event.target?.closest?.("[data-burst-session-action]"); if (!button || !root.contains?.(button)) return; if (button.dataset.burstSessionAction === "stop") void interrupt("manual-stop"); else if (button.dataset.burstSessionAction === "finish") void cleanup(); };
+  const visibilityChange = () => { if (globalThis.document?.visibilityState === "hidden" && running()) { if (phase === "sprint") session.experiment.burstAccumulator?.markSprintCorrupted(sprintOrdinal, "visibility"); void interrupt("visibility-hidden"); } };
+  const startInactive = async (nextPhase, durationMs) => { if (transitionPromise || !running()) return; phase = "transition"; transitionPromise = engine.pause(`protocol-inactive:burst-${nextPhase}`).then(() => { if (!running()) return; inactiveStartedAt = wallNow(); inactiveEndsAt = inactiveStartedAt + durationMs; phase = nextPhase; const snap = engine.getSnapshot(); if (nextPhase === "preview") renderPreview(root, session, snap, sprintOrdinal + 1, durationMs); else renderRecovery(root, sprintOrdinal, durationMs); }).catch((error) => { logger?.warn?.("Burst protocol inactive transition failed", error); void interrupt("measurement-corruption"); }).finally(() => { transitionPromise = null; }); await transitionPromise; };
+  const switchInactive = (nextPhase, durationMs) => { const now = wallNow(); if (inactiveStartedAt != null) protocolInactiveMs += Math.max(0, now - inactiveStartedAt); inactiveStartedAt = now; inactiveEndsAt = now + durationMs; phase = nextPhase; renderPreview(root, session, engine.getSnapshot(), sprintOrdinal + 1, durationMs); };
+  const startSprint = async () => { if (transitionPromise || phase !== "preview" || !running()) return; const now = wallNow(); if (inactiveStartedAt != null) protocolInactiveMs += Math.max(0, now - inactiveStartedAt); inactiveStartedAt = null; phase = "transition"; transitionPromise = engine.resume().then((snapshot) => { if (!running()) return; sprintOrdinal += 1; phase = "sprint"; inactiveEndsAt = null; session.experiment.burstAccumulator?.markSprintStart(sprintOrdinal); renderSprint(root, session, snapshot, sprintOrdinal); focus(); }).catch((error) => { logger?.warn?.("Burst sprint start failed", error); void interrupt("measurement-corruption"); }).finally(() => { transitionPromise = null; }); await transitionPromise; };
   async function pulse() {
     if (!running() || transitionPromise) return;
-    if (phase === "recovery") {
-      const remaining = Math.max(0, (recoveryEndsAt ?? Date.now()) - Date.now());
-      renderRecovery(root, sprintOrdinal, remaining);
-      if (remaining <= 0) await endRecovery();
-      return;
-    }
-    if (phase !== "sprint") return;
-    const snapshot = engine.getSnapshot();
-    const activeMs = snapshot.timing?.activeDurationMs ?? 0;
-    const sprintEnd = sprintOrdinal * PRACTICE_BURST_SPRINT_DURATION_MS;
-    if (sprintOrdinal < PRACTICE_BURST_SPRINT_COUNT && activeMs >= sprintEnd) {
-      await beginRecovery();
-      return;
-    }
-    if (sprintOrdinal === PRACTICE_BURST_SPRINT_COUNT && activeMs >= PRACTICE_BURST_TOTAL_ACTIVE_DURATION_MS) {
-      try { await engine.tick(); } catch (error) {
-        logger?.warn?.("Burst Sprints completion tick failed", error);
-        await interrupt("measurement-corruption");
-      }
-      return;
-    }
-    renderSprint(root, session, snapshot, sprintOrdinal);
-    focus();
+    if (phase === "preview" || phase === "recovery") { const remaining = inactiveRemainingMs(); if (phase === "preview") renderPreview(root, session, engine.getSnapshot(), sprintOrdinal + 1, remaining); else renderRecovery(root, sprintOrdinal, remaining); if (remaining <= 0) { if (phase === "recovery") switchInactive("preview", PRACTICE_BURST_PREVIEW_DURATION_MS); else await startSprint(); } return; }
+    const snapshot = engine.getSnapshot(); const activeMs = snapshot.timing?.activeDurationMs ?? 0;
+    if (phase === "warmup") { if (activeMs >= PRACTICE_BURST_WARMUP_DURATION_MS) { await startInactive("preview", PRACTICE_BURST_PREVIEW_DURATION_MS); return; } renderWarmup(root, session, snapshot); focus(); return; }
+    if (phase === "sprint") { const end = PRACTICE_BURST_WARMUP_DURATION_MS + sprintOrdinal * PRACTICE_BURST_SPRINT_DURATION_MS; if (activeMs >= end && sprintOrdinal < PRACTICE_BURST_SPRINT_COUNT) { await startInactive("recovery", PRACTICE_BURST_RECOVERY_DURATION_MS); return; } if (sprintOrdinal === PRACTICE_BURST_SPRINT_COUNT && activeMs >= PRACTICE_BURST_TOTAL_ACTIVE_DURATION_MS) { await engine.tick(); return; } renderSprint(root, session, snapshot, sprintOrdinal); focus(); }
   }
-
   try {
     await engine.prepare({ experiment: session.experiment, configuration: session.configuration, contentPlan: session.contentPlan });
-    unsubscribe = engine.subscribe((snapshot, event) => {
-      if (!running()) return;
-      if (event === "completed") {
-        completing = true;
-        pulseLoop?.stop();
-        void engine.complete().then((result) => {
-          if (closed || interrupted) return;
-          finalResult = result;
-          phase = "result";
-          renderResult(root, result.summary?.trainingQuality, false);
-        }).catch((error) => {
-          completing = false;
-          logger?.warn?.("Burst Sprints completion retrieval failed", error);
-          void interrupt("measurement-corruption");
-        });
-        return;
-      }
-      if (phase === "sprint" && snapshot.lifecycleState === "active") {
-        renderSprint(root, session, snapshot, sprintOrdinal);
-        focus();
-      }
-    });
-    root.addEventListener("beforeinput", beforeInput);
-    root.addEventListener("keydown", keyDown);
-    root.addEventListener("click", click);
-    globalThis.document?.addEventListener?.("visibilitychange", visibilityChange);
-    const startSnapshot = await engine.start();
-    if (running()) { renderSprint(root, session, startSnapshot, sprintOrdinal); focus(); }
-    pulseLoop = createPracticeSessionPulse({
-      ...dependencies.pulseTimers,
-      intervalMs: 50,
-      isActive: running,
-      run: pulse,
-      onError: async (error) => {
-        logger?.warn?.("Burst Sprints timer failed", error);
-        await interrupt("measurement-corruption");
-      },
-    });
-    pulseLoop.start();
-    visibilityChange();
-  } catch (error) {
-    await cleanup(false);
-    throw error;
-  }
-
-  return Object.freeze({
-    getSnapshot: () => Object.freeze({
-      engine: engine.getSnapshot(),
-      phase,
-      sprintOrdinal,
-      recoveryRemainingMs: phase === "recovery" ? Math.max(0, (recoveryEndsAt ?? Date.now()) - Date.now()) : 0,
-    }),
-    exit: cleanup,
-    interrupt,
-  });
+    unsubscribe = engine.subscribe((snapshot, event) => { if (!running()) return; if (event === "completed") { completing = true; pulseLoop?.stop(); void engine.complete().then((result) => { if (closed || interrupted) return; if (inactiveStartedAt != null) { protocolInactiveMs += Math.max(0, wallNow() - inactiveStartedAt); inactiveStartedAt = null; } finalResult = { ...result, protocolInactiveMs }; phase = "result"; renderResult(root, result.summary?.trainingQuality, false); }).catch((error) => { logger?.warn?.("Burst completion failed", error); void interrupt("measurement-corruption"); }); return; } if (snapshot.lifecycleState === "active" && phase === "warmup") { renderWarmup(root, session, snapshot); focus(); } });
+    root.addEventListener("beforeinput", beforeInput); root.addEventListener("keydown", keyDown); root.addEventListener("click", click); globalThis.document?.addEventListener?.("visibilitychange", visibilityChange);
+    const start = await engine.start(); renderWarmup(root, session, start); focus(); pulseLoop = createPracticeSessionPulse({ ...dependencies.pulseTimers, intervalMs: 50, isActive: running, run: pulse, onError: (error) => { logger?.warn?.("Burst timer failed", error); return interrupt("measurement-corruption"); } }); pulseLoop.start(); visibilityChange();
+  } catch (error) { await cleanup(false); throw error; }
+  return Object.freeze({ stop: () => interrupt("manual-stop"), interrupt, exit: cleanup, getSnapshot: publicSnapshot });
 }

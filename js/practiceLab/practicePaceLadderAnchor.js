@@ -4,70 +4,40 @@ import { PRACTICE_PACE_LADDER_POLICY_V1 } from "./practicePaceLadderPolicy.js";
 
 const freeze = (value) => Object.freeze(value);
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
-const median = (values) => {
-  const sorted = values.filter(Number.isFinite).sort((a, b) => a - b);
-  if (!sorted.length) return null;
-  const mid = Math.floor(sorted.length / 2);
-  return sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
-};
+const DAY_MS = 86_400_000;
 
 export function calculatePracticePaceLadderDifficultyAdjustment(formTypability) {
   const status = formTypability?.status ?? "insufficient";
   const difficultyIndex = Number.isFinite(formTypability?.difficultyIndex) ? formTypability.difficultyIndex : null;
   const coverage = Number.isFinite(formTypability?.availableModelWeight) ? clamp(formTypability.availableModelWeight, 0, 1) : 0;
-  if (!["full", "partial"].includes(status) || difficultyIndex == null || coverage <= 0) return freeze({ status: "unadjusted", adjustmentLog: 0, difficultyIndex, coverage });
+  if (!["full", "partial"].includes(status) || difficultyIndex == null || coverage < 0.90) return freeze({ status: "unadjusted", adjustmentLog: 0, difficultyIndex, coverage });
   const adjustmentLog = clamp(PRACTICE_ABILITY_POLICY_V1.difficulty.logCoefficient * difficultyIndex * coverage, -PRACTICE_ABILITY_POLICY_V1.difficulty.maxAbsoluteLogAdjustment, PRACTICE_ABILITY_POLICY_V1.difficulty.maxAbsoluteLogAdjustment);
   return freeze({ status: "adjusted", adjustmentLog, difficultyIndex, coverage });
 }
 
-export function isOrdinaryPaceAnchorSession(summary) {
-  return Boolean(summary
-    && summary.status === "completed"
-    && summary.experimentId === "real-text"
-    && !summary.assessmentBinding
-    && !summary.coachBinding
-    && !summary.evaluationSummary
-    && !summary.retentionReviewSummary
-    && (summary.targetEntities?.length ?? 0) === 0
-    && Number.isFinite(summary.wpm)
-    && summary.wpm > 0
-    && Number.isFinite(summary.accuracy)
-    && summary.accuracy >= 85);
+export function resolvePracticePaceLadderFrontierAnchor({ controlFrontier = null, difficultyAdjustmentLog = 0, now = () => new Date(), policy = PRACTICE_PACE_LADDER_POLICY_V1 } = {}) {
+  const status = controlFrontier?.status;
+  const confidence = controlFrontier?.confidence;
+  const frontierWpm = Number(controlFrontier?.frontierWpm);
+  const updatedAtMs = Date.parse(controlFrontier?.updatedAt ?? "");
+  const nowValue = typeof now === "function" ? now() : now;
+  const nowMs = (nowValue instanceof Date ? nowValue : new Date(nowValue)).getTime();
+  const ageMs = Number.isFinite(updatedAtMs) && Number.isFinite(nowMs) ? Math.max(0, nowMs - updatedAtMs) : Infinity;
+  if (!["bracketed", "lower-bound"].includes(status) || !["medium", "high"].includes(confidence) || !Number.isFinite(frontierWpm) || frontierWpm <= 0 || ageMs > 45 * DAY_MS) return freeze({ version: PRACTICE_PACE_LADDER_ANCHOR_POLICY_VERSION, source: "in-session-reference", status: "pending", rawAnchorWpm: null, effectiveWpm: null });
+  const adjustment = Number.isFinite(difficultyAdjustmentLog) ? difficultyAdjustmentLog : 0;
+  const rawAnchorWpm = clamp(frontierWpm * Math.exp(-adjustment), policy.targetMinimumWpm, policy.targetMaximumWpm);
+  return freeze({ version: PRACTICE_PACE_LADDER_ANCHOR_POLICY_VERSION, source: "pl14-frontier", status: "ready", rawAnchorWpm, effectiveWpm: frontierWpm, frontierStatus: status, frontierConfidence: confidence, frontierUpdatedAt: controlFrontier.updatedAt, frontierIsLowerBound: status === "lower-bound" });
 }
 
-export function deriveOrdinaryPracticeAnchor(sessionSummaries = [], { maximumSamples = 5 } = {}) {
-  const eligible = sessionSummaries.filter(isOrdinaryPaceAnchorSession)
-    .sort((a, b) => String(b.completedAtUtc ?? b.updatedAt ?? "").localeCompare(String(a.completedAtUtc ?? a.updatedAt ?? "")))
-    .slice(0, maximumSamples);
-  const value = median(eligible.map((item) => item.wpm));
-  return freeze({ measuredWpm: value, sampleCount: eligible.length, sourceExperimentIds: eligible.length ? ["real-text"] : [] });
+export function resolvePracticePaceLadderReferenceAnchor({ acceptedForwardInsertions, firstPassAccuracy, grossWpm, coverage, interrupted = false, policy = PRACTICE_PACE_LADDER_POLICY_V1 } = {}) {
+  const accuracyRatio = Number.isFinite(firstPassAccuracy) ? (firstPassAccuracy > 1 ? firstPassAccuracy / 100 : firstPassAccuracy) : null;
+  const eligible = !interrupted && coverage === "complete" && Number(acceptedForwardInsertions) >= policy.referenceMinimumAcceptedForwardInsertions && Number.isFinite(accuracyRatio) && accuracyRatio >= policy.referenceMinimumFirstPassAccuracy && Number.isFinite(grossWpm) && grossWpm > 0;
+  const rawAnchorWpm = eligible ? clamp(grossWpm, policy.targetMinimumWpm, policy.targetMaximumWpm) : null;
+  return freeze({ version: PRACTICE_PACE_LADDER_ANCHOR_POLICY_VERSION, source: "in-session-reference", status: eligible ? "ready" : "insufficient-measurement", rawAnchorWpm, effectiveWpm: rawAnchorWpm, referenceAccuracy: accuracyRatio, acceptedForwardInsertions: Number(acceptedForwardInsertions || 0) });
 }
 
-export function resolvePracticePaceLadderAnchor({ userSelectedWpm = null, ordinaryPerformance = null, policy = PRACTICE_PACE_LADDER_POLICY_V1 } = {}) {
-  const requested = Number(userSelectedWpm);
-  if (Number.isFinite(requested) && requested >= policy.targetMinimumWpm && requested <= policy.targetMaximumWpm) return freeze({
-    version: PRACTICE_PACE_LADDER_ANCHOR_POLICY_VERSION,
-    source: "user-selected",
-    requestedWpm: requested,
-    measuredWpm: null,
-    effectiveWpm: requested,
-    calibrationWpm: null,
-    calibrationEligible: false,
-  });
-  const measured = Number(ordinaryPerformance?.measuredWpm);
-  if (Number.isFinite(measured) && measured >= policy.targetMinimumWpm && measured <= policy.targetMaximumWpm) return freeze({
-    version: PRACTICE_PACE_LADDER_ANCHOR_POLICY_VERSION,
-    source: "ordinary-performance",
-    requestedWpm: null,
-    measuredWpm: measured,
-    effectiveWpm: measured,
-    calibrationWpm: null,
-    calibrationEligible: false,
-  });
-  return freeze({ version: PRACTICE_PACE_LADDER_ANCHOR_POLICY_VERSION, source: "unavailable", requestedWpm: null, measuredWpm: null, effectiveWpm: null, calibrationWpm: null, calibrationEligible: false });
-}
-
-export function resolvePracticePaceLadderCalibration({ usableSeconds, correctedChars, coverage, interrupted = false, correctedWpm = null, policy = PRACTICE_PACE_LADDER_POLICY_V1 } = {}) {
-  const eligible = !interrupted && coverage === "complete" && Number(usableSeconds) >= policy.calibrationMinimumUsableSeconds && Number(correctedChars) >= policy.calibrationMinimumCorrectedCharacters && Number.isFinite(correctedWpm) && correctedWpm > 0;
-  return freeze({ eligible, status: eligible ? "eligible" : "insufficient-measurement", calibrationWpm: eligible ? correctedWpm : null });
-}
+// Legacy-reader compatibility only; no canonical launch path consumes ordinary/user anchors.
+export function isOrdinaryPaceAnchorSession() { return false; }
+export function deriveOrdinaryPracticeAnchor() { return freeze({ measuredWpm: null, sampleCount: 0, sourceExperimentIds: [] }); }
+export function resolvePracticePaceLadderAnchor(input = {}) { return resolvePracticePaceLadderFrontierAnchor(input); }
+export function resolvePracticePaceLadderCalibration(input = {}) { const anchor = resolvePracticePaceLadderReferenceAnchor({ acceptedForwardInsertions: input.acceptedForwardInsertions ?? input.correctedChars, firstPassAccuracy: input.firstPassAccuracy ?? 1, grossWpm: input.grossWpm ?? input.correctedWpm, coverage: input.coverage, interrupted: input.interrupted }); return freeze({ eligible: anchor.status === "ready", status: anchor.status, calibrationWpm: anchor.rawAnchorWpm }); }
