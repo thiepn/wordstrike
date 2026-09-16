@@ -1,6 +1,12 @@
 import { FLOW_CATEGORIES, FLOW_DIFFICULTIES, FLOW_SESSION_LENGTHS } from "./flowConfig.js";
 import { FLOW_PASSAGE_CATALOG } from "./flowCatalog.js";
 import {
+  createAdaptiveFocusSchedule,
+  getAdaptivePassageFit,
+  normalizeFlowWeaknessProfile,
+  parseFlowWeaknessProfile,
+} from "./flowAdaptive.js";
+import {
   getFlowModifierContentBiases,
   normalizeFlowModifierIds,
 } from "./flowModifiers.js";
@@ -58,6 +64,7 @@ function candidateScore(passage, {
   targetDifficulty,
   preferredTags,
   modifierBiases,
+  adaptiveWeakness,
   usageCount,
   previousId,
   seed,
@@ -80,6 +87,11 @@ function candidateScore(passage, {
   if (modifierBiases.longform) {
     score += Math.min(260, (passage.wordCount || 0) * 6);
     score += tagBonus(passage, ["long-sentences", "semicolons", "parentheses"], 80);
+  }
+
+  if (adaptiveWeakness) {
+    const fit = getAdaptivePassageFit(passage, adaptiveWeakness);
+    score += fit > 0 ? 900 + (fit * 1.6) : -500;
   }
 
   score -= usageCount * 1400;
@@ -116,6 +128,7 @@ function createSegments(chapters) {
         startIndex,
         endIndex,
         text: passage.text,
+        adaptiveFocus: passage.adaptiveFocus || null,
       }));
       cursor = endIndex + 1;
     }
@@ -129,6 +142,7 @@ export function createFlowRunPlan({
   sessionLength = "standard",
   seed = "phase5-default",
   modifiers = [],
+  adaptiveProfile = null,
   catalog = FLOW_PASSAGE_CATALOG,
 } = {}) {
   if (!Array.isArray(catalog) || !catalog.length) throw new TypeError("Flow run planner requires at least one passage");
@@ -137,8 +151,12 @@ export function createFlowRunPlan({
   const safeLength = Object.hasOwn(RUN_PROFILES, sessionLength) ? sessionLength : "standard";
   const modifierIds = normalizeFlowModifierIds(modifiers);
   const modifierBiases = getFlowModifierContentBiases(modifierIds);
+  const normalizedAdaptive = normalizeFlowWeaknessProfile(adaptiveProfile);
   const profile = RUN_PROFILES[safeLength];
   const passagesPerChapter = modifierBiases.sprint ? 1 : profile.passagesPerChapter;
+  const totalPassages = profile.chapterIndexes.length * passagesPerChapter;
+  const adaptiveSchedule = createAdaptiveFocusSchedule(totalPassages, normalizedAdaptive);
+  const adaptiveBySlot = new Map(adaptiveSchedule.map(({ slot, weakness }) => [slot, weakness]));
   const usage = new Map();
   let previousId = null;
   let slot = 0;
@@ -148,17 +166,29 @@ export function createFlowRunPlan({
     const targetDifficulty = chapterDifficulty(safeDifficulty, templateIndex);
     const passages = [];
     for (let passageIndex = 0; passageIndex < passagesPerChapter; passageIndex += 1) {
+      const adaptiveWeakness = adaptiveBySlot.get(slot) || null;
       const selected = selectPassage(catalog, {
         category: safeCategory,
         targetDifficulty,
         preferredTags: template.preferredTags,
         modifierBiases,
+        adaptiveWeakness,
         previousId,
         seed,
         slot,
         usage,
       });
-      passages.push(selected);
+      const plannedPassage = adaptiveWeakness
+        ? Object.freeze({
+            ...selected,
+            adaptiveFocus: Object.freeze({
+              key: adaptiveWeakness.key,
+              label: adaptiveWeakness.label,
+              score: adaptiveWeakness.score,
+            }),
+          })
+        : selected;
+      passages.push(plannedPassage);
       usage.set(selected.id, (usage.get(selected.id) || 0) + 1);
       previousId = selected.id;
       slot += 1;
@@ -182,9 +212,13 @@ export function createFlowRunPlan({
   const baseMinutes = FLOW_SESSION_LENGTHS[safeLength]?.targetMinutes ?? 6;
   const targetMinutes = modifierBiases.sprint ? Math.max(1, Math.round(baseMinutes * 0.6)) : baseMinutes;
   const modifierSignature = modifierIds.length ? modifierIds.join("+") : "base";
+  const adaptiveSignature = normalizedAdaptive.weaknesses.length
+    ? normalizedAdaptive.weaknesses.map(({ key, score }) => `${key}:${score}`).join("+")
+    : "balanced";
+  const targetedPassageCount = segments.filter(({ adaptiveFocus }) => adaptiveFocus).length;
 
   return Object.freeze({
-    id: `flow-${safeLength}-${hashSeed(`${seed}:${safeCategory}:${safeDifficulty}:${modifierSignature}`).toString(16)}`,
+    id: `flow-${safeLength}-${hashSeed(`${seed}:${safeCategory}:${safeDifficulty}:${modifierSignature}:${adaptiveSignature}`).toString(16)}`,
     seed: String(seed),
     category: safeCategory,
     difficulty: safeDifficulty,
@@ -195,6 +229,13 @@ export function createFlowRunPlan({
     passageCount: segments.length,
     repeatedPassageCount: segments.length - uniqueIds.size,
     wordCount: chapters.reduce((sum, chapter) => sum + chapter.wordCount, 0),
+    adaptive: Object.freeze({
+      enabled: normalizedAdaptive.weaknesses.length > 0,
+      targetedPassageCount,
+      normalPassageCount: segments.length - targetedPassageCount,
+      targetRatio: segments.length ? Number((targetedPassageCount / segments.length).toFixed(3)) : 0,
+      weaknesses: normalizedAdaptive.weaknesses,
+    }),
     chapters: Object.freeze(chapters),
     segments,
     fullText,
@@ -210,5 +251,8 @@ export function resolveFlowRunPlan(searchLike = "") {
   const sessionLength = Object.hasOwn(RUN_PROFILES, params.get("flowLength")) ? params.get("flowLength") : "standard";
   const seed = params.get("flowSeed") || "phase5-default";
   const modifiers = normalizeFlowModifierIds(params.get("flowModifierIds") || "");
-  return createFlowRunPlan({ category, difficulty, sessionLength, seed, modifiers });
+  const adaptiveProfile = params.get("flowAdaptive") === "1"
+    ? parseFlowWeaknessProfile(params.get("flowWeaknesses") || "")
+    : null;
+  return createFlowRunPlan({ category, difficulty, sessionLength, seed, modifiers, adaptiveProfile });
 }
