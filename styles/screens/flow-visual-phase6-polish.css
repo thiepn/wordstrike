@@ -1,0 +1,37 @@
+/* Phase 6 visual QA polish: keep technical IDs and explanatory notes on separate rows. */
+
+.flow-ready-screen .flow-phase1-shell {
+  grid-template-areas:
+    "back back"
+    "kicker kicker"
+    "title brief"
+    "lead brief"
+    "id brief"
+    "start brief"
+    "note brief";
+}
+
+.flow-ready-screen .flow-phase1-note[data-flow-run-id],
+.flow-ready-screen .flow-phase1-note[data-flow-passage-id] {
+  grid-area: id;
+  justify-self: start;
+  color: color-mix(in srgb, var(--flow-signal) 48%, var(--flow-ink-muted) 52%);
+}
+
+.flow-ready-screen .flow-phase1-note:not([data-flow-run-id]):not([data-flow-passage-id]) {
+  grid-area: note;
+}
+
+@media (max-width: 860px) {
+  .flow-ready-screen .flow-phase1-shell {
+    grid-template-areas:
+      "back"
+      "kicker"
+      "title"
+      "lead"
+      "brief"
+      "id"
+      "start"
+      "note";
+  }
+}
