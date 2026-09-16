@@ -31,10 +31,15 @@ try {
   await page.locator('[data-practice-action="start-preview-protocol"]').click();await page.locator('[data-protocol-input]').waitFor();console.log('Protocol ready',id);
   await page.evaluate(()=>inputDurations=[]);const before=await metrics();console.log('Metrics ready',id);let maxNodes=0,characters=0;const began=Date.now();
   while(await page.locator('[data-protocol-input]').count()) {
-   if(Date.now()-began>240000)throw Error('Protocol exceeded real-time duration budget');
+   if(Date.now()-began>240000)throw Error('Protocol exceeded real-time duration budget: '+await page.locator('main').innerText());
    if(await page.locator('[data-protocol-input]').isEnabled()) {
-    const character=await page.locator('[data-protocol-text] [aria-current]').textContent();
-    await page.locator('[data-protocol-input]').pressSequentially(character);characters++;if(characters%100===0)console.log('Typed',id,characters);
+    try {
+     const character=await page.locator('[data-protocol-text] [aria-current]').textContent({timeout:1000});
+     await page.locator('[data-protocol-input]').pressSequentially(character,{timeout:1000});characters++;
+    } catch(error) {
+     if(await page.getByRole('heading',{name:'Session complete',exact:true}).count())break;
+     throw error;
+    }
    }
    maxNodes=Math.max(maxNodes,await page.locator('#app *').count());await page.waitForTimeout(200);
   }

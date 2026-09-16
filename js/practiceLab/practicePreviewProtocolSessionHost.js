@@ -35,13 +35,14 @@ export async function mountPracticePreviewProtocolSession({root,experimentId,dur
     async function advance(){if(closed||finished)return;
       if(countIn){const beat=Math.floor((performance.now()-countIn.start)/(60000/countIn.bpm));if(beat>=4){countIn=null;cue.textContent='';input.disabled=false;await engine.resume();input.focus();}else cue.textContent=`Count-in ${beat+1} / 4`;return;}
       await engine.tick();if(finished||closed)return;const snapshot=engine.getSnapshot(),ms=snapshot.timing?.activeDurationMs??0;
+      if(snapshot.completion?.state==='error')throw new Error('Session finalization failed');
       if(experimentId==='metronome-typing'&&ms>=prepared.schedule.blocks[0].endMs){let plan;try{plan=prepared.calibrate();}catch{await engine.pause('calibration-insufficient');pulse.stop();input.disabled=true;status.textContent='Not enough baseline typing for a supported rhythm. End this session and try again at your natural pace.';return;}
         const block=plan.blocks.find(b=>ms>=b.startMs&&ms<b.endMs);if(!counted&&block?.blockId===plan.countInBeforeBlockId){counted=true;await engine.pause('count-in');input.disabled=true;countIn={start:performance.now(),bpm:plan.tempo.bpm};return;}
         cue.textContent=block?.condition==='pulse'?`Beat ${1+Math.floor((ms-block.startMs)/(60000/plan.tempo.bpm))%4} · ${plan.tempo.bpm.toFixed(0)} BPM · ${plan.tempo.charsPerBeat} characters per beat`:'Silent — type naturally';
       }
       paint(snapshot);
     }
-    pulse=createPracticeSessionPulse({run:advance,intervalMs:50,isActive:()=>!closed&&!finished,onError:async()=>{status.textContent='Session interrupted. End the session and try again.';input.disabled=true;await engine.pause('protocol-error');}});
+    pulse=createPracticeSessionPulse({run:advance,intervalMs:50,isActive:()=>!closed&&!finished,onError:async()=>{status.setAttribute('role','alert');status.textContent='Session interrupted. End the session and try again.';input.disabled=true;await engine.pause('protocol-error');}});
     doc.addEventListener('visibilitychange',visibility);paint(await engine.start());pulse.start();input.focus();
     return {exit,getSnapshot:()=>engine.getSnapshot()};
   }catch(error){await exit();throw error;}

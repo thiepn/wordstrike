@@ -124,7 +124,8 @@ export function buildPracticeProfileUpdate(profile, summary, { completed = true 
     lastPracticeAt: summary.completedAtUtc,
     lastTrainingDayKey: summary.localDayKey,
     totalCompletedSessions: profile.totalCompletedSessions + (completed ? 1 : 0),
-    totalPracticeDurationMs: profile.totalPracticeDurationMs + summary.activeDurationMs,
+    // Profile counters use whole milliseconds; session measurements retain precision.
+    totalPracticeDurationMs: Math.round(profile.totalPracticeDurationMs + summary.activeDurationMs),
     activeTrainingDays: profile.activeTrainingDays + (newDay ? 1 : 0),
   });
 }

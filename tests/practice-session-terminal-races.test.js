@@ -156,3 +156,17 @@ assert.equal(dirtyEngine.getSnapshot().checkpoint.dirty, true);
 assert.equal(dirtyHarness.time.timerCount, 1);
 
 console.log("Practice abandonment thresholds, PL11 abandoned evidence, interruption, forced-checkpoint coalescing, completion precedence, and destroy races passed.");
+
+// performance.now() supplies fractional milliseconds in real browsers. The
+// profile counter is integral, while the measurement itself must stay precise.
+for (const terminal of ['complete', 'abandon']) {
+  const fractional = await createPracticeSessionHarness({suffix: `fractional-${terminal}`, text:'abc'});
+  const engine = await engineFor(fractional);
+  await fractional.time.advance(30000.625, {runTimers:false});
+  const result = await engine[terminal]('manual-stop');
+  assert.equal(result.summary.activeDurationMs, 30000.625);
+  assert.equal((await fractional.repository.getPracticeProfile()).totalPracticeDurationMs, 30001);
+  assert.equal((await fractional.repository.getPracticeProfile()).totalCompletedSessions, terminal==='complete'?1:0);
+  assert.ok(await fractional.repository.getSessionSummary(fractional.sessionId));
+  await engine.destroy();
+}
