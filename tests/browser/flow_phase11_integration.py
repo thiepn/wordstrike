@@ -141,9 +141,9 @@ def certify_progression(browser, browser_name, base, evidence):
     page.locator('[data-flow-integration-resume]').click()
     expect(page.locator('[data-flow-view="ready"]')).to_be_visible(timeout=10000)
     adaptive = page.evaluate('window.wordstrikeFlowPhase1.getRunPlan()')
-    assert adaptive['adaptiveEnabled'] is True, adaptive
-    assert adaptive['focusPassageCount'] == 1, adaptive
-    assert adaptive['adaptiveWeaknesses'][0]['key'] == 'typo-pair', adaptive
+    assert adaptive['adaptive']['enabled'] is True, adaptive
+    assert adaptive['adaptive']['targetedPassageCount'] == 1, adaptive
+    assert adaptive['adaptive']['weaknesses'][0]['key'] == 'typo-pair', adaptive
 
     assert not errors, errors
     evidence.append({
