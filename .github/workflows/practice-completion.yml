@@ -1,9 +1,9 @@
 name: Practice Completion
 on:
   push:
-    branches: [finish-practice-lab]
+    branches: [main, practice-release-hardening]
   pull_request:
-    paths: ['js/practiceLab/**', 'data/practice/**', 'tests/browser/practice_completion.mjs', '.github/workflows/practice-completion.yml']
+    paths: ['js/practiceLab/**', 'data/practice/**', 'tests/browser/practice_*.mjs', 'style.css', 'sw.js', '.github/workflows/practice-completion.yml']
 permissions:
   contents: read
 jobs:
@@ -34,10 +34,33 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: npm install --no-save playwright@1.57.0
+      - run: npm install --no-save playwright@1.57.0 axe-core@4.10.3
       - run: node tests/browser/practice_completion.mjs
+      - run: node tests/browser/practice_accessibility.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: practice-completion-browser
-          path: browser-artifacts/practice-completion/
+          path: |
+            browser-artifacts/practice-completion/
+            browser-artifacts/practice-accessibility/
+  performance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    container:
+      image: mcr.microsoft.com/playwright:v1.57.0-noble
+      options: --ipc=host
+    env:
+      HOME: /root
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --no-save playwright@1.57.0
+      - run: node tests/browser/practice_performance.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: practice-performance
+          path: browser-artifacts/practice-performance/

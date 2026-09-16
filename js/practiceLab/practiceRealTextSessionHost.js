@@ -13,9 +13,10 @@ const ratioPercent = (value) => finite(value) ? `${number(value * 100, 1)}%` : "
 const fmtSeconds = (ms) => finite(ms) ? `${number(ms / 1000, 0)} s` : "—";
 
 function renderText(element, contentPlan, snapshot) {
-  const graphemes=Array.from(contentPlan.text),cursor=snapshot.cursorIndex??0;
+  const cursor=snapshot.cursorIndex??0;
   if(element.dataset.cursor===String(cursor))return;
   element.dataset.cursor=String(cursor);
+  const graphemes=Array.from(contentPlan.text);
   const errors=new Set(snapshot.errorPositions??[]),fragment=element.ownerDocument.createDocumentFragment();
   for(let i=Math.max(0,cursor-180);i<Math.min(graphemes.length,cursor+500);i++){
     const span=element.ownerDocument.createElement('span');span.className='practice-real-text-char'+(i<cursor?(errors.has(i)?' is-error':' is-typed'):i===cursor?' is-current':'');span.textContent=graphemes[i];fragment.append(span);
@@ -32,11 +33,11 @@ function renderActive(root, { contentPlan, snapshot, mode }) {
     ? "Protected measurement · no targets · no live score"
     : "Broad training · no targets · no live score";
   if (!root.querySelector("[data-real-text-input]")) root.innerHTML = `<section class="screen practice-lab-screen practice-real-text-session" data-practice-view="real-text-${mode}-session">
-    <div class="practice-lab-shell"><header class="practice-real-text-session-header"><div><div class="eyebrow">Real Text</div><h1>${label}</h1><p>${note}</p></div><button type="button" data-real-text-session-action="stop">STOP</button></header>
+    <main class="practice-lab-shell"><header class="practice-real-text-session-header"><div><div class="eyebrow">Real Text</div><h1>${label}</h1><p>${note}</p></div><button type="button" data-real-text-session-action="stop">STOP</button></header>
     <div class="practice-real-text-time" ><strong>${fmtSeconds(remaining)}</strong><span>remaining</span></div>
     <section class="practice-real-text-typing" aria-label="Natural typing passage"></section>
     <textarea data-real-text-input aria-label="Real Text typing input" inputmode="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" style="display:block;width:100%;box-sizing:border-box;min-height:3em"></textarea>
-    </div></section>`;
+    </main></section>`;
   root.querySelector('.practice-real-text-time strong').textContent=fmtSeconds(remaining);
   renderText(root.querySelector('.practice-real-text-typing'),contentPlan,snapshot);
 }
@@ -99,7 +100,7 @@ export async function mountPracticeRealTextSession({ root, session, mode = "natu
   try {
     await engine.prepare({ experiment: session.experiment, configuration: session.configuration, contentPlan: session.contentPlan, ...(mode === "cold" ? { evaluationPlan: session.evaluationPlan, evaluationArtifact: session.evaluationArtifact } : {}) });
     unsubscribe = engine.subscribe((snapshot, event) => {
-      if (event === "completed") { pulse?.stop(); void engine.complete().then((result) => { finalResult = result; mode === "cold" ? renderColdResult(root, result) : renderNaturalResult(root, result); }).catch((error) => logger?.warn?.("Real Text completion retrieval failed", error)); return; }
+      if (event === "completed") { pulse?.stop(); void engine.complete().then((result) => { finalResult = result; mode === "cold" ? renderColdResult(root, result) : renderNaturalResult(root, result); const heading=root.querySelector("h1"); if(heading){heading.tabIndex=-1;heading.focus({preventScroll:true});} }).catch((error) => logger?.warn?.("Real Text completion retrieval failed", error)); return; }
       if (!finalResult) { renderActive(root, { contentPlan: session.contentPlan, snapshot, mode });  }
     });
     pulse = createPracticeSessionPulse({run:()=>engine.tick(),intervalMs:100,isActive:()=>!closed&&!finalResult,onError:error=>logger?.warn?.("Real Text timer failed",error)});pulse.start();

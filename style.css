@@ -3539,3 +3539,20 @@ body.gameplay-viewport-short .boss-phrase-size-extreme { font-size: clamp(16px, 
 .practice-lab-screen [data-assessment-input] { display: block; width: 100%; min-height: 52px; }
 .practice-lab-screen [data-assessment-text],
 .practice-real-text-typing { overflow-wrap: anywhere; white-space: pre-wrap; }
+
+/* Practice sessions need stable contrast and visible keyboard targets. */
+.practice-lab-screen { height: auto; background: var(--bg); }
+.practice-lab-screen::after { content: none; }
+.practice-lab-screen :is(button, select, textarea, summary):focus-visible {
+  outline: 3px solid var(--text-primary);
+  outline-offset: 3px;
+}
+.practice-lab-screen button { min-height: 44px; }
+.practice-lab-screen :is(select, textarea) {
+  color: var(--text-primary);
+  background: var(--panel);
+  border: 1px solid var(--text-muted);
+  font: inherit;
+  min-height: 44px;
+}
+.practice-lab-screen textarea { padding: 10px; }
