@@ -1,0 +1,180 @@
+/* =========================================================
+   WORDSTRIKE FLOW PHASE 10 — ADAPTIVE WEAKNESS TRAINING
+   ========================================================= */
+
+.flow-phase1-screen[data-flow-adaptive-phase10="true"] .flow-adaptive-ready,
+.flow-phase1-screen[data-flow-adaptive-phase10="true"] .flow-adaptive-results {
+  border-top: 1px solid var(--flow-line, rgb(241 239 232 / 12%));
+  border-bottom: 1px solid var(--flow-line, rgb(241 239 232 / 12%));
+  padding: 20px 0;
+}
+
+.flow-adaptive-ready {
+  display: grid;
+  gap: 12px;
+}
+
+.flow-adaptive-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  font-family: var(--flow-ui-face, inherit);
+}
+
+.flow-adaptive-heading > span {
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--flow-ink-muted, currentColor);
+}
+
+.flow-adaptive-heading > strong {
+  font-family: var(--flow-data-face, ui-monospace, monospace);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--flow-ink-soft, currentColor);
+}
+
+.flow-adaptive-ready > p,
+.flow-adaptive-results > p {
+  margin: 0;
+  max-width: 740px;
+  line-height: 1.55;
+  color: var(--flow-ink-soft, currentColor);
+}
+
+.flow-adaptive-weaknesses {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.flow-adaptive-weakness {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  border-left: 2px solid var(--flow-signal, currentColor);
+  padding: 5px 9px;
+  background: color-mix(in srgb, var(--flow-signal, currentColor) 7%, transparent);
+}
+
+.flow-adaptive-weakness strong {
+  font-size: 0.8rem;
+  font-weight: 560;
+}
+
+.flow-adaptive-weakness small {
+  font-family: var(--flow-data-face, ui-monospace, monospace);
+  font-size: 0.7rem;
+  color: var(--flow-ink-muted, currentColor);
+}
+
+.flow-adaptive-focus-strip {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 12px;
+  align-items: baseline;
+  padding: 7px 0;
+  border-top: 1px solid color-mix(in srgb, var(--flow-signal, currentColor) 35%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--flow-signal, currentColor) 18%, transparent);
+  font-family: var(--flow-data-face, ui-monospace, monospace);
+}
+
+.flow-adaptive-focus-strip span,
+.flow-adaptive-focus-strip small {
+  font-size: 0.66rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--flow-ink-muted, currentColor);
+}
+
+.flow-adaptive-focus-strip strong {
+  font-size: 0.76rem;
+  font-weight: 620;
+  letter-spacing: 0.03em;
+  color: var(--flow-signal, currentColor);
+}
+
+.flow-adaptive-chapter-note {
+  margin: 0;
+  max-width: 580px;
+  font: 500 0.78rem/1.45 var(--flow-data-face, ui-monospace, monospace);
+  color: var(--flow-signal, currentColor);
+}
+
+.flow-adaptive-results {
+  display: grid;
+  gap: 15px;
+}
+
+.flow-adaptive-results ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0;
+}
+
+.flow-adaptive-results li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 18px;
+  align-items: center;
+  padding: 12px 0;
+  border-top: 1px solid var(--flow-line, rgb(241 239 232 / 12%));
+}
+
+.flow-adaptive-results li > div {
+  display: grid;
+  gap: 3px;
+}
+
+.flow-adaptive-results li strong {
+  font-size: 0.9rem;
+  font-weight: 560;
+}
+
+.flow-adaptive-results li span {
+  font-size: 0.76rem;
+  color: var(--flow-ink-muted, currentColor);
+}
+
+.flow-adaptive-results li em {
+  font: normal 600 1rem/1 var(--flow-data-face, ui-monospace, monospace);
+  color: var(--flow-signal, currentColor);
+}
+
+.flow-adaptive-results [data-flow-adaptive-next] {
+  justify-self: start;
+}
+
+.flow-adaptive-coverage {
+  color: var(--flow-ink-muted, currentColor);
+  font-family: var(--flow-data-face, ui-monospace, monospace);
+  font-size: 0.7rem;
+}
+
+@media (max-width: 640px) {
+  .flow-adaptive-heading,
+  .flow-adaptive-focus-strip {
+    align-items: flex-start;
+  }
+
+  .flow-adaptive-heading {
+    display: grid;
+    gap: 5px;
+  }
+
+  .flow-adaptive-focus-strip {
+    grid-template-columns: 1fr auto;
+  }
+
+  .flow-adaptive-focus-strip span {
+    grid-column: 1 / -1;
+  }
+
+  .flow-adaptive-results li {
+    gap: 12px;
+  }
+}
