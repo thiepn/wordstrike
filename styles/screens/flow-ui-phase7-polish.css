@@ -41,10 +41,38 @@
   overflow-wrap: anywhere;
 }
 
+/* Phase 5's run id/category notes describe the already-resolved plan. Phase 7
+   stages a new configuration before that plan is rebuilt, so keeping those
+   notes visible would present two conflicting states. */
+.flow-ready-screen[data-flow-ui-phase7="true"] .flow-phase1-note {
+  display: none;
+}
+
+.flow-ready-screen[data-flow-ui-phase7="true"] .flow-phase1-shell {
+  grid-template-areas:
+    "back back"
+    "kicker kicker"
+    "title brief"
+    "lead brief"
+    "setup setup"
+    "start start";
+}
+
 @media (max-width: 900px) {
   .flow-phase1-screen[data-flow-ui-phase7="true"] .flow-choice-row--categories,
   .flow-phase1-screen[data-flow-ui-phase7="true"] .flow-choice-row--difficulty {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .flow-ready-screen[data-flow-ui-phase7="true"] .flow-phase1-shell {
+    grid-template-areas:
+      "back"
+      "kicker"
+      "title"
+      "lead"
+      "brief"
+      "setup"
+      "start";
   }
 }
 
