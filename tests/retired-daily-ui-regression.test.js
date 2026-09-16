@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { ONBOARDING_VERSIONS, getOnboardingTutorial } from "../js/onboardingContent.js";
-import { renderSettings } from "../js/ui.js";
+import { renderSettings, renderTitle } from "../js/ui.js";
 
 const app = {
   html: "",
@@ -10,6 +10,11 @@ const app = {
   querySelectorAll() { return []; },
 };
 globalThis.document = { querySelector: (selector) => selector === "#app" ? app : null };
+
+renderTitle(0, {});
+assert.match(app.html, /Campaign, Typing Test, Endless and Flow/);
+assert.doesNotMatch(app.html, /Arcade Rush/);
+
 renderSettings({ settings: { strictMode: false, particles: true, screenShake: true } }, 0, {});
 assert.doesNotMatch(app.html, /DAILY STRIKE GUIDE|data-tutorial-id="daily"/);
 assert.doesNotMatch(app.html, /ARCADE RUSH GUIDE|data-tutorial-id="arcade-rush"/);
@@ -26,4 +31,4 @@ assert.doesNotMatch(indexHtml, /Daily Strike/);
 assert.doesNotMatch(manifest, /daily challenges/i);
 assert.doesNotMatch(css, /\.daily-(?:hud|screen)/);
 assert.doesNotMatch(mobile, /\.daily-screen/);
-console.log("Retired Daily Strike and Arcade Rush onboarding no longer leak into active Settings, metadata, shared CSS, or mobile input routing.");
+console.log("Retired Daily Strike and Arcade Rush no longer leak into active title, Settings, metadata, shared CSS, or mobile input routing.");
