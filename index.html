@@ -73,7 +73,11 @@
     <script type="module" src="js/flow/flowMigrationPresentation.js?v=20260915a"></script>
     <script type="module" src="js/flow/flowPhase1.js?v=20260916d"></script>
     <script type="module" src="js/flow/flowVisualPhase6.js?v=20260916a"></script>
-    <script type="module" src="js/flow/flowUiPhase7.js?v=20260916a"></script>
+    <script type="module">
+      if (new URLSearchParams(location.search).get("flowUi") === "1") {
+        import("./js/flow/flowUiPhase7.js?v=20260916a");
+      }
+    </script>
     <script type="module" src="js/thiepnAccountPresentation.js?v=20260912a"></script>
     <script type="module" src="js/speedTestPerformanceV1.js?v=20260910a"></script>
     <script type="module" src="js/speedTestPerformanceV2.js?v=20260910b"></script>
