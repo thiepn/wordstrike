@@ -4,10 +4,12 @@ import { getPracticeStoreKey } from "./practiceStorageContract.js";
 export const PRACTICE_PL30_MODEL_BOUNDARY_REPAIR_VERSION = 1;
 export const PRACTICE_PL30_MODEL_BOUNDARY_REPAIR_META_KEY = "gc2Pl30ModelBoundaryRepair";
 
-// These values were reserved by the historical V30 entity model but PL30 never
-// owns them as persistent PL11 entities. They are retained here only as cleanup
-// sentinels for legacy DB12 data.
+// GC2 recognizes both the audit-level pseudo-entity aliases and the concrete
+// historical V30 reserved types. None are active PL11 entity types; these names
+// exist here only as one-time DB12 cleanup sentinels.
 export const PRACTICE_PL30_RETIRED_PERSISTENT_ENTITY_TYPES = Object.freeze([
+  "punctuation-pattern",
+  "number-symbol-pattern",
   "punctuation-transition",
   "number-pattern",
   "symbol-pattern",
