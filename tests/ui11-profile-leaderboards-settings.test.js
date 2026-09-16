@@ -61,7 +61,7 @@ assert.match(presentation, /"role", "switch"/);
 assert.match(presentation, /"aria-checked"/);
 assert.doesNotMatch(presentation, /localStorage|sessionStorage|fetch\(|supabase|leaderboardService|statistics\.js|modeStorage/i);
 
-// Existing Profile & Stats data model and interactions remain authoritative.
+// Existing Profile & Stats data model remains authoritative while Phase 0 suppresses public Rush presentation.
 assert.match(statisticsUi, /STATISTICS_TABS = Object\.freeze\(\[/);
 for (const label of ["OVERVIEW", "CAMPAIGN", "TYPING TEST", "ENDLESS", "ARCADE RUSH", "RECENT", "PROFILE"]) {
   assert.match(statisticsUi, new RegExp(`"${label}"`));
@@ -72,13 +72,16 @@ assert.match(statisticsUi, /data-stats-action="copy-id"/);
 assert.match(statisticsUi, /renderGlobalAccount/);
 assert.match(statisticsUi, /getRecentSessionStatistics/);
 
-// Existing global leaderboard services/categories/actions remain authoritative.
+// Public leaderboard navigation excludes Rush while direct historical Rush boards remain renderable.
 assert.match(leaderboardUi, /getLeaderboardSelection/);
 assert.match(leaderboardUi, /LEADERBOARD_CATEGORIES/);
 assert.match(leaderboardUi, /leaderboard-select-campaign/);
 assert.match(leaderboardUi, /leaderboard-select-typing/);
 assert.match(leaderboardUi, /leaderboard-select-endless/);
-assert.match(leaderboardUi, /leaderboard-select-arcade-rush/);
+assert.doesNotMatch(leaderboardUi, /leaderboard-select-arcade-rush/);
+assert.match(leaderboardUi, /boardKey === LEADERBOARD_BOARDS\.ARCADE_RUSH/);
+assert.match(leaderboardUi, /LEGACY BOARD \/\/ RETIRED MODE \/\/ ALL-TIME/);
+assert.match(leaderboardUi, /kind === "arcade-rush"/);
 assert.match(leaderboardUi, /leaderboard-refresh/);
 assert.match(leaderboardUi, /leaderboard-google-sign-in/);
 
@@ -92,6 +95,7 @@ assert.match(ui, /handlers\.toggle\(button\.dataset\.setting\)/);
 assert.match(ui, /data-tutorial-reset="hints"/);
 assert.match(ui, /data-tutorial-reset="all"/);
 assert.match(ui, /RESET PROGRESS/);
+assert.doesNotMatch(ui, /data-tutorial-id="arcade-rush"/);
 
 // The disabled mode registry boundary remains untouched.
 assert.match(modes, /id: MODE_IDS\.PRACTICE,[\s\S]*enabled: false,[\s\S]*status: "coming-soon",[\s\S]*route: null/);
@@ -101,4 +105,4 @@ assert.match(workflow, /tests\/browser\/ui11_profile_leaderboards_settings\.py/)
 assert.match(workflow, /tests\/browser\/ui11_mobile_heading_contract\.py/);
 assert.match(workflow, /browser-artifacts\/ui11-profile-leaderboards-settings\//);
 
-console.log("UI11 source contracts passed: Profile/Stats, Leaderboards and Settings share one low-chrome presentation layer while existing data, auth, routing, persistence and mode boundaries remain authoritative.");
+console.log("UI11 source contracts passed: public Rush surfaces stay retired while historical Rush data remains compatible and Profile/Stats, Leaderboards and Settings retain the shared low-chrome presentation layer.");
