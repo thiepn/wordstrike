@@ -55,7 +55,7 @@ Metronome currently uses the supported visual cue path. Audio cue delivery has n
 | GAP-006 | Semantic controls, stable focus/input and bounded responsive views implemented; assistive-technology and full contrast audit not certified |
 | GAP-007 | Bounded passage DOM and evidence pagination verified; actual Android performance and long-duration memory certification not claimed |
 | GAP-008 | Chromium, Firefox and WebKit automated completion journeys passed. Actual Edge, Safari, Android Chrome, Samsung Internet and iOS Safari/PWA evidence remains open |
-| GAP-009 | Main reconciled; branch published and remote core/browser CI passed. Merge and deployed-build parity tracked in PR #122 and deployment workflow |
+| GAP-009 | Closed for PR #122: all 21 workflows passed; merged as `05b2b2c`; Pages run 35150243585 passed; nine live shell/controller/host assets matched SHA-256 |
 | GAP-010 | Operational evidence views implemented; persistent history checked in browser |
 
 ## Remote completion evidence
@@ -69,3 +69,16 @@ Certified executable source: `b21eb7b42a16b9821e3308ec74469dc69bb7146a`.
 - Content validation, privacy audit, migration checks and deterministic Read-Ahead artifact regeneration PASS in the same completion run.
 - Firefox container HOME and the explicit V7 browser test fixture were corrected without changing the shipped Typing Results entry.
 - Automated engine coverage is not physical-device or assistive-technology certification. Public activation remains gated until those release requirements are met.
+
+## Accessibility and performance hardening follow-up
+
+- Real Text result focus moves to its heading; evidence views preserve keyboard focus after asynchronous loading.
+- Assessment passages have a named region; Real Text has a main landmark.
+- Practice screens grow with their content, use a stable background without the decorative scanline overlay, and provide visible keyboard focus plus at least 44px-high buttons and input controls.
+- Real browser fractional milliseconds are rounded only in the integral profile total; precise session metrics remain unchanged. Regression coverage verifies both completed and abandoned sessions. This fixes real-time finalization failures hidden by integer-clock tests. Protocol finalization errors are now surfaced instead of leaving a silent zero-second screen.
+- Idle Real Text timer renders no longer reallocate the passage character array.
+- `tests/browser/practice_accessibility.mjs` audits 36 views at 1280, 390 and 320px using the production stylesheets. The local default-palette run has zero WCAG 2/2.1/2.2 A/AA rule violations, zero unresolved checks and zero page overflow. Screenshots were inspected. Native textarea contrast uncertainty is resolved only for opaque, unobscured controls without ancestor filters/opacity, using calculated luminance; the observed minimum is 16.20:1. This is not a screen-reader certification or a claim about every customizable palette.
+- `tests/browser/practice_performance.mjs` adds unaccelerated 3-minute Read-Ahead and 2-minute Metronome sessions at 390px with 4x desktop CPU throttling. It records event-handler p95 duration, DOM bounds and observed heap growth. Its conservative budgets are 100ms p95, 2,000 DOM nodes and 24MiB heap growth. This measures a controlled desktop browser, not actual Android hardware or long-duration endurance.
+- Both checks are part of the Practice Completion workflow. Offline cache version v4 distributes the updated shell.
+
+Physical-device, assistive-technology and Android endurance certification remain open. No local/CI emulation result is substituted for those requirements. Public activation remains disabled.

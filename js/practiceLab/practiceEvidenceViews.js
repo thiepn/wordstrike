@@ -10,6 +10,7 @@ export async function loadPracticeEvidenceViews({repository=null,dataStore=null}
   try{const {profile,context}=await repo.initializePracticeStorage();const [skills,reviews,sessions]=await Promise.all([repo.listSkillStats(profile.profileId,context.contextId),repo.listReviewItems(profile.profileId,context.contextId),repo.listSessionSummaries(profile.profileId,{contextId:context.contextId})]);return {status:'ready',skills,reviews,sessions,contextId:context.contextId};}finally{store?.close?.();}
 }
 export function renderPracticeEvidenceView(root,kind,state,{focus=false,embedded=false}={}) {
+  const retainFocus = !embedded && root.contains(root.ownerDocument?.activeElement);
   const title=kind==='skill-map'?'Skill Map':kind==='review-queue'?'Review Queue':'Practice history';
   let body='';const page=Math.max(0,Math.floor(Number(state.page)||0)),pageSize=100;let total=0;
   if(state.status==='loading')body='<p role="status">Loading local evidence…</p>';
@@ -26,5 +27,5 @@ export function renderPracticeEvidenceView(root,kind,state,{focus=false,embedded
   }
   if(total>pageSize)body+=`<nav aria-label="Evidence pages"><button type="button" data-practice-action="evidence-page" data-page="${page-1}" ${page===0?'disabled':''}>PREVIOUS</button><span> Page ${page+1} of ${Math.ceil(total/pageSize)} </span><button type="button" data-practice-action="evidence-page" data-page="${page+1}" ${(page+1)*pageSize>=total?'disabled':''}>NEXT</button></nav>`;
   root.innerHTML=embedded?`<h2>${title}</h2>${body}`:`<section class="screen practice-lab-screen" data-practice-view="${kind}"><div class="practice-lab-shell"><header class="practice-lab-header"><button type="button" data-practice-action="back">← Back to Practice Lab</button></header><main class="practice-lab-detail"><h1 tabindex="-1">${title}</h1>${body}</main></div></section>`;
-  if(focus)root.querySelector('h1')?.focus({preventScroll:true});
+  if(focus || retainFocus)root.querySelector('h1')?.focus({preventScroll:true});
 }

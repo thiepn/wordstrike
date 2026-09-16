@@ -591,8 +591,7 @@
   "openGates": [
     "cross-platform-physical-devices",
     "assistive-technology",
-    "Android-performance",
-    "deployed-build-parity"
+    "Android-performance"
   ],
   "verification": {
     "repositoryTestFiles": 390,
@@ -619,6 +618,24 @@
     ],
     "remoteSourceCommit": "b21eb7b42a16b9821e3308ec74469dc69bb7146a",
     "remoteCompletionRun": 35148284276,
-    "remoteFullSuitePassed": 390
+    "remoteFullSuitePassed": 390,
+    "deployment": {
+      "commit": "05b2b2c0249b623c90149a7a11794b43f6d63c2d",
+      "pagesRun": 35150243585,
+      "matchedLiveAssets": 9
+    },
+    "automatedAccessibility": {
+      "screens": 36,
+      "widths": [
+        320,
+        390,
+        1280
+      ],
+      "violations": 0,
+      "unresolvedChecks": 0,
+      "horizontalOverflow": 0,
+      "minimumNativeInputContrast": 16.2034,
+      "report": "practice-completion-evidence/accessibility-report.json"
+    }
   }
 }
