@@ -73,10 +73,10 @@ function renderReady() {
     <section class="screen flow-phase1-screen flow-ready-screen" data-flow-view="ready">
       <main class="flow-phase1-shell">
         <button type="button" class="screen-back-button" data-flow-action="back">BACK</button>
-        <div class="flow-phase1-kicker">Natural typing content engine · Phase 2 developer route</div>
+        <div class="flow-phase1-kicker">Core Flow gameplay · Phase 3 developer route</div>
         <h1>FLOW</h1>
-        <p class="flow-phase1-lead">Type complete text exactly as written. Phase 2 now selects from a validated passage catalog by category and difficulty.</p>
-        <div class="flow-phase1-brief" aria-label="Phase 2 session details">
+        <p class="flow-phase1-lead">Maintain quality through complete text. Clean forward progress raises Flow and Momentum; mistakes reduce both without ending the run.</p>
+        <div class="flow-phase1-brief" aria-label="Phase 3 session details">
           <span><strong>${passage.characters ?? passage.text.length}</strong> characters</span>
           <span><strong>${escapeHtml(category)}</strong> category</span>
           <span><strong>${escapeHtml(difficulty)}</strong> difficulty</span>
@@ -84,7 +84,7 @@ function renderReady() {
         </div>
         <p class="flow-phase1-note" data-flow-passage-id>${escapeHtml(passage.id)}</p>
         <button type="button" class="ui-button ui-button--primary flow-phase1-start" data-flow-action="start">START FLOW</button>
-        <p class="flow-phase1-note">Source: ${escapeHtml(source)}. Public launch, scoring, rhythm analysis and progression remain intentionally out of scope.</p>
+        <p class="flow-phase1-note">Source: ${escapeHtml(source)}. Cadence analysis and public launch remain intentionally out of scope.</p>
       </main>
     </section>`;
   app.querySelector('[data-flow-action="back"]')?.addEventListener("click", restoreReturnSurface);
@@ -109,13 +109,24 @@ function renderRun() {
           <button type="button" class="screen-back-button" data-flow-action="back">BACK</button>
           <div><span>FLOW · ${escapeHtml(resolvedSelection?.passage?.id || "passage")}</span><strong data-flow-progress>0 / ${run.passage.length}</strong></div>
         </header>
+        <section class="flow-gameplay-hud" aria-label="Flow gameplay status">
+          <div class="flow-score-block"><span>Score</span><strong data-flow-score>0</strong></div>
+          <div class="flow-meter-block">
+            <div class="flow-meter-label"><span>Flow</span><strong data-flow-value>60</strong></div>
+            <div class="flow-meter" role="progressbar" aria-label="Flow meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="60" data-flow-meter>
+              <span data-flow-meter-fill style="width:60%"></span>
+            </div>
+          </div>
+          <div class="flow-momentum-block"><span>Momentum</span><strong data-flow-momentum>×1.0</strong></div>
+        </section>
         <div class="flow-run-copy">
-          <p>Type the passage naturally. Backspace removes the most recent character.</p>
+          <p>Type the passage naturally. Mistakes cost Flow and Momentum, but recovery is always possible.</p>
           <div class="flow-passages" aria-label="Typing passage">
             <div class="flow-passage" data-flow-passage aria-label="${escapeHtml(run.passage)}">${getFlowCharacterView(run).map(charMarkup).join("")}</div>
           </div>
         </div>
         <div class="flow-run-diagnostics" aria-live="polite">
+          <span>Accuracy <strong data-flow-accuracy>100.0%</strong></span>
           <span>Corrected <strong data-flow-corrected>0</strong></span>
           <span>Unresolved <strong data-flow-unresolved>0</strong></span>
         </div>
@@ -145,10 +156,27 @@ function startRun() {
   renderRun();
 }
 
+function updateGameplayHud(app, gameplay) {
+  if (!gameplay) return;
+  const score = app.querySelector("[data-flow-score]");
+  if (score) score.textContent = gameplay.score.toLocaleString("en-US");
+  const flowValue = app.querySelector("[data-flow-value]");
+  if (flowValue) flowValue.textContent = String(Math.round(gameplay.flowValue));
+  const meter = app.querySelector("[data-flow-meter]");
+  meter?.setAttribute("aria-valuenow", String(Math.round(gameplay.flowValue)));
+  const fill = app.querySelector("[data-flow-meter-fill]");
+  if (fill) fill.style.width = `${gameplay.flowValue}%`;
+  const momentum = app.querySelector("[data-flow-momentum]");
+  if (momentum) momentum.textContent = `×${gameplay.momentum.toFixed(1)}`;
+  const accuracy = app.querySelector("[data-flow-accuracy]");
+  if (accuracy) accuracy.textContent = `${gameplay.accuracyPercent.toFixed(1)}%`;
+}
+
 function updateRunView() {
   if (!run || view !== "run") return;
   const app = root();
   if (!app) return;
+  const snapshot = getFlowTypingSnapshot(run);
   const characters = getFlowCharacterView(run);
   for (const character of characters) {
     const node = app.querySelector(`[data-flow-char="${character.index}"]`);
@@ -163,6 +191,7 @@ function updateRunView() {
   if (corrected) corrected.textContent = String(run.correctedErrors);
   const unresolved = app.querySelector("[data-flow-unresolved]");
   if (unresolved) unresolved.textContent = String(run.uncorrectedErrors);
+  updateGameplayHud(app, snapshot.gameplay);
   if (run.phase === FLOW_PHASES.COMPLETE) renderComplete();
 }
 
@@ -170,19 +199,34 @@ function renderComplete() {
   const app = root();
   if (!app || !run) return;
   view = "complete";
+  const snapshot = getFlowTypingSnapshot(run);
+  const gameplay = snapshot.gameplay;
+  const breakdown = gameplay.scoreBreakdown;
   const durationMs = Math.max(0, (run.completedAt ?? now()) - (run.startedAt ?? run.completedAt ?? now()));
   const seconds = (durationMs / 1000).toFixed(1);
   app.innerHTML = `
     <section class="screen flow-phase1-screen flow-complete-screen" data-flow-view="complete">
       <main class="flow-phase1-shell flow-complete-shell">
-        <div class="flow-phase1-kicker">Content-engine validation complete</div>
-        <h1>PASSAGE COMPLETE</h1>
-        <p class="flow-phase1-lead">The selected catalog passage reached the terminal state. Timing and correction telemetry remain separate from future Flow scoring.</p>
-        <div class="flow-phase1-brief">
-          <span><strong>${run.passage.length}</strong> characters</span>
+        <div class="flow-phase1-kicker">Core Flow gameplay complete</div>
+        <h1>FLOW COMPLETE</h1>
+        <div class="flow-final-score"><span>Flow Score</span><strong data-flow-final-score>${gameplay.score.toLocaleString("en-US")}</strong></div>
+        <p class="flow-phase1-lead">Score rewards accurate forward progress, sustained Flow quality, passage difficulty, and Momentum. Typing faster does not directly increase it.</p>
+        <div class="flow-phase1-brief flow-result-metrics">
+          <span><strong>${gameplay.accuracyPercent.toFixed(1)}%</strong> raw accuracy</span>
+          <span><strong>${gameplay.averageFlow.toFixed(1)}</strong> average Flow</span>
+          <span><strong>${gameplay.peakFlow.toFixed(0)}</strong> peak Flow</span>
+          <span><strong>×${gameplay.averageMomentum.toFixed(2)}</strong> average Momentum</span>
+          <span><strong>×${gameplay.peakMomentum.toFixed(1)}</strong> peak Momentum</span>
           <span><strong>${run.correctedErrors}</strong> corrected errors</span>
           <span><strong>${run.uncorrectedErrors}</strong> unresolved errors</span>
           <span><strong>${seconds}s</strong> elapsed</span>
+        </div>
+        <div class="flow-score-breakdown" aria-label="Flow score breakdown">
+          <span>${breakdown.characterBase.toLocaleString("en-US")} character points</span>
+          <span>× ${breakdown.difficultyMultiplier.toFixed(2)} difficulty</span>
+          <span>× ${breakdown.accuracyMultiplier.toFixed(3)} accuracy</span>
+          <span>× ${breakdown.flowMultiplier.toFixed(3)} Flow</span>
+          <span>× ${breakdown.averageMomentum.toFixed(3)} Momentum</span>
         </div>
         <div class="flow-complete-actions">
           <button type="button" class="ui-button ui-button--primary" data-flow-action="restart">TYPE AGAIN</button>
