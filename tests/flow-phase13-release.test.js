@@ -55,10 +55,16 @@ assert.equal(release.searchParams.get("foo"), "keep");
 assert.equal(release.searchParams.has("dev"), false);
 for (const key of [
   "mode", "flowRelease", "flowRun", "flowUi", "flowUx",
-  "flowModifiers", "flowAdaptive", "flowIntegration",
+  "flowModifiers", "flowAdaptive", "flowIntegration", "flowSeed",
 ]) {
   assert.ok(release.searchParams.has(key), `release URL missing ${key}`);
 }
+assert.match(release.searchParams.get("flowSeed"), /^release-/);
+const explicitSeed = new URL(buildFlowReleaseUrl({
+  href: "https://wordstrike.test/?flowSeed=explicit-release-seed",
+  search: "?flowSeed=explicit-release-seed",
+}));
+assert.equal(explicitSeed.searchParams.get("flowSeed"), "explicit-release-seed", "explicit release seeds must remain deterministic");
 assert.equal(release.searchParams.get("mode"), "flow");
 assert.equal(release.searchParams.get("flowRelease"), "1");
 assert.equal(isFlowReleaseRoute({ href: release.href, search: release.search }), true);
@@ -105,5 +111,6 @@ assert.match(loader, /removeTemporaryDeveloperFlag\(\)/);
 assert.match(loader, /installReleaseExitCleanup\(\)/);
 assert.match(loader, /button\[data-mode-id=["']flow["']\]/);
 assert.match(loader, /cache\.addAll\(urls\)/);
+assert.match(loader, /flowSeed/);
 
-console.log("Flow Phase 13 release contracts passed: public registry, production route normalization, clean exit, compatibility loader ordering, complete offline module graph, and offline asset pack.");
+console.log("Flow Phase 13 release contracts passed: public registry, fresh production seed, clean exit, compatibility loader ordering, complete offline module graph, and offline asset pack.");
