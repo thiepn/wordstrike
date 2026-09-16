@@ -36,6 +36,7 @@ const FLOW_RELEASE_ASSETS = Object.freeze([
   "./js/flow/flowIntegrationPhase11.js?v=20260916a",
   "./js/flow/flowModifiers.js",
   "./js/flow/flowModifiersPhase9.js?v=20260916a",
+  "./js/flow/flowPassages.js",
   "./js/flow/flowPhase1.js?v=20260916d",
   "./js/flow/flowProgression.js",
   "./js/flow/flowRunPlan.js",
