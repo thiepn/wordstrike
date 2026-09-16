@@ -75,6 +75,7 @@
     <script type="module" src="js/flow/flowVisualPhase6.js?v=20260916a"></script>
     <script type="module">
       if (new URLSearchParams(location.search).get("flowUi") === "1") {
+        import("./js/flow/flowUiPhase7KeyboardGuard.js?v=20260916a");
         import("./js/flow/flowUiPhase7.js?v=20260916a");
       }
     </script>
