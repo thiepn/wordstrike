@@ -19,7 +19,7 @@ ARTIFACTS = ROOT / "browser-artifacts" / "customization-p3-release"
 MIN_TARGET = 44 - 0.01
 
 SEED = """(() => {
-  for (const [id,v] of Object.entries({general:3,campaign:1,typing:1,endless:1,boss:1,leaderboards:1,'arcade-rush':1}))
+  for (const [id,v] of Object.entries({general:3,campaign:2,typing:1,endless:1,boss:1,leaderboards:1,'arcade-rush':1}))
     localStorage.setItem(`wordstrike.onboarding.${id}.v${v}`,'seen');
   if (!localStorage.getItem('wordstrike_save')) localStorage.setItem('wordstrike_save', JSON.stringify({
     currentFurthestLevel:10,
@@ -361,7 +361,7 @@ def certify_cross_feature_edges(browser, engine, base, checks):
 
     # Malformed/unknown saved preferences normalize without losing progress.
     corrupt = """(() => {
-      for (const [id,v] of Object.entries({general:3,campaign:1,typing:1,endless:1,boss:1,leaderboards:1,'arcade-rush':1}))
+      for (const [id,v] of Object.entries({general:3,campaign:2,typing:1,endless:1,boss:1,leaderboards:1,'arcade-rush':1}))
         localStorage.setItem(`wordstrike.onboarding.${id}.v${v}`,'seen');
       localStorage.setItem('wordstrike_save', JSON.stringify({currentFurthestLevel:7,levels:{1:{bestWPM:81}},settings:{
         theme:'unknown',accent:17,effectsIntensity:'warp',gameplayHud:'dense',actionModeIntensity:'max',

@@ -3,7 +3,57 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+      (() => {
+        // Diet Copilot and WORDSTRIKE share this Supabase project's Site URL.
+        // WORDSTRIKE deliberately uses implicit OAuth, whose result is returned
+        // in the URL fragment. Diet Copilot uses PKCE, whose result is returned
+        // in the query string. Web callbacks go straight back to Diet so the
+        // canonical Diet client that created the verifier performs the exchange.
+        // Only an explicit native marker diverts the callback to Android.
+        const TARGET_KEY = 'diet-copilot:oauth-target-v2';
+        const FLOW_KEY = 'diet-copilot:oauth-flow-v2';
+        const source = new URL(location.href);
+        const value = key => source.searchParams.get(key);
+
+        const hasPkceResult = Boolean(
+          value('code') || value('error') || value('error_code') || value('error_description')
+        );
+        if (!hasPkceResult) return;
+
+        let targetKind = null;
+        let storedFlow = null;
+        try {
+          targetKind = sessionStorage.getItem(TARGET_KEY);
+          storedFlow = sessionStorage.getItem(FLOW_KEY);
+        } catch {}
+
+        const target = new URL(
+          targetKind === 'native' ? '/diet/native-auth-callback.html' : '/diet/',
+          source.origin
+        );
+
+        for (const key of ['code', 'error', 'error_code', 'error_description']) {
+          const current = value(key);
+          if (current !== null) target.searchParams.set(key, current);
+        }
+
+        const flowId = value('sb_flow_id') || storedFlow;
+        if (flowId) target.searchParams.set('sb_flow_id', flowId);
+
+        try {
+          sessionStorage.removeItem(TARGET_KEY);
+          sessionStorage.removeItem(FLOW_KEY);
+          history.replaceState(null, '', source.pathname);
+        } catch {}
+
+        location.replace(target.href);
+      })();
+    </script>
     <meta name="theme-color" content="#0A0E14">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="WORDSTRIKE">
     <meta name="description" content="WORDSTRIKE is a local-first browser typing game with Campaign, Typing Test, Endless, Arcade Rush, statistics, and optional global leaderboards.">
     <meta property="og:title" content="WORDSTRIKE">
     <meta property="og:description" content="Precision typing under arcade pressure. Play Campaign, Typing Test, Endless, and Arcade Rush.">
@@ -30,6 +80,7 @@
     <link rel="stylesheet" href="styles/screens/typing-test-ui8-contract.css">
     <link rel="stylesheet" href="styles/screens/arcade-rush-gameplay.css">
     <link rel="stylesheet" href="styles/screens/results-pause-onboarding.css">
+    <link rel="stylesheet" href="styles/screens/typing-performance-v1.css?v=20260910a">
     <link rel="stylesheet" href="styles/screens/profile-leaderboards-settings.css">
     <link rel="stylesheet" href="styles/screens/profile-leaderboards-settings-ui11-contract.css">
     <link rel="stylesheet" href="styles/screens/ui12-global-polish.css">
@@ -44,12 +95,26 @@
   <body>
     <main id="app"></main>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0"></script>
-    <script type="module" src="js/main.js?v=20260910e"></script>
+    <script type="module" src="js/main.js?v=20260910f"></script>
+    <script type="module" src="js/thiepnAccountPresentation.js?v=20260912a"></script>
+    <script type="module" src="js/speedTestPerformanceV1.js?v=20260910a"></script>
+    <script type="module" src="js/speedTestPerformanceV2.js?v=20260910b"></script>
+    <script type="module" src="js/speedTestPerformanceV3.js?v=20260911a"></script>
+    <script type="module" src="js/speedTestPerformanceV4.js?v=20260911a"></script>
+    <script type="module" src="js/speedTestPerformanceV5.js?v=20260911a"></script>
+    <script type="module" src="js/speedTestResultsV6.js?v=20260911a"></script>
     <script type="module" src="js/campaignGameplayPresentation.js"></script>
     <script type="module" src="js/endlessGameplayPresentation.js"></script>
     <script type="module" src="js/bossGameplayPresentation.js"></script>
     <script type="module" src="js/arcadeRushGameplayPresentation.js"></script>
     <script type="module" src="js/profileLeaderboardsSettingsPresentation.js"></script>
     <script type="module" src="js/ui12GlobalPresentation.js"></script>
+
+    <script>
+      const canRegisterPwa = location.protocol === "https:" || location.hostname === "localhost";
+      if ("serviceWorker" in navigator && canRegisterPwa) {
+        window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js").catch(() => {}));
+      }
+    </script>
   </body>
 </html>

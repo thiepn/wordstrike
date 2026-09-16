@@ -18,11 +18,11 @@ ARTIFACTS = ROOT / "browser-artifacts" / "ui7-boss-gameplay"
 
 SEED = """(() => {
   for (const [id, version] of Object.entries({
-    general:3, campaign:1, typing:1, endless:1, boss:1, leaderboards:1, 'arcade-rush':1
+    general:3, campaign:2, typing:1, endless:1, boss:1, leaderboards:1, 'arcade-rush':1
   })) localStorage.setItem(`wordstrike.onboarding.${id}.v${version}`, 'seen');
   localStorage.setItem('wordstrike_save', JSON.stringify({
     currentFurthestLevel: 10,
-    levels:{1:{grade:'A',bestWPM:82,bestAccuracy:98,bestScore:4000,completed:true}},
+    levels:Object.fromEntries(Array.from({length:9},(_,index)=>[index+1,{grade:'A',bestWPM:82,bestAccuracy:98,bestScore:4000+index,completed:true}])),
     settings:{strictMode:false,particles:true,screenShake:true,speedTestTimerPosition:'center',speedTestFontSize:'auto'}
   }));
 })();"""

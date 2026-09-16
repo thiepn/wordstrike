@@ -32,10 +32,10 @@ assert.deepEqual(calls[0], [
       persistSession: true,
       autoRefreshToken: true,
       detectSessionInUrl: true,
-      storageKey: "wordstrike_supabase_auth_v1",
+      storageKey: "sb-hycegznamzjhwinegaai-auth-token",
     },
   },
 ]);
-assert.equal(SUPABASE_AUTH_STORAGE_KEY, "wordstrike_supabase_auth_v1");
+assert.equal(SUPABASE_AUTH_STORAGE_KEY, "sb-hycegznamzjhwinegaai-auth-token");
 
-console.log("Supabase browser client singleton and persistent implicit OAuth options passed.");
+console.log("Supabase browser client singleton and shared THIEPN Account OAuth options passed.");

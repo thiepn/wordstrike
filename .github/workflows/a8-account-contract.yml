@@ -1,0 +1,38 @@
+name: A8 Account Consumer Contract
+
+on:
+  pull_request:
+    paths:
+      - '.well-known/thiepn-app.json'
+      - 'supabase/functions/_shared/operations.js'
+      - 'docs/account-platform/**'
+      - '.github/workflows/a8-account-contract.yml'
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+      - name: Validate WORDSTRIKE A8 contract
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const manifest=JSON.parse(fs.readFileSync('.well-known/thiepn-app.json','utf8'));
+          const operations=fs.readFileSync('supabase/functions/_shared/operations.js','utf8');
+          const expected={schemaVersion:'1.0',app:'wordstrike',displayName:'WORDSTRIKE',path:'/wordstrike/',accountContract:'1.0',sdkContract:'1.x',integrationMode:'certified-legacy',operationsVersion:'A7.1',sessionAuthority:'thiepn-account'};
+          for(const [key,value] of Object.entries(expected))if(manifest[key]!==value)throw new Error(`WORDSTRIKE A8 manifest mismatch: ${key}`);
+          if(manifest.health?.networkFailureLogsOutUser!==false)throw new Error('Network failure must not log WORDSTRIKE out.');
+          if(manifest.health?.localGameplayPreservedOnBackendFailure!==true)throw new Error('Local gameplay degraded-mode contract regressed.');
+          if(manifest.health?.onlineWritesRequireServerValidation!==true)throw new Error('Online writes must remain server-validated.');
+          if(!operations.includes('OPERATIONS_VERSION = "A7.1"'))throw new Error('A7 operational correlation contract regressed.');
+          if(!operations.includes('X-Request-ID'))throw new Error('Request correlation header missing.');
+          console.log('WORDSTRIKE A8 consumer contract passed.');
+          NODE

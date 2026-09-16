@@ -27,6 +27,15 @@ import {
   createSpeedTestMetrics,
 } from "./speedTestMetrics.js";
 import {
+  createSpeedTestTimeline,
+  finalizeSpeedTestTimeline,
+  persistSpeedTestTimeline,
+  recordSpeedTestTimelineCharacter,
+  recordSpeedTestTimelineCorrection,
+  recordSpeedTestTimelineMissedCharacters,
+  recordSpeedTestTimelineSpace,
+} from "./speedTestTimeline.js";
+import {
   createSpeedTestWordStream,
   SPEED_TEST_WORD_SET,
   SPEED_TEST_BATCH_SIZE,
@@ -96,6 +105,8 @@ export function createSpeedTestRuntime({
     typedBuffer: "",
     committedWords: [],
     metrics: createSpeedTestMetrics(),
+    timeline: createSpeedTestTimeline(),
+    performanceTimeline: null,
     activeStartedAtMs: null,
     accumulatedActiveMs: 0,
     completedAtMs: null,
@@ -179,12 +190,24 @@ function beginActiveTyping(state, nowMs) {
   return true;
 }
 
-function commitCurrentWord(state, { separator = false } = {}) {
+function commitCurrentWord(state, { separator = false, nowMs = null } = {}) {
   const expected = getSpeedTestCurrentWord(state);
   const typed = state.typedBuffer;
   const correctPositions = countCorrectPositions(expected, typed);
   const missingCharacters = Math.max(0, expected.length - typed.length);
   const exact = typed === expected;
+  const eventNow = Number.isFinite(nowMs) ? nowMs : monotonicNow();
+  const activeMs = getSpeedTestActiveDuration(state, eventNow);
+
+  if (missingCharacters > 0) {
+    recordSpeedTestTimelineMissedCharacters(state.timeline, {
+      activeMs,
+      count: missingCharacters,
+      expected: expected.slice(typed.length),
+      typed,
+      word: expected,
+    });
+  }
 
   state.metrics.committedCorrectCharacters += correctPositions;
   state.metrics.missedCharacters += missingCharacters;
@@ -196,6 +219,7 @@ function commitCurrentWord(state, { separator = false } = {}) {
     state.metrics.correctSpaces += 1;
     state.metrics.correctKeystrokes += 1;
     state.metrics.rawTypedCharacters += 1;
+    recordSpeedTestTimelineSpace(state.timeline, activeMs);
   }
   state.committedWords.push({
     expected,
@@ -219,6 +243,8 @@ function buildSpeedTestResult(state, completedAtMs) {
     typedBuffer: state.typedBuffer,
     includePartial: state.config.testType === SPEED_TEST_TYPES.TIME,
   });
+  state.performanceTimeline = state.performanceTimeline
+    || finalizeSpeedTestTimeline(state.timeline, activeDurationMs);
   const endedAt = Date.now();
   return buildSessionResult({
     sessionId: session.id,
@@ -283,6 +309,7 @@ function buildSpeedTestResult(state, completedAtMs) {
       generatedWordCount: state.words.length,
       completedWordCount: state.metrics.wordsCompleted,
       attemptSeed: state.attemptSeed,
+      performanceTimeline: state.performanceTimeline,
     },
   });
 }
@@ -328,6 +355,11 @@ export function completeSpeedTest(state, completedAtMs = monotonicNow()) {
       newAccuracyRecord: false,
     };
   }
+  persistSpeedTestTimeline(
+    result.sessionId,
+    result.modeData?.performanceTimeline,
+    result.endedAt,
+  );
   state.result = result;
   return result;
 }
@@ -337,6 +369,15 @@ function processCharacter(state, character, nowMs) {
   const expected = getSpeedTestCurrentWord(state);
   const typedIndex = state.typedBuffer.length;
   const classification = classifySpeedTestCharacter(expected, typedIndex, character);
+  const activeMs = getSpeedTestActiveDuration(state, nowMs);
+  recordSpeedTestTimelineCharacter(state.timeline, {
+    activeMs,
+    correct: classification === "correct",
+    extra: classification === "extra",
+    expected: expected[typedIndex] || "",
+    typed: character,
+    word: expected,
+  });
   state.typedBuffer += character;
   state.metrics.printableKeystrokes += 1;
   state.metrics.rawTypedCharacters += 1;
@@ -351,7 +392,7 @@ function processCharacter(state, character, nowMs) {
     state.currentWordIndex === state.config.wordCount - 1
   );
   if (isFinalWord && state.typedBuffer === expected) {
-    commitCurrentWord(state);
+    commitCurrentWord(state, { nowMs });
     completeSpeedTest(state, nowMs);
   }
 }
@@ -371,8 +412,19 @@ export function handleSpeedTestInput(state, event, nowMs = monotonicNow()) {
   if (event.key === "Backspace") {
     event.preventDefault?.();
     if (!state.typedBuffer) return false;
+    const expected = getSpeedTestCurrentWord(state);
+    const activeMs = getSpeedTestActiveDuration(state, eventNow);
+    const wordDelete = event.ctrlKey || event.metaKey;
+    const erasedCorrectChars = wordDelete
+      ? countCorrectPositions(expected, state.typedBuffer)
+      : expected[state.typedBuffer.length - 1] === state.typedBuffer.at(-1) ? 1 : 0;
+    recordSpeedTestTimelineCorrection(state.timeline, {
+      activeMs,
+      erasedCorrectChars,
+      wordDelete,
+    });
     state.metrics.backspaces += 1;
-    if (event.ctrlKey || event.metaKey) {
+    if (wordDelete) {
       state.typedBuffer = "";
       state.metrics.wordDeletes += 1;
     } else {
@@ -391,7 +443,7 @@ export function handleSpeedTestInput(state, event, nowMs = monotonicNow()) {
     ) {
       return false;
     }
-    commitCurrentWord(state, { separator: true });
+    commitCurrentWord(state, { separator: true, nowMs: eventNow });
     return true;
   }
   if (typeof event.key !== "string" || event.key.length !== 1) return false;
@@ -518,6 +570,8 @@ export function clearSpeedTestRuntime() {
     currentSpeedTest.words.length = 0;
     currentSpeedTest.committedWords.length = 0;
     currentSpeedTest.typedBuffer = "";
+    if (currentSpeedTest.timeline?.buckets) currentSpeedTest.timeline.buckets.length = 0;
+    if (currentSpeedTest.timeline?.mistakes) currentSpeedTest.timeline.mistakes.length = 0;
   }
   currentSpeedTest = null;
   callbacks = {};
@@ -569,6 +623,7 @@ export function getSpeedTestDiagnosticText(state = currentSpeedTest, nowMs = mon
     `EXTRA=${state.metrics.extraCharacters}`,
     `BACKSPACES=${state.metrics.backspaces}`,
     `WORD DELETES=${state.metrics.wordDeletes}`,
+    `TIMELINE POINTS=${state.performanceTimeline?.points?.length ?? state.timeline?.buckets?.length ?? 0}`,
     `CPM=${live.cpm.toFixed(2)}`,
     `WPM=${live.wpm.toFixed(2)}`,
     `RAW CPM=${live.rawCpm.toFixed(2)}`,

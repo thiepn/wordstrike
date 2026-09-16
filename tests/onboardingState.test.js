@@ -12,12 +12,14 @@ globalThis.localStorage = {
 resetAllOnboarding();
 
 assert.equal(ONBOARDING_TUTORIALS.general.steps.length, 4);
-assert.equal(ONBOARDING_TUTORIALS.campaign.steps.length, 3);
+assert.equal(ONBOARDING_TUTORIALS.campaign.steps.length, 4);
 assert.equal(ONBOARDING_TUTORIALS.typing.steps.length, 3);
 assert.equal(ONBOARDING_TUTORIALS.endless.steps.length, 2);
 assert.equal(ONBOARDING_TUTORIALS.daily, undefined);
 assert.equal(ONBOARDING_TUTORIALS.boss.steps.length, 2);
 assert.equal(ONBOARDING_TUTORIALS.leaderboards.steps.length, 1);
+assert.match(ONBOARDING_TUTORIALS.campaign.steps[2].body, /60-second Typing Test/);
+assert.doesNotMatch(ONBOARDING_TUTORIALS.campaign.steps[2].body, /placement/i);
 
 const controller = createOnboardingController();
 const states = [];
@@ -31,7 +33,7 @@ controller.previous();
 assert.equal(controller.getState().currentStep, 0);
 controller.next();
 controller.last();
-assert.equal(controller.getState().currentStep, 2);
+assert.equal(controller.getState().currentStep, 3);
 controller.first();
 assert.equal(controller.getState().currentStep, 0);
 controller.skip();

@@ -2,7 +2,6 @@ import { startModeCustomizationPresentation } from "./modeCustomizationPresentat
 import { startCustomizationPresentation } from "./customizationPresentation.js";
 import {
   appState,
-  canLaunchLevel,
   changeScreen,
   clearAttemptRuntime,
   isDevelopmentMode,
@@ -18,6 +17,7 @@ import {
 } from "./levelGenerator.js";
 import { generateBossEncounter } from "./bossGenerator.js";
 import {
+  isCampaignLevelAccessible,
   loadSave,
   resetProgress,
   updateLevelResult,
@@ -138,6 +138,7 @@ import {
   resolveAppClickAction,
 } from "./appClickRouting.js";
 import { createGlobalKeyboardController } from "./appKeyboardController.js";
+import { createNativeBackNavigation, createWordStrikeBackHandler } from "./nativeBackNavigation.js";
 import {
   getAuthState,
   initializeAuth,
@@ -598,8 +599,8 @@ function backFromSettings() {
 
 function startLevel(levelNumber, source = "level-select") {
   const safeLevel = Math.max(1, Math.min(100, levelNumber));
-  const legitimatelyUnlocked = safeLevel <= appState.save.currentFurthestLevel;
-  if (!canLaunchLevel(appState.devMode, appState.save.currentFurthestLevel, safeLevel)) return;
+  const legitimatelyUnlocked = isCampaignLevelAccessible(appState.save, safeLevel);
+  if (!appState.devMode && !legitimatelyUnlocked) return;
   if (safeLevel % 10 === 0 && source !== "developer" && openAutomaticTutorial("boss", (choice) => {
     if (choice === "primary") startLevel(safeLevel, source);
   })) return;
@@ -1432,6 +1433,28 @@ function inspectDevLevel(levelNumber) {
   input?.focus();
 }
 
+const handleNativeBack = createWordStrikeBackHandler({
+  state: appState,
+  onboardingController,
+  getSpeedTestState: getCurrentSpeedTest,
+  backPracticeLab: () => practiceLabController?.back(),
+  cancelProfileNameEdit,
+  openTitle,
+  openModeSelect,
+  openLevelSelect,
+  openEndlessReady,
+  openArcadeRushReady,
+  resetSpeedTestAttempt,
+  pauseGame,
+  pauseTypingTest,
+  backFromSettings,
+});
+
+const nativeBackNavigation = createNativeBackNavigation({
+  windowRef: window,
+  onBack: handleNativeBack,
+});
+
 const handleGlobalKeydown = createGlobalKeyboardController({
   state: appState,
   currentTimeMs,
@@ -1568,6 +1591,7 @@ async function bootstrap() {
     loadCommonWordBank(),
   ]);
   document.addEventListener("keydown", handleGlobalKeydown);
+  nativeBackNavigation.mount();
   const appRoot = document.querySelector("#app");
   attachAppClickListener(appRoot, handleAppClick);
   appRoot?.addEventListener("input", handleAppInput);

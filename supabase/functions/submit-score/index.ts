@@ -1,5 +1,11 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { getCorsHeaders } from "../_shared/leaderboardProfile.js";
+import {
+  classifyStatus,
+  logOperationalEvent,
+  operationId,
+  responseHeaders,
+} from "../_shared/operations.js";
 import { validateScoreSubmission } from "../_shared/scoreSubmission.js";
 
 const MESSAGES: Record<string, string> = Object.freeze({
@@ -28,49 +34,63 @@ const MESSAGES: Record<string, string> = Object.freeze({
   SERVER_ERROR: "Global score submission is temporarily unavailable.",
 });
 
-function response(payload: unknown, status: number, cors: Record<string, string>) {
+function response(
+  payload: unknown,
+  status: number,
+  cors: Record<string, string>,
+  requestId: string,
+) {
   return new Response(JSON.stringify(payload), {
     status,
-    headers: { ...cors, "Content-Type": "application/json; charset=utf-8" },
+    headers: responseHeaders(cors, requestId),
   });
 }
 
-function failure(code: string, status: number, cors: Record<string, string>) {
+function failure(
+  code: string,
+  status: number,
+  cors: Record<string, string>,
+  requestId: string,
+) {
   const safeCode = code in MESSAGES ? code : "SERVER_ERROR";
   return response({
     ok: false,
     error: { code: safeCode, message: MESSAGES[safeCode] },
-  }, status, cors);
+  }, status, cors, requestId);
 }
 
 Deno.serve(async (request) => {
+  const requestId = operationId(request.headers);
+  const started = Date.now();
   const cors = getCorsHeaders(request.headers.get("Origin"));
-  if (!cors) return failure("INVALID_REQUEST", 403, {});
-  if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: cors });
-  if (request.method !== "POST") return failure("METHOD_NOT_ALLOWED", 405, cors);
+  if (!cors) return failure("INVALID_REQUEST", 403, {}, requestId);
+  if (request.method === "OPTIONS") {
+    return new Response(null, { status: 204, headers: { ...cors, "X-Request-ID": requestId } });
+  }
+  if (request.method !== "POST") return failure("METHOD_NOT_ALLOWED", 405, cors, requestId);
 
   const token = (request.headers.get("Authorization") || "").match(/^Bearer\s+(.+)$/i)?.[1];
-  if (!token) return failure("NOT_AUTHENTICATED", 401, cors);
+  if (!token) return failure("NOT_AUTHENTICATED", 401, cors, requestId);
 
   const supabaseUrl = Deno.env.get("SUPABASE_URL");
   const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-  if (!supabaseUrl || !serviceRoleKey) return failure("SERVER_ERROR", 500, cors);
+  if (!supabaseUrl || !serviceRoleKey) return failure("SERVER_ERROR", 500, cors, requestId);
   const client = createClient(supabaseUrl, serviceRoleKey, {
     auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
   });
 
   const { data: userData, error: userError } = await client.auth.getUser(token);
   const userId = userData?.user?.id;
-  if (userError || !userId) return failure("NOT_AUTHENTICATED", 401, cors);
+  if (userError || !userId) return failure("NOT_AUTHENTICATED", 401, cors, requestId);
 
   let body: Record<string, unknown>;
   try {
     body = await request.json();
   } catch {
-    return failure("INVALID_REQUEST", 400, cors);
+    return failure("INVALID_REQUEST", 400, cors, requestId);
   }
   const validation = validateScoreSubmission(body);
-  if (!validation.valid) return failure(validation.code, 400, cors);
+  if (!validation.valid) return failure(validation.code, 400, cors, requestId);
   const value = validation.value;
 
   try {
@@ -95,13 +115,28 @@ Deno.serve(async (request) => {
       p_metrics: value.metrics,
     });
     if (error || !data || typeof data !== "object") {
-      console.error("submit-score RPC failed", { boardKey: value.boardKey });
-      return failure("SERVER_ERROR", 500, cors);
+      logOperationalEvent("wordstrike.score.failure", {
+        request_id: requestId,
+        service: "submit-score",
+        category: "service",
+        http_status: 500,
+        board_key: value.boardKey,
+        duration_ms: Date.now() - started,
+      });
+      return failure("SERVER_ERROR", 500, cors, requestId);
     }
     if (data.ok !== true) {
       const code = String(data.code || "SERVER_ERROR");
       const status = code === "RATE_LIMITED" ? 429 : code === "PROFILE_REQUIRED" ? 403 : 400;
-      return failure(code, status, cors);
+      logOperationalEvent("wordstrike.score.failure", {
+        request_id: requestId,
+        service: "submit-score",
+        category: classifyStatus(status),
+        http_status: status,
+        board_key: value.boardKey,
+        duration_ms: Date.now() - started,
+      });
+      return failure(code, status, cors, requestId);
     }
 
     const { data: leaderboard, error: rankError } = await client.rpc("get_public_leaderboard", {
@@ -109,8 +144,24 @@ Deno.serve(async (request) => {
       p_challenge_date: value.challengeDate,
       p_viewer_user_id: userId,
     });
-    if (rankError) console.error("submit-score rank lookup failed", { boardKey: value.boardKey });
+    if (rankError) {
+      logOperationalEvent("wordstrike.score.rank_failure", {
+        request_id: requestId,
+        service: "submit-score",
+        category: "service",
+        http_status: 500,
+        board_key: value.boardKey,
+      });
+    }
     const duplicate = data.duplicate === true;
+    logOperationalEvent("wordstrike.score.success", {
+      request_id: requestId,
+      service: "submit-score",
+      http_status: 200,
+      board_key: value.boardKey,
+      duplicate,
+      duration_ms: Date.now() - started,
+    });
     return response({
       ok: true,
       data: {
@@ -122,9 +173,16 @@ Deno.serve(async (request) => {
           ? Number(leaderboard.viewer.rank)
           : null,
       },
-    }, 200, cors);
+    }, 200, cors, requestId);
   } catch {
-    console.error("submit-score request failed", { boardKey: value.boardKey });
-    return failure("SERVER_ERROR", 500, cors);
+    logOperationalEvent("wordstrike.score.failure", {
+      request_id: requestId,
+      service: "submit-score",
+      category: "service",
+      http_status: 500,
+      board_key: value.boardKey,
+      duration_ms: Date.now() - started,
+    });
+    return failure("SERVER_ERROR", 500, cors, requestId);
   }
 });
