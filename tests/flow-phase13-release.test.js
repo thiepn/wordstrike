@@ -85,6 +85,7 @@ for (const asset of [
   "./js/flow/flowCadence.js",
   "./js/flow/flowGameplay.js",
   "./js/flow/flowContentExpansion.js",
+  "./js/flow/flowPassages.js",
   "./js/flow/flowProgression.js",
   "./js/flow/flowIntegrationPhase11.js?v=20260916a",
   "./styles/screens/flow-phase1.css?v=20260916d",
@@ -105,4 +106,4 @@ assert.match(loader, /installReleaseExitCleanup\(\)/);
 assert.match(loader, /button\[data-mode-id=["']flow["']\]/);
 assert.match(loader, /cache\.addAll\(urls\)/);
 
-console.log("Flow Phase 13 release contracts passed: public registry, production route normalization, clean exit, compatibility loader ordering, and offline asset pack.");
+console.log("Flow Phase 13 release contracts passed: public registry, production route normalization, clean exit, compatibility loader ordering, complete offline module graph, and offline asset pack.");
