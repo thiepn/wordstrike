@@ -153,12 +153,23 @@ function setupMarkup() {
 
 function syncChoiceState(screen) {
   if (!draft) return;
-  for (const button of screen.querySelectorAll("[data-flow-choice-group]")) {
-    const group = button.dataset.flowChoiceGroup;
-    const selected = draft[group] === button.dataset.flowChoiceValue;
-    button.classList.toggle("is-selected", selected);
-    button.setAttribute("aria-pressed", String(selected));
+
+  // Clear presentation state first so each semantic group can never retain a
+  // stale visual selection after the draft changes rapidly through click or
+  // keyboard input.
+  const buttons = [...screen.querySelectorAll("[data-flow-choice-group]")];
+  for (const button of buttons) {
+    button.classList.remove("is-selected");
+    button.setAttribute("aria-pressed", "false");
   }
+  for (const group of ["sessionLength", "category", "difficulty"]) {
+    const value = draft[group];
+    const selected = screen.querySelector(`[data-flow-choice-group="${group}"][data-flow-choice-value="${value}"]`);
+    if (!selected) continue;
+    selected.classList.add("is-selected");
+    selected.setAttribute("aria-pressed", "true");
+  }
+
   const summary = screen.querySelector("[data-flow-setup-summary]");
   if (summary) summary.textContent = LENGTH_COPY[draft.sessionLength];
   const focus = screen.querySelector("[data-flow-setup-focus]");
