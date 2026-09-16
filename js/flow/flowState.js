@@ -9,13 +9,21 @@ export const FLOW_PHASES = Object.freeze({
   COMPLETE: "complete",
 });
 
+function routeModifierIds() {
+  const search = globalThis.location?.search;
+  if (!search) return [];
+  const params = new URLSearchParams(search);
+  return normalizeFlowModifierIds(params.get("flowModifierIds") || "");
+}
+
 export function createInitialFlowRun(options = {}) {
   const normalized = normalizeFlowOptions(options);
+  const explicitModifiers = options.modifiers ?? options.modifierIds;
   return {
     mode: FLOW_MODE_ID,
     phase: FLOW_PHASES.IDLE,
     ...normalized,
-    modifiers: normalizeFlowModifierIds(options.modifiers || options.modifierIds || []),
+    modifiers: normalizeFlowModifierIds(explicitModifiers ?? routeModifierIds()),
     passageId: null,
     startedAt: null,
     completedAt: null,
