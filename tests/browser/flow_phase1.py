@@ -89,9 +89,10 @@ def certify_public_gate(browser, browser_name, base, evidence):
     expect(page.locator('.mode-select-screen')).to_be_visible()
     flow = page.locator('[data-mode-id="flow"]')
     expect(flow).to_be_visible()
-    expect(flow).to_have_attribute('aria-disabled', 'true')
+    assert flow.get_attribute('aria-disabled') is None
+    assert flow.evaluate('el => el.tagName') == 'BUTTON'
     assert page.locator('[data-flow-view="ready"]').count() == 0
-    evidence.append({"browser": browser_name, "case": "public Phase 1 Flow remains gated"})
+    evidence.append({"browser": browser_name, "case": "released public Flow is available without auto-launching from Mode Select"})
     context.close()
 
 
