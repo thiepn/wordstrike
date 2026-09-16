@@ -168,16 +168,17 @@ def certify_isolation(browser, browser_name, base, evidence):
     assert page.locator('[data-flow-modifier-setup]').count() == 0
     assert page.locator('[data-flow-modifier-strip]').count() == 0
 
-    # Public Flow is still gated.
+    # Released public Flow is available, but Mode Select alone must not mount modifiers.
     page.goto(base, wait_until="domcontentloaded")
     expect(page.locator('.title-screen')).to_be_visible(timeout=10000)
     page.locator('[data-action="modes"]').click()
     flow = page.locator('[data-mode-id="flow"]')
     expect(flow).to_be_visible()
-    expect(flow).to_have_attribute('aria-disabled', 'true')
+    assert flow.get_attribute('aria-disabled') is None
+    assert flow.evaluate('el => el.tagName') == 'BUTTON'
     assert page.locator('[data-flow-modifier-setup]').count() == 0
 
-    evidence.append({"browser": browser_name, "case": "Phase 9 gate preserves Phase 8 and public Flow"})
+    evidence.append({"browser": browser_name, "case": "Phase 9 developer gate preserves Phase 8 while released Flow is available"})
     context.close()
 
 
