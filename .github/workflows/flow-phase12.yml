@@ -1,0 +1,23 @@
+name: Flow Phase 12 content certification
+on:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  flow-phase12:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Certify production Flow content library
+        run: node tests/flow-phase12-content-expansion.test.js
+      - name: Re-certify content, run planning, adaptive training, and progression contracts
+        run: |
+          node tests/flow-phase2-content.test.js
+          node tests/flow-phase5-run-plan.test.js
+          node tests/flow-phase10-adaptive.test.js
+          node tests/flow-phase11-progression.test.js
