@@ -35,7 +35,7 @@ function backspaceEvent() {
   };
 }
 
-test("Arcade Rush is retained only as hidden legacy compatibility while Flow owns the public slot", () => {
+test("Arcade Rush is retained only as hidden legacy compatibility while Flow owns the released public slot", () => {
   const rush = getModeDefinition(MODE_IDS.ARCADE_RUSH);
   assert.equal(MODE_IDS.ARCADE_RUSH, "arcade-rush");
   assert.ok(rush);
@@ -53,10 +53,10 @@ test("Arcade Rush is retained only as hidden legacy compatibility while Flow own
   assert.ok(flow);
   assert.equal(flow.name, "Flow");
   assert.equal(flow.shortLabel, "Natural Typing");
-  assert.equal(flow.enabled, false);
+  assert.equal(flow.enabled, true);
   assert.equal(flow.visible, true);
-  assert.equal(flow.route, null);
-  assert.equal(flow.status, "coming-soon");
+  assert.equal(flow.route, "flow-release");
+  assert.equal(flow.status, "available");
   assert.equal(getAllModes().some(({ id }) => id === MODE_IDS.FLOW), true);
 
   assert.equal(Object.hasOwn(MODE_IDS, "DAILY"), false);
@@ -124,15 +124,18 @@ test("legacy Arcade Rush backspace handling remains safe", () => {
   assert.equal(forwarded, 1);
 });
 
-test("production mode selection cannot launch Arcade Rush and Flow has no borrowed gameplay route", async () => {
-  const [main, modes] = await Promise.all([
+test("production mode selection cannot launch Arcade Rush and Flow uses only its dedicated release route", async () => {
+  const [main, modes, release] = await Promise.all([
     readFile(new URL("../js/main.js", import.meta.url), "utf8"),
     readFile(new URL("../js/modes.js", import.meta.url), "utf8"),
+    readFile(new URL("../js/flow/flowRuntimeLoader.js", import.meta.url), "utf8"),
   ]);
   assert.match(main, /route === "arcade-rush-ready"\) openArcadeRushReady\("mode-select"\)/);
   assert.doesNotMatch(main, /MODE_IDS\.DAILY|openDailyReady|startDaily|daily-ready/);
   assert.match(main, /renderModeSelect\(getPracticeLabFeatureGate\(\)\.resolveModeDefinitions\(getAllModes\(\)\)/);
   assert.doesNotMatch(modes, /Daily Strike|MODE_IDS\.DAILY|daily-ready/);
   assert.match(modes, /name: "Arcade Rush"[\s\S]*enabled: true[\s\S]*visible: false[\s\S]*route: null/);
-  assert.match(modes, /name: "Flow"[\s\S]*enabled: false[\s\S]*visible: true[\s\S]*route: null/);
+  assert.match(modes, /name: "Flow"[\s\S]*enabled: true[\s\S]*visible: true[\s\S]*route: "flow-release"/);
+  assert.match(release, /button\[data-mode-id=["']flow["']\]/);
+  assert.match(release, /flowRelease/);
 });
