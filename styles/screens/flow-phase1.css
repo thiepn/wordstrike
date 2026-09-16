@@ -1,0 +1,196 @@
+.flow-phase1-screen {
+  min-height: 100dvh;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.flow-phase1-shell,
+.flow-run-shell {
+  width: min(100% - 32px, 980px);
+  margin: 0 auto;
+  padding: clamp(28px, 5vw, 72px) 0;
+}
+
+.flow-phase1-shell {
+  display: grid;
+  gap: 24px;
+  align-content: center;
+  min-height: 100dvh;
+}
+
+.flow-phase1-kicker {
+  font: 700 0.78rem/1.2 var(--font-ui, inherit);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  opacity: 0.66;
+}
+
+.flow-phase1-shell h1 {
+  margin: 0;
+  font-size: clamp(3rem, 9vw, 7rem);
+  line-height: 0.9;
+  letter-spacing: -0.055em;
+}
+
+.flow-phase1-lead,
+.flow-phase1-note,
+.flow-run-copy > p {
+  margin: 0;
+  max-width: 760px;
+  line-height: 1.65;
+}
+
+.flow-phase1-lead {
+  font-size: clamp(1.05rem, 2vw, 1.3rem);
+}
+
+.flow-phase1-note,
+.flow-run-copy > p {
+  opacity: 0.68;
+}
+
+.flow-phase1-brief,
+.flow-run-diagnostics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+}
+
+.flow-phase1-brief span,
+.flow-run-diagnostics span {
+  display: inline-flex;
+  gap: 0.45em;
+  align-items: baseline;
+}
+
+.flow-phase1-start {
+  justify-self: start;
+  min-width: 180px;
+}
+
+.flow-run-shell {
+  display: grid;
+  gap: clamp(28px, 5vw, 56px);
+}
+
+.flow-run-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.flow-run-header > div {
+  display: grid;
+  gap: 4px;
+  text-align: right;
+}
+
+.flow-run-header span {
+  font-size: 0.78rem;
+  letter-spacing: 0.16em;
+  opacity: 0.62;
+}
+
+.flow-run-header strong {
+  font-variant-numeric: tabular-nums;
+}
+
+.flow-run-copy {
+  display: grid;
+  gap: 24px;
+}
+
+.flow-passages {
+  width: 100%;
+}
+
+.flow-passage {
+  font-family: var(--font-body, ui-monospace, "SFMono-Regular", Consolas, monospace);
+  font-size: clamp(1.28rem, 2.6vw, 2rem);
+  line-height: 1.75;
+  letter-spacing: 0.012em;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  user-select: none;
+}
+
+.flow-char {
+  position: relative;
+  transition: opacity 100ms ease, background-color 100ms ease, color 100ms ease;
+}
+
+.flow-char--pending {
+  opacity: 0.38;
+}
+
+.flow-char--correct {
+  opacity: 1;
+}
+
+.flow-char--incorrect {
+  opacity: 1;
+  text-decoration-line: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.22em;
+}
+
+.flow-char--current::after {
+  content: "";
+  position: absolute;
+  left: -0.08em;
+  top: 0.05em;
+  width: 2px;
+  height: 1.25em;
+  background: currentColor;
+  animation: flow-caret-blink 1s steps(1, end) infinite;
+}
+
+.flow-input-capture {
+  position: fixed;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.flow-complete-shell {
+  max-width: 820px;
+}
+
+.flow-complete-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+@keyframes flow-caret-blink {
+  0%, 48% { opacity: 1; }
+  49%, 100% { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flow-char {
+    transition: none;
+  }
+  .flow-char--current::after {
+    animation: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .flow-phase1-shell,
+  .flow-run-shell {
+    width: min(100% - 24px, 980px);
+    padding-top: 20px;
+    padding-bottom: 32px;
+  }
+  .flow-run-header {
+    align-items: flex-start;
+  }
+  .flow-passage {
+    font-size: clamp(1.18rem, 5.4vw, 1.48rem);
+    line-height: 1.68;
+  }
+}
