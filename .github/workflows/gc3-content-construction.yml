@@ -17,6 +17,7 @@ jobs:
       - name: Generate governed original sources
         run: |
           node scripts/generatePracticeGc3OriginalSources.mjs
+          node scripts/normalizePracticeGc3SourceAuthoring.mjs
           node scripts/buildPracticeGc3SourceRegistry.mjs
       - name: Regenerate canonical PL6-PL10 artifacts
         run: |
@@ -43,6 +44,7 @@ jobs:
         run: |
           git diff > /tmp/first.diff
           node scripts/generatePracticeGc3OriginalSources.mjs
+          node scripts/normalizePracticeGc3SourceAuthoring.mjs
           node scripts/buildPracticeGc3SourceRegistry.mjs
           npm run build:practice-corpus
           npm run build:practice-indexes
