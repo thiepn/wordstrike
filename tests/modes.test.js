@@ -21,10 +21,10 @@ assert.equal(rush.route, null, "retired Rush must not expose a production route"
 assert.equal(rush.status, "retired");
 
 const flow = getModeDefinition(MODE_IDS.FLOW);
-assert.equal(flow.enabled, false);
+assert.equal(flow.enabled, true, "Phase 13 releases Flow as a normal public mode");
 assert.equal(flow.visible, true);
-assert.equal(flow.route, null);
-assert.equal(flow.status, "coming-soon");
+assert.equal(flow.route, "flow-release");
+assert.equal(flow.status, "available");
 
 assert.equal(MODE_IDS.DAILY, undefined);
 assert.equal(getModeDefinition("daily"), null);
@@ -33,11 +33,11 @@ assert.equal(getModeDefinition(MODE_IDS.PRACTICE).enabled, false);
 
 assert.deepEqual(
   getEnabledModes().map(({ id }) => id),
-  [MODE_IDS.CAMPAIGN, MODE_IDS.SPEED_TEST, MODE_IDS.ENDLESS],
+  [MODE_IDS.CAMPAIGN, MODE_IDS.SPEED_TEST, MODE_IDS.ENDLESS, MODE_IDS.FLOW],
 );
 assert.deepEqual(
   getEnabledModes({ includeHidden: true }).map(({ id }) => id),
-  [MODE_IDS.CAMPAIGN, MODE_IDS.SPEED_TEST, MODE_IDS.ENDLESS, MODE_IDS.ARCADE_RUSH],
+  [MODE_IDS.CAMPAIGN, MODE_IDS.SPEED_TEST, MODE_IDS.ENDLESS, MODE_IDS.ARCADE_RUSH, MODE_IDS.FLOW],
 );
 assert.deepEqual(
   getAllModes().map(({ id }) => id),
@@ -55,7 +55,7 @@ assert.deepEqual(
 assert.equal(isModeEnabled(MODE_IDS.CAMPAIGN), true);
 assert.equal(isModeEnabled(MODE_IDS.ENDLESS), true);
 assert.equal(isModeEnabled(MODE_IDS.ARCADE_RUSH), true);
-assert.equal(isModeEnabled(MODE_IDS.FLOW), false);
+assert.equal(isModeEnabled(MODE_IDS.FLOW), true);
 assert.equal(isValidModeId("unknown"), false);
 assert.equal(getModeDefinition("unknown"), null);
 
@@ -65,4 +65,4 @@ assert.equal(Object.isFrozen(modes[0]), true);
 assert.throws(() => { modes[0].enabled = false; }, TypeError);
 assert.equal(getModeDefinition(MODE_IDS.CAMPAIGN).enabled, true);
 
-console.log("Flow Phase 0 mode registry hides retired Rush from public discovery while preserving compatibility runtime access, exposes disabled Flow/Practice slots, removes Daily, and remains immutable.");
+console.log("Final mode registry exposes Campaign, Typing Test, Endless, and Flow; keeps Practice gated; hides retired Rush while preserving compatibility runtime access; removes Daily; and remains immutable.");
