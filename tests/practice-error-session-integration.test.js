@@ -23,7 +23,7 @@ async function advanceAndInput(engine, harness, milliseconds, type, value = "") 
   return engine.handleInput(harness.input(type, value));
 }
 
-test("PL9 live events remain intact while current PL25 sessions persist canonical errorSummary inside v13", async () => {
+test("PL9 live events remain intact while current PL38 sessions persist canonical errorSummary inside v14", async () => {
   const harness = await createPracticeSessionHarness({ suffix: "pl9-live", text: "aaaaaa" });
   const engine = createEngine(harness);
   await engine.prepare({ experiment: harness.experiment, configuration: {}, contentPlan: harness.contentPlan });
@@ -36,10 +36,11 @@ test("PL9 live events remain intact while current PL25 sessions persist canonica
   const beforeComplete = engine.getMetricsSnapshot();
   const result = await engine.complete("manual-stop");
 
-  assert.equal(result.summary.recordVersion, 13);
+  assert.equal(result.summary.recordVersion, 14);
   assert.equal(result.summary.abilityMeasurementSummary, null);
   assert.equal(result.summary.retentionReviewSummary, null);
   assert.equal(result.summary.evaluationSummary, null);
+  assert.equal(result.summary.researchBinding, null);
   assert.equal(result.summary.errorSummary.errorEpisodeCount, 1);
   assert.equal(result.summary.errorSummary.correctedEpisodeCount, 1);
   assert.equal(result.summary.errorSummary.incorrectCharactersRemoved, 1);

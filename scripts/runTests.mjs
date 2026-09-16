@@ -14,6 +14,9 @@ if (!files.length) {
   console.log(`Running ${files.length} WORDSTRIKE test files...`);
 }
 
+const failedFiles = [];
+let failureExitCode = 0;
+
 for (const file of files) {
   const testPath = fileURLToPath(new URL(file, testsDirectory));
   const exitCode = await new Promise((resolve, reject) => {
@@ -34,11 +37,15 @@ for (const file of files) {
 
   if (exitCode !== 0) {
     console.error(`Test failed: ${file}`);
-    process.exitCode = exitCode;
-    break;
+    failedFiles.push(file);
+    failureExitCode ||= exitCode;
   }
 }
 
-if (!process.exitCode) {
+if (failedFiles.length) {
+  console.error(`\n${failedFiles.length} of ${files.length} test files failed:`);
+  for (const file of failedFiles) console.error(`- ${file}`);
+  process.exitCode = failureExitCode || 1;
+} else if (!process.exitCode) {
   console.log(`All ${files.length} test files passed.`);
 }

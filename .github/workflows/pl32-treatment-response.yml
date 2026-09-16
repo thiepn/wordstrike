@@ -1,0 +1,34 @@
+name: PL32 Treatment Response
+
+on:
+  pull_request:
+  push:
+    branches: [pl32-treatment-response]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  certify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Run PL32 Treatment Response certification
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p test-artifacts
+          npm run test:pl32-treatment-response 2>&1 | tee test-artifacts/pl32-treatment-response.log
+      - name: Upload PL32 test evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pl32-treatment-response-evidence
+          path: test-artifacts/pl32-treatment-response.log
+          retention-days: 7
+          if-no-files-found: warn

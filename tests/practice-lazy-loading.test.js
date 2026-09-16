@@ -10,8 +10,24 @@ const registryFacade = await readFile(
   new URL("../js/practiceLab/practiceExperimentRegistry.js", import.meta.url),
   "utf8",
 );
-const controllerRuntime = await readFile(
-  new URL("../js/practiceLab/practiceLabControllerRuntime.js", import.meta.url),
+const controllerRuntimeV38 = await readFile(
+  new URL("../js/practiceLab/practiceLabControllerRuntimeV38.js", import.meta.url),
+  "utf8",
+);
+const controllerRuntimeV37 = await readFile(
+  new URL("../js/practiceLab/practiceLabControllerRuntimeV37.js", import.meta.url),
+  "utf8",
+);
+const controllerRuntimeV36 = await readFile(
+  new URL("../js/practiceLab/practiceLabControllerRuntimeV36.js", import.meta.url),
+  "utf8",
+);
+const controllerRuntimeV32 = await readFile(
+  new URL("../js/practiceLab/practiceLabControllerRuntimeV32.js", import.meta.url),
+  "utf8",
+);
+const controllerRuntimeV31 = await readFile(
+  new URL("../js/practiceLab/practiceLabControllerRuntimeV31.js", import.meta.url),
   "utf8",
 );
 const registryRuntime = await readFile(
@@ -22,28 +38,41 @@ const registryRuntime = await readFile(
 assert.match(main, /from "\.\/practiceLab\/practiceFeatureGate\.js"/);
 assert.match(main, /from "\.\/practiceLab\/practiceExperimentRegistry\.js"/);
 assert.match(main, /from "\.\/practiceLab\/practiceLabController\.js"/);
-assert.doesNotMatch(main, /practice(?:LabController|ExperimentRegistry)Runtime\.js/);
-assert.doesNotMatch(main, /practice(?:WeakKeys|CombinationRepair)/);
+assert.doesNotMatch(main, /practice(?:LabController|ExperimentRegistry)Runtime(?:V\d+)?\.js/);
+assert.doesNotMatch(main, /practice(?:WeakKeys|CombinationRepair|TreatmentResponse)/);
 
-assert.match(controllerFacade, /import\("\.\/practiceLabControllerRuntime\.js"\)/);
+assert.match(controllerFacade, /import\("\.\/practiceLabControllerRuntimeV40\.js"\)/);
 assert.match(controllerFacade, /import\("\.\/practiceExperimentRegistryRuntime\.js"\)/);
 assert.match(controllerFacade, /import\("\.\/practiceCombinationRepairExperiment\.js"\)/);
 assert.match(controllerFacade, /import\("\.\/practiceWeakKeysExperiment\.js"\)/);
+assert.match(controllerFacade, /import\("\.\/practiceCustomTextExperiment\.js"\)/);
+assert.match(controllerFacade, /import\("\.\/practiceWeaknessBossExperiment\.js"\)/);
 assert.doesNotMatch(controllerFacade, /from "\.\/practiceLab(?:ViewModel|Renderer|Routes)(?:V\d+)?\.js"/);
-assert.doesNotMatch(controllerFacade, /from "\.\/practice(?:SessionEngine|Repository|IndexedDbStore|ManifestStore)\.js"/);
+assert.doesNotMatch(controllerFacade, /from "\.\/practice(?:SessionEngine|Repository|IndexedDbStore|ManifestStore|TreatmentResponseRuntime)\.js"/);
 
 assert.match(registryFacade, /import\("\.\/practiceExperimentRegistryRuntime\.js"\)/);
 assert.doesNotMatch(registryFacade, /from "\.\/practiceSessionContract\.js"/);
 assert.doesNotMatch(registryFacade, /from "\.\/practiceExperimentCatalog\.js"/);
 
-assert.match(controllerRuntime, /from "\.\/practiceLabViewModelV21\.js"/);
-assert.match(controllerRuntime, /from "\.\/practiceLabRendererV21\.js"/);
-assert.match(controllerRuntime, /from "\.\/practiceLabRoutes\.js"/);
-assert.doesNotMatch(controllerRuntime, /from "\.\/practice(?:SessionEngine|Repository|IndexedDbStore|ManifestStore)\.js"/);
-assert.match(controllerRuntime, /import\("\.\/practiceCombinationRepairSessionHost\.js"\)/);
-assert.match(controllerRuntime, /import\("\.\/practiceCombinationRepairRecommendationRuntime\.js"\)/);
-assert.match(controllerRuntime, /import\("\.\/practiceWeakKeysSessionHost\.js"\)/);
-assert.match(controllerRuntime, /import\("\.\/practiceWeakKeysRecommendationRuntime\.js"\)/);
+assert.match(controllerRuntimeV38, /from "\.\/practiceLabControllerRuntimeV37\.js"/);
+assert.match(controllerRuntimeV38, /from "\.\/practiceLabRendererV38\.js"/);
+assert.match(controllerRuntimeV38, /import\("\.\/practiceResearchRuntime\.js"\)/);
+assert.match(controllerRuntimeV38, /import\("\.\/practiceResearchProbeSessionHost\.js"\)/);
+assert.doesNotMatch(controllerRuntimeV38, /from "\.\/practice(?:SessionEngine|Repository|IndexedDbStore|ManifestStore|ResearchRuntime)\.js"/);
+assert.match(controllerRuntimeV37, /from "\.\/practiceLabControllerRuntimeV36\.js"/);
+assert.match(controllerRuntimeV37, /from "\.\/practiceLabRendererV37\.js"/);
+assert.match(controllerRuntimeV37, /import\("\.\/practiceWeaknessBossSessionHost\.js"\)/);
+assert.doesNotMatch(controllerRuntimeV37, /from "\.\/practice(?:SessionEngine|Repository|IndexedDbStore|ManifestStore)\.js"/);
+assert.match(controllerRuntimeV36, /from "\.\/practiceLabControllerRuntimeV32\.js"/);
+assert.match(controllerRuntimeV36, /from "\.\/practiceLabRendererV36\.js"/);
+assert.match(controllerRuntimeV36, /import\("\.\/practicePhysicalTelemetryViewRuntime\.js"\)/);
+assert.doesNotMatch(controllerRuntimeV36, /from "\.\/practice(?:SessionEngine|Repository|IndexedDbStore|ManifestStore)\.js"/);
+assert.match(controllerRuntimeV32, /from "\.\/practiceLabControllerRuntimeV31\.js"/);
+assert.match(controllerRuntimeV32, /from "\.\/practiceLabRendererV32\.js"/);
+assert.match(controllerRuntimeV32, /from "\.\/practiceLabRoutes\.js"/);
+assert.match(controllerRuntimeV32, /import\("\.\/practiceTreatmentResponseRuntime\.js"\)/);
+assert.doesNotMatch(controllerRuntimeV32, /from "\.\/practice(?:SessionEngine|Repository|IndexedDbStore|ManifestStore|TreatmentResponseRuntime)\.js"/);
+assert.match(controllerRuntimeV31, /import\("\.\/practiceCustomTextSessionHost\.js"\)/);
 assert.match(registryRuntime, /from "\.\/practiceSessionContract\.js"/);
 assert.match(registryRuntime, /from "\.\/practiceExperimentCatalog\.js"/);
 
@@ -53,4 +82,4 @@ const browserStaticPracticeImports = [
 ].map((match) => match[1]);
 assert.deepEqual(browserStaticPracticeImports, ["./practiceExperimentRegistry.js"]);
 
-console.log("Practice Lab heavy runtime is excluded from the normal browser static import graph; PL20 and PL21 recommendation/storage/session modules load only inside Practice and on their relevant routes.");
+console.log("Practice Lab heavy runtime remains outside the normal browser static graph; PL38 Research wraps V37 lazily and loads research/session runtimes only on demand.");

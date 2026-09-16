@@ -1,0 +1,32 @@
+name: PL37 Weakness Boss
+
+on:
+  push:
+    branches: [pl37-weakness-boss]
+  pull_request:
+    paths:
+      - 'js/practiceLab/**'
+      - 'tests/practice-weakness-boss*-pl37.test.js'
+      - 'docs/practice-lab/PL37-WEAKNESS-BOSS.md'
+      - 'docs/PRACTICE_LAB_WEAKNESS_BOSS.md'
+      - 'package.json'
+      - '.github/workflows/pl37-weakness-boss.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  certify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: PL37 focused certification
+        run: npm run test:pl37-weakness-boss
+      - name: PL8-PL36 critical Practice regressions
+        run: node --test tests/practice-latency-*.test.js tests/practice-normalization-*.test.js tests/practice-treatment-response*-pl32.test.js tests/practice-coach-personalization-*.test.js tests/practice-read-ahead*-pl34.test.js tests/practice-metronome*-pl35.test.js tests/practice-physical-telemetry*-pl36.test.js
+      - name: Full WordStrike regression suite
+        run: npm test

@@ -1,0 +1,92 @@
+name: PL39 Privacy Security Data Integrity
+
+on:
+  push:
+    branches: [pl39-privacy-security-integrity]
+  pull_request:
+    paths:
+      - 'js/practiceLab/**'
+      - 'tests/*pl39*.test.js'
+      - 'tests/browser/practice_pl39_privacy_security.py'
+      - 'scripts/auditPracticePrivacySecurity.mjs'
+      - 'scripts/testPracticeMigrations.mjs'
+      - 'docs/PRACTICE_LAB_DATA_INVENTORY.md'
+      - 'docs/PRACTICE_LAB_PRIVACY_SECURITY_DATA_INTEGRITY_CERTIFICATION.md'
+      - 'package.json'
+      - '.github/workflows/pl39-privacy-security-integrity.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  certify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: PL39 static privacy/security audit
+        id: source_audit
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -o pipefail
+          npm run audit:practice-privacy-security 2>&1 | tee pl39-source-audit.log
+      - name: PL39 database and record migrations
+        shell: bash
+        run: |
+          set -o pipefail
+          npm run test:practice-migrations 2>&1 | tee pl39-migrations.log
+      - name: PL39 focused integrity certification
+        run: npm run test:pl39-integrity
+      - name: PL31-PL38 sensitive subsystem regressions
+        run: node --test tests/practice-custom-text-pl31.test.js tests/practice-treatment-response*-pl32.test.js tests/practice-coach-personalization-*.test.js tests/practice-physical-telemetry*-pl36.test.js tests/practice-weakness-boss*-pl37.test.js tests/*pl38*.test.js
+      - name: Full WordStrike regression suite
+        shell: bash
+        run: |
+          set -o pipefail
+          npm test 2>&1 | tee pl39-full-suite.log
+      - name: Enforce source audit
+        if: always()
+        shell: bash
+        run: |
+          if [ '${{ steps.source_audit.outcome }}' != 'success' ]; then
+            echo 'PL39 source audit failed.'
+            exit 1
+          fi
+      - name: Retain PL39 logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pl39-certification-logs
+          path: |
+            pl39-source-audit.log
+            pl39-migrations.log
+            pl39-full-suite.log
+          if-no-files-found: warn
+          retention-days: 14
+
+  browser-privacy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    container:
+      image: mcr.microsoft.com/playwright/python:v1.57.0-noble
+      options: --ipc=host
+    env:
+      HOME: /root
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install browser test dependencies
+        run: python3 -m pip install -r tests/browser/requirements.txt
+      - name: PL39 browser privacy, XSS, network, URL and cache certification
+        run: python3 tests/browser/practice_pl39_privacy_security.py
+      - name: Retain browser privacy evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pl39-browser-privacy-evidence
+          path: browser-artifacts/pl39-privacy-security/
+          if-no-files-found: warn
+          retention-days: 14

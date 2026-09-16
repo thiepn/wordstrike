@@ -80,15 +80,15 @@ function validObservation(index = 1) {
   };
 }
 
-test("PL13 ability contracts remain intact inside the PL25 storage/session/foundation envelope", () => {
-  assert.equal(PRACTICE_DATABASE_VERSION, 8);
+test("PL13 ability contracts remain intact inside the current PL38 storage/session/foundation envelope", () => {
+  assert.ok(PRACTICE_DATABASE_VERSION >= 12);
   assert.equal(PRACTICE_RECORD_VERSIONS.abilityState, 1);
   assert.equal(PRACTICE_RECORD_VERSIONS.skillStat, 3);
-  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 13);
+  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 14);
   assert.equal(PRACTICE_RECORD_VERSIONS.checkpoint, 3);
   assert.equal(PRACTICE_RECORD_VERSIONS.evaluationState, 1);
   assert.equal(PRACTICE_RECORD_VERSIONS.assessmentRun, 1);
-  assert.equal(PRACTICE_RECORD_VERSIONS.coachPlan, 1);
+  assert.equal(PRACTICE_RECORD_VERSIONS.coachPlan, 2);
   assert.equal(PRACTICE_FOUNDATION_ANALYSIS_VERSION, 10);
   assert.equal(PRACTICE_ABILITY_ESTIMATOR_VERSION, 1);
   assert.equal(PRACTICE_ABILITY_POLICY_VERSION, 1);
@@ -106,7 +106,7 @@ test("PL13 abilityStates schema has exact key/index ownership and unique profile
   assert.equal(PRACTICE_LIMITS.abilityStateBytes, 32 * 1024);
 });
 
-test("PL13 abilityStates remain structurally correct in the current fresh DB v8 schema", () => {
+test("PL13 abilityStates remain structurally correct in the current fresh DB12 schema", () => {
   const fresh = makeDatabase();
   applyPracticeDatabaseUpgrade(fresh);
   assert.deepEqual([...fresh.stores.keys()], PRACTICE_STORE_NAMES);
@@ -128,7 +128,7 @@ test("PL13 v2-to-v3 ability-store upgrade still creates only abilityStates when 
   assert.equal(upgraded.stores.get("abilityStates").snapshot().find((index) => index.name === "profileContextChannel")?.options?.unique, true);
 });
 
-test("PL13 sessionSummary v6 ability migration remains null through the current PL25 v13 wrapper", () => {
+test("PL13 sessionSummary v6 ability migration remains null through the current PL38 v14 wrapper", () => {
   const current = createDefaultSessionSummary({ profileId, contextId, now: () => new Date("2026-09-05T10:00:00.000Z") });
   const historical = { ...current, recordVersion: 6 };
   delete historical.abilityMeasurementSummary;
@@ -138,10 +138,11 @@ test("PL13 sessionSummary v6 ability migration remains null through the current 
   delete historical.evaluationSummary;
   delete historical.assessmentBinding;
   delete historical.coachBinding;
+  delete historical.researchBinding;
   const migration = migratePracticeRecord("sessionSummary", historical);
   assert.equal(migration.ok, true);
-  assert.deepEqual(migration.steps, ["sessionSummary:6->7", "sessionSummary:7->8", "sessionSummary:8->9", "sessionSummary:9->10", "sessionSummary:10->11", "sessionSummary:11->12", "sessionSummary:12->13"]);
-  assert.equal(migration.value.recordVersion, 13);
+  assert.deepEqual(migration.steps, ["sessionSummary:6->7", "sessionSummary:7->8", "sessionSummary:8->9", "sessionSummary:9->10", "sessionSummary:10->11", "sessionSummary:11->12", "sessionSummary:12->13", "sessionSummary:13->14"]);
+  assert.equal(migration.value.recordVersion, 14);
   assert.equal(migration.value.abilityMeasurementSummary, null);
   assert.equal(migration.value.performanceMeasurementSummary, null);
   assert.equal(migration.value.learningEvidenceSummary, null);
@@ -149,6 +150,7 @@ test("PL13 sessionSummary v6 ability migration remains null through the current 
   assert.equal(migration.value.evaluationSummary, null);
   assert.equal(migration.value.assessmentBinding, null);
   assert.equal(migration.value.coachBinding, null);
+  assert.equal(migration.value.researchBinding, null);
   assert.equal(Object.hasOwn(migration.value, "newAbilityEstimate"), false);
 });
 
@@ -165,15 +167,7 @@ test("PL13 ability state accepts fractional accumulated active time, remains bou
 
 test("PL13 ability modules import with zero storage/network/listener/timer side effects", async () => {
   const calls = { storage: 0, indexedDb: 0, fetch: 0, listeners: 0, timers: 0 };
-  const original = {
-    localStorage: globalThis.localStorage,
-    indexedDB: globalThis.indexedDB,
-    fetch: globalThis.fetch,
-    document: globalThis.document,
-    window: globalThis.window,
-    setTimeout: globalThis.setTimeout,
-    setInterval: globalThis.setInterval,
-  };
+  const original = { localStorage: globalThis.localStorage, indexedDB: globalThis.indexedDB, fetch: globalThis.fetch, document: globalThis.document, window: globalThis.window, setTimeout: globalThis.setTimeout, setInterval: globalThis.setInterval };
   Object.defineProperties(globalThis, {
     localStorage: { configurable: true, value: { getItem() { calls.storage += 1; }, setItem() { calls.storage += 1; }, removeItem() { calls.storage += 1; } } },
     indexedDB: { configurable: true, value: { open() { calls.indexedDb += 1; throw new Error("unexpected IndexedDB open"); } } },
@@ -184,9 +178,7 @@ test("PL13 ability modules import with zero storage/network/listener/timer side 
     setInterval: { configurable: true, value: (...args) => { calls.timers += 1; return original.setInterval(...args); } },
   });
   try {
-    for (const module of ["practiceAbilityConstants.js", "practiceAbilityPolicy.js", "practiceAbilityObservation.js", "practiceAbilityEstimator.js", "practiceAbilityComparison.js", "practiceAbilityValidation.js"]) {
-      await import(new URL(`../js/practiceLab/${module}?pl13=${encodeURIComponent(module)}`, import.meta.url));
-    }
+    for (const module of ["practiceAbilityConstants.js", "practiceAbilityPolicy.js", "practiceAbilityObservation.js", "practiceAbilityEstimator.js", "practiceAbilityComparison.js", "practiceAbilityValidation.js"]) await import(new URL(`../js/practiceLab/${module}?pl13=${encodeURIComponent(module)}`, import.meta.url));
     assert.deepEqual(calls, { storage: 0, indexedDb: 0, fetch: 0, listeners: 0, timers: 0 });
   } finally {
     for (const [key, value] of Object.entries(original)) Object.defineProperty(globalThis, key, { configurable: true, writable: true, value });

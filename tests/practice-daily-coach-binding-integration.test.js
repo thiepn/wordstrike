@@ -98,11 +98,15 @@ test("PL25 rejects direct coachBinding configuration as a privileged field even 
       configuration: { correctionBehavior: "allow", coachBinding: createPracticeCoachBlockBinding(plan, block) },
       contentPlan,
     }),
-    (error) => error?.code === "PRACTICE_EVALUATION_PRIVILEGE_VIOLATION" || error?.code === "PRACTICE_SESSION_INVALID_CONFIGURATION",
+    (error) => [
+      "PRACTICE_SESSION_TRUSTED_CONFIGURATION_REJECTED",
+      "PRACTICE_EVALUATION_PRIVILEGE_VIOLATION",
+      "PRACTICE_SESSION_INVALID_CONFIGURATION",
+    ].includes(error?.code),
   );
 });
 
-test("PL25 object-bound Coach child persists compact v13 coachBinding and completes the exact parent block", async () => {
+test("PL25 object-bound Coach child preserves compact coachBinding in the current v14 summary and completes the exact parent block", async () => {
   const harness = await createPracticeSessionHarness({ suffix: "pl25-coach-trusted" });
   const plan = activate(makePlan(harness));
   await harness.repository.saveCoachPlan(plan);
@@ -120,7 +124,7 @@ test("PL25 object-bound Coach child persists compact v13 coachBinding and comple
   const typed = child.handleInput(harness.input("character", "r"));
   assert.equal(typed.accepted, true);
   const completed = await child.complete("manual-stop");
-  assert.equal(completed.summary.recordVersion, 13);
+  assert.equal(completed.summary.recordVersion, 14);
   assert.deepEqual(completed.summary.coachBinding, binding);
   assert.equal(completed.commit.coachUpdated, true);
 

@@ -205,17 +205,13 @@ test("PL20 registry descriptor is an ordinary non-resumable training experiment"
   assert.equal(registry.hasImplementation("combination-repair"), true);
 });
 
-test("PL20 shipped English corpus remains fail-closed while only one training family exists", async () => {
+test("PL20 expanded English corpus supplies matched probes for common combinations", async () => {
   const runtime = createPracticeCombinationRepairRuntime({ fetchImpl: fileFetch });
   const diagnostics = await runtime.getDiagnostics();
   assert.equal(diagnostics.ready, true);
-  assert.equal(diagnostics.trainingFamilyCount, 1);
+  assert.ok(diagnostics.trainingFamilyCount >= 16);
 
   const availability = await runtime.inspectTarget({ entityType: "bigram", entityKey: "nt" });
-  assert.equal(availability.status, "limited-content");
-  assert.equal(availability.reasons.length > 0, true);
-  await assert.rejects(
-    runtime.prepare({ entityType: "bigram", entityKey: "nt", targetSource: "manual" }),
-    (error) => ["INSUFFICIENT_TARGET_CONTENT", "INSUFFICIENT_PROBE_MATCH"].includes(error.code),
-  );
+  assert.equal(availability.status, "ready");
+  assert.deepEqual(availability.reasons, []);
 });

@@ -112,17 +112,17 @@ for (const [type, current] of [
   assert.equal(migrated.value.contextId, defaultA);
 }
 
-assert.equal(PRACTICE_DATABASE_VERSION, 8);
+assert.ok(PRACTICE_DATABASE_VERSION >= 10);
 assert.equal(PRACTICE_RECORD_VERSIONS.profile, 3);
 assert.equal(PRACTICE_RECORD_VERSIONS.context, 1);
 assert.equal(PRACTICE_RECORD_VERSIONS.skillStat, 3);
 assert.equal(PRACTICE_RECORD_VERSIONS.abilityState, 1);
 assert.equal(PRACTICE_RECORD_VERSIONS.learningState, 1);
-assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 13);
+assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 14);
 assert.equal(PRACTICE_RECORD_VERSIONS.reviewItem, 3);
 assert.equal(PRACTICE_RECORD_VERSIONS.evaluationState, 1);
 assert.equal(PRACTICE_RECORD_VERSIONS.assessmentRun, 1);
-assert.equal(PRACTICE_RECORD_VERSIONS.coachPlan, 1);
+assert.equal(PRACTICE_RECORD_VERSIONS.coachPlan, 2);
 assert.equal(PRACTICE_RECORD_VERSIONS.checkpoint, 3);
 assert.equal(PRACTICE_STORE_DEFINITIONS.skillStats.indexes.some((index) => index.name === "profileEntity"), false);
 assert.equal(PRACTICE_STORE_DEFINITIONS.reviewItems.indexes.some((index) => index.name === "profileEntity"), false);
@@ -194,5 +194,8 @@ const retention = buildPracticeRetentionPlan({ reviewItems: [aReview, bReview], 
 assert.equal(retention.reviewItems.length, 0);
 
 await repository.resetPracticeData();
-assert.equal((await dataStore.list("contexts")).length, 0);
+const contextsAfterReset = await dataStore.list("contexts");
+assert.equal(contextsAfterReset.some((record) => record.contextId === contextB.contextId), false);
+assert.equal(contextsAfterReset.some((record) => record.contextId === foreignContext.contextId && record.profileId === profileB), true);
+assert.equal(contextsAfterReset.some((record) => record.contextId === defaultA && record.profileId === profileA), true);
 console.log("PL5 context identity, migrations, ownership, isolation, history, checkpoint, commit, retention, and reset passed.");

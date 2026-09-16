@@ -1,0 +1,29 @@
+name: PL36 Physical Keyboard Telemetry
+
+on:
+  push:
+    branches: [pl36-physical-keyboard-telemetry]
+  pull_request:
+    paths:
+      - 'js/practiceLab/**'
+      - 'js/appKeyboardController.js'
+      - 'tests/practice-physical-telemetry*-pl36.test.js'
+      - 'docs/practice-lab/PL36-PHYSICAL-KEYBOARD-TELEMETRY.md'
+      - 'package.json'
+      - '.github/workflows/pl36-physical-keyboard-telemetry.yml'
+
+jobs:
+  certify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: PL36 focused certification
+        run: npm run test:pl36-physical-telemetry
+      - name: PL8-PL35 critical Practice regressions
+        run: node --test tests/practice-latency-*.test.js tests/practice-normalization-*.test.js tests/practice-treatment-response*-pl32.test.js tests/practice-coach-personalization-*.test.js tests/practice-read-ahead*-pl34.test.js tests/practice-metronome*-pl35.test.js
+      - name: Full WordStrike regression suite
+        run: npm test

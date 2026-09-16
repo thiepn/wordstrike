@@ -35,7 +35,7 @@ export function resolvePracticeCoachReadinessModifier(readinessBand, { stale = f
   return policy.readinessModifier[readinessBand] ?? policy.readinessModifier.unknown;
 }
 
-export function calculatePracticeCoachTargetUtility({
+export function calculatePracticeCoachNeedUtility({
   priorityScore = null,
   priority = null,
   weaknessScore = null,
@@ -44,7 +44,6 @@ export function calculatePracticeCoachTargetUtility({
   marginalGainBand = "unknown",
   readinessBand = "unknown",
   readinessStale = false,
-  interventionMatch = 1,
   policy = PRACTICE_COACH_POLICY_V1,
 } = {}) {
   const baseNeed = resolvePracticeCoachBaseNeed({ priorityScore, priority, weaknessScore });
@@ -53,8 +52,7 @@ export function calculatePracticeCoachTargetUtility({
   const marginalGainModifier = resolvePracticeCoachMarginalGainModifier(marginalGainBand, policy);
   const headroom = Math.min(saturationModifier, marginalGainModifier);
   const readinessModifier = resolvePracticeCoachReadinessModifier(readinessBand, { stale: readinessStale, policy });
-  const normalizedMatch = clamp(Number(interventionMatch) || 0, 0, 1);
-  const coachTargetUtility = clamp(baseNeed * masteryModifier * headroom * readinessModifier * normalizedMatch, 0, 100);
+  const needUtility = clamp(baseNeed * masteryModifier * headroom * readinessModifier, 0, 100);
   return Object.freeze({
     utilityVersion: PRACTICE_COACH_UTILITY_VERSION,
     baseNeed,
@@ -63,6 +61,16 @@ export function calculatePracticeCoachTargetUtility({
     marginalGainModifier,
     headroom,
     readinessModifier,
+    needUtility,
+  });
+}
+
+export function calculatePracticeCoachTargetUtility(input = {}) {
+  const need = calculatePracticeCoachNeedUtility(input);
+  const normalizedMatch = clamp(Number(input.interventionMatch) || 0, 0, 1);
+  const coachTargetUtility = clamp(need.needUtility * normalizedMatch, 0, 100);
+  return Object.freeze({
+    ...need,
     interventionMatch: normalizedMatch,
     coachTargetUtility,
   });

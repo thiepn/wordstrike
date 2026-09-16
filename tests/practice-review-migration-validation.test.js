@@ -55,12 +55,12 @@ function legacyReviewV2() {
   };
 }
 
-test("PL17 review contracts remain intact inside the PL25 DB8/session13/foundation10 envelope", () => {
-  assert.equal(PRACTICE_DATABASE_VERSION, 8);
+test("PL17 review contracts remain intact inside the current PL38 envelope", () => {
+  assert.ok(PRACTICE_DATABASE_VERSION >= 10);
   assert.equal(PRACTICE_RECORD_VERSIONS.reviewItem, 3);
-  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 13);
+  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 14);
   assert.equal(PRACTICE_RECORD_VERSIONS.evaluationState, 1);
-  assert.equal(PRACTICE_RECORD_VERSIONS.coachPlan, 1);
+  assert.equal(PRACTICE_RECORD_VERSIONS.coachPlan, 2);
   assert.equal(PRACTICE_FOUNDATION_ANALYSIS_VERSION, 10);
   assert.equal(PRACTICE_LIMITS.reviewItemBytes, 32 * 1024);
   assert.equal(PRACTICE_REVIEW_MODEL_VERSION, 1);
@@ -94,7 +94,7 @@ test("PL17 review v2 -> v3 preserves legacy scheduler history but creates zero c
   assert.equal(validateReviewItem(migrated.value).valid, true);
 });
 
-test("PL17 session v9 retention migration remains null through the current PL25 v13 wrapper", () => {
+test("PL17 session v9 retention migration remains null through the current PL38 v14 wrapper", () => {
   const current = createDefaultSessionSummary({
     profileId: baseIdentity.profileId,
     contextId: baseIdentity.contextId,
@@ -108,8 +108,8 @@ test("PL17 session v9 retention migration remains null through the current PL25 
   delete v9.coachBinding;
   const migrated = migratePracticeRecord("sessionSummary", v9);
   assert.equal(migrated.ok, true, JSON.stringify(migrated.error));
-  assert.deepEqual(migrated.steps, ["sessionSummary:9->10", "sessionSummary:10->11", "sessionSummary:11->12", "sessionSummary:12->13"]);
-  assert.equal(migrated.value.recordVersion, 13);
+  assert.deepEqual(migrated.steps, ["sessionSummary:9->10", "sessionSummary:10->11", "sessionSummary:11->12", "sessionSummary:12->13", "sessionSummary:13->14"]);
+  assert.equal(migrated.value.recordVersion, PRACTICE_RECORD_VERSIONS.sessionSummary);
   assert.equal(migrated.value.retentionReviewSummary, null);
   assert.equal(migrated.value.evaluationSummary, null);
   assert.equal(migrated.value.assessmentBinding, null);

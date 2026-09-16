@@ -18,13 +18,13 @@
   "bindings": {
     "corpusId": "practice-en-v1",
     "corpusVersion": 1,
-    "corpusChecksum": "sha256-28beccf65eed71519da306c129da5040a20f364aed320dc21eea2d16c2a1c404",
+    "corpusChecksum": "sha256-55b276a4628d6c29f5ce47ced81e4ed5f571866c5e3afa56ee7ee3d9c1fd1438",
     "indexSchemaVersion": 1,
-    "indexChecksum": "sha256-bb198244a6b6cefcae5cb908bf3dee6e9e52259f9ef41576ec69c429a423ff32",
+    "indexChecksum": "sha256-91fa2d94960c10da646ae5473b9d1a555eef849dfef7526b6c2ca3954fe109d8",
     "typabilityModelVersion": 1,
     "typabilityFeatureVersion": 1,
     "typabilityReferenceVersion": 1,
-    "typabilityReferenceChecksum": "sha256-94a6f90c3593ebc089211882e2d9afaf0bf46b66386cdc98dbe60c533e6dd471",
+    "typabilityReferenceChecksum": "sha256-2a3070a839af7e294dfd826ce5e6ff473bf82f3bf34eb335ce1d52c936aac111",
     "frequencyReferenceVersion": 1,
     "frequencyReferenceId": "ws-en-frequency-v1",
     "frequencyReferenceChecksum": "sha256-b9bc8dde064335c2258844919c6dd62537f95ac4a2d5920fdd7213a9cb5d45ad"
@@ -35,85 +35,73 @@
     "maximumDifficultySpread": 0.5
   },
   "formsPath": "data/practice/consistency/en-v1/WS-CONSISTENCY-EN-1.forms.json",
-  "formsChecksum": "sha256-ab04d78a9547f6ca46089bf05cead59a726efde565c56b88b68ddc4e12095c0e",
+  "formsChecksum": "sha256-88af9f7a93172042e7187f253705a85284083176897f7f465fe50b801be4e129",
   "forms": [
     {
       "formId": "consistency-en-01",
-      "formHash": "sha256-1d3df01868135891e1197dba48abbc74e403e8c78b06b5d49a8d113f4c7f4041",
-      "graphemeCount": 24285,
+      "formHash": "sha256-70092d015de2d4d7f8d1b8745b2b38e5d6d723bd9a677336f60daf5b51841467",
+      "graphemeCount": 24003,
       "ready": true,
       "reasons": [],
-      "warnings": [
-        "window-percentile-advisory"
-      ],
+      "warnings": [],
       "availableModelWeight": 1,
-      "relativeDifficultyPercentile": 50,
-      "windowDifficultySpread": 0.22462524478255252
+      "relativeDifficultyPercentile": 66.66666666666667,
+      "windowDifficultySpread": 0.09133430161486139
     },
     {
       "formId": "consistency-en-02",
-      "formHash": "sha256-49372e3cd2439c319efe1fe171a41931e9b0d46b364c9a71b4c2ad4b5a10e34a",
-      "graphemeCount": 24274,
+      "formHash": "sha256-28a24e741a446f8abc40e7786b54005720c05b15048a7e4c85231a8e486c29e2",
+      "graphemeCount": 24108,
       "ready": true,
       "reasons": [],
-      "warnings": [
-        "window-percentile-advisory"
-      ],
+      "warnings": [],
       "availableModelWeight": 1,
-      "relativeDifficultyPercentile": 50,
-      "windowDifficultySpread": 0.2401756799828949
+      "relativeDifficultyPercentile": 66.66666666666667,
+      "windowDifficultySpread": 0.0973095976743025
     },
     {
       "formId": "consistency-en-03",
-      "formHash": "sha256-62aab8cf7484ba272f818cd6c0f3290f2802e49d4b55fab10d700d4ac3b9e1fe",
-      "graphemeCount": 24237,
+      "formHash": "sha256-0ead6add4f3127690b4504ad8e8a53cc98cc6759ff1c50d27706cdb041a5ee7f",
+      "graphemeCount": 24062,
       "ready": true,
       "reasons": [],
-      "warnings": [
-        "window-percentile-advisory"
-      ],
+      "warnings": [],
       "availableModelWeight": 1,
-      "relativeDifficultyPercentile": 50,
-      "windowDifficultySpread": 0.23192148337340876
+      "relativeDifficultyPercentile": 66.66666666666667,
+      "windowDifficultySpread": 0.0889953814393632
     },
     {
       "formId": "consistency-en-04",
-      "formHash": "sha256-bac5f543c31db5d93203b26bc797efd2020dea6a74bb489a54859d61bc679aaa",
-      "graphemeCount": 24434,
+      "formHash": "sha256-bbb5841a4ed8b1f4ba1e0d17415fa618140046799fb61777c6f2acc337294b05",
+      "graphemeCount": 24092,
       "ready": true,
       "reasons": [],
-      "warnings": [
-        "window-percentile-advisory"
-      ],
+      "warnings": [],
       "availableModelWeight": 1,
-      "relativeDifficultyPercentile": 50,
-      "windowDifficultySpread": 0.25475529731252494
+      "relativeDifficultyPercentile": 66.66666666666667,
+      "windowDifficultySpread": 0.09888708016518269
     },
     {
       "formId": "consistency-en-05",
-      "formHash": "sha256-8a1742f7022328fb2d55140f4ca90ced2c322cd109d4d109c7c0f277485ac644",
-      "graphemeCount": 24343,
+      "formHash": "sha256-a1e35f7d97d740e94be57bb285e70c35400153ee27da01c06d13606944fdb777",
+      "graphemeCount": 24111,
       "ready": true,
       "reasons": [],
-      "warnings": [
-        "window-percentile-advisory"
-      ],
+      "warnings": [],
       "availableModelWeight": 1,
-      "relativeDifficultyPercentile": 50,
-      "windowDifficultySpread": 0.21821602663524
+      "relativeDifficultyPercentile": 66.66666666666667,
+      "windowDifficultySpread": 0.09876938321848573
     },
     {
       "formId": "consistency-en-06",
-      "formHash": "sha256-e5c49c612f79c3798e87b1a4d0bbabd855e6753d03724d2e2a3c293af896191d",
-      "graphemeCount": 24365,
+      "formHash": "sha256-16d2de2b75574bdd4d6219f180c978444dd2da9b15415c4666f97a99fcda5e05",
+      "graphemeCount": 24087,
       "ready": true,
       "reasons": [],
-      "warnings": [
-        "window-percentile-advisory"
-      ],
+      "warnings": [],
       "availableModelWeight": 1,
-      "relativeDifficultyPercentile": 50,
-      "windowDifficultySpread": 0.23883682678107512
+      "relativeDifficultyPercentile": 66.66666666666667,
+      "windowDifficultySpread": 0.06563980403265757
     }
   ]
 }

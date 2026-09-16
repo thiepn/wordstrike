@@ -7,36 +7,450 @@
   "partitionPolicyVersion": 1,
   "createdAt": "2026-09-04T00:00:00.000Z",
   "sourceIds": [
-    "ws-original-en-foundation-v1"
+    "ws-original-en-foundation-v1",
+    "ws-original-gc3-assessment-en-v1",
+    "ws-original-gc3-benchmark-en-v1",
+    "ws-original-gc3-realtext-en-v1",
+    "ws-original-gc3-transfer-en-v1"
   ],
   "partitionCounts": {
-    "training": 2,
-    "transfer": 1,
-    "benchmark": 1,
-    "diagnostic": 2,
-    "research-holdout": 1
+    "training": 42,
+    "transfer": 17,
+    "benchmark": 7,
+    "diagnostic": 86,
+    "research-holdout": 5
   },
   "familyCounts": {
-    "total": 5,
+    "total": 87,
     "byPartition": {
-      "training": 1,
-      "transfer": 1,
-      "benchmark": 1,
-      "diagnostic": 1,
-      "research-holdout": 1
+      "training": 41,
+      "transfer": 17,
+      "benchmark": 7,
+      "diagnostic": 17,
+      "research-holdout": 5
     }
   },
   "contentCounts": {
-    "total": 7,
+    "total": 157,
     "byPartition": {
-      "training": 2,
-      "transfer": 1,
-      "benchmark": 1,
-      "diagnostic": 2,
-      "research-holdout": 1
+      "training": 42,
+      "transfer": 17,
+      "benchmark": 7,
+      "diagnostic": 86,
+      "research-holdout": 5
     }
   },
   "familyAssignments": [
+    {
+      "familyId": "fam_gc3_assess_001",
+      "partition": "diagnostic",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "fam_gc3_assess_002",
+      "partition": "diagnostic",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "fam_gc3_assess_003",
+      "partition": "diagnostic",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "fam_gc3_assess_004",
+      "partition": "diagnostic",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "fam_gc3_assess_005",
+      "partition": "diagnostic",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "fam_gc3_assess_006",
+      "partition": "diagnostic",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "fam_gc3_assess_007",
+      "partition": "diagnostic",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "fam_gc3_assess_008",
+      "partition": "diagnostic",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "fam_gc3_assess_009",
+      "partition": "diagnostic",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "fam_gc3_assess_010",
+      "partition": "diagnostic",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "fam_gc3_assess_011",
+      "partition": "diagnostic",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "fam_gc3_assess_012",
+      "partition": "diagnostic",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "fam_gc3_assess_013",
+      "partition": "diagnostic",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "fam_gc3_assess_014",
+      "partition": "diagnostic",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "fam_gc3_assess_015",
+      "partition": "diagnostic",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "fam_gc3_assess_016",
+      "partition": "diagnostic",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "fam_gc3_bench_001",
+      "partition": "benchmark",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "fam_gc3_bench_002",
+      "partition": "benchmark",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "fam_gc3_bench_003",
+      "partition": "benchmark",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "fam_gc3_bench_004",
+      "partition": "benchmark",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "fam_gc3_bench_005",
+      "partition": "benchmark",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "fam_gc3_bench_006",
+      "partition": "benchmark",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "fam_gc3_breadth_001",
+      "partition": "training",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "fam_gc3_breadth_002",
+      "partition": "training",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "fam_gc3_breadth_003",
+      "partition": "training",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "fam_gc3_breadth_004",
+      "partition": "training",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "fam_gc3_breadth_005",
+      "partition": "training",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "fam_gc3_breadth_006",
+      "partition": "training",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "fam_gc3_breadth_007",
+      "partition": "training",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "fam_gc3_breadth_008",
+      "partition": "training",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "fam_gc3_breadth_009",
+      "partition": "training",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "fam_gc3_breadth_010",
+      "partition": "training",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "fam_gc3_breadth_011",
+      "partition": "training",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "fam_gc3_breadth_012",
+      "partition": "training",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "fam_gc3_breadth_013",
+      "partition": "training",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "fam_gc3_breadth_014",
+      "partition": "training",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "fam_gc3_breadth_015",
+      "partition": "training",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "fam_gc3_breadth_016",
+      "partition": "training",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "fam_gc3_breadth_017",
+      "partition": "training",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "fam_gc3_breadth_018",
+      "partition": "training",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "fam_gc3_breadth_019",
+      "partition": "training",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "fam_gc3_breadth_020",
+      "partition": "training",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "fam_gc3_breadth_021",
+      "partition": "training",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "fam_gc3_breadth_022",
+      "partition": "training",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "fam_gc3_breadth_023",
+      "partition": "training",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "fam_gc3_breadth_024",
+      "partition": "training",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "fam_gc3_realtext_001",
+      "partition": "training",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "fam_gc3_realtext_002",
+      "partition": "training",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "fam_gc3_realtext_003",
+      "partition": "training",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "fam_gc3_realtext_004",
+      "partition": "training",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "fam_gc3_realtext_005",
+      "partition": "training",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "fam_gc3_realtext_006",
+      "partition": "training",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "fam_gc3_realtext_007",
+      "partition": "training",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "fam_gc3_realtext_008",
+      "partition": "training",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "fam_gc3_realtext_009",
+      "partition": "training",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "fam_gc3_realtext_010",
+      "partition": "training",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "fam_gc3_realtext_011",
+      "partition": "training",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "fam_gc3_realtext_012",
+      "partition": "training",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "fam_gc3_realtext_013",
+      "partition": "training",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "fam_gc3_realtext_014",
+      "partition": "training",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "fam_gc3_realtext_015",
+      "partition": "training",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "fam_gc3_realtext_016",
+      "partition": "training",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "fam_gc3_realtext_017",
+      "partition": "research-holdout",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "fam_gc3_realtext_018",
+      "partition": "research-holdout",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "fam_gc3_realtext_019",
+      "partition": "research-holdout",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "fam_gc3_realtext_020",
+      "partition": "research-holdout",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "fam_gc3_transfer_001",
+      "partition": "transfer",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "fam_gc3_transfer_002",
+      "partition": "transfer",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "fam_gc3_transfer_003",
+      "partition": "transfer",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "fam_gc3_transfer_004",
+      "partition": "transfer",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "fam_gc3_transfer_005",
+      "partition": "transfer",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "fam_gc3_transfer_006",
+      "partition": "transfer",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "fam_gc3_transfer_007",
+      "partition": "transfer",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "fam_gc3_transfer_008",
+      "partition": "transfer",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "fam_gc3_transfer_009",
+      "partition": "transfer",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "fam_gc3_transfer_010",
+      "partition": "transfer",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "fam_gc3_transfer_011",
+      "partition": "transfer",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "fam_gc3_transfer_012",
+      "partition": "transfer",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "fam_gc3_transfer_013",
+      "partition": "transfer",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "fam_gc3_transfer_014",
+      "partition": "transfer",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "fam_gc3_transfer_015",
+      "partition": "transfer",
+      "assignment": "locked"
+    },
+    {
+      "familyId": "fam_gc3_transfer_016",
+      "partition": "transfer",
+      "assignment": "locked"
+    },
     {
       "familyId": "ws-en-foundation-paragraph-001",
       "partition": "training",
@@ -64,5 +478,5 @@
     }
   ],
   "status": "foundation",
-  "buildChecksum": "sha256-28beccf65eed71519da306c129da5040a20f364aed320dc21eea2d16c2a1c404"
+  "buildChecksum": "sha256-55b276a4628d6c29f5ce47ced81e4ed5f571866c5e3afa56ee7ee3d9c1fd1438"
 }

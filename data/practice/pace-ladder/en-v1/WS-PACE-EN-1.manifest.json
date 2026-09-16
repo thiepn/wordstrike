@@ -17,7 +17,7 @@
   "slidingWindow": {
     "size": 600,
     "stride": 300,
-    "maximumDifficultySpread": 0.6
+    "maximumDifficultySpread": 0.5
   },
   "minimumAvailableModelWeight": 0.9,
   "source": {
@@ -28,28 +28,28 @@
   "bindings": {
     "corpusId": "practice-en-v1",
     "corpusVersion": 1,
-    "corpusChecksum": "sha256-28beccf65eed71519da306c129da5040a20f364aed320dc21eea2d16c2a1c404",
+    "corpusChecksum": "sha256-55b276a4628d6c29f5ce47ced81e4ed5f571866c5e3afa56ee7ee3d9c1fd1438",
     "indexSchemaVersion": 1,
-    "indexChecksum": "sha256-bb198244a6b6cefcae5cb908bf3dee6e9e52259f9ef41576ec69c429a423ff32",
+    "indexChecksum": "sha256-91fa2d94960c10da646ae5473b9d1a555eef849dfef7526b6c2ca3954fe109d8",
     "typabilityModelVersion": 1,
     "typabilityFeatureVersion": 1,
     "typabilityReferenceVersion": 1,
-    "typabilityReferenceChecksum": "sha256-94a6f90c3593ebc089211882e2d9afaf0bf46b66386cdc98dbe60c533e6dd471",
+    "typabilityReferenceChecksum": "sha256-2a3070a839af7e294dfd826ce5e6ff473bf82f3bf34eb335ce1d52c936aac111",
     "frequencyReferenceVersion": 1,
     "frequencyReferenceId": "ws-en-frequency-v1",
     "frequencyReferenceChecksum": "sha256-b9bc8dde064335c2258844919c6dd62537f95ac4a2d5920fdd7213a9cb5d45ad"
   },
   "formsPath": "data/practice/pace-ladder/en-v1/WS-PACE-EN-1.forms.json",
-  "formsChecksum": "sha256-e0c4c353fabefbcc640f2461f6899aeb81b2679f2a024cba6120e96dff7fe735",
+  "formsChecksum": "sha256-5b4395ba92180aa8cf5247114d3ef67d0dd43a7d4110af0882f911c4207ed2c4",
   "forms": [
     {
       "formId": "pace-en-01",
       "formHash": "sha256-258ef8bbf8e7bbd763c8a15b919452b2dfe3403045c1286ee9f79c75a47036cc",
       "graphemeCount": 11893,
       "availableModelWeight": 1,
-      "relativeDifficultyPercentile": 50,
+      "relativeDifficultyPercentile": 66.66666666666667,
       "windowCount": 39,
-      "windowDifficultySpread": 0.2753813088994538,
+      "windowDifficultySpread": 0.1415966789623999,
       "ready": true,
       "reasons": []
     },
@@ -58,9 +58,9 @@
       "formHash": "sha256-3b8ab2930b8066224511723b37745106395ab17f59548ef70f471ee4ffe15c21",
       "graphemeCount": 11893,
       "availableModelWeight": 1,
-      "relativeDifficultyPercentile": 50,
+      "relativeDifficultyPercentile": 66.66666666666667,
       "windowCount": 39,
-      "windowDifficultySpread": 0.2605800416969719,
+      "windowDifficultySpread": 0.11253390601934467,
       "ready": true,
       "reasons": []
     },
@@ -69,9 +69,9 @@
       "formHash": "sha256-ac572772e704464447a153d94e1f1beaf41e5f2755febfb8d548f47b4c4b930e",
       "graphemeCount": 11893,
       "availableModelWeight": 1,
-      "relativeDifficultyPercentile": 50,
+      "relativeDifficultyPercentile": 66.66666666666667,
       "windowCount": 39,
-      "windowDifficultySpread": 0.3187939359137475,
+      "windowDifficultySpread": 0.12315450424107187,
       "ready": true,
       "reasons": []
     },
@@ -80,9 +80,9 @@
       "formHash": "sha256-9eda53e9bd93c122cf7bf8b4bb46161956026463f1424685df8974089112db43",
       "graphemeCount": 11893,
       "availableModelWeight": 1,
-      "relativeDifficultyPercentile": 50,
+      "relativeDifficultyPercentile": 66.66666666666667,
       "windowCount": 39,
-      "windowDifficultySpread": 0.24121494882627825,
+      "windowDifficultySpread": 0.12313637466305118,
       "ready": true,
       "reasons": []
     },
@@ -91,9 +91,9 @@
       "formHash": "sha256-91cbc9b8ea8f980be5739c4bfc1dbf533f6d23b55707cd5599fe518822d849a5",
       "graphemeCount": 11893,
       "availableModelWeight": 1,
-      "relativeDifficultyPercentile": 50,
+      "relativeDifficultyPercentile": 66.66666666666667,
       "windowCount": 39,
-      "windowDifficultySpread": 0.27727174378325625,
+      "windowDifficultySpread": 0.14403412303400093,
       "ready": true,
       "reasons": []
     },
@@ -102,9 +102,9 @@
       "formHash": "sha256-a52dffdd4d5e835dc51c16e38608e20a773089d0dc1935e0e038e879fc4592cc",
       "graphemeCount": 11893,
       "availableModelWeight": 1,
-      "relativeDifficultyPercentile": 50,
+      "relativeDifficultyPercentile": 66.66666666666667,
       "windowCount": 39,
-      "windowDifficultySpread": 0.2587085168780926,
+      "windowDifficultySpread": 0.13547973215772324,
       "ready": true,
       "reasons": []
     },
@@ -113,9 +113,9 @@
       "formHash": "sha256-7a991734c8881fd117fedb71d9b3eddfe7d9cac040fd10167f4fbcdceec632d7",
       "graphemeCount": 11893,
       "availableModelWeight": 1,
-      "relativeDifficultyPercentile": 50,
+      "relativeDifficultyPercentile": 66.66666666666667,
       "windowCount": 39,
-      "windowDifficultySpread": 0.26322276546142,
+      "windowDifficultySpread": 0.10812120079922967,
       "ready": true,
       "reasons": []
     },
@@ -124,9 +124,9 @@
       "formHash": "sha256-06ec002886f340b0607b3f84c6b95989c4d6109babfd3030635cb0c30bd6abc5",
       "graphemeCount": 11893,
       "availableModelWeight": 1,
-      "relativeDifficultyPercentile": 50,
+      "relativeDifficultyPercentile": 66.66666666666667,
       "windowCount": 39,
-      "windowDifficultySpread": 0.2753813088994538,
+      "windowDifficultySpread": 0.1620923195269956,
       "ready": true,
       "reasons": []
     }

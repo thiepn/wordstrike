@@ -7,6 +7,7 @@ import {
 } from "./practiceConstants.js";
 import {
   PRACTICE_STORAGE_ERROR_CODES,
+  assertPracticeSerializable,
   practiceStorageError,
 } from "./practiceStorageContract.js";
 
@@ -69,6 +70,7 @@ export function createPracticeIndexedDbStore({
       return requestPromise(transaction.objectStore(storeName).get(key));
     },
     put(storeName, record) {
+      assertPracticeSerializable(record);
       return requestPromise(transaction.objectStore(storeName).put(record)).then(() => record);
     },
     delete(storeName, key) {

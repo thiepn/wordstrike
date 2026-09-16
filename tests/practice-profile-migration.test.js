@@ -57,24 +57,39 @@ assert.equal(initialized.profile.recordVersion, 3);
 assert.equal(initialized.profile.lastTrainingDayKey, null);
 assert.deepEqual(await dataStore.get("profiles", profileId), initialized.profile);
 
-assert.equal(PRACTICE_DATABASE_VERSION, 8);
+assert.ok(PRACTICE_DATABASE_VERSION >= 12);
 assert.equal(PRACTICE_MANIFEST_VERSION, 1);
-assert.deepEqual(PRACTICE_RECORD_VERSIONS, {
+const legacyRecordVersions = {
   context: 1,
   profile: 3,
   skillStat: 3,
-  sessionSummary: 13,
+  sessionSummary: 14,
   abilityState: 1,
   performanceState: 1,
   learningState: 1,
   reviewItem: 3,
   evaluationState: 1,
   assessmentRun: 1,
-  coachPlan: 1,
+  coachPlan: 2,
   customText: 1,
   preset: 1,
   checkpoint: 3,
   quarantine: 1,
-});
+};
+for (const [recordType, version] of Object.entries(legacyRecordVersions)) {
+  assert.equal(PRACTICE_RECORD_VERSIONS[recordType], version, `${recordType} version must remain stable`);
+}
+assert.deepEqual(
+  Object.fromEntries(Object.entries(PRACTICE_RECORD_VERSIONS).filter(([recordType]) => !Object.hasOwn(legacyRecordVersions, recordType))),
+  {
+    treatmentEpisode: 1,
+    treatmentResponseState: 1,
+    physicalTelemetryStat: 1,
+    physicalTelemetrySession: 1,
+    researchEnrollment: 1,
+    researchAssignment: 1,
+    researchAnalysisState: 1,
+  },
+);
 
-console.log("Practice profile migration, canonical day key, repository upgrade, and PL25 version envelope passed.");
+console.log("Practice profile migration, canonical day key, repository upgrade, and PL38 version envelope passed.");

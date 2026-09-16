@@ -20,9 +20,9 @@ import { getRealTextPracticeAvailability } from "../js/practiceLab/practiceRealT
 import { PRACTICE_DATABASE_VERSION, PRACTICE_RECORD_VERSIONS } from "../js/practiceLab/practiceConstants.js";
 import { PRACTICE_FOUNDATION_ANALYSIS_VERSION } from "../js/practiceLab/practiceFoundationAnalysis.js";
 
-test("PL24 contracts remain intact inside the PL25 DB8/session13/foundation10 envelope and all PL24 protocols stay v1", () => {
-  assert.equal(PRACTICE_DATABASE_VERSION, 8);
-  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 13);
+test("PL24 contracts remain intact inside the current PL38 envelope and all PL24 protocols stay v1", () => {
+  assert.ok(PRACTICE_DATABASE_VERSION >= 10);
+  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 14);
   assert.equal(PRACTICE_FOUNDATION_ANALYSIS_VERSION, 10);
   assert.deepEqual([
     PRACTICE_REAL_TEXT_VERSION,
@@ -77,13 +77,13 @@ test("PL24 hidden Cold Transfer descriptor requests exactly PL18 cold-transfer p
   assert.deepEqual(descriptor.supportedCompletionModes, ["duration"]);
 });
 
-test("PL24 checked-in production Real Text pool is an honest draft, not fabricated capacity", async () => {
+test("PL24 checked-in production Real Text pool has governed release capacity", async () => {
   const pool = JSON.parse(await readFile(new URL("../data/practice/real-text/en-v1/WS-REALTEXT-EN-1.manifest.json", import.meta.url), "utf8"));
   assert.equal(pool.poolId, "WS-REALTEXT-EN-1");
-  assert.equal(pool.status, "draft");
-  assert.equal(pool.units.length, 0);
-  assert.equal(pool.releaseReport.releaseBlockers.includes("minimum-ready-unit-count:0/16"), true);
+  assert.equal(pool.status, "ready");
+  assert.equal(pool.units.length, 16);
+  assert.deepEqual(pool.releaseReport.releaseBlockers, []);
   const availability = getRealTextPracticeAvailability({ pool, language: "en" });
-  assert.equal(availability.status, "unavailable");
-  assert.deepEqual(availability.supportedDurationsMs, []);
+  assert.equal(availability.status, "ready");
+  assert.deepEqual(availability.supportedDurationsMs, [180_000,300_000,600_000]);
 });

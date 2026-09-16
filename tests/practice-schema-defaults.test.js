@@ -6,6 +6,7 @@ import {
   PRACTICE_MANIFEST_KEY,
   PRACTICE_STORE_DEFINITIONS,
 } from "../js/practiceLab/practiceConstants.js";
+import { PRACTICE_STORE_DEFINITIONS as PRACTICE_STORE_DEFINITIONS_V31 } from "../js/practiceLab/practiceConstantsV31.js";
 import { createDefaultPracticeAbilityState } from "../js/practiceLab/practiceAbilityEstimator.js";
 import { validatePracticeAbilityState } from "../js/practiceLab/practiceAbilityValidation.js";
 import {
@@ -91,20 +92,31 @@ assert.match(createPracticePresetId({ uuid: () => "preset-12345678" }), /^practi
 
 assert.equal(PRACTICE_MANIFEST_KEY, "wordstrike.practice.manifest.v1");
 assert.equal(PRACTICE_DATABASE_NAME, "wordstrike-practice-lab");
-assert.equal(PRACTICE_DATABASE_VERSION, 8);
+assert.equal(PRACTICE_DATABASE_VERSION, 12);
 assert.equal(PRACTICE_LIMITS.manifestBytes, 65536);
-assert.deepEqual(Object.keys(PRACTICE_STORE_DEFINITIONS), [
+const legacyStoreNames = [
   "meta", "profiles", "contexts", "skillStats", "abilityStates", "performanceStates", "learningStates", "evaluationStates", "assessmentRuns", "coachPlans", "sessionSummaries", "reviewItems",
   "customTexts", "presets", "activeSessionCheckpoints", "quarantine",
+];
+const pl32StoreNames = [...legacyStoreNames, "treatmentEpisodes", "treatmentResponseStates"];
+assert.deepEqual(Object.keys(PRACTICE_STORE_DEFINITIONS_V31), legacyStoreNames);
+assert.deepEqual(Object.keys(PRACTICE_STORE_DEFINITIONS), [
+  ...pl32StoreNames,
+  "physicalTelemetryStats",
+  "physicalTelemetrySessions",
+  "researchEnrollments",
+  "researchAssignments",
+  "researchAnalysisStates",
 ]);
-assert.equal(summary.recordVersion, 13);
+assert.equal(summary.recordVersion, 14);
 assert.equal(summary.evaluationSummary, null);
 assert.equal(summary.assessmentBinding, null);
 assert.equal(summary.coachBinding, null);
+assert.equal(summary.researchBinding, null);
 assert.equal(toPracticeUtcIso(now), "2026-07-05T18:42:13.000Z");
 assert.equal(isValidPracticeUtcIso("2026-07-05T18:42:13.000Z"), true);
 assert.equal(isValidPracticeUtcIso("2026-07-05 18:42:13"), false);
 assert.match(getPracticeLocalDayKey(now), /^2026-07-05$/);
 assert.equal(getPracticeTimeContext(now).timezoneOffsetMinutes, new Date(now()).getTimezoneOffset());
 
-console.log("Practice defaults, injected IDs/clocks, independent nested values, ability state, and PL25 DB8 schema descriptors passed.");
+console.log("Practice defaults, injected IDs/clocks, independent nested values, ability state, and PL38 DB12 schema descriptors passed.");

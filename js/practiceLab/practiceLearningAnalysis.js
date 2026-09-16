@@ -1,5 +1,5 @@
 import { withPracticeLearningAnalysis } from "./practiceFoundationAnalysis.js";
-import { buildPracticeLearningAnalysis } from "./practiceLearningObservation.js";
+import { buildPracticeWeaknessBossLearningAnalysis } from "./practiceWeaknessBossLearning.js";
 import { PRACTICE_LEARNING_POLICY_V1 } from "./practiceLearningPolicy.js";
 import {
   getPracticeTrustedEvaluationPurpose,
@@ -30,7 +30,7 @@ export async function attachPracticeLearningAnalysis({
       trackedLearningStatIds = new Set(await repository.listLearningStateIds(profileId, contextId));
     }
   }
-  const learning = buildPracticeLearningAnalysis({
+  const learning = buildPracticeWeaknessBossLearningAnalysis({
     foundationAnalysis,
     contentPlan,
     profileId,

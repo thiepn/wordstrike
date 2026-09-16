@@ -29,7 +29,7 @@ test("PL10 typability build is deterministic and binds exact PL6/PL7 checksums",
   assert.deepEqual(first, second);
   assert.equal(first.reference.corpusChecksum, source.corpusManifest.buildChecksum);
   assert.equal(first.reference.indexChecksum, source.indexManifest.indexChecksum);
-  assert.equal(first.reference.referenceItemCount, 2);
+  assert.equal(first.reference.referenceItemCount, source.partitionArtifacts.training.items.length);
   assert.equal(first.frequencyMetadata.referenceVersion, null);
   assert.deepEqual(first.diagnostics.fitPartitions, ["training"]);
   assert.deepEqual(PRACTICE_TYPABILITY_FIT_PARTITIONS, ["training"]);
@@ -88,5 +88,5 @@ test("PL10 checked-in governed model keeps training-only fit and protected holdo
   assert.equal(manifest.frequencyReferenceId, "ws-en-frequency-v1");
   assert.ok(manifest.frequencyReferenceChecksum);
   assert.deepEqual(manifest.frequencySourceIds, ["ws-original-en-frequency-v1"]);
-  assert.equal(manifest.indexChecksum, "sha256-bb198244a6b6cefcae5cb908bf3dee6e9e52259f9ef41576ec69c429a423ff32");
+  assert.equal(manifest.indexChecksum, (await readJson("data/practice/indexes/en-v1/manifest.json")).indexChecksum);
 });

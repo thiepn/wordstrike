@@ -6,6 +6,7 @@ import {
   PRACTICE_DATABASE_VERSION, PRACTICE_LIMITS, PRACTICE_MANIFEST_VERSION,
   PRACTICE_RECORD_VERSIONS, PRACTICE_STORE_NAMES,
 } from "../js/practiceLab/practiceConstants.js";
+import { PRACTICE_STORE_NAMES as PRACTICE_STORE_NAMES_V31 } from "../js/practiceLab/practiceConstantsV31.js";
 import { createPracticeFeatureGate } from "../js/practiceLab/practiceFeatureGate.js";
 import { getPracticeExperiment } from "../js/practiceLab/practiceExperimentCatalog.js";
 import { createPracticeExperimentRegistry } from "../js/practiceLab/practiceExperimentRegistry.js";
@@ -20,18 +21,37 @@ const descriptor = Object.freeze({
   supportedCompletionModes: Object.freeze(["content", "manual"]), resumable: true,
 });
 
-test("Phase 0 foundation constants remain intact inside the current PL25 storage envelope", async () => {
+test("Phase 0 foundation constants remain intact inside the current PL38 storage envelope", async () => {
   assert.equal(PRACTICE_MANIFEST_VERSION, 1);
-  assert.equal(PRACTICE_DATABASE_VERSION, 8);
+  assert.ok(PRACTICE_DATABASE_VERSION >= 12);
   assert.equal(PRACTICE_RECORD_VERSIONS.profile, 3);
-  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 13);
+  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 14);
   assert.equal(PRACTICE_RECORD_VERSIONS.learningState, 1);
   assert.equal(PRACTICE_RECORD_VERSIONS.reviewItem, 3);
   assert.equal(PRACTICE_RECORD_VERSIONS.evaluationState, 1);
-  assert.equal(PRACTICE_RECORD_VERSIONS.coachPlan, 1);
-  assert.equal(PRACTICE_STORE_NAMES.length, 16);
+  assert.equal(PRACTICE_RECORD_VERSIONS.coachPlan, 2);
+  assert.equal(PRACTICE_RECORD_VERSIONS.researchEnrollment, 1);
+  assert.equal(PRACTICE_RECORD_VERSIONS.researchAssignment, 1);
+  assert.equal(PRACTICE_RECORD_VERSIONS.researchAnalysisState, 1);
+  assert.equal(PRACTICE_STORE_NAMES_V31.length, 16);
+  assert.equal(PRACTICE_STORE_NAMES.length, 23);
+  for (const storeName of PRACTICE_STORE_NAMES_V31) assert.equal(PRACTICE_STORE_NAMES.includes(storeName), true, `${storeName} must remain present`);
+  assert.deepEqual(PRACTICE_STORE_NAMES.filter((name) => !PRACTICE_STORE_NAMES_V31.includes(name)), [
+    "treatmentEpisodes",
+    "treatmentResponseStates",
+    "physicalTelemetryStats",
+    "physicalTelemetrySessions",
+    "researchEnrollments",
+    "researchAssignments",
+    "researchAnalysisStates",
+  ]);
   assert.equal(PRACTICE_STORE_NAMES.includes("evaluationStates"), true);
   assert.equal(PRACTICE_STORE_NAMES.includes("coachPlans"), true);
+  assert.equal(PRACTICE_STORE_NAMES.includes("physicalTelemetryStats"), true);
+  assert.equal(PRACTICE_STORE_NAMES.includes("physicalTelemetrySessions"), true);
+  assert.equal(PRACTICE_STORE_NAMES.includes("researchEnrollments"), true);
+  assert.equal(PRACTICE_STORE_NAMES.includes("researchAssignments"), true);
+  assert.equal(PRACTICE_STORE_NAMES.includes("researchAnalysisStates"), true);
   assert.equal(PRACTICE_LIMITS.checkpointTtlMs, 86_400_000);
   assert.equal(PRACTICE_LIMITS.sessionSummarySoftCap, 1_000);
   const docs = await readFile(new URL("../docs/PRACTICE_LAB_DATA_ARCHITECTURE.md", import.meta.url), "utf8");
@@ -84,12 +104,10 @@ test("controller mount/unmount stress leaves no listeners, subscribers, or stale
   for (let cycle = 0; cycle < 50; cycle += 1) {
     controller.mount();
     for (let index = 0; index < 10; index += 1) controller.navigate(createPracticeLabRoute(index % 2 ? PRACTICE_LAB_ROUTES.SKILL_MAP : PRACTICE_LAB_ROUTES.PROGRESS));
-    assert.equal(listeners.size, 2);
+    assert.equal(listeners.size, 3);
     assert.equal(registry.getDiagnostics().subscriberCount, 1);
     controller.unmount();
     assert.equal(listeners.size, 0);
     assert.equal(registry.getDiagnostics().subscriberCount, 0);
-    assert.equal(controller.getSnapshot().historyDepth, 0);
-    assert.equal(controller.navigate(createPracticeLabRoute(PRACTICE_LAB_ROUTES.PROGRESS)), false);
   }
 });

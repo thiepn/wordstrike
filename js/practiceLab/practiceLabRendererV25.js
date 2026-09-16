@@ -2,6 +2,7 @@ import { renderPracticeLabV24 } from "./practiceLabRendererV24.js";
 
 const escapeHtml = (value = "") => String(value).replace(/[&<>'"]/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[character]);
 const statusClass = (value) => String(value ?? "pending").replace(/[^a-z0-9-]/gi, "");
+const number = (value, digits = 2) => Number.isFinite(value) ? Number(value).toFixed(digits).replace(/\.00$/, "").replace(/(\.\d)0$/, "$1") : "—";
 
 function renderDurationChoices(view) {
   return `<div class="practice-coach-duration" role="group" aria-label="Daily Training duration">${view.durationChoices.map((item) => `<button type="button" data-practice-action="set-coach-duration" data-coach-minutes="${item.minutes}" aria-pressed="${item.selected}" ${view.plan ? "disabled" : ""}>${item.minutes} MIN</button>`).join("")}</div>`;
@@ -15,16 +16,42 @@ function renderSuggestion(suggestion, type) {
 
 function renderBlock(block, view) {
   const target = block.target ? `<span class="practice-coach-target">${escapeHtml(block.target)}</span>` : "";
+  const informed = block.responseInformed ? '<span class="practice-lab-status">Response-informed</span>' : "";
   const blocked = block.blockedReason ? `<p class="practice-lab-muted">${escapeHtml(block.blockedReason)}</p>` : "";
   const skip = block.canSkip && view.plan?.status !== "abandoned" && view.plan?.status !== "expired"
     ? `<button type="button" class="practice-lab-text-button" data-practice-action="skip-coach-block" data-coach-block-id="${escapeHtml(block.blockId)}">SKIP</button>` : "";
   return `<article class="practice-coach-block" data-coach-block-id="${escapeHtml(block.blockId)}" data-status="${statusClass(block.status)}">
     <div class="practice-coach-block-index">${block.ordinal}</div>
     <div class="practice-coach-block-copy"><div class="practice-lab-card-meta"><span>${escapeHtml(block.title)}</span><span>~${block.estimatedMinutes} min</span></div>
-      <div class="practice-coach-block-title"><h3>${escapeHtml(block.title)}</h3>${target}</div>
+      <div class="practice-coach-block-title"><h3>${escapeHtml(block.title)}</h3>${target}${informed}</div>
       <p>${escapeHtml(block.reason)}</p>${blocked}</div>
     <div class="practice-coach-block-actions"><span class="practice-lab-status" data-status="${statusClass(block.status)}">${escapeHtml(block.statusLabel)}</span>${skip}</div>
   </article>`;
+}
+
+function renderOptionComparison(row) {
+  const modifier = Number.isFinite(row.responseModifier) ? `${number(row.responseModifier)}×` : "—";
+  return `<li><strong>${escapeHtml(row.experimentId ?? "unknown")}</strong> · base match ${number(row.baseInterventionMatch)} · modifier ${escapeHtml(modifier)} · personalized utility ${number(row.personalizedOptionUtility)}<br><span class="practice-lab-muted">${escapeHtml(row.sourceScope ?? "none")} · ${escapeHtml(row.evidenceDepth ?? "insufficient")} · ${escapeHtml(row.responsePattern ?? "insufficient")}</span></li>`;
+}
+
+function renderDeveloperDiagnostic(item) {
+  const assignment = item.assignmentComposition
+    ? `${Number(item.assignmentComposition.manual || 0)} manual · ${Number(item.assignmentComposition.coach || 0)} Coach`
+    : "—";
+  const options = item.optionComparisons?.length
+    ? `<ul>${item.optionComparisons.map(renderOptionComparison).join("")}</ul>`
+    : "<p class=\"practice-lab-muted\">No response-adjusted alternative comparison was stored.</p>";
+  return `<article class="practice-lab-empty-state" data-coach-personalization-diagnostic="${escapeHtml(item.blockId)}">
+    <div class="eyebrow">${escapeHtml(item.title)}${item.target ? ` · ${escapeHtml(item.target)}` : ""}</div>
+    <p>Need utility <strong>${number(item.needUtility)}</strong> · base utility <strong>${number(item.baseUtilityScore)}</strong> · personalized utility <strong>${number(item.personalizedUtilityScore)}</strong> · response modifier <strong>${number(item.responseModifier)}×</strong></p>
+    <p class="practice-lab-muted">${escapeHtml(item.sourceScope ?? "none")} evidence · ${escapeHtml(item.evidenceDepth ?? "insufficient")} depth · ${escapeHtml(item.responsePattern ?? "insufficient")} · ${Number(item.eligibleSampleCount || 0)} eligible samples · ${escapeHtml(item.freshnessBucket ?? "no freshness bucket")} · ${escapeHtml(assignment)} · ${escapeHtml(item.measurementGrade ?? "no measurement grade")}</p>
+    ${options}
+  </article>`;
+}
+
+function renderDeveloperDiagnostics(plan, view) {
+  if (!view.preview || !plan.developerDiagnostics?.length) return "";
+  return `<details class="practice-lab-empty-state" data-coach-personalization-diagnostics><summary><strong>Coach v2 diagnostics</strong></summary><p class="practice-lab-muted">Developer-only bounded audit data. Current need determines inclusion; response evidence can only adjust selection among compatible methods.</p>${plan.developerDiagnostics.map(renderDeveloperDiagnostic).join("")}</details>`;
 }
 
 export function renderPracticeCoach(root, view, { focusSelector = null } = {}) {
@@ -41,6 +68,7 @@ export function renderPracticeCoach(root, view, { focusSelector = null } = {}) {
       <div class="practice-coach-blocks">${plan.blocks.map((block) => renderBlock(block, view)).join("")}</div>
     </section>
     <section class="practice-lab-empty-state"><h2>Why this plan?</h2>${plan.rationales.length ? `<ul>${plan.rationales.map((reason) => `<li>${escapeHtml(reason)}</li>`).join("")}</ul>` : "<p>Broad practice is the best available use of today's budget.</p>"}<p class="practice-lab-muted">The plan is frozen when created and is not rewritten after individual block results.</p></section>
+    ${renderDeveloperDiagnostics(plan, view)}
     ${(plan.suggestions?.assessmentSuggestion || plan.suggestions?.coldTransferSuggestion) ? `<section class="practice-coach-suggestions" aria-labelledby="practice-coach-suggestions-title"><div class="practice-lab-section-heading"><div><div class="eyebrow">Separate measurements</div><h2 id="practice-coach-suggestions-title">Optional suggestions</h2></div><p>These are outside today's training block count and never start automatically.</p></div><div class="practice-coach-suggestion-grid">${renderSuggestion(plan.suggestions.assessmentSuggestion, "assessment")}${renderSuggestion(plan.suggestions.coldTransferSuggestion, "cold")}</div></section>` : ""}` : "";
 
   root.innerHTML = `<section class="screen practice-lab-screen practice-coach-screen" data-practice-view="daily-training"><div class="practice-lab-shell">

@@ -11,11 +11,11 @@ import { buildPracticeFoundationAnalysis, PRACTICE_FOUNDATION_ANALYSIS_VERSION }
 import { migratePracticeRecord } from "../js/practiceLab/practiceMigrations.js";
 import { validateSessionSummary } from "../js/practiceLab/practiceValidation.js";
 
-test("PL19 contracts remain intact inside the PL25 DB8/session13/foundation10 envelope", () => {
-  assert.equal(PRACTICE_DATABASE_VERSION, 8);
+test("PL19 contracts remain intact inside the current PL38 DB12/session14/foundation10 envelope", () => {
+  assert.equal(PRACTICE_DATABASE_VERSION, 12);
   assert.equal(PRACTICE_RECORD_VERSIONS.assessmentRun, 1);
-  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 13);
-  assert.equal(PRACTICE_RECORD_VERSIONS.coachPlan, 1);
+  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 14);
+  assert.equal(PRACTICE_RECORD_VERSIONS.coachPlan, 2);
   assert.equal(PRACTICE_FOUNDATION_ANALYSIS_VERSION, 10);
   assert.equal(PRACTICE_LIMITS.assessmentRunBytes, 128 * 1024);
   assert.equal(PRACTICE_LIMITS.assessmentRuns, 50);
@@ -25,7 +25,7 @@ test("PL19 contracts remain intact inside the PL25 DB8/session13/foundation10 en
   ]);
 });
 
-test("PL19 historical session v11 migrates through assessmentBinding v12 to PL25 coachBinding v13", () => {
+test("PL19 historical session v11 migrates through assessmentBinding v12, coachBinding v13, and PL38 researchBinding v14", () => {
   const current = createDefaultSessionSummary({
     profileId: "practice-profile_migration-12345678",
     contextId: "practice-context_migration-12345678",
@@ -35,11 +35,14 @@ test("PL19 historical session v11 migrates through assessmentBinding v12 to PL25
   const v11 = { ...current, recordVersion: 11 };
   delete v11.assessmentBinding;
   delete v11.coachBinding;
+  delete v11.researchBinding;
   const migrated = migratePracticeRecord("sessionSummary", v11);
   assert.equal(migrated.ok, true, JSON.stringify(migrated.error));
-  assert.deepEqual(migrated.steps, ["sessionSummary:11->12", "sessionSummary:12->13"]);
+  assert.deepEqual(migrated.steps, ["sessionSummary:11->12", "sessionSummary:12->13", "sessionSummary:13->14"]);
+  assert.equal(migrated.value.recordVersion, 14);
   assert.equal(migrated.value.assessmentBinding, null);
   assert.equal(migrated.value.coachBinding, null);
+  assert.equal(migrated.value.researchBinding, null);
   assert.equal(migrated.value.evaluationSummary, current.evaluationSummary);
   assert.equal(validateSessionSummary(migrated.value).valid, true);
 });

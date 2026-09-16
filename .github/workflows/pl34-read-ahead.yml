@@ -1,0 +1,28 @@
+name: PL34 Read-Ahead
+
+on:
+  push:
+    branches: [pl34-read-ahead]
+  pull_request:
+    paths:
+      - 'js/practiceLab/**'
+      - 'tests/practice-read-ahead*-pl34.test.js'
+      - 'scripts/buildPracticeReadAheadForms.mjs'
+      - 'data/practice/read-ahead/**'
+      - 'docs/**'
+      - 'package.json'
+      - '.github/workflows/pl34-read-ahead.yml'
+
+jobs:
+  certify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: PL34 Read-Ahead certification
+        run: npm run test:pl34-read-ahead
+      - name: Full WordStrike regression suite
+        run: npm test

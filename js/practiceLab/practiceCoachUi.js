@@ -30,7 +30,10 @@ const REASON_COPY = Object.freeze({
   "broad-integration": "Broad natural-text practice adds non-weakness-only integration.",
   "readiness-reduced": "Today's plan starts with broader practice before focused work.",
   "warmup-observed": "Today's plan starts with broader practice before focused work.",
+  "response-informed-treatment": "Recent response evidence slightly influenced which compatible practice method was selected.",
 });
+
+const RESPONSE_RATIONALE = "Recent response evidence slightly influenced which compatible practice method was selected. Current need still determined whether the target was included.";
 
 const BLOCKED_COPY = Object.freeze({
   "target-practised-after-plan": "This target was directly practiced after today's plan was created.",
@@ -78,6 +81,7 @@ function blockView(block, { nextPendingId = null, startingBlockId = null } = {})
     statusLabel: blockStatusLabel(block, startingBlockId),
     reason,
     blockedReason,
+    responseInformed: block.responseInformed === true,
     canSkip: block.status === "pending" && block.blockId === nextPendingId && startingBlockId == null,
   });
 }
@@ -94,8 +98,46 @@ function rationales(plan) {
   if (plan?.decisionContext?.readinessBand === "reduced" || plan?.decisionContext?.warmupStatus === "observed") output.push("Today's plan starts with broader practice before focused work.");
   const target = plan?.blocks?.find((block) => block.kind === "targeted-intervention");
   if (target) output.push(blockReason(target));
+  if (plan?.blocks?.some((block) => block.responseInformed === true)) output.push(RESPONSE_RATIONALE);
   if (plan?.blocks?.some((block) => block.kind === "real-text")) output.push("Broad natural-text practice keeps the plan from becoming weakness-only.");
-  return freezeDeep([...new Set(output)].slice(0, 3));
+  return freezeDeep([...new Set(output)].slice(0, 4));
+}
+
+function developerDiagnostics(plan) {
+  const diagnostics = [];
+  for (const block of plan?.blocks ?? []) {
+    const decision = block?.personalizationDecision;
+    if (block?.kind !== "targeted-intervention" || !decision) continue;
+    diagnostics.push({
+      blockId: block.blockId,
+      title: BLOCK_TITLES[block.experimentId] ?? "Practice",
+      target: targetLabel(block),
+      treatmentFamilyKey: decision.treatmentFamilyKey ?? null,
+      needUtility: Number.isFinite(decision.needUtility) ? decision.needUtility : null,
+      baseUtilityScore: Number.isFinite(block.baseUtilityScore) ? block.baseUtilityScore : null,
+      personalizedUtilityScore: Number.isFinite(block.personalizedUtilityScore) ? block.personalizedUtilityScore : null,
+      responseModifier: Number.isFinite(decision.responseModifier) ? decision.responseModifier : 1,
+      sourceScope: decision.sourceScope ?? "none",
+      evidenceDepth: decision.evidenceDepth ?? "insufficient",
+      responsePattern: decision.responsePattern ?? "insufficient",
+      eligibleSampleCount: Number.isFinite(decision.eligibleSampleCount) ? decision.eligibleSampleCount : 0,
+      freshnessBucket: decision.freshnessBucket ?? null,
+      assignmentComposition: decision.assignmentComposition ?? null,
+      measurementGrade: decision.measurementGrade ?? null,
+      optionComparisons: (decision.optionComparisons ?? []).slice(0, 4).map((row) => ({
+        experimentId: row.experimentId,
+        treatmentFamilyKey: row.treatmentFamilyKey,
+        baseInterventionMatch: row.baseInterventionMatch,
+        responseModifier: row.responseModifier,
+        personalizedInterventionMatch: row.personalizedInterventionMatch,
+        personalizedOptionUtility: row.personalizedOptionUtility,
+        sourceScope: row.sourceScope,
+        responsePattern: row.responsePattern,
+        evidenceDepth: row.evidenceDepth,
+      })),
+    });
+  }
+  return freezeDeep(diagnostics.slice(0, 2));
 }
 
 export function createDefaultPracticeCoachUiState({ requestedMinutes = PRACTICE_COACH_DEFAULT_MINUTES } = {}) {
@@ -162,6 +204,8 @@ export function buildPracticeCoachViewModel({ state, preview = true } = {}) {
       canStartNext: Boolean(nextBlock) && !activeBlock && normalized.status !== "starting" && normalized.startingBlockId == null && !["finished", "abandoned", "expired"].includes(plan.status),
       canEndToday: !activeBlock && normalized.status !== "starting" && normalized.startingBlockId == null && !["finished", "abandoned", "expired"].includes(plan.status),
       rationales: rationales(plan),
+      responseInformed: plan.personalization?.responseInformed === true || plan.blocks.some((block) => block.responseInformed === true),
+      developerDiagnostics: preview ? developerDiagnostics(plan) : [],
       suggestions: plan.suggestions ?? {},
     },
   });

@@ -40,7 +40,7 @@ const frequencyProvider = createPracticeReferenceFrequencyProvider(frequency);
 function sentencePool(source) {
   const rows = [];
   for (const subject of source.generation.subjects) for (const verb of source.generation.verbs) for (const object of source.generation.objects) for (const ending of source.generation.endings) {
-    const text = `${subject} ${verb} ${object} near a familiar community neighborhood ${ending}`;
+    const text = `${subject} ${verb} ${object}, near a familiar community neighborhood, ${ending}`;
     rows.push({ text, rank: sha256(`${source.generation.salt}\0${subject}\0${verb}\0${object}\0${ending}`) });
   }
   rows.sort((a, b) => a.rank.localeCompare(b.rank) || a.text.localeCompare(b.text));

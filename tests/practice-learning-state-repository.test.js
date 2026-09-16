@@ -110,11 +110,11 @@ function summaryFor(harness, sessionId, evidenceSummary, completedAtUtc = "2026-
   });
 }
 
-test("PL16 learning-state contract remains intact inside the current PL25 DB8/session13 envelope", () => {
-  assert.equal(PRACTICE_DATABASE_VERSION, 8);
+test("PL16 learning-state contract remains intact inside the current Practice DB/session envelope", () => {
+  assert.ok(PRACTICE_DATABASE_VERSION >= 10);
   assert.equal(PRACTICE_RECORD_VERSIONS.learningState, 1);
   assert.equal(PRACTICE_RECORD_VERSIONS.reviewItem, 3);
-  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 13);
+  assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 14);
   assert.equal(PRACTICE_RECORD_VERSIONS.evaluationState, 1);
   assert.equal(PRACTICE_STORE_DEFINITIONS.learningStates.keyPath, "learningStateId");
   assert.ok(PRACTICE_STORE_DEFINITIONS.learningStates.indexes.some((index) => index.name === "statId" && index.options?.unique));

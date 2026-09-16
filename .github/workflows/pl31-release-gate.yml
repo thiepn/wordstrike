@@ -1,0 +1,74 @@
+name: PL31 final release gate
+
+on:
+  push:
+    branches: [pl31-custom-text]
+
+permissions:
+  contents: read
+
+jobs:
+  node:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Run complete WORDSTRIKE Node test suite
+        run: npm test
+      - name: Validate PL29 deterministic artifacts
+        run: npm run validate:practice-sustained
+      - name: Validate PL30 deterministic artifacts
+        run: npm run validate:practice-special-domains
+      - name: Confirm validation is read-only
+        run: git diff --exit-code
+
+  typing-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    container:
+      image: mcr.microsoft.com/playwright/python:v1.57.0-noble
+      options: --ipc=host
+    env:
+      HOME: /root
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install browser dependencies
+        run: python3 -m pip install -r tests/browser/requirements.txt
+      - name: Run Typing browser regressions
+        run: |
+          python3 tests/browser/typing_regressions.py
+          python3 tests/browser/typing_ui8_visual_regressions.py
+
+  non-practice-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    container:
+      image: mcr.microsoft.com/playwright/python:v1.57.0-noble
+      options: --ipc=host
+    env:
+      HOME: /root
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install browser dependencies
+        run: python3 -m pip install -r tests/browser/requirements.txt
+      - name: Run non-Practice regression surface
+        run: |
+          python3 tests/browser/non_practice_regressions.py
+          python3 tests/browser/ui1_design_system.py
+          python3 tests/browser/ui2_title_navigation.py
+          python3 tests/browser/ui3_mode_select.py
+          python3 tests/browser/ui4_campaign_progression.py
+          python3 tests/browser/ui5_campaign_gameplay.py
+          python3 tests/browser/ui5_campaign_visual.py
+          python3 tests/browser/ui6_endless_gameplay.py
+          python3 tests/browser/ui6_endless_visual.py
+          python3 tests/browser/ui7_boss_gameplay.py
+          python3 tests/browser/ui7_boss_visual.py
+          python3 tests/browser/ui9_arcade_rush.py
+          python3 tests/browser/ui10_results_pause_onboarding.py
+          python3 tests/browser/ui11_profile_leaderboards_settings.py
+          python3 tests/browser/ui11_mobile_heading_contract.py
+          python3 tests/browser/ui12_final_polish.py

@@ -43,7 +43,7 @@ test("controller mounts deterministically, navigates with bounded history, and u
   assert.equal(controller.getSnapshot().route.name, "home");
   controller.navigate(createPracticeLabRoute(PRACTICE_LAB_ROUTES.SKILL_MAP));
   assert.equal(controller.getSnapshot().route.name, "skill-map");
-  assert.equal(root.listenerCount("click"), 1);
+  assert.equal(root.listenerCount("click"), 2);
   controller.back();
   assert.equal(controller.getSnapshot().route.name, "home");
   controller.back();

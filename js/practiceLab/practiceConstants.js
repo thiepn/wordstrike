@@ -1,225 +1,159 @@
-export const PRACTICE_MANIFEST_KEY = "wordstrike.practice.manifest.v1";
-export const PRACTICE_MANIFEST_BACKUP_KEY = "wordstrike.practice.manifest.backup.v1";
-export const PRACTICE_MANIFEST_TEMP_KEY = "wordstrike.practice.manifest.temp.v1";
-export const PRACTICE_DATABASE_NAME = "wordstrike-practice-lab";
-export const PRACTICE_DATABASE_VERSION = 8;
-export const PRACTICE_MANIFEST_VERSION = 1;
-export const PRACTICE_CONTEXT_FINGERPRINT_VERSION = 1;
+import {
+  PRACTICE_LIMITS as PRACTICE_LIMITS_V31,
+  PRACTICE_OBSOLETE_INDEXES as PRACTICE_OBSOLETE_INDEXES_V31,
+  PRACTICE_RECORD_VERSIONS as PRACTICE_RECORD_VERSIONS_V31,
+  PRACTICE_STORE_DEFINITIONS as PRACTICE_STORE_DEFINITIONS_V31,
+  QUOTA_RECOVERY_STEPS as QUOTA_RECOVERY_STEPS_V31,
+} from "./practiceConstantsV31.js";
+
+export * from "./practiceConstantsV31.js";
+
+export const PRACTICE_DATABASE_VERSION = 12;
 
 export const PRACTICE_RECORD_VERSIONS = Object.freeze({
-  context: 1,
-  profile: 3,
-  skillStat: 3,
-  sessionSummary: 13,
-  abilityState: 1,
-  performanceState: 1,
-  learningState: 1,
-  reviewItem: 3,
-  evaluationState: 1,
-  assessmentRun: 1,
-  coachPlan: 1,
-  customText: 1,
-  preset: 1,
-  checkpoint: 3,
-  quarantine: 1,
+  ...PRACTICE_RECORD_VERSIONS_V31,
+  sessionSummary: 14,
+  coachPlan: 2,
+  treatmentEpisode: 1,
+  treatmentResponseState: 1,
+  physicalTelemetryStat: 1,
+  physicalTelemetrySession: 1,
+  researchEnrollment: 1,
+  researchAssignment: 1,
+  researchAnalysisState: 1,
 });
 
 export const PRACTICE_LIMITS = Object.freeze({
-  manifestBytes: 64 * 1024,
-  customTextCount: 20,
-  customTextCharacters: 250_000,
-  customTextTotalCharacters: 1_000_000,
-  customTextTitleLength: 120,
-  presetCount: 10,
-  presetNameLength: 60,
-  recentLatencySamples: 64,
-  primaryLimiterIds: 8,
-  recommendationIds: 20,
-  targetEntities: 256,
-  sessionObjectBytes: 128 * 1024,
-  skillStatBytes: 64 * 1024,
-  abilityStateBytes: 32 * 1024,
-  performanceStateBytes: 64 * 1024,
-  learningStateBytes: 32 * 1024,
-  reviewItemBytes: 32 * 1024,
-  evaluationStateBytes: 64 * 1024,
-  assessmentRunBytes: 128 * 1024,
-  coachPlanBytes: 64 * 1024,
-  checkpointBytes: 512 * 1024,
-  configurationDepth: 8,
-  configurationBytes: 32 * 1024,
-  sessionSummarySoftCap: 1_000,
-  sessionSummaryHardCap: 2_000,
-  sessionSummaryDays: 730,
-  bigramStats: 1_500,
-  trigramStats: 2_000,
-  wordStats: 5_000,
-  patternStats: 1_000,
-  reviewItems: 5_000,
-  assessmentRuns: 50,
-  coachPlans: 120,
-  coachPlanDays: 180,
-  quarantineRecords: 100,
-  checkpointTtlMs: 24 * 60 * 60 * 1000,
-  abandonmentCharacters: 20,
-  abandonmentActiveMs: 30_000,
+  ...PRACTICE_LIMITS_V31,
+  treatmentEpisodesPerProfile: 500,
+  treatmentOpenEpisodesPerContext: 64,
+  treatmentResponseStatesPerProfile: 256,
+  treatmentResponseSamplesPerState: 64,
+  treatmentEpisodeBytes: 32 * 1024,
+  treatmentClosedDays: 365,
+  treatmentInvalidDays: 30,
+  treatmentPreparedTtlMs: 24 * 60 * 60 * 1000,
+  physicalTelemetryStatsPerContext: 2304,
+  physicalTelemetryKeyStatsPerContext: 128,
+  physicalTelemetryTransitionStatsPerContext: 2048,
+  physicalTelemetryModifierStatsPerContext: 128,
+  physicalTelemetrySessionMarkersPerProfile: 500,
+  physicalTelemetrySessionMarkerDays: 180,
+  physicalTelemetryRecentSamples: 32,
+  physicalTelemetryStatBytes: 8 * 1024,
+  researchEnrollmentsPerProfile: 32,
+  researchAssignmentsPerProfile: 256,
+  researchAnalysisStatesPerProfile: 64,
+  researchAssignmentBytes: 48 * 1024,
+  researchCompletedDays: 365,
+  researchTechnicalInvalidDays: 90,
 });
+
+const existingSessionIndexes = PRACTICE_STORE_DEFINITIONS_V31.sessionSummaries.indexes;
+const hasProfileContextCompleted = existingSessionIndexes.some((index) => index.name === "profileContextCompletedAt");
+const hasResearchAssignment = existingSessionIndexes.some((index) => index.name === "researchAssignmentId");
 
 export const PRACTICE_STORE_DEFINITIONS = Object.freeze({
-  meta: Object.freeze({ keyPath: "key", indexes: [] }),
-  profiles: Object.freeze({ keyPath: "profileId", indexes: [Object.freeze({ name: "updatedAt", keyPath: "updatedAt" })] }),
-  contexts: Object.freeze({
-    keyPath: "contextId",
-    indexes: [
-      Object.freeze({ name: "profileId", keyPath: "profileId" }),
-      Object.freeze({ name: "updatedAt", keyPath: "updatedAt" }),
-      Object.freeze({ name: "lastUsedAt", keyPath: "lastUsedAt" }),
-      Object.freeze({ name: "profileFingerprint", keyPath: ["profileId", "fingerprint"], options: { unique: true } }),
-    ],
-  }),
-  skillStats: Object.freeze({
-    keyPath: "statId",
-    indexes: [
-      Object.freeze({ name: "profileId", keyPath: "profileId" }),
-      Object.freeze({ name: "contextId", keyPath: "contextId" }),
-      Object.freeze({ name: "entityType", keyPath: "entityType" }),
-      Object.freeze({ name: "updatedAt", keyPath: "updatedAt" }),
-      Object.freeze({ name: "priority", keyPath: "priority" }),
-      Object.freeze({ name: "confidenceLevel", keyPath: "confidenceLevel" }),
-      Object.freeze({ name: "masteryState", keyPath: "masteryState" }),
-      Object.freeze({ name: "profileContextEntity", keyPath: ["profileId", "contextId", "entityType", "entityKey"], options: { unique: true } }),
-    ],
-  }),
-  abilityStates: Object.freeze({
-    keyPath: "abilityStateId",
-    indexes: [
-      Object.freeze({ name: "profileId", keyPath: "profileId" }),
-      Object.freeze({ name: "contextId", keyPath: "contextId" }),
-      Object.freeze({ name: "channel", keyPath: "channel" }),
-      Object.freeze({ name: "updatedAt", keyPath: "updatedAt" }),
-      Object.freeze({ name: "profileContextChannel", keyPath: ["profileId", "contextId", "channel"], options: { unique: true } }),
-    ],
-  }),
-  performanceStates: Object.freeze({
-    keyPath: "performanceStateId",
-    indexes: [
-      Object.freeze({ name: "profileId", keyPath: "profileId" }),
-      Object.freeze({ name: "contextId", keyPath: "contextId" }),
-      Object.freeze({ name: "updatedAt", keyPath: "updatedAt" }),
-      Object.freeze({ name: "profileContext", keyPath: ["profileId", "contextId"], options: { unique: true } }),
-    ],
-  }),
-  learningStates: Object.freeze({
-    keyPath: "learningStateId",
-    indexes: [
-      Object.freeze({ name: "profileId", keyPath: "profileId" }),
-      Object.freeze({ name: "contextId", keyPath: "contextId" }),
-      Object.freeze({ name: "entityType", keyPath: "entityType" }),
-      Object.freeze({ name: "updatedAt", keyPath: "updatedAt" }),
-      Object.freeze({ name: "statId", keyPath: "statId", options: { unique: true } }),
-      Object.freeze({ name: "profileContextEntity", keyPath: ["profileId", "contextId", "entityType", "entityKey"], options: { unique: true } }),
-    ],
-  }),
-  evaluationStates: Object.freeze({
-    keyPath: "evaluationStateId",
-    indexes: [
-      Object.freeze({ name: "profileId", keyPath: "profileId", options: { unique: true } }),
-      Object.freeze({ name: "updatedAt", keyPath: "updatedAt" }),
-    ],
-  }),
-  assessmentRuns: Object.freeze({
-    keyPath: "assessmentRunId",
-    indexes: [
-      Object.freeze({ name: "profileId", keyPath: "profileId" }),
-      Object.freeze({ name: "contextId", keyPath: "contextId" }),
-      Object.freeze({ name: "status", keyPath: "status" }),
-      Object.freeze({ name: "depth", keyPath: "depth" }),
-      Object.freeze({ name: "startedAt", keyPath: "startedAt" }),
-      Object.freeze({ name: "completedAt", keyPath: "completedAt" }),
-      Object.freeze({ name: "profileStatus", keyPath: ["profileId", "status"] }),
-    ],
-  }),
-  coachPlans: Object.freeze({
-    keyPath: "coachPlanId",
-    indexes: [
-      Object.freeze({ name: "profileId", keyPath: "profileId" }),
-      Object.freeze({ name: "contextId", keyPath: "contextId" }),
-      Object.freeze({ name: "localDayKey", keyPath: "localDayKey" }),
-      Object.freeze({ name: "status", keyPath: "status" }),
-      Object.freeze({ name: "updatedAt", keyPath: "updatedAt" }),
-      Object.freeze({ name: "profileContextDay", keyPath: ["profileId", "contextId", "localDayKey"], options: { unique: true } }),
-    ],
-  }),
+  ...PRACTICE_STORE_DEFINITIONS_V31,
   sessionSummaries: Object.freeze({
-    keyPath: "sessionId",
-    indexes: [
+    ...PRACTICE_STORE_DEFINITIONS_V31.sessionSummaries,
+    indexes: Object.freeze([
+      ...existingSessionIndexes,
+      ...(hasProfileContextCompleted ? [] : [Object.freeze({ name: "profileContextCompletedAt", keyPath: ["profileId", "contextId", "completedAtUtc"] })]),
+      ...(hasResearchAssignment ? [] : [Object.freeze({ name: "researchAssignmentId", keyPath: "researchBinding.researchAssignmentId" })]),
+    ]),
+  }),
+  treatmentEpisodes: Object.freeze({
+    keyPath: "treatmentEpisodeId",
+    indexes: Object.freeze([
+      Object.freeze({ name: "treatmentSessionId", keyPath: "treatment.treatmentSessionId", options: { unique: true } }),
       Object.freeze({ name: "profileId", keyPath: "profileId" }),
       Object.freeze({ name: "contextId", keyPath: "contextId" }),
-      Object.freeze({ name: "experimentId", keyPath: "experimentId" }),
-      Object.freeze({ name: "startedAtUtc", keyPath: "startedAtUtc" }),
-      Object.freeze({ name: "completedAtUtc", keyPath: "completedAtUtc" }),
       Object.freeze({ name: "status", keyPath: "status" }),
-      Object.freeze({ name: "localDayKey", keyPath: "localDayKey" }),
-      Object.freeze({ name: "coachPlanId", keyPath: "coachBinding.coachPlanId" }),
-    ],
+      Object.freeze({ name: "treatmentFamilyKey", keyPath: "treatment.treatmentFamilyKey" }),
+      Object.freeze({ name: "targetStatId", keyPath: "treatment.targetStatId" }),
+      Object.freeze({ name: "outcomeDomain", keyPath: "treatment.outcomeDomain" }),
+      Object.freeze({ name: "completedAt", keyPath: "treatment.completedAt" }),
+      Object.freeze({ name: "profileContextCompletedAt", keyPath: ["profileId", "contextId", "treatment.completedAt"] }),
+    ]),
   }),
-  reviewItems: Object.freeze({
-    keyPath: "reviewItemId",
-    indexes: [
+  treatmentResponseStates: Object.freeze({
+    keyPath: "treatmentResponseStateId",
+    indexes: Object.freeze([
       Object.freeze({ name: "profileId", keyPath: "profileId" }),
       Object.freeze({ name: "contextId", keyPath: "contextId" }),
-      Object.freeze({ name: "dueAtUtc", keyPath: "dueAtUtc" }),
-      Object.freeze({ name: "localDueDayKey", keyPath: "localDueDayKey" }),
-      Object.freeze({ name: "state", keyPath: "state" }),
+      Object.freeze({ name: "treatmentFamilyKey", keyPath: "treatmentFamilyKey" }),
+      Object.freeze({ name: "outcomeKey", keyPath: "outcomeKey" }),
+      Object.freeze({ name: "delayBucket", keyPath: "delayBucket" }),
+      Object.freeze({ name: "updatedAt", keyPath: "updatedAt" }),
+    ]),
+  }),
+  physicalTelemetryStats: Object.freeze({
+    keyPath: "physicalTelemetryStatId",
+    indexes: Object.freeze([
+      Object.freeze({ name: "profileId", keyPath: "profileId" }),
+      Object.freeze({ name: "contextId", keyPath: "contextId" }),
       Object.freeze({ name: "entityType", keyPath: "entityType" }),
-      Object.freeze({ name: "entityKey", keyPath: "entityKey" }),
-      Object.freeze({ name: "profileContextEntity", keyPath: ["profileId", "contextId", "entityType", "entityKey"], options: { unique: true } }),
-    ],
-  }),
-  customTexts: Object.freeze({
-    keyPath: "customTextId",
-    indexes: [
-      Object.freeze({ name: "profileId", keyPath: "profileId" }),
       Object.freeze({ name: "updatedAt", keyPath: "updatedAt" }),
-      Object.freeze({ name: "lastUsedAt", keyPath: "lastUsedAt" }),
-      Object.freeze({ name: "normalizedTitle", keyPath: "normalizedTitle" }),
-    ],
+      Object.freeze({ name: "profileContextEntityType", keyPath: ["profileId", "contextId", "entityType"] }),
+    ]),
   }),
-  presets: Object.freeze({
-    keyPath: "presetId",
-    indexes: [
+  physicalTelemetrySessions: Object.freeze({
+    keyPath: "sessionId",
+    indexes: Object.freeze([
       Object.freeze({ name: "profileId", keyPath: "profileId" }),
-      Object.freeze({ name: "experimentId", keyPath: "experimentId" }),
+      Object.freeze({ name: "contextId", keyPath: "contextId" }),
+      Object.freeze({ name: "status", keyPath: "status" }),
+      Object.freeze({ name: "completedAt", keyPath: "completedAt" }),
+      Object.freeze({ name: "appliedAt", keyPath: "appliedAt" }),
+      Object.freeze({ name: "profileCompletedAt", keyPath: ["profileId", "completedAt"] }),
+    ]),
+  }),
+  researchEnrollments: Object.freeze({
+    keyPath: "researchEnrollmentId",
+    indexes: Object.freeze([
+      Object.freeze({ name: "profileId", keyPath: "profileId" }),
+      Object.freeze({ name: "contextId", keyPath: "contextId" }),
+      Object.freeze({ name: "status", keyPath: "status" }),
+      Object.freeze({ name: "studyId", keyPath: "studyId" }),
+      Object.freeze({ name: "profileContextStudyVersion", keyPath: ["profileId", "contextId", "studyId", "studyVersion"], options: { unique: true } }),
       Object.freeze({ name: "updatedAt", keyPath: "updatedAt" }),
-    ],
+    ]),
   }),
-  activeSessionCheckpoints: Object.freeze({
-    keyPath: "profileId",
-    indexes: [
-      Object.freeze({ name: "sessionId", keyPath: "sessionId", options: { unique: true } }),
-      Object.freeze({ name: "expiresAt", keyPath: "expiresAt" }),
-    ],
+  researchAssignments: Object.freeze({
+    keyPath: "researchAssignmentId",
+    indexes: Object.freeze([
+      Object.freeze({ name: "researchEnrollmentId", keyPath: "researchEnrollmentId" }),
+      Object.freeze({ name: "profileId", keyPath: "profileId" }),
+      Object.freeze({ name: "contextId", keyPath: "contextId" }),
+      Object.freeze({ name: "status", keyPath: "status" }),
+      Object.freeze({ name: "targetStatId", keyPath: "target.statId" }),
+      Object.freeze({ name: "localDayKey", keyPath: "localDayKey" }),
+      Object.freeze({ name: "enrollmentSequence", keyPath: ["researchEnrollmentId", "assignmentIndex"], options: { unique: true } }),
+      Object.freeze({ name: "profileContextDay", keyPath: ["profileId", "contextId", "localDayKey"] }),
+      Object.freeze({ name: "createdAt", keyPath: "createdAt" }),
+    ]),
   }),
-  quarantine: Object.freeze({
-    keyPath: "quarantineId",
-    indexes: [
-      Object.freeze({ name: "sourceStore", keyPath: "sourceStore" }),
-      Object.freeze({ name: "detectedAt", keyPath: "detectedAt" }),
-    ],
+  researchAnalysisStates: Object.freeze({
+    keyPath: "researchAnalysisStateId",
+    indexes: Object.freeze([
+      Object.freeze({ name: "researchEnrollmentId", keyPath: "researchEnrollmentId", options: { unique: true } }),
+      Object.freeze({ name: "profileId", keyPath: "profileId" }),
+      Object.freeze({ name: "contextId", keyPath: "contextId" }),
+      Object.freeze({ name: "studyId", keyPath: "studyId" }),
+      Object.freeze({ name: "updatedAt", keyPath: "updatedAt" }),
+    ]),
   }),
 });
 
-export const PRACTICE_OBSOLETE_INDEXES = Object.freeze({ skillStats: Object.freeze(["profileEntity"]), reviewItems: Object.freeze(["profileEntity"]) });
+export const PRACTICE_OBSOLETE_INDEXES = Object.freeze({
+  ...PRACTICE_OBSOLETE_INDEXES_V31,
+});
+
 export const PRACTICE_STORE_NAMES = Object.freeze(Object.keys(PRACTICE_STORE_DEFINITIONS));
-export const ENTITY_TYPES = Object.freeze(["key", "bigram", "trigram", "word", "punctuation-transition", "number-pattern", "symbol-pattern"]);
-export const MASTERY_STATES = Object.freeze(["unmeasured", "needs-data", "weak", "developing", "stable", "strong", "mastered"]);
-export const CONFIDENCE_LEVELS = Object.freeze(["none", "low", "medium", "high"]);
-export const SESSION_STATUSES = Object.freeze(["completed", "abandoned", "interrupted", "invalid"]);
-export const COMPLETION_REASONS = Object.freeze(["time-complete", "content-complete", "word-target-complete", "manual-stop", "navigation-away", "refresh-interruption", "error"]);
-export const REVIEW_STATES = Object.freeze(["inactive", "active", "suspended"]);
-export const PRACTICE_INPUT_METHODS = Object.freeze(["unknown", "physical", "software"]);
-export const STORAGE_HEALTH_STATES = Object.freeze(["healthy", "degraded", "quota-warning", "quota-exceeded", "migration-warning", "recovery-required"]);
-export const ASSESSMENT_STATES = Object.freeze(["never-started", "incomplete", "complete", "stale"]);
-export const CHECKPOINT_PHASES = Object.freeze(["created", "ready", "active", "paused", "interrupted"]);
-export const LATENCY_HISTOGRAM_BOUNDS_MS = Object.freeze([50, 80, 120, 180, 260, 400, 650, Infinity]);
-export const QUOTA_RECOVERY_STEPS = Object.freeze(["expired-checkpoints", "excess-session-summaries", "stale-review-items", "old-coach-plans", "low-confidence-skill-stats", "old-quarantine"]);
+
+export const QUOTA_RECOVERY_STEPS = Object.freeze([
+  ...QUOTA_RECOVERY_STEPS_V31.filter((step) => step !== "low-confidence-skill-stats"),
+  "old-treatment-episodes",
+  ...(QUOTA_RECOVERY_STEPS_V31.includes("low-confidence-skill-stats") ? ["low-confidence-skill-stats"] : []),
+]);

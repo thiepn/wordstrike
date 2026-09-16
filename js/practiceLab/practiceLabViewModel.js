@@ -106,6 +106,7 @@ export function buildExperimentDetailViewModel({ route, registry, assessmentAvai
   if (!resolved) return Object.freeze({ kind: "not-found", title: "Experiment not found", description: "That Practice Lab experiment does not exist.", backLabel: "Back to Practice Lab" });
   const entry = resolved.catalogEntry;
   const base = {
+    experimentId: entry.id,
     title: entry.title, category: PRACTICE_CATEGORY_LABELS[entry.category], description: entry.description,
     longDescription: entry.longDescription, primarySkill: entry.primarySkill,
     duration: durationLabel(entry.estimatedDurationMinutes), difficulty: entry.difficulty,

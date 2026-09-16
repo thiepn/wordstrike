@@ -8,6 +8,822 @@
   "partition": "training",
   "items": [
     {
+      "contentId": "cnt_gc3_breadth_001_s000_0",
+      "familyId": "fam_gc3_breadth_001",
+      "sourceId": "ws-original-gc3-realtext-en-v1",
+      "language": "en",
+      "corpusVersion": 1,
+      "partition": "training",
+      "contentType": "passage",
+      "text": "The red boat sat by the shore. A boy saw it move in the wind. He ran to tell his dad, who came down the path and tied it to a post.",
+      "contentHash": "sha256-5e3b1413907775074e4e21890a8bce2b336e35ecd3b4e4ec627e377985b7bea2",
+      "reviewStatus": "approved",
+      "metadata": {
+        "tags": [
+          "training",
+          "wordstrike-original",
+          "breadth",
+          "segment:0"
+        ]
+      }
+    },
+    {
+      "contentId": "cnt_gc3_breadth_002_s000_9",
+      "familyId": "fam_gc3_breadth_002",
+      "sourceId": "ws-original-gc3-realtext-en-v1",
+      "language": "en",
+      "corpusVersion": 1,
+      "partition": "training",
+      "contentType": "passage",
+      "text": "We went out at dawn to see the sun. The air was cool and the grass was wet. I took a bag of food and my friend took a cup of tea.",
+      "contentHash": "sha256-185b8ebe2e9c0f75e3ff22626bda7e8e3f883eca17648cf86da7fe330cbd6aeb",
+      "reviewStatus": "approved",
+      "metadata": {
+        "tags": [
+          "training",
+          "wordstrike-original",
+          "breadth",
+          "segment:0"
+        ]
+      }
+    },
+    {
+      "contentId": "cnt_gc3_breadth_003_s000_11",
+      "familyId": "fam_gc3_breadth_003",
+      "sourceId": "ws-original-gc3-realtext-en-v1",
+      "language": "en",
+      "corpusVersion": 1,
+      "partition": "training",
+      "contentType": "passage",
+      "text": "A cat lay on the wall in the yard. It woke when the gate swung wide, then ran to the house and hid by the door.",
+      "contentHash": "sha256-1d631a61ee3c8fe66398ba39e418df7d189dc9d51f3597fd7e8d2e447cb1fa2c",
+      "reviewStatus": "approved",
+      "metadata": {
+        "tags": [
+          "training",
+          "wordstrike-original",
+          "breadth",
+          "segment:0"
+        ]
+      }
+    },
+    {
+      "contentId": "cnt_gc3_breadth_004_s000_22",
+      "familyId": "fam_gc3_breadth_004",
+      "sourceId": "ws-original-gc3-realtext-en-v1",
+      "language": "en",
+      "corpusVersion": 1,
+      "partition": "training",
+      "contentType": "passage",
+      "text": "She put the bread on a plate and cut it in two. We ate it with jam, then washed the cups and put them back on the shelf.",
+      "contentHash": "sha256-0639ef30a3fe4d8baedcd662df9ceb7cf1de591c1b08e9256f01ba0141bcd0d8",
+      "reviewStatus": "approved",
+      "metadata": {
+        "tags": [
+          "training",
+          "wordstrike-original",
+          "breadth",
+          "segment:0"
+        ]
+      }
+    },
+    {
+      "contentId": "cnt_gc3_breadth_005_s000_11",
+      "familyId": "fam_gc3_breadth_005",
+      "sourceId": "ws-original-gc3-realtext-en-v1",
+      "language": "en",
+      "corpusVersion": 1,
+      "partition": "training",
+      "contentType": "passage",
+      "text": "The bus was late, so we chose to walk. We took the short path by the park and got there just as the rain came down.",
+      "contentHash": "sha256-141d6c8881186802095bd7b89e614c6a393c4ec251bd793d744bd5720561b1be",
+      "reviewStatus": "approved",
+      "metadata": {
+        "tags": [
+          "training",
+          "wordstrike-original",
+          "breadth",
+          "segment:0"
+        ]
+      }
+    },
+    {
+      "contentId": "cnt_gc3_breadth_006_s000_23",
+      "familyId": "fam_gc3_breadth_006",
+      "sourceId": "ws-original-gc3-realtext-en-v1",
+      "language": "en",
+      "corpusVersion": 1,
+      "partition": "training",
+      "contentType": "passage",
+      "text": "He had a map but no pen. I gave him mine so he could mark the way to the lake and the best place to stop.",
+      "contentHash": "sha256-1110f96b05f1bd91fe10e7b63fe384bd63fa02c459b626e50ecf4cfc9ead6b39",
+      "reviewStatus": "approved",
+      "metadata": {
+        "tags": [
+          "training",
+          "wordstrike-original",
+          "breadth",
+          "segment:0"
+        ]
+      }
+    },
+    {
+      "contentId": "cnt_gc3_breadth_007_s000_18",
+      "familyId": "fam_gc3_breadth_007",
+      "sourceId": "ws-original-gc3-realtext-en-v1",
+      "language": "en",
+      "corpusVersion": 1,
+      "partition": "training",
+      "contentType": "passage",
+      "text": "The dog ran up the hill to find a stick. We sat on a rock and watched the clouds drift by while he ran back to us.",
+      "contentHash": "sha256-8b47a241f2107f878f165ad6e06f06217a459e01d08bf9dd4ddefac12fabf31e",
+      "reviewStatus": "approved",
+      "metadata": {
+        "tags": [
+          "training",
+          "wordstrike-original",
+          "breadth",
+          "segment:0"
+        ]
+      }
+    },
+    {
+      "contentId": "cnt_gc3_breadth_008_s000_8",
+      "familyId": "fam_gc3_breadth_008",
+      "sourceId": "ws-original-gc3-realtext-en-v1",
+      "language": "en",
+      "corpusVersion": 1,
+      "partition": "training",
+      "contentType": "passage",
+      "text": "A girl stood at the door with a small box. She said it was for us and asked if we could sign for it.",
+      "contentHash": "sha256-79ed3ec60c545d3722f83fa8ddf6fa2f3606d053da8c536b138fa69fdd92ad35",
+      "reviewStatus": "approved",
+      "metadata": {
+        "tags": [
+          "training",
+          "wordstrike-original",
+          "breadth",
+          "segment:0"
+        ]
+      }
+    },
+    {
+      "contentId": "cnt_gc3_breadth_009_s000_4",
+      "familyId": "fam_gc3_breadth_009",
+      "sourceId": "ws-original-gc3-realtext-en-v1",
+      "language": "en",
+      "corpusVersion": 1,
+      "partition": "training",
+      "contentType": "passage",
+      "text": "I saw a light in the hall and went to look. My son was there with a book and said he could not sleep.",
+      "contentHash": "sha256-4100249b1e1f72bfaaa42fc4b53f58b97bf62400b3aa1b6da5d71e3304f671a7",
+      "reviewStatus": "approved",
+      "metadata": {
+        "tags": [
+          "training",
+          "wordstrike-original",
+          "breadth",
+          "segment:0"
+        ]
+      }
+    },
+    {
+      "contentId": "cnt_gc3_breadth_010_s000_5",
+      "familyId": "fam_gc3_breadth_010",
+      "sourceId": "ws-original-gc3-realtext-en-v1",
+      "language": "en",
+      "corpusVersion": 1,
+      "partition": "training",
+      "contentType": "passage",
+      "text": "We left our bags in the room and went out for a meal. The town was still quiet and most shops were shut.",
+      "contentHash": "sha256-708262f7fabae29da09066f9ac7958e72e2a6ae26be66801b17c7f192f477a83",
+      "reviewStatus": "approved",
+      "metadata": {
+        "tags": [
+          "training",
+          "wordstrike-original",
+          "breadth",
+          "segment:0"
+        ]
+      }
+    },
+    {
+      "contentId": "cnt_gc3_breadth_011_s000_7",
+      "familyId": "fam_gc3_breadth_011",
+      "sourceId": "ws-original-gc3-realtext-en-v1",
+      "language": "en",
+      "corpusVersion": 1,
+      "partition": "training",
+      "contentType": "passage",
+      "text": "Dad took the old chair out to the shed. He said he would fix the leg and paint it blue when the wood was dry.",
+      "contentHash": "sha256-d4634fa2b965fc7f1689f52c66e372707a3da666c49a893e43b2790a66ea335e",
+      "reviewStatus": "approved",
+      "metadata": {
+        "tags": [
+          "training",
+          "wordstrike-original",
+          "breadth",
+          "segment:0"
+        ]
+      }
+    },
+    {
+      "contentId": "cnt_gc3_breadth_012_s000_28",
+      "familyId": "fam_gc3_breadth_012",
+      "sourceId": "ws-original-gc3-realtext-en-v1",
+      "language": "en",
+      "corpusVersion": 1,
+      "partition": "training",
+      "contentType": "passage",
+      "text": "They sat by the fire and told us how the trip had gone. It was a long way home, but they were glad to be back.",
+      "contentHash": "sha256-b2dfb90f8c51176710faae8096da6618bb6920318bedda6278177a5762c611cb",
+      "reviewStatus": "approved",
+      "metadata": {
+        "tags": [
+          "training",
+          "wordstrike-original",
+          "breadth",
+          "segment:0"
+        ]
+      }
+    },
+    {
+      "contentId": "cnt_gc3_breadth_013_s000_2",
+      "familyId": "fam_gc3_breadth_013",
+      "sourceId": "ws-original-gc3-realtext-en-v1",
+      "language": "en",
+      "corpusVersion": 1,
+      "partition": "training",
+      "contentType": "passage",
+      "text": "Interdisciplinary coordination requires unambiguous documentation, reproducible measurements, and independent verification of operational assumptions.",
+      "contentHash": "sha256-de022da871ebb60c19863b305fbe9935d9cf568befbc775773fb4ad5f5613f83",
+      "reviewStatus": "approved",
+      "metadata": {
+        "tags": [
+          "training",
+          "wordstrike-original",
+          "breadth",
+          "segment:0"
+        ]
+      }
+    },
+    {
+      "contentId": "cnt_gc3_breadth_014_s000_1",
+      "familyId": "fam_gc3_breadth_014",
+      "sourceId": "ws-original-gc3-realtext-en-v1",
+      "language": "en",
+      "corpusVersion": 1,
+      "partition": "training",
+      "contentType": "passage",
+      "text": "Photochemical decomposition accelerates when ultraviolet irradiation interacts with temperature-sensitive compounds under oxygen-rich conditions.",
+      "contentHash": "sha256-b7e77e436b1a9e89229771a00913e190ae121c2c51fa375e2da7b8801913f158",
+      "reviewStatus": "approved",
+      "metadata": {
+        "tags": [
+          "training",
+          "wordstrike-original",
+          "breadth",
+          "segment:0"
+        ]
+      }
+    },
+    {
+      "contentId": "cnt_gc3_breadth_015_s000_8",
+      "familyId": "fam_gc3_breadth_015",
+      "sourceId": "ws-original-gc3-realtext-en-v1",
+      "language": "en",
+      "corpusVersion": 1,
+      "partition": "training",
+      "contentType": "passage",
+      "text": "Microscopic crystallization patterns distinguish heterogeneous nucleation from homogeneous transformation in supersaturated experimental solutions.",
+      "contentHash": "sha256-d3815bdaf83fc2cf2894e07fe4b72794d820342a34d13b3bc3b674281610e1d6",
+      "reviewStatus": "approved",
+      "metadata": {
+        "tags": [
+          "training",
+          "wordstrike-original",
+          "breadth",
+          "segment:0"
+        ]
+      }
+    },
+    {
+      "contentId": "cnt_gc3_breadth_016_s000_14",
+      "familyId": "fam_gc3_breadth_016",
+      "sourceId": "ws-original-gc3-realtext-en-v1",
+      "language": "en",
+      "corpusVersion": 1,
+      "partition": "training",
+      "contentType": "passage",
+      "text": "Contemporary architectural conservation balances archaeological interpretation, structural reinforcement, and accessibility requirements.",
+      "contentHash": "sha256-d2825d7d1f149c0e8139959a02db983471e8d2ea0134457fb90d9366142b4443",
+      "reviewStatus": "approved",
+      "metadata": {
+        "tags": [
+          "training",
+          "wordstrike-original",
+          "breadth",
+          "segment:0"
+        ]
+      }
+    },
+    {
+      "contentId": "cnt_gc3_breadth_017_s000_19",
+      "familyId": "fam_gc3_breadth_017",
+      "sourceId": "ws-original-gc3-realtext-en-v1",
+      "language": "en",
+      "corpusVersion": 1,
+      "partition": "training",
+      "contentType": "passage",
+      "text": "Electromagnetic interference compromises measurement reproducibility unless instrumentation incorporates appropriate shielding and differential amplification.",
+      "contentHash": "sha256-a9ec899a74d4d8a3ca82434c77a2fd49a8199adf9725af4ec153cda8049d1fe7",
+      "reviewStatus": "approved",
+      "metadata": {
+        "tags": [
+          "training",
+          "wordstrike-original",
+          "breadth",
+          "segment:0"
+        ]
+      }
+    },
+    {
+      "contentId": "cnt_gc3_breadth_018_s000_8",
+      "familyId": "fam_gc3_breadth_018",
+      "sourceId": "ws-original-gc3-realtext-en-v1",
+      "language": "en",
+      "corpusVersion": 1,
+      "partition": "training",
+      "contentType": "passage",
+      "text": "Organizational decentralization redistributes administrative responsibility while preserving accountability through standardized evaluation procedures.",
+      "contentHash": "sha256-4dc6deee8008811893cb2a45c7547e73d34d0d8d39728344cc97509b296bdda1",
+      "reviewStatus": "approved",
+      "metadata": {
+        "tags": [
+          "training",
+          "wordstrike-original",
+          "breadth",
+          "segment:0"
+        ]
+      }
+    },
+    {
+      "contentId": "cnt_gc3_breadth_019_s000_14",
+      "familyId": "fam_gc3_breadth_019",
+      "sourceId": "ws-original-gc3-realtext-en-v1",
+      "language": "en",
+      "corpusVersion": 1,
+      "partition": "training",
+      "contentType": "passage",
+      "text": "Biogeographical distributions reflect evolutionary diversification, ecological specialization, and historical fragmentation of interconnected habitats.",
+      "contentHash": "sha256-88037451193154c9441ff7da8c64441bd2f25e7bdefb504a75bc74c77eadcbb9",
+      "reviewStatus": "approved",
+      "metadata": {
+        "tags": [
+          "training",
+          "wordstrike-original",
+          "breadth",
+          "segment:0"
+        ]
+      }
+    },
+    {
+      "contentId": "cnt_gc3_breadth_020_s000_5",
+      "familyId": "fam_gc3_breadth_020",
+      "sourceId": "ws-original-gc3-realtext-en-v1",
+      "language": "en",
+      "corpusVersion": 1,
+      "partition": "training",
+      "contentType": "passage",
+      "text": "Computational reconstruction combines probabilistic inference with geometrical constraints to estimate otherwise inaccessible anatomical characteristics.",
+      "contentHash": "sha256-3dd256830b1cd020a676c32522411cb24751bad70a79e451387a2f104853f0e6",
+      "reviewStatus": "approved",
+      "metadata": {
+        "tags": [
+          "training",
+          "wordstrike-original",
+          "breadth",
+          "segment:0"
+        ]
+      }
+    },
+    {
+      "contentId": "cnt_gc3_breadth_021_s000_9",
+      "familyId": "fam_gc3_breadth_021",
+      "sourceId": "ws-original-gc3-realtext-en-v1",
+      "language": "en",
+      "corpusVersion": 1,
+      "partition": "training",
+      "contentType": "passage",
+      "text": "Lexicographical classifications distinguish morphological derivation, semantic specialization, and sociolinguistic variation across documented communities.",
+      "contentHash": "sha256-d53f810737d3b39fe850cd64376539074e93a2b39d214c9304ada45a40eb3a7e",
+      "reviewStatus": "approved",
+      "metadata": {
+        "tags": [
+          "training",
+          "wordstrike-original",
+          "breadth",
+          "segment:0"
+        ]
+      }
+    },
+    {
+      "contentId": "cnt_gc3_breadth_022_s000_2",
+      "familyId": "fam_gc3_breadth_022",
+      "sourceId": "ws-original-gc3-realtext-en-v1",
+      "language": "en",
+      "corpusVersion": 1,
+      "partition": "training",
+      "contentType": "passage",
+      "text": "Hydrogeological investigations characterize subterranean permeability through repeated measurements of pressure differentials and contaminant concentrations.",
+      "contentHash": "sha256-f582dd02da0b57334e8e0bd734ecfe05d1971a5f2dbccbb7bbe3a6a856808845",
+      "reviewStatus": "approved",
+      "metadata": {
+        "tags": [
+          "training",
+          "wordstrike-original",
+          "breadth",
+          "segment:0"
+        ]
+      }
+    },
+    {
+      "contentId": "cnt_gc3_breadth_023_s000_11",
+      "familyId": "fam_gc3_breadth_023",
+      "sourceId": "ws-original-gc3-realtext-en-v1",
+      "language": "en",
+      "corpusVersion": 1,
+      "partition": "training",
+      "contentType": "passage",
+      "text": "Thermodynamic equilibrium constrains microscopic configurations without prescribing the trajectories of individual interacting constituents.",
+      "contentHash": "sha256-b2924f80a7537344420c112d7a99fa4a4b56c71e6c648e258d357f08c4a7cbd9",
+      "reviewStatus": "approved",
+      "metadata": {
+        "tags": [
+          "training",
+          "wordstrike-original",
+          "breadth",
+          "segment:0"
+        ]
+      }
+    },
+    {
+      "contentId": "cnt_gc3_breadth_024_s000_7",
+      "familyId": "fam_gc3_breadth_024",
+      "sourceId": "ws-original-gc3-realtext-en-v1",
+      "language": "en",
+      "corpusVersion": 1,
+      "partition": "training",
+      "contentType": "passage",
+      "text": "Astronomical spectroscopy identifies characteristic absorption signatures despite atmospheric distortion and instrumental calibration uncertainties.",
+      "contentHash": "sha256-ae8c330988dd170bab496c5b4e12ba7c8280966bf85c87bb9931c8e5680ff1d5",
+      "reviewStatus": "approved",
+      "metadata": {
+        "tags": [
+          "training",
+          "wordstrike-original",
+          "breadth",
+          "segment:0"
+        ]
+      }
+    },
+    {
+      "contentId": "cnt_gc3_realtext_001_s000_3",
+      "familyId": "fam_gc3_realtext_001",
+      "sourceId": "ws-original-gc3-realtext-en-v1",
+      "language": "en",
+      "corpusVersion": 1,
+      "partition": "training",
+      "contentType": "passage",
+      "text": "Lake Water Sampling is easiest to understand by spending time in a lakeside pier during a monthly visit and noticing how ordinary details support one another. Field labels draws attention first, while reed beds provides a quieter reference. People compare two positions, then clear the working area, because shared spaces work best when the next person can understand what happened. The work is practical rather than dramatic, and its quality depends on small decisions made in a sensible order.\n\nA second walk through the area changes the emphasis. Sample bottles may look different as light, weather, or use changes, whereas depth marks often reveals a slower pattern. Experienced workers inspect the next item before they measure a visible change. This habit keeps attention on evidence instead of guesswork. It also leaves a clear trail for someone who arrives later and needs to understand the same scene without a long explanation.\n\nCoordination matters even when each task is small. One person can return a tool while another can review the sequence; neither action is impressive alone, but together they prevent avoidable delay. Secchi disks serves as a useful checkpoint, especially when cool boxes changes unexpectedly. Good practice favors clear signals, enough working space, and time to correct a minor problem before it becomes a larger one.\n\nThe setting becomes more informative when observations are compared rather than isolated. Instead of rushing toward a conclusion, people mark the result, leave the route clear, and check the reference in a sequence that leaves room for review. This works because small changes are easier to judge when the reference stays fixed. Over time, repeated records form a dependable picture of what is normal, what is seasonal, and what deserves a closer look.\n\nThere is also value in leaving the place ready for the next cycle. Reed beds should be returned to a clear state, depth marks should remain easy to inspect, and the final note should describe what actually changed. A quiet routine gives people time to notice an error before it spreads. That principle sounds modest, but it makes routine work easier to repeat and easier to trust.",
+      "contentHash": "sha256-6b6fde6554325b40780c0eea0c435231e0215044f53ef55b58ac3a7ae24c560f",
+      "reviewStatus": "approved",
+      "metadata": {
+        "tags": [
+          "training",
+          "real-text",
+          "gc3",
+          "wordstrike-original",
+          "segment:0"
+        ]
+      }
+    },
+    {
+      "contentId": "cnt_gc3_realtext_002_s000_1",
+      "familyId": "fam_gc3_realtext_002",
+      "sourceId": "ws-original-gc3-realtext-en-v1",
+      "language": "en",
+      "corpusVersion": 1,
+      "partition": "training",
+      "contentType": "passage",
+      "text": "Bookbinding Workshop is easiest to understand by spending time in a craft room binding notebooks by hand and noticing how ordinary details support one another. Press boards draws attention first, while folded signatures provides a quieter reference. People clear the working area, then inspect the next item, because simple tools become reliable when they are used in the same way each time. The work is practical rather than dramatic, and its quality depends on small decisions made in a sensible order.\n\nA second walk through the area changes the emphasis. Linen thread may look different as light, weather, or use changes, whereas bone folders often reveals a slower pattern. Experienced workers measure a visible change before they return a tool. This habit keeps attention on evidence instead of guesswork. It also leaves a clear trail for someone who arrives later and needs to understand the same scene without a long explanation.\n\nCoordination matters even when each task is small. One person can review the sequence while another can mark the result; neither action is impressive alone, but together they prevent avoidable delay. Cutting mats serves as a useful checkpoint, especially when cover boards changes unexpectedly. Good practice favors clear signals, enough working space, and time to correct a minor problem before it becomes a larger one.\n\nThe setting becomes more informative when observations are compared rather than isolated. Instead of rushing toward a conclusion, people leave the route clear, check the reference, and record a short note in a sequence that leaves room for review. This works because consistent notes are more useful than vivid memory after several days. Over time, repeated records form a dependable picture of what is normal, what is seasonal, and what deserves a closer look.\n\nThere is also value in leaving the place ready for the next cycle. Folded signatures should be returned to a clear state, bone folders should remain easy to inspect, and the final note should describe what actually changed. Clear labels reduce repeated questions without making the work rigid. That principle sounds modest, but it makes routine work easier to repeat and easier to trust.",
+      "contentHash": "sha256-43cfecaf3296bcc5ac9b3d3ef367768b13c8413033047ba60c5e36545cd4c57f",
+      "reviewStatus": "approved",
+      "metadata": {
+        "tags": [
+          "training",
+          "real-text",
+          "gc3",
+          "wordstrike-original",
+          "segment:0"
+        ]
+      }
+    },
+    {
+      "contentId": "cnt_gc3_realtext_003_s000_3",
+      "familyId": "fam_gc3_realtext_003",
+      "sourceId": "ws-original-gc3-realtext-en-v1",
+      "language": "en",
+      "corpusVersion": 1,
+      "partition": "training",
+      "contentType": "passage",
+      "text": "Bus Depot Dispatch is easiest to understand by spending time in a bus depot before the morning peak and noticing how ordinary details support one another. Route boards draws attention first, while vehicle bays provides a quieter reference. People inspect the next item, then measure a visible change, because small changes are easier to judge when the reference stays fixed. The work is practical rather than dramatic, and its quality depends on small decisions made in a sensible order.\n\nA second walk through the area changes the emphasis. Driver packets may look different as light, weather, or use changes, whereas charging points often reveals a slower pattern. Experienced workers return a tool before they review the sequence. This habit keeps attention on evidence instead of guesswork. It also leaves a clear trail for someone who arrives later and needs to understand the same scene without a long explanation.\n\nCoordination matters even when each task is small. One person can mark the result while another can leave the route clear; neither action is impressive alone, but together they prevent avoidable delay. Inspection cones serves as a useful checkpoint, especially when departure clocks changes unexpectedly. Good practice favors clear signals, enough working space, and time to correct a minor problem before it becomes a larger one.\n\nThe setting becomes more informative when observations are compared rather than isolated. Instead of rushing toward a conclusion, people check the reference, record a short note, and compare two positions in a sequence that leaves room for review. This works because a quiet routine gives people time to notice an error before it spreads. Over time, repeated records form a dependable picture of what is normal, what is seasonal, and what deserves a closer look.\n\nThere is also value in leaving the place ready for the next cycle. Vehicle bays should be returned to a clear state, charging points should remain easy to inspect, and the final note should describe what actually changed. Shared spaces work best when the next person can understand what happened. That principle sounds modest, but it makes routine work easier to repeat and easier to trust.",
+      "contentHash": "sha256-fd3356ed0f4d570b126133c503651179763a73a91a01b9c606c54a48f8caa8e6",
+      "reviewStatus": "approved",
+      "metadata": {
+        "tags": [
+          "training",
+          "real-text",
+          "gc3",
+          "wordstrike-original",
+          "segment:0"
+        ]
+      }
+    },
+    {
+      "contentId": "cnt_gc3_realtext_004_s000_5",
+      "familyId": "fam_gc3_realtext_004",
+      "sourceId": "ws-original-gc3-realtext-en-v1",
+      "language": "en",
+      "corpusVersion": 1,
+      "partition": "training",
+      "contentType": "passage",
+      "text": "Public Fountain Survey is easiest to understand by spending time in a civic square with a restored fountain and noticing how ordinary details support one another. Basin tiles draws attention first, while pump access provides a quieter reference. People measure a visible change, then return a tool, because consistent notes are more useful than vivid memory after several days. The work is practical rather than dramatic, and its quality depends on small decisions made in a sensible order.\n\nA second walk through the area changes the emphasis. Drain covers may look different as light, weather, or use changes, whereas stone carvings often reveals a slower pattern. Experienced workers review the sequence before they mark the result. This habit keeps attention on evidence instead of guesswork. It also leaves a clear trail for someone who arrives later and needs to understand the same scene without a long explanation.\n\nCoordination matters even when each task is small. One person can leave the route clear while another can check the reference; neither action is impressive alone, but together they prevent avoidable delay. Maintenance hatches serves as a useful checkpoint, especially when water jets changes unexpectedly. Good practice favors clear signals, enough working space, and time to correct a minor problem before it becomes a larger one.\n\nThe setting becomes more informative when observations are compared rather than isolated. Instead of rushing toward a conclusion, people record a short note, compare two positions, and clear the working area in a sequence that leaves room for review. This works because clear labels reduce repeated questions without making the work rigid. Over time, repeated records form a dependable picture of what is normal, what is seasonal, and what deserves a closer look.\n\nThere is also value in leaving the place ready for the next cycle. Pump access should be returned to a clear state, stone carvings should remain easy to inspect, and the final note should describe what actually changed. Simple tools become reliable when they are used in the same way each time. That principle sounds modest, but it makes routine work easier to repeat and easier to trust.",
+      "contentHash": "sha256-99834cdd71b5176d8e76d4e34b72791e9eaa7f595b40388269e76c7a2f6f44d9",
+      "reviewStatus": "approved",
+      "metadata": {
+        "tags": [
+          "training",
+          "real-text",
+          "gc3",
+          "wordstrike-original",
+          "segment:0"
+        ]
+      }
+    },
+    {
+      "contentId": "cnt_gc3_realtext_005_s000_3",
+      "familyId": "fam_gc3_realtext_005",
+      "sourceId": "ws-original-gc3-realtext-en-v1",
+      "language": "en",
+      "corpusVersion": 1,
+      "partition": "training",
+      "contentType": "passage",
+      "text": "Hill Farm Water Trough is easiest to understand by spending time in a hillside farm during a dry week and noticing how ordinary details support one another. Grass lanes draws attention first, while stone walls provides a quieter reference. People return a tool, then review the sequence, because a quiet routine gives people time to notice an error before it spreads. The work is practical rather than dramatic, and its quality depends on small decisions made in a sensible order.\n\nA second walk through the area changes the emphasis. Water pipes may look different as light, weather, or use changes, whereas storage tanks often reveals a slower pattern. Experienced workers mark the result before they leave the route clear. This habit keeps attention on evidence instead of guesswork. It also leaves a clear trail for someone who arrives later and needs to understand the same scene without a long explanation.\n\nCoordination matters even when each task is small. One person can check the reference while another can record a short note; neither action is impressive alone, but together they prevent avoidable delay. Trough valves serves as a useful checkpoint, especially when fence posts changes unexpectedly. Good practice favors clear signals, enough working space, and time to correct a minor problem before it becomes a larger one.\n\nThe setting becomes more informative when observations are compared rather than isolated. Instead of rushing toward a conclusion, people compare two positions, clear the working area, and inspect the next item in a sequence that leaves room for review. This works because shared spaces work best when the next person can understand what happened. Over time, repeated records form a dependable picture of what is normal, what is seasonal, and what deserves a closer look.\n\nThere is also value in leaving the place ready for the next cycle. Stone walls should be returned to a clear state, storage tanks should remain easy to inspect, and the final note should describe what actually changed. Small changes are easier to judge when the reference stays fixed. That principle sounds modest, but it makes routine work easier to repeat and easier to trust.",
+      "contentHash": "sha256-83800cfffd0fb1c7ccc99a9f496da22693de4e2cd8c62b7385d2dc1fce12a749",
+      "reviewStatus": "approved",
+      "metadata": {
+        "tags": [
+          "training",
+          "real-text",
+          "gc3",
+          "wordstrike-original",
+          "segment:0"
+        ]
+      }
+    },
+    {
+      "contentId": "cnt_gc3_realtext_006_s000_1",
+      "familyId": "fam_gc3_realtext_006",
+      "sourceId": "ws-original-gc3-realtext-en-v1",
+      "language": "en",
+      "corpusVersion": 1,
+      "partition": "training",
+      "contentType": "passage",
+      "text": "Theater Stage Changeover is easiest to understand by spending time in a community theater between rehearsal and a show and noticing how ordinary details support one another. Light cues draws attention first, while cable covers provides a quieter reference. People review the sequence, then mark the result, because clear labels reduce repeated questions without making the work rigid. The work is practical rather than dramatic, and its quality depends on small decisions made in a sensible order.\n\nA second walk through the area changes the emphasis. Call sheets may look different as light, weather, or use changes, whereas curtains often reveals a slower pattern. Experienced workers leave the route clear before they check the reference. This habit keeps attention on evidence instead of guesswork. It also leaves a clear trail for someone who arrives later and needs to understand the same scene without a long explanation.\n\nCoordination matters even when each task is small. One person can record a short note while another can compare two positions; neither action is impressive alone, but together they prevent avoidable delay. Stage marks serves as a useful checkpoint, especially when prop tables changes unexpectedly. Good practice favors clear signals, enough working space, and time to correct a minor problem before it becomes a larger one.\n\nThe setting becomes more informative when observations are compared rather than isolated. Instead of rushing toward a conclusion, people clear the working area, inspect the next item, and measure a visible change in a sequence that leaves room for review. This works because simple tools become reliable when they are used in the same way each time. Over time, repeated records form a dependable picture of what is normal, what is seasonal, and what deserves a closer look.\n\nThere is also value in leaving the place ready for the next cycle. Cable covers should be returned to a clear state, curtains should remain easy to inspect, and the final note should describe what actually changed. Consistent notes are more useful than vivid memory after several days. That principle sounds modest, but it makes routine work easier to repeat and easier to trust.",
+      "contentHash": "sha256-0f000a06c9eb64d3be493aa55f27976196e805f0e48753ce90f11e5c85fac69a",
+      "reviewStatus": "approved",
+      "metadata": {
+        "tags": [
+          "training",
+          "real-text",
+          "gc3",
+          "wordstrike-original",
+          "segment:0"
+        ]
+      }
+    },
+    {
+      "contentId": "cnt_gc3_realtext_007_s000_3",
+      "familyId": "fam_gc3_realtext_007",
+      "sourceId": "ws-original-gc3-realtext-en-v1",
+      "language": "en",
+      "corpusVersion": 1,
+      "partition": "training",
+      "contentType": "passage",
+      "text": "Wetland Boardwalk Survey is easiest to understand by spending time in a timber boardwalk crossing a wetland and noticing how ordinary details support one another. Depth posts draws attention first, while trail signs provides a quieter reference. People mark the result, then leave the route clear, because shared spaces work best when the next person can understand what happened. The work is practical rather than dramatic, and its quality depends on small decisions made in a sensible order.\n\nA second walk through the area changes the emphasis. Reed beds may look different as light, weather, or use changes, whereas water channels often reveals a slower pattern. Experienced workers check the reference before they record a short note. This habit keeps attention on evidence instead of guesswork. It also leaves a clear trail for someone who arrives later and needs to understand the same scene without a long explanation.\n\nCoordination matters even when each task is small. One person can compare two positions while another can clear the working area; neither action is impressive alone, but together they prevent avoidable delay. Board planks serves as a useful checkpoint, especially when viewing screens changes unexpectedly. Good practice favors clear signals, enough working space, and time to correct a minor problem before it becomes a larger one.\n\nThe setting becomes more informative when observations are compared rather than isolated. Instead of rushing toward a conclusion, people inspect the next item, measure a visible change, and return a tool in a sequence that leaves room for review. This works because small changes are easier to judge when the reference stays fixed. Over time, repeated records form a dependable picture of what is normal, what is seasonal, and what deserves a closer look.\n\nThere is also value in leaving the place ready for the next cycle. Trail signs should be returned to a clear state, water channels should remain easy to inspect, and the final note should describe what actually changed. A quiet routine gives people time to notice an error before it spreads. That principle sounds modest, but it makes routine work easier to repeat and easier to trust.",
+      "contentHash": "sha256-b848ec548af76c7e520da80fbb63dfa370eb1f54f4135cd82d8a1efe0cb407b2",
+      "reviewStatus": "approved",
+      "metadata": {
+        "tags": [
+          "training",
+          "real-text",
+          "gc3",
+          "wordstrike-original",
+          "segment:0"
+        ]
+      }
+    },
+    {
+      "contentId": "cnt_gc3_realtext_008_s000_34",
+      "familyId": "fam_gc3_realtext_008",
+      "sourceId": "ws-original-gc3-realtext-en-v1",
+      "language": "en",
+      "corpusVersion": 1,
+      "partition": "training",
+      "contentType": "passage",
+      "text": "Clock Repair Desk is easiest to understand by spending time in a repair bench for mechanical clocks and noticing how ordinary details support one another. Parts labels draws attention first, while gear trays provides a quieter reference. People leave the route clear, then check the reference, because simple tools become reliable when they are used in the same way each time. The work is practical rather than dramatic, and its quality depends on small decisions made in a sensible order.\n\nA second walk through the area changes the emphasis. Spring barrels may look different as light, weather, or use changes, whereas small screws often reveals a slower pattern. Experienced workers record a short note before they compare two positions. This habit keeps attention on evidence instead of guesswork. It also leaves a clear trail for someone who arrives later and needs to understand the same scene without a long explanation.\n\nCoordination matters even when each task is small. One person can clear the working area while another can inspect the next item; neither action is impressive alone, but together they prevent avoidable delay. Brass plates serves as a useful checkpoint, especially when oil cups changes unexpectedly. Good practice favors clear signals, enough working space, and time to correct a minor problem before it becomes a larger one.\n\nThe setting becomes more informative when observations are compared rather than isolated. Instead of rushing toward a conclusion, people measure a visible change, return a tool, and review the sequence in a sequence that leaves room for review. This works because consistent notes are more useful than vivid memory after several days. Over time, repeated records form a dependable picture of what is normal, what is seasonal, and what deserves a closer look.\n\nThere is also value in leaving the place ready for the next cycle. Gear trays should be returned to a clear state, small screws should remain easy to inspect, and the final note should describe what actually changed. Clear labels reduce repeated questions without making the work rigid. That principle sounds modest, but it makes routine work easier to repeat and easier to trust.",
+      "contentHash": "sha256-e878577c0d761d1d83ded79bfe433e37decbaf8a5ed5c5716b198d3de3dd524f",
+      "reviewStatus": "approved",
+      "metadata": {
+        "tags": [
+          "training",
+          "real-text",
+          "gc3",
+          "wordstrike-original",
+          "segment:0"
+        ]
+      }
+    },
+    {
+      "contentId": "cnt_gc3_realtext_009_s000_3",
+      "familyId": "fam_gc3_realtext_009",
+      "sourceId": "ws-original-gc3-realtext-en-v1",
+      "language": "en",
+      "corpusVersion": 1,
+      "partition": "training",
+      "contentType": "passage",
+      "text": "Orchard Harvest Route is easiest to understand by spending time in a mixed orchard during early autumn and noticing how ordinary details support one another. Apple crates draws attention first, while pear rows provides a quieter reference. People check the reference, then record a short note, because small changes are easier to judge when the reference stays fixed. The work is practical rather than dramatic, and its quality depends on small decisions made in a sensible order.\n\nA second walk through the area changes the emphasis. Ladder feet may look different as light, weather, or use changes, whereas grass lanes often reveals a slower pattern. Experienced workers compare two positions before they clear the working area. This habit keeps attention on evidence instead of guesswork. It also leaves a clear trail for someone who arrives later and needs to understand the same scene without a long explanation.\n\nCoordination matters even when each task is small. One person can inspect the next item while another can measure a visible change; neither action is impressive alone, but together they prevent avoidable delay. Tree tags serves as a useful checkpoint, especially when packing notes changes unexpectedly. Good practice favors clear signals, enough working space, and time to correct a minor problem before it becomes a larger one.\n\nThe setting becomes more informative when observations are compared rather than isolated. Instead of rushing toward a conclusion, people return a tool, review the sequence, and mark the result in a sequence that leaves room for review. This works because a quiet routine gives people time to notice an error before it spreads. Over time, repeated records form a dependable picture of what is normal, what is seasonal, and what deserves a closer look.\n\nThere is also value in leaving the place ready for the next cycle. Pear rows should be returned to a clear state, grass lanes should remain easy to inspect, and the final note should describe what actually changed. Shared spaces work best when the next person can understand what happened. That principle sounds modest, but it makes routine work easier to repeat and easier to trust.",
+      "contentHash": "sha256-bd5b386ac6cb3020f40fab11ab4a497e09e90848c06e87169f3714f44ca4eb7e",
+      "reviewStatus": "approved",
+      "metadata": {
+        "tags": [
+          "training",
+          "real-text",
+          "gc3",
+          "wordstrike-original",
+          "segment:0"
+        ]
+      }
+    },
+    {
+      "contentId": "cnt_gc3_realtext_010_s000_22",
+      "familyId": "fam_gc3_realtext_010",
+      "sourceId": "ws-original-gc3-realtext-en-v1",
+      "language": "en",
+      "corpusVersion": 1,
+      "partition": "training",
+      "contentType": "passage",
+      "text": "Aquarium Service Morning is easiest to understand by spending time in an aquarium before visitors arrive and noticing how ordinary details support one another. Viewing glass draws attention first, while feed bins provides a quieter reference. People record a short note, then compare two positions, because consistent notes are more useful than vivid memory after several days. The work is practical rather than dramatic, and its quality depends on small decisions made in a sensible order.\n\nA second walk through the area changes the emphasis. Water tests may look different as light, weather, or use changes, whereas tank lights often reveals a slower pattern. Experienced workers clear the working area before they inspect the next item. This habit keeps attention on evidence instead of guesswork. It also leaves a clear trail for someone who arrives later and needs to understand the same scene without a long explanation.\n\nCoordination matters even when each task is small. One person can measure a visible change while another can return a tool; neither action is impressive alone, but together they prevent avoidable delay. Backup pumps serves as a useful checkpoint, especially when filter gauges changes unexpectedly. Good practice favors clear signals, enough working space, and time to correct a minor problem before it becomes a larger one.\n\nThe setting becomes more informative when observations are compared rather than isolated. Instead of rushing toward a conclusion, people review the sequence, mark the result, and leave the route clear in a sequence that leaves room for review. This works because clear labels reduce repeated questions without making the work rigid. Over time, repeated records form a dependable picture of what is normal, what is seasonal, and what deserves a closer look.\n\nThere is also value in leaving the place ready for the next cycle. Feed bins should be returned to a clear state, tank lights should remain easy to inspect, and the final note should describe what actually changed. Simple tools become reliable when they are used in the same way each time. That principle sounds modest, but it makes routine work easier to repeat and easier to trust.",
+      "contentHash": "sha256-c52db1b2f8ae95a19d7e3d6d82a113f1a34a61cf1ad74e2a7652187d1db3b28a",
+      "reviewStatus": "approved",
+      "metadata": {
+        "tags": [
+          "training",
+          "real-text",
+          "gc3",
+          "wordstrike-original",
+          "segment:0"
+        ]
+      }
+    },
+    {
+      "contentId": "cnt_gc3_realtext_011_s000_0",
+      "familyId": "fam_gc3_realtext_011",
+      "sourceId": "ws-original-gc3-realtext-en-v1",
+      "language": "en",
+      "corpusVersion": 1,
+      "partition": "training",
+      "contentType": "passage",
+      "text": "Stone Mason Yard is easiest to understand by spending time in an outdoor yard preparing cut stone and noticing how ordinary details support one another. Wood templates draws attention first, while dust sheets provides a quieter reference. People compare two positions, then clear the working area, because a quiet routine gives people time to notice an error before it spreads. The work is practical rather than dramatic, and its quality depends on small decisions made in a sensible order.\n\nA second walk through the area changes the emphasis. Chisels may look different as light, weather, or use changes, whereas lifting straps often reveals a slower pattern. Experienced workers inspect the next item before they measure a visible change. This habit keeps attention on evidence instead of guesswork. It also leaves a clear trail for someone who arrives later and needs to understand the same scene without a long explanation.\n\nCoordination matters even when each task is small. One person can return a tool while another can review the sequence; neither action is impressive alone, but together they prevent avoidable delay. Stone blocks serves as a useful checkpoint, especially when measuring tapes changes unexpectedly. Good practice favors clear signals, enough working space, and time to correct a minor problem before it becomes a larger one.\n\nThe setting becomes more informative when observations are compared rather than isolated. Instead of rushing toward a conclusion, people mark the result, leave the route clear, and check the reference in a sequence that leaves room for review. This works because shared spaces work best when the next person can understand what happened. Over time, repeated records form a dependable picture of what is normal, what is seasonal, and what deserves a closer look.\n\nThere is also value in leaving the place ready for the next cycle. Dust sheets should be returned to a clear state, lifting straps should remain easy to inspect, and the final note should describe what actually changed. Small changes are easier to judge when the reference stays fixed. That principle sounds modest, but it makes routine work easier to repeat and easier to trust.",
+      "contentHash": "sha256-897aeb7d5406b1b1f8ca88b183a51a8fce870561cfa206369162c3c06abfa24b",
+      "reviewStatus": "approved",
+      "metadata": {
+        "tags": [
+          "training",
+          "real-text",
+          "gc3",
+          "wordstrike-original",
+          "segment:0"
+        ]
+      }
+    },
+    {
+      "contentId": "cnt_gc3_realtext_012_s000_26",
+      "familyId": "fam_gc3_realtext_012",
+      "sourceId": "ws-original-gc3-realtext-en-v1",
+      "language": "en",
+      "corpusVersion": 1,
+      "partition": "training",
+      "contentType": "passage",
+      "text": "Forest Trail Marking is easiest to understand by spending time in a woodland trail where markers are renewed and noticing how ordinary details support one another. Stream crossings draws attention first, while map posts provides a quieter reference. People clear the working area, then inspect the next item, because clear labels reduce repeated questions without making the work rigid. The work is practical rather than dramatic, and its quality depends on small decisions made in a sensible order.\n\nA second walk through the area changes the emphasis. Wooden bridges may look different as light, weather, or use changes, whereas painted blazes often reveals a slower pattern. Experienced workers measure a visible change before they return a tool. This habit keeps attention on evidence instead of guesswork. It also leaves a clear trail for someone who arrives later and needs to understand the same scene without a long explanation.\n\nCoordination matters even when each task is small. One person can review the sequence while another can mark the result; neither action is impressive alone, but together they prevent avoidable delay. Path forks serves as a useful checkpoint, especially when fallen branches changes unexpectedly. Good practice favors clear signals, enough working space, and time to correct a minor problem before it becomes a larger one.\n\nThe setting becomes more informative when observations are compared rather than isolated. Instead of rushing toward a conclusion, people leave the route clear, check the reference, and record a short note in a sequence that leaves room for review. This works because simple tools become reliable when they are used in the same way each time. Over time, repeated records form a dependable picture of what is normal, what is seasonal, and what deserves a closer look.\n\nThere is also value in leaving the place ready for the next cycle. Map posts should be returned to a clear state, painted blazes should remain easy to inspect, and the final note should describe what actually changed. Consistent notes are more useful than vivid memory after several days. That principle sounds modest, but it makes routine work easier to repeat and easier to trust.",
+      "contentHash": "sha256-42b8bbd4944ab1683146d038df5510e23922d853b174ceb3c265bef82d6cce4c",
+      "reviewStatus": "approved",
+      "metadata": {
+        "tags": [
+          "training",
+          "real-text",
+          "gc3",
+          "wordstrike-original",
+          "segment:0"
+        ]
+      }
+    },
+    {
+      "contentId": "cnt_gc3_realtext_013_s000_8",
+      "familyId": "fam_gc3_realtext_013",
+      "sourceId": "ws-original-gc3-realtext-en-v1",
+      "language": "en",
+      "corpusVersion": 1,
+      "partition": "training",
+      "contentType": "passage",
+      "text": "Cafe Opening Routine is easiest to understand by spending time in a small cafe preparing for customers and noticing how ordinary details support one another. Pastry trays draws attention first, while window blinds provides a quieter reference. People inspect the next item, then measure a visible change, because shared spaces work best when the next person can understand what happened. The work is practical rather than dramatic, and its quality depends on small decisions made in a sensible order.\n\nA second walk through the area changes the emphasis. Coffee grinders may look different as light, weather, or use changes, whereas water pitchers often reveals a slower pattern. Experienced workers return a tool before they review the sequence. This habit keeps attention on evidence instead of guesswork. It also leaves a clear trail for someone who arrives later and needs to understand the same scene without a long explanation.\n\nCoordination matters even when each task is small. One person can mark the result while another can leave the route clear; neither action is impressive alone, but together they prevent avoidable delay. Menu boards serves as a useful checkpoint, especially when clean cups changes unexpectedly. Good practice favors clear signals, enough working space, and time to correct a minor problem before it becomes a larger one.\n\nThe setting becomes more informative when observations are compared rather than isolated. Instead of rushing toward a conclusion, people check the reference, record a short note, and compare two positions in a sequence that leaves room for review. This works because small changes are easier to judge when the reference stays fixed. Over time, repeated records form a dependable picture of what is normal, what is seasonal, and what deserves a closer look.\n\nThere is also value in leaving the place ready for the next cycle. Window blinds should be returned to a clear state, water pitchers should remain easy to inspect, and the final note should describe what actually changed. A quiet routine gives people time to notice an error before it spreads. That principle sounds modest, but it makes routine work easier to repeat and easier to trust.",
+      "contentHash": "sha256-edf328d9a8bab6ffa02ce06cc190a6996362d57730a3114fed2cf58b2b1faf13",
+      "reviewStatus": "approved",
+      "metadata": {
+        "tags": [
+          "training",
+          "real-text",
+          "gc3",
+          "wordstrike-original",
+          "segment:0"
+        ]
+      }
+    },
+    {
+      "contentId": "cnt_gc3_realtext_014_s000_2",
+      "familyId": "fam_gc3_realtext_014",
+      "sourceId": "ws-original-gc3-realtext-en-v1",
+      "language": "en",
+      "corpusVersion": 1,
+      "partition": "training",
+      "contentType": "passage",
+      "text": "Workshop Tool Library is easiest to understand by spending time in a cooperative tool library on inventory day and noticing how ordinary details support one another. Return carts draws attention first, while drill cases provides a quieter reference. People measure a visible change, then return a tool, because simple tools become reliable when they are used in the same way each time. The work is practical rather than dramatic, and its quality depends on small decisions made in a sensible order.\n\nA second walk through the area changes the emphasis. Hand saws may look different as light, weather, or use changes, whereas loan tags often reveals a slower pattern. Experienced workers review the sequence before they mark the result. This habit keeps attention on evidence instead of guesswork. It also leaves a clear trail for someone who arrives later and needs to understand the same scene without a long explanation.\n\nCoordination matters even when each task is small. One person can leave the route clear while another can check the reference; neither action is impressive alone, but together they prevent avoidable delay. Storage hooks serves as a useful checkpoint, especially when charging shelves changes unexpectedly. Good practice favors clear signals, enough working space, and time to correct a minor problem before it becomes a larger one.\n\nThe setting becomes more informative when observations are compared rather than isolated. Instead of rushing toward a conclusion, people record a short note, compare two positions, and clear the working area in a sequence that leaves room for review. This works because consistent notes are more useful than vivid memory after several days. Over time, repeated records form a dependable picture of what is normal, what is seasonal, and what deserves a closer look.\n\nThere is also value in leaving the place ready for the next cycle. Drill cases should be returned to a clear state, loan tags should remain easy to inspect, and the final note should describe what actually changed. Clear labels reduce repeated questions without making the work rigid. That principle sounds modest, but it makes routine work easier to repeat and easier to trust.",
+      "contentHash": "sha256-ed12eaaec6330a7224e598655787e7819fcd9bc0e1f457487be94b2952ddcb1e",
+      "reviewStatus": "approved",
+      "metadata": {
+        "tags": [
+          "training",
+          "real-text",
+          "gc3",
+          "wordstrike-original",
+          "segment:0"
+        ]
+      }
+    },
+    {
+      "contentId": "cnt_gc3_realtext_015_s000_8",
+      "familyId": "fam_gc3_realtext_015",
+      "sourceId": "ws-original-gc3-realtext-en-v1",
+      "language": "en",
+      "corpusVersion": 1,
+      "partition": "training",
+      "contentType": "passage",
+      "text": "Seaside Weather Station is easiest to understand by spending time in a weather station above a headland and noticing how ordinary details support one another. Wind cups draws attention first, while rain gauges provides a quieter reference. People return a tool, then review the sequence, because small changes are easier to judge when the reference stays fixed. The work is practical rather than dramatic, and its quality depends on small decisions made in a sensible order.\n\nA second walk through the area changes the emphasis. Temperature screens may look different as light, weather, or use changes, whereas data cables often reveals a slower pattern. Experienced workers mark the result before they leave the route clear. This habit keeps attention on evidence instead of guesswork. It also leaves a clear trail for someone who arrives later and needs to understand the same scene without a long explanation.\n\nCoordination matters even when each task is small. One person can check the reference while another can record a short note; neither action is impressive alone, but together they prevent avoidable delay. Cloud charts serves as a useful checkpoint, especially when service boxes changes unexpectedly. Good practice favors clear signals, enough working space, and time to correct a minor problem before it becomes a larger one.\n\nThe setting becomes more informative when observations are compared rather than isolated. Instead of rushing toward a conclusion, people compare two positions, clear the working area, and inspect the next item in a sequence that leaves room for review. This works because a quiet routine gives people time to notice an error before it spreads. Over time, repeated records form a dependable picture of what is normal, what is seasonal, and what deserves a closer look.\n\nThere is also value in leaving the place ready for the next cycle. Rain gauges should be returned to a clear state, data cables should remain easy to inspect, and the final note should describe what actually changed. Shared spaces work best when the next person can understand what happened. That principle sounds modest, but it makes routine work easier to repeat and easier to trust.",
+      "contentHash": "sha256-81e54f111d1f21aef36054d8775389a6c36a423b2415083f84e212c5e8ab5505",
+      "reviewStatus": "approved",
+      "metadata": {
+        "tags": [
+          "training",
+          "real-text",
+          "gc3",
+          "wordstrike-original",
+          "segment:0"
+        ]
+      }
+    },
+    {
+      "contentId": "cnt_gc3_realtext_016_s000_48",
+      "familyId": "fam_gc3_realtext_016",
+      "sourceId": "ws-original-gc3-realtext-en-v1",
+      "language": "en",
+      "corpusVersion": 1,
+      "partition": "training",
+      "contentType": "passage",
+      "text": "Campus Bicycle Shed is easiest to understand by spending time in a bicycle shed during maintenance and noticing how ordinary details support one another. Air pumps draws attention first, while lock rails provides a quieter reference. People review the sequence, then mark the result, because consistent notes are more useful than vivid memory after several days. The work is practical rather than dramatic, and its quality depends on small decisions made in a sensible order.\n\nA second walk through the area changes the emphasis. Tool drawers may look different as light, weather, or use changes, whereas tire levers often reveals a slower pattern. Experienced workers leave the route clear before they check the reference. This habit keeps attention on evidence instead of guesswork. It also leaves a clear trail for someone who arrives later and needs to understand the same scene without a long explanation.\n\nCoordination matters even when each task is small. One person can record a short note while another can compare two positions; neither action is impressive alone, but together they prevent avoidable delay. Spare tubes serves as a useful checkpoint, especially when repair stands changes unexpectedly. Good practice favors clear signals, enough working space, and time to correct a minor problem before it becomes a larger one.\n\nThe setting becomes more informative when observations are compared rather than isolated. Instead of rushing toward a conclusion, people clear the working area, inspect the next item, and measure a visible change in a sequence that leaves room for review. This works because clear labels reduce repeated questions without making the work rigid. Over time, repeated records form a dependable picture of what is normal, what is seasonal, and what deserves a closer look.\n\nThere is also value in leaving the place ready for the next cycle. Lock rails should be returned to a clear state, tire levers should remain easy to inspect, and the final note should describe what actually changed. Simple tools become reliable when they are used in the same way each time. That principle sounds modest, but it makes routine work easier to repeat and easier to trust.",
+      "contentHash": "sha256-f59bd25873554d0d5f52d6ed0e75dd09ed0dd2c314084f5c37121ac3759b530a",
+      "reviewStatus": "approved",
+      "metadata": {
+        "tags": [
+          "training",
+          "real-text",
+          "gc3",
+          "wordstrike-original",
+          "segment:0"
+        ]
+      }
+    },
+    {
       "contentId": "practice-en-ws-foundation-001-s1",
       "familyId": "ws-en-foundation-paragraph-001",
       "sourceId": "ws-original-en-foundation-v1",

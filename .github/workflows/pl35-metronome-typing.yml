@@ -1,0 +1,26 @@
+name: PL35 Metronome Typing
+
+on:
+  push:
+    branches: [pl35-metronome-typing]
+  pull_request:
+    paths:
+      - 'js/practiceLab/**'
+      - 'tests/practice-metronome*-pl35.test.js'
+      - 'docs/practice-lab/PL35-METRONOME-TYPING.md'
+      - 'package.json'
+      - '.github/workflows/pl35-metronome-typing.yml'
+
+jobs:
+  certify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: PL35 Metronome Typing certification
+        run: npm run test:pl35-metronome
+      - name: Full WordStrike regression suite
+        run: npm test

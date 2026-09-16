@@ -5,94 +5,781 @@
   "matchPolicyVersion": 1,
   "language": "en",
   "partition": "diagnostic",
-  "status": "draft",
+  "status": "ready",
   "bindings": {
     "corpusId": "practice-en-v1",
     "corpusVersion": 1,
-    "corpusChecksum": "sha256-28beccf65eed71519da306c129da5040a20f364aed320dc21eea2d16c2a1c404",
-    "indexChecksum": "sha256-bb198244a6b6cefcae5cb908bf3dee6e9e52259f9ef41576ec69c429a423ff32",
+    "corpusChecksum": "sha256-55b276a4628d6c29f5ce47ced81e4ed5f571866c5e3afa56ee7ee3d9c1fd1438",
+    "indexChecksum": "sha256-91fa2d94960c10da646ae5473b9d1a555eef849dfef7526b6c2ca3954fe109d8",
     "typabilityModelVersion": 1,
     "typabilityFeatureVersion": 1,
     "typabilityReferenceVersion": 1,
-    "typabilityReferenceChecksum": "sha256-94a6f90c3593ebc089211882e2d9afaf0bf46b66386cdc98dbe60c533e6dd471",
-    "diagnosticTypabilityChecksum": "sha256-a79916a7440b6099c5641d385cd5aa9ba023d2750142582383993f65adc20bef"
+    "typabilityReferenceChecksum": "sha256-2a3070a839af7e294dfd826ce5e6ff473bf82f3bf34eb335ce1d52c936aac111",
+    "diagnosticTypabilityChecksum": "sha256-00ef7a209de2ec60e322c8e5cac7cb79ae334903343610d07af9b87207ed52ae"
   },
   "sourceInventory": {
-    "approvedDiagnosticItems": 2,
-    "families": 1,
-    "maximumSourceItemGraphemes": 15,
-    "totalSourceGraphemes": 30
+    "approvedDiagnosticItems": 86,
+    "families": 17,
+    "maximumSourceItemGraphemes": 779,
+    "totalSourceGraphemes": 53242
   },
-  "reasons": [
-    "Diagnostic corpus has only two 15-grapheme approved probes from one family.",
-    "No form can satisfy the 2200/3300/4400-grapheme capacity floors without artificial repetition.",
-    "The corpus cannot satisfy a-z, lexical, combination, punctuation, number, or symbol coverage requirements.",
-    "No diagnostic block has the minimum two valid matched variants required for ready status."
-  ],
+  "reasons": [],
   "formSets": [
     {
       "blockId": "diagnostic-core-keys",
-      "status": "draft",
-      "forms": [],
-      "reasons": [
-        "coverage-and-capacity-insufficient"
-      ]
+      "status": "ready",
+      "forms": [
+        {
+          "formId": "diagnostic-core-keys-form-01",
+          "contentIds": [
+            "cnt_gc3_assess_001_s000_6",
+            "cnt_gc3_assess_001_s001_4",
+            "cnt_gc3_assess_001_s002_28",
+            "cnt_gc3_assess_001_s003_0",
+            "cnt_gc3_assess_001_s004_6",
+            "cnt_gc3_assess_001_s005_4"
+          ],
+          "segmentHashes": [
+            "sha256-4cfe8d12604bbd48ec8700e5b7f7c1b44d7d8f317b16ea611526a9d837381281",
+            "sha256-dc316d31af4dfb02e45ab52b9882ac5604a709e35ec66cd70c4d8a9365cd51e1",
+            "sha256-25d6537c3a5f96cb653ea13a0d734cd156a8cb9757664352e4ab30b351e073a8",
+            "sha256-14a681a84436a578270963c46ef0d59fe97412c2ccc7a0aad9e5984412974fc4",
+            "sha256-fef2b6d5ea4736ac0bbebe57393f50803b6ed7989c0a76c9a741fdebcbde25d1",
+            "sha256-0a7f1cf025fbaf74d40f19c914f5fcb7fdac360f9ca71ce955a0dd97edb6455f"
+          ],
+          "segmentGraphemes": [
+            648,
+            647,
+            647,
+            649,
+            646,
+            779
+          ],
+          "joiner": " ",
+          "familyId": "fam_gc3_assess_001",
+          "sourceId": "ws-original-gc3-assessment-en-v1",
+          "partition": "diagnostic",
+          "graphemeCount": 4021,
+          "contentHash": "sha256-aa6e41c10b9b24528d34c9d3011b2b9bb024a34d4b16c9d675c05335bc601407",
+          "difficultyIndex": 0.04251601255188911,
+          "relativeDifficultyPercentile": 57.142857142857146,
+          "standardizedFeatures": {
+            "meanWordLength": -0.02834205099124606,
+            "p90WordLength": 0,
+            "uppercaseRatio": 0.02904127794768358,
+            "punctuationRatio": 0.3678884409640478,
+            "digitRatio": 0,
+            "symbolRatio": 0,
+            "lexicalRarityScore": 2.220446049250313e-15,
+            "bigramRarityScore": 1.787459069646502e-13
+          },
+          "availableModelWeight": 1
+        },
+        {
+          "formId": "diagnostic-core-keys-form-02",
+          "contentIds": [
+            "cnt_gc3_assess_002_s000_18",
+            "cnt_gc3_assess_002_s001_18",
+            "cnt_gc3_assess_002_s002_9",
+            "cnt_gc3_assess_002_s003_18",
+            "cnt_gc3_assess_002_s004_18",
+            "cnt_gc3_assess_002_s005_3"
+          ],
+          "segmentHashes": [
+            "sha256-fc80b0234116230bc03fd937b4e8cf751230fd5b083b86f82d27284354dd3a2b",
+            "sha256-11a491a1a43f2c95973558be03e894054a4dc04deea824fc77b83b027d849565",
+            "sha256-6ab1e9fc010d22e52d21017f6798f6a2bc4fa17f84c12a57aefdcfee2ed1b55d",
+            "sha256-37106953820382e278fd9c8d10a24c3040c3919c862e413ba8635b031054c9e4",
+            "sha256-a8116d681411c44778eaf17cad9509c296e27762698216d24eb2b23350dcd580",
+            "sha256-02d89a5ad9bee54a5f9b509fd7077a5ebf3d1bc72afbb3e2af90dc41b021ae92"
+          ],
+          "segmentGraphemes": [
+            643,
+            647,
+            648,
+            649,
+            649,
+            690
+          ],
+          "joiner": " ",
+          "familyId": "fam_gc3_assess_002",
+          "sourceId": "ws-original-gc3-assessment-en-v1",
+          "partition": "diagnostic",
+          "graphemeCount": 3931,
+          "contentHash": "sha256-a22e80b6b02cd157ec7664f5c4644e1f0b4294956e396062501c80d18d7633ca",
+          "difficultyIndex": 0.0632081885784263,
+          "relativeDifficultyPercentile": 59.523809523809526,
+          "standardizedFeatures": {
+            "meanWordLength": -0.005885914638335692,
+            "p90WordLength": 0,
+            "uppercaseRatio": 0.025092877488078896,
+            "punctuationRatio": 0.5136720597643252,
+            "digitRatio": 0,
+            "symbolRatio": 0,
+            "lexicalRarityScore": 6.661338147750939e-15,
+            "bigramRarityScore": 1.6764367671839864e-13
+          },
+          "availableModelWeight": 1
+        }
+      ],
+      "reasons": []
     },
     {
       "blockId": "diagnostic-word-launch",
-      "status": "draft",
-      "forms": [],
-      "reasons": [
-        "coverage-and-capacity-insufficient"
-      ]
+      "status": "ready",
+      "forms": [
+        {
+          "formId": "diagnostic-word-launch-form-01",
+          "contentIds": [
+            "cnt_gc3_assess_003_s000_0",
+            "cnt_gc3_assess_003_s001_2",
+            "cnt_gc3_assess_003_s002_8",
+            "cnt_gc3_assess_003_s003_48",
+            "cnt_gc3_assess_003_s004_2",
+            "cnt_gc3_assess_003_s005_25"
+          ],
+          "segmentHashes": [
+            "sha256-613d3dca3acec15d01ea67d9dddcf052250e8ed7b1cfdd0be74f45645db42ae2",
+            "sha256-408d48406a2995ee5e45c7ea573bc3188eca9505e2ce8f94d9443af315c495bc",
+            "sha256-509a0e11b98fd20e47982df86b39b2fba3d2f22de6f33b453e4922d24f442f44",
+            "sha256-11d098a6d20cc2537506a9a1619e39f3d64a6927050d6197b62ef9f3c6bd0529",
+            "sha256-2acf29d4a320fe386bb2c5bfdaaf7c45cb5c07c2de5ed10de12b7b458376fbe2",
+            "sha256-d08c361aa8316def7e059dc66fd6660ae85893642bc79b5c297d22214f7555ed"
+          ],
+          "segmentGraphemes": [
+            643,
+            646,
+            650,
+            644,
+            650,
+            355
+          ],
+          "joiner": " ",
+          "familyId": "fam_gc3_assess_003",
+          "sourceId": "ws-original-gc3-assessment-en-v1",
+          "partition": "diagnostic",
+          "graphemeCount": 3593,
+          "contentHash": "sha256-81b88e4bfb4a1024cdc7d2f96b667fd0153b4f5c38daaec7cdb17e9257a3f9bf",
+          "difficultyIndex": 0.026377833061084904,
+          "relativeDifficultyPercentile": 54.76190476190476,
+          "standardizedFeatures": {
+            "meanWordLength": -0.001383704777933364,
+            "p90WordLength": 0,
+            "uppercaseRatio": 0.01211861314198287,
+            "punctuationRatio": 0.21156137092774133,
+            "digitRatio": 0,
+            "symbolRatio": 0,
+            "lexicalRarityScore": 1.554312234475219e-14,
+            "bigramRarityScore": 1.2656542480726785e-13
+          },
+          "availableModelWeight": 1
+        },
+        {
+          "formId": "diagnostic-word-launch-form-02",
+          "contentIds": [
+            "cnt_gc3_assess_004_s000_0",
+            "cnt_gc3_assess_004_s001_0",
+            "cnt_gc3_assess_004_s002_19",
+            "cnt_gc3_assess_004_s003_1",
+            "cnt_gc3_assess_004_s004_7",
+            "cnt_gc3_assess_004_s005_5"
+          ],
+          "segmentHashes": [
+            "sha256-5e3fad243983bfa53d99fec5a04178096d09d27adf5af000ac64f5dc501a2d7b",
+            "sha256-9e880193e7ad0a21a3e148bc9d670ea87c07526aace18e64d8bd2e993bcd60e4",
+            "sha256-6727d56c381b0715d52a4dc41fb12a671773036dbf3361e8acca45ebeacaa5e8",
+            "sha256-00154c01b5979f64fd76e202bc94dec8bf2f0939657d9089af601a3cf8a6a9fe",
+            "sha256-687d22e433e92f98473c2e519b25a2a4325a078c2af6509b1323be977f27045a",
+            "sha256-8a1a47caaae246ad1080c861cb390347b4c48b77ac2bef1032411768982f7750"
+          ],
+          "segmentGraphemes": [
+            645,
+            650,
+            650,
+            648,
+            647,
+            382
+          ],
+          "joiner": " ",
+          "familyId": "fam_gc3_assess_004",
+          "sourceId": "ws-original-gc3-assessment-en-v1",
+          "partition": "diagnostic",
+          "graphemeCount": 3627,
+          "contentHash": "sha256-4f57207d74cffee40ff8a928eb0b0f73021fd70563c3aeea4e7e5225394236fa",
+          "difficultyIndex": 0.02511581197935556,
+          "relativeDifficultyPercentile": 54.76190476190476,
+          "standardizedFeatures": {
+            "meanWordLength": 0.020415078870242395,
+            "p90WordLength": 0,
+            "uppercaseRatio": -0.0019824341772903264,
+            "punctuationRatio": 0.1837303564818076,
+            "digitRatio": 0,
+            "symbolRatio": 0,
+            "lexicalRarityScore": 1.554312234475219e-14,
+            "bigramRarityScore": 1.3655743202889425e-13
+          },
+          "availableModelWeight": 1
+        }
+      ],
+      "reasons": []
     },
     {
       "blockId": "diagnostic-combinations",
-      "status": "draft",
-      "forms": [],
-      "reasons": [
-        "coverage-and-capacity-insufficient"
-      ]
+      "status": "ready",
+      "forms": [
+        {
+          "formId": "diagnostic-combinations-form-01",
+          "contentIds": [
+            "cnt_gc3_assess_005_s000_11",
+            "cnt_gc3_assess_005_s001_38",
+            "cnt_gc3_assess_005_s002_16",
+            "cnt_gc3_assess_005_s003_6",
+            "cnt_gc3_assess_005_s004_8",
+            "cnt_gc3_assess_005_s005_5",
+            "cnt_gc3_assess_005_s006_1",
+            "cnt_gc3_assess_005_s007_6"
+          ],
+          "segmentHashes": [
+            "sha256-25b3a25de053fb588415bdd74b99a649740a993bd9dc380aa94fa0c85fd27a76",
+            "sha256-02838e75bd090070d5d8f5d0b943f7ebb33fe1749a1b0c52305a548c6f841421",
+            "sha256-011c30ec40d43df26973bf6577077f88a30a2f30e2f8ad57c27828d5a2ed6de5",
+            "sha256-fae962130250782048c99ac9bf91bb8f395a2b20609f8de215ebdd078ea4348f",
+            "sha256-2885c71e53484e6fc13b9c3192bbc518031ce169efcd308be220722e901eaadf",
+            "sha256-f6064e3e4c84d1dacc33a4b539e09fa0d53938838cdc0cee7a0ff1b58261c329",
+            "sha256-944c2558471c3d6a06b9820d1e37dd0f8f4b0a14c179eb8006b3edb4e0d971a6",
+            "sha256-634742116dac028b5d16a1eaf247d33e937ce3776f5c284b899cc2e4449c9299"
+          ],
+          "segmentGraphemes": [
+            649,
+            647,
+            646,
+            643,
+            645,
+            649,
+            637,
+            463
+          ],
+          "joiner": " ",
+          "familyId": "fam_gc3_assess_005",
+          "sourceId": "ws-original-gc3-assessment-en-v1",
+          "partition": "diagnostic",
+          "graphemeCount": 4986,
+          "contentHash": "sha256-3275671cb1cf09f411b56b71084ee6cc6c3a0edc49e255b29450a6b4496cb7f6",
+          "difficultyIndex": 0.040310112307798046,
+          "relativeDifficultyPercentile": 57.142857142857146,
+          "standardizedFeatures": {
+            "meanWordLength": -0.004344478102256074,
+            "p90WordLength": 0,
+            "uppercaseRatio": 0.0427635896570475,
+            "punctuationRatio": 0.306073915319997,
+            "digitRatio": 0,
+            "symbolRatio": 0,
+            "lexicalRarityScore": -1.554312234475219e-14,
+            "bigramRarityScore": 3.0309088572266774e-13
+          },
+          "availableModelWeight": 1
+        },
+        {
+          "formId": "diagnostic-combinations-form-02",
+          "contentIds": [
+            "cnt_gc3_assess_006_s000_7",
+            "cnt_gc3_assess_006_s001_7",
+            "cnt_gc3_assess_006_s002_2",
+            "cnt_gc3_assess_006_s003_9",
+            "cnt_gc3_assess_006_s004_19",
+            "cnt_gc3_assess_006_s005_4",
+            "cnt_gc3_assess_006_s006_7",
+            "cnt_gc3_assess_006_s007_6"
+          ],
+          "segmentHashes": [
+            "sha256-7ee251b4aa0db2092f9e6302d81b7f49af2eb0374b612426f00ad797fe7e2025",
+            "sha256-b35464c4022190da224933c99edfb1c2656fd932e9206d965eed637c69e284bb",
+            "sha256-67fa11ac0271bb77785e4b5c901c7a30f69634a1492d7270561ae4e205488973",
+            "sha256-e9b22dddc0f52645e499db5d7da04d0443da057a9f546df9ad05a3da7cd4f057",
+            "sha256-f6253e7dce36a90e23bb861f24709da1a938df8205c3ba088cbf11b7b244f2b3",
+            "sha256-922e67a9a34c5b08ecdea60e189bdba6cc7a56c2c4132ebb67ebcd50b8763b6f",
+            "sha256-f3e0ab806aaae822f78c8d14ce110b8288bd3925be70540bdd712b853b03c6f5",
+            "sha256-833af967d6be4791ea67da0a255ab39144584b20c2f0332c73856cc840ff2c08"
+          ],
+          "segmentGraphemes": [
+            649,
+            646,
+            644,
+            649,
+            642,
+            641,
+            648,
+            478
+          ],
+          "joiner": " ",
+          "familyId": "fam_gc3_assess_006",
+          "sourceId": "ws-original-gc3-assessment-en-v1",
+          "partition": "diagnostic",
+          "graphemeCount": 5004,
+          "contentHash": "sha256-1bf67c78c1f0306dc9ad0c7907a79fb33386aec17c92ff9b8fda7f77021a35d3",
+          "difficultyIndex": 0.03771655776825793,
+          "relativeDifficultyPercentile": 54.76190476190476,
+          "standardizedFeatures": {
+            "meanWordLength": 0.00679003766426302,
+            "p90WordLength": 0,
+            "uppercaseRatio": 0.013068961405023408,
+            "punctuationRatio": 0.2943604633451502,
+            "digitRatio": 0,
+            "symbolRatio": 0,
+            "lexicalRarityScore": -1.4432899320127035e-14,
+            "bigramRarityScore": 3.064215547965432e-13
+          },
+          "availableModelWeight": 1
+        }
+      ],
+      "reasons": []
     },
     {
       "blockId": "diagnostic-punctuation-capitals",
-      "status": "draft",
-      "forms": [],
-      "reasons": [
-        "coverage-and-capacity-insufficient"
-      ]
+      "status": "ready",
+      "forms": [
+        {
+          "formId": "diagnostic-punctuation-capitals-form-01",
+          "contentIds": [
+            "cnt_gc3_assess_007_s000_3",
+            "cnt_gc3_assess_007_s001_0",
+            "cnt_gc3_assess_007_s002_24",
+            "cnt_gc3_assess_007_s003_3",
+            "cnt_gc3_assess_007_s004_3"
+          ],
+          "segmentHashes": [
+            "sha256-b1c524eb1d45c1f1d76b7bf92abff3694f84d4d4a5129da313dae87eb2209dec",
+            "sha256-281a774c8f9ca6994c71a820edac2162f4850e25eb18215427e98e881de183b1",
+            "sha256-97e36b3dad6a0bdacebdec62104abb8701fb6e6d4851891c7cf15ceb9005e240",
+            "sha256-109e93abb2a49fa74fc6c81a9b20804075d624beda2d8168bf129a89132e9ac0",
+            "sha256-477b9138741ef1161c282fc425860dde3b9e96355330cd15087acb59e4f7dcab"
+          ],
+          "segmentGraphemes": [
+            649,
+            643,
+            646,
+            642,
+            458
+          ],
+          "joiner": " ",
+          "familyId": "fam_gc3_assess_007",
+          "sourceId": "ws-original-gc3-assessment-en-v1",
+          "partition": "diagnostic",
+          "graphemeCount": 3042,
+          "contentHash": "sha256-e4d96f3e1a88199cae2762d03fdaf4953c9ffb74a475296ec84a9ab708278ea1",
+          "difficultyIndex": 0.0720570852766897,
+          "relativeDifficultyPercentile": 61.904761904761905,
+          "standardizedFeatures": {
+            "meanWordLength": 0.0007424599516114528,
+            "p90WordLength": 0,
+            "uppercaseRatio": 0.16142484726353842,
+            "punctuationRatio": 0.4649650579839591,
+            "digitRatio": 0,
+            "symbolRatio": 0,
+            "lexicalRarityScore": 1.3322676295501878e-14,
+            "bigramRarityScore": 2.220446049250313e-15
+          },
+          "availableModelWeight": 1
+        },
+        {
+          "formId": "diagnostic-punctuation-capitals-form-02",
+          "contentIds": [
+            "cnt_gc3_assess_008_s000_9",
+            "cnt_gc3_assess_008_s001_19",
+            "cnt_gc3_assess_008_s002_26",
+            "cnt_gc3_assess_008_s003_19",
+            "cnt_gc3_assess_008_s004_0"
+          ],
+          "segmentHashes": [
+            "sha256-6a4c7cf33fa5101782d18f617fcd815f7cda7858633c13909116974f7836deb6",
+            "sha256-ad7af9c5ff5944021018eb2258451367092482d230a772fa1d109586cf9f8e21",
+            "sha256-30d30793cc4dee0d0eb88ead584e4b86f6acc537e1e1a7e092d8ebe28ecd77e0",
+            "sha256-7488499eaf5b5f9c9d49b133bbe31577be83cb58804f5b22e28ef7635c2e0214",
+            "sha256-9dc12d63df4fcfdb36e7cbfd86b850906f836fb2cd2086acaba6b1ad4be3ca57"
+          ],
+          "segmentGraphemes": [
+            644,
+            646,
+            648,
+            643,
+            435
+          ],
+          "joiner": " ",
+          "familyId": "fam_gc3_assess_008",
+          "sourceId": "ws-original-gc3-assessment-en-v1",
+          "partition": "diagnostic",
+          "graphemeCount": 3020,
+          "contentHash": "sha256-3abcd0262548da6cbc38966524cba5706d70d0c6c2394941085d18671d972718",
+          "difficultyIndex": 0.050476634894210996,
+          "relativeDifficultyPercentile": 57.142857142857146,
+          "standardizedFeatures": {
+            "meanWordLength": 0.015012702073981258,
+            "p90WordLength": 0,
+            "uppercaseRatio": 0.09141231186263771,
+            "punctuationRatio": 0.3244447614675624,
+            "digitRatio": 0,
+            "symbolRatio": 0,
+            "lexicalRarityScore": 1.3322676295501878e-14,
+            "bigramRarityScore": 1.1102230246251565e-15
+          },
+          "availableModelWeight": 1
+        }
+      ],
+      "reasons": []
     },
     {
       "blockId": "diagnostic-numbers-symbols",
-      "status": "draft",
-      "forms": [],
-      "reasons": [
-        "coverage-and-capacity-insufficient"
-      ]
+      "status": "ready",
+      "forms": [
+        {
+          "formId": "diagnostic-numbers-symbols-form-01",
+          "contentIds": [
+            "cnt_gc3_assess_009_s000_1",
+            "cnt_gc3_assess_009_s001_9",
+            "cnt_gc3_assess_009_s002_7",
+            "cnt_gc3_assess_009_s003_23",
+            "cnt_gc3_assess_009_s004_1"
+          ],
+          "segmentHashes": [
+            "sha256-766767cfcfec222b44534e28ee677a7625cfada8d26c304f8f629cb7b497a84b",
+            "sha256-5dfdd2aefb15fbcdb9eda77f9d1f4686db071fcf47474beea72e3877e8f09373",
+            "sha256-b3283871d4b9d5ee05211c3e6560181371bbeb12de737a3f5b4a7d6d4d229b1b",
+            "sha256-f90defb035c9e1e5f8f2ccb55379e4b3b7bbe54695053fc66dd8a8e22f9a29b0",
+            "sha256-4604594e5219caa236ed5389caabd3ad470f1b1bf8e56da8f3cf665d0e37e996"
+          ],
+          "segmentGraphemes": [
+            643,
+            645,
+            647,
+            650,
+            388
+          ],
+          "joiner": " ",
+          "familyId": "fam_gc3_assess_009",
+          "sourceId": "ws-original-gc3-assessment-en-v1",
+          "partition": "diagnostic",
+          "graphemeCount": 2977,
+          "contentHash": "sha256-8b9c216c9bdcaee1917b625b12d53bdc8fca7261037a927c589c05d7d6cf92b8",
+          "difficultyIndex": 0.1656755111613676,
+          "relativeDifficultyPercentile": 76.19047619047619,
+          "standardizedFeatures": {
+            "meanWordLength": -0.050152525979952324,
+            "p90WordLength": 0,
+            "uppercaseRatio": 0.12007529656054855,
+            "punctuationRatio": 0.2994720167529566,
+            "digitRatio": 1.370415155179363,
+            "symbolRatio": 0.2015316404675534,
+            "lexicalRarityScore": 1.3322676295501878e-14,
+            "bigramRarityScore": -2.886579864025407e-14
+          },
+          "availableModelWeight": 1
+        },
+        {
+          "formId": "diagnostic-numbers-symbols-form-02",
+          "contentIds": [
+            "cnt_gc3_assess_010_s000_1",
+            "cnt_gc3_assess_010_s001_5",
+            "cnt_gc3_assess_010_s002_18",
+            "cnt_gc3_assess_010_s003_7",
+            "cnt_gc3_assess_010_s004_17"
+          ],
+          "segmentHashes": [
+            "sha256-d79bf0163a23752855cb9c674c7013dff472e5763f26bc82b58e1773ea6eb7fe",
+            "sha256-ff39cd6190276ca9511b2cc3b6ed4527cd1bf42a7beef50b27eed95eaa2b4e87",
+            "sha256-aa936a5d93e199a42d5a16761ba1766d7aeb7fb64119d9a944aac4021f5e9fb2",
+            "sha256-9b0d4f5648770c51607424e41abd3e2fbed759a63f4217913bb72d5d22528b60",
+            "sha256-1dc9120945fc56bf8b04461667e0849154f3748b9f7d154f28e80395728ae119"
+          ],
+          "segmentGraphemes": [
+            644,
+            648,
+            645,
+            648,
+            447
+          ],
+          "joiner": " ",
+          "familyId": "fam_gc3_assess_010",
+          "sourceId": "ws-original-gc3-assessment-en-v1",
+          "partition": "diagnostic",
+          "graphemeCount": 3036,
+          "contentHash": "sha256-37ed1eefe3aea3f556cc85995d3fe2bab8bbd9bd1b5c4770383c3a5290dcf166",
+          "difficultyIndex": 0.12979139195142023,
+          "relativeDifficultyPercentile": 66.66666666666667,
+          "standardizedFeatures": {
+            "meanWordLength": -0.034189602269892365,
+            "p90WordLength": 0,
+            "uppercaseRatio": 0.12978632434648504,
+            "punctuationRatio": 0.2829585014181152,
+            "digitRatio": 0.9463722397476341,
+            "symbolRatio": 0.15772870662460567,
+            "lexicalRarityScore": 1.2212453270876722e-14,
+            "bigramRarityScore": -4.440892098500626e-15
+          },
+          "availableModelWeight": 1
+        }
+      ],
+      "reasons": []
     },
     {
       "blockId": "diagnostic-lexical-extended",
-      "status": "draft",
-      "forms": [],
-      "reasons": [
-        "coverage-and-capacity-insufficient"
-      ]
+      "status": "ready",
+      "forms": [
+        {
+          "formId": "diagnostic-lexical-extended-form-01",
+          "contentIds": [
+            "cnt_gc3_assess_011_s000_18",
+            "cnt_gc3_assess_011_s001_9",
+            "cnt_gc3_assess_011_s002_7",
+            "cnt_gc3_assess_011_s003_16"
+          ],
+          "segmentHashes": [
+            "sha256-aac62fb48e83ee6f6b746d77393e9e8276618670311271c8e80c75507263262e",
+            "sha256-4978bf91db6f21ee2834e76b259e73ad1380ec8e1472e5d9df16a9dd3f4b1792",
+            "sha256-ed2f8a0d5500a8bbae9ff93576fb337f075de5de719c54d223112f68f7a08160",
+            "sha256-b19a04c05b3508f9f75362c23fff669ab7a788eb9cb8ac8f4c1b2ae5219b1d82"
+          ],
+          "segmentGraphemes": [
+            647,
+            649,
+            648,
+            722
+          ],
+          "joiner": " ",
+          "familyId": "fam_gc3_assess_011",
+          "sourceId": "ws-original-gc3-assessment-en-v1",
+          "partition": "diagnostic",
+          "graphemeCount": 2669,
+          "contentHash": "sha256-17d5ef35a045cad1be2928c00e790e14041d957c5014a987401a3530b124a63f",
+          "difficultyIndex": 0.012224476686508317,
+          "relativeDifficultyPercentile": 54.76190476190476,
+          "standardizedFeatures": {
+            "meanWordLength": 0.009877548656514704,
+            "p90WordLength": 0,
+            "uppercaseRatio": 0.0007772101926243127,
+            "punctuationRatio": 0.08805289901849638,
+            "digitRatio": 0,
+            "symbolRatio": 0,
+            "lexicalRarityScore": 9.992007221626409e-15,
+            "bigramRarityScore": -9.43689570931383e-14
+          },
+          "availableModelWeight": 1
+        },
+        {
+          "formId": "diagnostic-lexical-extended-form-02",
+          "contentIds": [
+            "cnt_gc3_assess_012_s000_14",
+            "cnt_gc3_assess_012_s001_49",
+            "cnt_gc3_assess_012_s002_7",
+            "cnt_gc3_assess_012_s003_5"
+          ],
+          "segmentHashes": [
+            "sha256-3f416422ab068d0ad8f0d92efa21a27d5cf6e4d3ef9474e34fd92d9de1541524",
+            "sha256-81e55d202cfdae6c7e2d316a5b109106692a531b1cfd5c25b6b4c6fb81754f81",
+            "sha256-49d2bfb8f10ffa4cbf0ab2ce4888e2b4fa5f4c76c9c1538c0019b28d6614c636",
+            "sha256-3884eb98061de32188251115ed08346cd8a1d858763a1e3aaa22f6516b056775"
+          ],
+          "segmentGraphemes": [
+            648,
+            650,
+            649,
+            755
+          ],
+          "joiner": " ",
+          "familyId": "fam_gc3_assess_012",
+          "sourceId": "ws-original-gc3-assessment-en-v1",
+          "partition": "diagnostic",
+          "graphemeCount": 2705,
+          "contentHash": "sha256-eb9d478813b894b955cda56b535836f3f70ee0735d9fb1a4a675a6393f0afb64",
+          "difficultyIndex": 0.010735154899872614,
+          "relativeDifficultyPercentile": 54.76190476190476,
+          "standardizedFeatures": {
+            "meanWordLength": 0.04106671616856259,
+            "p90WordLength": 0,
+            "uppercaseRatio": -0.01902939247985236,
+            "punctuationRatio": 0.05056182967416549,
+            "digitRatio": 0,
+            "symbolRatio": 0,
+            "lexicalRarityScore": 8.881784197001252e-15,
+            "bigramRarityScore": -7.216449660063518e-14
+          },
+          "availableModelWeight": 1
+        }
+      ],
+      "reasons": []
     },
     {
       "blockId": "diagnostic-combinations-extended",
-      "status": "draft",
-      "forms": [],
-      "reasons": [
-        "coverage-and-capacity-insufficient"
-      ]
+      "status": "ready",
+      "forms": [
+        {
+          "formId": "diagnostic-combinations-extended-form-01",
+          "contentIds": [
+            "cnt_gc3_assess_013_s000_2",
+            "cnt_gc3_assess_013_s001_11",
+            "cnt_gc3_assess_013_s002_19",
+            "cnt_gc3_assess_013_s003_3"
+          ],
+          "segmentHashes": [
+            "sha256-d300d3e21fabf073320ac377c1fb47b321b737be6d8cdf8d56f9ef077f625e99",
+            "sha256-bcce19aff00f0a43ee5703f67232184bf33f046cfe7d31d1be34e6a283157041",
+            "sha256-fb6115624f9d7fdfe73fbed4a13e67d9e9b56e5b31ade9cdf6511372603d3adb",
+            "sha256-078ab33f4e5e3be2fc700d7d7ad66145bca753fabf215c12814fd1bba6e60d03"
+          ],
+          "segmentGraphemes": [
+            649,
+            650,
+            648,
+            705
+          ],
+          "joiner": " ",
+          "familyId": "fam_gc3_assess_013",
+          "sourceId": "ws-original-gc3-assessment-en-v1",
+          "partition": "diagnostic",
+          "graphemeCount": 2655,
+          "contentHash": "sha256-b0695b37241301503433d8f05ed1522b7c4f351e554d259250db9233f4cbbdde",
+          "difficultyIndex": 0.009620180817899733,
+          "relativeDifficultyPercentile": 54.76190476190476,
+          "standardizedFeatures": {
+            "meanWordLength": -0.028302709258503488,
+            "p90WordLength": 0,
+            "uppercaseRatio": 0.011489794378030833,
+            "punctuationRatio": 0.1083302905123016,
+            "digitRatio": 0,
+            "symbolRatio": 0,
+            "lexicalRarityScore": 9.992007221626409e-15,
+            "bigramRarityScore": -1.099120794378905e-13
+          },
+          "availableModelWeight": 1
+        },
+        {
+          "formId": "diagnostic-combinations-extended-form-02",
+          "contentIds": [
+            "cnt_gc3_assess_014_s000_9",
+            "cnt_gc3_assess_014_s001_7",
+            "cnt_gc3_assess_014_s002_6",
+            "cnt_gc3_assess_014_s003_3"
+          ],
+          "segmentHashes": [
+            "sha256-4388744b1a28427968410376e63ae0fe50dd18b31dd73717d50e7d6b5eed91bc",
+            "sha256-1970b75f2b4de08d4f81d1e009708c892fb0af164ea73ed72aed672f65d73588",
+            "sha256-fc4c0cb3e801622fda5b0ef339df06a4dcd82fd1b9394857c04c359a9c3257b8",
+            "sha256-820685f938adaaec4b33597246473ff88bc11d6fa4e266156ffaaf7543451405"
+          ],
+          "segmentGraphemes": [
+            650,
+            648,
+            649,
+            726
+          ],
+          "joiner": " ",
+          "familyId": "fam_gc3_assess_014",
+          "sourceId": "ws-original-gc3-assessment-en-v1",
+          "partition": "diagnostic",
+          "graphemeCount": 2676,
+          "contentHash": "sha256-f457c767b750c3e6093773ebec272ea2213c1b81da7fa234309aad8106a2dd1b",
+          "difficultyIndex": 0.011918611203206917,
+          "relativeDifficultyPercentile": 54.76190476190476,
+          "standardizedFeatures": {
+            "meanWordLength": 0.015942109006079817,
+            "p90WordLength": 0,
+            "uppercaseRatio": -0.0031238229840706636,
+            "punctuationRatio": 0.08066880050546649,
+            "digitRatio": 0,
+            "symbolRatio": 0,
+            "lexicalRarityScore": 9.992007221626409e-15,
+            "bigramRarityScore": -8.770761894538737e-14
+          },
+          "availableModelWeight": 1
+        }
+      ],
+      "reasons": []
     },
     {
       "blockId": "diagnostic-mixed",
-      "status": "draft",
-      "forms": [],
-      "reasons": [
-        "coverage-and-capacity-insufficient"
-      ]
+      "status": "ready",
+      "forms": [
+        {
+          "formId": "diagnostic-mixed-form-01",
+          "contentIds": [
+            "cnt_gc3_assess_015_s000_1",
+            "cnt_gc3_assess_015_s001_5",
+            "cnt_gc3_assess_015_s002_3",
+            "cnt_gc3_assess_015_s003_9"
+          ],
+          "segmentHashes": [
+            "sha256-e621e5e5a7298f03cee0118807e28c87597c390499605ef9390cd48c138c6366",
+            "sha256-e3f7792d923b468b0468d2aad0d03394b7919b445469a5370e8f329f98d54df1",
+            "sha256-81e06fd00c94a21b182e0d8c7854ef8b213c195f6b0f986cf106a46b704fdcf0",
+            "sha256-87b6b33649f17d762596cab3ad6f971c24b5e2719b3b03ea9bda472b9fae9340"
+          ],
+          "segmentGraphemes": [
+            648,
+            650,
+            647,
+            716
+          ],
+          "joiner": " ",
+          "familyId": "fam_gc3_assess_015",
+          "sourceId": "ws-original-gc3-assessment-en-v1",
+          "partition": "diagnostic",
+          "graphemeCount": 2664,
+          "contentHash": "sha256-8ae1b3799246861179b8a50ac0702a7339180ab3d161affe2bd0fa11b692ac79",
+          "difficultyIndex": 0.011130839416760385,
+          "relativeDifficultyPercentile": 54.76190476190476,
+          "standardizedFeatures": {
+            "meanWordLength": -0.004983956375935432,
+            "p90WordLength": 0,
+            "uppercaseRatio": 0.004702723183067949,
+            "punctuationRatio": 0.09548333432183621,
+            "digitRatio": 0,
+            "symbolRatio": 0,
+            "lexicalRarityScore": 9.992007221626409e-15,
+            "bigramRarityScore": -9.992007221626409e-14
+          },
+          "availableModelWeight": 1
+        },
+        {
+          "formId": "diagnostic-mixed-form-02",
+          "contentIds": [
+            "cnt_gc3_assess_016_s000_3",
+            "cnt_gc3_assess_016_s001_3",
+            "cnt_gc3_assess_016_s002_3",
+            "cnt_gc3_assess_016_s003_6"
+          ],
+          "segmentHashes": [
+            "sha256-079da9e089b64490933f94c5fbf020c14fe0578f080cf8b4520191b753c50039",
+            "sha256-5068a0da20e81e7b453554ba819afb4181848634877bf30704d7c7806d7b29e4",
+            "sha256-6ace252b2a1ec9c8ff6b9e49855a07d00ae5735889d9c2ac9610c412d8ca6cb4",
+            "sha256-85f8a18dcee0b93412d0ec7b51ef22b71d719b9f25a7152db5c053fec6d2b448"
+          ],
+          "segmentGraphemes": [
+            648,
+            647,
+            644,
+            732
+          ],
+          "joiner": " ",
+          "familyId": "fam_gc3_assess_016",
+          "sourceId": "ws-original-gc3-assessment-en-v1",
+          "partition": "diagnostic",
+          "graphemeCount": 2674,
+          "contentHash": "sha256-5d3d0fba9887e42ef84e2fefd85657fcb6741cf39a505a6850a310030506a39f",
+          "difficultyIndex": 0.013187179349247586,
+          "relativeDifficultyPercentile": 54.76190476190476,
+          "standardizedFeatures": {
+            "meanWordLength": -0.012032279987333144,
+            "p90WordLength": 0,
+            "uppercaseRatio": 0.04545996265017567,
+            "punctuationRatio": 0.08805289901849638,
+            "digitRatio": 0,
+            "symbolRatio": 0,
+            "lexicalRarityScore": 9.992007221626409e-15,
+            "bigramRarityScore": -9.547918011776346e-14
+          },
+          "availableModelWeight": 1
+        }
+      ],
+      "reasons": []
     }
   ]
 }
