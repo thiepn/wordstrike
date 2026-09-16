@@ -136,7 +136,15 @@ function decorateSetup(screen) {
 
   setupObserver?.disconnect();
   setupObserver = new MutationObserver((records) => {
-    if (!records.some((record) => record.type === "attributes" && record.attributeName === "aria-pressed")) return;
+    // Phase 8 owns only the duration/category/difficulty choice groups. Later
+    // phases may add independent aria-pressed controls to the same ready
+    // screen; those must not reset Phase 8's Start-state presentation.
+    const ownsChange = records.some((record) => (
+      record.type === "attributes"
+      && record.attributeName === "aria-pressed"
+      && record.target?.matches?.("[data-flow-choice-group]")
+    ));
+    if (!ownsChange) return;
     queueMicrotask(() => {
       syncRovingTabindex(screen);
       syncSetupDock(screen);
@@ -205,8 +213,6 @@ function decorateRun(screen) {
 
   for (const target of [screen.querySelector(".flow-run-copy"), screen.querySelector("[data-flow-passage]")]) {
     target?.addEventListener("pointerdown", (event) => {
-      // Prevent the browser's default pointer/click focus transfer from
-      // immediately stealing focus back after the hidden capture is restored.
       event.preventDefault();
       focusTypingInput(screen);
     });
