@@ -31,7 +31,9 @@ assert.equal(getModeDefinition(MODE_IDS.ARCADE_RUSH)?.status, "retired");
 assert.equal(getModeDefinition(MODE_IDS.ARCADE_RUSH)?.route, null);
 assert.equal(getModeDefinition(MODE_IDS.ARCADE_RUSH)?.storesProgress, true);
 assert.equal(getModeDefinition(MODE_IDS.FLOW)?.visible, true);
-assert.equal(getModeDefinition(MODE_IDS.FLOW)?.enabled, false);
+assert.equal(getModeDefinition(MODE_IDS.FLOW)?.enabled, true);
+assert.equal(getModeDefinition(MODE_IDS.FLOW)?.status, "available");
+assert.equal(getModeDefinition(MODE_IDS.FLOW)?.route, "flow-release");
 
 const endTarget = getLeaderboardKeyboardTarget({
   selectedCategory: LEADERBOARD_CATEGORIES.CAMPAIGN,
@@ -126,4 +128,4 @@ assert.match(adapterSource, /function openArcadeRushLeaderboard\(\)/);
 assert.doesNotMatch(adapterSource, /function openShadowArcadeRushLeaderboard/);
 assert.match(adapterSource, /leaderboardAvailable: true/);
 
-console.log("Flow Phase 0 production cutover passed: Flow owns public mode discovery while legacy Rush routing/data remain addressable internally.");
+console.log("Phase 13 production cutover passed: released Flow owns public mode discovery while legacy Rush routing/data remain addressable internally.");
