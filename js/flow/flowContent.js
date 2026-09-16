@@ -8,7 +8,7 @@ const ID_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const TAG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const TYPOGRAPHIC_CHARACTERS = new Set(["€", "£", "–", "—", "“", "”", "‘", "’", "…"]);
 const ALLOWED_ASCII_PUNCTUATION = new Set([...
-  " .,!?;:'\"()[]{}-/%$+&=@#_*",
+  " .,!?;:'\"()[]{}-/%$+&=@#_*<>",
 ]);
 
 function isSupportedCharacter(character) {
@@ -42,7 +42,7 @@ export function analyzeFlowText(text) {
     parentheses: count(normalized, "(") + count(normalized, ")"),
     dashes: count(normalized, "-") + count(normalized, "–") + count(normalized, "—"),
     numbers: (normalized.match(/\d/g) || []).length,
-    symbols: (normalized.match(/[%€£$+&=@#_*\/]/g) || []).length,
+    symbols: (normalized.match(/[%€£$+&=@#_*\/<>"]/g) || []).length,
   };
   return Object.freeze({
     characters: [...normalized].length,
