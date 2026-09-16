@@ -185,6 +185,26 @@ function removeTemporaryDeveloperFlag() {
   replaceUrl(url);
 }
 
+function installReleaseBootstrapGuard() {
+  if (typeof document === "undefined") return () => {};
+  const id = "flow-release-bootstrap-guard";
+  document.getElementById(id)?.remove();
+  const style = document.createElement("style");
+  style.id = id;
+  style.textContent = `
+    html[data-flow-release-booting="true"] #app [data-flow-view] {
+      visibility: hidden !important;
+      pointer-events: none !important;
+    }
+  `;
+  document.head?.append(style);
+  document.documentElement?.setAttribute("data-flow-release-booting", "true");
+  return () => {
+    document.documentElement?.removeAttribute("data-flow-release-booting");
+    style.remove();
+  };
+}
+
 function installReleaseExitCleanup() {
   if (typeof document === "undefined") return;
   const app = document.querySelector("#app");
@@ -229,42 +249,48 @@ async function importFlowRuntime() {
   const developer = isFlowDeveloperRoute();
   if (!release && !developer) return false;
 
+  let clearReleaseBootstrapGuard = null;
   if (release) {
     const normalized = releaseUrl();
     replaceUrl(normalized);
     await waitForModeSelect();
+    clearReleaseBootstrapGuard = installReleaseBootstrapGuard();
     const temporary = new URL(globalThis.location.href);
     temporary.searchParams.set("dev", "1");
     replaceUrl(temporary);
   }
 
-  await import("./flowIntegrationBootstrap.js?v=20260916a");
-  await import("./flowPhase1.js?v=20260916d");
-  await import("./flowVisualPhase6.js?v=20260916a");
+  try {
+    await import("./flowIntegrationBootstrap.js?v=20260916a");
+    await import("./flowPhase1.js?v=20260916d");
+    await import("./flowVisualPhase6.js?v=20260916a");
 
-  const params = new URLSearchParams(globalThis.location.search);
-  if (params.get("flowUi") === "1") {
-    await import("./flowUiPhase7KeyboardGuard.js?v=20260916a");
-    await import("./flowUiPhase7.js?v=20260916a");
-    await import("./flowUiPhase7Polish.js?v=20260916a");
-    if (params.get("flowUx") === "1") {
-      await import("./flowUxPhase8.js?v=20260916a");
-      if (params.get("flowModifiers") === "1") {
-        await import("./flowModifiersPhase9.js?v=20260916a");
+    const params = new URLSearchParams(globalThis.location.search);
+    if (params.get("flowUi") === "1") {
+      await import("./flowUiPhase7KeyboardGuard.js?v=20260916a");
+      await import("./flowUiPhase7.js?v=20260916a");
+      await import("./flowUiPhase7Polish.js?v=20260916a");
+      if (params.get("flowUx") === "1") {
+        await import("./flowUxPhase8.js?v=20260916a");
+        if (params.get("flowModifiers") === "1") {
+          await import("./flowModifiersPhase9.js?v=20260916a");
+        }
+        if (params.get("flowAdaptive") === "1") {
+          await import("./flowAdaptivePhase10.js?v=20260916a");
+        }
+        if (params.get("flowIntegration") === "1") {
+          await import("./flowIntegrationPhase11.js?v=20260916a");
+        }
       }
-      if (params.get("flowAdaptive") === "1") {
-        await import("./flowAdaptivePhase10.js?v=20260916a");
-      }
-      if (params.get("flowIntegration") === "1") {
-        await import("./flowIntegrationPhase11.js?v=20260916a");
-      }
+    }
+  } finally {
+    if (release) {
+      removeTemporaryDeveloperFlag();
+      clearReleaseBootstrapGuard?.();
     }
   }
 
-  if (release) {
-    removeTemporaryDeveloperFlag();
-    installReleaseExitCleanup();
-  }
+  if (release) installReleaseExitCleanup();
   return true;
 }
 
