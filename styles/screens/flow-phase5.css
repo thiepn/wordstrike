@@ -1,0 +1,48 @@
+.flow-chapter-strip {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  align-items: baseline;
+  padding: 10px 0;
+  border-bottom: 1px solid currentColor;
+  font: 700 0.76rem/1.2 var(--font-ui, inherit);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.flow-chapter-strip span {
+  opacity: 0.68;
+}
+
+.flow-chapter-strip strong {
+  font-variant-numeric: tabular-nums;
+}
+
+.flow-chapter-screen {
+  display: grid;
+  place-items: center;
+}
+
+.flow-chapter-transition {
+  max-width: 820px;
+}
+
+.flow-chapter-transition h1 {
+  max-width: 760px;
+}
+
+.flow-chapter-transition .ui-button {
+  justify-self: start;
+  min-width: 160px;
+}
+
+@media (max-width: 640px) {
+  .flow-chapter-strip {
+    align-items: flex-start;
+  }
+
+  .flow-chapter-transition {
+    min-height: 100dvh;
+    align-content: center;
+  }
+}
