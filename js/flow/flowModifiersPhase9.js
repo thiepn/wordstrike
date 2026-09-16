@@ -15,7 +15,6 @@ const enabled = params.get("dev") === "1"
   && params.get("flowModifiers") === "1";
 
 let draftModifiers = normalizeFlowModifierIds(params.get("flowModifierIds") || "");
-let decoratedScreen = null;
 let statusTimer = null;
 
 function controller() {
@@ -87,14 +86,16 @@ function modifierSetupMarkup() {
 function syncSetup(screen) {
   for (const button of screen.querySelectorAll("[data-flow-modifier-id]")) {
     const selected = draftModifiers.includes(button.dataset.flowModifierId);
-    button.classList.toggle("is-selected", selected);
-    button.setAttribute("aria-pressed", String(selected));
+    if (button.classList.contains("is-selected") !== selected) button.classList.toggle("is-selected", selected);
+    const nextPressed = String(selected);
+    if (button.getAttribute("aria-pressed") !== nextPressed) button.setAttribute("aria-pressed", nextPressed);
   }
   const summary = screen.querySelector("[data-flow-modifier-selection]");
   if (summary) {
-    summary.textContent = draftModifiers.length
+    const text = draftModifiers.length
       ? `${draftModifiers.length} active · ${draftModifiers.map((id) => FLOW_MODIFIERS[id].name).join(" · ")}`
       : "No modifiers active";
+    if (summary.textContent !== text) summary.textContent = text;
   }
   const dock = document.querySelector("[data-flow-ux='setup-action-dock']");
   let modifierLabel = dock?.querySelector("[data-flow-modifier-dock]");
@@ -103,11 +104,14 @@ function syncSetup(screen) {
     modifierLabel.dataset.flowModifierDock = "";
     dock.querySelector(".flow-ux-setup-action-copy")?.append(modifierLabel);
   }
-  if (modifierLabel) modifierLabel.textContent = draftModifiers.length ? `${draftModifiers.length} modifier${draftModifiers.length === 1 ? "" : "s"}` : "Base rules";
+  if (modifierLabel) {
+    const text = draftModifiers.length ? `${draftModifiers.length} modifier${draftModifiers.length === 1 ? "" : "s"}` : "Base rules";
+    if (modifierLabel.textContent !== text) modifierLabel.textContent = text;
+  }
   const start = dock?.querySelector('[data-flow-action="start"]') || screen.querySelector('[data-flow-action="start"]');
   if (start && setupChanged()) {
-    start.textContent = "START UPDATED RUN";
-    start.dataset.flowSetupChanged = "true";
+    if (start.textContent !== "START UPDATED RUN") start.textContent = "START UPDATED RUN";
+    if (start.dataset.flowSetupChanged !== "true") start.dataset.flowSetupChanged = "true";
   }
 }
 
@@ -117,12 +121,10 @@ function selectModifier(screen, id) {
 }
 
 function decorateReady(screen) {
-  if (screen.querySelector("[data-flow-modifier-setup]")) {
-    syncSetup(screen);
-    return;
-  }
+  if (screen.dataset.flowModifiersPhase9 === "true") return true;
   const itinerary = screen.querySelector("[data-flow-setup-itinerary]");
-  itinerary?.insertAdjacentHTML("beforebegin", modifierSetupMarkup());
+  if (!itinerary) return false;
+  itinerary.insertAdjacentHTML("beforebegin", modifierSetupMarkup());
   screen.querySelector("[data-flow-modifier-setup]")?.addEventListener("click", (event) => {
     const choice = event.target.closest?.("[data-flow-modifier-id]");
     if (choice) {
@@ -135,6 +137,8 @@ function decorateReady(screen) {
     }
   });
   syncSetup(screen);
+  screen.dataset.flowModifiersPhase9 = "true";
+  return true;
 }
 
 function activeModifierIds() {
@@ -152,50 +156,61 @@ function stripMarkup(modifierIds, extra = "") {
 }
 
 function decorateRun(screen) {
-  if (screen.querySelector("[data-flow-modifier-strip]")) return;
+  if (screen.dataset.flowModifiersPhase9 === "true") return true;
   const modifierIds = activeModifierIds();
-  if (!modifierIds.length) return;
-  const rail = screen.querySelector("[data-flow-ui='session-rail']");
-  const anchor = rail || screen.querySelector(".flow-run-header");
-  anchor?.insertAdjacentHTML("afterend", stripMarkup(modifierIds, '<small data-flow-modifier-status aria-live="polite"></small>'));
+  if (modifierIds.length) {
+    const rail = screen.querySelector("[data-flow-ui='session-rail']");
+    const anchor = rail || screen.querySelector(".flow-run-header");
+    if (!anchor) return false;
+    anchor.insertAdjacentHTML("afterend", stripMarkup(modifierIds, '<small data-flow-modifier-status aria-live="polite"></small>'));
+  }
+  screen.dataset.flowModifiersPhase9 = "true";
+  return true;
 }
 
 function decorateChapter(screen) {
-  if (screen.querySelector("[data-flow-modifier-strip]")) return;
+  if (screen.dataset.flowModifiersPhase9 === "true") return true;
   const modifierIds = activeModifierIds();
-  const rail = screen.querySelector("[data-flow-ui='session-rail']");
-  rail?.insertAdjacentHTML("afterend", stripMarkup(modifierIds));
+  if (modifierIds.length) {
+    const rail = screen.querySelector("[data-flow-ui='session-rail']");
+    if (!rail) return false;
+    rail.insertAdjacentHTML("afterend", stripMarkup(modifierIds));
+  }
+  screen.dataset.flowModifiersPhase9 = "true";
+  return true;
 }
 
 function decorateComplete(screen) {
-  if (screen.querySelector("[data-flow-modifier-results]")) return;
+  if (screen.dataset.flowModifiersPhase9 === "true") return true;
   const snapshot = controller()?.getSnapshot?.();
   const modifierIds = normalizeFlowModifierIds(snapshot?.modifiers || []);
-  if (!modifierIds.length) return;
+  if (!modifierIds.length) {
+    screen.dataset.flowModifiersPhase9 = "true";
+    return true;
+  }
+  const primary = screen.querySelector("[data-flow-ux='primary-results']");
+  const scoreBreakdown = screen.querySelector(".flow-score-breakdown");
+  if (!primary || !scoreBreakdown) return false;
   const breakdown = snapshot?.gameplay?.scoreBreakdown;
   const entries = breakdown?.modifierEntries || [];
   const rows = entries.map((entry) => {
     const state = entry.id === "clean-run" ? (entry.achieved ? "earned" : "lost") : "applied";
     return `<li><span>${entry.name}</span><strong>×${entry.appliedMultiplier.toFixed(2)}</strong><small>${state}</small></li>`;
   }).join("");
-  const section = `
+  primary.insertAdjacentHTML("afterend", `
     <section class="flow-modifier-results" data-flow-modifier-results aria-label="Flow modifier results">
       <div><span>Modifiers</span><strong>×${(breakdown?.modifierMultiplier ?? 1).toFixed(3)}</strong></div>
       <ul>${rows}</ul>
-    </section>`;
-  const primary = screen.querySelector("[data-flow-ux='primary-results']");
-  primary?.insertAdjacentHTML("afterend", section);
-  const scoreBreakdown = screen.querySelector(".flow-score-breakdown");
-  if (scoreBreakdown && !scoreBreakdown.querySelector("[data-flow-modifier-score-line]")) {
-    scoreBreakdown.insertAdjacentHTML("beforeend", `<span data-flow-modifier-score-line>× ${(breakdown?.modifierMultiplier ?? 1).toFixed(3)} modifiers</span>`);
-  }
+    </section>`);
+  scoreBreakdown.insertAdjacentHTML("beforeend", `<span data-flow-modifier-score-line>× ${(breakdown?.modifierMultiplier ?? 1).toFixed(3)} modifiers</span>`);
+  screen.dataset.flowModifiersPhase9 = "true";
+  return true;
 }
 
 function decorate() {
   if (!enabled) return;
   const screen = currentScreen();
-  if (!screen) return;
-  if (screen !== decoratedScreen) decoratedScreen = screen;
+  if (!screen || screen.dataset.flowModifiersPhase9 === "true") return;
   const view = screen.dataset.flowView;
   if (view === "ready") decorateReady(screen);
   else if (view === "run") decorateRun(screen);
