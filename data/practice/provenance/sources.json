@@ -2,58 +2,22 @@
   "registryVersion": 1,
   "sources": [
     {
-      "sourceId": "ws-original-en-foundation-v1",
-      "title": "WordStrike Practice English Foundation Samples v1",
-      "sourceType": "wordstrike-original",
-      "upstream": null,
+      "sourceId": "ws-common-words-en-diagnostic-v1",
+      "title": "WordStrike reviewed common-word diagnostic display source for PL28",
+      "sourceType": "permissive-import",
+      "upstream": "https://github.com/first20hours/google-10000-english/blob/master/google-10000-english-usa-no-swears.txt",
       "license": {
-        "name": "WordStrike-authored original corpus material",
-        "spdx": null,
-        "url": null,
-        "attributionRequired": false,
-        "notes": "Content-specific reviewed metadata. Repository code licensing is a separate concern."
+        "name": "MIT License",
+        "spdx": "MIT",
+        "url": "https://github.com/first20hours/google-10000-english/blob/master/LICENSE.md",
+        "attributionRequired": true,
+        "notes": "Display approval applies only to the reviewed lowercase lexical dataset and its manual-review artifact."
       },
-      "retrievedAt": null,
-      "sourceChecksum": "sha256-d7da8abebbefc2558b55b84d22d2c6e4756c3749c8b1a13d6d04c968ee4e03e0",
-      "snapshotPath": "authoring/en-v1.source.json",
+      "retrievedAt": "2026-06-30T00:00:00.000Z",
+      "sourceChecksum": "sha256-9db3a3ed1a30fbd603890b0a7a7b29f736f8ca925f541f822b932e1fb8e6045e",
+      "snapshotPath": "common-words/en-v1/PL6-COMMON-WORD-SOURCE-EN-1.json",
       "usageApproval": "practice-display-approved",
-      "notes": "Small PL6 foundation corpus only; not production-complete coverage."
-    },
-    {
-      "sourceId": "ws-original-en-pace-ladder-v1",
-      "title": "WordStrike Pace Ladder English Diagnostic Template Source v1",
-      "sourceType": "wordstrike-original",
-      "upstream": null,
-      "license": {
-        "name": "WordStrike-authored original corpus material",
-        "spdx": null,
-        "url": null,
-        "attributionRequired": false,
-        "notes": "Original diagnostic natural-text material authored for the Pace Ladder protocol."
-      },
-      "retrievedAt": null,
-      "sourceChecksum": "sha256-77c30534ae24da1a34bf45b285caf9efa91519041dab328dd04553b3867be0bf",
-      "snapshotPath": "pace-ladder/en-v1/source.json",
-      "usageApproval": "practice-display-approved",
-      "notes": "Diagnostic-only source material for PL26 Pace Ladder forms; not part of protected evaluation pools."
-    },
-    {
-      "sourceId": "ws-original-en-frequency-v1",
-      "title": "WordStrike English Typability Frequency Bands v1",
-      "sourceType": "wordstrike-original",
-      "upstream": null,
-      "license": {
-        "name": "WordStrike-authored statistical reference",
-        "spdx": null,
-        "url": null,
-        "attributionRequired": false,
-        "notes": "Curated frequency-band reference used only for Practice typability statistics."
-      },
-      "retrievedAt": null,
-      "sourceChecksum": "sha256-f6e9613d84a62b21df8a61a12b2b9c001190cfacefdc99ba808623063493b018",
-      "snapshotPath": "provenance/frequency/en-v1.frequency.json",
-      "usageApproval": "statistical-only",
-      "notes": "Governed statistical reference for PL10 typability coverage; it is not user-facing corpus content."
+      "notes": "Independent PL6 production-display approval for the PL28 diagnostic form pool. The derived Check artifact is partitioned diagnostic and never sources training, transfer, benchmark, or research-holdout records as measurement material."
     },
     {
       "sourceId": "ws-common-words-en-statistical-v1",
@@ -92,24 +56,6 @@
       "notes": "Independent PL6 production-display approval for the PL28 training bank. The derived Practice artifact is partitioned training and never sources protected evaluation partitions."
     },
     {
-      "sourceId": "ws-common-words-en-diagnostic-v1",
-      "title": "WordStrike reviewed common-word diagnostic display source for PL28",
-      "sourceType": "permissive-import",
-      "upstream": "https://github.com/first20hours/google-10000-english/blob/master/google-10000-english-usa-no-swears.txt",
-      "license": {
-        "name": "MIT License",
-        "spdx": "MIT",
-        "url": "https://github.com/first20hours/google-10000-english/blob/master/LICENSE.md",
-        "attributionRequired": true,
-        "notes": "Display approval applies only to the reviewed lowercase lexical dataset and its manual-review artifact."
-      },
-      "retrievedAt": "2026-06-30T00:00:00.000Z",
-      "sourceChecksum": "sha256-9db3a3ed1a30fbd603890b0a7a7b29f736f8ca925f541f822b932e1fb8e6045e",
-      "snapshotPath": "common-words/en-v1/PL6-COMMON-WORD-SOURCE-EN-1.json",
-      "usageApproval": "practice-display-approved",
-      "notes": "Independent PL6 production-display approval for the PL28 diagnostic form pool. The derived Check artifact is partitioned diagnostic and never sources training, transfer, benchmark, or research-holdout records as measurement material."
-    },
-    {
       "sourceId": "ws-original-en-consistency-v1",
       "title": "WordStrike Consistency English Training Source v1",
       "sourceType": "wordstrike-original",
@@ -124,24 +70,6 @@
       "retrievedAt": null,
       "sourceChecksum": "sha256-4b06c70f300ea07daabe4e7422335196e7032d85091c823a9e12fe10174d4e44",
       "snapshotPath": "consistency/en-v1/source.json",
-      "usageApproval": "practice-display-approved",
-      "notes": "PL29 training sustained natural-prose source."
-    },
-    {
-      "sourceId": "ws-original-en-endurance-practice-v1",
-      "title": "WordStrike Endurance Practice English Training Source v1",
-      "sourceType": "wordstrike-original",
-      "upstream": null,
-      "license": {
-        "name": "WordStrike-authored original corpus material",
-        "spdx": null,
-        "url": null,
-        "attributionRequired": false,
-        "notes": "Content-specific reviewed metadata. Repository code licensing is a separate concern."
-      },
-      "retrievedAt": null,
-      "sourceChecksum": "sha256-39466cc376afbb245ec2eccd753a2f080c1ce6cc328e33b9d98c849bdc6b6939",
-      "snapshotPath": "endurance/en-v1/practice-source.json",
       "usageApproval": "practice-display-approved",
       "notes": "PL29 training sustained natural-prose source."
     },
@@ -164,8 +92,8 @@
       "notes": "PL29 diagnostic sustained natural-prose source."
     },
     {
-      "sourceId": "ws-original-en-punctuation-capitals-v1",
-      "title": "WordStrike Punctuation & Capitals English v1 authored templates",
+      "sourceId": "ws-original-en-endurance-practice-v1",
+      "title": "WordStrike Endurance Practice English Training Source v1",
       "sourceType": "wordstrike-original",
       "upstream": null,
       "license": {
@@ -173,13 +101,49 @@
         "spdx": null,
         "url": null,
         "attributionRequired": false,
-        "notes": "Original PL30 punctuation/capital transcription material."
+        "notes": "Content-specific reviewed metadata. Repository code licensing is a separate concern."
       },
       "retrievedAt": null,
-      "sourceChecksum": "sha256-1ae7bfcb5118a05108c552bc15af2b5c4cf15316e38dde67faecc6d8eec2371a",
-      "snapshotPath": "punctuation-capitals/en-v1/source.json",
+      "sourceChecksum": "sha256-39466cc376afbb245ec2eccd753a2f080c1ce6cc328e33b9d98c849bdc6b6939",
+      "snapshotPath": "endurance/en-v1/practice-source.json",
       "usageApproval": "practice-display-approved",
-      "notes": "PL30 training and diagnostic source templates. Derived artifacts remain partition-separated."
+      "notes": "PL29 training sustained natural-prose source."
+    },
+    {
+      "sourceId": "ws-original-en-foundation-v1",
+      "title": "WordStrike Practice English Foundation Samples v1",
+      "sourceType": "wordstrike-original",
+      "upstream": null,
+      "license": {
+        "name": "WordStrike-authored original corpus material",
+        "spdx": null,
+        "url": null,
+        "attributionRequired": false,
+        "notes": "Content-specific reviewed metadata. Repository code licensing is a separate concern."
+      },
+      "retrievedAt": null,
+      "sourceChecksum": "sha256-d7da8abebbefc2558b55b84d22d2c6e4756c3749c8b1a13d6d04c968ee4e03e0",
+      "snapshotPath": "authoring/en-v1.source.json",
+      "usageApproval": "practice-display-approved",
+      "notes": "Small PL6 foundation corpus only; not production-complete coverage."
+    },
+    {
+      "sourceId": "ws-original-en-frequency-v1",
+      "title": "WordStrike English Typability Frequency Bands v1",
+      "sourceType": "wordstrike-original",
+      "upstream": null,
+      "license": {
+        "name": "WordStrike-authored statistical reference",
+        "spdx": null,
+        "url": null,
+        "attributionRequired": false,
+        "notes": "Curated frequency-band reference used only for Practice typability statistics."
+      },
+      "retrievedAt": null,
+      "sourceChecksum": "sha256-f6e9613d84a62b21df8a61a12b2b9c001190cfacefdc99ba808623063493b018",
+      "snapshotPath": "provenance/frequency/en-v1.frequency.json",
+      "usageApproval": "statistical-only",
+      "notes": "Governed statistical reference for PL10 typability coverage; it is not user-facing corpus content."
     },
     {
       "sourceId": "ws-original-en-numbers-symbols-v1",
@@ -198,6 +162,114 @@
       "snapshotPath": "numbers-symbols/en-v1/source.json",
       "usageApproval": "practice-display-approved",
       "notes": "PL30 training and diagnostic source templates. Values are synthetic and non-PII."
+    },
+    {
+      "sourceId": "ws-original-en-pace-ladder-v1",
+      "title": "WordStrike Pace Ladder English Diagnostic Template Source v1",
+      "sourceType": "wordstrike-original",
+      "upstream": null,
+      "license": {
+        "name": "WordStrike-authored original corpus material",
+        "spdx": null,
+        "url": null,
+        "attributionRequired": false,
+        "notes": "Original diagnostic natural-text material authored for the Pace Ladder protocol."
+      },
+      "retrievedAt": null,
+      "sourceChecksum": "sha256-77c30534ae24da1a34bf45b285caf9efa91519041dab328dd04553b3867be0bf",
+      "snapshotPath": "pace-ladder/en-v1/source.json",
+      "usageApproval": "practice-display-approved",
+      "notes": "Diagnostic-only source material for PL26 Pace Ladder forms; not part of protected evaluation pools."
+    },
+    {
+      "sourceId": "ws-original-en-punctuation-capitals-v1",
+      "title": "WordStrike Punctuation & Capitals English v1 authored templates",
+      "sourceType": "wordstrike-original",
+      "upstream": null,
+      "license": {
+        "name": "WordStrike-authored original corpus material",
+        "spdx": null,
+        "url": null,
+        "attributionRequired": false,
+        "notes": "Original PL30 punctuation/capital transcription material."
+      },
+      "retrievedAt": null,
+      "sourceChecksum": "sha256-1ae7bfcb5118a05108c552bc15af2b5c4cf15316e38dde67faecc6d8eec2371a",
+      "snapshotPath": "punctuation-capitals/en-v1/source.json",
+      "usageApproval": "practice-display-approved",
+      "notes": "PL30 training and diagnostic source templates. Derived artifacts remain partition-separated."
+    },
+    {
+      "sourceId": "ws-original-gc3-assessment-en-v1",
+      "title": "GC3 Assessment English Original Source v1",
+      "sourceType": "wordstrike-original",
+      "upstream": null,
+      "license": {
+        "name": "WordStrike-authored original corpus material",
+        "spdx": null,
+        "url": null,
+        "attributionRequired": false,
+        "notes": "GC3 release-critical prose authored for WordStrike and reviewed for local Practice display."
+      },
+      "retrievedAt": null,
+      "sourceChecksum": "sha256-da42c77b574a7f583961d234bcdafb03475a157daf69ff8767d0d1fc26714202",
+      "snapshotPath": "authoring/gc3-assessment-en-v1.source.json",
+      "usageApproval": "practice-display-approved",
+      "notes": "GC3 governed original content; partition and family boundaries are enforced by the canonical corpus builder."
+    },
+    {
+      "sourceId": "ws-original-gc3-benchmark-en-v1",
+      "title": "GC3 Benchmark English Original Source v1",
+      "sourceType": "wordstrike-original",
+      "upstream": null,
+      "license": {
+        "name": "WordStrike-authored original corpus material",
+        "spdx": null,
+        "url": null,
+        "attributionRequired": false,
+        "notes": "GC3 release-critical prose authored for WordStrike and reviewed for local Practice display."
+      },
+      "retrievedAt": null,
+      "sourceChecksum": "sha256-605dd54550c8ff9740b96b15b8f444ea762da019285c3472ca00303efc20d3dd",
+      "snapshotPath": "authoring/gc3-benchmark-en-v1.source.json",
+      "usageApproval": "practice-display-approved",
+      "notes": "GC3 governed original content; partition and family boundaries are enforced by the canonical corpus builder."
+    },
+    {
+      "sourceId": "ws-original-gc3-realtext-en-v1",
+      "title": "GC3 Real Text English Original Source v1",
+      "sourceType": "wordstrike-original",
+      "upstream": null,
+      "license": {
+        "name": "WordStrike-authored original corpus material",
+        "spdx": null,
+        "url": null,
+        "attributionRequired": false,
+        "notes": "GC3 release-critical prose authored for WordStrike and reviewed for local Practice display."
+      },
+      "retrievedAt": null,
+      "sourceChecksum": "sha256-bdbfb80983d45f2fe0f9759fb4f8adb1e524bcf86f722b1e06b4f0dc485e0124",
+      "snapshotPath": "authoring/gc3-realtext-en-v1.source.json",
+      "usageApproval": "practice-display-approved",
+      "notes": "GC3 governed original content; partition and family boundaries are enforced by the canonical corpus builder."
+    },
+    {
+      "sourceId": "ws-original-gc3-transfer-en-v1",
+      "title": "GC3 Transfer English Original Source v1",
+      "sourceType": "wordstrike-original",
+      "upstream": null,
+      "license": {
+        "name": "WordStrike-authored original corpus material",
+        "spdx": null,
+        "url": null,
+        "attributionRequired": false,
+        "notes": "GC3 release-critical prose authored for WordStrike and reviewed for local Practice display."
+      },
+      "retrievedAt": null,
+      "sourceChecksum": "sha256-21f6a4b2af2125ea27bb77fe0e1affa2c67dce360e6f4aabf348cd8a603338fe",
+      "snapshotPath": "authoring/gc3-transfer-en-v1.source.json",
+      "usageApproval": "practice-display-approved",
+      "notes": "GC3 governed original content; partition and family boundaries are enforced by the canonical corpus builder."
     }
   ]
 }

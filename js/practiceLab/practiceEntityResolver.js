@@ -19,6 +19,8 @@ export function createPracticeEntityResolver({
   if (!contentPlan || typeof contentPlan.text !== "string") throw new TypeError("Practice entity resolver requires a content plan");
   const resolvedLanguage = language ?? contentPlan.metadata?.language ?? "en";
   const analysis = analyzePracticeText({ text: contentPlan.text, language: resolvedLanguage, segmenter });
+  const evidenceSegments = contentPlan.metadata?.evidenceSegments;
+  const segmentAt = position => Array.isArray(evidenceSegments) ? evidenceSegments.find(s => position >= s.startIndex && position < s.endIndex) : {startIndex:0,endIndex:analysis.graphemeCount};
   const wordByPosition = Array(analysis.graphemeCount).fill(null);
   for (const word of analysis.words) {
     for (let p = word.startIndex; p < word.endIndex; p += 1) wordByPosition[p] = word;
@@ -45,9 +47,11 @@ export function createPracticeEntityResolver({
 
   const resolveAtPosition = (position) => {
     if (!Number.isInteger(position) || position < 0 || position >= analysis.graphemes.length) return freezeDeep([]);
+    const segment = segmentAt(position);
+    if (!segment) return freezeDeep([]);
     const entities = [entity("key", analysis.graphemes[position])];
-    if (position >= 1) entities.push(entity("bigram", analysis.graphemes.slice(position - 1, position + 1).join("")));
-    if (position >= 2) entities.push(entity("trigram", analysis.graphemes.slice(position - 2, position + 1).join("")));
+    if (position - 1 >= segment.startIndex) entities.push(entity("bigram", analysis.graphemes.slice(position - 1, position + 1).join("")));
+    if (position - 2 >= segment.startIndex) entities.push(entity("trigram", analysis.graphemes.slice(position - 2, position + 1).join("")));
     const word = wordByPosition[position];
     if (allowWordEntities && word?.lexicalKey) entities.push(entity("word", word.lexicalKey));
     return freezeDeep(entities);
@@ -55,6 +59,7 @@ export function createPracticeEntityResolver({
 
   return Object.freeze({
     analysis,
+    isEvidenceBoundary(position) { return Array.isArray(evidenceSegments) && (!segmentAt(position) || segmentAt(position).startIndex === position); },
     directTargetKeys,
     directTargetsByType: freezeDeep(directTargetsByType),
     resolveAtPosition,

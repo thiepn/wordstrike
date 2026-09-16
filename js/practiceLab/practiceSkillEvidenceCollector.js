@@ -284,6 +284,7 @@ export function createPracticeSkillEvidenceTracker({
       if (!["fluent", "disfluent"].includes(normalized.latencyClass)) continue;
       if (!(normalized.correctness === "correct" || normalized.correctness === true)) continue;
       if (!Number.isInteger(normalized.textPosition)) continue;
+      if (entityResolver.isEvidenceBoundary(normalized.textPosition)) continue;
       const word = entityResolver.resolveWordAtPosition(normalized.textPosition);
       for (const entity of entityResolver.resolveAtPosition(normalized.textPosition)) {
         const entry = entries.get(idKey(entity.entityType, entity.entityKey));

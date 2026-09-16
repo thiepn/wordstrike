@@ -4,29 +4,380 @@
   "poolVersion": 1,
   "generatorVersion": 1,
   "language": "en",
-  "status": "draft",
+  "status": "ready",
   "separator": " ",
   "corpusBinding": {
     "corpusId": "practice-en-v1",
     "corpusVersion": 1,
-    "corpusChecksum": "sha256-28beccf65eed71519da306c129da5040a20f364aed320dc21eea2d16c2a1c404"
+    "corpusChecksum": "sha256-55b276a4628d6c29f5ce47ced81e4ed5f571866c5e3afa56ee7ee3d9c1fd1438"
   },
   "indexBinding": {
     "indexSchemaVersion": 1,
-    "indexChecksum": "sha256-bb198244a6b6cefcae5cb908bf3dee6e9e52259f9ef41576ec69c429a423ff32"
+    "indexChecksum": "sha256-91fa2d94960c10da646ae5473b9d1a555eef849dfef7526b6c2ca3954fe109d8"
   },
   "typabilityBinding": {
     "modelVersion": 1,
     "featureVersion": 1,
     "referenceVersion": 1,
-    "referenceChecksum": "sha256-94a6f90c3593ebc089211882e2d9afaf0bf46b66386cdc98dbe60c533e6dd471",
-    "trainingArtifactChecksum": "sha256-5e7e1f524a4856876073b7906dc4b8685c3495dc12fcbc954ba3c41d837470dc"
+    "referenceChecksum": "sha256-2a3070a839af7e294dfd826ce5e6ff473bf82f3bf34eb335ce1d52c936aac111",
+    "trainingArtifactChecksum": "sha256-d8ee8261ebd8ad47d4bc36ef435ddeee4ca7f67f8906cabf951c78a9f6b5bcc1"
   },
-  "units": [],
+  "units": [
+    {
+      "unitId": "realtext-cnt_gc3_realtext_001_s000_3",
+      "unitVersion": 1,
+      "familyIds": [
+        "fam_gc3_realtext_001"
+      ],
+      "orderedContentIds": [
+        "cnt_gc3_realtext_001_s000_3"
+      ],
+      "contentHashes": {
+        "cnt_gc3_realtext_001_s000_3": "sha256-6b6fde6554325b40780c0eea0c435231e0215044f53ef55b58ac3a7ae24c560f"
+      },
+      "graphemeCount": 2191,
+      "wordCount": 355,
+      "difficultyIndex": -0.0008962957257556096,
+      "relativeDifficultyPercentile": 29.761904761904763,
+      "availableModelWeight": 1,
+      "digitRatio": 0,
+      "symbolRatio": 0,
+      "separator": " ",
+      "unitHash": "fnv1a32-a297270c"
+    },
+    {
+      "unitId": "realtext-cnt_gc3_realtext_002_s000_1",
+      "unitVersion": 1,
+      "familyIds": [
+        "fam_gc3_realtext_002"
+      ],
+      "orderedContentIds": [
+        "cnt_gc3_realtext_002_s000_1"
+      ],
+      "contentHashes": {
+        "cnt_gc3_realtext_002_s000_1": "sha256-43cfecaf3296bcc5ac9b3d3ef367768b13c8413033047ba60c5e36545cd4c57f"
+      },
+      "graphemeCount": 2211,
+      "wordCount": 354,
+      "difficultyIndex": -0.006470894765741496,
+      "relativeDifficultyPercentile": 13.095238095238095,
+      "availableModelWeight": 1,
+      "digitRatio": 0,
+      "symbolRatio": 0,
+      "separator": " ",
+      "unitHash": "fnv1a32-6237a31e"
+    },
+    {
+      "unitId": "realtext-cnt_gc3_realtext_003_s000_3",
+      "unitVersion": 1,
+      "familyIds": [
+        "fam_gc3_realtext_003"
+      ],
+      "orderedContentIds": [
+        "cnt_gc3_realtext_003_s000_3"
+      ],
+      "contentHashes": {
+        "cnt_gc3_realtext_003_s000_3": "sha256-fd3356ed0f4d570b126133c503651179763a73a91a01b9c606c54a48f8caa8e6"
+      },
+      "graphemeCount": 2208,
+      "wordCount": 355,
+      "difficultyIndex": -0.0017415260341274445,
+      "relativeDifficultyPercentile": 20.238095238095237,
+      "availableModelWeight": 1,
+      "digitRatio": 0,
+      "symbolRatio": 0,
+      "separator": " ",
+      "unitHash": "fnv1a32-0747ca9d"
+    },
+    {
+      "unitId": "realtext-cnt_gc3_realtext_004_s000_5",
+      "unitVersion": 1,
+      "familyIds": [
+        "fam_gc3_realtext_004"
+      ],
+      "orderedContentIds": [
+        "cnt_gc3_realtext_004_s000_5"
+      ],
+      "contentHashes": {
+        "cnt_gc3_realtext_004_s000_5": "sha256-99834cdd71b5176d8e76d4e34b72791e9eaa7f595b40388269e76c7a2f6f44d9"
+      },
+      "graphemeCount": 2210,
+      "wordCount": 354,
+      "difficultyIndex": -0.0010307012633713145,
+      "relativeDifficultyPercentile": 27.38095238095238,
+      "availableModelWeight": 1,
+      "digitRatio": 0,
+      "symbolRatio": 0,
+      "separator": " ",
+      "unitHash": "fnv1a32-e2768261"
+    },
+    {
+      "unitId": "realtext-cnt_gc3_realtext_005_s000_3",
+      "unitVersion": 1,
+      "familyIds": [
+        "fam_gc3_realtext_005"
+      ],
+      "orderedContentIds": [
+        "cnt_gc3_realtext_005_s000_3"
+      ],
+      "contentHashes": {
+        "cnt_gc3_realtext_005_s000_3": "sha256-83800cfffd0fb1c7ccc99a9f496da22693de4e2cd8c62b7385d2dc1fce12a749"
+      },
+      "graphemeCount": 2190,
+      "wordCount": 356,
+      "difficultyIndex": 0.003831253103986619,
+      "relativeDifficultyPercentile": 53.57142857142857,
+      "availableModelWeight": 1,
+      "digitRatio": 0,
+      "symbolRatio": 0,
+      "separator": " ",
+      "unitHash": "fnv1a32-57d00eb1"
+    },
+    {
+      "unitId": "realtext-cnt_gc3_realtext_006_s000_1",
+      "unitVersion": 1,
+      "familyIds": [
+        "fam_gc3_realtext_006"
+      ],
+      "orderedContentIds": [
+        "cnt_gc3_realtext_006_s000_1"
+      ],
+      "contentHashes": {
+        "cnt_gc3_realtext_006_s000_1": "sha256-0f000a06c9eb64d3be493aa55f27976196e805f0e48753ce90f11e5c85fac69a"
+      },
+      "graphemeCount": 2210,
+      "wordCount": 354,
+      "difficultyIndex": -0.0010307012633715255,
+      "relativeDifficultyPercentile": 25,
+      "availableModelWeight": 1,
+      "digitRatio": 0,
+      "symbolRatio": 0,
+      "separator": " ",
+      "unitHash": "fnv1a32-5d60440a"
+    },
+    {
+      "unitId": "realtext-cnt_gc3_realtext_007_s000_3",
+      "unitVersion": 1,
+      "familyIds": [
+        "fam_gc3_realtext_007"
+      ],
+      "orderedContentIds": [
+        "cnt_gc3_realtext_007_s000_3"
+      ],
+      "contentHashes": {
+        "cnt_gc3_realtext_007_s000_3": "sha256-b848ec548af76c7e520da80fbb63dfa370eb1f54f4135cd82d8a1efe0cb407b2"
+      },
+      "graphemeCount": 2204,
+      "wordCount": 355,
+      "difficultyIndex": -0.001548745557646553,
+      "relativeDifficultyPercentile": 22.61904761904762,
+      "availableModelWeight": 1,
+      "digitRatio": 0,
+      "symbolRatio": 0,
+      "separator": " ",
+      "unitHash": "fnv1a32-99aa9e05"
+    },
+    {
+      "unitId": "realtext-cnt_gc3_realtext_008_s000_34",
+      "unitVersion": 1,
+      "familyIds": [
+        "fam_gc3_realtext_008"
+      ],
+      "orderedContentIds": [
+        "cnt_gc3_realtext_008_s000_34"
+      ],
+      "contentHashes": {
+        "cnt_gc3_realtext_008_s000_34": "sha256-e878577c0d761d1d83ded79bfe433e37decbaf8a5ed5c5716b198d3de3dd524f"
+      },
+      "graphemeCount": 2196,
+      "wordCount": 354,
+      "difficultyIndex": -0.0003560001627416433,
+      "relativeDifficultyPercentile": 36.904761904761905,
+      "availableModelWeight": 1,
+      "digitRatio": 0,
+      "symbolRatio": 0,
+      "separator": " ",
+      "unitHash": "fnv1a32-53864c77"
+    },
+    {
+      "unitId": "realtext-cnt_gc3_realtext_009_s000_3",
+      "unitVersion": 1,
+      "familyIds": [
+        "fam_gc3_realtext_009"
+      ],
+      "orderedContentIds": [
+        "cnt_gc3_realtext_009_s000_3"
+      ],
+      "contentHashes": {
+        "cnt_gc3_realtext_009_s000_3": "sha256-bd5b386ac6cb3020f40fab11ab4a497e09e90848c06e87169f3714f44ca4eb7e"
+      },
+      "graphemeCount": 2185,
+      "wordCount": 354,
+      "difficultyIndex": 0.0002065258911260917,
+      "relativeDifficultyPercentile": 41.666666666666664,
+      "availableModelWeight": 1,
+      "digitRatio": 0,
+      "symbolRatio": 0,
+      "separator": " ",
+      "unitHash": "fnv1a32-66ea9f9b"
+    },
+    {
+      "unitId": "realtext-cnt_gc3_realtext_010_s000_22",
+      "unitVersion": 1,
+      "familyIds": [
+        "fam_gc3_realtext_010"
+      ],
+      "orderedContentIds": [
+        "cnt_gc3_realtext_010_s000_22"
+      ],
+      "contentHashes": {
+        "cnt_gc3_realtext_010_s000_22": "sha256-c52db1b2f8ae95a19d7e3d6d82a113f1a34a61cf1ad74e2a7652187d1db3b28a"
+      },
+      "graphemeCount": 2196,
+      "wordCount": 353,
+      "difficultyIndex": 0.0004459345069100571,
+      "relativeDifficultyPercentile": 44.04761904761905,
+      "availableModelWeight": 1,
+      "digitRatio": 0,
+      "symbolRatio": 0,
+      "separator": " ",
+      "unitHash": "fnv1a32-31d1702b"
+    },
+    {
+      "unitId": "realtext-cnt_gc3_realtext_011_s000_0",
+      "unitVersion": 1,
+      "familyIds": [
+        "fam_gc3_realtext_011"
+      ],
+      "orderedContentIds": [
+        "cnt_gc3_realtext_011_s000_0"
+      ],
+      "contentHashes": {
+        "cnt_gc3_realtext_011_s000_0": "sha256-897aeb7d5406b1b1f8ca88b183a51a8fce870561cfa206369162c3c06abfa24b"
+      },
+      "graphemeCount": 2195,
+      "wordCount": 353,
+      "difficultyIndex": 0.0004951756018443603,
+      "relativeDifficultyPercentile": 46.42857142857143,
+      "availableModelWeight": 1,
+      "digitRatio": 0,
+      "symbolRatio": 0,
+      "separator": " ",
+      "unitHash": "fnv1a32-25996813"
+    },
+    {
+      "unitId": "realtext-cnt_gc3_realtext_012_s000_26",
+      "unitVersion": 1,
+      "familyIds": [
+        "fam_gc3_realtext_012"
+      ],
+      "orderedContentIds": [
+        "cnt_gc3_realtext_012_s000_26"
+      ],
+      "contentHashes": {
+        "cnt_gc3_realtext_012_s000_26": "sha256-42b8bbd4944ab1683146d038df5510e23922d853b174ceb3c265bef82d6cce4c"
+      },
+      "graphemeCount": 2210,
+      "wordCount": 355,
+      "difficultyIndex": -0.001836523651499988,
+      "relativeDifficultyPercentile": 17.857142857142858,
+      "availableModelWeight": 1,
+      "digitRatio": 0,
+      "symbolRatio": 0,
+      "separator": " ",
+      "unitHash": "fnv1a32-f108bfb0"
+    },
+    {
+      "unitId": "realtext-cnt_gc3_realtext_013_s000_8",
+      "unitVersion": 1,
+      "familyIds": [
+        "fam_gc3_realtext_013"
+      ],
+      "orderedContentIds": [
+        "cnt_gc3_realtext_013_s000_8"
+      ],
+      "contentHashes": {
+        "cnt_gc3_realtext_013_s000_8": "sha256-edf328d9a8bab6ffa02ce06cc190a6996362d57730a3114fed2cf58b2b1faf13"
+      },
+      "graphemeCount": 2201,
+      "wordCount": 354,
+      "difficultyIndex": -0.0006022212669757499,
+      "relativeDifficultyPercentile": 34.523809523809526,
+      "availableModelWeight": 1,
+      "digitRatio": 0,
+      "symbolRatio": 0,
+      "separator": " ",
+      "unitHash": "fnv1a32-a9d11341"
+    },
+    {
+      "unitId": "realtext-cnt_gc3_realtext_014_s000_2",
+      "unitVersion": 1,
+      "familyIds": [
+        "fam_gc3_realtext_014"
+      ],
+      "orderedContentIds": [
+        "cnt_gc3_realtext_014_s000_2"
+      ],
+      "contentHashes": {
+        "cnt_gc3_realtext_014_s000_2": "sha256-ed12eaaec6330a7224e598655787e7819fcd9bc0e1f457487be94b2952ddcb1e"
+      },
+      "graphemeCount": 2201,
+      "wordCount": 354,
+      "difficultyIndex": -0.0006022212669765936,
+      "relativeDifficultyPercentile": 32.142857142857146,
+      "availableModelWeight": 1,
+      "digitRatio": 0,
+      "symbolRatio": 0,
+      "separator": " ",
+      "unitHash": "fnv1a32-c2626350"
+    },
+    {
+      "unitId": "realtext-cnt_gc3_realtext_015_s000_8",
+      "unitVersion": 1,
+      "familyIds": [
+        "fam_gc3_realtext_015"
+      ],
+      "orderedContentIds": [
+        "cnt_gc3_realtext_015_s000_8"
+      ],
+      "contentHashes": {
+        "cnt_gc3_realtext_015_s000_8": "sha256-81e54f111d1f21aef36054d8775389a6c36a423b2415083f84e212c5e8ab5505"
+      },
+      "graphemeCount": 2195,
+      "wordCount": 354,
+      "difficultyIndex": -0.0003060493654456798,
+      "relativeDifficultyPercentile": 39.285714285714285,
+      "availableModelWeight": 1,
+      "digitRatio": 0,
+      "symbolRatio": 0,
+      "separator": " ",
+      "unitHash": "fnv1a32-87dda517"
+    },
+    {
+      "unitId": "realtext-cnt_gc3_realtext_016_s000_48",
+      "unitVersion": 1,
+      "familyIds": [
+        "fam_gc3_realtext_016"
+      ],
+      "orderedContentIds": [
+        "cnt_gc3_realtext_016_s000_48"
+      ],
+      "contentHashes": {
+        "cnt_gc3_realtext_016_s000_48": "sha256-f59bd25873554d0d5f52d6ed0e75dd09ed0dd2c314084f5c37121ac3759b530a"
+      },
+      "graphemeCount": 2194,
+      "wordCount": 353,
+      "difficultyIndex": 0.0005446527342730546,
+      "relativeDifficultyPercentile": 48.80952380952381,
+      "availableModelWeight": 1,
+      "digitRatio": 0,
+      "symbolRatio": 0,
+      "separator": " ",
+      "unitHash": "fnv1a32-bd6bf2e9"
+    }
+  ],
   "releaseReport": {
-    "releaseBlockers": [
-      "minimum-ready-unit-count:0/16"
-    ]
+    "releaseBlockers": []
   },
-  "checksum": "fnv1a32-4b676178"
+  "checksum": "fnv1a32-4dc4d655"
 }

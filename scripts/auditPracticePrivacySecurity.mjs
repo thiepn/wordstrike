@@ -56,6 +56,8 @@ const STATIC_FETCH_FILES = Object.freeze(new Set([
 // Exact current sink counts are certified. A new occurrence is not inherited by
 // this review: it changes the count and fails PL39 until explicitly audited.
 const REVIEWED_INNER_HTML = Object.freeze({
+  "js/practiceLab/practiceAssessmentSessionHost.js": [2, "fixed shell and bounded visible passage window; all dynamic strings HTML-escaped"],
+  "js/practiceLab/practiceEvidenceViews.js": [1, "escaped entity/session strings and finite numeric formatting; no raw source content"],
   "js/practiceLab/practiceAccuracyRecoverySessionHost.js": [2, "fixed shell/results and bounded metrics"],
   "js/practiceLab/practiceBurstSprintsSessionHost.js": [1, "GC1 central shell helper; dynamic text is escaped and protocol/result metrics are bounded"],
   "js/practiceLab/practiceCoachReviewSessionHost.js": [3, "fixed review shell/results with validated identifiers"],

@@ -18,13 +18,13 @@
   "bindings": {
     "corpusId": "practice-en-v1",
     "corpusVersion": 1,
-    "corpusChecksum": "sha256-28beccf65eed71519da306c129da5040a20f364aed320dc21eea2d16c2a1c404",
+    "corpusChecksum": "sha256-55b276a4628d6c29f5ce47ced81e4ed5f571866c5e3afa56ee7ee3d9c1fd1438",
     "indexSchemaVersion": 1,
-    "indexChecksum": "sha256-bb198244a6b6cefcae5cb908bf3dee6e9e52259f9ef41576ec69c429a423ff32",
+    "indexChecksum": "sha256-91fa2d94960c10da646ae5473b9d1a555eef849dfef7526b6c2ca3954fe109d8",
     "typabilityModelVersion": 1,
     "typabilityFeatureVersion": 1,
     "typabilityReferenceVersion": 1,
-    "typabilityReferenceChecksum": "sha256-94a6f90c3593ebc089211882e2d9afaf0bf46b66386cdc98dbe60c533e6dd471",
+    "typabilityReferenceChecksum": "sha256-2a3070a839af7e294dfd826ce5e6ff473bf82f3bf34eb335ce1d52c936aac111",
     "frequencyReferenceVersion": 1,
     "frequencyReferenceId": "ws-en-frequency-v1",
     "frequencyReferenceChecksum": "sha256-b9bc8dde064335c2258844919c6dd62537f95ac4a2d5920fdd7213a9cb5d45ad"

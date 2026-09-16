@@ -192,6 +192,7 @@ export function createPracticeAssessmentService({
             partition: "diagnostic",
             assessmentDiagnosticFormId: block.diagnosticFormId,
             assessmentBlockId: block.blockId,
+            evidenceSegments: loaded.evidenceSegments ?? null,
           },
         };
       } else {

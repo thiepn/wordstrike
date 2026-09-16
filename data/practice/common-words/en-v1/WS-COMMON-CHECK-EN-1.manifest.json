@@ -34,13 +34,13 @@
   "bindings": {
     "corpusId": "practice-en-v1",
     "corpusVersion": 1,
-    "corpusChecksum": "sha256-28beccf65eed71519da306c129da5040a20f364aed320dc21eea2d16c2a1c404",
+    "corpusChecksum": "sha256-55b276a4628d6c29f5ce47ced81e4ed5f571866c5e3afa56ee7ee3d9c1fd1438",
     "indexSchemaVersion": 1,
     "indexGeneratorVersion": 1,
-    "indexChecksum": "sha256-bb198244a6b6cefcae5cb908bf3dee6e9e52259f9ef41576ec69c429a423ff32",
+    "indexChecksum": "sha256-91fa2d94960c10da646ae5473b9d1a555eef849dfef7526b6c2ca3954fe109d8",
     "typabilityModelVersion": 1,
     "typabilityReferenceVersion": 1,
-    "typabilityReferenceChecksum": "sha256-94a6f90c3593ebc089211882e2d9afaf0bf46b66386cdc98dbe60c533e6dd471",
+    "typabilityReferenceChecksum": "sha256-2a3070a839af7e294dfd826ce5e6ff473bf82f3bf34eb335ce1d52c936aac111",
     "frequencyReferenceVersion": 1,
     "frequencyReferenceChecksum": "sha256-b9bc8dde064335c2258844919c6dd62537f95ac4a2d5920fdd7213a9cb5d45ad",
     "builderVersion": 1,
@@ -53,8 +53,8 @@
     "sourceSnapshotChecksum": "sha256-b21f765a7b059fa5401d1dbe29af28050a7ec8b5c72af976b4203e28ac53fccb",
     "commonWordReferenceId": "WS-COMMON-EN-1",
     "commonWordReferenceVersion": 1,
-    "commonWordReferenceChecksum": "sha256-7d20bd63e451df4d78cabfb622d5214b8e8921bdb35a47155f69f966308a0880",
-    "sourceChecksum": "sha256-7d20bd63e451df4d78cabfb622d5214b8e8921bdb35a47155f69f966308a0880",
+    "commonWordReferenceChecksum": "sha256-fccf3b14b5ff40fbdb77bacab2cc0293740c1e1dc588977f6fe345ad69ed7f34",
+    "sourceChecksum": "sha256-fccf3b14b5ff40fbdb77bacab2cc0293740c1e1dc588977f6fe345ad69ed7f34",
     "displaySourceId": "ws-common-words-en-diagnostic-v1",
     "displaySourceChecksum": "sha256-9db3a3ed1a30fbd603890b0a7a7b29f736f8ca925f541f822b932e1fb8e6045e",
     "displaySourceRegistryChecksum": "sha256-0612d1bd11805f91c735497eed250624fd89e447828bd479d07f933d8ee1762b"
@@ -17037,5 +17037,5 @@
       "textHash": "sha256-f70be8fe3072fb0729516d6831940ae802142552e7e6c233eb1a8ab14e690fbd"
     }
   ],
-  "checksum": "sha256-e4a6801b85fb2df324985125ac6c25cdb95dfbce89e7374f15aa04f2f77d9b4c"
+  "checksum": "sha256-16d415214021b7dede4b08a297f27cbe89a18bdab7ef82d59c10bf8641903af4"
 }

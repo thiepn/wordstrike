@@ -1,0 +1,1383 @@
+{
+  "schemaVersion": 1,
+  "corpusId": "practice-en-v1",
+  "language": "en",
+  "corpusVersion": 1,
+  "partitionPolicyVersion": 1,
+  "status": "foundation",
+  "createdAt": "2026-09-04T00:00:00.000Z",
+  "families": [
+    {
+      "familyId": "fam_gc3_assess_001",
+      "sourceId": "ws-original-gc3-assessment-en-v1",
+      "partitionLock": "diagnostic",
+      "items": [
+        {
+          "contentId": "cnt_gc3_assess_001_s000_6",
+          "contentType": "passage",
+          "text": "Mineral Specimen Catalog is easiest to understand by spending time in a geology classroom cataloging minerals and noticing how ordinary details support one another. Feldspar trays draws attention first, while cabinet drawers provides a quieter reference. People return a tool, then review the sequence, because shared spaces work best when the next person can understand what happened. The work is practical rather than dramatic, and its quality depends on small decisions made in a sensible order.\n\nA second walk through the area changes the emphasis. Quartz crystals may look different as light, weather, or use changes, whereas zinc labels often",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-core-keys",
+              "gc3",
+              "wordstrike-original",
+              "segment:0"
+            ]
+          }
+        },
+        {
+          "contentId": "cnt_gc3_assess_001_s001_4",
+          "contentType": "passage",
+          "text": "reveals a slower pattern. Experienced workers mark the result before they leave the route clear. This habit keeps attention on evidence instead of guesswork. It also leaves a clear trail for someone who arrives later and needs to understand the same scene without a long explanation.\n\nCoordination matters even when each task is small. One person can check the reference while another can record a short note; neither action is impressive alone, but together they prevent avoidable delay. Boxed specimens serves as a useful checkpoint, especially when x-ray notes changes unexpectedly. Good practice favors clear signals, enough working space, and",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-core-keys",
+              "gc3",
+              "wordstrike-original",
+              "segment:1"
+            ]
+          }
+        },
+        {
+          "contentId": "cnt_gc3_assess_001_s002_28",
+          "contentType": "passage",
+          "text": "time to correct a minor problem before it becomes a larger one.\n\nThe setting becomes more informative when observations are compared rather than isolated. Instead of rushing toward a conclusion, people compare two positions, clear the working area, and inspect the next item in a sequence that leaves room for review. This works because small changes are easier to judge when the reference stays fixed. Over time, repeated records form a dependable picture of what is normal, what is seasonal, and what deserves a closer look.\n\nThere is also value in leaving the place ready for the next cycle. Cabinet drawers should be returned to a clear state,",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-core-keys",
+              "gc3",
+              "wordstrike-original",
+              "segment:2"
+            ]
+          }
+        },
+        {
+          "contentId": "cnt_gc3_assess_001_s003_0",
+          "contentType": "passage",
+          "text": "zinc labels should remain easy to inspect, and the final note should describe what actually changed. A quiet routine gives people time to notice an error before it spreads. That principle sounds modest, but it makes routine work easier to repeat and easier to trust.\n\nAnother useful detail concerns quartz crystals. When conditions shift, careful observers leave the route clear before deciding whether an adjustment is needed. They compare notes, check the immediate surroundings, and keep the explanation tied to what can be seen or measured. Simple tools become reliable when they are used in the same way each time. By the end of a normal cycle,",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-core-keys",
+              "gc3",
+              "wordstrike-original",
+              "segment:3"
+            ]
+          }
+        },
+        {
+          "contentId": "cnt_gc3_assess_001_s004_6",
+          "contentType": "passage",
+          "text": "the group can describe what changed, what stayed stable, and what should be checked next.\n\nAnother useful detail concerns zinc labels. When conditions shift, careful observers check the reference before deciding whether an adjustment is needed. They compare notes, check the immediate surroundings, and keep the explanation tied to what can be seen or measured. Small changes are easier to judge when the reference stays fixed. By the end of a normal cycle, the group can describe what changed, what stayed stable, and what should be checked next.\n\nAnother useful detail concerns boxed specimens. When conditions shift, careful observers record a",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-core-keys",
+              "gc3",
+              "wordstrike-original",
+              "segment:4"
+            ]
+          }
+        },
+        {
+          "contentId": "cnt_gc3_assess_001_s005_4",
+          "contentType": "passage",
+          "text": "short note before deciding whether an adjustment is needed. They compare notes, check the immediate surroundings, and keep the explanation tied to what can be seen or measured. Consistent notes are more useful than vivid memory after several days. By the end of a normal cycle, the group can describe what changed, what stayed stable, and what should be checked next.\n\nA quartz expert named Zoe examined six boxes near the kiln, then checked a wax seal beside a zinc tag. Five quick questions followed: was the quartz mixed, was the box dry, did the index match, was the label exact, and had the sample been moved? Max joined the review with a jacketed journal, an x-ray reference, and a sketch of a fox. Every query was closed with a verified note before the cabinet was locked.",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-core-keys",
+              "gc3",
+              "wordstrike-original",
+              "segment:5"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "familyId": "fam_gc3_assess_002",
+      "sourceId": "ws-original-gc3-assessment-en-v1",
+      "partitionLock": "diagnostic",
+      "items": [
+        {
+          "contentId": "cnt_gc3_assess_002_s000_18",
+          "contentType": "passage",
+          "text": "Wildlife Rescue Intake is easiest to understand by spending time in a wildlife care center during morning intake and noticing how ordinary details support one another. Intake forms draws attention first, while quail boxes provides a quieter reference. People review the sequence, then mark the result, because simple tools become reliable when they are used in the same way each time. The work is practical rather than dramatic, and its quality depends on small decisions made in a sensible order.\n\nA second walk through the area changes the emphasis. Fox carriers may look different as light, weather, or use changes, whereas exam lamps often",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-core-keys",
+              "gc3",
+              "wordstrike-original",
+              "segment:0"
+            ]
+          }
+        },
+        {
+          "contentId": "cnt_gc3_assess_002_s001_18",
+          "contentType": "passage",
+          "text": "reveals a slower pattern. Experienced workers leave the route clear before they check the reference. This habit keeps attention on evidence instead of guesswork. It also leaves a clear trail for someone who arrives later and needs to understand the same scene without a long explanation.\n\nCoordination matters even when each task is small. One person can record a short note while another can compare two positions; neither action is impressive alone, but together they prevent avoidable delay. Quiet zones serves as a useful checkpoint, especially when weighing pads changes unexpectedly. Good practice favors clear signals, enough working space,",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-core-keys",
+              "gc3",
+              "wordstrike-original",
+              "segment:1"
+            ]
+          }
+        },
+        {
+          "contentId": "cnt_gc3_assess_002_s002_9",
+          "contentType": "passage",
+          "text": "and time to correct a minor problem before it becomes a larger one.\n\nThe setting becomes more informative when observations are compared rather than isolated. Instead of rushing toward a conclusion, people clear the working area, inspect the next item, and measure a visible change in a sequence that leaves room for review. This works because consistent notes are more useful than vivid memory after several days. Over time, repeated records form a dependable picture of what is normal, what is seasonal, and what deserves a closer look.\n\nThere is also value in leaving the place ready for the next cycle. Quail boxes should be returned to a clear",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-core-keys",
+              "gc3",
+              "wordstrike-original",
+              "segment:2"
+            ]
+          }
+        },
+        {
+          "contentId": "cnt_gc3_assess_002_s003_18",
+          "contentType": "passage",
+          "text": "state, exam lamps should remain easy to inspect, and the final note should describe what actually changed. Clear labels reduce repeated questions without making the work rigid. That principle sounds modest, but it makes routine work easier to repeat and easier to trust.\n\nAnother useful detail concerns fox carriers. When conditions shift, careful observers check the reference before deciding whether an adjustment is needed. They compare notes, check the immediate surroundings, and keep the explanation tied to what can be seen or measured. Small changes are easier to judge when the reference stays fixed. By the end of a normal cycle, the group",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-core-keys",
+              "gc3",
+              "wordstrike-original",
+              "segment:3"
+            ]
+          }
+        },
+        {
+          "contentId": "cnt_gc3_assess_002_s004_18",
+          "contentType": "passage",
+          "text": "can describe what changed, what stayed stable, and what should be checked next.\n\nAnother useful detail concerns exam lamps. When conditions shift, careful observers record a short note before deciding whether an adjustment is needed. They compare notes, check the immediate surroundings, and keep the explanation tied to what can be seen or measured. Consistent notes are more useful than vivid memory after several days. By the end of a normal cycle, the group can describe what changed, what stayed stable, and what should be checked next.\n\nAnother useful detail concerns quiet zones. When conditions shift, careful observers compare two positions",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-core-keys",
+              "gc3",
+              "wordstrike-original",
+              "segment:4"
+            ]
+          }
+        },
+        {
+          "contentId": "cnt_gc3_assess_002_s005_3",
+          "contentType": "passage",
+          "text": "before deciding whether an adjustment is needed. They compare notes, check the immediate surroundings, and keep the explanation tied to what can be seen or measured. A quiet routine gives people time to notice an error before it spreads. By the end of a normal cycle, the group can describe what changed, what stayed stable, and what should be checked next.\n\nThe next cabinet held quartz, zircon, feldspar, pyrite, and a zinc specimen beside an x-ray envelope. A quiz card asked exact questions about color, texture, weight, box number, index code, and location. Zoe and Max checked jars, journals, jacketed folders, a waxed tag, and a fox sketch before returning each object to its drawer.",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-core-keys",
+              "gc3",
+              "wordstrike-original",
+              "segment:5"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "familyId": "fam_gc3_assess_003",
+      "sourceId": "ws-original-gc3-assessment-en-v1",
+      "partitionLock": "diagnostic",
+      "items": [
+        {
+          "contentId": "cnt_gc3_assess_003_s000_0",
+          "contentType": "passage",
+          "text": "Letterpress Type Cases is easiest to understand by spending time in a print shop preparing loose type and noticing how ordinary details support one another. Type cases draws attention first, while wood furniture provides a quieter reference. People mark the result, then leave the route clear, because small changes are easier to judge when the reference stays fixed. The work is practical rather than dramatic, and its quality depends on small decisions made in a sensible order.\n\nA second walk through the area changes the emphasis. Metal quads may look different as light, weather, or use changes, whereas ink rollers often reveals a slower",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-word-launch",
+              "gc3",
+              "wordstrike-original",
+              "segment:0"
+            ]
+          }
+        },
+        {
+          "contentId": "cnt_gc3_assess_003_s001_2",
+          "contentType": "passage",
+          "text": "pattern. Experienced workers check the reference before they record a short note. This habit keeps attention on evidence instead of guesswork. It also leaves a clear trail for someone who arrives later and needs to understand the same scene without a long explanation.\n\nCoordination matters even when each task is small. One person can compare two positions while another can clear the working area; neither action is impressive alone, but together they prevent avoidable delay. Proof paper serves as a useful checkpoint, especially when composing sticks changes unexpectedly. Good practice favors clear signals, enough working space, and time to",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-word-launch",
+              "gc3",
+              "wordstrike-original",
+              "segment:1"
+            ]
+          }
+        },
+        {
+          "contentId": "cnt_gc3_assess_003_s002_8",
+          "contentType": "passage",
+          "text": "correct a minor problem before it becomes a larger one.\n\nThe setting becomes more informative when observations are compared rather than isolated. Instead of rushing toward a conclusion, people inspect the next item, measure a visible change, and return a tool in a sequence that leaves room for review. This works because a quiet routine gives people time to notice an error before it spreads. Over time, repeated records form a dependable picture of what is normal, what is seasonal, and what deserves a closer look.\n\nThere is also value in leaving the place ready for the next cycle. Wood furniture should be returned to a clear state, ink rollers",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-word-launch",
+              "gc3",
+              "wordstrike-original",
+              "segment:2"
+            ]
+          }
+        },
+        {
+          "contentId": "cnt_gc3_assess_003_s003_48",
+          "contentType": "passage",
+          "text": "should remain easy to inspect, and the final note should describe what actually changed. Shared spaces work best when the next person can understand what happened. That principle sounds modest, but it makes routine work easier to repeat and easier to trust.\n\nAnother useful detail concerns metal quads. When conditions shift, careful observers record a short note before deciding whether an adjustment is needed. They compare notes, check the immediate surroundings, and keep the explanation tied to what can be seen or measured. Consistent notes are more useful than vivid memory after several days. By the end of a normal cycle, the group can",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-word-launch",
+              "gc3",
+              "wordstrike-original",
+              "segment:3"
+            ]
+          }
+        },
+        {
+          "contentId": "cnt_gc3_assess_003_s004_2",
+          "contentType": "passage",
+          "text": "describe what changed, what stayed stable, and what should be checked next.\n\nAnother useful detail concerns ink rollers. When conditions shift, careful observers compare two positions before deciding whether an adjustment is needed. They compare notes, check the immediate surroundings, and keep the explanation tied to what can be seen or measured. A quiet routine gives people time to notice an error before it spreads. By the end of a normal cycle, the group can describe what changed, what stayed stable, and what should be checked next.\n\nAnother useful detail concerns proof paper. When conditions shift, careful observers clear the working area",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-word-launch",
+              "gc3",
+              "wordstrike-original",
+              "segment:4"
+            ]
+          }
+        },
+        {
+          "contentId": "cnt_gc3_assess_003_s005_25",
+          "contentType": "passage",
+          "text": "before deciding whether an adjustment is needed. They compare notes, check the immediate surroundings, and keep the explanation tied to what can be seen or measured. Clear labels reduce repeated questions without making the work rigid. By the end of a normal cycle, the group can describe what changed, what stayed stable, and what should be checked next.",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-word-launch",
+              "gc3",
+              "wordstrike-original",
+              "segment:5"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "familyId": "fam_gc3_assess_004",
+      "sourceId": "ws-original-gc3-assessment-en-v1",
+      "partitionLock": "diagnostic",
+      "items": [
+        {
+          "contentId": "cnt_gc3_assess_004_s000_0",
+          "contentType": "passage",
+          "text": "Botanical Seed Exchange is easiest to understand by spending time in a seed library preparing spring packets and noticing how ordinary details support one another. Species cards draws attention first, while date stamps provides a quieter reference. People leave the route clear, then check the reference, because consistent notes are more useful than vivid memory after several days. The work is practical rather than dramatic, and its quality depends on small decisions made in a sensible order.\n\nA second walk through the area changes the emphasis. Sorting bowls may look different as light, weather, or use changes, whereas storage tins often",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-word-launch",
+              "gc3",
+              "wordstrike-original",
+              "segment:0"
+            ]
+          }
+        },
+        {
+          "contentId": "cnt_gc3_assess_004_s001_0",
+          "contentType": "passage",
+          "text": "reveals a slower pattern. Experienced workers record a short note before they compare two positions. This habit keeps attention on evidence instead of guesswork. It also leaves a clear trail for someone who arrives later and needs to understand the same scene without a long explanation.\n\nCoordination matters even when each task is small. One person can clear the working area while another can inspect the next item; neither action is impressive alone, but together they prevent avoidable delay. Germination notes serves as a useful checkpoint, especially when seed envelopes changes unexpectedly. Good practice favors clear signals, enough working",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-word-launch",
+              "gc3",
+              "wordstrike-original",
+              "segment:1"
+            ]
+          }
+        },
+        {
+          "contentId": "cnt_gc3_assess_004_s002_19",
+          "contentType": "passage",
+          "text": "space, and time to correct a minor problem before it becomes a larger one.\n\nThe setting becomes more informative when observations are compared rather than isolated. Instead of rushing toward a conclusion, people measure a visible change, return a tool, and review the sequence in a sequence that leaves room for review. This works because clear labels reduce repeated questions without making the work rigid. Over time, repeated records form a dependable picture of what is normal, what is seasonal, and what deserves a closer look.\n\nThere is also value in leaving the place ready for the next cycle. Date stamps should be returned to a clear state,",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-word-launch",
+              "gc3",
+              "wordstrike-original",
+              "segment:2"
+            ]
+          }
+        },
+        {
+          "contentId": "cnt_gc3_assess_004_s003_1",
+          "contentType": "passage",
+          "text": "storage tins should remain easy to inspect, and the final note should describe what actually changed. Simple tools become reliable when they are used in the same way each time. That principle sounds modest, but it makes routine work easier to repeat and easier to trust.\n\nAnother useful detail concerns sorting bowls. When conditions shift, careful observers compare two positions before deciding whether an adjustment is needed. They compare notes, check the immediate surroundings, and keep the explanation tied to what can be seen or measured. A quiet routine gives people time to notice an error before it spreads. By the end of a normal cycle,",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-word-launch",
+              "gc3",
+              "wordstrike-original",
+              "segment:3"
+            ]
+          }
+        },
+        {
+          "contentId": "cnt_gc3_assess_004_s004_7",
+          "contentType": "passage",
+          "text": "the group can describe what changed, what stayed stable, and what should be checked next.\n\nAnother useful detail concerns storage tins. When conditions shift, careful observers clear the working area before deciding whether an adjustment is needed. They compare notes, check the immediate surroundings, and keep the explanation tied to what can be seen or measured. Clear labels reduce repeated questions without making the work rigid. By the end of a normal cycle, the group can describe what changed, what stayed stable, and what should be checked next.\n\nAnother useful detail concerns germination notes. When conditions shift, careful observers",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-word-launch",
+              "gc3",
+              "wordstrike-original",
+              "segment:4"
+            ]
+          }
+        },
+        {
+          "contentId": "cnt_gc3_assess_004_s005_5",
+          "contentType": "passage",
+          "text": "inspect the next item before deciding whether an adjustment is needed. They compare notes, check the immediate surroundings, and keep the explanation tied to what can be seen or measured. Shared spaces work best when the next person can understand what happened. By the end of a normal cycle, the group can describe what changed, what stayed stable, and what should be checked next.",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-word-launch",
+              "gc3",
+              "wordstrike-original",
+              "segment:5"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "familyId": "fam_gc3_assess_005",
+      "sourceId": "ws-original-gc3-assessment-en-v1",
+      "partitionLock": "diagnostic",
+      "items": [
+        {
+          "contentId": "cnt_gc3_assess_005_s000_11",
+          "contentType": "passage",
+          "text": "Civic Hall Notice Board is easiest to understand by spending time in a civic hall arranging weekly notices and noticing how ordinary details support one another. Room numbers draws attention first, while pin rails provides a quieter reference. People check the reference, then record a short note, because a quiet routine gives people time to notice an error before it spreads. The work is practical rather than dramatic, and its quality depends on small decisions made in a sensible order.\n\nA second walk through the area changes the emphasis. Event notes may look different as light, weather, or use changes, whereas calendar boxes often reveals a",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-combinations",
+              "gc3",
+              "wordstrike-original",
+              "segment:0"
+            ]
+          }
+        },
+        {
+          "contentId": "cnt_gc3_assess_005_s001_38",
+          "contentType": "passage",
+          "text": "slower pattern. Experienced workers compare two positions before they clear the working area. This habit keeps attention on evidence instead of guesswork. It also leaves a clear trail for someone who arrives later and needs to understand the same scene without a long explanation.\n\nCoordination matters even when each task is small. One person can inspect the next item while another can measure a visible change; neither action is impressive alone, but together they prevent avoidable delay. Meeting cards serves as a useful checkpoint, especially when date headings changes unexpectedly. Good practice favors clear signals, enough working space,",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-combinations",
+              "gc3",
+              "wordstrike-original",
+              "segment:1"
+            ]
+          }
+        },
+        {
+          "contentId": "cnt_gc3_assess_005_s002_16",
+          "contentType": "passage",
+          "text": "and time to correct a minor problem before it becomes a larger one.\n\nThe setting becomes more informative when observations are compared rather than isolated. Instead of rushing toward a conclusion, people return a tool, review the sequence, and mark the result in a sequence that leaves room for review. This works because shared spaces work best when the next person can understand what happened. Over time, repeated records form a dependable picture of what is normal, what is seasonal, and what deserves a closer look.\n\nThere is also value in leaving the place ready for the next cycle. Pin rails should be returned to a clear state, calendar",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-combinations",
+              "gc3",
+              "wordstrike-original",
+              "segment:2"
+            ]
+          }
+        },
+        {
+          "contentId": "cnt_gc3_assess_005_s003_6",
+          "contentType": "passage",
+          "text": "boxes should remain easy to inspect, and the final note should describe what actually changed. Small changes are easier to judge when the reference stays fixed. That principle sounds modest, but it makes routine work easier to repeat and easier to trust.\n\nAnother useful detail concerns event notes. When conditions shift, careful observers clear the working area before deciding whether an adjustment is needed. They compare notes, check the immediate surroundings, and keep the explanation tied to what can be seen or measured. Clear labels reduce repeated questions without making the work rigid. By the end of a normal cycle, the group can",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-combinations",
+              "gc3",
+              "wordstrike-original",
+              "segment:3"
+            ]
+          }
+        },
+        {
+          "contentId": "cnt_gc3_assess_005_s004_8",
+          "contentType": "passage",
+          "text": "describe what changed, what stayed stable, and what should be checked next.\n\nAnother useful detail concerns calendar boxes. When conditions shift, careful observers inspect the next item before deciding whether an adjustment is needed. They compare notes, check the immediate surroundings, and keep the explanation tied to what can be seen or measured. Shared spaces work best when the next person can understand what happened. By the end of a normal cycle, the group can describe what changed, what stayed stable, and what should be checked next.\n\nAnother useful detail concerns meeting cards. When conditions shift, careful observers measure a",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-combinations",
+              "gc3",
+              "wordstrike-original",
+              "segment:4"
+            ]
+          }
+        },
+        {
+          "contentId": "cnt_gc3_assess_005_s005_5",
+          "contentType": "passage",
+          "text": "visible change before deciding whether an adjustment is needed. They compare notes, check the immediate surroundings, and keep the explanation tied to what can be seen or measured. Simple tools become reliable when they are used in the same way each time. By the end of a normal cycle, the group can describe what changed, what stayed stable, and what should be checked next.\n\nAnother useful detail concerns date headings. When conditions shift, careful observers return a tool before deciding whether an adjustment is needed. They compare notes, check the immediate surroundings, and keep the explanation tied to what can be seen or measured. Small",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-combinations",
+              "gc3",
+              "wordstrike-original",
+              "segment:5"
+            ]
+          }
+        },
+        {
+          "contentId": "cnt_gc3_assess_005_s006_1",
+          "contentType": "passage",
+          "text": "changes are easier to judge when the reference stays fixed. By the end of a normal cycle, the group can describe what changed, what stayed stable, and what should be checked next.\n\nAnother useful detail concerns room numbers. When conditions shift, careful observers review the sequence before deciding whether an adjustment is needed. They compare notes, check the immediate surroundings, and keep the explanation tied to what can be seen or measured. Consistent notes are more useful than vivid memory after several days. By the end of a normal cycle, the group can describe what changed, what stayed stable, and what should be checked",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-combinations",
+              "gc3",
+              "wordstrike-original",
+              "segment:6"
+            ]
+          }
+        },
+        {
+          "contentId": "cnt_gc3_assess_005_s007_6",
+          "contentType": "passage",
+          "text": "next.\n\nAnother useful detail concerns pin rails. When conditions shift, careful observers mark the result before deciding whether an adjustment is needed. They compare notes, check the immediate surroundings, and keep the explanation tied to what can be seen or measured. A quiet routine gives people time to notice an error before it spreads. By the end of a normal cycle, the group can describe what changed, what stayed stable, and what should be checked next.",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-combinations",
+              "gc3",
+              "wordstrike-original",
+              "segment:7"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "familyId": "fam_gc3_assess_006",
+      "sourceId": "ws-original-gc3-assessment-en-v1",
+      "partitionLock": "diagnostic",
+      "items": [
+        {
+          "contentId": "cnt_gc3_assess_006_s000_7",
+          "contentType": "passage",
+          "text": "Editorial Proof Desk is easiest to understand by spending time in an editorial desk checking a feature and noticing how ordinary details support one another. Caption cards draws attention first, while page numbers provides a quieter reference. People record a short note, then compare two positions, because clear labels reduce repeated questions without making the work rigid. The work is practical rather than dramatic, and its quality depends on small decisions made in a sensible order.\n\nA second walk through the area changes the emphasis. Style guides may look different as light, weather, or use changes, whereas headline sheets often reveals",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-combinations",
+              "gc3",
+              "wordstrike-original",
+              "segment:0"
+            ]
+          }
+        },
+        {
+          "contentId": "cnt_gc3_assess_006_s001_7",
+          "contentType": "passage",
+          "text": "a slower pattern. Experienced workers clear the working area before they inspect the next item. This habit keeps attention on evidence instead of guesswork. It also leaves a clear trail for someone who arrives later and needs to understand the same scene without a long explanation.\n\nCoordination matters even when each task is small. One person can measure a visible change while another can return a tool; neither action is impressive alone, but together they prevent avoidable delay. Margin notes serves as a useful checkpoint, especially when quotation marks changes unexpectedly. Good practice favors clear signals, enough working space, and",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-combinations",
+              "gc3",
+              "wordstrike-original",
+              "segment:1"
+            ]
+          }
+        },
+        {
+          "contentId": "cnt_gc3_assess_006_s002_2",
+          "contentType": "passage",
+          "text": "time to correct a minor problem before it becomes a larger one.\n\nThe setting becomes more informative when observations are compared rather than isolated. Instead of rushing toward a conclusion, people review the sequence, mark the result, and leave the route clear in a sequence that leaves room for review. This works because simple tools become reliable when they are used in the same way each time. Over time, repeated records form a dependable picture of what is normal, what is seasonal, and what deserves a closer look.\n\nThere is also value in leaving the place ready for the next cycle. Page numbers should be returned to a clear state,",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-combinations",
+              "gc3",
+              "wordstrike-original",
+              "segment:2"
+            ]
+          }
+        },
+        {
+          "contentId": "cnt_gc3_assess_006_s003_9",
+          "contentType": "passage",
+          "text": "headline sheets should remain easy to inspect, and the final note should describe what actually changed. Consistent notes are more useful than vivid memory after several days. That principle sounds modest, but it makes routine work easier to repeat and easier to trust.\n\nAnother useful detail concerns style guides. When conditions shift, careful observers inspect the next item before deciding whether an adjustment is needed. They compare notes, check the immediate surroundings, and keep the explanation tied to what can be seen or measured. Shared spaces work best when the next person can understand what happened. By the end of a normal cycle,",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-combinations",
+              "gc3",
+              "wordstrike-original",
+              "segment:3"
+            ]
+          }
+        },
+        {
+          "contentId": "cnt_gc3_assess_006_s004_19",
+          "contentType": "passage",
+          "text": "the group can describe what changed, what stayed stable, and what should be checked next.\n\nAnother useful detail concerns headline sheets. When conditions shift, careful observers measure a visible change before deciding whether an adjustment is needed. They compare notes, check the immediate surroundings, and keep the explanation tied to what can be seen or measured. Simple tools become reliable when they are used in the same way each time. By the end of a normal cycle, the group can describe what changed, what stayed stable, and what should be checked next.\n\nAnother useful detail concerns margin notes. When conditions shift, careful",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-combinations",
+              "gc3",
+              "wordstrike-original",
+              "segment:4"
+            ]
+          }
+        },
+        {
+          "contentId": "cnt_gc3_assess_006_s005_4",
+          "contentType": "passage",
+          "text": "observers return a tool before deciding whether an adjustment is needed. They compare notes, check the immediate surroundings, and keep the explanation tied to what can be seen or measured. Small changes are easier to judge when the reference stays fixed. By the end of a normal cycle, the group can describe what changed, what stayed stable, and what should be checked next.\n\nAnother useful detail concerns quotation marks. When conditions shift, careful observers review the sequence before deciding whether an adjustment is needed. They compare notes, check the immediate surroundings, and keep the explanation tied to what can be seen or",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-combinations",
+              "gc3",
+              "wordstrike-original",
+              "segment:5"
+            ]
+          }
+        },
+        {
+          "contentId": "cnt_gc3_assess_006_s006_7",
+          "contentType": "passage",
+          "text": "measured. Consistent notes are more useful than vivid memory after several days. By the end of a normal cycle, the group can describe what changed, what stayed stable, and what should be checked next.\n\nAnother useful detail concerns caption cards. When conditions shift, careful observers mark the result before deciding whether an adjustment is needed. They compare notes, check the immediate surroundings, and keep the explanation tied to what can be seen or measured. A quiet routine gives people time to notice an error before it spreads. By the end of a normal cycle, the group can describe what changed, what stayed stable, and what should be",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-combinations",
+              "gc3",
+              "wordstrike-original",
+              "segment:6"
+            ]
+          }
+        },
+        {
+          "contentId": "cnt_gc3_assess_006_s007_6",
+          "contentType": "passage",
+          "text": "checked next.\n\nAnother useful detail concerns page numbers. When conditions shift, careful observers leave the route clear before deciding whether an adjustment is needed. They compare notes, check the immediate surroundings, and keep the explanation tied to what can be seen or measured. Clear labels reduce repeated questions without making the work rigid. By the end of a normal cycle, the group can describe what changed, what stayed stable, and what should be checked next.",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-combinations",
+              "gc3",
+              "wordstrike-original",
+              "segment:7"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "familyId": "fam_gc3_assess_007",
+      "sourceId": "ws-original-gc3-assessment-en-v1",
+      "partitionLock": "diagnostic",
+      "items": [
+        {
+          "contentId": "cnt_gc3_assess_007_s000_3",
+          "contentType": "passage",
+          "text": "Workshop Parts Ledger is easiest to understand by spending time in a repair workshop tracking parts and noticing how ordinary details support one another. Stock counts draws attention first, while order sheets provides a quieter reference. People compare two positions, then clear the working area, because shared spaces work best when the next person can understand what happened. The work is practical rather than dramatic, and its quality depends on small decisions made in a sensible order.\n\nA second walk through the area changes the emphasis. Bin labels may look different as light, weather, or use changes, whereas shelf codes often reveals a",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-punctuation-capitals",
+              "gc3",
+              "wordstrike-original",
+              "segment:0"
+            ]
+          }
+        },
+        {
+          "contentId": "cnt_gc3_assess_007_s001_0",
+          "contentType": "passage",
+          "text": "slower pattern. Experienced workers inspect the next item before they measure a visible change. This habit keeps attention on evidence instead of guesswork. It also leaves a clear trail for someone who arrives later and needs to understand the same scene without a long explanation.\n\nCoordination matters even when each task is small. One person can return a tool while another can review the sequence; neither action is impressive alone, but together they prevent avoidable delay. Invoices serves as a useful checkpoint, especially when small washers changes unexpectedly. Good practice favors clear signals, enough working space, and time to",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-punctuation-capitals",
+              "gc3",
+              "wordstrike-original",
+              "segment:1"
+            ]
+          }
+        },
+        {
+          "contentId": "cnt_gc3_assess_007_s002_24",
+          "contentType": "passage",
+          "text": "correct a minor problem before it becomes a larger one.\n\nThe setting becomes more informative when observations are compared rather than isolated. Instead of rushing toward a conclusion, people mark the result, leave the route clear, and check the reference in a sequence that leaves room for review. This works because small changes are easier to judge when the reference stays fixed. Over time, repeated records form a dependable picture of what is normal, what is seasonal, and what deserves a closer look.\n\nThere is also value in leaving the place ready for the next cycle. Order sheets should be returned to a clear state, shelf codes should",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-punctuation-capitals",
+              "gc3",
+              "wordstrike-original",
+              "segment:2"
+            ]
+          }
+        },
+        {
+          "contentId": "cnt_gc3_assess_007_s003_3",
+          "contentType": "passage",
+          "text": "remain easy to inspect, and the final note should describe what actually changed. A quiet routine gives people time to notice an error before it spreads. That principle sounds modest, but it makes routine work easier to repeat and easier to trust.\n\nAnother useful detail concerns bin labels. When conditions shift, careful observers measure a visible change before deciding whether an adjustment is needed. They compare notes, check the immediate surroundings, and keep the explanation tied to what can be seen or measured. Simple tools become reliable when they are used in the same way each time. By the end of a normal cycle, the group can",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-punctuation-capitals",
+              "gc3",
+              "wordstrike-original",
+              "segment:3"
+            ]
+          }
+        },
+        {
+          "contentId": "cnt_gc3_assess_007_s004_3",
+          "contentType": "passage",
+          "text": "describe what changed, what stayed stable, and what should be checked next.\n\nNear the entrance, a card read, \"Check labels first; move objects second.\" The instruction was brief, but its punctuation mattered. A second note asked: Which shelf is active? Which tray is complete? Staff used commas for short sequences, semicolons for related checks, and dashes only when an interruption helped. Parenthetical notes (such as temporary room numbers) stayed short.",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-punctuation-capitals",
+              "gc3",
+              "wordstrike-original",
+              "segment:4"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "familyId": "fam_gc3_assess_008",
+      "sourceId": "ws-original-gc3-assessment-en-v1",
+      "partitionLock": "diagnostic",
+      "items": [
+        {
+          "contentId": "cnt_gc3_assess_008_s000_9",
+          "contentType": "passage",
+          "text": "Trail Distance Board is easiest to understand by spending time in a trail office updating route information and noticing how ordinary details support one another. Shelter numbers draws attention first, while distance markers provides a quieter reference. People clear the working area, then inspect the next item, because simple tools become reliable when they are used in the same way each time. The work is practical rather than dramatic, and its quality depends on small decisions made in a sensible order.\n\nA second walk through the area changes the emphasis. Bridge codes may look different as light, weather, or use changes, whereas grade",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-punctuation-capitals",
+              "gc3",
+              "wordstrike-original",
+              "segment:0"
+            ]
+          }
+        },
+        {
+          "contentId": "cnt_gc3_assess_008_s001_19",
+          "contentType": "passage",
+          "text": "notices often reveals a slower pattern. Experienced workers measure a visible change before they return a tool. This habit keeps attention on evidence instead of guesswork. It also leaves a clear trail for someone who arrives later and needs to understand the same scene without a long explanation.\n\nCoordination matters even when each task is small. One person can review the sequence while another can mark the result; neither action is impressive alone, but together they prevent avoidable delay. Map years serves as a useful checkpoint, especially when gates changes unexpectedly. Good practice favors clear signals, enough working space, and",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-punctuation-capitals",
+              "gc3",
+              "wordstrike-original",
+              "segment:1"
+            ]
+          }
+        },
+        {
+          "contentId": "cnt_gc3_assess_008_s002_26",
+          "contentType": "passage",
+          "text": "time to correct a minor problem before it becomes a larger one.\n\nThe setting becomes more informative when observations are compared rather than isolated. Instead of rushing toward a conclusion, people leave the route clear, check the reference, and record a short note in a sequence that leaves room for review. This works because consistent notes are more useful than vivid memory after several days. Over time, repeated records form a dependable picture of what is normal, what is seasonal, and what deserves a closer look.\n\nThere is also value in leaving the place ready for the next cycle. Distance markers should be returned to a clear state,",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-punctuation-capitals",
+              "gc3",
+              "wordstrike-original",
+              "segment:2"
+            ]
+          }
+        },
+        {
+          "contentId": "cnt_gc3_assess_008_s003_19",
+          "contentType": "passage",
+          "text": "grade notices should remain easy to inspect, and the final note should describe what actually changed. Clear labels reduce repeated questions without making the work rigid. That principle sounds modest, but it makes routine work easier to repeat and easier to trust.\n\nAnother useful detail concerns bridge codes. When conditions shift, careful observers return a tool before deciding whether an adjustment is needed. They compare notes, check the immediate surroundings, and keep the explanation tied to what can be seen or measured. Small changes are easier to judge when the reference stays fixed. By the end of a normal cycle, the group can",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-punctuation-capitals",
+              "gc3",
+              "wordstrike-original",
+              "segment:3"
+            ]
+          }
+        },
+        {
+          "contentId": "cnt_gc3_assess_008_s004_0",
+          "contentType": "passage",
+          "text": "describe what changed, what stayed stable, and what should be checked next.\n\nAn editor left a note: \"Keep the sentence clear, not clever.\" One caption needed a comma after its opening phrase; another needed a colon before a compact explanation. A semicolon joined two balanced observations; a dash marked a useful aside. Brackets [used for supplied context] appeared rarely, and apostrophes stayed where ordinary English required them.",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-punctuation-capitals",
+              "gc3",
+              "wordstrike-original",
+              "segment:4"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "familyId": "fam_gc3_assess_009",
+      "sourceId": "ws-original-gc3-assessment-en-v1",
+      "partitionLock": "diagnostic",
+      "items": [
+        {
+          "contentId": "cnt_gc3_assess_009_s000_1",
+          "contentType": "passage",
+          "text": "Natural History Reading Room is easiest to understand by spending time in a museum reading room comparing field journals and noticing how ordinary details support one another. Field journals draws attention first, while species indexes provides a quieter reference. People inspect the next item, then measure a visible change, because small changes are easier to judge when the reference stays fixed. The work is practical rather than dramatic, and its quality depends on small decisions made in a sensible order.\n\nA second walk through the area changes the emphasis. Regional maps may look different as light, weather, or use changes, whereas",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-numbers-symbols",
+              "gc3",
+              "wordstrike-original",
+              "segment:0"
+            ]
+          }
+        },
+        {
+          "contentId": "cnt_gc3_assess_009_s001_9",
+          "contentType": "passage",
+          "text": "reference shelves often reveals a slower pattern. Experienced workers return a tool before they review the sequence. This habit keeps attention on evidence instead of guesswork. It also leaves a clear trail for someone who arrives later and needs to understand the same scene without a long explanation.\n\nCoordination matters even when each task is small. One person can mark the result while another can leave the route clear; neither action is impressive alone, but together they prevent avoidable delay. Specimen sketches serves as a useful checkpoint, especially when catalog drawers changes unexpectedly. Good practice favors clear signals,",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-numbers-symbols",
+              "gc3",
+              "wordstrike-original",
+              "segment:1"
+            ]
+          }
+        },
+        {
+          "contentId": "cnt_gc3_assess_009_s002_7",
+          "contentType": "passage",
+          "text": "enough working space, and time to correct a minor problem before it becomes a larger one.\n\nThe setting becomes more informative when observations are compared rather than isolated. Instead of rushing toward a conclusion, people check the reference, record a short note, and compare two positions in a sequence that leaves room for review. This works because a quiet routine gives people time to notice an error before it spreads. Over time, repeated records form a dependable picture of what is normal, what is seasonal, and what deserves a closer look.\n\nThere is also value in leaving the place ready for the next cycle. Species indexes should be",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-numbers-symbols",
+              "gc3",
+              "wordstrike-original",
+              "segment:2"
+            ]
+          }
+        },
+        {
+          "contentId": "cnt_gc3_assess_009_s003_23",
+          "contentType": "passage",
+          "text": "returned to a clear state, reference shelves should remain easy to inspect, and the final note should describe what actually changed. Shared spaces work best when the next person can understand what happened. That principle sounds modest, but it makes routine work easier to repeat and easier to trust.\n\nAnother useful detail concerns regional maps. When conditions shift, careful observers review the sequence before deciding whether an adjustment is needed. They compare notes, check the immediate surroundings, and keep the explanation tied to what can be seen or measured. Consistent notes are more useful than vivid memory after several days. By",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-numbers-symbols",
+              "gc3",
+              "wordstrike-original",
+              "segment:3"
+            ]
+          }
+        },
+        {
+          "contentId": "cnt_gc3_assess_009_s004_1",
+          "contentType": "passage",
+          "text": "the end of a normal cycle, the group can describe what changed, what stayed stable, and what should be checked next.\n\nAt midday the ledger showed 24 washers in bin 12, 18 bolts on shelf 4B, and 7 clips in box 9. Invoice 208 listed a $40 deposit and a 20 percent adjustment. One gear kit used a 3:2 ratio. The clerk checked 5 + 7 = 12, 18 - 4 = 14, and 24 / 6 = 4 before closing order 731.",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-numbers-symbols",
+              "gc3",
+              "wordstrike-original",
+              "segment:4"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "familyId": "fam_gc3_assess_010",
+      "sourceId": "ws-original-gc3-assessment-en-v1",
+      "partitionLock": "diagnostic",
+      "items": [
+        {
+          "contentId": "cnt_gc3_assess_010_s000_1",
+          "contentType": "passage",
+          "text": "Architecture Model Room is easiest to understand by spending time in a design studio reviewing building models and noticing how ordinary details support one another. Foam models draws attention first, while timber samples provides a quieter reference. People measure a visible change, then return a tool, because consistent notes are more useful than vivid memory after several days. The work is practical rather than dramatic, and its quality depends on small decisions made in a sensible order.\n\nA second walk through the area changes the emphasis. Window studies may look different as light, weather, or use changes, whereas site plans often",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-numbers-symbols",
+              "gc3",
+              "wordstrike-original",
+              "segment:0"
+            ]
+          }
+        },
+        {
+          "contentId": "cnt_gc3_assess_010_s001_5",
+          "contentType": "passage",
+          "text": "reveals a slower pattern. Experienced workers review the sequence before they mark the result. This habit keeps attention on evidence instead of guesswork. It also leaves a clear trail for someone who arrives later and needs to understand the same scene without a long explanation.\n\nCoordination matters even when each task is small. One person can leave the route clear while another can check the reference; neither action is impressive alone, but together they prevent avoidable delay. Material boards serves as a useful checkpoint, especially when section drawings changes unexpectedly. Good practice favors clear signals, enough working space,",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-numbers-symbols",
+              "gc3",
+              "wordstrike-original",
+              "segment:1"
+            ]
+          }
+        },
+        {
+          "contentId": "cnt_gc3_assess_010_s002_18",
+          "contentType": "passage",
+          "text": "and time to correct a minor problem before it becomes a larger one.\n\nThe setting becomes more informative when observations are compared rather than isolated. Instead of rushing toward a conclusion, people record a short note, compare two positions, and clear the working area in a sequence that leaves room for review. This works because clear labels reduce repeated questions without making the work rigid. Over time, repeated records form a dependable picture of what is normal, what is seasonal, and what deserves a closer look.\n\nThere is also value in leaving the place ready for the next cycle. Timber samples should be returned to a clear",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-numbers-symbols",
+              "gc3",
+              "wordstrike-original",
+              "segment:2"
+            ]
+          }
+        },
+        {
+          "contentId": "cnt_gc3_assess_010_s003_7",
+          "contentType": "passage",
+          "text": "state, site plans should remain easy to inspect, and the final note should describe what actually changed. Simple tools become reliable when they are used in the same way each time. That principle sounds modest, but it makes routine work easier to repeat and easier to trust.\n\nAnother useful detail concerns window studies. When conditions shift, careful observers mark the result before deciding whether an adjustment is needed. They compare notes, check the immediate surroundings, and keep the explanation tied to what can be seen or measured. A quiet routine gives people time to notice an error before it spreads. By the end of a normal cycle,",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-numbers-symbols",
+              "gc3",
+              "wordstrike-original",
+              "segment:3"
+            ]
+          }
+        },
+        {
+          "contentId": "cnt_gc3_assess_010_s004_17",
+          "contentType": "passage",
+          "text": "the group can describe what changed, what stayed stable, and what should be checked next.\n\nRoute notes used compact values without becoming a puzzle. Section 12.5 km began at marker 7, bridge B-3 stood near kilometer 8, and the steepest signed grade was 8 percent. A maintenance split of 2+4 crews covered 6 zones; budget line $25 stayed separate from route A2. The reviewer checked 9 - 3 = 6 and 4 * 2 = 8. Depot 106 reported 30 available places.",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-numbers-symbols",
+              "gc3",
+              "wordstrike-original",
+              "segment:4"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "familyId": "fam_gc3_assess_011",
+      "sourceId": "ws-original-gc3-assessment-en-v1",
+      "partitionLock": "diagnostic",
+      "items": [
+        {
+          "contentId": "cnt_gc3_assess_011_s000_18",
+          "contentType": "passage",
+          "text": "Mechanical Toy Collection is easiest to understand by spending time in a conservation bench examining mechanical toys and noticing how ordinary details support one another. Painted wheels draws attention first, while axle pins provides a quieter reference. People return a tool, then review the sequence, because a quiet routine gives people time to notice an error before it spreads. The work is practical rather than dramatic, and its quality depends on small decisions made in a sensible order.\n\nA second walk through the area changes the emphasis. Clockwork drums may look different as light, weather, or use changes, whereas maker marks often",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-lexical-extended",
+              "gc3",
+              "wordstrike-original",
+              "segment:0"
+            ]
+          }
+        },
+        {
+          "contentId": "cnt_gc3_assess_011_s001_9",
+          "contentType": "passage",
+          "text": "reveals a slower pattern. Experienced workers mark the result before they leave the route clear. This habit keeps attention on evidence instead of guesswork. It also leaves a clear trail for someone who arrives later and needs to understand the same scene without a long explanation.\n\nCoordination matters even when each task is small. One person can check the reference while another can record a short note; neither action is impressive alone, but together they prevent avoidable delay. Tin gears serves as a useful checkpoint, especially when spring keys changes unexpectedly. Good practice favors clear signals, enough working space, and time to",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-lexical-extended",
+              "gc3",
+              "wordstrike-original",
+              "segment:1"
+            ]
+          }
+        },
+        {
+          "contentId": "cnt_gc3_assess_011_s002_7",
+          "contentType": "passage",
+          "text": "correct a minor problem before it becomes a larger one.\n\nThe setting becomes more informative when observations are compared rather than isolated. Instead of rushing toward a conclusion, people compare two positions, clear the working area, and inspect the next item in a sequence that leaves room for review. This works because shared spaces work best when the next person can understand what happened. Over time, repeated records form a dependable picture of what is normal, what is seasonal, and what deserves a closer look.\n\nThere is also value in leaving the place ready for the next cycle. Axle pins should be returned to a clear state, maker",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-lexical-extended",
+              "gc3",
+              "wordstrike-original",
+              "segment:2"
+            ]
+          }
+        },
+        {
+          "contentId": "cnt_gc3_assess_011_s003_16",
+          "contentType": "passage",
+          "text": "marks should remain easy to inspect, and the final note should describe what actually changed. Small changes are easier to judge when the reference stays fixed. That principle sounds modest, but it makes routine work easier to repeat and easier to trust.\n\nAnother useful detail concerns clockwork drums. When conditions shift, careful observers leave the route clear before deciding whether an adjustment is needed. They compare notes, check the immediate surroundings, and keep the explanation tied to what can be seen or measured. Clear labels reduce repeated questions without making the work rigid. By the end of a normal cycle, the group can describe what changed, what stayed stable, and what should be checked next.",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-lexical-extended",
+              "gc3",
+              "wordstrike-original",
+              "segment:3"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "familyId": "fam_gc3_assess_012",
+      "sourceId": "ws-original-gc3-assessment-en-v1",
+      "partitionLock": "diagnostic",
+      "items": [
+        {
+          "contentId": "cnt_gc3_assess_012_s000_14",
+          "contentType": "passage",
+          "text": "Urban Wayfinding Study is easiest to understand by spending time in a pedestrian district reviewing signs and noticing how ordinary details support one another. Building numbers draws attention first, while direction arrows provides a quieter reference. People review the sequence, then mark the result, because clear labels reduce repeated questions without making the work rigid. The work is practical rather than dramatic, and its quality depends on small decisions made in a sensible order.\n\nA second walk through the area changes the emphasis. Information kiosks may look different as light, weather, or use changes, whereas street names often",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-lexical-extended",
+              "gc3",
+              "wordstrike-original",
+              "segment:0"
+            ]
+          }
+        },
+        {
+          "contentId": "cnt_gc3_assess_012_s001_49",
+          "contentType": "passage",
+          "text": "reveals a slower pattern. Experienced workers leave the route clear before they check the reference. This habit keeps attention on evidence instead of guesswork. It also leaves a clear trail for someone who arrives later and needs to understand the same scene without a long explanation.\n\nCoordination matters even when each task is small. One person can record a short note while another can compare two positions; neither action is impressive alone, but together they prevent avoidable delay. Corner maps serves as a useful checkpoint, especially when crossing signals changes unexpectedly. Good practice favors clear signals, enough working space,",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-lexical-extended",
+              "gc3",
+              "wordstrike-original",
+              "segment:1"
+            ]
+          }
+        },
+        {
+          "contentId": "cnt_gc3_assess_012_s002_7",
+          "contentType": "passage",
+          "text": "and time to correct a minor problem before it becomes a larger one.\n\nThe setting becomes more informative when observations are compared rather than isolated. Instead of rushing toward a conclusion, people clear the working area, inspect the next item, and measure a visible change in a sequence that leaves room for review. This works because simple tools become reliable when they are used in the same way each time. Over time, repeated records form a dependable picture of what is normal, what is seasonal, and what deserves a closer look.\n\nThere is also value in leaving the place ready for the next cycle. Direction arrows should be returned to",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-lexical-extended",
+              "gc3",
+              "wordstrike-original",
+              "segment:2"
+            ]
+          }
+        },
+        {
+          "contentId": "cnt_gc3_assess_012_s003_5",
+          "contentType": "passage",
+          "text": "a clear state, street names should remain easy to inspect, and the final note should describe what actually changed. Consistent notes are more useful than vivid memory after several days. That principle sounds modest, but it makes routine work easier to repeat and easier to trust.\n\nAnother useful detail concerns information kiosks. When conditions shift, careful observers check the reference before deciding whether an adjustment is needed. They compare notes, check the immediate surroundings, and keep the explanation tied to what can be seen or measured. Shared spaces work best when the next person can understand what happened. By the end of a normal cycle, the group can describe what changed, what stayed stable, and what should be checked next.",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-lexical-extended",
+              "gc3",
+              "wordstrike-original",
+              "segment:3"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "familyId": "fam_gc3_assess_013",
+      "sourceId": "ws-original-gc3-assessment-en-v1",
+      "partitionLock": "diagnostic",
+      "items": [
+        {
+          "contentId": "cnt_gc3_assess_013_s000_2",
+          "contentType": "passage",
+          "text": "Textile Dye Workshop is easiest to understand by spending time in a craft studio testing plant dyes and noticing how ordinary details support one another. Rinse bowls draws attention first, while color cards provides a quieter reference. People mark the result, then leave the route clear, because shared spaces work best when the next person can understand what happened. The work is practical rather than dramatic, and its quality depends on small decisions made in a sensible order.\n\nA second walk through the area changes the emphasis. Linen swatches may look different as light, weather, or use changes, whereas dye baths often reveals a slower",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-combinations-extended",
+              "gc3",
+              "wordstrike-original",
+              "segment:0"
+            ]
+          }
+        },
+        {
+          "contentId": "cnt_gc3_assess_013_s001_11",
+          "contentType": "passage",
+          "text": "pattern. Experienced workers check the reference before they record a short note. This habit keeps attention on evidence instead of guesswork. It also leaves a clear trail for someone who arrives later and needs to understand the same scene without a long explanation.\n\nCoordination matters even when each task is small. One person can compare two positions while another can clear the working area; neither action is impressive alone, but together they prevent avoidable delay. Sample tags serves as a useful checkpoint, especially when wood tongs changes unexpectedly. Good practice favors clear signals, enough working space, and time to correct a",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-combinations-extended",
+              "gc3",
+              "wordstrike-original",
+              "segment:1"
+            ]
+          }
+        },
+        {
+          "contentId": "cnt_gc3_assess_013_s002_19",
+          "contentType": "passage",
+          "text": "minor problem before it becomes a larger one.\n\nThe setting becomes more informative when observations are compared rather than isolated. Instead of rushing toward a conclusion, people inspect the next item, measure a visible change, and return a tool in a sequence that leaves room for review. This works because small changes are easier to judge when the reference stays fixed. Over time, repeated records form a dependable picture of what is normal, what is seasonal, and what deserves a closer look.\n\nThere is also value in leaving the place ready for the next cycle. Color cards should be returned to a clear state, dye baths should remain easy",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-combinations-extended",
+              "gc3",
+              "wordstrike-original",
+              "segment:2"
+            ]
+          }
+        },
+        {
+          "contentId": "cnt_gc3_assess_013_s003_3",
+          "contentType": "passage",
+          "text": "to inspect, and the final note should describe what actually changed. A quiet routine gives people time to notice an error before it spreads. That principle sounds modest, but it makes routine work easier to repeat and easier to trust.\n\nAnother useful detail concerns linen swatches. When conditions shift, careful observers record a short note before deciding whether an adjustment is needed. They compare notes, check the immediate surroundings, and keep the explanation tied to what can be seen or measured. Simple tools become reliable when they are used in the same way each time. By the end of a normal cycle, the group can describe what changed, what stayed stable, and what should be checked next.",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-combinations-extended",
+              "gc3",
+              "wordstrike-original",
+              "segment:3"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "familyId": "fam_gc3_assess_014",
+      "sourceId": "ws-original-gc3-assessment-en-v1",
+      "partitionLock": "diagnostic",
+      "items": [
+        {
+          "contentId": "cnt_gc3_assess_014_s000_9",
+          "contentType": "passage",
+          "text": "Regional Food Market is easiest to understand by spending time in an indoor market preparing morning stalls and noticing how ordinary details support one another. Stall signs draws attention first, while vegetable crates provides a quieter reference. People leave the route clear, then check the reference, because simple tools become reliable when they are used in the same way each time. The work is practical rather than dramatic, and its quality depends on small decisions made in a sensible order.\n\nA second walk through the area changes the emphasis. Bread baskets may look different as light, weather, or use changes, whereas price cards often",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-combinations-extended",
+              "gc3",
+              "wordstrike-original",
+              "segment:0"
+            ]
+          }
+        },
+        {
+          "contentId": "cnt_gc3_assess_014_s001_7",
+          "contentType": "passage",
+          "text": "reveals a slower pattern. Experienced workers record a short note before they compare two positions. This habit keeps attention on evidence instead of guesswork. It also leaves a clear trail for someone who arrives later and needs to understand the same scene without a long explanation.\n\nCoordination matters even when each task is small. One person can clear the working area while another can inspect the next item; neither action is impressive alone, but together they prevent avoidable delay. Herb bundles serves as a useful checkpoint, especially when cool boxes changes unexpectedly. Good practice favors clear signals, enough working space,",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-combinations-extended",
+              "gc3",
+              "wordstrike-original",
+              "segment:1"
+            ]
+          }
+        },
+        {
+          "contentId": "cnt_gc3_assess_014_s002_6",
+          "contentType": "passage",
+          "text": "and time to correct a minor problem before it becomes a larger one.\n\nThe setting becomes more informative when observations are compared rather than isolated. Instead of rushing toward a conclusion, people measure a visible change, return a tool, and review the sequence in a sequence that leaves room for review. This works because consistent notes are more useful than vivid memory after several days. Over time, repeated records form a dependable picture of what is normal, what is seasonal, and what deserves a closer look.\n\nThere is also value in leaving the place ready for the next cycle. Vegetable crates should be returned to a clear state,",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-combinations-extended",
+              "gc3",
+              "wordstrike-original",
+              "segment:2"
+            ]
+          }
+        },
+        {
+          "contentId": "cnt_gc3_assess_014_s003_3",
+          "contentType": "passage",
+          "text": "price cards should remain easy to inspect, and the final note should describe what actually changed. Clear labels reduce repeated questions without making the work rigid. That principle sounds modest, but it makes routine work easier to repeat and easier to trust.\n\nAnother useful detail concerns bread baskets. When conditions shift, careful observers compare two positions before deciding whether an adjustment is needed. They compare notes, check the immediate surroundings, and keep the explanation tied to what can be seen or measured. Small changes are easier to judge when the reference stays fixed. By the end of a normal cycle, the group can describe what changed, what stayed stable, and what should be checked next.",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-combinations-extended",
+              "gc3",
+              "wordstrike-original",
+              "segment:3"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "familyId": "fam_gc3_assess_015",
+      "sourceId": "ws-original-gc3-assessment-en-v1",
+      "partitionLock": "diagnostic",
+      "items": [
+        {
+          "contentId": "cnt_gc3_assess_015_s000_1",
+          "contentType": "passage",
+          "text": "Field Sketching Class is easiest to understand by spending time in an outdoor drawing class by a viaduct and noticing how ordinary details support one another. Stone arches draws attention first, while shadow edges provides a quieter reference. People check the reference, then record a short note, because small changes are easier to judge when the reference stays fixed. The work is practical rather than dramatic, and its quality depends on small decisions made in a sensible order.\n\nA second walk through the area changes the emphasis. Track lines may look different as light, weather, or use changes, whereas grass banks often reveals a slower",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-mixed",
+              "gc3",
+              "wordstrike-original",
+              "segment:0"
+            ]
+          }
+        },
+        {
+          "contentId": "cnt_gc3_assess_015_s001_5",
+          "contentType": "passage",
+          "text": "pattern. Experienced workers compare two positions before they clear the working area. This habit keeps attention on evidence instead of guesswork. It also leaves a clear trail for someone who arrives later and needs to understand the same scene without a long explanation.\n\nCoordination matters even when each task is small. One person can inspect the next item while another can measure a visible change; neither action is impressive alone, but together they prevent avoidable delay. Drawing boards serves as a useful checkpoint, especially when pencil grades changes unexpectedly. Good practice favors clear signals, enough working space, and time",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-mixed",
+              "gc3",
+              "wordstrike-original",
+              "segment:1"
+            ]
+          }
+        },
+        {
+          "contentId": "cnt_gc3_assess_015_s002_3",
+          "contentType": "passage",
+          "text": "to correct a minor problem before it becomes a larger one.\n\nThe setting becomes more informative when observations are compared rather than isolated. Instead of rushing toward a conclusion, people return a tool, review the sequence, and mark the result in a sequence that leaves room for review. This works because a quiet routine gives people time to notice an error before it spreads. Over time, repeated records form a dependable picture of what is normal, what is seasonal, and what deserves a closer look.\n\nThere is also value in leaving the place ready for the next cycle. Shadow edges should be returned to a clear state, grass banks should",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-mixed",
+              "gc3",
+              "wordstrike-original",
+              "segment:2"
+            ]
+          }
+        },
+        {
+          "contentId": "cnt_gc3_assess_015_s003_9",
+          "contentType": "passage",
+          "text": "remain easy to inspect, and the final note should describe what actually changed. Shared spaces work best when the next person can understand what happened. That principle sounds modest, but it makes routine work easier to repeat and easier to trust.\n\nAnother useful detail concerns track lines. When conditions shift, careful observers clear the working area before deciding whether an adjustment is needed. They compare notes, check the immediate surroundings, and keep the explanation tied to what can be seen or measured. Consistent notes are more useful than vivid memory after several days. By the end of a normal cycle, the group can describe what changed, what stayed stable, and what should be checked next.",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-mixed",
+              "gc3",
+              "wordstrike-original",
+              "segment:3"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "familyId": "fam_gc3_assess_016",
+      "sourceId": "ws-original-gc3-assessment-en-v1",
+      "partitionLock": "diagnostic",
+      "items": [
+        {
+          "contentId": "cnt_gc3_assess_016_s000_3",
+          "contentType": "passage",
+          "text": "Town Square Mixed Use is easiest to understand by spending time in a central square becoming busy at noon and noticing how ordinary details support one another. Bus stops draws attention first, while stone paving provides a quieter reference. People record a short note, then compare two positions, because consistent notes are more useful than vivid memory after several days. The work is practical rather than dramatic, and its quality depends on small decisions made in a sensible order.\n\nA second walk through the area changes the emphasis. Cafe chairs may look different as light, weather, or use changes, whereas tree planters often reveals a",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-mixed",
+              "gc3",
+              "wordstrike-original",
+              "segment:0"
+            ]
+          }
+        },
+        {
+          "contentId": "cnt_gc3_assess_016_s001_3",
+          "contentType": "passage",
+          "text": "slower pattern. Experienced workers clear the working area before they inspect the next item. This habit keeps attention on evidence instead of guesswork. It also leaves a clear trail for someone who arrives later and needs to understand the same scene without a long explanation.\n\nCoordination matters even when each task is small. One person can measure a visible change while another can return a tool; neither action is impressive alone, but together they prevent avoidable delay. Crossing lights serves as a useful checkpoint, especially when market canopies changes unexpectedly. Good practice favors clear signals, enough working space, and",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-mixed",
+              "gc3",
+              "wordstrike-original",
+              "segment:1"
+            ]
+          }
+        },
+        {
+          "contentId": "cnt_gc3_assess_016_s002_3",
+          "contentType": "passage",
+          "text": "time to correct a minor problem before it becomes a larger one.\n\nThe setting becomes more informative when observations are compared rather than isolated. Instead of rushing toward a conclusion, people review the sequence, mark the result, and leave the route clear in a sequence that leaves room for review. This works because clear labels reduce repeated questions without making the work rigid. Over time, repeated records form a dependable picture of what is normal, what is seasonal, and what deserves a closer look.\n\nThere is also value in leaving the place ready for the next cycle. Stone paving should be returned to a clear state, tree",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-mixed",
+              "gc3",
+              "wordstrike-original",
+              "segment:2"
+            ]
+          }
+        },
+        {
+          "contentId": "cnt_gc3_assess_016_s003_6",
+          "contentType": "passage",
+          "text": "planters should remain easy to inspect, and the final note should describe what actually changed. Simple tools become reliable when they are used in the same way each time. That principle sounds modest, but it makes routine work easier to repeat and easier to trust.\n\nAnother useful detail concerns cafe chairs. When conditions shift, careful observers inspect the next item before deciding whether an adjustment is needed. They compare notes, check the immediate surroundings, and keep the explanation tied to what can be seen or measured. A quiet routine gives people time to notice an error before it spreads. By the end of a normal cycle, the group can describe what changed, what stayed stable, and what should be checked next.",
+          "reviewStatus": "approved",
+          "metadata": {
+            "tags": [
+              "diagnostic",
+              "assessment:diagnostic-mixed",
+              "gc3",
+              "wordstrike-original",
+              "segment:3"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

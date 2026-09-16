@@ -18,13 +18,13 @@
   "bindings": {
     "corpusId": "practice-en-v1",
     "corpusVersion": 1,
-    "corpusChecksum": "sha256-28beccf65eed71519da306c129da5040a20f364aed320dc21eea2d16c2a1c404",
+    "corpusChecksum": "sha256-55b276a4628d6c29f5ce47ced81e4ed5f571866c5e3afa56ee7ee3d9c1fd1438",
     "indexSchemaVersion": 1,
-    "indexChecksum": "sha256-bb198244a6b6cefcae5cb908bf3dee6e9e52259f9ef41576ec69c429a423ff32",
+    "indexChecksum": "sha256-91fa2d94960c10da646ae5473b9d1a555eef849dfef7526b6c2ca3954fe109d8",
     "typabilityModelVersion": 1,
     "typabilityFeatureVersion": 1,
     "typabilityReferenceVersion": 1,
-    "typabilityReferenceChecksum": "sha256-94a6f90c3593ebc089211882e2d9afaf0bf46b66386cdc98dbe60c533e6dd471",
+    "typabilityReferenceChecksum": "sha256-2a3070a839af7e294dfd826ce5e6ff473bf82f3bf34eb335ce1d52c936aac111",
     "frequencyReferenceVersion": 1,
     "frequencyReferenceId": "ws-en-frequency-v1",
     "frequencyReferenceChecksum": "sha256-b9bc8dde064335c2258844919c6dd62537f95ac4a2d5920fdd7213a9cb5d45ad"
@@ -35,85 +35,73 @@
     "maximumDifficultySpread": 0.4
   },
   "formsPath": "data/practice/endurance/en-v1/WS-ENDURANCE-CHECK-EN-1.forms.json",
-  "formsChecksum": "sha256-1e6aff0ae8ead51b8a95f31b717e5e30a19ea325ef062e50f5c8200a5a32366b",
+  "formsChecksum": "sha256-695bb888dfe47f57244eb0ef09be9a49ea1e8f5ad09e767412d0ebf22b04a601",
   "forms": [
     {
       "formId": "endurance-check-en-01",
-      "formHash": "sha256-0cc7dd97ec8579f5cb47d5ed8a32befb131b4eea374f4f7cd7c054c849be84e8",
-      "graphemeCount": 24432,
+      "formHash": "sha256-c02b581da012876040ef0a9ef28dadc45f5bc14dfaf0e02afbb52c49b1121aff",
+      "graphemeCount": 24251,
       "ready": true,
       "reasons": [],
-      "warnings": [
-        "window-percentile-advisory"
-      ],
+      "warnings": [],
       "availableModelWeight": 1,
-      "relativeDifficultyPercentile": 50,
-      "windowDifficultySpread": 0.15543535609551518
+      "relativeDifficultyPercentile": 66.66666666666667,
+      "windowDifficultySpread": 0.07414870597789759
     },
     {
       "formId": "endurance-check-en-02",
-      "formHash": "sha256-5c7b7c1282817aa1833ba7ed78925d0fc53129e1414251b49874b98f024bd60f",
-      "graphemeCount": 24308,
+      "formHash": "sha256-46a2c3d634506a092613807965762e574fa5256bb6380369cf14afc798ad1941",
+      "graphemeCount": 24263,
       "ready": true,
       "reasons": [],
-      "warnings": [
-        "window-percentile-advisory"
-      ],
+      "warnings": [],
       "availableModelWeight": 1,
-      "relativeDifficultyPercentile": 50,
-      "windowDifficultySpread": 0.16088078665619698
+      "relativeDifficultyPercentile": 66.66666666666667,
+      "windowDifficultySpread": 0.08384270595670787
     },
     {
       "formId": "endurance-check-en-03",
-      "formHash": "sha256-916a6bf2dd322d40efe14ee9654a255b6c4f783080bcf38ec9f97b3c40db8146",
-      "graphemeCount": 24386,
+      "formHash": "sha256-8ca326f926ad0fa0d8568d6fff202c8e0955ce384cd3706b9b5561473c97d665",
+      "graphemeCount": 24231,
       "ready": true,
       "reasons": [],
-      "warnings": [
-        "window-percentile-advisory"
-      ],
+      "warnings": [],
       "availableModelWeight": 1,
-      "relativeDifficultyPercentile": 50,
-      "windowDifficultySpread": 0.17522046633014127
+      "relativeDifficultyPercentile": 66.66666666666667,
+      "windowDifficultySpread": 0.06591607365121088
     },
     {
       "formId": "endurance-check-en-04",
-      "formHash": "sha256-dc159b93be4f016051052d51416ef0c1c658c1175e2ec5ae83abe88ec5616914",
-      "graphemeCount": 24592,
+      "formHash": "sha256-ec9526f572c614659c3e31d89cfd4fbf9775f081a3d0127a99b1a753152adf4e",
+      "graphemeCount": 24149,
       "ready": true,
       "reasons": [],
-      "warnings": [
-        "window-percentile-advisory"
-      ],
+      "warnings": [],
       "availableModelWeight": 1,
-      "relativeDifficultyPercentile": 50,
-      "windowDifficultySpread": 0.19309237418085556
+      "relativeDifficultyPercentile": 66.66666666666667,
+      "windowDifficultySpread": 0.06646855325050448
     },
     {
       "formId": "endurance-check-en-05",
-      "formHash": "sha256-663772f6b08063c7004fa9788d746dcf4fb19c20811e7bdcec26180bd07a7ef6",
-      "graphemeCount": 24417,
+      "formHash": "sha256-c49dd47e227a8e8827044fc6513cd92dd789c523947225973058a41afdd98bbd",
+      "graphemeCount": 24217,
       "ready": true,
       "reasons": [],
-      "warnings": [
-        "window-percentile-advisory"
-      ],
+      "warnings": [],
       "availableModelWeight": 1,
-      "relativeDifficultyPercentile": 50,
-      "windowDifficultySpread": 0.17983535694157005
+      "relativeDifficultyPercentile": 66.66666666666667,
+      "windowDifficultySpread": 0.06875423432261196
     },
     {
       "formId": "endurance-check-en-06",
-      "formHash": "sha256-8ddccb094a9f3d65d272956512c174ee5538168848e2b32ad34390c00391383d",
-      "graphemeCount": 24535,
+      "formHash": "sha256-a2a8e6d1966649eac8b3fcd2990dbf5ecf4bec5df4ddebf48a29964254384df1",
+      "graphemeCount": 24199,
       "ready": true,
       "reasons": [],
-      "warnings": [
-        "window-percentile-advisory"
-      ],
+      "warnings": [],
       "availableModelWeight": 1,
-      "relativeDifficultyPercentile": 50,
-      "windowDifficultySpread": 0.19007775876654062
+      "relativeDifficultyPercentile": 66.66666666666667,
+      "windowDifficultySpread": 0.07582447213765847
     }
   ]
 }

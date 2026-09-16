@@ -1,3 +1,4 @@
+import { createPracticeSessionPulse } from './practiceSessionPulse.js';
 import { createPracticeIndexedDbStore } from "./practiceIndexedDbStore.js";
 import { createPracticeManifestStore } from "./practiceManifestStore.js";
 import { createPracticeRepository } from "./practiceRepository.js";
@@ -82,13 +83,14 @@ export async function mountPracticeRealTextSession({ root, session, mode = "natu
   if (expectedContextId && initialized.context.contextId !== expectedContextId) throw Object.assign(new Error("Practice context changed after Real Text preparation"), { code: "PRACTICE_CONTEXT_MISMATCH" });
   const sessionId = mode === "cold" ? session.sessionId : session.realTextPlan.sessionId;
   const engine = (dependencies.engineFactory ?? createPracticeSessionEngine)({ repository, sessionId, profileId: initialized.profile.profileId, contextId: initialized.context.contextId, logger });
-  let finalResult = null; let closed = false; let unsubscribe = null;
+  let pulse = null; let finalResult = null; let closed = false; let unsubscribe = null;
   const focus = () => queueMicrotask(() => root.querySelector?.("[data-real-text-input]")?.focus?.({ preventScroll: true }));
-  const finish = async () => { if (closed) return; closed = true; unsubscribe?.(); root.removeEventListener("beforeinput", beforeInput); root.removeEventListener("keydown", keyDown); root.removeEventListener("click", click); globalThis.document?.removeEventListener?.("visibilitychange", visibilityChange); try { await engine.destroy(); } catch {} try { dataStore.close?.(); } catch {} onExit(finalResult); };
+  const finish = async () => { if (closed) return; closed = true; pulse?.stop(); unsubscribe?.(); root.removeEventListener("beforeinput", beforeInput); root.removeEventListener("keydown", keyDown); root.removeEventListener("click", click); globalThis.document?.removeEventListener?.("visibilitychange", visibilityChange); try { await engine.destroy(); } catch {} try { dataStore.close?.(); } catch {} onExit(finalResult); };
   const handle = (input) => engine.handleInput(input);
   const beforeInput = (event) => {
     const capture = event.target?.closest?.("[data-real-text-input]"); if (closed || finalResult || !capture || !root.contains?.(capture)) return; event.preventDefault();
     if (INSERT_TYPES.has(event.inputType) && typeof event.data === "string") for (const value of Array.from(event.data.normalize("NFC"))) handle(normalizedInput(value === " " ? "space" : "character", value));
+    else if (event.inputType === "insertLineBreak") handle(normalizedInput("character", "\n"));
     else if (event.inputType === "deleteContentBackward") handle(normalizedInput("backspace", ""));
     else if (event.inputType === "deleteWordBackward") handle(normalizedInput("word-delete", ""));
     capture.value = "";
@@ -100,9 +102,10 @@ export async function mountPracticeRealTextSession({ root, session, mode = "natu
   try {
     await engine.prepare({ experiment: session.experiment, configuration: session.configuration, contentPlan: session.contentPlan, ...(mode === "cold" ? { evaluationPlan: session.evaluationPlan, evaluationArtifact: session.evaluationArtifact } : {}) });
     unsubscribe = engine.subscribe((snapshot, event) => {
-      if (event === "completed") { void engine.complete().then((result) => { finalResult = result; mode === "cold" ? renderColdResult(root, result) : renderNaturalResult(root, result); }).catch((error) => logger?.warn?.("Real Text completion retrieval failed", error)); return; }
+      if (event === "completed") { pulse?.stop(); void engine.complete().then((result) => { finalResult = result; mode === "cold" ? renderColdResult(root, result) : renderNaturalResult(root, result); }).catch((error) => logger?.warn?.("Real Text completion retrieval failed", error)); return; }
       if (!finalResult) { renderActive(root, { contentPlan: session.contentPlan, snapshot, mode }); if (snapshot.lifecycleState === "active") focus(); }
     });
+    pulse = createPracticeSessionPulse({run:()=>engine.tick(),intervalMs:100,isActive:()=>!closed&&!finalResult,onError:error=>logger?.warn?.("Real Text timer failed",error)});pulse.start();
     const snapshot = await engine.start(); renderActive(root, { contentPlan: session.contentPlan, snapshot, mode }); focus();
   } catch (error) { logger?.warn?.("Real Text session start failed", error); await finish(); throw error; }
   return Object.freeze({ getSnapshot: () => engine.getSnapshot(), exit: finish });

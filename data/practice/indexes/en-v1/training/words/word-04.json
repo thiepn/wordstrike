@@ -3,7 +3,7 @@
   "indexGeneratorVersion": 1,
   "corpusId": "practice-en-v1",
   "corpusVersion": 1,
-  "corpusChecksum": "sha256-28beccf65eed71519da306c129da5040a20f364aed320dc21eea2d16c2a1c404",
+  "corpusChecksum": "sha256-55b276a4628d6c29f5ce47ced81e4ed5f571866c5e3afa56ee7ee3d9c1fd1438",
   "language": "en",
   "partition": "training",
   "indexType": "words",
@@ -11,6 +11,2319 @@
   "shardCount": 16,
   "shardId": 4,
   "entries": [
+    {
+      "entityType": "word",
+      "entityKey": "above",
+      "lexicalKey": "above",
+      "surfaceForms": [
+        {
+          "surfaceText": "above",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_realtext_015_s000_8",
+          "familyId": "fam_gc3_realtext_015",
+          "count": 1,
+          "positions": [
+            87
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "also",
+      "lexicalKey": "also",
+      "surfaceForms": [
+        {
+          "surfaceText": "also",
+          "corpusOccurrenceCount": 32
+        }
+      ],
+      "corpusOccurrenceCount": 32,
+      "contentCoverageCount": 16,
+      "familyCoverageCount": 16,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_realtext_001_s000_3",
+          "familyId": "fam_gc3_realtext_001",
+          "count": 2,
+          "positions": [
+            815,
+            1820
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_002_s000_1",
+          "familyId": "fam_gc3_realtext_002",
+          "count": 2,
+          "positions": [
+            815,
+            1833
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_003_s000_3",
+          "familyId": "fam_gc3_realtext_003",
+          "count": 2,
+          "positions": [
+            798,
+            1827
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_004_s000_5",
+          "familyId": "fam_gc3_realtext_004",
+          "count": 2,
+          "positions": [
+            800,
+            1831
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_005_s000_3",
+          "familyId": "fam_gc3_realtext_005",
+          "count": 2,
+          "positions": [
+            790,
+            1821
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_006_s000_1",
+          "familyId": "fam_gc3_realtext_006",
+          "count": 2,
+          "positions": [
+            806,
+            1840
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_007_s000_3",
+          "familyId": "fam_gc3_realtext_007",
+          "count": 2,
+          "positions": [
+            804,
+            1828
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_008_s000_34",
+          "familyId": "fam_gc3_realtext_008",
+          "count": 2,
+          "positions": [
+            805,
+            1825
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_009_s000_3",
+          "familyId": "fam_gc3_realtext_009",
+          "count": 2,
+          "positions": [
+            795,
+            1811
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_010_s000_22",
+          "familyId": "fam_gc3_realtext_010",
+          "count": 2,
+          "positions": [
+            805,
+            1822
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_011_s000_0",
+          "familyId": "fam_gc3_realtext_011",
+          "count": 2,
+          "positions": [
+            806,
+            1825
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_012_s000_26",
+          "familyId": "fam_gc3_realtext_012",
+          "count": 2,
+          "positions": [
+            814,
+            1837
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_013_s000_8",
+          "familyId": "fam_gc3_realtext_013",
+          "count": 2,
+          "positions": [
+            811,
+            1823
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_014_s000_2",
+          "familyId": "fam_gc3_realtext_014",
+          "count": 2,
+          "positions": [
+            800,
+            1832
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_015_s000_8",
+          "familyId": "fam_gc3_realtext_015",
+          "count": 2,
+          "positions": [
+            790,
+            1819
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_016_s000_48",
+          "familyId": "fam_gc3_realtext_016",
+          "count": 2,
+          "positions": [
+            788,
+            1819
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "arrive",
+      "lexicalKey": "arrive",
+      "surfaceForms": [
+        {
+          "surfaceText": "arrive",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_realtext_010_s000_22",
+          "familyId": "fam_gc3_realtext_010",
+          "count": 1,
+          "positions": [
+            98
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "atmospheric",
+      "lexicalKey": "atmospheric",
+      "surfaceForms": [
+        {
+          "surfaceText": "atmospheric",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_breadth_024_s000_7",
+          "familyId": "fam_gc3_breadth_024",
+          "count": 1,
+          "positions": [
+            82
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "bags",
+      "lexicalKey": "bags",
+      "surfaceForms": [
+        {
+          "surfaceText": "bags",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_breadth_010_s000_5",
+          "familyId": "fam_gc3_breadth_010",
+          "count": 1,
+          "positions": [
+            12
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "barrels",
+      "lexicalKey": "barrels",
+      "surfaceForms": [
+        {
+          "surfaceText": "barrels",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_realtext_008_s000_34",
+          "familyId": "fam_gc3_realtext_008",
+          "count": 1,
+          "positions": [
+            551
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "bicycle",
+      "lexicalKey": "bicycle",
+      "surfaceForms": [
+        {
+          "surfaceText": "bicycle",
+          "corpusOccurrenceCount": 1
+        },
+        {
+          "surfaceText": "Bicycle",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 2,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_realtext_016_s000_48",
+          "familyId": "fam_gc3_realtext_016",
+          "count": 2,
+          "positions": [
+            7,
+            67
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "boxes",
+      "lexicalKey": "boxes",
+      "surfaceForms": [
+        {
+          "surfaceText": "boxes",
+          "corpusOccurrenceCount": 2
+        }
+      ],
+      "corpusOccurrenceCount": 2,
+      "contentCoverageCount": 2,
+      "familyCoverageCount": 2,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_realtext_001_s000_3",
+          "familyId": "fam_gc3_realtext_001",
+          "count": 1,
+          "positions": [
+            1202
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_015_s000_8",
+          "familyId": "fam_gc3_realtext_015",
+          "count": 1,
+          "positions": [
+            1186
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "classifications",
+      "lexicalKey": "classifications",
+      "surfaceForms": [
+        {
+          "surfaceText": "classifications",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_breadth_021_s000_9",
+          "familyId": "fam_gc3_breadth_021",
+          "count": 1,
+          "positions": [
+            16
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "clean",
+      "lexicalKey": "clean",
+      "surfaceForms": [
+        {
+          "surfaceText": "clean",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_realtext_013_s000_8",
+          "familyId": "fam_gc3_realtext_013",
+          "count": 1,
+          "positions": [
+            1196
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "configurations",
+      "lexicalKey": "configurations",
+      "surfaceForms": [
+        {
+          "surfaceText": "configurations",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_breadth_023_s000_11",
+          "familyId": "fam_gc3_breadth_023",
+          "count": 1,
+          "positions": [
+            49
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "contemporary",
+      "lexicalKey": "contemporary",
+      "surfaceForms": [
+        {
+          "surfaceText": "Contemporary",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_breadth_016_s000_14",
+          "familyId": "fam_gc3_breadth_016",
+          "count": 1,
+          "positions": [
+            0
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "find",
+      "lexicalKey": "find",
+      "surfaceForms": [
+        {
+          "surfaceText": "find",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_breadth_007_s000_18",
+          "familyId": "fam_gc3_breadth_007",
+          "count": 1,
+          "positions": [
+            27
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "fragmentation",
+      "lexicalKey": "fragmentation",
+      "surfaceForms": [
+        {
+          "surfaceText": "fragmentation",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_breadth_019_s000_14",
+          "familyId": "fam_gc3_breadth_019",
+          "count": 1,
+          "positions": [
+            110
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "hall",
+      "lexicalKey": "hall",
+      "surfaceForms": [
+        {
+          "surfaceText": "hall",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_breadth_009_s000_4",
+          "familyId": "fam_gc3_breadth_009",
+          "count": 1,
+          "positions": [
+            21
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "home",
+      "lexicalKey": "home",
+      "surfaceForms": [
+        {
+          "surfaceText": "home",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_breadth_012_s000_28",
+          "familyId": "fam_gc3_breadth_012",
+          "count": 1,
+          "positions": [
+            74
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "homogeneous",
+      "lexicalKey": "homogeneous",
+      "surfaceForms": [
+        {
+          "surfaceText": "homogeneous",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_breadth_015_s000_8",
+          "familyId": "fam_gc3_breadth_015",
+          "count": 1,
+          "positions": [
+            79
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "in",
+      "lexicalKey": "in",
+      "surfaceForms": [
+        {
+          "surfaceText": "in",
+          "corpusOccurrenceCount": 78
+        }
+      ],
+      "corpusOccurrenceCount": 78,
+      "contentCoverageCount": 22,
+      "familyCoverageCount": 22,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_breadth_001_s000_0",
+          "familyId": "fam_gc3_breadth_001",
+          "count": 1,
+          "positions": [
+            49
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_breadth_003_s000_11",
+          "familyId": "fam_gc3_breadth_003",
+          "count": 1,
+          "positions": [
+            22
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_breadth_004_s000_22",
+          "familyId": "fam_gc3_breadth_004",
+          "count": 1,
+          "positions": [
+            40
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_breadth_009_s000_4",
+          "familyId": "fam_gc3_breadth_009",
+          "count": 1,
+          "positions": [
+            14
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_breadth_010_s000_5",
+          "familyId": "fam_gc3_breadth_010",
+          "count": 1,
+          "positions": [
+            17
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_breadth_015_s000_8",
+          "familyId": "fam_gc3_breadth_015",
+          "count": 1,
+          "positions": [
+            106
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_001_s000_3",
+          "familyId": "fam_gc3_realtext_001",
+          "count": 4,
+          "positions": [
+            62,
+            475,
+            1558,
+            1831
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_002_s000_1",
+          "familyId": "fam_gc3_realtext_002",
+          "count": 5,
+          "positions": [
+            63,
+            365,
+            484,
+            1566,
+            1844
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_003_s000_3",
+          "familyId": "fam_gc3_realtext_003",
+          "count": 4,
+          "positions": [
+            61,
+            467,
+            1559,
+            1838
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_004_s000_5",
+          "familyId": "fam_gc3_realtext_004",
+          "count": 5,
+          "positions": [
+            65,
+            470,
+            1565,
+            1842,
+            2090
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_005_s000_3",
+          "familyId": "fam_gc3_realtext_005",
+          "count": 4,
+          "positions": [
+            65,
+            460,
+            1550,
+            1832
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_006_s000_1",
+          "familyId": "fam_gc3_realtext_006",
+          "count": 5,
+          "positions": [
+            67,
+            477,
+            1569,
+            1679,
+            1851
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_007_s000_3",
+          "familyId": "fam_gc3_realtext_007",
+          "count": 4,
+          "positions": [
+            67,
+            473,
+            1566,
+            1839
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_008_s000_34",
+          "familyId": "fam_gc3_realtext_008",
+          "count": 5,
+          "positions": [
+            60,
+            350,
+            469,
+            1558,
+            1836
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_009_s000_3",
+          "familyId": "fam_gc3_realtext_009",
+          "count": 4,
+          "positions": [
+            64,
+            460,
+            1543,
+            1822
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_010_s000_22",
+          "familyId": "fam_gc3_realtext_010",
+          "count": 5,
+          "positions": [
+            67,
+            470,
+            1556,
+            1833,
+            2076
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_011_s000_0",
+          "familyId": "fam_gc3_realtext_011",
+          "count": 4,
+          "positions": [
+            59,
+            470,
+            1554,
+            1836
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_012_s000_26",
+          "familyId": "fam_gc3_realtext_012",
+          "count": 5,
+          "positions": [
+            63,
+            479,
+            1566,
+            1676,
+            1848
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_013_s000_8",
+          "familyId": "fam_gc3_realtext_013",
+          "count": 4,
+          "positions": [
+            63,
+            480,
+            1561,
+            1834
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_014_s000_2",
+          "familyId": "fam_gc3_realtext_014",
+          "count": 5,
+          "positions": [
+            64,
+            359,
+            478,
+            1565,
+            1843
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_015_s000_8",
+          "familyId": "fam_gc3_realtext_015",
+          "count": 4,
+          "positions": [
+            66,
+            454,
+            1551,
+            1830
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_016_s000_48",
+          "familyId": "fam_gc3_realtext_016",
+          "count": 5,
+          "positions": [
+            62,
+            455,
+            1553,
+            1830,
+            2074
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "isolated",
+      "lexicalKey": "isolated",
+      "surfaceForms": [
+        {
+          "surfaceText": "isolated",
+          "corpusOccurrenceCount": 16
+        }
+      ],
+      "corpusOccurrenceCount": 16,
+      "contentCoverageCount": 16,
+      "familyCoverageCount": 16,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_realtext_001_s000_3",
+          "familyId": "fam_gc3_realtext_001",
+          "count": 1,
+          "positions": [
+            1437
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_002_s000_1",
+          "familyId": "fam_gc3_realtext_002",
+          "count": 1,
+          "positions": [
+            1441
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_003_s000_3",
+          "familyId": "fam_gc3_realtext_003",
+          "count": 1,
+          "positions": [
+            1434
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_004_s000_5",
+          "familyId": "fam_gc3_realtext_004",
+          "count": 1,
+          "positions": [
+            1437
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_005_s000_3",
+          "familyId": "fam_gc3_realtext_005",
+          "count": 1,
+          "positions": [
+            1420
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_006_s000_1",
+          "familyId": "fam_gc3_realtext_006",
+          "count": 1,
+          "positions": [
+            1436
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_007_s000_3",
+          "familyId": "fam_gc3_realtext_007",
+          "count": 1,
+          "positions": [
+            1442
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_008_s000_34",
+          "familyId": "fam_gc3_realtext_008",
+          "count": 1,
+          "positions": [
+            1436
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_009_s000_3",
+          "familyId": "fam_gc3_realtext_009",
+          "count": 1,
+          "positions": [
+            1430
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_010_s000_22",
+          "familyId": "fam_gc3_realtext_010",
+          "count": 1,
+          "positions": [
+            1435
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_011_s000_0",
+          "familyId": "fam_gc3_realtext_011",
+          "count": 1,
+          "positions": [
+            1433
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_012_s000_26",
+          "familyId": "fam_gc3_realtext_012",
+          "count": 1,
+          "positions": [
+            1441
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_013_s000_8",
+          "familyId": "fam_gc3_realtext_013",
+          "count": 1,
+          "positions": [
+            1436
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_014_s000_2",
+          "familyId": "fam_gc3_realtext_014",
+          "count": 1,
+          "positions": [
+            1437
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_015_s000_8",
+          "familyId": "fam_gc3_realtext_015",
+          "count": 1,
+          "positions": [
+            1421
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_016_s000_48",
+          "familyId": "fam_gc3_realtext_016",
+          "count": 1,
+          "positions": [
+            1420
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "lake",
+      "lexicalKey": "lake",
+      "surfaceForms": [
+        {
+          "surfaceText": "lake",
+          "corpusOccurrenceCount": 1
+        },
+        {
+          "surfaceText": "Lake",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 2,
+      "contentCoverageCount": 2,
+      "familyCoverageCount": 2,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_breadth_006_s000_23",
+          "familyId": "fam_gc3_breadth_006",
+          "count": 1,
+          "positions": [
+            73
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_001_s000_3",
+          "familyId": "fam_gc3_realtext_001",
+          "count": 1,
+          "positions": [
+            0
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "look",
+      "lexicalKey": "look",
+      "surfaceForms": [
+        {
+          "surfaceText": "look",
+          "corpusOccurrenceCount": 33
+        }
+      ],
+      "corpusOccurrenceCount": 33,
+      "contentCoverageCount": 17,
+      "familyCoverageCount": 17,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_breadth_009_s000_4",
+          "familyId": "fam_gc3_breadth_009",
+          "count": 1,
+          "positions": [
+            38
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_001_s000_3",
+          "familyId": "fam_gc3_realtext_001",
+          "count": 2,
+          "positions": [
+            569,
+            1804
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_002_s000_1",
+          "familyId": "fam_gc3_realtext_002",
+          "count": 2,
+          "positions": [
+            576,
+            1817
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_003_s000_3",
+          "familyId": "fam_gc3_realtext_003",
+          "count": 2,
+          "positions": [
+            561,
+            1811
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_004_s000_5",
+          "familyId": "fam_gc3_realtext_004",
+          "count": 2,
+          "positions": [
+            562,
+            1815
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_005_s000_3",
+          "familyId": "fam_gc3_realtext_005",
+          "count": 2,
+          "positions": [
+            551,
+            1805
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_006_s000_1",
+          "familyId": "fam_gc3_realtext_006",
+          "count": 2,
+          "positions": [
+            568,
+            1824
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_007_s000_3",
+          "familyId": "fam_gc3_realtext_007",
+          "count": 2,
+          "positions": [
+            562,
+            1812
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_008_s000_34",
+          "familyId": "fam_gc3_realtext_008",
+          "count": 2,
+          "positions": [
+            563,
+            1809
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_009_s000_3",
+          "familyId": "fam_gc3_realtext_009",
+          "count": 2,
+          "positions": [
+            551,
+            1795
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_010_s000_22",
+          "familyId": "fam_gc3_realtext_010",
+          "count": 2,
+          "positions": [
+            561,
+            1806
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_011_s000_0",
+          "familyId": "fam_gc3_realtext_011",
+          "count": 2,
+          "positions": [
+            557,
+            1809
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_012_s000_26",
+          "familyId": "fam_gc3_realtext_012",
+          "count": 2,
+          "positions": [
+            573,
+            1821
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_013_s000_8",
+          "familyId": "fam_gc3_realtext_013",
+          "count": 2,
+          "positions": [
+            575,
+            1807
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_014_s000_2",
+          "familyId": "fam_gc3_realtext_014",
+          "count": 2,
+          "positions": [
+            567,
+            1816
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_015_s000_8",
+          "familyId": "fam_gc3_realtext_015",
+          "count": 2,
+          "positions": [
+            553,
+            1803
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_016_s000_48",
+          "familyId": "fam_gc3_realtext_016",
+          "count": 2,
+          "positions": [
+            547,
+            1803
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "may",
+      "lexicalKey": "may",
+      "surfaceForms": [
+        {
+          "surfaceText": "may",
+          "corpusOccurrenceCount": 16
+        }
+      ],
+      "corpusOccurrenceCount": 16,
+      "contentCoverageCount": 16,
+      "familyCoverageCount": 16,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_realtext_001_s000_3",
+          "familyId": "fam_gc3_realtext_001",
+          "count": 1,
+          "positions": [
+            565
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_002_s000_1",
+          "familyId": "fam_gc3_realtext_002",
+          "count": 1,
+          "positions": [
+            572
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_003_s000_3",
+          "familyId": "fam_gc3_realtext_003",
+          "count": 1,
+          "positions": [
+            557
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_004_s000_5",
+          "familyId": "fam_gc3_realtext_004",
+          "count": 1,
+          "positions": [
+            558
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_005_s000_3",
+          "familyId": "fam_gc3_realtext_005",
+          "count": 1,
+          "positions": [
+            547
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_006_s000_1",
+          "familyId": "fam_gc3_realtext_006",
+          "count": 1,
+          "positions": [
+            564
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_007_s000_3",
+          "familyId": "fam_gc3_realtext_007",
+          "count": 1,
+          "positions": [
+            558
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_008_s000_34",
+          "familyId": "fam_gc3_realtext_008",
+          "count": 1,
+          "positions": [
+            559
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_009_s000_3",
+          "familyId": "fam_gc3_realtext_009",
+          "count": 1,
+          "positions": [
+            547
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_010_s000_22",
+          "familyId": "fam_gc3_realtext_010",
+          "count": 1,
+          "positions": [
+            557
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_011_s000_0",
+          "familyId": "fam_gc3_realtext_011",
+          "count": 1,
+          "positions": [
+            553
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_012_s000_26",
+          "familyId": "fam_gc3_realtext_012",
+          "count": 1,
+          "positions": [
+            569
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_013_s000_8",
+          "familyId": "fam_gc3_realtext_013",
+          "count": 1,
+          "positions": [
+            571
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_014_s000_2",
+          "familyId": "fam_gc3_realtext_014",
+          "count": 1,
+          "positions": [
+            563
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_015_s000_8",
+          "familyId": "fam_gc3_realtext_015",
+          "count": 1,
+          "positions": [
+            549
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_016_s000_48",
+          "familyId": "fam_gc3_realtext_016",
+          "count": 1,
+          "positions": [
+            543
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "microscopic",
+      "lexicalKey": "microscopic",
+      "surfaceForms": [
+        {
+          "surfaceText": "microscopic",
+          "corpusOccurrenceCount": 1
+        },
+        {
+          "surfaceText": "Microscopic",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 2,
+      "contentCoverageCount": 2,
+      "familyCoverageCount": 2,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_breadth_015_s000_8",
+          "familyId": "fam_gc3_breadth_015",
+          "count": 1,
+          "positions": [
+            0
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_breadth_023_s000_11",
+          "familyId": "fam_gc3_breadth_023",
+          "count": 1,
+          "positions": [
+            37
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "mine",
+      "lexicalKey": "mine",
+      "surfaceForms": [
+        {
+          "surfaceText": "mine",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_breadth_006_s000_23",
+          "familyId": "fam_gc3_breadth_006",
+          "count": 1,
+          "positions": [
+            36
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "monthly",
+      "lexicalKey": "monthly",
+      "surfaceForms": [
+        {
+          "surfaceText": "monthly",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_realtext_001_s000_3",
+          "familyId": "fam_gc3_realtext_001",
+          "count": 1,
+          "positions": [
+            90
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "most",
+      "lexicalKey": "most",
+      "surfaceForms": [
+        {
+          "surfaceText": "most",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_breadth_010_s000_5",
+          "familyId": "fam_gc3_breadth_010",
+          "count": 1,
+          "positions": [
+            83
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "no",
+      "lexicalKey": "no",
+      "surfaceForms": [
+        {
+          "surfaceText": "no",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_breadth_006_s000_23",
+          "familyId": "fam_gc3_breadth_006",
+          "count": 1,
+          "positions": [
+            17
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "notes",
+      "lexicalKey": "notes",
+      "surfaceForms": [
+        {
+          "surfaceText": "notes",
+          "corpusOccurrenceCount": 9
+        }
+      ],
+      "corpusOccurrenceCount": 9,
+      "contentCoverageCount": 9,
+      "familyCoverageCount": 9,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_realtext_002_s000_1",
+          "familyId": "fam_gc3_realtext_002",
+          "count": 1,
+          "positions": [
+            1639
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_004_s000_5",
+          "familyId": "fam_gc3_realtext_004",
+          "count": 1,
+          "positions": [
+            318
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_006_s000_1",
+          "familyId": "fam_gc3_realtext_006",
+          "count": 1,
+          "positions": [
+            2057
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_008_s000_34",
+          "familyId": "fam_gc3_realtext_008",
+          "count": 1,
+          "positions": [
+            1631
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_009_s000_3",
+          "familyId": "fam_gc3_realtext_009",
+          "count": 1,
+          "positions": [
+            1195
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_010_s000_22",
+          "familyId": "fam_gc3_realtext_010",
+          "count": 1,
+          "positions": [
+            318
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_012_s000_26",
+          "familyId": "fam_gc3_realtext_012",
+          "count": 1,
+          "positions": [
+            2057
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_014_s000_2",
+          "familyId": "fam_gc3_realtext_014",
+          "count": 1,
+          "positions": [
+            1638
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_016_s000_48",
+          "familyId": "fam_gc3_realtext_016",
+          "count": 1,
+          "positions": [
+            303
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "oxygen-rich",
+      "lexicalKey": "oxygen-rich",
+      "surfaceForms": [
+        {
+          "surfaceText": "oxygen-rich",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_breadth_014_s000_1",
+          "familyId": "fam_gc3_breadth_014",
+          "count": 1,
+          "positions": [
+            122
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "painted",
+      "lexicalKey": "painted",
+      "surfaceForms": [
+        {
+          "surfaceText": "painted",
+          "corpusOccurrenceCount": 2
+        }
+      ],
+      "corpusOccurrenceCount": 2,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_realtext_012_s000_26",
+          "familyId": "fam_gc3_realtext_012",
+          "count": 2,
+          "positions": [
+            631,
+            1942
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "patterns",
+      "lexicalKey": "patterns",
+      "surfaceForms": [
+        {
+          "surfaceText": "patterns",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_breadth_015_s000_8",
+          "familyId": "fam_gc3_breadth_015",
+          "count": 1,
+          "positions": [
+            28
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "people",
+      "lexicalKey": "people",
+      "surfaceForms": [
+        {
+          "surfaceText": "people",
+          "corpusOccurrenceCount": 24
+        },
+        {
+          "surfaceText": "People",
+          "corpusOccurrenceCount": 16
+        }
+      ],
+      "corpusOccurrenceCount": 40,
+      "contentCoverageCount": 16,
+      "familyCoverageCount": 16,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_realtext_001_s000_3",
+          "familyId": "fam_gc3_realtext_001",
+          "count": 3,
+          "positions": [
+            241,
+            1487,
+            2048
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_002_s000_1",
+          "familyId": "fam_gc3_realtext_002",
+          "count": 2,
+          "positions": [
+            250,
+            1491
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_003_s000_3",
+          "familyId": "fam_gc3_realtext_003",
+          "count": 3,
+          "positions": [
+            240,
+            1484,
+            1643
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_004_s000_5",
+          "familyId": "fam_gc3_realtext_004",
+          "count": 2,
+          "positions": [
+            246,
+            1487
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_005_s000_3",
+          "familyId": "fam_gc3_realtext_005",
+          "count": 3,
+          "positions": [
+            240,
+            318,
+            1470
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_006_s000_1",
+          "familyId": "fam_gc3_realtext_006",
+          "count": 2,
+          "positions": [
+            257,
+            1486
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_007_s000_3",
+          "familyId": "fam_gc3_realtext_007",
+          "count": 3,
+          "positions": [
+            246,
+            1492,
+            2061
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_008_s000_34",
+          "familyId": "fam_gc3_realtext_008",
+          "count": 2,
+          "positions": [
+            238,
+            1486
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_009_s000_3",
+          "familyId": "fam_gc3_realtext_009",
+          "count": 3,
+          "positions": [
+            240,
+            1480,
+            1627
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_010_s000_22",
+          "familyId": "fam_gc3_realtext_010",
+          "count": 2,
+          "positions": [
+            243,
+            1485
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_011_s000_0",
+          "familyId": "fam_gc3_realtext_011",
+          "count": 3,
+          "positions": [
+            239,
+            328,
+            1483
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_012_s000_26",
+          "familyId": "fam_gc3_realtext_012",
+          "count": 2,
+          "positions": [
+            250,
+            1491
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_013_s000_8",
+          "familyId": "fam_gc3_realtext_013",
+          "count": 3,
+          "positions": [
+            244,
+            1486,
+            2058
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_014_s000_2",
+          "familyId": "fam_gc3_realtext_014",
+          "count": 2,
+          "positions": [
+            250,
+            1487
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_015_s000_8",
+          "familyId": "fam_gc3_realtext_015",
+          "count": 3,
+          "positions": [
+            240,
+            1471,
+            1635
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_016_s000_48",
+          "familyId": "fam_gc3_realtext_016",
+          "count": 2,
+          "positions": [
+            234,
+            1470
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "preserving",
+      "lexicalKey": "preserving",
+      "surfaceForms": [
+        {
+          "surfaceText": "preserving",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_breadth_018_s000_8",
+          "familyId": "fam_gc3_breadth_018",
+          "count": 1,
+          "positions": [
+            82
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "put",
+      "lexicalKey": "put",
+      "surfaceForms": [
+        {
+          "surfaceText": "put",
+          "corpusOccurrenceCount": 2
+        }
+      ],
+      "corpusOccurrenceCount": 2,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_breadth_004_s000_22",
+          "familyId": "fam_gc3_breadth_004",
+          "count": 2,
+          "positions": [
+            4,
+            93
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "quality",
+      "lexicalKey": "quality",
+      "surfaceForms": [
+        {
+          "surfaceText": "quality",
+          "corpusOccurrenceCount": 16
+        }
+      ],
+      "corpusOccurrenceCount": 16,
+      "contentCoverageCount": 16,
+      "familyCoverageCount": 16,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_realtext_001_s000_3",
+          "familyId": "fam_gc3_realtext_001",
+          "count": 1,
+          "positions": [
+            435
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_002_s000_1",
+          "familyId": "fam_gc3_realtext_002",
+          "count": 1,
+          "positions": [
+            444
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_003_s000_3",
+          "familyId": "fam_gc3_realtext_003",
+          "count": 1,
+          "positions": [
+            427
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_004_s000_5",
+          "familyId": "fam_gc3_realtext_004",
+          "count": 1,
+          "positions": [
+            430
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_005_s000_3",
+          "familyId": "fam_gc3_realtext_005",
+          "count": 1,
+          "positions": [
+            420
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_006_s000_1",
+          "familyId": "fam_gc3_realtext_006",
+          "count": 1,
+          "positions": [
+            437
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_007_s000_3",
+          "familyId": "fam_gc3_realtext_007",
+          "count": 1,
+          "positions": [
+            433
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_008_s000_34",
+          "familyId": "fam_gc3_realtext_008",
+          "count": 1,
+          "positions": [
+            429
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_009_s000_3",
+          "familyId": "fam_gc3_realtext_009",
+          "count": 1,
+          "positions": [
+            420
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_010_s000_22",
+          "familyId": "fam_gc3_realtext_010",
+          "count": 1,
+          "positions": [
+            430
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_011_s000_0",
+          "familyId": "fam_gc3_realtext_011",
+          "count": 1,
+          "positions": [
+            430
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_012_s000_26",
+          "familyId": "fam_gc3_realtext_012",
+          "count": 1,
+          "positions": [
+            439
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_013_s000_8",
+          "familyId": "fam_gc3_realtext_013",
+          "count": 1,
+          "positions": [
+            440
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_014_s000_2",
+          "familyId": "fam_gc3_realtext_014",
+          "count": 1,
+          "positions": [
+            438
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_015_s000_8",
+          "familyId": "fam_gc3_realtext_015",
+          "count": 1,
+          "positions": [
+            414
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_016_s000_48",
+          "familyId": "fam_gc3_realtext_016",
+          "count": 1,
+          "positions": [
+            415
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "ran",
+      "lexicalKey": "ran",
+      "surfaceForms": [
+        {
+          "surfaceText": "ran",
+          "corpusOccurrenceCount": 4
+        }
+      ],
+      "corpusOccurrenceCount": 4,
+      "contentCoverageCount": 3,
+      "familyCoverageCount": 3,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_breadth_001_s000_0",
+          "familyId": "fam_gc3_breadth_001",
+          "count": 1,
+          "positions": [
+            65
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_breadth_003_s000_11",
+          "familyId": "fam_gc3_breadth_003",
+          "count": 1,
+          "positions": [
+            74
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_breadth_007_s000_18",
+          "familyId": "fam_gc3_breadth_007",
+          "count": 2,
+          "positions": [
+            8,
+            99
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "returned",
+      "lexicalKey": "returned",
+      "surfaceForms": [
+        {
+          "surfaceText": "returned",
+          "corpusOccurrenceCount": 16
+        }
+      ],
+      "corpusOccurrenceCount": 16,
+      "contentCoverageCount": 16,
+      "familyCoverageCount": 16,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_realtext_001_s000_3",
+          "familyId": "fam_gc3_realtext_001",
+          "count": 1,
+          "positions": [
+            1898
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_002_s000_1",
+          "familyId": "fam_gc3_realtext_002",
+          "count": 1,
+          "positions": [
+            1919
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_003_s000_3",
+          "familyId": "fam_gc3_realtext_003",
+          "count": 1,
+          "positions": [
+            1908
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_004_s000_5",
+          "familyId": "fam_gc3_realtext_004",
+          "count": 1,
+          "positions": [
+            1911
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_005_s000_3",
+          "familyId": "fam_gc3_realtext_005",
+          "count": 1,
+          "positions": [
+            1901
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_006_s000_1",
+          "familyId": "fam_gc3_realtext_006",
+          "count": 1,
+          "positions": [
+            1921
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_007_s000_3",
+          "familyId": "fam_gc3_realtext_007",
+          "count": 1,
+          "positions": [
+            1908
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_008_s000_34",
+          "familyId": "fam_gc3_realtext_008",
+          "count": 1,
+          "positions": [
+            1904
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_009_s000_3",
+          "familyId": "fam_gc3_realtext_009",
+          "count": 1,
+          "positions": [
+            1889
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_010_s000_22",
+          "familyId": "fam_gc3_realtext_010",
+          "count": 1,
+          "positions": [
+            1900
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_011_s000_0",
+          "familyId": "fam_gc3_realtext_011",
+          "count": 1,
+          "positions": [
+            1905
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_012_s000_26",
+          "familyId": "fam_gc3_realtext_012",
+          "count": 1,
+          "positions": [
+            1915
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_013_s000_8",
+          "familyId": "fam_gc3_realtext_013",
+          "count": 1,
+          "positions": [
+            1905
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_014_s000_2",
+          "familyId": "fam_gc3_realtext_014",
+          "count": 1,
+          "positions": [
+            1912
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_015_s000_8",
+          "familyId": "fam_gc3_realtext_015",
+          "count": 1,
+          "positions": [
+            1899
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_016_s000_48",
+          "familyId": "fam_gc3_realtext_016",
+          "count": 1,
+          "positions": [
+            1898
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "route",
+      "lexicalKey": "route",
+      "surfaceForms": [
+        {
+          "surfaceText": "route",
+          "corpusOccurrenceCount": 15
+        },
+        {
+          "surfaceText": "Route",
+          "corpusOccurrenceCount": 2
+        }
+      ],
+      "corpusOccurrenceCount": 17,
+      "contentCoverageCount": 16,
+      "familyCoverageCount": 16,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_realtext_001_s000_3",
+          "familyId": "fam_gc3_realtext_001",
+          "count": 1,
+          "positions": [
+            1521
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_002_s000_1",
+          "familyId": "fam_gc3_realtext_002",
+          "count": 1,
+          "positions": [
+            1508
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_003_s000_3",
+          "familyId": "fam_gc3_realtext_003",
+          "count": 2,
+          "positions": [
+            155,
+            1032
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_004_s000_5",
+          "familyId": "fam_gc3_realtext_004",
+          "count": 1,
+          "positions": [
+            1000
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_005_s000_3",
+          "familyId": "fam_gc3_realtext_005",
+          "count": 1,
+          "positions": [
+            713
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_006_s000_1",
+          "familyId": "fam_gc3_realtext_006",
+          "count": 1,
+          "positions": [
+            697
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_007_s000_3",
+          "familyId": "fam_gc3_realtext_007",
+          "count": 1,
+          "positions": [
+            285
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_008_s000_34",
+          "familyId": "fam_gc3_realtext_008",
+          "count": 1,
+          "positions": [
+            255
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_009_s000_3",
+          "familyId": "fam_gc3_realtext_009",
+          "count": 1,
+          "positions": [
+            16
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_010_s000_22",
+          "familyId": "fam_gc3_realtext_010",
+          "count": 1,
+          "positions": [
+            1544
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_011_s000_0",
+          "familyId": "fam_gc3_realtext_011",
+          "count": 1,
+          "positions": [
+            1517
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_012_s000_26",
+          "familyId": "fam_gc3_realtext_012",
+          "count": 1,
+          "positions": [
+            1508
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_013_s000_8",
+          "familyId": "fam_gc3_realtext_013",
+          "count": 1,
+          "positions": [
+            1045
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_014_s000_2",
+          "familyId": "fam_gc3_realtext_014",
+          "count": 1,
+          "positions": [
+            1000
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_015_s000_8",
+          "familyId": "fam_gc3_realtext_015",
+          "count": 1,
+          "positions": [
+            713
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_016_s000_48",
+          "familyId": "fam_gc3_realtext_016",
+          "count": 1,
+          "positions": [
+            679
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "shore",
+      "lexicalKey": "shore",
+      "surfaceForms": [
+        {
+          "surfaceText": "shore",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_breadth_001_s000_0",
+          "familyId": "fam_gc3_breadth_001",
+          "count": 1,
+          "positions": [
+            24
+          ]
+        }
+      ]
+    },
     {
       "entityType": "word",
       "entityKey": "skill",
@@ -31,6 +2344,593 @@
           "count": 1,
           "positions": [
             63
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "standardized",
+      "lexicalKey": "standardized",
+      "surfaceForms": [
+        {
+          "surfaceText": "standardized",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_breadth_018_s000_8",
+          "familyId": "fam_gc3_breadth_018",
+          "count": 1,
+          "positions": [
+            116
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "stone",
+      "lexicalKey": "stone",
+      "surfaceForms": [
+        {
+          "surfaceText": "stone",
+          "corpusOccurrenceCount": 4
+        },
+        {
+          "surfaceText": "Stone",
+          "corpusOccurrenceCount": 3
+        }
+      ],
+      "corpusOccurrenceCount": 7,
+      "contentCoverageCount": 3,
+      "familyCoverageCount": 3,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_realtext_004_s000_5",
+          "familyId": "fam_gc3_realtext_004",
+          "count": 2,
+          "positions": [
+            620,
+            1938
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_005_s000_3",
+          "familyId": "fam_gc3_realtext_005",
+          "count": 2,
+          "positions": [
+            198,
+            1879
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_011_s000_0",
+          "familyId": "fam_gc3_realtext_011",
+          "count": 3,
+          "positions": [
+            0,
+            92,
+            1128
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "storage",
+      "lexicalKey": "storage",
+      "surfaceForms": [
+        {
+          "surfaceText": "storage",
+          "corpusOccurrenceCount": 2
+        },
+        {
+          "surfaceText": "Storage",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 3,
+      "contentCoverageCount": 2,
+      "familyCoverageCount": 2,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_realtext_005_s000_3",
+          "familyId": "fam_gc3_realtext_005",
+          "count": 2,
+          "positions": [
+            609,
+            1928
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_014_s000_2",
+          "familyId": "fam_gc3_realtext_014",
+          "count": 1,
+          "positions": [
+            1130
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "straps",
+      "lexicalKey": "straps",
+      "surfaceForms": [
+        {
+          "surfaceText": "straps",
+          "corpusOccurrenceCount": 2
+        }
+      ],
+      "corpusOccurrenceCount": 2,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_realtext_011_s000_0",
+          "familyId": "fam_gc3_realtext_011",
+          "count": 2,
+          "positions": [
+            623,
+            1940
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "tapes",
+      "lexicalKey": "tapes",
+      "surfaceForms": [
+        {
+          "surfaceText": "tapes",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_realtext_011_s000_0",
+          "familyId": "fam_gc3_realtext_011",
+          "count": 1,
+          "positions": [
+            1198
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "tell",
+      "lexicalKey": "tell",
+      "surfaceForms": [
+        {
+          "surfaceText": "tell",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_breadth_001_s000_0",
+          "familyId": "fam_gc3_breadth_001",
+          "count": 1,
+          "positions": [
+            72
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "theater",
+      "lexicalKey": "theater",
+      "surfaceForms": [
+        {
+          "surfaceText": "theater",
+          "corpusOccurrenceCount": 1
+        },
+        {
+          "surfaceText": "Theater",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 2,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_realtext_006_s000_1",
+          "familyId": "fam_gc3_realtext_006",
+          "count": 2,
+          "positions": [
+            0,
+            82
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "through",
+      "lexicalKey": "through",
+      "surfaceForms": [
+        {
+          "surfaceText": "through",
+          "corpusOccurrenceCount": 18
+        }
+      ],
+      "corpusOccurrenceCount": 18,
+      "contentCoverageCount": 18,
+      "familyCoverageCount": 18,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_breadth_018_s000_8",
+          "familyId": "fam_gc3_breadth_018",
+          "count": 1,
+          "positions": [
+            108
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_breadth_022_s000_2",
+          "familyId": "fam_gc3_breadth_022",
+          "count": 1,
+          "positions": [
+            70
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_001_s000_3",
+          "familyId": "fam_gc3_realtext_001",
+          "count": 1,
+          "positions": [
+            511
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_002_s000_1",
+          "familyId": "fam_gc3_realtext_002",
+          "count": 1,
+          "positions": [
+            520
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_003_s000_3",
+          "familyId": "fam_gc3_realtext_003",
+          "count": 1,
+          "positions": [
+            503
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_004_s000_5",
+          "familyId": "fam_gc3_realtext_004",
+          "count": 1,
+          "positions": [
+            506
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_005_s000_3",
+          "familyId": "fam_gc3_realtext_005",
+          "count": 1,
+          "positions": [
+            496
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_006_s000_1",
+          "familyId": "fam_gc3_realtext_006",
+          "count": 1,
+          "positions": [
+            513
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_007_s000_3",
+          "familyId": "fam_gc3_realtext_007",
+          "count": 1,
+          "positions": [
+            509
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_008_s000_34",
+          "familyId": "fam_gc3_realtext_008",
+          "count": 1,
+          "positions": [
+            505
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_009_s000_3",
+          "familyId": "fam_gc3_realtext_009",
+          "count": 1,
+          "positions": [
+            496
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_010_s000_22",
+          "familyId": "fam_gc3_realtext_010",
+          "count": 1,
+          "positions": [
+            506
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_011_s000_0",
+          "familyId": "fam_gc3_realtext_011",
+          "count": 1,
+          "positions": [
+            506
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_012_s000_26",
+          "familyId": "fam_gc3_realtext_012",
+          "count": 1,
+          "positions": [
+            515
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_013_s000_8",
+          "familyId": "fam_gc3_realtext_013",
+          "count": 1,
+          "positions": [
+            516
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_014_s000_2",
+          "familyId": "fam_gc3_realtext_014",
+          "count": 1,
+          "positions": [
+            514
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_015_s000_8",
+          "familyId": "fam_gc3_realtext_015",
+          "count": 1,
+          "positions": [
+            490
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_016_s000_48",
+          "familyId": "fam_gc3_realtext_016",
+          "count": 1,
+          "positions": [
+            491
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "ultraviolet",
+      "lexicalKey": "ultraviolet",
+      "surfaceForms": [
+        {
+          "surfaceText": "ultraviolet",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_breadth_014_s000_1",
+          "familyId": "fam_gc3_breadth_014",
+          "count": 1,
+          "positions": [
+            45
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "value",
+      "lexicalKey": "value",
+      "surfaceForms": [
+        {
+          "surfaceText": "value",
+          "corpusOccurrenceCount": 16
+        }
+      ],
+      "corpusOccurrenceCount": 16,
+      "contentCoverageCount": 16,
+      "familyCoverageCount": 16,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_realtext_001_s000_3",
+          "familyId": "fam_gc3_realtext_001",
+          "count": 1,
+          "positions": [
+            1825
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_002_s000_1",
+          "familyId": "fam_gc3_realtext_002",
+          "count": 1,
+          "positions": [
+            1838
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_003_s000_3",
+          "familyId": "fam_gc3_realtext_003",
+          "count": 1,
+          "positions": [
+            1832
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_004_s000_5",
+          "familyId": "fam_gc3_realtext_004",
+          "count": 1,
+          "positions": [
+            1836
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_005_s000_3",
+          "familyId": "fam_gc3_realtext_005",
+          "count": 1,
+          "positions": [
+            1826
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_006_s000_1",
+          "familyId": "fam_gc3_realtext_006",
+          "count": 1,
+          "positions": [
+            1845
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_007_s000_3",
+          "familyId": "fam_gc3_realtext_007",
+          "count": 1,
+          "positions": [
+            1833
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_008_s000_34",
+          "familyId": "fam_gc3_realtext_008",
+          "count": 1,
+          "positions": [
+            1830
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_009_s000_3",
+          "familyId": "fam_gc3_realtext_009",
+          "count": 1,
+          "positions": [
+            1816
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_010_s000_22",
+          "familyId": "fam_gc3_realtext_010",
+          "count": 1,
+          "positions": [
+            1827
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_011_s000_0",
+          "familyId": "fam_gc3_realtext_011",
+          "count": 1,
+          "positions": [
+            1830
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_012_s000_26",
+          "familyId": "fam_gc3_realtext_012",
+          "count": 1,
+          "positions": [
+            1842
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_013_s000_8",
+          "familyId": "fam_gc3_realtext_013",
+          "count": 1,
+          "positions": [
+            1828
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_014_s000_2",
+          "familyId": "fam_gc3_realtext_014",
+          "count": 1,
+          "positions": [
+            1837
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_015_s000_8",
+          "familyId": "fam_gc3_realtext_015",
+          "count": 1,
+          "positions": [
+            1824
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_realtext_016_s000_48",
+          "familyId": "fam_gc3_realtext_016",
+          "count": 1,
+          "positions": [
+            1824
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "valves",
+      "lexicalKey": "valves",
+      "surfaceForms": [
+        {
+          "surfaceText": "valves",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_realtext_005_s000_3",
+          "familyId": "fam_gc3_realtext_005",
+          "count": 1,
+          "positions": [
+            1125
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "visitors",
+      "lexicalKey": "visitors",
+      "surfaceForms": [
+        {
+          "surfaceText": "visitors",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_realtext_010_s000_22",
+          "familyId": "fam_gc3_realtext_010",
+          "count": 1,
+          "positions": [
+            89
           ]
         }
       ]

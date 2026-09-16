@@ -4,7 +4,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { buildPracticeBenchmarkSuiteArtifact } from "../js/practiceLab/practiceEvaluationArtifacts.js";
 import { extractPracticeTextDifficultyFeatures } from "../js/practiceLab/practiceTextDifficultyFeatures.js";
-import { createUnavailablePracticeReferenceFrequencyProvider } from "../js/practiceLab/practiceReferenceFrequency.js";
+import { createPracticeReferenceFrequencyProvider } from "../js/practiceLab/practiceReferenceFrequency.js";
 import { scorePracticeTextTypability } from "../js/practiceLab/practiceTypabilityModel.js";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
@@ -24,7 +24,7 @@ const [corpusText, typabilityText, corpus, typabilityArtifact, reference] = awai
   readFile(corpusFile, "utf8"), readFile(typabilityFile, "utf8"), readJson(corpusFile), readJson(typabilityFile), readJson(referenceFile),
 ]);
 if (corpus.partition !== "benchmark" || typabilityArtifact.partition !== "benchmark") throw new Error("PL18 benchmark builder requires benchmark partition artifacts only");
-const frequencyProvider = createUnavailablePracticeReferenceFrequencyProvider({ language: corpus.language });
+const frequencyProvider = createPracticeReferenceFrequencyProvider(await readJson(path.join(root, "data/practice/provenance/frequency/en-v1.frequency.json")));
 const scoreComposite = (text) => {
   const features = extractPracticeTextDifficultyFeatures({ text, language: corpus.language, frequencyProvider });
   return { features, textDifficulty: scorePracticeTextTypability({ features, reference, language: corpus.language }) };
