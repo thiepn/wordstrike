@@ -48,9 +48,9 @@ def launch_public_flow(page):
     flow.click()
     expect(page.locator('[data-flow-view="ready"]')).to_be_visible(timeout=15000)
     assert 'flowRelease=1' in page.url, page.url
+    assert page.evaluate('window.wordstrikeFlowReleasePhase13.runtimeReady()') is True
     assert 'dev=1' not in page.url, page.url
     assert page.evaluate('window.wordstrikeFlowReleasePhase13.isReleaseRoute()') is True
-    assert page.evaluate('window.wordstrikeFlowReleasePhase13.runtimeReady()') is True
     expect(page.locator('.flow-phase1-screen[data-flow-ui-phase7="true"]')).to_be_visible()
     expect(page.locator('[data-flow-integration-profile]')).to_be_visible(timeout=10000)
 
@@ -127,6 +127,9 @@ def certify_public_journey(browser, browser_name, base, evidence):
     flow.focus()
     page.keyboard.press('Enter')
     expect(page.locator('[data-flow-view="ready"]')).to_be_visible(timeout=15000)
+    # READY renders before the compatibility loader necessarily removes its
+    # temporary dev flag. Await runtimeReady before asserting final URL state.
+    assert page.evaluate('window.wordstrikeFlowReleasePhase13.runtimeReady()') is True
     assert 'flowRelease=1' in page.url and 'dev=1' not in page.url, page.url
 
     assert not errors, errors
