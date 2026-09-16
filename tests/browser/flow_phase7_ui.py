@@ -91,6 +91,17 @@ def certify_setup_and_run(browser, browser_name, base, evidence):
     expect(page.locator('[data-flow-action="start"]')).to_have_text('START UPDATED RUN')
     assert page.locator('.flow-setup-itinerary .flow-itinerary-step').count() == 3
 
+    # The inherited Phase 5 summary must reflect the same staged draft rather
+    # than exposing the previously resolved Standard / Mixed / Natural plan.
+    draft_summary = page.locator('[data-flow-view="ready"] .flow-phase1-brief')
+    expect(draft_summary).to_have_attribute('aria-label', 'Selected Flow run setup')
+    summary_text = draft_summary.inner_text()
+    for expected_text in ('~3 min', '3 chapters', '6 passages', 'Dialogue', 'Advanced'):
+        assert expected_text in summary_text, (expected_text, summary_text)
+    assert 'Standard run' not in summary_text, summary_text
+    assert page.locator('[data-flow-view="ready"] .flow-phase1-note').count() == 2
+    assert page.locator('[data-flow-view="ready"] .flow-phase1-note:visible').count() == 0
+
     draft = page.evaluate('window.wordstrikeFlowUiPhase7.getDraft()')
     assert draft['sessionLength'] == 'quick', draft
     assert draft['category'] == 'dialogue', draft
