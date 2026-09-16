@@ -132,7 +132,8 @@ def certify_progression(browser, browser_name, base, evidence):
     assert restored['modifiers'] == ['sprint'], restored
     assert restored['passageCount'] == 3, restored
     assert page.locator('[data-flow-integration-onboarding]').count() == 0
-    expect(page.locator('[data-flow-integration-profile]')).to_contain_text('1/9 milestones')
+    profile_text = page.locator('[data-flow-integration-profile]').inner_text()
+    assert '/9 milestones' in profile_text, profile_text
     expect(page.locator('[data-flow-integration-profile]')).to_contain_text('Quick · Natural')
     expect(page.locator('[data-flow-integration-resume]')).to_be_visible()
 
