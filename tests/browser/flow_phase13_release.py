@@ -66,6 +66,7 @@ def make_quick_sprint(page, seed):
       return url.href;
     }""", seed), wait_until='domcontentloaded')
     expect(page.locator('[data-flow-view="ready"]')).to_be_visible(timeout=15000)
+    assert page.evaluate('window.wordstrikeFlowReleasePhase13.runtimeReady()') is True
     assert 'dev=1' not in page.url, page.url
     onboarding = page.locator('[data-flow-integration-onboarding-done]')
     if onboarding.count():
@@ -144,6 +145,7 @@ def certify_mobile(browser, browser_name, base, evidence):
     open_modes(page, base)
     page.locator('button[data-mode-id="flow"]').click()
     expect(page.locator('[data-flow-view="ready"]')).to_be_visible(timeout=15000)
+    assert page.evaluate('window.wordstrikeFlowReleasePhase13.runtimeReady()') is True
     geometry = page.evaluate("""() => ({
       overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
       viewport: document.documentElement.clientWidth,
@@ -200,6 +202,7 @@ def certify_offline(browser, browser_name, base, evidence):
     expect(page.locator('.mode-select-screen')).to_be_visible()
     page.locator('button[data-mode-id="flow"]').click()
     expect(page.locator('[data-flow-view="ready"]')).to_be_visible(timeout=15000)
+    assert page.evaluate('window.wordstrikeFlowReleasePhase13.runtimeReady()') is True
     assert 'dev=1' not in page.url, page.url
     context.set_offline(False)
 
