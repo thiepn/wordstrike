@@ -5,18 +5,49 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script>
       (() => {
-        // The shared Supabase project's Site URL currently points at WORDSTRIKE.
-        // Diet Copilot uses PKCE, so its callback arrives in query parameters,
-        // while WORDSTRIKE's own implicit OAuth uses a URL fragment
-        // (#access_token=... / #error=...). Relay only PKCE query results.
+        // Diet Copilot and WORDSTRIKE share this Supabase project's Site URL.
+        // A Diet OAuth attempt writes an explicit same-origin session marker
+        // before leaving for Google. Only a marked callback is relayed here;
+        // WORDSTRIKE's own auth remains untouched.
+        const TARGET_KEY = 'diet-copilot:oauth-target-v2';
+        const FLOW_KEY = 'diet-copilot:oauth-flow-v2';
         const source = new URL(location.href);
-        if (!source.searchParams.has('code') && !source.searchParams.has('error')) return;
+        const fragment = new URLSearchParams(source.hash.slice(1));
+        const value = key => source.searchParams.get(key) ?? fragment.get(key);
 
-        const target = new URL('/diet/native-auth-callback.html', source.origin);
-        for (const key of ['code', 'sb_flow_id', 'error', 'error_description', 'error_code']) {
-          const value = source.searchParams.get(key);
-          if (value !== null) target.searchParams.set(key, value);
+        let targetKind = null;
+        let storedFlow = null;
+        try {
+          targetKind = sessionStorage.getItem(TARGET_KEY);
+          storedFlow = sessionStorage.getItem(FLOW_KEY);
+        } catch {}
+
+        if (targetKind !== 'web' && targetKind !== 'native') return;
+
+        const hasResult = Boolean(
+          value('code') || value('error') || value('error_code') || value('error_description')
+        );
+        if (!hasResult) return;
+
+        const target = new URL(
+          targetKind === 'web' ? '/diet/' : '/diet/native-auth-callback.html',
+          source.origin
+        );
+
+        for (const key of ['code', 'error', 'error_code', 'error_description']) {
+          const current = value(key);
+          if (current !== null) target.searchParams.set(key, current);
         }
+
+        const flowId = value('sb_flow_id') || storedFlow;
+        if (flowId) target.searchParams.set('sb_flow_id', flowId);
+
+        try {
+          sessionStorage.removeItem(TARGET_KEY);
+          sessionStorage.removeItem(FLOW_KEY);
+          history.replaceState(null, '', source.pathname);
+        } catch {}
+
         location.replace(target.href);
       })();
     </script>
