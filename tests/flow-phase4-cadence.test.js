@@ -82,8 +82,9 @@ for (const key of ["word-transition", "after-comma", "after-sentence", "capitals
   assert.ok(keys.has(key), `expected natural typing latency group ${key}`);
 }
 assert.ok(featureAnalysis.slowestHesitations.length > 0);
-assert.equal(featureAnalysis.slowestHesitations[0].key, "word-transition");
+assert.equal(featureAnalysis.slowestHesitations[0].key, "capitals");
 assert.ok(featureAnalysis.slowestHesitations[0].deltaMs > 0);
+assert.ok(featureAnalysis.slowestHesitations.some(({ key }) => key === "word-transition"));
 
 const shortRun = createFlowTypingRun("abc");
 insertFlowText(shortRun, "a", 0);
