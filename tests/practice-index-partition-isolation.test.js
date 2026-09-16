@@ -23,7 +23,8 @@ test("protected partitions have annotations but cannot be target-selected throug
 
   const trainingRefs = await index.getTargetContentRefs({ partition: "training", entityType: "key", entityKey: "a", purpose: "training" });
   assert.ok(trainingRefs.length > 0);
-  assert.ok(trainingRefs.every((ref) => ref.contentId.includes("practice-en-")));
+  const training = JSON.parse(await readFile(new URL("../data/practice/training/en-v1.json", import.meta.url), "utf8"));
+  assert.ok(trainingRefs.every(ref => training.items.some(item => item.contentId === ref.contentId)));
 
   const diagnosticRefs = await index.getTargetContentRefs({ partition: "diagnostic", entityType: "key", entityKey: "a", purpose: "diagnostic" });
   assert.ok(diagnosticRefs.length > 0);

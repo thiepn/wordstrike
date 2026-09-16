@@ -77,13 +77,13 @@ test("PL24 hidden Cold Transfer descriptor requests exactly PL18 cold-transfer p
   assert.deepEqual(descriptor.supportedCompletionModes, ["duration"]);
 });
 
-test("PL24 checked-in production Real Text pool is an honest draft, not fabricated capacity", async () => {
+test("PL24 checked-in production Real Text pool has governed release capacity", async () => {
   const pool = JSON.parse(await readFile(new URL("../data/practice/real-text/en-v1/WS-REALTEXT-EN-1.manifest.json", import.meta.url), "utf8"));
   assert.equal(pool.poolId, "WS-REALTEXT-EN-1");
-  assert.equal(pool.status, "draft");
-  assert.equal(pool.units.length, 0);
-  assert.equal(pool.releaseReport.releaseBlockers.includes("minimum-ready-unit-count:0/16"), true);
+  assert.equal(pool.status, "ready");
+  assert.equal(pool.units.length, 16);
+  assert.deepEqual(pool.releaseReport.releaseBlockers, []);
   const availability = getRealTextPracticeAvailability({ pool, language: "en" });
-  assert.equal(availability.status, "unavailable");
-  assert.deepEqual(availability.supportedDurationsMs, []);
+  assert.equal(availability.status, "ready");
+  assert.deepEqual(availability.supportedDurationsMs, [180_000,300_000,600_000]);
 });

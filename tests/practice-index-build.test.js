@@ -76,12 +76,10 @@ test("build-time annotations bind positions and hashes to their exact PL6 conten
 
 test("index manifest counts match the foundation corpus and generated artifact inventory", async () => {
   const manifest = JSON.parse(await readFile(new URL("../data/practice/indexes/en-v1/manifest.json", import.meta.url), "utf8"));
-  assert.equal(manifest.diagnostics.contentAnalyzed, 7);
-  assert.equal(manifest.counts.training.contentItems, 2);
-  assert.equal(manifest.counts.transfer.contentItems, 1);
-  assert.equal(manifest.counts.benchmark.contentItems, 1);
-  assert.equal(manifest.counts.diagnostic.contentItems, 2);
-  assert.equal(manifest.counts["research-holdout"].contentItems, 1);
+  const corpus = JSON.parse(await readFile(new URL("../data/practice/manifests/en-v1.manifest.json", import.meta.url), "utf8"));
+  assert.equal(manifest.diagnostics.contentAnalyzed, corpus.contentCounts.total);
+  for (const [partition, count] of Object.entries(corpus.contentCounts.byPartition)) assert.equal(manifest.counts[partition].contentItems, count);
+  assert.ok(manifest.artifactChecksums.every(a=>a.indexType==='content'||a.bytes<=2*1024*1024));
   assert.ok(manifest.artifactChecksums.length > 5);
   assert.match(manifest.indexChecksum, /^sha256-[a-f0-9]{64}$/);
 });

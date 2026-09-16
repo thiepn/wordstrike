@@ -9,5 +9,5 @@ test("PL24 checked-in Real Text pool rebuild is deterministic and current", () =
   });
   assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`);
   assert.match(result.stdout, /WS-REALTEXT-EN-1/);
-  assert.match(result.stdout, /draft/);
+  assert.match(result.stdout, /ready/);
 });

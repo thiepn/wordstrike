@@ -12,20 +12,15 @@ const percent = (value) => finite(value) ? `${number(value, 1)}%` : "—";
 const ratioPercent = (value) => finite(value) ? `${number(value * 100, 1)}%` : "—";
 const fmtSeconds = (ms) => finite(ms) ? `${number(ms / 1000, 0)} s` : "—";
 
-function renderText(contentPlan, snapshot) {
-  const graphemes = Array.from(contentPlan.text);
-  const cursor = snapshot.cursorIndex ?? 0;
-  const errors = new Set(snapshot.errorPositions ?? []);
-  const start = Math.max(0, cursor - 180);
-  const end = Math.min(graphemes.length, cursor + 500);
-  return graphemes.slice(start, end).map((value, offset) => {
-    const index = start + offset;
-    const classes = ["practice-real-text-char"];
-    if (index < cursor) classes.push(errors.has(index) ? "is-error" : "is-typed");
-    if (index === cursor) classes.push("is-current");
-    const shown = value === " " ? "&nbsp;" : escapeHtml(value);
-    return `<span class="${classes.join(" ")}">${shown}</span>`;
-  }).join("");
+function renderText(element, contentPlan, snapshot) {
+  const graphemes=Array.from(contentPlan.text),cursor=snapshot.cursorIndex??0;
+  if(element.dataset.cursor===String(cursor))return;
+  element.dataset.cursor=String(cursor);
+  const errors=new Set(snapshot.errorPositions??[]),fragment=element.ownerDocument.createDocumentFragment();
+  for(let i=Math.max(0,cursor-180);i<Math.min(graphemes.length,cursor+500);i++){
+    const span=element.ownerDocument.createElement('span');span.className='practice-real-text-char'+(i<cursor?(errors.has(i)?' is-error':' is-typed'):i===cursor?' is-current':'');span.textContent=graphemes[i];fragment.append(span);
+  }
+  element.replaceChildren(fragment);
 }
 
 function renderActive(root, { contentPlan, snapshot, mode }) {
@@ -36,12 +31,14 @@ function renderActive(root, { contentPlan, snapshot, mode }) {
   const note = mode === "cold"
     ? "Protected measurement · no targets · no live score"
     : "Broad training · no targets · no live score";
-  root.innerHTML = `<section class="screen practice-lab-screen practice-real-text-session" data-practice-view="real-text-${mode}-session">
+  if (!root.querySelector("[data-real-text-input]")) root.innerHTML = `<section class="screen practice-lab-screen practice-real-text-session" data-practice-view="real-text-${mode}-session">
     <div class="practice-lab-shell"><header class="practice-real-text-session-header"><div><div class="eyebrow">Real Text</div><h1>${label}</h1><p>${note}</p></div><button type="button" data-real-text-session-action="stop">STOP</button></header>
-    <div class="practice-real-text-time" aria-live="polite"><strong>${fmtSeconds(remaining)}</strong><span>remaining</span></div>
-    <section class="practice-real-text-typing" aria-label="Natural typing passage">${renderText(contentPlan, snapshot)}</section>
-    <textarea data-real-text-input aria-label="Real Text typing input" inputmode="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" style="position:fixed;left:-10000px;top:0;width:1px;height:1px;opacity:0"></textarea>
+    <div class="practice-real-text-time" ><strong>${fmtSeconds(remaining)}</strong><span>remaining</span></div>
+    <section class="practice-real-text-typing" aria-label="Natural typing passage"></section>
+    <textarea data-real-text-input aria-label="Real Text typing input" inputmode="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" style="display:block;width:100%;box-sizing:border-box;min-height:3em"></textarea>
     </div></section>`;
+  root.querySelector('.practice-real-text-time strong').textContent=fmtSeconds(remaining);
+  renderText(root.querySelector('.practice-real-text-typing'),contentPlan,snapshot);
 }
 
 function renderNaturalResult(root, finalResult) {
@@ -103,7 +100,7 @@ export async function mountPracticeRealTextSession({ root, session, mode = "natu
     await engine.prepare({ experiment: session.experiment, configuration: session.configuration, contentPlan: session.contentPlan, ...(mode === "cold" ? { evaluationPlan: session.evaluationPlan, evaluationArtifact: session.evaluationArtifact } : {}) });
     unsubscribe = engine.subscribe((snapshot, event) => {
       if (event === "completed") { pulse?.stop(); void engine.complete().then((result) => { finalResult = result; mode === "cold" ? renderColdResult(root, result) : renderNaturalResult(root, result); }).catch((error) => logger?.warn?.("Real Text completion retrieval failed", error)); return; }
-      if (!finalResult) { renderActive(root, { contentPlan: session.contentPlan, snapshot, mode }); if (snapshot.lifecycleState === "active") focus(); }
+      if (!finalResult) { renderActive(root, { contentPlan: session.contentPlan, snapshot, mode });  }
     });
     pulse = createPracticeSessionPulse({run:()=>engine.tick(),intervalMs:100,isActive:()=>!closed&&!finalResult,onError:error=>logger?.warn?.("Real Text timer failed",error)});pulse.start();
     const snapshot = await engine.start(); renderActive(root, { contentPlan: session.contentPlan, snapshot, mode }); focus();

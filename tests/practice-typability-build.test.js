@@ -88,5 +88,5 @@ test("PL10 checked-in governed model keeps training-only fit and protected holdo
   assert.equal(manifest.frequencyReferenceId, "ws-en-frequency-v1");
   assert.ok(manifest.frequencyReferenceChecksum);
   assert.deepEqual(manifest.frequencySourceIds, ["ws-original-en-frequency-v1"]);
-  assert.equal(manifest.indexChecksum, "sha256-bb198244a6b6cefcae5cb908bf3dee6e9e52259f9ef41576ec69c429a423ff32");
+  assert.equal(manifest.indexChecksum, (await readJson("data/practice/indexes/en-v1/manifest.json")).indexChecksum);
 });

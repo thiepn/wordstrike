@@ -41,7 +41,7 @@ assert.match(main, /from "\.\/practiceLab\/practiceLabController\.js"/);
 assert.doesNotMatch(main, /practice(?:LabController|ExperimentRegistry)Runtime(?:V\d+)?\.js/);
 assert.doesNotMatch(main, /practice(?:WeakKeys|CombinationRepair|TreatmentResponse)/);
 
-assert.match(controllerFacade, /import\("\.\/practiceLabControllerRuntimeV38\.js"\)/);
+assert.match(controllerFacade, /import\("\.\/practiceLabControllerRuntimeV40\.js"\)/);
 assert.match(controllerFacade, /import\("\.\/practiceExperimentRegistryRuntime\.js"\)/);
 assert.match(controllerFacade, /import\("\.\/practiceCombinationRepairExperiment\.js"\)/);
 assert.match(controllerFacade, /import\("\.\/practiceWeakKeysExperiment\.js"\)/);

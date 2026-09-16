@@ -10,7 +10,8 @@ test("PL38 shell loads V38 while Research orchestration remains lazy", async () 
     readFile(controllerUrl, "utf8"),
     readFile(shellUrl, "utf8"),
   ]);
-  assert.match(shellSource, /practiceLabControllerRuntimeV38\.js/);
+  assert.match(shellSource, /practiceLabControllerRuntimeV40\.js/);
+  assert.match(await readFile(new URL("../js/practiceLab/practiceLabControllerRuntimeV40.js", import.meta.url), "utf8"), /practiceLabControllerRuntimeV38\.js/);
   assert.match(controllerSource, /createPracticeLabControllerV37/);
   assert.match(controllerSource, /PRACTICE_LAB_ROUTES\.RESEARCH/);
   assert.match(controllerSource, /import\("\.\/practiceResearchRuntime\.js"\)/);
