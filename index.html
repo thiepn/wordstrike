@@ -6,14 +6,14 @@
     <script>
       (() => {
         // The shared Supabase project's Site URL currently points at WORDSTRIKE.
-        // Diet Copilot uses PKCE, so its successful fallback callback arrives
-        // here as ?code=... while WORDSTRIKE's own implicit OAuth uses a URL
-        // fragment (#access_token=...). Relay only PKCE code callbacks.
+        // Diet Copilot uses PKCE, so its callback arrives in query parameters,
+        // while WORDSTRIKE's own implicit OAuth uses a URL fragment
+        // (#access_token=... / #error=...). Relay only PKCE query results.
         const source = new URL(location.href);
-        if (!source.searchParams.has('code')) return;
+        if (!source.searchParams.has('code') && !source.searchParams.has('error')) return;
 
         const target = new URL('/diet/native-auth-callback.html', source.origin);
-        for (const key of ['code', 'sb_flow_id']) {
+        for (const key of ['code', 'sb_flow_id', 'error', 'error_description', 'error_code']) {
           const value = source.searchParams.get(key);
           if (value !== null) target.searchParams.set(key, value);
         }
