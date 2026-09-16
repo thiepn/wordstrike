@@ -293,9 +293,10 @@ def certify_isolation(browser, browser_name, base, evidence):
     page.locator('[data-action="modes"]').click()
     flow = page.locator('[data-mode-id="flow"]')
     expect(flow).to_be_visible()
-    expect(flow).to_have_attribute('aria-disabled', 'true')
+    assert flow.get_attribute('aria-disabled') is None
+    assert flow.evaluate('el => el.tagName') == 'BUTTON'
     assert page.locator('[data-flow-ux-phase8="true"]').count() == 0
-    evidence.append({"browser": browser_name, "case": "Phase 8 is explicit and public Flow remains gated"})
+    evidence.append({"browser": browser_name, "case": "Phase 8 stays explicit on developer routes while released public Flow is available"})
     context.close()
 
 
