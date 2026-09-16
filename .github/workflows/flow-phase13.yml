@@ -1,0 +1,43 @@
+name: Flow Phase 13 release certification
+on:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Certify Flow release contracts
+        run: node tests/flow-phase13-release.test.js
+      - name: Re-certify final content and integration contracts
+        run: |
+          node tests/flow-phase12-content-expansion.test.js
+          node tests/flow-phase11-progression.test.js
+          node tests/ui3-mode-select.test.js
+
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    container:
+      image: mcr.microsoft.com/playwright/python:v1.57.0-noble
+      options: --ipc=host
+    env:
+      HOME: /root
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install browser test dependencies
+        run: python3 -m pip install -r tests/browser/requirements.txt
+      - name: Certify public Flow release candidate
+        run: python3 tests/browser/flow_phase13_release.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: flow-phase13-release-evidence
+          path: browser-artifacts/flow-phase13/
+          retention-days: 14
