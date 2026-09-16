@@ -57,8 +57,10 @@ def selected(page, group, value):
 def assert_single_selected(page, group, expected_value):
     active = page.locator(f'[data-flow-choice-group="{group}"][aria-pressed="true"]')
     assert active.count() == 1, (group, active.count())
-    expect(selected(page, group, expected_value)).to_have_attribute('aria-pressed', 'true')
-    expect(selected(page, group, expected_value)).to_have_class(lambda value: value is not None and 'is-selected' in value.split())
+    chosen = selected(page, group, expected_value)
+    expect(chosen).to_have_attribute('aria-pressed', 'true')
+    classes = (chosen.get_attribute('class') or '').split()
+    assert 'is-selected' in classes, (group, expected_value, classes)
 
 
 def certify_setup_and_run(browser, browser_name, base, evidence):
