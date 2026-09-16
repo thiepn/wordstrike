@@ -165,15 +165,42 @@ def certify_mobile(browser, browser_name, base, evidence):
     context.close()
 
 
+def bounded_service_worker_ready(page, timeout_ms=30000):
+    return page.evaluate("""timeoutMs => Promise.race([
+      navigator.serviceWorker.ready.then(() => ({ ready: true })),
+      new Promise(resolve => setTimeout(
+        () => resolve({ ready: false, reason: 'service-worker-ready-timeout' }),
+        timeoutMs,
+      )),
+    ])""", timeout_ms)
+
+
+def bounded_offline_ready(page, timeout_ms=30000):
+    return page.evaluate("""timeoutMs => Promise.race([
+      window.wordstrikeFlowReleasePhase13.offlineReady(),
+      new Promise(resolve => setTimeout(
+        () => resolve({ supported: true, cached: 0, timeout: true }),
+        timeoutMs,
+      )),
+    ])""", timeout_ms)
+
+
 def certify_offline(browser, browser_name, base, evidence):
     if browser_name != 'chromium':
         return
     context = context_for(browser, base)
     page = context.new_page()
+    print('Phase 13 offline: loading PWA origin', flush=True)
     page.goto(base, wait_until='load')
     expect(page.locator('.title-screen')).to_be_visible(timeout=10000)
-    page.evaluate('navigator.serviceWorker.ready.then(() => true)')
-    cache_result = page.evaluate('window.wordstrikeFlowReleasePhase13.offlineReady()')
+
+    print('Phase 13 offline: awaiting service worker registration', flush=True)
+    sw_ready = bounded_service_worker_ready(page)
+    assert sw_ready['ready'] is True, sw_ready
+
+    print('Phase 13 offline: awaiting Flow cache warm-up', flush=True)
+    cache_result = bounded_offline_ready(page)
+    assert cache_result.get('timeout') is not True, cache_result
     assert cache_result['supported'] is True, cache_result
     assert cache_result['cached'] == page.evaluate('window.wordstrikeFlowReleasePhase13.offlineAssetCount'), cache_result
     assert cache_result['cached'] >= 30, cache_result
@@ -196,10 +223,12 @@ def certify_offline(browser, browser_name, base, evidence):
 
     # Give clients.claim() a chance to attach the freshly installed worker.
     if not page.evaluate('Boolean(navigator.serviceWorker.controller)'):
+        print('Phase 13 offline: reloading once for service-worker control', flush=True)
         page.reload(wait_until='load')
         expect(page.locator('.title-screen')).to_be_visible(timeout=10000)
     assert page.evaluate('Boolean(navigator.serviceWorker.controller)') is True
 
+    print('Phase 13 offline: exercising true offline reload', flush=True)
     context.set_offline(True)
     page.reload(wait_until='domcontentloaded')
     expect(page.locator('.title-screen')).to_be_visible(timeout=10000)
@@ -216,6 +245,7 @@ def certify_offline(browser, browser_name, base, evidence):
         'case': 'PWA cache warm-up and offline public Flow relaunch',
         'cachedAssets': cache_result['cached'],
     })
+    print('Phase 13 offline: certification passed', flush=True)
     context.close()
 
 
@@ -225,19 +255,23 @@ def main():
     server = ThreadingHTTPServer(('127.0.0.1', 0), partial(QuietHandler, directory=str(ROOT)))
     thread = Thread(target=server.serve_forever, daemon=True)
     thread.start()
-    base = f'http://127.0.0.1:{server.server_port}/'
+    # WordStrike intentionally enables its local PWA registration on the hostname
+    # `localhost`. Bind the server to loopback but certify through that production-
+    # equivalent development origin instead of 127.0.0.1, where registration is gated.
+    base = f'http://localhost:{server.server_port}/'
     evidence = []
     try:
         with sync_playwright() as p:
             for browser_type in (p.chromium, p.firefox):
                 browser = browser_type.launch()
                 name = browser_type.name
+                print(f'Phase 13 browser: {name} public journey', flush=True)
                 certify_public_journey(browser, name, base, evidence)
                 certify_mobile(browser, name, base, evidence)
                 certify_offline(browser, name, base, evidence)
                 browser.close()
         (ARTIFACTS / 'evidence.json').write_text(json.dumps(evidence, indent=2), encoding='utf-8')
-        print(f'PASS: {len(evidence)} Flow Phase 13 public release scenarios')
+        print(f'PASS: {len(evidence)} Flow Phase 13 public release scenarios', flush=True)
     except Exception:
         traceback.print_exc()
         raise
