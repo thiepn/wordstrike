@@ -35,15 +35,9 @@ def context_for(browser, base, width=1440, height=900):
 
 
 def open_flow(page, base):
-    page.goto(base)
-    expect(page.locator('.title-screen')).to_be_visible(timeout=10000)
-    page.locator('[data-action="modes"]').click()
-    expect(page.locator('.mode-select-screen')).to_be_visible()
-    flow = page.locator('[data-mode-id="flow"]')
-    expect(flow).to_be_visible()
-    expect(flow).to_have_class(lambda value: value is not None and "available" in value)
-    flow.click()
-    expect(page.locator('[data-flow-view="ready"]')).to_be_visible()
+    page.goto(base + '?dev=1&mode=flow')
+    expect(page.locator('[data-flow-view="ready"]')).to_be_visible(timeout=10000)
+    assert page.evaluate('window.wordstrikeFlowPhase1.developerRouteEnabled') is True
     page.locator('[data-flow-action="start"]').click()
     expect(page.locator('[data-flow-view="run"]')).to_be_visible()
 
@@ -82,7 +76,22 @@ def certify_engine(browser, browser_name, base, evidence):
 
     if browser_name == 'chromium':
         page.screenshot(path=str(ARTIFACTS / 'chromium-complete.png'), full_page=True)
-    evidence.append({"browser": browser_name, "case": "full passage + error correction + telemetry", "length": len(passage)})
+    evidence.append({"browser": browser_name, "case": "developer route full passage + error correction + telemetry", "length": len(passage)})
+    context.close()
+
+
+def certify_public_gate(browser, browser_name, base, evidence):
+    context = context_for(browser, base)
+    page = context.new_page()
+    page.goto(base)
+    expect(page.locator('.title-screen')).to_be_visible(timeout=10000)
+    page.locator('[data-action="modes"]').click()
+    expect(page.locator('.mode-select-screen')).to_be_visible()
+    flow = page.locator('[data-mode-id="flow"]')
+    expect(flow).to_be_visible()
+    expect(flow).to_have_attribute('aria-disabled', 'true')
+    assert page.locator('[data-flow-view="ready"]').count() == 0
+    evidence.append({"browser": browser_name, "case": "public Phase 1 Flow remains gated"})
     context.close()
 
 
@@ -124,6 +133,7 @@ def main():
                 browser = browser_type.launch()
                 name = browser_type.name
                 certify_engine(browser, name, base, evidence)
+                certify_public_gate(browser, name, base, evidence)
                 certify_mobile_wrap(browser, name, base, evidence)
                 browser.close()
         (ARTIFACTS / 'evidence.json').write_text(json.dumps(evidence, indent=2), encoding='utf-8')
