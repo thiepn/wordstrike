@@ -1,0 +1,612 @@
+{
+  "auditDate": "2026-09-16",
+  "branch": "finish-practice-lab",
+  "frozenAuditModified": false,
+  "publicEnabled": false,
+  "databaseVersion": 12,
+  "sessionSummaryVersion": 14,
+  "phases": [
+    {
+      "phase": "PL1",
+      "area": "Architecture",
+      "implementation": "present",
+      "testFiles": [],
+      "canonicalBrowserEvidenceThisRun": false,
+      "releaseCertification": "not-inferred-from-unit-tests"
+    },
+    {
+      "phase": "PL2",
+      "area": "Storage",
+      "implementation": "present",
+      "testFiles": [
+        "tests/practice-performance-storage-repository.test.js",
+        "tests/practice-physical-telemetry-storage-pl36.test.js",
+        "tests/practice-treatment-response-storage-pl32.test.js",
+        "tests/practice-coach-personalization-storage-pl33.test.js",
+        "tests/practice-learning-storage.test.js",
+        "tests/practice-manifest-storage.test.js",
+        "tests/practice-ability-storage-migration.test.js",
+        "tests/practice-daily-coach-storage-lifecycle.test.js"
+      ],
+      "canonicalBrowserEvidenceThisRun": false,
+      "releaseCertification": "not-inferred-from-unit-tests"
+    },
+    {
+      "phase": "PL3",
+      "area": "Session engine",
+      "implementation": "present",
+      "testFiles": [
+        "tests/practice-ability-session-repository.test.js",
+        "tests/practice-assessment-session-integration.test.js",
+        "tests/practice-session-terminal-races.test.js",
+        "tests/practice-combination-repair-session-integration.test.js",
+        "tests/practice-weak-keys-session-integration.test.js",
+        "tests/practice-session-input-lifecycle.test.js",
+        "tests/practice-latency-session-integration.test.js",
+        "tests/practice-skill-evidence-session-repository.test.js",
+        "tests/practice-session-contract.test.js",
+        "tests/practice-session-privacy.test.js",
+        "tests/practice-error-session-integration.test.js",
+        "tests/practice-error-large-session.test.js",
+        "tests/practice-session-checkpoint-completion.test.js",
+        "tests/practice-session-pulse-pl28.test.js",
+        "tests/practice-normalization-session-integration.test.js",
+        "tests/practice-evaluation-session-gates.test.js"
+      ],
+      "canonicalBrowserEvidenceThisRun": false,
+      "releaseCertification": "not-inferred-from-unit-tests"
+    },
+    {
+      "phase": "PL4",
+      "area": "Shell and registry",
+      "implementation": "present",
+      "testFiles": [
+        "tests/practice-lab-controller.test.js",
+        "tests/practice-assessment-availability.test.js",
+        "tests/practice-lab-input-isolation.test.js",
+        "tests/practice-lab-renderer.test.js",
+        "tests/practice-lab-routes.test.js"
+      ],
+      "canonicalBrowserEvidenceThisRun": false,
+      "releaseCertification": "not-inferred-from-unit-tests"
+    },
+    {
+      "phase": "PL5",
+      "area": "Context identity",
+      "implementation": "present",
+      "testFiles": [
+        "tests/practice-context-normalization.test.js",
+        "tests/practice-context-migration-hardening.test.js",
+        "tests/practice-context-identity.test.js",
+        "tests/practice-context-import-safety.test.js"
+      ],
+      "canonicalBrowserEvidenceThisRun": false,
+      "releaseCertification": "not-inferred-from-unit-tests"
+    },
+    {
+      "phase": "PL6",
+      "area": "Corpus",
+      "implementation": "present",
+      "testFiles": [
+        "tests/practice-corpus-partition.test.js",
+        "tests/practice-corpus-build.test.js",
+        "tests/practice-corpus-isolation.test.js",
+        "tests/practice-corpus-validation.test.js"
+      ],
+      "canonicalBrowserEvidenceThisRun": false,
+      "releaseCertification": "not-inferred-from-unit-tests"
+    },
+    {
+      "phase": "PL7",
+      "area": "Indexes",
+      "implementation": "present",
+      "testFiles": [
+        "tests/practice-index-integrity.test.js",
+        "tests/practice-index-sharding.test.js",
+        "tests/practice-index-import-side-effects.test.js",
+        "tests/practice-index-performance.test.js",
+        "tests/practice-indexeddb-structure.test.js",
+        "tests/practice-target-index.test.js",
+        "tests/practice-index-runtime-loader.test.js",
+        "tests/practice-index-partition-isolation.test.js",
+        "tests/practice-index-build.test.js"
+      ],
+      "canonicalBrowserEvidenceThisRun": false,
+      "releaseCertification": "not-inferred-from-unit-tests"
+    },
+    {
+      "phase": "PL8",
+      "area": "Latency",
+      "implementation": "present",
+      "testFiles": [
+        "tests/practice-latency-classifier.test.js",
+        "tests/practice-latency-large-trace.test.js",
+        "tests/practice-latency-import-side-effects.test.js",
+        "tests/practice-latency-session-integration.test.js",
+        "tests/practice-latency-buffer-coverage.test.js",
+        "tests/practice-latency-migration-validation.test.js"
+      ],
+      "canonicalBrowserEvidenceThisRun": false,
+      "releaseCertification": "not-inferred-from-unit-tests"
+    },
+    {
+      "phase": "PL9",
+      "area": "Error recovery",
+      "implementation": "present",
+      "testFiles": [
+        "tests/practice-error-migration-validation.test.js",
+        "tests/practice-error-foundation.test.js",
+        "tests/practice-error-summary-privacy-size.test.js",
+        "tests/practice-error-tracker.test.js",
+        "tests/practice-error-import-side-effects.test.js",
+        "tests/practice-error-reconstruction.test.js",
+        "tests/practice-error-recovery.test.js",
+        "tests/practice-error-session-integration.test.js",
+        "tests/practice-error-large-session.test.js",
+        "tests/practice-error-alignment.test.js"
+      ],
+      "canonicalBrowserEvidenceThisRun": false,
+      "releaseCertification": "not-inferred-from-unit-tests"
+    },
+    {
+      "phase": "PL10",
+      "area": "Typability",
+      "implementation": "present",
+      "testFiles": [
+        "tests/practice-typability-model.test.js",
+        "tests/practice-typability-build.test.js",
+        "tests/practice-typability-features.test.js"
+      ],
+      "canonicalBrowserEvidenceThisRun": false,
+      "releaseCertification": "not-inferred-from-unit-tests"
+    },
+    {
+      "phase": "PL11",
+      "area": "Skill evidence",
+      "implementation": "present",
+      "testFiles": [
+        "tests/practice-skill-evidence-session-repository.test.js",
+        "tests/practice-skill-evidence-core.test.js"
+      ],
+      "canonicalBrowserEvidenceThisRun": false,
+      "releaseCertification": "not-inferred-from-unit-tests"
+    },
+    {
+      "phase": "PL12",
+      "area": "Limiter model",
+      "implementation": "present",
+      "testFiles": [
+        "tests/practice-limiter-impact-hierarchy.test.js",
+        "tests/practice-limiter-dimensions.test.js",
+        "tests/practice-limiter-policy.test.js",
+        "tests/practice-limiter-service-isolation.test.js"
+      ],
+      "canonicalBrowserEvidenceThisRun": false,
+      "releaseCertification": "not-inferred-from-unit-tests"
+    },
+    {
+      "phase": "PL13",
+      "area": "Ability estimation",
+      "implementation": "present",
+      "testFiles": [
+        "tests/practice-ability-session-repository.test.js",
+        "tests/practice-evaluation-comparability-language.test.js",
+        "tests/practice-assessment-availability.test.js",
+        "tests/practice-typability-model.test.js",
+        "tests/practice-common-words-ability-pl28.test.js",
+        "tests/practice-typability-build.test.js",
+        "tests/practice-typability-features.test.js",
+        "tests/practice-ability-observation.test.js",
+        "tests/practice-ability-storage-migration.test.js",
+        "tests/practice-ability-estimator.test.js"
+      ],
+      "canonicalBrowserEvidenceThisRun": false,
+      "releaseCertification": "not-inferred-from-unit-tests"
+    },
+    {
+      "phase": "PL14",
+      "area": "Performance frontier",
+      "implementation": "present",
+      "testFiles": [
+        "tests/practice-performance-state.test.js",
+        "tests/practice-performance-storage-repository.test.js",
+        "tests/practice-index-performance.test.js",
+        "tests/practice-performance-contract-isolation.test.js",
+        "tests/practice-normalization-privacy-performance.test.js"
+      ],
+      "canonicalBrowserEvidenceThisRun": false,
+      "releaseCertification": "not-inferred-from-unit-tests"
+    },
+    {
+      "phase": "PL15",
+      "area": "Learning curves",
+      "implementation": "present",
+      "testFiles": [
+        "tests/practice-learning-state-repository.test.js",
+        "tests/practice-learning-observation-phases.test.js",
+        "tests/practice-learning-saturation.test.js",
+        "tests/practice-learning-saturation-edge.test.js",
+        "tests/practice-learning-storage.test.js",
+        "tests/practice-learning-curves.test.js",
+        "tests/practice-learning-service-time.test.js"
+      ],
+      "canonicalBrowserEvidenceThisRun": false,
+      "releaseCertification": "not-inferred-from-unit-tests"
+    },
+    {
+      "phase": "PL16",
+      "area": "Mastery",
+      "implementation": "present",
+      "testFiles": [
+        "tests/practice-mastery-validation.test.js",
+        "tests/practice-mastery-regressions.test.js",
+        "tests/practice-mastery-automaticity.test.js",
+        "tests/practice-mastery-service.test.js"
+      ],
+      "canonicalBrowserEvidenceThisRun": false,
+      "releaseCertification": "not-inferred-from-unit-tests"
+    },
+    {
+      "phase": "PL17",
+      "area": "Retention",
+      "implementation": "present",
+      "testFiles": [
+        "tests/practice-assessment-retention.test.js",
+        "tests/practice-evaluation-store-retention.test.js",
+        "tests/practice-review-retention-model.test.js",
+        "tests/practice-daily-coach-review-retention.test.js",
+        "tests/practice-retention-quota.test.js"
+      ],
+      "canonicalBrowserEvidenceThisRun": false,
+      "releaseCertification": "not-inferred-from-unit-tests"
+    },
+    {
+      "phase": "PL18",
+      "area": "Evaluation framework",
+      "implementation": "present",
+      "testFiles": [
+        "tests/practice-evaluation-no-public-ui.test.js",
+        "tests/practice-evaluation-version-report.test.js",
+        "tests/practice-evaluation-build-scripts.test.js",
+        "tests/practice-evaluation-version-contract.test.js",
+        "tests/practice-evaluation-store-retention.test.js",
+        "tests/practice-evaluation-comparability-language.test.js",
+        "tests/practice-evaluation-draft-artifacts.test.js",
+        "tests/practice-evaluation-anti-leakage.test.js",
+        "tests/practice-evaluation-profile-history.test.js",
+        "tests/practice-evaluation-db-schema.test.js",
+        "tests/practice-evaluation-loader.test.js",
+        "tests/practice-evaluation-registry-import.test.js",
+        "tests/practice-evaluation-reservation-ttl.test.js",
+        "tests/practice-evaluation-protocol.test.js",
+        "tests/practice-evaluation-integrity.test.js",
+        "tests/practice-evaluation-privacy-state.test.js",
+        "tests/practice-evaluation-foundation.test.js",
+        "tests/practice-evaluation-build-comparison.test.js",
+        "tests/practice-evaluation-zero-opportunity.test.js",
+        "tests/practice-evaluation-selection-reservation.test.js",
+        "tests/practice-evaluation-session-gates.test.js"
+      ],
+      "canonicalBrowserEvidenceThisRun": false,
+      "releaseCertification": "not-inferred-from-unit-tests"
+    },
+    {
+      "phase": "PL19",
+      "area": "Full Assessment",
+      "implementation": "present",
+      "testFiles": [
+        "tests/practice-assessment-protocol-staleness.test.js",
+        "tests/practice-assessment-analysis.test.js",
+        "tests/practice-assessment-run.test.js",
+        "tests/practice-assessment-retention.test.js",
+        "tests/practice-assessment-session-integration.test.js",
+        "tests/practice-assessment-comparison.test.js",
+        "tests/practice-assessment-availability.test.js",
+        "tests/practice-assessment-report.test.js",
+        "tests/practice-assessment-ui.test.js",
+        "tests/practice-assessment-finalization-state.test.js",
+        "tests/practice-assessment-parent-expiry.test.js",
+        "tests/practice-assessment-protocol.test.js",
+        "tests/practice-assessment-pruning-privacy.test.js",
+        "tests/practice-assessment-migration-validation.test.js",
+        "tests/practice-assessment-import-privacy.test.js",
+        "tests/practice-assessment-preparation-failure.test.js",
+        "tests/practice-assessment-plan.test.js",
+        "tests/practice-assessment-cross-profile.test.js",
+        "tests/practice-assessment-registry-security.test.js",
+        "tests/practice-assessment-diagnostics-build.test.js"
+      ],
+      "canonicalBrowserEvidenceThisRun": true,
+      "releaseCertification": "not-inferred-from-unit-tests"
+    },
+    {
+      "phase": "PL20",
+      "area": "Combination Repair",
+      "implementation": "present",
+      "testFiles": [
+        "tests/practice-combination-repair-session-integration.test.js",
+        "tests/practice-combination-repair-contract.test.js",
+        "tests/practice-combination-repair-ui.test.js",
+        "tests/practice-combination-repair-recommendation-ui.test.js",
+        "tests/practice-combination-repair-runtime.test.js"
+      ],
+      "canonicalBrowserEvidenceThisRun": false,
+      "releaseCertification": "not-inferred-from-unit-tests"
+    },
+    {
+      "phase": "PL21",
+      "area": "Weak Keys",
+      "implementation": "present",
+      "testFiles": [
+        "tests/practice-weak-keys-generator.test.js",
+        "tests/practice-weak-keys-session-integration.test.js",
+        "tests/practice-weak-keys-ui.test.js",
+        "tests/practice-weak-keys-composer-probes.test.js",
+        "tests/practice-weak-keys-selection.test.js",
+        "tests/practice-weak-keys-contract.test.js"
+      ],
+      "canonicalBrowserEvidenceThisRun": false,
+      "releaseCertification": "not-inferred-from-unit-tests"
+    },
+    {
+      "phase": "PL22",
+      "area": "Problem Words",
+      "implementation": "present",
+      "testFiles": [
+        "tests/practice-problem-words-model.test.js",
+        "tests/practice-problem-words-generator.test.js",
+        "tests/practice-problem-words-contract.test.js"
+      ],
+      "canonicalBrowserEvidenceThisRun": false,
+      "releaseCertification": "not-inferred-from-unit-tests"
+    },
+    {
+      "phase": "PL23",
+      "area": "Accuracy and Recovery",
+      "implementation": "present",
+      "testFiles": [
+        "tests/practice-accuracy-recovery-contract.test.js",
+        "tests/practice-accuracy-recovery-ui.test.js",
+        "tests/practice-accuracy-recovery-metrics.test.js",
+        "tests/practice-accuracy-recovery-selection.test.js",
+        "tests/practice-accuracy-recovery-generator.test.js"
+      ],
+      "canonicalBrowserEvidenceThisRun": false,
+      "releaseCertification": "not-inferred-from-unit-tests"
+    },
+    {
+      "phase": "PL24",
+      "area": "Real Text",
+      "implementation": "present",
+      "testFiles": [
+        "tests/practice-real-text-contract.test.js",
+        "tests/practice-real-text-pool.test.js",
+        "tests/practice-real-text-build.test.js",
+        "tests/practice-real-text-cold-transfer.test.js"
+      ],
+      "canonicalBrowserEvidenceThisRun": true,
+      "releaseCertification": "not-inferred-from-unit-tests"
+    },
+    {
+      "phase": "PL25",
+      "area": "Daily Coach",
+      "implementation": "present",
+      "testFiles": [
+        "tests/practice-daily-coach-binding-integration.test.js",
+        "tests/practice-coach-documentation.test.js",
+        "tests/practice-daily-coach-ui.test.js",
+        "tests/practice-coach-personalization-storage-pl33.test.js",
+        "tests/practice-daily-coach-review-retention.test.js",
+        "tests/practice-coach-personalization-ui-pl33.test.js",
+        "tests/practice-coach-personalization-pl33.test.js",
+        "tests/practice-daily-coach-version-contract.test.js",
+        "tests/practice-daily-coach-core.test.js",
+        "tests/practice-daily-coach-storage-lifecycle.test.js"
+      ],
+      "canonicalBrowserEvidenceThisRun": false,
+      "releaseCertification": "not-inferred-from-unit-tests"
+    },
+    {
+      "phase": "PL26",
+      "area": "Pace Ladder",
+      "implementation": "present",
+      "testFiles": [
+        "tests/practice-pace-ladder-pl26.test.js"
+      ],
+      "canonicalBrowserEvidenceThisRun": false,
+      "releaseCertification": "not-inferred-from-unit-tests"
+    },
+    {
+      "phase": "PL27",
+      "area": "Burst Sprints",
+      "implementation": "present",
+      "testFiles": [
+        "tests/practice-burst-sprints-pl27.test.js"
+      ],
+      "canonicalBrowserEvidenceThisRun": false,
+      "releaseCertification": "not-inferred-from-unit-tests"
+    },
+    {
+      "phase": "PL28",
+      "area": "Common Words",
+      "implementation": "present",
+      "testFiles": [
+        "tests/practice-common-words-pl28.test.js",
+        "tests/practice-common-words-integrity-pl28.test.js",
+        "tests/practice-common-words-documentation-pl28.test.js",
+        "tests/practice-common-words-ability-pl28.test.js",
+        "tests/practice-common-words-artifacts-pl28.test.js",
+        "tests/practice-common-words-ui-pl28.test.js",
+        "tests/practice-common-words-import-safety-pl28.test.js",
+        "tests/practice-common-words-plan-identity-pl28.test.js",
+        "tests/practice-common-words-bindings-pl28.test.js"
+      ],
+      "canonicalBrowserEvidenceThisRun": false,
+      "releaseCertification": "not-inferred-from-unit-tests"
+    },
+    {
+      "phase": "PL29",
+      "area": "Consistency and Endurance",
+      "implementation": "present",
+      "testFiles": [
+        "tests/practice-consistency-endurance-pl29.test.js"
+      ],
+      "canonicalBrowserEvidenceThisRun": false,
+      "releaseCertification": "not-inferred-from-unit-tests"
+    },
+    {
+      "phase": "PL30",
+      "area": "Special domains",
+      "implementation": "present",
+      "testFiles": [
+        "tests/practice-special-domains-pl30.test.js"
+      ],
+      "canonicalBrowserEvidenceThisRun": false,
+      "releaseCertification": "not-inferred-from-unit-tests"
+    },
+    {
+      "phase": "PL31",
+      "area": "Custom Text",
+      "implementation": "present",
+      "testFiles": [
+        "tests/practice-custom-text-pl31.test.js"
+      ],
+      "canonicalBrowserEvidenceThisRun": false,
+      "releaseCertification": "not-inferred-from-unit-tests"
+    },
+    {
+      "phase": "PL32",
+      "area": "Treatment Response",
+      "implementation": "present",
+      "testFiles": [
+        "tests/practice-treatment-response-pl32.test.js",
+        "tests/practice-metronome-treatment-service-pl35.test.js",
+        "tests/practice-treatment-response-guards-pl32.test.js",
+        "tests/practice-treatment-response-storage-pl32.test.js",
+        "tests/practice-treatment-response-ui-pl32.test.js"
+      ],
+      "canonicalBrowserEvidenceThisRun": false,
+      "releaseCertification": "not-inferred-from-unit-tests"
+    },
+    {
+      "phase": "PL33",
+      "area": "Coach personalization",
+      "implementation": "present",
+      "testFiles": [
+        "tests/practice-coach-personalization-storage-pl33.test.js",
+        "tests/practice-coach-personalization-ui-pl33.test.js",
+        "tests/practice-coach-personalization-pl33.test.js"
+      ],
+      "canonicalBrowserEvidenceThisRun": false,
+      "releaseCertification": "not-inferred-from-unit-tests"
+    },
+    {
+      "phase": "PL34",
+      "area": "Read-Ahead",
+      "implementation": "present",
+      "testFiles": [
+        "tests/practice-read-ahead-pl34.test.js"
+      ],
+      "canonicalBrowserEvidenceThisRun": true,
+      "releaseCertification": "not-inferred-from-unit-tests"
+    },
+    {
+      "phase": "PL35",
+      "area": "Metronome",
+      "implementation": "present",
+      "testFiles": [
+        "tests/practice-metronome-pl35.test.js",
+        "tests/practice-metronome-treatment-service-pl35.test.js"
+      ],
+      "canonicalBrowserEvidenceThisRun": true,
+      "releaseCertification": "not-inferred-from-unit-tests"
+    },
+    {
+      "phase": "PL36",
+      "area": "Physical telemetry",
+      "implementation": "present",
+      "testFiles": [
+        "tests/practice-physical-telemetry-pl36.test.js",
+        "tests/practice-pl39-physical-telemetry.test.js",
+        "tests/practice-physical-telemetry-storage-pl36.test.js",
+        "tests/practice-physical-telemetry-ui-pl36.test.js",
+        "tests/practice-physical-telemetry-migration-pl36.test.js",
+        "tests/practice-physical-telemetry-runtime-pl36.test.js"
+      ],
+      "canonicalBrowserEvidenceThisRun": false,
+      "releaseCertification": "not-inferred-from-unit-tests"
+    },
+    {
+      "phase": "PL37",
+      "area": "Weakness Boss",
+      "implementation": "present",
+      "testFiles": [
+        "tests/practice-weakness-boss-core-pl37.test.js",
+        "tests/practice-weakness-boss-integration-pl37.test.js"
+      ],
+      "canonicalBrowserEvidenceThisRun": false,
+      "releaseCertification": "not-inferred-from-unit-tests"
+    },
+    {
+      "phase": "PL38",
+      "area": "Research A/B",
+      "implementation": "present",
+      "testFiles": [
+        "tests/practice-research-controller-pl38.test.js",
+        "tests/practice-research-recovery-pl38.test.js",
+        "tests/practice-research-integration-pl38.test.js",
+        "tests/practice-pl39-research-concurrency.test.js",
+        "tests/practice-research-cleanup-pl38.test.js",
+        "tests/practice-research-ui-pl38.test.js",
+        "tests/practice-research-certification-pl38.test.js"
+      ],
+      "canonicalBrowserEvidenceThisRun": false,
+      "releaseCertification": "not-inferred-from-unit-tests"
+    },
+    {
+      "phase": "PL39",
+      "area": "Integrity",
+      "implementation": "present",
+      "testFiles": [
+        "tests/practice-common-words-integrity-pl28.test.js",
+        "tests/practice-index-integrity.test.js",
+        "tests/practice-pl39-reset-integrity.test.js",
+        "tests/practice-pl39-foundation-integrity.test.js",
+        "tests/practice-evaluation-integrity.test.js"
+      ],
+      "canonicalBrowserEvidenceThisRun": false,
+      "releaseCertification": "not-inferred-from-unit-tests"
+    },
+    {
+      "phase": "PL40",
+      "area": "Release certification",
+      "implementation": "release-gated",
+      "testFiles": [
+        "tests/practice-final-release-pl40.test.js"
+      ],
+      "canonicalBrowserEvidenceThisRun": false,
+      "releaseCertification": "open"
+    }
+  ],
+  "openGates": [
+    "remote-push-and-CI",
+    "cross-platform-physical-devices",
+    "assistive-technology",
+    "Android-performance",
+    "deployed-build-parity"
+  ],
+  "verification": {
+    "repositoryTestFiles": 390,
+    "integratedFirstRunPassed": 389,
+    "integratedFirstRunFailed": 1,
+    "remainingFailureCorrectedAndFocusedRerunPassed": true,
+    "finalFocusedTestsPassed": 11,
+    "additionalBoundaryTestsPassed": 2,
+    "content": "PASS",
+    "privacy": "PASS",
+    "migrations": "PASS",
+    "chromiumReport": "practice-completion-evidence/chromium-report.json",
+    "physicalDeviceCertification": false,
+    "remoteCIExecuted": false
+  }
+}

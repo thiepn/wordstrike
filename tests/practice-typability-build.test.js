@@ -29,7 +29,7 @@ test("PL10 typability build is deterministic and binds exact PL6/PL7 checksums",
   assert.deepEqual(first, second);
   assert.equal(first.reference.corpusChecksum, source.corpusManifest.buildChecksum);
   assert.equal(first.reference.indexChecksum, source.indexManifest.indexChecksum);
-  assert.equal(first.reference.referenceItemCount, 2);
+  assert.equal(first.reference.referenceItemCount, source.partitionArtifacts.training.items.length);
   assert.equal(first.frequencyMetadata.referenceVersion, null);
   assert.deepEqual(first.diagnostics.fitPartitions, ["training"]);
   assert.deepEqual(PRACTICE_TYPABILITY_FIT_PARTITIONS, ["training"]);

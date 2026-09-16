@@ -161,7 +161,10 @@ assert.equal(accuracyFirst.steps[0].drill.type, "accuracy-recovery");
 assert.equal(accuracyFirst.steps[1].drill.type, "weak-words");
 
 const index = readFileSync(new URL("../index.html", import.meta.url), "utf8");
-assert.match(index, /js\/speedTestResultsV7\.js\?v=20260911a/);
+// Current main ships the V6 entry. Testing the V7 plan module above does not
+// authorize switching the public results screen during Practice integration.
+assert.match(index, /js\/speedTestResultsV6\.js\?v=20260911a/);
+assert.match(readFileSync(new URL("../js/speedTestResultsV6.js", import.meta.url), "utf8"), /speedTestResultsV6b\.js/);
 assert.doesNotMatch(index, /<link[^>]+typing-coach-v7\.css/,
   "V7 styling should stay lazy and not affect unrelated screens");
 const submission = readFileSync(new URL("../js/leaderboardSubmissionService.js", import.meta.url), "utf8");

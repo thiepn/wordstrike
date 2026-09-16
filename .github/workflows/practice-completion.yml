@@ -3,20 +3,37 @@ on:
   push:
     branches: [finish-practice-lab]
   pull_request:
-    paths: ['js/practiceLab/**', 'data/practice/**', 'tests/browser/practice_completion.py', '.github/workflows/practice-completion.yml']
+    paths: ['js/practiceLab/**', 'data/practice/**', 'tests/browser/practice_completion.mjs', '.github/workflows/practice-completion.yml']
 permissions:
   contents: read
 jobs:
+  core:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm test
+      - run: node scripts/validatePracticeReleaseContent.mjs
+      - run: node scripts/auditPracticePrivacySecurity.mjs
+      - run: node scripts/testPracticeMigrations.mjs
+      - run: node scripts/buildPracticeReadAheadForms.mjs
+      - run: git diff --exit-code -- data/practice/read-ahead
   browser:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     container:
-      image: mcr.microsoft.com/playwright/python:v1.57.0-noble
+      image: mcr.microsoft.com/playwright:v1.57.0-noble
       options: --ipc=host
     steps:
       - uses: actions/checkout@v4
-      - run: python3 -m pip install -r tests/browser/requirements.txt
-      - run: python3 tests/browser/practice_completion.py
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --no-save playwright@1.57.0
+      - run: node tests/browser/practice_completion.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:

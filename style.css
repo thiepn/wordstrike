@@ -3515,3 +3515,27 @@ body.gameplay-viewport-short .boss-phrase-size-extreme { font-size: clamp(16px, 
     grid-template-columns: 1fr;
   }
 }
+
+/* Practice completion surfaces: bounded passages and readable result tables. */
+.practice-protocol-result-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+  margin: 20px 0;
+}
+.practice-protocol-results {
+  border-collapse: collapse;
+  width: 100%;
+  text-align: left;
+}
+.practice-protocol-results th,
+.practice-protocol-results td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--text-muted, #667580);
+  vertical-align: top;
+}
+.practice-protocol-results th { color: var(--primary); }
+.practice-protocol-result-scroll:focus-visible { outline: 2px solid var(--primary); }
+.practice-lab-screen textarea { max-width: 100%; box-sizing: border-box; }
+.practice-lab-screen [data-assessment-input] { display: block; width: 100%; min-height: 52px; }
+.practice-lab-screen [data-assessment-text],
+.practice-real-text-typing { overflow-wrap: anywhere; white-space: pre-wrap; }

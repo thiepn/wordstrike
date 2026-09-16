@@ -1,0 +1,28 @@
+[
+  {
+    "browser": "chromium",
+    "width": 1280,
+    "status": "PASS",
+    "journeys": [
+      "assessment quick complete",
+      "real text complete",
+      "read-ahead masked complete",
+      "metronome calibrated complete",
+      "persistent history"
+    ],
+    "errors": []
+  },
+  {
+    "browser": "chromium",
+    "width": 390,
+    "status": "PASS",
+    "journeys": [
+      "assessment quick complete",
+      "real text complete",
+      "read-ahead masked complete",
+      "metronome calibrated complete",
+      "persistent history"
+    ],
+    "errors": []
+  }
+]

@@ -1,5 +1,7 @@
 # Practice Lab PL40 — Final Release Certification
 
+> Historical certification. For the 2026-09-16 completion audit, implemented repairs, and still-open release gates, see [PRACTICE_LAB_COMPLETION_AUDIT.md](PRACTICE_LAB_COMPLETION_AUDIT.md). This original record is retained; its PASS must not be read as current production-release certification.
+
 **Date:** 2026-09-14  
 **Status:** PASS  
 **Branch:** `pl40-final-release-certification`  

@@ -623,3 +623,8 @@ GC3 — Release-Critical Content Completion
 ```
 
 GC3 is not started by this closure commit.
+
+
+## Completion audit — 2026-09-16
+
+The subsequent content/runtime/UI repairs, current verification evidence and open release gates are recorded in [PRACTICE_LAB_COMPLETION_AUDIT.md](PRACTICE_LAB_COMPLETION_AUDIT.md) and its machine-readable matrix. GC1/GC2 historical certifications above remain unchanged. This entry does not certify remote deployment or physical-device coverage.
