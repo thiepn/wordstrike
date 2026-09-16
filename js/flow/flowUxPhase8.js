@@ -45,27 +45,54 @@ function selectedSetupSummary() {
   return `${titleCase(draft.sessionLength)} · ${titleCase(draft.category)} · ${titleCase(draft.difficulty)}`;
 }
 
+function setupDock(screen) {
+  return screen?.parentElement?.querySelector?.('[data-flow-ux="setup-action-dock"]') || null;
+}
+
+function inheritFlowTokens(screen, dock) {
+  const style = getComputedStyle(screen);
+  for (const name of [
+    "--flow-line-strong",
+    "--flow-line",
+    "--flow-bg-deep",
+    "--flow-signal",
+    "--flow-signal-faint",
+    "--flow-signal-soft",
+    "--flow-ink",
+    "--flow-ink-soft",
+    "--flow-ink-muted",
+    "--flow-data-face",
+    "--flow-ui-face",
+  ]) {
+    const value = style.getPropertyValue(name);
+    if (value) dock.style.setProperty(name, value);
+  }
+}
+
 function moveStartIntoActionDock(screen) {
   const start = screen.querySelector('[data-flow-action="start"]');
-  if (!start || screen.querySelector('[data-flow-ux="setup-action-dock"]')) return;
+  if (!start || setupDock(screen)) return;
 
   const dock = document.createElement("div");
-  dock.className = "flow-ux-setup-action-dock";
+  dock.className = "flow-phase1-screen flow-ux-setup-action-dock";
   dock.dataset.flowUx = "setup-action-dock";
   dock.setAttribute("role", "region");
   dock.setAttribute("aria-label", "Start Flow session");
+  inheritFlowTokens(screen, dock);
 
   const copy = document.createElement("div");
   copy.className = "flow-ux-setup-action-copy";
   copy.innerHTML = `<span>Ready</span><strong data-flow-ux-setup-selection>${selectedSetupSummary()}</strong>`;
   dock.append(copy, start);
 
-  const shell = screen.querySelector(".flow-phase1-shell");
-  shell?.append(dock);
+  // Keep the fixed dock outside Flow's transformed/revealed screen. A fixed
+  // descendant of a transformed ancestor uses that ancestor as its containing
+  // block and can end up below a long setup page instead of at the viewport.
+  screen.parentElement?.append(dock);
 }
 
 function syncSetupDock(screen) {
-  const label = screen.querySelector("[data-flow-ux-setup-selection]");
+  const label = setupDock(screen)?.querySelector("[data-flow-ux-setup-selection]");
   if (label) label.textContent = selectedSetupSummary();
   const summary = screen.querySelector(".flow-phase1-brief");
   if (summary) {
@@ -200,15 +227,18 @@ function metric(label, value) {
 }
 
 function decorateResults(screen) {
-  screen.dataset.flowUxPhase8 = "true";
-  if (screen.querySelector("[data-flow-ux='primary-results']")) return;
+  if (screen.querySelector("[data-flow-ux='primary-results']")) {
+    screen.dataset.flowUxPhase8 = "true";
+    return;
+  }
   const snapshot = controller()?.getSnapshot?.();
   if (!snapshot?.gameplay || !snapshot?.cadence) return;
 
   const gameplay = snapshot.gameplay;
   const cadence = snapshot.cadence;
   const finalScore = screen.querySelector(".flow-final-score");
-  if (!finalScore) return;
+  const actions = screen.querySelector(".flow-complete-actions");
+  if (!finalScore || !actions) return;
 
   const primary = document.createElement("section");
   primary.className = "flow-ux-primary-results";
@@ -221,8 +251,6 @@ function decorateResults(screen) {
     metric("Avg Flow", gameplay.averageFlow.toFixed(1)),
   ].join("");
   finalScore.insertAdjacentElement("afterend", primary);
-
-  const actions = screen.querySelector(".flow-complete-actions");
   primary.insertAdjacentElement("afterend", actions);
 
   const secondary = [
@@ -243,6 +271,7 @@ function decorateResults(screen) {
     details.append(summary, body);
     actions.insertAdjacentElement("afterend", details);
   }
+  screen.dataset.flowUxPhase8 = "true";
 }
 
 function decorate() {
