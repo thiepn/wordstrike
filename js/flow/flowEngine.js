@@ -1,4 +1,11 @@
 import { FLOW_PHASES, createInitialFlowRun } from "./flowState.js";
+import {
+  applyFlowBackspaceGameplay,
+  applyFlowInsertGameplay,
+  finalizeFlowGameplay,
+  getFlowGameplaySnapshot,
+  initializeFlowGameplay,
+} from "./flowGameplay.js";
 
 const WORD_CHAR = /[A-Za-z0-9'’]/;
 const SENTENCE_END = /[.!?]/;
@@ -42,9 +49,16 @@ function recordBoundaryTimings(run, index, at) {
   const passage = run.passage;
   const current = passage[index];
   const next = passage[index + 1];
+  const boundary = {
+    wordEnded: false,
+    cleanWord: false,
+    sentenceEnded: false,
+    cleanSentence: false,
+  };
   const wordEnded = WORD_CHAR.test(current) && (index === passage.length - 1 || !WORD_CHAR.test(next));
   if (wordEnded) {
     const startIndex = findWordStart(passage, index);
+    const cleanWord = typedSliceCorrect(run, startIndex, index);
     run.wordTimings.push({
       startIndex,
       endIndex: index,
@@ -52,12 +66,15 @@ function recordBoundaryTimings(run, index, at) {
       startedAt: timingStart(run, startIndex, at),
       completedAt: at,
       durationMs: Math.max(0, at - timingStart(run, startIndex, at)),
-      correct: typedSliceCorrect(run, startIndex, index),
+      correct: cleanWord,
     });
+    boundary.wordEnded = true;
+    boundary.cleanWord = cleanWord;
   }
 
   if (SENTENCE_END.test(current)) {
     const startIndex = findSentenceStart(passage, index);
+    const cleanSentence = typedSliceCorrect(run, startIndex, index);
     run.sentenceTimings.push({
       startIndex,
       endIndex: index,
@@ -65,9 +82,12 @@ function recordBoundaryTimings(run, index, at) {
       startedAt: timingStart(run, startIndex, at),
       completedAt: at,
       durationMs: Math.max(0, at - timingStart(run, startIndex, at)),
-      correct: typedSliceCorrect(run, startIndex, index),
+      correct: cleanSentence,
     });
+    boundary.sentenceEnded = true;
+    boundary.cleanSentence = cleanSentence;
   }
+  return boundary;
 }
 
 export function createFlowTypingRun(passage, options = {}) {
@@ -79,6 +99,7 @@ export function createFlowTypingRun(passage, options = {}) {
   run.correctionTimings = [];
   run.sentenceTimings = [];
   run.totalInsertedCharacters = 0;
+  initializeFlowGameplay(run);
   return run;
 }
 
@@ -101,6 +122,7 @@ export function insertFlowText(run, value, at = currentNow()) {
     const index = run.currentIndex;
     const expected = run.passage[index];
     const correct = actual === expected;
+    const newProgress = index >= (run.furthestIndexReached || 0);
     const entry = { index, expected, actual, correct, at };
     run.typedCharacters.push(entry);
     run.rawKeystrokes.push({ type: "insert", ...entry });
@@ -112,13 +134,22 @@ export function insertFlowText(run, value, at = currentNow()) {
       run.uncorrectedErrors += 1;
       run.errorTimings.push({ index, expected, actual, at });
     }
-    recordBoundaryTimings(run, index, at);
+    const boundary = recordBoundaryTimings(run, index, at);
+    applyFlowInsertGameplay(run, {
+      index,
+      correct,
+      newProgress,
+      cleanWord: boundary.cleanWord,
+      cleanSentence: boundary.cleanSentence,
+      at,
+    });
     changed = true;
   }
 
   if (changed && run.currentIndex >= run.passage.length) {
     run.phase = FLOW_PHASES.COMPLETE;
     run.completedAt = at;
+    finalizeFlowGameplay(run);
   }
   return changed;
 }
@@ -148,6 +179,7 @@ export function backspaceFlowText(run, at = currentNow()) {
     removedCorrectCharacter: removed.correct,
     at,
   });
+  applyFlowBackspaceGameplay(run, { removed, at });
   if (run.startedAt != null) run.phase = FLOW_PHASES.RUNNING;
   return true;
 }
@@ -184,6 +216,7 @@ export function getFlowTypingSnapshot(run) {
     uncorrectedErrors: run.uncorrectedErrors,
     startedAt: run.startedAt,
     completedAt: run.completedAt,
+    gameplay: getFlowGameplaySnapshot(run),
     rawKeystrokes: run.rawKeystrokes.map((entry) => ({ ...entry })),
     wordTimings: run.wordTimings.map((entry) => ({ ...entry })),
     sentenceTimings: run.sentenceTimings.map((entry) => ({ ...entry })),
