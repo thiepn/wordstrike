@@ -6,6 +6,11 @@ import {
 
 export * from "./practiceConstantsV30.js";
 
+// GC2: the active PL11 persistence model is deliberately narrower than the
+// historical V30 reservation surface. PL30 punctuation/number/symbol category
+// telemetry is transient analysis; persistent skill evidence is canonical-only.
+export const ENTITY_TYPES = Object.freeze(["key", "bigram", "trigram", "word"]);
+
 export const PRACTICE_DATABASE_VERSION = 9;
 
 export const PRACTICE_LIMITS = Object.freeze({
