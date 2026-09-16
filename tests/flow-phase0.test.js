@@ -18,8 +18,11 @@ assert.equal(publicModes.some((mode) => mode.id === MODE_IDS.ARCADE_RUSH), false
 const flowDefinition = publicModes.find((mode) => mode.id === MODE_IDS.FLOW);
 assert.ok(flowDefinition, "Flow should be visible in the public mode registry");
 assert.equal(flowDefinition.name, "Flow");
-assert.equal(flowDefinition.enabled, false, "Phase 0 must not launch Flow before its typing engine exists");
-assert.equal(flowDefinition.route, null);
+// Phase 0 originally reserved this slot as coming-soon. Final release keeps the
+// same identity/storage contract but intentionally promotes it to a public route.
+assert.equal(flowDefinition.enabled, true);
+assert.equal(flowDefinition.route, "flow-release");
+assert.equal(flowDefinition.status, "available");
 
 const registeredModes = getRegisteredModes();
 const legacyRush = registeredModes.find((mode) => mode.id === MODE_IDS.ARCADE_RUSH);
@@ -65,4 +68,4 @@ assert.equal(run.phase, FLOW_PHASES.IDLE);
 assert.equal(run.currentIndex, 0);
 assert.equal(run.score, 0);
 
-console.log("flow-phase0.test.js passed");
+console.log("flow-phase0 compatibility contract passed after Phase 13 public release");
