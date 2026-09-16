@@ -1,0 +1,24 @@
+name: Publish reviewed Practice commit
+on:
+  pull_request:
+    branches: [main]
+permissions:
+  contents: write
+jobs:
+  publish:
+    if: github.head_ref == 'practice-completion-transfer'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: practice-completion-transfer
+          fetch-depth: 0
+      - name: Verify and publish exact reviewed commit
+        run: |
+          cat .practice-transfer/part-* > /tmp/practice.bundle
+          echo "7f3b8da640efd4173bba60000927fbe0b1aa0b458a8ee9b269f485e179273ba6  /tmp/practice.bundle" | sha256sum -c -
+          git fetch origin gc3-release-critical-content-completion
+          git bundle verify /tmp/practice.bundle
+          git fetch /tmp/practice.bundle HEAD
+          test "$(git rev-parse FETCH_HEAD)" = da4426cd0468bece0d968f6725d4f17b9195dfa2
+          git push origin da4426cd0468bece0d968f6725d4f17b9195dfa2:refs/heads/finish-practice-lab
