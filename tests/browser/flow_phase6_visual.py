@@ -41,6 +41,11 @@ def route(base):
     return base + "?dev=1&mode=flow&flowRun=1&flowLength=quick&flowCategory=mixed&flowDifficulty=advanced&flowSeed=phase6-visual"
 
 
+def settle_visual(page):
+    # Phase 6 reveal motion lasts 520 ms; screenshots should represent the settled UI.
+    page.wait_for_timeout(650)
+
+
 def open_ready(page, base):
     page.goto(route(base))
     expect(page.locator('[data-flow-view="ready"]')).to_be_visible(timeout=10000)
@@ -86,6 +91,7 @@ def certify_visual_language(browser, browser_name, base, evidence):
     errors = []
     page.on("pageerror", lambda error: errors.append(str(error)))
     plan = open_ready(page, base)
+    settle_visual(page)
 
     ready_style = style_snapshot(page)
     assert 'serif' in ready_style['titleFont'].lower() or 'georgia' in ready_style['titleFont'].lower(), ready_style
@@ -99,6 +105,7 @@ def certify_visual_language(browser, browser_name, base, evidence):
 
     page.locator('[data-flow-action="start"]').click()
     expect(page.locator('[data-flow-view="run"]')).to_be_visible()
+    settle_visual(page)
 
     run_geometry = page.evaluate("""() => {
       const passage = document.querySelector('.flow-passage');
@@ -144,6 +151,7 @@ def certify_visual_language(browser, browser_name, base, evidence):
     page.keyboard.type(second['text'])
     expect(page.locator('[data-flow-view="chapter"]')).to_be_visible(timeout=10000)
     expect(page.locator('.flow-chapter-index')).to_have_text('02')
+    settle_visual(page)
     chapter_style = page.evaluate("""() => {
       const index = document.querySelector('.flow-chapter-index');
       const transition = document.querySelector('.flow-chapter-transition');
@@ -162,6 +170,7 @@ def certify_visual_language(browser, browser_name, base, evidence):
         page.screenshot(path=str(ARTIFACTS / 'chromium-chapter.png'), full_page=True)
         finish_quick_run_from_second_chapter(page, plan)
         expect(page.locator('[data-flow-view="complete"]')).to_be_visible(timeout=10000)
+        settle_visual(page)
         result_style = page.evaluate("""() => {
           const score = document.querySelector('.flow-final-score strong');
           const metrics = document.querySelector('.flow-result-metrics');
@@ -203,6 +212,7 @@ def certify_mobile(browser, browser_name, base, evidence):
     context = context_for(browser, base, width=390, height=844)
     page = context.new_page()
     plan = open_ready(page, base)
+    settle_visual(page)
     ready = page.evaluate("""() => ({
       overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
       titleSize: parseFloat(getComputedStyle(document.querySelector('.flow-ready-screen h1')).fontSize),
@@ -227,6 +237,7 @@ def certify_mobile(browser, browser_name, base, evidence):
         expect(page.locator('[data-flow-view="run"]')).to_be_visible(timeout=10000)
         page.keyboard.type(segment['text'])
     expect(page.locator('[data-flow-view="chapter"]')).to_be_visible(timeout=10000)
+    settle_visual(page)
     chapter = page.evaluate("""() => ({
       overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
       indexSize: parseFloat(getComputedStyle(document.querySelector('.flow-chapter-index')).fontSize),
