@@ -1,0 +1,63 @@
+/* Phase 7 visual QA corrections.
+   Native fieldset/legend layout does not participate in CSS Grid like an
+   ordinary element in every browser. Keep the semantic fieldset, but let the
+   option rows own their full width so labels never collapse or overlap. */
+
+.flow-phase1-screen[data-flow-ui-phase7="true"] .flow-choice-group {
+  display: block;
+  min-inline-size: 0;
+  padding: 16px 0 18px;
+}
+
+.flow-phase1-screen[data-flow-ui-phase7="true"] .flow-choice-group legend {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 0 0 12px;
+}
+
+.flow-phase1-screen[data-flow-ui-phase7="true"] .flow-choice-row {
+  width: 100%;
+}
+
+.flow-phase1-screen[data-flow-ui-phase7="true"] .flow-choice-row--length {
+  grid-template-columns: repeat(3, minmax(150px, 1fr));
+}
+
+.flow-phase1-screen[data-flow-ui-phase7="true"] .flow-choice-row--categories {
+  grid-template-columns: repeat(4, minmax(140px, 1fr));
+}
+
+.flow-phase1-screen[data-flow-ui-phase7="true"] .flow-choice-row--difficulty {
+  grid-template-columns: repeat(4, minmax(170px, 1fr));
+}
+
+.flow-phase1-screen[data-flow-ui-phase7="true"] .flow-choice {
+  min-width: 0;
+}
+
+.flow-phase1-screen[data-flow-ui-phase7="true"] .flow-choice span,
+.flow-phase1-screen[data-flow-ui-phase7="true"] .flow-choice small {
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 900px) {
+  .flow-phase1-screen[data-flow-ui-phase7="true"] .flow-choice-row--categories,
+  .flow-phase1-screen[data-flow-ui-phase7="true"] .flow-choice-row--difficulty {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .flow-phase1-screen[data-flow-ui-phase7="true"] .flow-choice-row--length {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .flow-phase1-screen[data-flow-ui-phase7="true"] .flow-choice-row--categories {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .flow-phase1-screen[data-flow-ui-phase7="true"] .flow-choice-row--difficulty {
+    grid-template-columns: 1fr;
+  }
+}
