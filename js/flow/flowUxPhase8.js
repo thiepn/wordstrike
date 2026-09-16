@@ -45,6 +45,15 @@ function selectedSetupSummary() {
   return `${titleCase(draft.sessionLength)} · ${titleCase(draft.category)} · ${titleCase(draft.difficulty)}`;
 }
 
+function setupDraftChanged() {
+  const plan = controller()?.getRunPlan?.();
+  const draft = uiController()?.getDraft?.();
+  if (!plan || !draft) return false;
+  return draft.sessionLength !== plan.sessionLength
+    || draft.category !== plan.category
+    || draft.difficulty !== plan.difficulty;
+}
+
 function setupDock(screen) {
   return screen?.parentElement?.querySelector?.('[data-flow-ux="setup-action-dock"]') || null;
 }
@@ -92,8 +101,20 @@ function moveStartIntoActionDock(screen) {
 }
 
 function syncSetupDock(screen) {
-  const label = setupDock(screen)?.querySelector("[data-flow-ux-setup-selection]");
+  const dock = setupDock(screen);
+  const label = dock?.querySelector("[data-flow-ux-setup-selection]");
   if (label) label.textContent = selectedSetupSummary();
+
+  // Phase 7 normally owns this label, but the dock relocates the same button
+  // outside the ready screen. Keep its presentation synchronized here while
+  // preserving Phase 7's already-attached click listener and handoff logic.
+  const start = dock?.querySelector('[data-flow-action="start"]');
+  if (start) {
+    const changed = setupDraftChanged();
+    start.textContent = changed ? "START UPDATED RUN" : "START FLOW";
+    start.dataset.flowSetupChanged = changed ? "true" : "false";
+  }
+
   const summary = screen.querySelector(".flow-phase1-brief");
   if (summary) {
     summary.setAttribute("role", "status");
