@@ -19,11 +19,14 @@ jobs:
           node scripts/generatePracticeGc3OriginalSources.mjs
           node scripts/normalizePracticeGc3SourceAuthoring.mjs
           node scripts/buildPracticeGc3SourceRegistry.mjs
-      - name: Regenerate canonical PL6-PL10 artifacts
-        run: |
-          npm run build:practice-corpus
-          npm run build:practice-indexes
-          npm run build:practice-typability
+      - name: Regenerate canonical PL6 corpus
+        run: npm run build:practice-corpus
+      - name: Measure PL7 annotation pressure
+        run: node scripts/measurePracticeGc3IndexCapacity.mjs
+      - name: Regenerate canonical PL7 indexes
+        run: npm run build:practice-indexes
+      - name: Regenerate canonical PL10 typability
+        run: npm run build:practice-typability
       - name: Regenerate GC3 release-critical artifacts
         run: |
           node scripts/buildPracticeRealTextPool.mjs
