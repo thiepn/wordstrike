@@ -120,17 +120,19 @@ def certify_public_journey(browser, browser_name, base, evidence):
     expect(page.locator('.mode-select-screen')).to_be_visible(timeout=10000)
     assert 'flowRelease=1' not in page.url, page.url
     assert 'flowRun=1' not in page.url, page.url
-    expect(page.locator('button[data-mode-id="flow"]')).to_be_visible()
+    flow = page.locator('button[data-mode-id="flow"]')
+    expect(flow).to_be_visible()
 
-    # A second release launch after clean exit must still work.
-    page.locator('button[data-mode-id="flow"]').click()
+    # A second release launch uses native keyboard activation on the public button.
+    flow.focus()
+    page.keyboard.press('Enter')
     expect(page.locator('[data-flow-view="ready"]')).to_be_visible(timeout=15000)
     assert 'flowRelease=1' in page.url and 'dev=1' not in page.url, page.url
 
     assert not errors, errors
     evidence.append({
         'browser': browser_name,
-        'case': 'public Mode Select → persisted Flow run → clean exit → relaunch',
+        'case': 'public Mode Select → persisted Flow run → clean exit → keyboard relaunch',
         'completedRuns': summary['progress']['completedRuns'],
         'canonicalSessions': summary['generic']['completedSessions'],
     })
