@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { FLOW_CATEGORIES, FLOW_DIFFICULTIES } from "../js/flow/flowConfig.js";
-import { FLOW_PASSAGE_CATALOG } from "../js/flow/flowCatalog.js";
+import { FLOW_PASSAGE_CATALOG, FLOW_SEED_PASSAGES } from "../js/flow/flowCatalog.js";
 import {
   FLOW_CONTENT_CATEGORIES,
   createFlowCatalog,
@@ -11,7 +11,8 @@ import {
 } from "../js/flow/flowContent.js";
 import { resolveFlowSelection } from "../js/flow/flowSelection.js";
 
-assert.equal(FLOW_PASSAGE_CATALOG.length, 32, "Phase 2 ships a compact seed catalog, not the later expansion library");
+assert.equal(FLOW_SEED_PASSAGES.length, 32, "Phase 2 seed catalog remains stable after later content expansion");
+assert.ok(FLOW_PASSAGE_CATALOG.length >= FLOW_SEED_PASSAGES.length, "later phases may expand the validated production catalog");
 assert.deepEqual(FLOW_CONTENT_CATEGORIES, FLOW_CATEGORIES.filter((category) => category !== "mixed"));
 assert.equal(FLOW_CONTENT_CATEGORIES.length, 7);
 assert.equal(FLOW_DIFFICULTIES.length, 4);
@@ -40,25 +41,25 @@ const naturalDialogue = queryFlowPassages(FLOW_PASSAGE_CATALOG, {
   category: "dialogue",
   difficulty: "natural",
 });
-assert.equal(naturalDialogue.length, 1);
-assert.equal(naturalDialogue[0].id, "dialogue-natural-01");
+assert.ok(naturalDialogue.length >= 1);
+assert.ok(naturalDialogue.some(({ id }) => id === "dialogue-natural-01"));
 
 const workPassages = queryFlowPassages(FLOW_PASSAGE_CATALOG, { tags: ["work"] });
 assert.ok(workPassages.length >= 4);
 assert.equal(workPassages.every((passage) => passage.tags.includes("work")), true);
 
-const withoutOne = queryFlowPassages(FLOW_PASSAGE_CATALOG, {
+const withoutOne = queryFlowPassages(FLOW_SEED_PASSAGES, {
   category: "professional",
   difficulty: "advanced",
   excludeIds: ["professional-advanced-01"],
 });
 assert.deepEqual(withoutOne.map(({ id }) => id), ["professional-advanced-02"]);
 
-const selectedA = selectFlowPassage(FLOW_PASSAGE_CATALOG, {
+const selectedA = selectFlowPassage(FLOW_SEED_PASSAGES, {
   category: "professional",
   difficulty: "advanced",
 }, "repeatable-seed");
-const selectedB = selectFlowPassage(FLOW_PASSAGE_CATALOG, {
+const selectedB = selectFlowPassage(FLOW_SEED_PASSAGES, {
   category: "professional",
   difficulty: "advanced",
 }, "repeatable-seed");
@@ -66,12 +67,12 @@ assert.equal(selectedA.id, selectedB.id, "selection must be deterministic for a 
 
 const seen = new Set();
 for (let seed = 0; seed < 20; seed += 1) {
-  seen.add(selectFlowPassage(FLOW_PASSAGE_CATALOG, {
+  seen.add(selectFlowPassage(FLOW_SEED_PASSAGES, {
     category: "professional",
     difficulty: "advanced",
   }, seed)?.id);
 }
-assert.equal(seen.size, 2, "seeded selection should be able to reach each matching passage");
+assert.equal(seen.size, 2, "seeded selection should be able to reach each matching Phase 2 passage");
 
 const defaultSelection = resolveFlowSelection("");
 assert.equal(defaultSelection.source, "phase1-validation");
@@ -106,4 +107,4 @@ assert.throws(() => validateFlowPassage({ ...validBase, text: "This passage has 
 assert.throws(() => validateFlowPassage({ ...validBase, text: "This passage includes an unsupported backslash \\ and must fail validation." }), /unsupported character/);
 assert.throws(() => createFlowCatalog([validBase, validBase]), /Duplicate Flow passage id/);
 
-console.log("Flow Phase 2 content contracts passed: schema validation, complete matrix coverage, query/filtering, deterministic selection, and developer-route resolution.");
+console.log("Flow Phase 2 content contracts passed: stable seed library, schema validation, matrix coverage, query/filtering, deterministic selection, and developer-route resolution.");

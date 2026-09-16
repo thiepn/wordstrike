@@ -1,6 +1,7 @@
 import { createFlowCatalog } from "./flowContent.js";
+import { FLOW_EXPANSION_PASSAGES } from "./flowContentExpansion.js";
 
-const SEED_PASSAGES = [
+export const FLOW_SEED_PASSAGES = Object.freeze([
   { id: "everyday-smooth-01", category: "everyday", difficulty: "smooth", tags: ["common-words", "periods"], text: `I made tea, opened the window, and wrote down three things I wanted to finish before lunch. The list was short, clear, and easy to follow.` },
   { id: "everyday-natural-01", category: "everyday", difficulty: "natural", tags: ["commas", "apostrophes", "conversation"], text: `I wasn't sure whether the shop would still be open, so I sent a quick message before leaving. Ten minutes later, they replied and said they'd wait.` },
   { id: "everyday-advanced-01", category: "everyday", difficulty: "advanced", tags: ["semicolons", "parentheses", "long-sentences"], text: `The plan looked simple at first; buy groceries, return the library books, and pick up the package (before the desk closed). By noon, two small delays had changed the order completely.` },
@@ -40,6 +41,9 @@ const SEED_PASSAGES = [
   { id: "stories-natural-02", category: "stories", difficulty: "natural", tags: ["narrative", "questions", "commas"], text: `A note was tucked beneath the cup when Sam returned. It had no name, only one sentence: "Will you remember where we first met?"` },
   { id: "professional-advanced-02", category: "professional", difficulty: "advanced", tags: ["work", "colons", "semicolons"], text: `The review has one priority: remove uncertainty before launch. Product owns the final copy; Engineering owns the migration; Support will verify the help-center links.` },
   { id: "academic-expert-02", category: "academic", difficulty: "expert", tags: ["academic", "symbols", "numbers", "parentheses"], text: `For x >= 0, the approximation remains within 2% across the tested interval [0, 25]. Outside that range, error grows quickly; extrapolation should therefore be treated as a separate assumption, not a measured result.` },
-];
+]);
 
-export const FLOW_PASSAGE_CATALOG = createFlowCatalog(SEED_PASSAGES);
+export const FLOW_PASSAGE_CATALOG = createFlowCatalog([
+  ...FLOW_SEED_PASSAGES,
+  ...FLOW_EXPANSION_PASSAGES,
+]);
