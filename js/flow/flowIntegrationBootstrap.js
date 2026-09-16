@@ -1,5 +1,5 @@
 import { getFlowModifierQueryValue } from "./flowModifiers.js";
-import { getFlowWeaknessQueryValue } from "./flowAdaptive.js";
+import { serializeFlowWeaknessProfile } from "./flowAdaptive.js";
 import { loadFlowProgress } from "./flowProgression.js";
 
 function eligible(params) {
@@ -46,7 +46,10 @@ export function applyFlowIntegrationDefaults(locationLike = globalThis.location)
     && Array.isArray(progress.lastWeaknessProfile)
     && progress.lastWeaknessProfile.length
   ) {
-    url.searchParams.set("flowWeaknesses", getFlowWeaknessQueryValue(progress.lastWeaknessProfile));
+    url.searchParams.set("flowWeaknesses", serializeFlowWeaknessProfile({
+      version: 1,
+      weaknesses: progress.lastWeaknessProfile,
+    }));
     changed = true;
   }
 
