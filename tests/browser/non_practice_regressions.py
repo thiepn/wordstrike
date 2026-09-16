@@ -76,13 +76,15 @@ def title_and_shell_checks(browser, base, browser_name, checks):
     page.locator('[data-action="modes"]').click()
     expect(page.locator(".mode-screen")).to_be_visible()
     active = page.locator("button.mode-option.available").evaluate_all("els => els.map(e => e.dataset.modeId)")
-    assert active == ["campaign", "speed-test", "endless"], active
+    assert active == ["campaign", "speed-test", "endless", "flow"], active
     assert page.locator('[data-mode-id="arcade-rush"]').count() == 0
-    flow = page.locator('[data-mode-id="flow"]')
+    flow = page.locator('button[data-mode-id="flow"]')
     expect(flow).to_be_visible()
-    expect(flow).to_have_attribute("aria-disabled", "true")
+    assert flow.get_attribute("aria-disabled") is None
+    practice = page.locator('article[data-mode-id="practice"]')
+    expect(practice).to_have_attribute("aria-disabled", "true")
     assert overflow(page) <= 1
-    checks.append({"browser": browser_name, "case": "Flow migration metadata and public mode navigation"})
+    checks.append({"browser": browser_name, "case": "Flow release metadata and four-mode public navigation"})
     assert_no_errors(errors, "title/modes")
     context.close()
 
