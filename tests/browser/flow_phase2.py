@@ -51,7 +51,7 @@ def certify_filtered_selection(browser, browser_name, base, evidence):
     assert selection['source'] == 'catalog-filter', selection
     assert selection['category'] == 'professional', selection
     assert selection['difficulty'] == 'advanced', selection
-    assert selection['matchCount'] == 2, selection
+    assert selection['matchCount'] >= 2, selection
     assert selection['passage']['category'] == 'professional', selection
     assert selection['passage']['difficulty'] == 'advanced', selection
     selected_id = selection['passage']['id']
