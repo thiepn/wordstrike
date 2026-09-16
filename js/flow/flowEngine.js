@@ -1,6 +1,6 @@
 import { FLOW_PHASES, createInitialFlowRun } from "./flowState.js";
 
-const WORD_CHAR = /[A-Za-z0-9']/;
+const WORD_CHAR = /[A-Za-z0-9'’]/;
 const SENTENCE_END = /[.!?]/;
 
 function normalizePassage(value) {
@@ -171,6 +171,10 @@ export function getFlowTypingSnapshot(run) {
   return {
     mode: run.mode,
     phase: run.phase,
+    passageId: run.passageId ?? null,
+    category: run.category,
+    difficulty: run.difficulty,
+    sessionLength: run.sessionLength,
     passage: run.passage,
     currentIndex: run.currentIndex,
     passageLength: run.passage.length,
