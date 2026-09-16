@@ -76,29 +76,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0"></script>
     <script type="module" src="js/main.js?v=20260910f"></script>
     <script type="module" src="js/flow/flowMigrationPresentation.js?v=20260915a"></script>
-    <script type="module" src="js/flow/flowIntegrationBootstrap.js?v=20260916a"></script>
-    <script type="module" src="js/flow/flowPhase1.js?v=20260916d"></script>
-    <script type="module" src="js/flow/flowVisualPhase6.js?v=20260916a"></script>
-    <script type="module">
-      const flowParams = new URLSearchParams(location.search);
-      if (flowParams.get("flowUi") === "1") {
-        import("./js/flow/flowUiPhase7KeyboardGuard.js?v=20260916a");
-        import("./js/flow/flowUiPhase7.js?v=20260916a");
-        import("./js/flow/flowUiPhase7Polish.js?v=20260916a");
-        if (flowParams.get("flowUx") === "1") {
-          import("./js/flow/flowUxPhase8.js?v=20260916a");
-          if (flowParams.get("flowModifiers") === "1") {
-            import("./js/flow/flowModifiersPhase9.js?v=20260916a");
-          }
-          if (flowParams.get("flowAdaptive") === "1") {
-            import("./js/flow/flowAdaptivePhase10.js?v=20260916a");
-          }
-          if (flowParams.get("flowIntegration") === "1") {
-            import("./js/flow/flowIntegrationPhase11.js?v=20260916a");
-          }
-        }
-      }
-    </script>
+    <script type="module" src="js/flow/flowRuntimeLoader.js?v=20260916a"></script>
     <script type="module" src="js/thiepnAccountPresentation.js?v=20260912a"></script>
     <script type="module" src="js/speedTestPerformanceV1.js?v=20260910a"></script>
     <script type="module" src="js/speedTestPerformanceV2.js?v=20260910b"></script>
