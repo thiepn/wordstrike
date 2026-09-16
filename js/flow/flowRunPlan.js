@@ -1,5 +1,9 @@
 import { FLOW_CATEGORIES, FLOW_DIFFICULTIES, FLOW_SESSION_LENGTHS } from "./flowConfig.js";
 import { FLOW_PASSAGE_CATALOG } from "./flowCatalog.js";
+import {
+  getFlowModifierContentBiases,
+  normalizeFlowModifierIds,
+} from "./flowModifiers.js";
 
 const DIFFICULTY_RANK = Object.freeze({ smooth: 0, natural: 1, advanced: 2, expert: 3 });
 
@@ -43,10 +47,17 @@ function chapterDifficulty(selectedDifficulty, templateIndex) {
   return DIFFICULTY_LADDERS[selectedDifficulty]?.[templateIndex] ?? "natural";
 }
 
+function tagBonus(passage, tags, perTag) {
+  let bonus = 0;
+  for (const tag of tags) if (passage.tags.includes(tag)) bonus += perTag;
+  return bonus;
+}
+
 function candidateScore(passage, {
   category,
   targetDifficulty,
   preferredTags,
+  modifierBiases,
   usageCount,
   previousId,
   seed,
@@ -57,6 +68,20 @@ function candidateScore(passage, {
   let score = 900 - ((targetRank - rank) * 110);
   if (category !== "mixed" && passage.category === category) score += 340;
   for (const tag of preferredTags) if (passage.tags.includes(tag)) score += 55;
+
+  if (modifierBiases.dialogue) {
+    if (passage.category === "dialogue") score += 650;
+    score += tagBonus(passage, ["quotes", "apostrophes", "conversation"], 105);
+  }
+  if (modifierBiases.symbols) {
+    if (passage.category === "numbers-symbols") score += 650;
+    score += tagBonus(passage, ["numbers", "symbols", "mixed-punctuation"], 115);
+  }
+  if (modifierBiases.longform) {
+    score += Math.min(260, (passage.wordCount || 0) * 6);
+    score += tagBonus(passage, ["long-sentences", "semicolons", "parentheses"], 80);
+  }
+
   score -= usageCount * 1400;
   if (passage.id === previousId) score -= 5000;
   score += seededJitter(seed, passage.id, slot);
@@ -103,13 +128,17 @@ export function createFlowRunPlan({
   difficulty = "natural",
   sessionLength = "standard",
   seed = "phase5-default",
+  modifiers = [],
   catalog = FLOW_PASSAGE_CATALOG,
 } = {}) {
   if (!Array.isArray(catalog) || !catalog.length) throw new TypeError("Flow run planner requires at least one passage");
   const safeCategory = FLOW_CATEGORIES.includes(category) ? category : "mixed";
   const safeDifficulty = FLOW_DIFFICULTIES.includes(difficulty) ? difficulty : "natural";
   const safeLength = Object.hasOwn(RUN_PROFILES, sessionLength) ? sessionLength : "standard";
+  const modifierIds = normalizeFlowModifierIds(modifiers);
+  const modifierBiases = getFlowModifierContentBiases(modifierIds);
   const profile = RUN_PROFILES[safeLength];
+  const passagesPerChapter = modifierBiases.sprint ? 1 : profile.passagesPerChapter;
   const usage = new Map();
   let previousId = null;
   let slot = 0;
@@ -118,11 +147,12 @@ export function createFlowRunPlan({
     const template = FLOW_CHAPTER_TEMPLATES[templateIndex];
     const targetDifficulty = chapterDifficulty(safeDifficulty, templateIndex);
     const passages = [];
-    for (let passageIndex = 0; passageIndex < profile.passagesPerChapter; passageIndex += 1) {
+    for (let passageIndex = 0; passageIndex < passagesPerChapter; passageIndex += 1) {
       const selected = selectPassage(catalog, {
         category: safeCategory,
         targetDifficulty,
         preferredTags: template.preferredTags,
+        modifierBiases,
         previousId,
         seed,
         slot,
@@ -149,14 +179,18 @@ export function createFlowRunPlan({
   const fullText = segments.map(({ text }) => text).join("");
   const cadenceExcludedAfterIndexes = Object.freeze(segments.slice(0, -1).map(({ endIndex }) => endIndex));
   const uniqueIds = new Set(segments.map(({ passageId }) => passageId));
+  const baseMinutes = FLOW_SESSION_LENGTHS[safeLength]?.targetMinutes ?? 6;
+  const targetMinutes = modifierBiases.sprint ? Math.max(1, Math.round(baseMinutes * 0.6)) : baseMinutes;
+  const modifierSignature = modifierIds.length ? modifierIds.join("+") : "base";
 
   return Object.freeze({
-    id: `flow-${safeLength}-${hashSeed(`${seed}:${safeCategory}:${safeDifficulty}`).toString(16)}`,
+    id: `flow-${safeLength}-${hashSeed(`${seed}:${safeCategory}:${safeDifficulty}:${modifierSignature}`).toString(16)}`,
     seed: String(seed),
     category: safeCategory,
     difficulty: safeDifficulty,
     sessionLength: safeLength,
-    targetMinutes: FLOW_SESSION_LENGTHS[safeLength]?.targetMinutes ?? 6,
+    modifiers: modifierIds,
+    targetMinutes,
     chapterCount: chapters.length,
     passageCount: segments.length,
     repeatedPassageCount: segments.length - uniqueIds.size,
@@ -175,5 +209,6 @@ export function resolveFlowRunPlan(searchLike = "") {
   const difficulty = FLOW_DIFFICULTIES.includes(params.get("flowDifficulty")) ? params.get("flowDifficulty") : "natural";
   const sessionLength = Object.hasOwn(RUN_PROFILES, params.get("flowLength")) ? params.get("flowLength") : "standard";
   const seed = params.get("flowSeed") || "phase5-default";
-  return createFlowRunPlan({ category, difficulty, sessionLength, seed });
+  const modifiers = normalizeFlowModifierIds(params.get("flowModifierIds") || "");
+  return createFlowRunPlan({ category, difficulty, sessionLength, seed, modifiers });
 }
