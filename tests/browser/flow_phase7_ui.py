@@ -54,6 +54,13 @@ def selected(page, group, value):
     return page.locator(f'[data-flow-choice-group="{group}"][data-flow-choice-value="{value}"]')
 
 
+def assert_single_selected(page, group, expected_value):
+    active = page.locator(f'[data-flow-choice-group="{group}"][aria-pressed="true"]')
+    assert active.count() == 1, (group, active.count())
+    expect(selected(page, group, expected_value)).to_have_attribute('aria-pressed', 'true')
+    expect(selected(page, group, expected_value)).to_have_class(lambda value: value is not None and 'is-selected' in value.split())
+
+
 def certify_setup_and_run(browser, browser_name, base, evidence):
     context = context_for(browser, base)
     page = context.new_page()
@@ -68,9 +75,9 @@ def certify_setup_and_run(browser, browser_name, base, evidence):
     assert page.locator('[data-flow-group="sessionLength"] [data-flow-choice-group]').count() == 3
     assert page.locator('[data-flow-group="category"] [data-flow-choice-group]').count() == 8
     assert page.locator('[data-flow-group="difficulty"] [data-flow-choice-group]').count() == 4
-    expect(selected(page, 'sessionLength', 'standard')).to_have_attribute('aria-pressed', 'true')
-    expect(selected(page, 'category', 'mixed')).to_have_attribute('aria-pressed', 'true')
-    expect(selected(page, 'difficulty', 'natural')).to_have_attribute('aria-pressed', 'true')
+    assert_single_selected(page, 'sessionLength', 'standard')
+    assert_single_selected(page, 'category', 'mixed')
+    assert_single_selected(page, 'difficulty', 'natural')
 
     # Focused setup controls own Enter instead of triggering Flow's legacy
     # READY-screen global Enter shortcut.
@@ -80,7 +87,7 @@ def certify_setup_and_run(browser, browser_name, base, evidence):
 
     # Arrow-key navigation stays inside the choice group.
     page.keyboard.press('ArrowRight')
-    expect(selected(page, 'category', 'everyday')).to_have_attribute('aria-pressed', 'true')
+    assert_single_selected(page, 'category', 'everyday')
 
     # Stage a materially different run without reloading yet.
     selected(page, 'sessionLength', 'quick').click()
@@ -90,6 +97,10 @@ def certify_setup_and_run(browser, browser_name, base, evidence):
     expect(page.locator('[data-flow-setup-focus]')).to_have_text('Dialogue · Advanced')
     expect(page.locator('[data-flow-action="start"]')).to_have_text('START UPDATED RUN')
     assert page.locator('.flow-setup-itinerary .flow-itinerary-step').count() == 3
+    assert_single_selected(page, 'sessionLength', 'quick')
+    assert_single_selected(page, 'category', 'dialogue')
+    assert_single_selected(page, 'difficulty', 'advanced')
+    expect(selected(page, 'difficulty', 'natural')).to_have_attribute('aria-pressed', 'false')
 
     # The inherited Phase 5 summary must reflect the same staged draft rather
     # than exposing the previously resolved Standard / Mixed / Natural plan.
@@ -168,9 +179,9 @@ def certify_setup_and_run(browser, browser_name, base, evidence):
     page.keyboard.press('Enter')
     expect(page.locator('[data-flow-view="ready"]')).to_be_visible(timeout=15000)
     expect(page.locator('[data-flow-ui="setup"]')).to_be_visible()
-    expect(selected(page, 'sessionLength', 'quick')).to_have_attribute('aria-pressed', 'true')
-    expect(selected(page, 'category', 'dialogue')).to_have_attribute('aria-pressed', 'true')
-    expect(selected(page, 'difficulty', 'advanced')).to_have_attribute('aria-pressed', 'true')
+    assert_single_selected(page, 'sessionLength', 'quick')
+    assert_single_selected(page, 'category', 'dialogue')
+    assert_single_selected(page, 'difficulty', 'advanced')
 
     assert not errors, errors
     evidence.append({
