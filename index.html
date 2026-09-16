@@ -66,6 +66,7 @@
     <link rel="stylesheet" href="styles/screens/flow-ux-phase8.css?v=20260916a">
     <link rel="stylesheet" href="styles/screens/flow-modifiers-phase9.css?v=20260916a">
     <link rel="stylesheet" href="styles/screens/flow-adaptive-phase10.css?v=20260916a">
+    <link rel="stylesheet" href="styles/screens/flow-integration-phase11.css?v=20260916a">
     <link rel="stylesheet" href="practiceLabV20.css">
     <link rel="stylesheet" href="practiceLabV21.css">
     <link rel="stylesheet" href="practiceLabV25.css">
@@ -75,6 +76,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0"></script>
     <script type="module" src="js/main.js?v=20260910f"></script>
     <script type="module" src="js/flow/flowMigrationPresentation.js?v=20260915a"></script>
+    <script type="module" src="js/flow/flowIntegrationBootstrap.js?v=20260916a"></script>
     <script type="module" src="js/flow/flowPhase1.js?v=20260916d"></script>
     <script type="module" src="js/flow/flowVisualPhase6.js?v=20260916a"></script>
     <script type="module">
@@ -90,6 +92,9 @@
           }
           if (flowParams.get("flowAdaptive") === "1") {
             import("./js/flow/flowAdaptivePhase10.js?v=20260916a");
+          }
+          if (flowParams.get("flowIntegration") === "1") {
+            import("./js/flow/flowIntegrationPhase11.js?v=20260916a");
           }
         }
       }
