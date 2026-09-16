@@ -3,6 +3,7 @@ import { PRACTICE_STORE_NAMES } from "./practiceConstants.js";
 import { getPracticeStoreKey } from "./practiceStorageContract.js";
 import { createPracticeCustomTextRepositoryFacade } from "./practiceCustomTextRepository.js";
 import { createDefaultPracticeEvaluationState } from "./practiceEvaluationState.js";
+import { reconcilePracticePl30ModelBoundary } from "./practicePl30ModelBoundaryRepair.js";
 
 const PROFILE_RESET_META_KEYS = Object.freeze(["pl5ContextIdentity", "manifestReconciliation"]);
 const PROFILE_RESET_STORES = Object.freeze(PRACTICE_STORE_NAMES.filter((storeName) => !["meta", "customTexts"].includes(storeName)));
@@ -21,6 +22,12 @@ export function createPracticeRepository(options = {}) {
   const now = options.now ?? Date.now;
   const core = createPracticeRepositoryV30({ ...options, dataStore });
   const custom = createPracticeCustomTextRepositoryFacade({ dataStore, now });
+
+  async function initializePracticeStorage(...args) {
+    const result = await core.initializePracticeStorage(...args);
+    await reconcilePracticePl30ModelBoundary(dataStore, { now });
+    return result;
+  }
 
   async function resolveActiveScope(requestedProfileId = null, requestedContextId = null) {
     const active = await core.getPracticeProfile?.();
@@ -139,13 +146,14 @@ export function createPracticeRepository(options = {}) {
     if (!activeProfile?.profileId) return core.resetPracticeData();
 
     await resetActiveProfileData(activeProfile.profileId);
-    await core.initializePracticeStorage();
+    await initializePracticeStorage();
     return true;
   }
 
   return Object.freeze({
     ...core,
     ...custom,
+    initializePracticeStorage,
     getCustomText,
     createCustomText,
     createPracticeCustomText: createCustomText,
