@@ -88,7 +88,8 @@
 
 .flow-run-header span,
 .flow-gameplay-hud span,
-.flow-final-score span {
+.flow-final-score span,
+.flow-analysis-heading span {
   font-size: 0.78rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -97,13 +98,14 @@
 
 .flow-run-header strong,
 .flow-gameplay-hud strong,
-.flow-final-score strong {
+.flow-final-score strong,
+.flow-natural-analysis strong {
   font-variant-numeric: tabular-nums;
 }
 
 .flow-gameplay-hud {
   display: grid;
-  grid-template-columns: minmax(110px, auto) minmax(220px, 1fr) minmax(120px, auto);
+  grid-template-columns: minmax(100px, auto) minmax(220px, 1fr) minmax(110px, auto) minmax(110px, auto);
   gap: 20px;
   align-items: end;
   padding: 16px 0;
@@ -113,18 +115,26 @@
 
 .flow-score-block,
 .flow-momentum-block,
-.flow-meter-block {
+.flow-meter-block,
+.flow-cadence-block {
   display: grid;
   gap: 8px;
 }
 
 .flow-score-block strong,
-.flow-momentum-block strong {
+.flow-momentum-block strong,
+.flow-cadence-block strong {
   font-size: clamp(1.35rem, 3vw, 2rem);
 }
 
-.flow-momentum-block {
+.flow-momentum-block,
+.flow-cadence-block {
   text-align: right;
+}
+
+.flow-cadence-block small {
+  font: 600 0.7rem/1.2 var(--font-ui, inherit);
+  opacity: 0.62;
 }
 
 .flow-meter-label {
@@ -228,6 +238,47 @@
   row-gap: 16px;
 }
 
+.flow-natural-analysis {
+  display: grid;
+  gap: 14px;
+  padding: 18px 0;
+  border-top: 1px solid currentColor;
+  border-bottom: 1px solid currentColor;
+}
+
+.flow-analysis-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 18px;
+}
+
+.flow-natural-analysis ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.flow-natural-analysis li {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 12px;
+  align-items: baseline;
+}
+
+.flow-natural-analysis li small,
+.flow-natural-analysis p {
+  opacity: 0.62;
+}
+
+.flow-natural-analysis p {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
 .flow-score-breakdown {
   display: flex;
   flex-wrap: wrap;
@@ -279,8 +330,27 @@
     grid-column: 1 / -1;
     grid-row: 2;
   }
-  .flow-momentum-block {
+  .flow-momentum-block,
+  .flow-cadence-block {
     text-align: right;
+  }
+  .flow-cadence-block {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  .flow-momentum-block {
+    grid-column: 1;
+    grid-row: 3;
+    text-align: left;
+  }
+  .flow-cadence-block {
+    grid-row: 3;
+  }
+  .flow-natural-analysis li {
+    grid-template-columns: 1fr auto;
+  }
+  .flow-natural-analysis li small {
+    grid-column: 1 / -1;
   }
   .flow-passage {
     font-size: clamp(1.18rem, 5.4vw, 1.48rem);
