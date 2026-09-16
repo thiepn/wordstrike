@@ -6,6 +6,7 @@ import {
   getFlowGameplaySnapshot,
   initializeFlowGameplay,
 } from "./flowGameplay.js";
+import { analyzeFlowCadence } from "./flowCadence.js";
 
 const WORD_CHAR = /[A-Za-z0-9'’]/;
 const SENTENCE_END = /[.!?]/;
@@ -217,6 +218,7 @@ export function getFlowTypingSnapshot(run) {
     startedAt: run.startedAt,
     completedAt: run.completedAt,
     gameplay: getFlowGameplaySnapshot(run),
+    cadence: analyzeFlowCadence(run),
     rawKeystrokes: run.rawKeystrokes.map((entry) => ({ ...entry })),
     wordTimings: run.wordTimings.map((entry) => ({ ...entry })),
     sentenceTimings: run.sentenceTimings.map((entry) => ({ ...entry })),
