@@ -204,11 +204,13 @@ def certify_offline(browser, browser_name, base, evidence):
     assert cache_result['supported'] is True, cache_result
     assert cache_result['cached'] == page.evaluate('window.wordstrikeFlowReleasePhase13.offlineAssetCount'), cache_result
     assert cache_result['cached'] >= 30, cache_result
+    assert cache_result['cacheName'] == page.evaluate('window.wordstrikeFlowReleasePhase13.offlineCacheName'), cache_result
 
+    # The production service-worker fallback uses caches.match(request), which
+    # intentionally searches both the rotating app-shell cache and the stable
+    # Flow release cache. Certify the same resolution path rather than coupling
+    # the test to a particular `wordstrike-pwa-vN` shell version.
     cached = page.evaluate("""async () => {
-      const keys = await caches.keys();
-      const name = keys.find(key => key.startsWith('wordstrike-pwa-'));
-      const cache = await caches.open(name);
       const targets = [
         './js/flow/flowRuntimeLoader.js?v=20260916a',
         './js/flow/flowContentExpansion.js',
@@ -216,7 +218,9 @@ def certify_offline(browser, browser_name, base, evidence):
         './styles/screens/flow-integration-phase11.css?v=20260916a',
       ];
       const results = [];
-      for (const target of targets) results.push(Boolean(await cache.match(new URL(target, location.href).href)));
+      for (const target of targets) {
+        results.push(Boolean(await caches.match(new URL(target, location.href).href)));
+      }
       return results;
     }""")
     assert all(cached), cached
@@ -244,6 +248,7 @@ def certify_offline(browser, browser_name, base, evidence):
         'browser': browser_name,
         'case': 'PWA cache warm-up and offline public Flow relaunch',
         'cachedAssets': cache_result['cached'],
+        'cacheName': cache_result['cacheName'],
     })
     print('Phase 13 offline: certification passed', flush=True)
     context.close()
