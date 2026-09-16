@@ -64,6 +64,7 @@
     <link rel="stylesheet" href="styles/screens/flow-ui-phase7.css?v=20260916a">
     <link rel="stylesheet" href="styles/screens/flow-ui-phase7-polish.css?v=20260916b">
     <link rel="stylesheet" href="styles/screens/flow-ux-phase8.css?v=20260916a">
+    <link rel="stylesheet" href="styles/screens/flow-modifiers-phase9.css?v=20260916a">
     <link rel="stylesheet" href="practiceLabV20.css">
     <link rel="stylesheet" href="practiceLabV21.css">
     <link rel="stylesheet" href="practiceLabV25.css">
@@ -83,6 +84,9 @@
         import("./js/flow/flowUiPhase7Polish.js?v=20260916a");
         if (flowParams.get("flowUx") === "1") {
           import("./js/flow/flowUxPhase8.js?v=20260916a");
+          if (flowParams.get("flowModifiers") === "1") {
+            import("./js/flow/flowModifiersPhase9.js?v=20260916a");
+          }
         }
       }
     </script>

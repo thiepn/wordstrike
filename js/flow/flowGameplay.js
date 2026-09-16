@@ -1,3 +1,8 @@
+import {
+  getFlowModifierGameplayScales,
+  getFlowModifierScoreBreakdown,
+} from "./flowModifiers.js";
+
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 
 export const FLOW_GAMEPLAY_RULES = Object.freeze({
@@ -69,6 +74,8 @@ export function calculateFlowScore(run) {
   const averageFlow = currentAverageFlow(run);
   const averageMomentum = currentAverageMomentum(run);
   const difficultyMultiplier = getDifficultyMultiplier(run.difficulty);
+  const modifierBreakdown = getFlowModifierScoreBreakdown(run);
+  const modifierMultiplier = modifierBreakdown.multiplier;
   const accuracyMultiplier = Number(
     Math.pow(clamp(accuracy, 0, 100) / 100, FLOW_GAMEPLAY_RULES.accuracyExponent).toFixed(4),
   );
@@ -80,7 +87,8 @@ export function calculateFlowScore(run) {
       * difficultyMultiplier
       * accuracyMultiplier
       * flowMultiplier
-      * scoredAverageMomentum,
+      * scoredAverageMomentum
+      * modifierMultiplier,
   );
   return Object.freeze({
     score,
@@ -92,6 +100,8 @@ export function calculateFlowScore(run) {
     averageFlow: Number(averageFlow.toFixed(2)),
     flowMultiplier,
     averageMomentum: scoredAverageMomentum,
+    modifierMultiplier,
+    modifierEntries: modifierBreakdown.entries,
   });
 }
 
@@ -158,12 +168,13 @@ export function applyFlowInsertGameplay(run, event) {
   if (!run || !event) return null;
   const correct = event.correct === true;
   const newProgress = event.newProgress === true;
+  const modifierScales = getFlowModifierGameplayScales(run);
   if (correct) run.correctKeystrokes += 1;
   else run.incorrectKeystrokes += 1;
 
   if (!correct) {
-    setFlow(run, run.flowValue - FLOW_GAMEPLAY_RULES.flow.incorrectCharacterLoss);
-    setMomentumCharge(run, run.momentumCharge - FLOW_GAMEPLAY_RULES.momentum.incorrectCharacterLoss);
+    setFlow(run, run.flowValue - (FLOW_GAMEPLAY_RULES.flow.incorrectCharacterLoss * modifierScales.incorrectLossScale));
+    setMomentumCharge(run, run.momentumCharge - (FLOW_GAMEPLAY_RULES.momentum.incorrectCharacterLoss * modifierScales.incorrectLossScale));
   } else if (newProgress) {
     setFlow(run, run.flowValue + FLOW_GAMEPLAY_RULES.flow.correctCharacterGain);
     setMomentumCharge(run, run.momentumCharge + FLOW_GAMEPLAY_RULES.momentum.correctCharacterGain);
@@ -198,12 +209,13 @@ export function applyFlowInsertGameplay(run, event) {
 export function applyFlowBackspaceGameplay(run, event) {
   if (!run || !event?.removed) return null;
   const removed = event.removed;
+  const modifierScales = getFlowModifierGameplayScales(run);
   if (removed.correct === true) {
-    setFlow(run, run.flowValue - FLOW_GAMEPLAY_RULES.flow.correctBackspaceLoss);
-    setMomentumCharge(run, run.momentumCharge - FLOW_GAMEPLAY_RULES.momentum.correctBackspaceLoss);
+    setFlow(run, run.flowValue - (FLOW_GAMEPLAY_RULES.flow.correctBackspaceLoss * modifierScales.correctBackspaceLossScale));
+    setMomentumCharge(run, run.momentumCharge - (FLOW_GAMEPLAY_RULES.momentum.correctBackspaceLoss * modifierScales.correctBackspaceLossScale));
   } else {
-    setFlow(run, run.flowValue + FLOW_GAMEPLAY_RULES.flow.correctedErrorRecovery);
-    setMomentumCharge(run, run.momentumCharge + FLOW_GAMEPLAY_RULES.momentum.correctedErrorRecovery);
+    setFlow(run, run.flowValue + (FLOW_GAMEPLAY_RULES.flow.correctedErrorRecovery * modifierScales.correctedRecoveryScale));
+    setMomentumCharge(run, run.momentumCharge + (FLOW_GAMEPLAY_RULES.momentum.correctedErrorRecovery * modifierScales.correctedRecoveryScale));
   }
   const breakdown = syncScore(run);
   recordGameplayEvent(run, {

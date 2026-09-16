@@ -1,4 +1,5 @@
 import { FLOW_MODE_ID, normalizeFlowOptions } from "./flowConfig.js";
+import { normalizeFlowModifierIds } from "./flowModifiers.js";
 
 export const FLOW_PHASES = Object.freeze({
   IDLE: "idle",
@@ -8,12 +9,21 @@ export const FLOW_PHASES = Object.freeze({
   COMPLETE: "complete",
 });
 
+function routeModifierIds() {
+  const search = globalThis.location?.search;
+  if (!search) return [];
+  const params = new URLSearchParams(search);
+  return normalizeFlowModifierIds(params.get("flowModifierIds") || "");
+}
+
 export function createInitialFlowRun(options = {}) {
   const normalized = normalizeFlowOptions(options);
+  const explicitModifiers = options.modifiers ?? options.modifierIds;
   return {
     mode: FLOW_MODE_ID,
     phase: FLOW_PHASES.IDLE,
     ...normalized,
+    modifiers: normalizeFlowModifierIds(explicitModifiers ?? routeModifierIds()),
     passageId: null,
     startedAt: null,
     completedAt: null,
@@ -22,6 +32,7 @@ export function createInitialFlowRun(options = {}) {
     incorrectChars: 0,
     correctedErrors: 0,
     uncorrectedErrors: 0,
+    blockedBackspaces: 0,
     pauses: [],
     rawKeystrokes: [],
     wordTimings: [],
