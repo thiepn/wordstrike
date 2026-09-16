@@ -28,6 +28,10 @@ function titleCase(value) {
     .join(" ");
 }
 
+function draftSignature(draft) {
+  return `${draft.sessionLength}|${draft.category}|${draft.difficulty}`;
+}
+
 function syncDraftSummary() {
   if (!enabled) return;
   const screen = document.querySelector('[data-flow-view="ready"][data-flow-ui-phase7="true"]');
@@ -35,7 +39,11 @@ function syncDraftSummary() {
   const draft = globalThis.window?.wordstrikeFlowUiPhase7?.getDraft?.();
   if (!screen || !brief || !draft) return;
 
+  const signature = draftSignature(draft);
+  if (brief.dataset.flowDraftSignature === signature) return;
+
   const length = LENGTHS[draft.sessionLength] || LENGTHS.standard;
+  brief.dataset.flowDraftSignature = signature;
   brief.setAttribute("aria-label", "Selected Flow run setup");
   brief.innerHTML = `
     <span><strong>~${length.minutes} min</strong> ${titleCase(draft.sessionLength)} run</span>
