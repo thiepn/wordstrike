@@ -1,4 +1,4 @@
-import { getFlowWeaknessQueryValue } from "./flowAdaptive.js";
+import { serializeFlowWeaknessProfile } from "./flowAdaptive.js";
 import {
   FLOW_MILESTONES,
   getFlowIntegrationSummary,
@@ -133,7 +133,10 @@ function resumeAdaptive() {
   if (!progress.lastWeaknessProfile?.length) return;
   const url = new URL(globalThis.location.href);
   url.searchParams.set("flowAdaptive", "1");
-  url.searchParams.set("flowWeaknesses", getFlowWeaknessQueryValue(progress.lastWeaknessProfile));
+  url.searchParams.set("flowWeaknesses", serializeFlowWeaknessProfile({
+    version: 1,
+    weaknesses: progress.lastWeaknessProfile,
+  }));
   url.searchParams.delete("flowUiStart");
   url.searchParams.delete("flowResumeAdaptive");
   globalThis.location.replace(url.href);
