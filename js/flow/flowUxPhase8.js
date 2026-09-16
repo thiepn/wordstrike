@@ -204,7 +204,12 @@ function decorateRun(screen) {
   }
 
   for (const target of [screen.querySelector(".flow-run-copy"), screen.querySelector("[data-flow-passage]")]) {
-    target?.addEventListener("pointerdown", () => queueMicrotask(() => focusTypingInput(screen)));
+    target?.addEventListener("pointerdown", (event) => {
+      // Prevent the browser's default pointer/click focus transfer from
+      // immediately stealing focus back after the hidden capture is restored.
+      event.preventDefault();
+      focusTypingInput(screen);
+    });
   }
   const input = focusCapture(screen);
   input?.addEventListener("focus", () => setTypingFocusState(screen));
