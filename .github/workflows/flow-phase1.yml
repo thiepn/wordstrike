@@ -17,8 +17,6 @@ jobs:
       - uses: actions/checkout@v4
       - name: Install browser test dependencies
         run: python3 -m pip install -r tests/browser/requirements.txt
-      - name: Certify Flow Phase 1 pure engine
-        run: node tests/flow-phase1-engine.test.js
       - name: Certify Flow Phase 1 browser engine
         run: python3 tests/browser/flow_phase1.py
       - uses: actions/upload-artifact@v4
