@@ -74,6 +74,18 @@ export function isFlowDeveloperRoute(locationLike = globalThis.location) {
   return params.get("dev") === "1" && params.get("mode") === "flow";
 }
 
+function createReleaseSeed() {
+  const stamp = Date.now().toString(36);
+  try {
+    const values = new Uint32Array(2);
+    globalThis.crypto?.getRandomValues?.(values);
+    if (values[0] || values[1]) return `release-${stamp}-${values[0].toString(36)}${values[1].toString(36)}`;
+  } catch {
+    // Date + Math.random fallback keeps public launches varied on older browsers.
+  }
+  return `release-${stamp}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
 function releaseUrl(locationLike = globalThis.location) {
   const href = locationLike?.href || globalThis.location?.href || "http://localhost/";
   const url = new URL(href);
@@ -86,6 +98,7 @@ function releaseUrl(locationLike = globalThis.location) {
   url.searchParams.set("flowModifiers", "1");
   url.searchParams.set("flowAdaptive", "1");
   url.searchParams.set("flowIntegration", "1");
+  if (!url.searchParams.has("flowSeed")) url.searchParams.set("flowSeed", createReleaseSeed());
   return url;
 }
 
