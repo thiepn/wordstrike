@@ -1,0 +1,27 @@
+name: Flow Phase 7 UI certification
+on:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  flow-phase7:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    container:
+      image: mcr.microsoft.com/playwright/python:v1.57.0-noble
+      options: --ipc=host
+    env:
+      HOME: /root
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install browser test dependencies
+        run: python3 -m pip install -r tests/browser/requirements.txt
+      - name: Certify Flow Phase 7 dedicated UI
+        run: python3 tests/browser/flow_phase7_ui.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: flow-phase7-ui-evidence
+          path: browser-artifacts/flow-phase7/
+          retention-days: 7
