@@ -73,26 +73,24 @@ export function createDefaultFlowProgress() {
       focusPassages: 0,
     },
     milestones: {},
-    lastWeaknessProfile: Object.freeze([]),
+    lastWeaknessProfile: [],
     history: [],
     recordedSessionIds: [],
   };
 }
 
 function sanitizeWeaknesses(value) {
-  if (!Array.isArray(value)) return [];
-  return value.slice(0, 3).filter((item) => item && typeof item.key === "string").map((item) => ({
+  const source = Array.isArray(value) ? value : (Array.isArray(value?.weaknesses) ? value.weaknesses : []);
+  return source.slice(0, 5).filter((item) => item && typeof item.key === "string").map((item) => ({
     key: item.key,
     label: typeof item.label === "string" ? item.label : item.key,
     score: Math.max(0, finite(item.score)),
-    confidence: Math.max(0, Math.min(1, finite(item.confidence))),
-    source: typeof item.source === "string" ? item.source : "unknown",
-    sampleCount: Math.max(0, Math.round(finite(item.sampleCount))),
+    expected: item.expected == null ? null : String(item.expected),
+    actual: item.actual == null ? null : String(item.actual),
   }));
 }
 
 export function sanitizeFlowProgress(value) {
-  const defaults = createDefaultFlowProgress();
   const source = safeObject(value);
   const counts = safeObject(source.counts);
   const best = safeObject(source.best);
