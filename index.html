@@ -8,9 +8,9 @@
         // Diet Copilot and WORDSTRIKE share this Supabase project's Site URL.
         // WORDSTRIKE deliberately uses implicit OAuth, whose result is returned
         // in the URL fragment. Diet Copilot uses PKCE, whose result is returned
-        // in the query string. Therefore an unclaimed query-string auth result
-        // is deterministically a Diet web callback; only an explicit native
-        // marker is allowed to divert it to the Android callback.
+        // in the query string. Web callbacks go straight back to Diet so the
+        // canonical Diet client that created the verifier performs the exchange.
+        // Only an explicit native marker diverts the callback to Android.
         const TARGET_KEY = 'diet-copilot:oauth-target-v2';
         const FLOW_KEY = 'diet-copilot:oauth-flow-v2';
         const source = new URL(location.href);
@@ -29,7 +29,7 @@
         } catch {}
 
         const target = new URL(
-          targetKind === 'native' ? '/diet/native-auth-callback.html' : '/diet/web-auth-callback.html',
+          targetKind === 'native' ? '/diet/native-auth-callback.html' : '/diet/',
           source.origin
         );
 
