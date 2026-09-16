@@ -1,5 +1,6 @@
 const RELEASE_FLAG = "flowRelease";
 const FLOW_RELEASE_VERSION = 1;
+const FLOW_RELEASE_CACHE_NAME = "wordstrike-flow-release-v1";
 const FLOW_RELEASE_QUERY_KEYS = Object.freeze([
   "mode",
   RELEASE_FLAG,
@@ -226,21 +227,25 @@ function installReleaseExitCleanup() {
   queueMicrotask(inspect);
 }
 
-function currentPwaCacheName(keys) {
-  const candidates = keys.filter((key) => key.startsWith("wordstrike-pwa-"));
-  return candidates.at(-1) || "wordstrike-pwa-v2";
-}
-
 export async function warmFlowOfflineCache() {
   if (!globalThis.caches?.open || !globalThis.fetch) return { supported: false, cached: 0 };
   try {
-    const keys = await globalThis.caches.keys();
-    const cache = await globalThis.caches.open(currentPwaCacheName(keys));
+    // Flow owns a small cache outside the rotating `wordstrike-pwa-*` namespace.
+    // PWA activation intentionally deletes older app-shell caches, so coupling
+    // Flow warm-up to a guessed shell version could erase freshly cached assets
+    // during a first install or service-worker upgrade. The service worker's
+    // fetch fallback uses caches.match(request), which searches this cache too.
+    const cache = await globalThis.caches.open(FLOW_RELEASE_CACHE_NAME);
     const urls = FLOW_RELEASE_ASSETS.map((asset) => new URL(asset, globalThis.location.href).href);
     await cache.addAll(urls);
-    return { supported: true, cached: urls.length };
+    return { supported: true, cached: urls.length, cacheName: FLOW_RELEASE_CACHE_NAME };
   } catch (error) {
-    return { supported: true, cached: 0, error: String(error?.message || error) };
+    return {
+      supported: true,
+      cached: 0,
+      cacheName: FLOW_RELEASE_CACHE_NAME,
+      error: String(error?.message || error),
+    };
   }
 }
 
@@ -310,7 +315,8 @@ if (globalThis.window) {
     offlineReady: () => offlineReady,
     runtimeReady: () => runtimeReady,
     offlineAssetCount: FLOW_RELEASE_ASSETS.length,
+    offlineCacheName: FLOW_RELEASE_CACHE_NAME,
   });
 }
 
-export { FLOW_RELEASE_ASSETS, FLOW_RELEASE_QUERY_KEYS };
+export { FLOW_RELEASE_ASSETS, FLOW_RELEASE_CACHE_NAME, FLOW_RELEASE_QUERY_KEYS };
