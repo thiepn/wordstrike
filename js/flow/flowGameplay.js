@@ -69,15 +69,18 @@ export function calculateFlowScore(run) {
   const averageFlow = currentAverageFlow(run);
   const averageMomentum = currentAverageMomentum(run);
   const difficultyMultiplier = getDifficultyMultiplier(run.difficulty);
-  const accuracyMultiplier = Math.pow(clamp(accuracy, 0, 100) / 100, FLOW_GAMEPLAY_RULES.accuracyExponent);
-  const flowMultiplier = flowScoreMultiplier(averageFlow);
+  const accuracyMultiplier = Number(
+    Math.pow(clamp(accuracy, 0, 100) / 100, FLOW_GAMEPLAY_RULES.accuracyExponent).toFixed(4),
+  );
+  const flowMultiplier = Number(flowScoreMultiplier(averageFlow).toFixed(4));
+  const scoredAverageMomentum = Number(averageMomentum.toFixed(3));
   const characterBase = Math.max(0, Number(run.correctChars) || 0) * FLOW_GAMEPLAY_RULES.basePointsPerCorrectCharacter;
   const score = Math.round(
     characterBase
       * difficultyMultiplier
       * accuracyMultiplier
       * flowMultiplier
-      * averageMomentum,
+      * scoredAverageMomentum,
   );
   return Object.freeze({
     score,
@@ -85,10 +88,10 @@ export function calculateFlowScore(run) {
     correctCharacters: Math.max(0, Number(run.correctChars) || 0),
     difficultyMultiplier,
     accuracyPercent: Number(accuracy.toFixed(2)),
-    accuracyMultiplier: Number(accuracyMultiplier.toFixed(4)),
+    accuracyMultiplier,
     averageFlow: Number(averageFlow.toFixed(2)),
-    flowMultiplier: Number(flowMultiplier.toFixed(4)),
-    averageMomentum: Number(averageMomentum.toFixed(3)),
+    flowMultiplier,
+    averageMomentum: scoredAverageMomentum,
   });
 }
 
