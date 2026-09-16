@@ -589,7 +589,6 @@
     }
   ],
   "openGates": [
-    "remote-push-and-CI",
     "cross-platform-physical-devices",
     "assistive-technology",
     "Android-performance",
@@ -607,6 +606,19 @@
     "migrations": "PASS",
     "chromiumReport": "practice-completion-evidence/chromium-report.json",
     "physicalDeviceCertification": false,
-    "remoteCIExecuted": false
+    "remoteCIExecuted": true,
+    "remoteCore": "PASS",
+    "remoteBrowserEngines": [
+      "chromium",
+      "firefox",
+      "webkit"
+    ],
+    "remoteBrowserWidths": [
+      1280,
+      390
+    ],
+    "remoteSourceCommit": "b21eb7b42a16b9821e3308ec74469dc69bb7146a",
+    "remoteCompletionRun": 35148284276,
+    "remoteFullSuitePassed": 390
   }
 }
