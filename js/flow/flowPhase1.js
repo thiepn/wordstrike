@@ -5,13 +5,14 @@ import {
   getFlowTypingSnapshot,
   insertFlowText,
 } from "./flowEngine.js";
-import { getFlowPhase1Passage } from "./flowPassages.js";
+import { resolveFlowSelection } from "./flowSelection.js";
 import { FLOW_PHASES } from "./flowState.js";
 
 const root = () => document.querySelector("#app");
 const now = () => globalThis.performance?.now?.() ?? Date.now();
 const search = new URLSearchParams(globalThis.location?.search || "");
 const developerFlowRequested = search.get("dev") === "1" && search.get("mode") === "flow";
+const resolvedSelection = resolveFlowSelection(search);
 
 let active = false;
 let dismissed = false;
@@ -45,24 +46,45 @@ function restoreReturnSurface() {
   storedReturnNodes = [];
 }
 
+function renderMissingSelection() {
+  const app = root();
+  if (!app) return;
+  app.innerHTML = `
+    <section class="screen flow-phase1-screen flow-ready-screen" data-flow-view="missing">
+      <main class="flow-phase1-shell">
+        <button type="button" class="screen-back-button" data-flow-action="back">BACK</button>
+        <div class="flow-phase1-kicker">Flow content system · Phase 2</div>
+        <h1>NO PASSAGE</h1>
+        <p class="flow-phase1-lead">The requested passage id does not exist in the validated Flow catalog.</p>
+      </main>
+    </section>`;
+  app.querySelector('[data-flow-action="back"]')?.addEventListener("click", restoreReturnSurface);
+}
+
 function renderReady() {
   const app = root();
   if (!app) return;
-  const passage = getFlowPhase1Passage();
+  if (!resolvedSelection?.passage) {
+    renderMissingSelection();
+    return;
+  }
+  const { passage, source, category, difficulty, matchCount } = resolvedSelection;
   app.innerHTML = `
     <section class="screen flow-phase1-screen flow-ready-screen" data-flow-view="ready">
       <main class="flow-phase1-shell">
         <button type="button" class="screen-back-button" data-flow-action="back">BACK</button>
-        <div class="flow-phase1-kicker">Natural typing engine · Phase 1 developer route</div>
+        <div class="flow-phase1-kicker">Natural typing content engine · Phase 2 developer route</div>
         <h1>FLOW</h1>
-        <p class="flow-phase1-lead">Type complete text exactly as written. Spaces, capitals, punctuation, apostrophes, quotation marks, numbers and corrections are all part of the run.</p>
-        <div class="flow-phase1-brief" aria-label="Phase 1 session details">
-          <span><strong>${passage.text.length}</strong> characters</span>
-          <span><strong>1</strong> validation passage</span>
-          <span><strong>No score</strong> in Phase 1</span>
+        <p class="flow-phase1-lead">Type complete text exactly as written. Phase 2 now selects from a validated passage catalog by category and difficulty.</p>
+        <div class="flow-phase1-brief" aria-label="Phase 2 session details">
+          <span><strong>${passage.characters ?? passage.text.length}</strong> characters</span>
+          <span><strong>${escapeHtml(category)}</strong> category</span>
+          <span><strong>${escapeHtml(difficulty)}</strong> difficulty</span>
+          <span><strong>${matchCount}</strong> matching passage${matchCount === 1 ? "" : "s"}</span>
         </div>
+        <p class="flow-phase1-note" data-flow-passage-id>${escapeHtml(passage.id)}</p>
         <button type="button" class="ui-button ui-button--primary flow-phase1-start" data-flow-action="start">START FLOW</button>
-        <p class="flow-phase1-note">This phase validates the typing engine only. Public launch, Flow scoring, rhythm analysis and progression come later.</p>
+        <p class="flow-phase1-note">Source: ${escapeHtml(source)}. Public launch, scoring, rhythm analysis and progression remain intentionally out of scope.</p>
       </main>
     </section>`;
   app.querySelector('[data-flow-action="back"]')?.addEventListener("click", restoreReturnSurface);
@@ -85,7 +107,7 @@ function renderRun() {
       <main class="flow-run-shell">
         <header class="flow-run-header">
           <button type="button" class="screen-back-button" data-flow-action="back">BACK</button>
-          <div><span>FLOW</span><strong data-flow-progress>0 / ${run.passage.length}</strong></div>
+          <div><span>FLOW · ${escapeHtml(resolvedSelection?.passage?.id || "passage")}</span><strong data-flow-progress>0 / ${run.passage.length}</strong></div>
         </header>
         <div class="flow-run-copy">
           <p>Type the passage naturally. Backspace removes the most recent character.</p>
@@ -110,12 +132,14 @@ function renderRun() {
 }
 
 function startRun() {
-  const passage = getFlowPhase1Passage();
+  const passage = resolvedSelection?.passage;
+  if (!passage) return;
   run = createFlowTypingRun(passage.text, {
     category: passage.category,
     difficulty: passage.difficulty,
     sessionLength: "quick",
   });
+  run.passageId = passage.id;
   active = true;
   view = "run";
   renderRun();
@@ -151,9 +175,9 @@ function renderComplete() {
   app.innerHTML = `
     <section class="screen flow-phase1-screen flow-complete-screen" data-flow-view="complete">
       <main class="flow-phase1-shell flow-complete-shell">
-        <div class="flow-phase1-kicker">Engine validation complete</div>
+        <div class="flow-phase1-kicker">Content-engine validation complete</div>
         <h1>PASSAGE COMPLETE</h1>
-        <p class="flow-phase1-lead">The full passage reached the terminal state. Phase 1 records timing and correction telemetry but intentionally does not calculate a Flow score.</p>
+        <p class="flow-phase1-lead">The selected catalog passage reached the terminal state. Timing and correction telemetry remain separate from future Flow scoring.</p>
         <div class="flow-phase1-brief">
           <span><strong>${run.passage.length}</strong> characters</span>
           <span><strong>${run.correctedErrors}</strong> corrected errors</span>
@@ -239,6 +263,7 @@ if (developerFlowRequested) {
 if (globalThis.window) {
   window.wordstrikeFlowPhase1 = Object.freeze({
     getSnapshot: () => getFlowTypingSnapshot(run),
+    getSelection: () => resolvedSelection,
     isActive: () => active,
     developerRouteEnabled: developerFlowRequested,
   });
