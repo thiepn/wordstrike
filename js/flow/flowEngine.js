@@ -7,6 +7,7 @@ import {
   initializeFlowGameplay,
 } from "./flowGameplay.js";
 import { analyzeFlowCadence } from "./flowCadence.js";
+import { hasFlowModifier } from "./flowModifiers.js";
 
 const WORD_CHAR = /[A-Za-z0-9'’]/;
 const SENTENCE_END = /[.!?]/;
@@ -157,6 +158,15 @@ export function insertFlowText(run, value, at = currentNow()) {
 
 export function backspaceFlowText(run, at = currentNow()) {
   if (!run || run.phase === FLOW_PHASES.COMPLETE || run.currentIndex <= 0) return false;
+  if (hasFlowModifier(run, "no-backspace")) {
+    run.blockedBackspaces = (run.blockedBackspaces || 0) + 1;
+    run.rawKeystrokes.push({
+      type: "blocked-backspace",
+      index: run.currentIndex - 1,
+      at,
+    });
+    return false;
+  }
   const removed = run.typedCharacters.pop();
   run.currentIndex -= 1;
   if (removed.correct) run.correctChars = Math.max(0, run.correctChars - 1);
@@ -208,6 +218,8 @@ export function getFlowTypingSnapshot(run) {
     category: run.category,
     difficulty: run.difficulty,
     sessionLength: run.sessionLength,
+    modifiers: [...(run.modifiers || [])],
+    blockedBackspaces: run.blockedBackspaces || 0,
     passage: run.passage,
     currentIndex: run.currentIndex,
     passageLength: run.passage.length,
