@@ -30,8 +30,13 @@ function mean(values) {
   return values.reduce((sum, value) => sum + value, 0) / values.length;
 }
 
+function cadenceBoundarySet(run) {
+  return new Set(run?.cadenceExcludedAfterIndexes || []);
+}
+
 function buildUninterruptedIntervals(run) {
   const intervals = [];
+  const excludedAfterIndexes = cadenceBoundarySet(run);
   let previousInsert = null;
   let interrupted = false;
   for (const event of run?.rawKeystrokes || []) {
@@ -40,7 +45,7 @@ function buildUninterruptedIntervals(run) {
       continue;
     }
     if (event.type !== "insert") continue;
-    if (previousInsert && !interrupted) {
+    if (previousInsert && !interrupted && !excludedAfterIndexes.has(previousInsert.index)) {
       const ms = Number(event.at) - Number(previousInsert.at);
       if (Number.isFinite(ms) && ms > 0 && ms < 60000) {
         intervals.push(Object.freeze({
@@ -126,6 +131,16 @@ function classifyCadence(intervals) {
   };
 }
 
+function deliberatePauseMs(run) {
+  return (run?.pauses || []).reduce((total, pause) => {
+    if (pause?.reason !== "chapter-transition") return total;
+    const startAt = Number(pause.startAt);
+    const endAt = Number(pause.endAt);
+    if (!Number.isFinite(startAt) || !Number.isFinite(endAt) || endAt <= startAt) return total;
+    return total + (endAt - startAt);
+  }, 0);
+}
+
 function typingDurationMs(run) {
   const start = Number(run?.startedAt);
   if (!Number.isFinite(start)) return 0;
@@ -134,7 +149,7 @@ function typingDurationMs(run) {
     ? Number(run.completedAt)
     : Number(raw.at(-1)?.at);
   if (!Number.isFinite(finalAt) || finalAt <= start) return 0;
-  return finalAt - start;
+  return Math.max(0, (finalAt - start) - deliberatePauseMs(run));
 }
 
 function getWpm(run) {
@@ -155,6 +170,7 @@ function finalEntry(run, index) {
 }
 
 function latency(run, fromIndex, toIndex) {
+  if (cadenceBoundarySet(run).has(fromIndex)) return null;
   const from = finalEntry(run, fromIndex);
   const to = finalEntry(run, toIndex);
   if (!from || !to) return null;
