@@ -102,7 +102,7 @@ assert.match(loader, /await waitForModeSelect\(\)/);
 assert.match(loader, /temporary\.searchParams\.set\("dev", "1"\)/);
 assert.match(loader, /removeTemporaryDeveloperFlag\(\)/);
 assert.match(loader, /installReleaseExitCleanup\(\)/);
-assert.match(loader, /button\[data-mode-id=\\"flow\\"\]/);
+assert.match(loader, /button\[data-mode-id=["']flow["']\]/);
 assert.match(loader, /cache\.addAll\(urls\)/);
 
 console.log("Flow Phase 13 release contracts passed: public registry, production route normalization, clean exit, compatibility loader ordering, and offline asset pack.");
