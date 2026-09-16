@@ -1,0 +1,27 @@
+name: Flow Phase 1 certification
+on:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  flow-phase1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    container:
+      image: mcr.microsoft.com/playwright/python:v1.57.0-noble
+      options: --ipc=host
+    env:
+      HOME: /root
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install browser test dependencies
+        run: python3 -m pip install -r tests/browser/requirements.txt
+      - name: Certify Flow Phase 1 browser engine
+        run: python3 tests/browser/flow_phase1.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: flow-phase1-evidence
+          path: browser-artifacts/flow-phase1/
+          retention-days: 7
