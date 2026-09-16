@@ -1,0 +1,66 @@
+name: GC3 Content Construction
+on:
+  push:
+    branches: [gc3-content-scratch]
+permissions:
+  contents: write
+jobs:
+  build-validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Generate governed original sources
+        run: |
+          node scripts/generatePracticeGc3OriginalSources.mjs
+          node scripts/buildPracticeGc3SourceRegistry.mjs
+      - name: Regenerate canonical PL6-PL10 artifacts
+        run: |
+          npm run build:practice-corpus
+          npm run build:practice-indexes
+          npm run build:practice-typability
+      - name: Regenerate GC3 release-critical artifacts
+        run: |
+          node scripts/buildPracticeRealTextPool.mjs
+          node scripts/buildPracticeBenchmarkSuite.mjs
+          node scripts/buildPracticeTransferPool.mjs
+          node scripts/buildPracticeAssessmentDiagnostics.mjs
+      - name: Focused canonical validation
+        run: |
+          npm run validate:practice-corpus
+          npm run validate:practice-indexes
+          npm run validate:practice-typability
+          node scripts/buildPracticeRealTextPool.mjs --check
+          node scripts/buildPracticeBenchmarkSuite.mjs --validate
+          node scripts/buildPracticeTransferPool.mjs --validate
+          node scripts/buildPracticeAssessmentDiagnostics.mjs --validate
+          node scripts/validatePracticeReleaseContent.mjs
+      - name: Deterministic regeneration check
+        run: |
+          git diff > /tmp/first.diff
+          node scripts/generatePracticeGc3OriginalSources.mjs
+          node scripts/buildPracticeGc3SourceRegistry.mjs
+          npm run build:practice-corpus
+          npm run build:practice-indexes
+          npm run build:practice-typability
+          node scripts/buildPracticeRealTextPool.mjs
+          node scripts/buildPracticeBenchmarkSuite.mjs
+          node scripts/buildPracticeTransferPool.mjs
+          node scripts/buildPracticeAssessmentDiagnostics.mjs
+          git diff > /tmp/second.diff
+          cmp /tmp/first.diff /tmp/second.diff
+      - name: Commit validated generated content
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add data/practice
+          if git diff --cached --quiet; then
+            echo 'Generated content already current.'
+          else
+            git commit -m 'chore(practice): regenerate GC3 release content'
+            git push
+          fi
