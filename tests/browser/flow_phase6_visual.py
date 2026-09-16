@@ -272,9 +272,10 @@ def certify_public_gate(browser, browser_name, base, evidence):
     page.locator('[data-action="modes"]').click()
     flow = page.locator('[data-mode-id="flow"]')
     expect(flow).to_be_visible()
-    expect(flow).to_have_attribute('aria-disabled', 'true')
+    assert flow.get_attribute('aria-disabled') is None
+    assert flow.evaluate('el => el.tagName') == 'BUTTON'
     assert page.locator('[data-flow-visual="quiet-signal"]').count() == 0
-    evidence.append({"browser": browser_name, "case": "public Flow remains gated after visual redesign"})
+    evidence.append({"browser": browser_name, "case": "released public Flow is available without auto-launching Phase 6 visuals"})
     context.close()
 
 
