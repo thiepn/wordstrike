@@ -19,8 +19,7 @@ class QuietHandler(SimpleHTTPRequestHandler):
         # Exercise V7 explicitly in this fixture without changing the shipped entry.
         if self.path.split('?', 1)[0] in ('/', '/index.html'):
             source = (ROOT / 'index.html').read_text()
-            source = source.replace('js/speedTestResultsV6.js?v=20260911a',
-                                    'js/speedTestResultsV7.js?v=20260911a')
+            source = source.replace('</body>', '<script type="module" src="js/speedTestResultsV7.js?v=20260911a"></script></body>')
             body = source.encode('utf-8')
             self.send_response(200)
             self.send_header('Content-Type', 'text/html; charset=utf-8')
