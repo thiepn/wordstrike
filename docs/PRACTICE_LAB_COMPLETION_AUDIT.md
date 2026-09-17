@@ -110,3 +110,16 @@ Required remediation before public activation:
 4. Update the public mode gate and metadata only after final acceptance, run the public-entry regression checks, then deploy and verify the live release.
 
 PR127 remains the latest deployed gated implementation: merge `f9d4aaa1b7124674c3680e026fda2e9610b0bc5f`; 402 test files and all 33 PR workflows passed; Pages deployment 35193456125 succeeded. Those technical results are retained and are not represented as editorial or physical-device certification.
+
+
+## Independent editorial remediation — 2026-09-17
+
+The editorial failure above has been remediated. All 58 long passages were replaced with independently composed narratives, including all 16 diagnostic variants. The generator now reads curated source prose and cannot recreate the old noun-substitution templates. The earlier failed report is retained as historical evidence.
+
+The rebuilt corpus has zero exact duplicates, zero hard near-duplicates and zero moderate cross-partition warnings. A new mandatory release check reconstructs diagnostic families and rejects repeated sentences of at least 60 characters across different families, both within and across all five partitions. All 87 families pass. The check detects exact sentence reuse; it is not a claim that automated checks alone establish literary quality.
+
+Six benchmark forms, sixteen transfer units, sixteen Real Text units and eight diagnostic sets with two matched variants each are ready under the unchanged matching and capacity policies. The model remains fitted only on training data; research holdout is not scored. All corpus indexes, reference data and dependent experiment forms are rebuilt in dependency order by `scripts/rebuildPracticeEditorialRelease.mjs`.
+
+Benchmark suite and transfer pool revisions advance to 2 so existing exposure records remain in their original lanes. Prior history is retained. Assessment comparisons reject different content revisions instead of presenting aggregate differences across the replacement as directly comparable. Content hashes and checksum bindings identify the new texts; storage schema versions are unchanged. Service-worker cache v6 distributes the new content and comparison logic.
+
+Evidence: [editorial-remediation.json](practice-completion-evidence/editorial-remediation.json). Publication remains a gated implementation release. Actual physical-browser/device/PWA, screen-reader and long-session Android acceptance are still required before enabling the public mode; automated engine or viewport tests do not close those requirements.
