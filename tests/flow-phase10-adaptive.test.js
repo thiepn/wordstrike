@@ -48,8 +48,9 @@ assert.deepEqual(
   profile.weaknesses.map(({ key, score, expected = null, actual = null }) => [key, score, expected, actual]),
 );
 
-assert.deepEqual(createAdaptiveFocusSchedule(6, parsed).map(({ slot }) => slot), [3]);
-assert.deepEqual(createAdaptiveFocusSchedule(12, parsed).map(({ slot }) => slot), [4, 8]);
+assert.deepEqual(createAdaptiveFocusSchedule(1, parsed).map(({ slot }) => slot), [0]);
+assert.deepEqual(createAdaptiveFocusSchedule(3, parsed).map(({ slot }) => slot), [1]);
+assert.deepEqual(createAdaptiveFocusSchedule(5, parsed).map(({ slot }) => slot), [2]);
 assert.deepEqual(createAdaptiveFocusSchedule(24, parsed).map(({ slot }) => slot), [4, 8, 12, 16, 20]);
 
 const standard = createFlowRunPlan({
@@ -58,12 +59,12 @@ const standard = createFlowRunPlan({
   seed: "phase10-standard",
   adaptiveProfile: parsed,
 });
-assert.equal(standard.passageCount, 12);
+assert.equal(standard.passageCount, 3);
 assert.equal(standard.adaptive.enabled, true);
-assert.equal(standard.adaptive.targetedPassageCount, 2);
-assert.equal(standard.adaptive.normalPassageCount, 10);
-assert.equal(standard.segments.filter(({ adaptiveFocus }) => adaptiveFocus).length, 2);
-assert.equal(standard.adaptive.targetRatio, 0.167);
+assert.equal(standard.adaptive.targetedPassageCount, 1);
+assert.equal(standard.adaptive.normalPassageCount, 2);
+assert.equal(standard.segments.filter(({ adaptiveFocus }) => adaptiveFocus).length, 1);
+assert.equal(standard.adaptive.targetRatio, 0.333);
 
 const long = createFlowRunPlan({
   sessionLength: "long",
@@ -71,10 +72,10 @@ const long = createFlowRunPlan({
   seed: "phase10-long",
   adaptiveProfile: parsed,
 });
-assert.equal(long.passageCount, 24);
-assert.equal(long.adaptive.targetedPassageCount, 5);
-assert.equal(long.adaptive.normalPassageCount, 19);
-assert.equal(long.adaptive.targetRatio, 0.208);
+assert.equal(long.passageCount, 5);
+assert.equal(long.adaptive.targetedPassageCount, 1);
+assert.equal(long.adaptive.normalPassageCount, 4);
+assert.equal(long.adaptive.targetRatio, 0.2);
 
 const sprint = createFlowRunPlan({
   sessionLength: "quick",
@@ -83,7 +84,7 @@ const sprint = createFlowRunPlan({
   modifiers: ["sprint"],
   adaptiveProfile: parsed,
 });
-assert.equal(sprint.passageCount, 3);
+assert.equal(sprint.passageCount, 1);
 assert.equal(sprint.adaptive.targetedPassageCount, 1);
 
 const apostrophe = parsed.weaknesses.find(({ key }) => key === "apostrophes");
@@ -98,4 +99,4 @@ const lowConfidence = buildFlowWeaknessProfile({
 });
 assert.equal(lowConfidence.weaknesses.length, 0, "one-off noise must not create an adaptive weakness");
 
-console.log("Flow Phase 10 adaptive contracts passed: confidence gating, serialization, 80/20 focus scheduling, planner targeting, Sprint compatibility, and noise resistance.");
+console.log("Flow Phase 10 adaptive contracts passed: confidence gating, serialization, shorter-session focus scheduling, planner targeting, Sprint compatibility, and noise resistance.");

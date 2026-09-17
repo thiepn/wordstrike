@@ -38,11 +38,10 @@ def context_for(browser, base, width=1440, height=900, reduced_motion="no-prefer
 
 
 def route(base):
-    return base + "?dev=1&mode=flow&flowRun=1&flowLength=quick&flowCategory=mixed&flowDifficulty=advanced&flowSeed=phase6-visual"
+    return base + "?dev=1&mode=flow&flowRun=1&flowLength=standard&flowCategory=mixed&flowDifficulty=advanced&flowSeed=phase6-visual"
 
 
 def settle_visual(page):
-    # Phase 6 reveal motion lasts 520 ms; screenshots should represent the settled UI.
     page.wait_for_timeout(650)
 
 
@@ -50,7 +49,10 @@ def open_ready(page, base):
     page.goto(route(base))
     expect(page.locator('[data-flow-view="ready"]')).to_be_visible(timeout=10000)
     expect(page.locator('.flow-phase1-screen')).to_have_attribute('data-flow-visual', 'quiet-signal')
-    return page.evaluate('window.wordstrikeFlowPhase1.getRunPlan()')
+    plan = page.evaluate('window.wordstrikeFlowPhase1.getRunPlan()')
+    assert plan['chapterCount'] == 3, plan
+    assert plan['passageCount'] == 3, plan
+    return plan
 
 
 def style_snapshot(page):
@@ -71,9 +73,9 @@ def style_snapshot(page):
     }""")
 
 
-def finish_quick_run_from_second_chapter(page, plan):
+def finish_standard_run_from_second_chapter(page, plan):
     page.locator('[data-flow-action="continue-chapter"]').click()
-    for index in range(2, len(plan['segments'])):
+    for index in range(1, len(plan['segments'])):
         segment = plan['segments'][index]
         expect(page.locator('[data-flow-view="run"]')).to_be_visible(timeout=10000)
         page.keyboard.type(segment['text'])
@@ -133,22 +135,16 @@ def certify_visual_language(browser, browser_name, base, evidence):
     assert run_geometry['hudBorderRadius'] == '0px', run_geometry
     assert run_geometry['overflow'] <= 1, run_geometry
 
-    # Build enough Flow to exercise the state-aware signal hook.
     first = plan['segments'][0]
-    page.keyboard.type(first['text'][:90])
+    probe = min(90, max(1, len(first['text']) - 1))
+    page.keyboard.type(first['text'][:probe])
     meter_band = page.locator('[data-flow-meter]').get_attribute('data-flow-band')
     assert meter_band in ('mid', 'high'), meter_band
 
     if browser_name == 'chromium':
         page.screenshot(path=str(ARTIFACTS / 'chromium-run.png'), full_page=True)
 
-    # Finish first chapter and certify the typographic chapter transition.
-    remaining_first = first['text'][90:]
-    if remaining_first:
-        page.keyboard.type(remaining_first)
-    second = plan['segments'][1]
-    expect(page.locator('[data-flow-view="run"]')).to_be_visible(timeout=10000)
-    page.keyboard.type(second['text'])
+    page.keyboard.type(first['text'][probe:])
     expect(page.locator('[data-flow-view="chapter"]')).to_be_visible(timeout=10000)
     expect(page.locator('.flow-chapter-index')).to_have_text('02')
     settle_visual(page)
@@ -168,7 +164,7 @@ def certify_visual_language(browser, browser_name, base, evidence):
 
     if browser_name == 'chromium':
         page.screenshot(path=str(ARTIFACTS / 'chromium-chapter.png'), full_page=True)
-        finish_quick_run_from_second_chapter(page, plan)
+        finish_standard_run_from_second_chapter(page, plan)
         expect(page.locator('[data-flow-view="complete"]')).to_be_visible(timeout=10000)
         settle_visual(page)
         result_style = page.evaluate("""() => {
@@ -197,7 +193,7 @@ def certify_visual_language(browser, browser_name, base, evidence):
     assert not errors, errors
     evidence.append({
         "browser": browser_name,
-        "case": "Quiet Signal ready/run/chapter/results visual hierarchy",
+        "case": "Quiet Signal ready/run/substantial-chapter/results visual hierarchy",
         "ready": ready_style,
         "run": run_geometry,
         "chapter": chapter_style,
@@ -233,9 +229,7 @@ def certify_mobile(browser, browser_name, base, evidence):
     assert mobile_run['passageWidth'] <= 362, mobile_run
     assert mobile_run['passageSize'] >= 18, mobile_run
 
-    for segment in plan['segments'][:2]:
-        expect(page.locator('[data-flow-view="run"]')).to_be_visible(timeout=10000)
-        page.keyboard.type(segment['text'])
+    page.keyboard.type(plan['segments'][0]['text'])
     expect(page.locator('[data-flow-view="chapter"]')).to_be_visible(timeout=10000)
     settle_visual(page)
     chapter = page.evaluate("""() => ({

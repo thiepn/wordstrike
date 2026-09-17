@@ -1,5 +1,5 @@
 const CACHE_PREFIX = "wordstrike-pwa-";
-const CACHE_NAME = CACHE_PREFIX + "v7";
+const CACHE_NAME = CACHE_PREFIX + "v8";
 const APP_SHELL = [
   "./assets/branding/wordstrike-logo.webp",
   "./data/practice/read-ahead/en-v1/WS-READAHEAD-EN-1.forms.json",
@@ -15,6 +15,7 @@ const APP_SHELL = [
   "./js/flow/flowGameplay.js",
   "./js/flow/flowIntegrationBootstrap.js",
   "./js/flow/flowIntegrationPhase11.js",
+  "./js/flow/flowLongformContent.js",
   "./js/flow/flowMigrationPresentation.js",
   "./js/flow/flowMigrationPresentation.js?v=20260915a",
   "./js/flow/flowModifiers.js",
@@ -24,12 +25,13 @@ const APP_SHELL = [
   "./js/flow/flowProgression.js",
   "./js/flow/flowRunPlan.js",
   "./js/flow/flowRuntimeLoader.js",
-  "./js/flow/flowRuntimeLoader.js?v=20260916a",
+  "./js/flow/flowRuntimeLoader.js?v=20260917a",
   "./js/flow/flowSelection.js",
   "./js/flow/flowShell.js",
   "./js/flow/flowState.js",
   "./js/flow/flowUiPhase7.js",
   "./js/flow/flowUiPhase7KeyboardGuard.js",
+  "./js/flow/flowUiPhase7KeyboardGuard.js?v=20260917a",
   "./js/flow/flowUiPhase7Polish.js",
   "./js/flow/flowUxPhase8.js",
   "./js/flow/flowVisualPhase6.js",

@@ -43,10 +43,10 @@ def open_ready(page, base):
     expect(page.locator('[data-flow-view="ready"]')).to_be_visible(timeout=10000)
     plan = page.evaluate('window.wordstrikeFlowPhase1.getRunPlan()')
     assert plan['sessionLength'] == 'quick', plan
-    assert plan['targetMinutes'] == 3, plan
-    assert plan['chapterCount'] == 3, plan
-    assert plan['passageCount'] == 6, plan
-    assert [chapter['title'] for chapter in plan['chapters']] == ['Settle In', 'Precision', 'Final Flow'], plan
+    assert plan['targetMinutes'] == 2, plan
+    assert plan['chapterCount'] == 1, plan
+    assert plan['passageCount'] == 1, plan
+    assert [chapter['title'] for chapter in plan['chapters']] == ['Settle In'], plan
     return plan
 
 
@@ -58,7 +58,6 @@ def certify_run(browser, browser_name, base, evidence):
     plan = open_ready(page, base)
     page.locator('[data-flow-action="start"]').click()
 
-    chapter_transitions = 0
     for index, segment in enumerate(plan['segments']):
         expect(page.locator('[data-flow-view="run"]')).to_be_visible(timeout=10000)
         active_index = page.evaluate('window.wordstrikeFlowPhase1.getActiveSegmentIndex()')
@@ -69,44 +68,21 @@ def certify_run(browser, browser_name, base, evidence):
         expect(page.locator('[data-flow-chapter]')).to_contain_text(chapter['title'])
         page.keyboard.type(segment['text'])
 
-        if index == len(plan['segments']) - 1:
-            break
-        next_segment = plan['segments'][index + 1]
-        if next_segment['chapterIndex'] != segment['chapterIndex']:
-            chapter_transitions += 1
-            expect(page.locator('[data-flow-view="chapter"]')).to_be_visible(timeout=10000)
-            next_chapter = plan['chapters'][next_segment['chapterIndex']]
-            expect(page.locator('.flow-chapter-transition h1')).to_have_text(next_chapter['title'])
-            page.wait_for_timeout(650)
-            page.locator('[data-flow-action="continue-chapter"]').click()
-        else:
-            expect(page.locator('[data-flow-view="run"]')).to_be_visible(timeout=10000)
-
     expect(page.locator('[data-flow-view="complete"]')).to_be_visible(timeout=10000)
     snapshot = page.evaluate('window.wordstrikeFlowPhase1.getSnapshot()')
     assert snapshot['phase'] == 'complete', snapshot
     assert snapshot['currentIndex'] == len(plan['fullText']), snapshot
     assert snapshot['gameplay']['score'] > 0, snapshot
-
-    # Browser scheduling can introduce unrelated stalls during synthetic ultra-fast
-    # typing. The contract is that passage/chapter boundaries themselves never
-    # become cadence pauses.
-    boundary_indexes = set(plan['cadenceExcludedAfterIndexes'])
-    for pause in snapshot['cadence']['pauseEvents']:
-        assert pause['fromIndex'] not in boundary_indexes, (pause, boundary_indexes)
-
     assert snapshot['cadence']['typingDurationMs'] > 0, snapshot['cadence']
-    assert chapter_transitions == 2, chapter_transitions
     assert not errors, errors
 
     if browser_name == 'chromium':
         page.screenshot(path=str(ARTIFACTS / 'chromium-complete.png'), full_page=True)
     evidence.append({
         "browser": browser_name,
-        "case": "quick run completes across chapters",
+        "case": "short quick run completes without forced chapter interruptions",
         "chapters": plan['chapterCount'],
         "passages": plan['passageCount'],
-        "transitions": chapter_transitions,
         "schedulerPauses": snapshot['cadence']['pauseCount'],
         "score": snapshot['gameplay']['score'],
     })
@@ -140,17 +116,17 @@ def certify_mobile(browser, browser_name, base, evidence):
     })""")
     assert geometry['overflow'] <= 1, geometry
     page.locator('[data-flow-action="start"]').click()
-    for segment in plan['segments'][:2]:
-        expect(page.locator('[data-flow-view="run"]')).to_be_visible(timeout=10000)
-        page.keyboard.type(segment['text'])
-    expect(page.locator('[data-flow-view="chapter"]')).to_be_visible(timeout=10000)
-    chapter_geometry = page.evaluate("""() => ({
+    expect(page.locator('[data-flow-view="run"]')).to_be_visible(timeout=10000)
+    run_geometry = page.evaluate("""() => ({
       overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
-      width: document.querySelector('.flow-chapter-transition').getBoundingClientRect().width
+      width: document.querySelector('.flow-run-shell').getBoundingClientRect().width,
+      viewport: document.documentElement.clientWidth,
     })""")
-    assert chapter_geometry['overflow'] <= 1, chapter_geometry
-    page.screenshot(path=str(ARTIFACTS / 'chromium-mobile-chapter.png'), full_page=True)
-    evidence.append({"browser": browser_name, "case": "390px ready and chapter transition", **chapter_geometry})
+    assert run_geometry['overflow'] <= 1, run_geometry
+    assert run_geometry['width'] <= run_geometry['viewport'] + 1, run_geometry
+    assert plan['passageCount'] == 1, plan
+    page.screenshot(path=str(ARTIFACTS / 'chromium-mobile-run.png'), full_page=True)
+    evidence.append({"browser": browser_name, "case": "390px ready and shortened run", **run_geometry})
     context.close()
 
 

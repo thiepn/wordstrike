@@ -92,13 +92,15 @@ def certify_exact_and_missing(browser, browser_name, base, evidence):
     assert exact['passage']['id'] == 'numbers-symbols-expert-01', exact
     assert exact['passage']['category'] == 'numbers-symbols', exact
     assert exact['passage']['difficulty'] == 'expert', exact
-    assert '€' in exact['passage']['text'] and '%' in exact['passage']['text'] and '@' in exact['passage']['text'], exact
+    text = exact['passage']['text']
+    assert 'EUR' in text and '€' not in text and '%' in text and '@' in text, exact
+    assert all(32 <= ord(char) <= 126 for char in text), exact
 
     page.goto(base + "?dev=1&mode=flow&flowPassage=does-not-exist")
     expect(page.locator('[data-flow-view="missing"]')).to_be_visible(timeout=10000)
     expect(page.locator('h1')).to_have_text('NO PASSAGE')
 
-    evidence.append({"browser": browser_name, "case": "exact id and invalid-id failure state"})
+    evidence.append({"browser": browser_name, "case": "exact ASCII-safe id and invalid-id failure state"})
     context.close()
 
 

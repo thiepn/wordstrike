@@ -6,14 +6,21 @@ export const FLOW_CONTENT_CATEGORIES = Object.freeze(
 
 const ID_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const TAG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
-const TYPOGRAPHIC_CHARACTERS = new Set(["€", "£", "–", "—", "“", "”", "‘", "’", "…"]);
-const ALLOWED_ASCII_PUNCTUATION = new Set([...
-  " .,!?;:'\"()[]{}-/%$+&=@#_*<>",
-]);
+const STANDARD_KEYBOARD_CHARACTER = /^[\x20-\x7E]$/;
 
 function isSupportedCharacter(character) {
-  if (/^[A-Za-z0-9]$/.test(character)) return true;
-  return ALLOWED_ASCII_PUNCTUATION.has(character) || TYPOGRAPHIC_CHARACTERS.has(character);
+  return STANDARD_KEYBOARD_CHARACTER.test(character);
+}
+
+export function normalizeFlowKeyboardText(value) {
+  return String(value ?? "")
+    .normalize("NFC")
+    .replaceAll("€", "EUR ")
+    .replaceAll("£", "GBP ")
+    .replace(/[–—]/g, "-")
+    .replace(/[“”]/g, '"')
+    .replace(/[‘’]/g, "'")
+    .replaceAll("…", "...");
 }
 
 function count(text, character) {
@@ -32,17 +39,17 @@ function assertBalanced(text, left, right, label) {
 
 export function analyzeFlowText(text) {
   const normalized = String(text ?? "").normalize("NFC");
-  const words = normalized.match(/[A-Za-z0-9]+(?:['’][A-Za-z0-9]+)*/g) || [];
+  const words = normalized.match(/[A-Za-z0-9]+(?:'[A-Za-z0-9]+)*/g) || [];
   const punctuation = {
     commas: count(normalized, ","),
-    apostrophes: count(normalized, "'") + count(normalized, "’"),
-    quotes: count(normalized, '"') + count(normalized, "“") + count(normalized, "”"),
+    apostrophes: count(normalized, "'"),
+    quotes: count(normalized, '"'),
     semicolons: count(normalized, ";"),
     colons: count(normalized, ":"),
     parentheses: count(normalized, "(") + count(normalized, ")"),
-    dashes: count(normalized, "-") + count(normalized, "–") + count(normalized, "—"),
+    dashes: count(normalized, "-"),
     numbers: (normalized.match(/\d/g) || []).length,
-    symbols: (normalized.match(/[%€£$+&=@#_*\/<>"]/g) || []).length,
+    symbols: (normalized.match(/[%$+&=@#_*\\\/<>"|`~^]/g) || []).length,
   };
   return Object.freeze({
     characters: [...normalized].length,
@@ -73,10 +80,6 @@ export function validateFlowPassage(candidate) {
   }
 
   if (count(text, '"') % 2 !== 0) throw new TypeError("Flow passage has malformed straight quotation marks");
-  if (count(text, "“") !== count(text, "”")) throw new TypeError("Flow passage has malformed curly quotation marks");
-  if (count(text, "‘") !== count(text, "’") && count(text, "‘") > 0) {
-    throw new TypeError("Flow passage has malformed curly single quotation marks");
-  }
   assertBalanced(text, "(", ")", "parentheses");
   assertBalanced(text, "[", "]", "brackets");
   assertBalanced(text, "{", "}", "braces");
@@ -99,7 +102,10 @@ export function validateFlowPassage(candidate) {
 
 export function createFlowCatalog(candidates) {
   if (!Array.isArray(candidates)) throw new TypeError("Flow catalog must be an array");
-  const passages = candidates.map(validateFlowPassage);
+  const passages = candidates.map((candidate) => validateFlowPassage({
+    ...candidate,
+    text: normalizeFlowKeyboardText(candidate?.text),
+  }));
   const ids = new Set();
   for (const passage of passages) {
     if (ids.has(passage.id)) throw new TypeError(`Duplicate Flow passage id: ${passage.id}`);

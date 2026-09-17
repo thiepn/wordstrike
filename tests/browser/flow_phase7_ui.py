@@ -73,6 +73,9 @@ def certify_setup_and_run(browser, browser_name, base, evidence):
     assert initial['sessionLength'] == 'standard', initial
     assert initial['category'] == 'mixed', initial
     assert initial['difficulty'] == 'natural', initial
+    assert initial['coherent'] is True, initial
+    assert initial['chapterCount'] == 1, initial
+    assert initial['passageCount'] == 3, initial
 
     assert page.locator('[data-flow-group="sessionLength"] [data-flow-choice-group]').count() == 3
     assert page.locator('[data-flow-group="category"] [data-flow-choice-group]').count() == 8
@@ -80,6 +83,8 @@ def certify_setup_and_run(browser, browser_name, base, evidence):
     assert_single_selected(page, 'sessionLength', 'standard')
     assert_single_selected(page, 'category', 'mixed')
     assert_single_selected(page, 'difficulty', 'natural')
+    expect(page.locator('[data-flow-setup-summary]')).to_have_text('~5 min · 3 connected sections')
+    assert page.locator('.flow-setup-itinerary .flow-itinerary-step').count() == 3
 
     # Focused setup controls own Enter instead of triggering Flow's legacy
     # READY-screen global Enter shortcut.
@@ -91,29 +96,18 @@ def certify_setup_and_run(browser, browser_name, base, evidence):
     page.keyboard.press('ArrowRight')
     assert_single_selected(page, 'category', 'everyday')
 
-    # Stage a materially different run without reloading yet.
+    # Stage a materially different short run without reloading yet.
     selected(page, 'sessionLength', 'quick').click()
     selected(page, 'category', 'dialogue').click()
     selected(page, 'difficulty', 'advanced').click()
-    expect(page.locator('[data-flow-setup-summary]')).to_contain_text('~3 min')
+    expect(page.locator('[data-flow-setup-summary]')).to_have_text('~2 min · 1 long section')
     expect(page.locator('[data-flow-setup-focus]')).to_have_text('Dialogue · Advanced')
     expect(page.locator('[data-flow-action="start"]')).to_have_text('START UPDATED RUN')
-    assert page.locator('.flow-setup-itinerary .flow-itinerary-step').count() == 3
+    assert page.locator('.flow-setup-itinerary .flow-itinerary-step').count() == 1
     assert_single_selected(page, 'sessionLength', 'quick')
     assert_single_selected(page, 'category', 'dialogue')
     assert_single_selected(page, 'difficulty', 'advanced')
     expect(selected(page, 'difficulty', 'natural')).to_have_attribute('aria-pressed', 'false')
-
-    # The inherited Phase 5 summary must reflect the same staged draft rather
-    # than exposing the previously resolved Standard / Mixed / Natural plan.
-    draft_summary = page.locator('[data-flow-view="ready"] .flow-phase1-brief')
-    expect(draft_summary).to_have_attribute('aria-label', 'Selected Flow run setup')
-    summary_text = ' '.join(draft_summary.inner_text().split())
-    for expected_text in ('~3 min', '3 chapters', '6 passages', 'Dialogue', 'Advanced'):
-        assert expected_text in summary_text, (expected_text, summary_text)
-    assert 'Standard run' not in summary_text, summary_text
-    assert page.locator('[data-flow-view="ready"] .flow-phase1-note').count() == 2
-    assert page.locator('[data-flow-view="ready"] .flow-phase1-note:visible').count() == 0
 
     draft = page.evaluate('window.wordstrikeFlowUiPhase7.getDraft()')
     assert draft['sessionLength'] == 'quick', draft
@@ -123,52 +117,51 @@ def certify_setup_and_run(browser, browser_name, base, evidence):
     if browser_name == 'chromium':
         page.screenshot(path=str(ARTIFACTS / 'chromium-setup.png'), full_page=True)
 
-    # The setup handoff performs one canonical reload, then auto-starts the
-    # re-planned run through the existing Flow controller.
     page.locator('[data-flow-action="start"]').click()
     expect(page.locator('[data-flow-view="run"]')).to_be_visible(timeout=15000)
     plan = page.evaluate('window.wordstrikeFlowPhase1.getRunPlan()')
     assert plan['sessionLength'] == 'quick', plan
     assert plan['category'] == 'dialogue', plan
     assert plan['difficulty'] == 'advanced', plan
-    assert plan['chapterCount'] == 3, plan
+    assert plan['chapterCount'] == 1, plan
+    assert plan['passageCount'] == 1, plan
     assert 'flowUiStart' not in page.url, page.url
 
     rail = page.locator('[data-flow-ui="session-rail"]')
     expect(rail).to_be_visible()
-    assert rail.locator('.flow-itinerary-step').count() == 3
+    assert rail.locator('.flow-itinerary-step').count() == 1
     assert rail.locator('.flow-itinerary-step[data-state="current"]').count() == 1
     expect(rail.locator('.flow-session-rail-copy')).to_contain_text('Settle In')
 
     if browser_name == 'chromium':
         page.screenshot(path=str(ARTIFACTS / 'chromium-run-ui.png'), full_page=True)
 
-    chapter_transitions = 0
-    for index, segment in enumerate(plan['segments']):
-        expect(page.locator('[data-flow-view="run"]')).to_be_visible(timeout=10000)
-        active = page.evaluate('window.wordstrikeFlowPhase1.getActiveSegmentIndex()')
-        assert active == index, (active, index)
-        page.keyboard.type(segment['text'])
+    segment = plan['segments'][0]
+    text = segment['text']
+    spaces = [index for index, character in enumerate(text) if character == ' ']
+    assert len(spaces) >= 2, text
+    probe_end = spaces[1] + 1
+    probe = text[:probe_end]
+    page.keyboard.type(probe)
+    before_delete = page.evaluate('window.wordstrikeFlowPhase1.getSnapshot().currentIndex')
+    assert before_delete == probe_end, (before_delete, probe_end)
 
-        if index == len(plan['segments']) - 1:
-            break
-        next_segment = plan['segments'][index + 1]
-        if next_segment['chapterIndex'] != segment['chapterIndex']:
-            chapter_transitions += 1
-            expect(page.locator('[data-flow-view="chapter"]')).to_be_visible(timeout=10000)
-            chapter_rail = page.locator('[data-flow-view="chapter"] [data-flow-ui="session-rail"]')
-            expect(chapter_rail).to_be_visible()
-            current = chapter_rail.locator('.flow-itinerary-step[data-state="current"]')
-            assert current.count() == 1
-            if browser_name == 'chromium' and chapter_transitions == 1:
-                page.screenshot(path=str(ARTIFACTS / 'chromium-chapter-ui.png'), full_page=True)
-            page.locator('[data-flow-action="continue-chapter"]').click()
+    # Ctrl+Backspace must remove the preceding whole word (plus the trailing
+    # separator) and keep the Flow engine/scoring state synchronized.
+    page.keyboard.press('Control+Backspace')
+    after_delete = page.evaluate('window.wordstrikeFlowPhase1.getSnapshot().currentIndex')
+    assert after_delete < before_delete - 1, (after_delete, before_delete)
+    deleted = text[after_delete:probe_end]
+    assert deleted.strip(), deleted
+    page.keyboard.type(deleted)
+    restored = page.evaluate('window.wordstrikeFlowPhase1.getSnapshot().currentIndex')
+    assert restored == probe_end, (restored, probe_end)
 
+    page.keyboard.type(text[probe_end:])
     expect(page.locator('[data-flow-view="complete"]')).to_be_visible(timeout=10000)
-    assert chapter_transitions == 2
     result_rail = page.locator('[data-flow-view="complete"] [data-flow-ui="session-rail"]')
     expect(result_rail).to_be_visible()
-    assert result_rail.locator('.flow-itinerary-step[data-state="complete"]').count() == 3
+    assert result_rail.locator('.flow-itinerary-step[data-state="complete"]').count() == 1
     expect(page.locator('[data-flow-action="restart"]')).to_have_text('RUN AGAIN')
     setup_action = page.locator('[data-flow-ui-action="setup"]')
     expect(setup_action).to_have_text('CHANGE SETUP')
@@ -176,7 +169,6 @@ def certify_setup_and_run(browser, browser_name, base, evidence):
     if browser_name == 'chromium':
         page.screenshot(path=str(ARTIFACTS / 'chromium-results-ui.png'), full_page=True)
 
-    # Focused result action must win over the legacy COMPLETE-screen Enter shortcut.
     setup_action.focus()
     page.keyboard.press('Enter')
     expect(page.locator('[data-flow-view="ready"]')).to_be_visible(timeout=15000)
@@ -188,10 +180,10 @@ def certify_setup_and_run(browser, browser_name, base, evidence):
     assert not errors, errors
     evidence.append({
         "browser": browser_name,
-        "case": "setup → canonical handoff → run rail → chapter rail → results → setup",
+        "case": "short setup -> ctrl-backspace word delete -> complete -> setup",
         "chapters": plan['chapterCount'],
         "passages": plan['passageCount'],
-        "transitions": chapter_transitions,
+        "deletedCharacters": before_delete - after_delete,
     })
     context.close()
 
@@ -200,14 +192,12 @@ def certify_phase_isolation(browser, browser_name, base, evidence):
     context = context_for(browser, base)
     page = context.new_page()
 
-    # Phase 6 developer route remains unchanged unless flowUi=1 is explicit.
     phase6_url = base + "?dev=1&mode=flow&flowRun=1&flowLength=quick&flowCategory=mixed&flowDifficulty=advanced&flowSeed=phase7-isolation"
     page.goto(phase6_url)
     expect(page.locator('[data-flow-view="ready"]')).to_be_visible(timeout=10000)
     assert page.locator('[data-flow-ui="setup"]').count() == 0
     assert page.locator('[data-flow-ui="session-rail"]').count() == 0
 
-    # Public Mode Select exposes released Flow but must not auto-mount Phase 7 UI.
     page.goto(base)
     expect(page.locator('.title-screen')).to_be_visible(timeout=10000)
     page.locator('[data-action="modes"]').click()

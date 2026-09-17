@@ -65,7 +65,6 @@ def certify_setup_and_rules(browser, browser_name, base, evidence):
 
     assert page.locator('[data-flow-modifier-id]').count() == 8
 
-    # Conflicts are replacement groups, not invalid states.
     choice(page, 'calm').click()
     expect(choice(page, 'calm')).to_have_attribute('aria-pressed', 'true')
     choice(page, 'precision').click()
@@ -98,16 +97,15 @@ def certify_setup_and_rules(browser, browser_name, base, evidence):
 
     plan = page.evaluate('window.wordstrikeFlowPhase1.getRunPlan()')
     assert plan['modifiers'] == draft, plan
-    assert plan['chapterCount'] == 3, plan
-    assert plan['passageCount'] == 3, plan
-    assert plan['targetMinutes'] == 2, plan
+    assert plan['chapterCount'] == 1, plan
+    assert plan['passageCount'] == 1, plan
+    assert plan['targetMinutes'] == 1, plan
     assert 'flowUiStart' not in page.url, page.url
 
     strip = page.locator('[data-flow-modifier-strip]')
     expect(strip).to_be_visible()
     assert strip.locator('strong').count() == 5
 
-    # No Backspace is an engine rule, not a cosmetic button state.
     first = plan['segments'][0]['text'][0]
     page.keyboard.type(first)
     before = page.evaluate('window.wordstrikeFlowPhase1.getSnapshot()')
@@ -117,7 +115,6 @@ def certify_setup_and_rules(browser, browser_name, base, evidence):
     assert after['blockedBackspaces'] == 1, after
     expect(page.locator('[data-flow-modifier-status]')).to_have_text('Backspace disabled')
 
-    # Finish the sprint run without raw mistakes so Clean Run is earned.
     for index, segment in enumerate(plan['segments']):
         expect(page.locator('[data-flow-view="run"]')).to_be_visible(timeout=10000)
         text = segment['text']
@@ -125,9 +122,11 @@ def certify_setup_and_rules(browser, browser_name, base, evidence):
             text = text[1:]
         page.keyboard.type(text)
         if index < len(plan['segments']) - 1:
-            expect(page.locator('[data-flow-view="chapter"]')).to_be_visible(timeout=10000)
-            expect(page.locator('[data-flow-modifier-strip]')).to_be_visible()
-            page.locator('[data-flow-action="continue-chapter"]').click()
+            next_segment = plan['segments'][index + 1]
+            if next_segment['chapterIndex'] != segment['chapterIndex']:
+                expect(page.locator('[data-flow-view="chapter"]')).to_be_visible(timeout=10000)
+                expect(page.locator('[data-flow-modifier-strip]')).to_be_visible()
+                page.locator('[data-flow-action="continue-chapter"]').click()
 
     expect(page.locator('[data-flow-view="complete"]')).to_be_visible(timeout=10000)
     expect(page.locator('[data-flow-modifier-results]')).to_be_visible()
@@ -145,7 +144,7 @@ def certify_setup_and_rules(browser, browser_name, base, evidence):
 
     evidence.append({
         "browser": browser_name,
-        "case": "conflicts → canonical handoff → sprint → no-backspace → clean-run results",
+        "case": "conflicts -> canonical handoff -> short sprint -> no-backspace -> clean-run results",
         "modifiers": draft,
         "passages": plan['passageCount'],
         "modifierMultiplier": breakdown['modifierMultiplier'],
@@ -157,7 +156,6 @@ def certify_isolation(browser, browser_name, base, evidence):
     context = context_for(browser, base)
     page = context.new_page()
 
-    # Phase 8 remains unchanged without the explicit modifier gate.
     phase8 = (
         base
         + "?dev=1&mode=flow&flowRun=1&flowUi=1&flowUx=1"
@@ -168,7 +166,6 @@ def certify_isolation(browser, browser_name, base, evidence):
     assert page.locator('[data-flow-modifier-setup]').count() == 0
     assert page.locator('[data-flow-modifier-strip]').count() == 0
 
-    # Released public Flow is available, but Mode Select alone must not mount modifiers.
     page.goto(base, wait_until="domcontentloaded")
     expect(page.locator('.title-screen')).to_be_visible(timeout=10000)
     page.locator('[data-action="modes"]').click()

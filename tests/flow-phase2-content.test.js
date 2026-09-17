@@ -5,6 +5,7 @@ import {
   FLOW_CONTENT_CATEGORIES,
   createFlowCatalog,
   getFlowCatalogCoverage,
+  normalizeFlowKeyboardText,
   queryFlowPassages,
   selectFlowPassage,
   validateFlowPassage,
@@ -28,6 +29,7 @@ for (const passage of FLOW_PASSAGE_CATALOG) {
   assert.ok(passage.sentenceCount >= 1 || passage.category === "quotes", passage.id);
   assert.ok(FLOW_CONTENT_CATEGORIES.includes(passage.category));
   assert.ok(FLOW_DIFFICULTIES.includes(passage.difficulty));
+  assert.match(passage.text, /^[\x20-\x7E]+$/, `${passage.id} must use only standard printable English-keyboard characters`);
 }
 
 const coverage = getFlowCatalogCoverage(FLOW_PASSAGE_CATALOG);
@@ -104,7 +106,25 @@ assert.throws(() => validateFlowPassage({ ...validBase, text: "This  passage con
 assert.throws(() => validateFlowPassage({ ...validBase, text: "This passage contains a hidden\u200B character and must be rejected." }), /invisible or control/);
 assert.throws(() => validateFlowPassage({ ...validBase, text: 'This passage has an "unclosed quotation mark and must fail validation.' }), /quotation/);
 assert.throws(() => validateFlowPassage({ ...validBase, text: "This passage has an unclosed parenthesis (and must fail validation." }), /parentheses/);
-assert.throws(() => validateFlowPassage({ ...validBase, text: "This passage includes an unsupported backslash \\ and must fail validation." }), /unsupported character/);
+assert.throws(() => validateFlowPassage({ ...validBase, text: "This passage includes an em dash — and must fail direct validation." }), /unsupported character/);
+assert.equal(
+  validateFlowPassage({ ...validBase, text: "This passage includes a standard keyboard backslash \\ and remains valid." }).id,
+  validBase.id,
+);
+assert.equal(
+  normalizeFlowKeyboardText('Cost €5 — “fine”…'),
+  'Cost EUR 5 - "fine"...',
+);
+const legacyNormalized = createFlowCatalog([{
+  ...validBase,
+  id: "legacy-keyboard-normalization",
+  text: "The old corpus used €5 and an em dash — here, but playable Flow normalizes both.",
+}])[0];
+assert.equal(
+  legacyNormalized.text,
+  "The old corpus used EUR 5 and an em dash - here, but playable Flow normalizes both.",
+);
+assert.match(legacyNormalized.text, /^[\x20-\x7E]+$/);
 assert.throws(() => createFlowCatalog([validBase, validBase]), /Duplicate Flow passage id/);
 
-console.log("Flow Phase 2 content contracts passed: stable seed library, schema validation, matrix coverage, query/filtering, deterministic selection, and developer-route resolution.");
+console.log("Flow Phase 2 content contracts passed: stable seed library, ASCII keyboard validation, legacy text normalization, matrix coverage, deterministic selection, and developer-route resolution.");

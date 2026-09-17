@@ -74,7 +74,7 @@ def make_quick_sprint(page, seed):
     plan = page.evaluate('window.wordstrikeFlowPhase1.getRunPlan()')
     assert plan['sessionLength'] == 'quick', plan
     assert plan['modifiers'] == ['sprint'], plan
-    assert plan['passageCount'] == 3, plan
+    assert plan['passageCount'] == 1, plan
     return plan
 
 
@@ -84,8 +84,10 @@ def finish_run(page, plan):
         expect(page.locator('[data-flow-view="run"]')).to_be_visible(timeout=10000)
         page.keyboard.type(segment['text'])
         if index < len(plan['segments']) - 1:
-            expect(page.locator('[data-flow-view="chapter"]')).to_be_visible(timeout=10000)
-            page.locator('[data-flow-action="continue-chapter"]').click()
+            next_segment = plan['segments'][index + 1]
+            if next_segment['chapterIndex'] != segment['chapterIndex']:
+                expect(page.locator('[data-flow-view="chapter"]')).to_be_visible(timeout=10000)
+                page.locator('[data-flow-action="continue-chapter"]').click()
     expect(page.locator('[data-flow-view="complete"]')).to_be_visible(timeout=10000)
     expect(page.locator('[data-flow-integration-complete]')).to_be_visible(timeout=10000)
 
@@ -115,7 +117,6 @@ def certify_public_journey(browser, browser_name, base, evidence):
     if browser_name == 'chromium':
         page.screenshot(path=str(ARTIFACTS / 'chromium-public-results.png'), full_page=True)
 
-    # Escape from results restores the exact Mode Select surface saved underneath Flow.
     page.keyboard.press('Escape')
     expect(page.locator('.mode-select-screen')).to_be_visible(timeout=10000)
     assert 'flowRelease=1' not in page.url, page.url
@@ -123,23 +124,49 @@ def certify_public_journey(browser, browser_name, base, evidence):
     flow = page.locator('button[data-mode-id="flow"]')
     expect(flow).to_be_visible()
 
-    # A second release launch uses native keyboard activation on the public button.
     flow.focus()
     page.keyboard.press('Enter')
     expect(page.locator('[data-flow-view="ready"]')).to_be_visible(timeout=15000)
-    # READY renders before the compatibility loader necessarily removes its
-    # temporary dev flag. Await runtimeReady before asserting final URL state.
     assert page.evaluate('window.wordstrikeFlowReleasePhase13.runtimeReady()') is True
     assert 'flowRelease=1' in page.url and 'dev=1' not in page.url, page.url
 
+    persisted_plan = page.evaluate('window.wordstrikeFlowPhase1.getRunPlan()')
+    assert persisted_plan['sessionLength'] == 'quick', persisted_plan
+    assert persisted_plan['modifiers'] == ['sprint'], persisted_plan
+    assert persisted_plan['passageCount'] == 1, persisted_plan
     assert not errors, errors
+    context.close()
+
+    fresh_context = context_for(browser, base)
+    fresh_page = fresh_context.new_page()
+    fresh_errors = []
+    fresh_page.on('pageerror', lambda error: fresh_errors.append(str(error)))
+    open_modes(fresh_page, base)
+    launch_public_flow(fresh_page)
+
+    default_plan = fresh_page.evaluate('window.wordstrikeFlowPhase1.getRunPlan()')
+    assert default_plan['sessionLength'] == 'standard', default_plan
+    assert default_plan['modifiers'] == [], default_plan
+    assert default_plan['coherent'] is True, default_plan
+    assert default_plan['continuous'] is True, default_plan
+    assert default_plan['passageCount'] == 3, default_plan
+    assert default_plan['chapterCount'] == 1, default_plan
+    assert default_plan['seriesTitle'], default_plan
+    assert all('"' not in segment['text'] for segment in default_plan['segments']), default_plan
+    assert all(32 <= ord(char) <= 126 for segment in default_plan['segments'] for char in segment['text']), default_plan
+    assert not fresh_errors, fresh_errors
+
     evidence.append({
         'browser': browser_name,
-        'case': 'public Mode Select → persisted Flow run → clean exit → keyboard relaunch',
+        'case': 'public Flow persists explicit setup while a fresh profile starts coherent Standard',
         'completedRuns': summary['progress']['completedRuns'],
         'canonicalSessions': summary['generic']['completedSessions'],
+        'persistedLength': persisted_plan['sessionLength'],
+        'persistedModifiers': persisted_plan['modifiers'],
+        'defaultStory': default_plan['seriesTitle'],
+        'defaultSections': default_plan['passageCount'],
     })
-    context.close()
+    fresh_context.close()
 
 
 def certify_mobile(browser, browser_name, base, evidence):
@@ -206,14 +233,11 @@ def certify_offline(browser, browser_name, base, evidence):
     assert cache_result['cached'] >= 30, cache_result
     assert cache_result['cacheName'] == page.evaluate('window.wordstrikeFlowReleasePhase13.offlineCacheName'), cache_result
 
-    # The production service-worker fallback uses caches.match(request), which
-    # intentionally searches both the rotating app-shell cache and the stable
-    # Flow release cache. Certify the same resolution path rather than coupling
-    # the test to a particular `wordstrike-pwa-vN` shell version.
     cached = page.evaluate("""async () => {
       const targets = [
-        './js/flow/flowRuntimeLoader.js?v=20260916a',
-        './js/flow/flowContentExpansion.js',
+        './js/flow/flowRuntimeLoader.js?v=20260917a',
+        './js/flow/flowLongformContent.js',
+        './js/flow/flowUiPhase7KeyboardGuard.js?v=20260917a',
         './js/flow/flowIntegrationPhase11.js?v=20260916a',
         './styles/screens/flow-integration-phase11.css?v=20260916a',
       ];
@@ -225,7 +249,6 @@ def certify_offline(browser, browser_name, base, evidence):
     }""")
     assert all(cached), cached
 
-    # Give clients.claim() a chance to attach the freshly installed worker.
     if not page.evaluate('Boolean(navigator.serviceWorker.controller)'):
         print('Phase 13 offline: reloading once for service-worker control', flush=True)
         page.reload(wait_until='load')
@@ -242,11 +265,14 @@ def certify_offline(browser, browser_name, base, evidence):
     expect(page.locator('[data-flow-view="ready"]')).to_be_visible(timeout=15000)
     assert page.evaluate('window.wordstrikeFlowReleasePhase13.runtimeReady()') is True
     assert 'dev=1' not in page.url, page.url
+    offline_plan = page.evaluate('window.wordstrikeFlowPhase1.getRunPlan()')
+    assert offline_plan['coherent'] is True, offline_plan
+    assert offline_plan['passageCount'] == 3, offline_plan
     context.set_offline(False)
 
     evidence.append({
         'browser': browser_name,
-        'case': 'PWA cache warm-up and offline public Flow relaunch',
+        'case': 'PWA cache warm-up and offline coherent Flow relaunch',
         'cachedAssets': cache_result['cached'],
         'cacheName': cache_result['cacheName'],
     })
@@ -260,9 +286,6 @@ def main():
     server = ThreadingHTTPServer(('127.0.0.1', 0), partial(QuietHandler, directory=str(ROOT)))
     thread = Thread(target=server.serve_forever, daemon=True)
     thread.start()
-    # WordStrike intentionally enables its local PWA registration on the hostname
-    # `localhost`. Bind the server to loopback but certify through that production-
-    # equivalent development origin instead of 127.0.0.1, where registration is gated.
     base = f'http://localhost:{server.server_port}/'
     evidence = []
     try:
