@@ -22,6 +22,7 @@ const RECOMMENDATION_STATUSES = new Set(["ready", "no-evidence", "unsupported", 
 export function createPracticeLabController({
   root,
   appNavigation = {},
+  navigationController = null,
   experimentRegistry,
   featureGate,
   renderer = renderPracticeLabV21,
@@ -349,13 +350,13 @@ export function createPracticeLabController({
     if (!target || !root.contains?.(target) || target.disabled || target.getAttribute?.("aria-disabled") === "true") return;
     const action = target.dataset.practiceAction;
     if (action === "exit") appNavigation.exit?.();
-    else if (action === "back") back();
+    else if (action === "back") (navigationController?.back ?? back)();
     else if (action === "help") appNavigation.help?.({ onboardingVersion: PRACTICE_LAB_ONBOARDING_VERSION });
-    else if (action === "open-experiment") navigate(
+    else if (action === "open-experiment") (navigationController?.navigate ?? navigate)(
       createPracticeLabRoute(PRACTICE_LAB_ROUTES.EXPERIMENT_DETAIL, { experimentId: target.dataset.experimentId }),
       { returnFocusSelector: `[data-experiment-id="${String(target.dataset.experimentId || "").replace(/[^a-z0-9-]/gi, "")}"]` },
     );
-    else if (action === "navigate") navigate(
+    else if (action === "navigate") (navigationController?.navigate ?? navigate)(
       createPracticeLabRoute(target.dataset.route),
       { returnFocusSelector: `[data-route="${String(target.dataset.route || "").replace(/[^a-z0-9-]/gi, "")}"]` },
     );
