@@ -589,6 +589,7 @@
     }
   ],
   "openGates": [
+    "editorial-content-independence",
     "cross-platform-physical-devices",
     "assistive-technology",
     "Android-performance"
@@ -637,5 +638,11 @@
       "minimumNativeInputContrast": 16.2034,
       "report": "practice-completion-evidence/accessibility-report.json"
     }
+  },
+  "finalAcceptance": {
+    "sourceCommit": "f9d4aaa1b7124674c3680e026fda2e9610b0bc5f",
+    "decision": "NOT_READY_FOR_PUBLIC_RELEASE",
+    "report": "practice-completion-evidence/final-acceptance-review.json",
+    "note": "402 test files and 33 workflows passed on PR127; editorial review failed despite passing numerical duplicate thresholds."
   }
 }

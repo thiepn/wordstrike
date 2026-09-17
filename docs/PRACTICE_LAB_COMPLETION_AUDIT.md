@@ -90,3 +90,23 @@ A fresh service-worker install followed by an offline document load reproduced a
 Real menu clicks also exposed a controller integration defect: the base click handler navigated directly, bypassing the later controllers' route-loading hooks. Real Text remained on “Checking availability” although direct API navigation worked. DOM back, experiment and evidence navigation now dispatch through the complete controller stack.
 
 `tests/practice-offline-shell.test.js` prevents startup URL/runtime asset drift. `tests/browser/practice_offline.mjs` uses the production document, real service worker and actual menu clicks; it checks fresh offline startup, unopened Assessment/Real Text/Read-Ahead/Metronome content, meaningful interrupted-session persistence across reload, and network recovery. The browser workflow retains its report and screenshot. These checks do not constitute installed iOS/Android PWA certification. Public activation remains gated.
+
+
+## Final acceptance decision — 2026-09-17
+
+**NOT READY FOR PUBLIC RELEASE.** This decision supersedes any implication that only device certification remains.
+
+The production catalog was exercised through actual menu clicks at 1280px and 390px: 17 experiment setup views at each width, zero page errors and zero horizontal overflow. This does not certify every complete session or every populated evidence state.
+
+The editorial review **failed**. All 355 moderate cross-partition pairs share at least one identical sentence of 60 or more characters; the maximum is 14 shared long sentences. Of these pairs, 48 connect benchmark/training, 125 training/transfer, 43 training/research-holdout, 96 benchmark/transfer, 12 benchmark/research-holdout and 31 transfer/research-holdout. These are repeated templates, not merely shared vocabulary. Inspected examples also include agreement errors such as “Shelf labels draws attention” and “reading tables provides”. The existing exact/hard duplicate checks still pass; those thresholds alone cannot establish editorial quality or independent assessment material.
+
+Full evidence: [final-acceptance-review.json](practice-completion-evidence/final-acceptance-review.json).
+
+Required remediation before public activation:
+
+1. Replace repeated-template material with independently authored, grammatically reviewed passages, preserving the required counts and capacities. Review diagnostic prose as well; the current cross-partition warnings do not cover repetition within a partition.
+2. Regenerate source hashes, corpus, indexes, typability references and dependent forms/manifests. Recheck protected/training separation, content capacity, shard budgets, provenance, save compatibility and all affected session paths. Do not relax thresholds or relabel related passages as independent families to make the checks pass.
+3. Complete actual Android/iOS/browser/PWA, screen-reader and long-session Android acceptance; record environments, outcomes and any fixes.
+4. Update the public mode gate and metadata only after final acceptance, run the public-entry regression checks, then deploy and verify the live release.
+
+PR127 remains the latest deployed gated implementation: merge `f9d4aaa1b7124674c3680e026fda2e9610b0bc5f`; 402 test files and all 33 PR workflows passed; Pages deployment 35193456125 succeeded. Those technical results are retained and are not represented as editorial or physical-device certification.
