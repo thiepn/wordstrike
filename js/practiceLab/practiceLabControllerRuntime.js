@@ -324,6 +324,13 @@ export function createPracticeLabController({
   };
 
   const input = (event) => {
+    const combinationField = event.target?.closest?.("[data-combination-target]");
+    if (combinationField && root.contains?.(combinationField) && isCombinationRepairRoute() && !hasSessionHost()) {
+      // Recommendation loading can repaint this form after the user has typed.
+      // Keep the draft in state without replacing the focused input on each key.
+      combinationRepairState = normalizePracticeCombinationRepairUiState({ ...combinationRepairState, targetValue: combinationField.value, selectedSource: "manual", status: "idle", reasonCode: null, message: null });
+      return;
+    }
     const field = event.target?.closest?.("[data-weak-key-target]");
     if (!field || !root.contains?.(field) || !isWeakKeysRoute() || hasSessionHost()) return;
     const normalized = normalizePracticeWeakKeysManualInput(field.value, "en");

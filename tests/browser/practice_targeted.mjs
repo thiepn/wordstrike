@@ -37,7 +37,7 @@ try {
   await page.locator(`[data-practice-action="${mode.start}"]:enabled`).waitFor({timeout:30000}).catch(async error=>{throw new Error(error.message+'\n'+await page.locator('body').innerText());});
   check(`${width} ${mode.id} available in ${Date.now()-begin}ms`);
   await page.locator(`[data-practice-action="${mode.start}"]`).click();
-  await page.locator(mode.input).waitFor({timeout:30000});
+  await page.locator(mode.input).waitFor({timeout:30000}).catch(async error=>{throw new Error(error.message+'\n'+await page.locator('body').innerText()+'\nErrors: '+JSON.stringify(errors));});
   await page.evaluate(selector=>window.capture=document.querySelector(selector),mode.input);
   for(let i=0;i<30;i++) {
    const expected=await page.locator('.is-current').first().textContent();

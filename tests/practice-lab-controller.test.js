@@ -79,3 +79,22 @@ test("controller cannot navigate through a closed feature gate", () => {
   assert.equal(kind, "unavailable");
   assert.equal(controller.navigate(createPracticeLabRoute(PRACTICE_LAB_ROUTES.PROGRESS)), false);
 });
+
+test('late combination recommendations preserve the manually typed target', async () => {
+  const { createPracticeLabController: createRuntime } = await import('../js/practiceLab/practiceLabControllerRuntime.js');
+  const { registerPracticeCombinationRepairExperiment } = await import('../js/practiceLab/practiceCombinationRepairExperiment.js');
+  const root = fakeRoot();
+  const gate = createPracticeFeatureGate({ developerMode: true });
+  const registry = createPracticeExperimentRegistry({ featureGate: gate });
+  registerPracticeCombinationRepairExperiment(registry);
+  let resolveRecommendations; let view;
+  const recommendations = new Promise(resolve => { resolveRecommendations = resolve; });
+  const controller = createRuntime({ root, featureGate: gate, experimentRegistry: registry, renderer: (_root, next) => { view = next; }, combinationRepairRecommendationLoader: () => recommendations });
+  controller.mount(createPracticeLabRoute(PRACTICE_LAB_ROUTES.EXPERIMENT_DETAIL, { experimentId: 'combination-repair' }));
+  const field = { value: 'th', closest: selector => selector === '[data-combination-target]' ? field : null };
+  root.dispatch('input', { target: field });
+  resolveRecommendations({ status: 'no-evidence' });
+  await new Promise(resolve => setImmediate(resolve));
+  assert.equal(view.targetValue, 'th');
+  controller.unmount();
+});
