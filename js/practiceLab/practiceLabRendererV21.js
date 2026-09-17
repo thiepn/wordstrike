@@ -7,7 +7,7 @@ function targetStatus(view) {
   if (view.status === "preparing") return '<div class="practice-lab-notice" role="status"><strong>Building the fixed plan…</strong><p>Verifying exact phase quotas, neutral Mix material, and matched probes.</p></div>';
   if (view.status === "ready") return '<div class="practice-lab-notice" role="status"><strong>Standard protocol available.</strong><p>The Start button will build a new immutable session plan.</p></div>';
   if (["limited-content", "unsupported", "unavailable", "error"].includes(view.status)) return `<div class="practice-lab-notice" role="${view.status === "limited-content" ? "status" : "alert"}"><strong>${view.status === "limited-content" ? "Limited training content" : "Key unavailable"}</strong><p>${escapeHtml(view.message)}</p>${view.status === "limited-content" ? "<p>No weaker protocol or protected-text fallback will be substituted.</p>" : ""}</div>`;
-  return '<div class="practice-lab-notice"><strong>Developer preview</strong><p>Choose one English letter. Uppercase input is normalized to lowercase; digits, punctuation, symbols, whitespace, and multi-letter targets are unsupported in v1.</p></div>';
+  return '<div class="practice-lab-notice"><strong>Target selection</strong><p>Choose one English letter. Uppercase input is normalized to lowercase; digits, punctuation, symbols, whitespace, and multi-letter targets are unsupported in v1.</p></div>';
 }
 
 function recommendationRows(view) {
@@ -38,7 +38,7 @@ function phasePlan(view) {
 
 function renderWeakKeys(root, view, { focusSelector = null } = {}) {
   root.innerHTML = `<section class="screen practice-lab-screen" data-practice-view="weak-keys-detail">
-    <div class="practice-lab-shell"><header class="practice-lab-header"><button type="button" class="practice-lab-back" data-practice-action="back" aria-label="${escapeHtml(view.backLabel)}">← ${escapeHtml(view.backLabel)}</button><span class="practice-lab-status is-preview">DEVELOPER PREVIEW</span></header>
+    <div class="practice-lab-shell"><header class="practice-lab-header"><button type="button" class="practice-lab-back" data-practice-action="back" aria-label="${escapeHtml(view.backLabel)}">← ${escapeHtml(view.backLabel)}</button><span class="practice-lab-status is-preview">PRACTICE LAB</span></header>
     <main class="practice-lab-detail practice-weak-key-detail">
       <div class="eyebrow">${escapeHtml(view.category)} · key intervention</div><h1>${escapeHtml(view.title)}</h1><p class="practice-lab-lead">${escapeHtml(view.description)}</p><p>${escapeHtml(view.longDescription)}</p>
       <section class="practice-lab-empty-state"><h2>Recommended keys</h2>${recommendationRows(view)}</section>

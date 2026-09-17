@@ -9,7 +9,7 @@ function statusNotice(view) {
   if (view.status === "limited-content") return `<div class="practice-lab-notice" role="status"><strong>Limited training content</strong><p>${escapeHtml(view.message)}</p><p>No weaker fallback plan will be substituted.</p></div>`;
   if (view.status === "unsupported" || view.status === "unavailable" || view.status === "error") return `<div class="practice-lab-notice" role="alert"><strong>Target unavailable</strong><p>${escapeHtml(view.message)}</p></div>`;
   if (view.status === "ready") return '<div class="practice-lab-notice" role="status"><strong>Plan ready.</strong><p>Starting the shared Practice session engine.</p></div>';
-  return '<div class="practice-lab-notice"><strong>Developer preview</strong><p>Choose one lowercase bigram or trigram. The target is validated against the approved training corpus before a session can start.</p></div>';
+  return '<div class="practice-lab-notice"><strong>Target selection</strong><p>Choose one lowercase bigram or trigram. The target is validated against the approved training corpus before a session can start.</p></div>';
 }
 
 function recommendationList(view) {
@@ -28,7 +28,7 @@ function renderCombinationRepair(root, view, { focusSelector = null } = {}) {
   const expectedLength = view.entityType === "bigram" ? 2 : 3;
   const typeLabel = view.entityType === "bigram" ? "Bigram" : "Trigram";
   root.innerHTML = `<section class="screen practice-lab-screen" data-practice-view="combination-repair-detail">
-    <div class="practice-lab-shell"><header class="practice-lab-header"><button type="button" class="practice-lab-back" data-practice-action="back" aria-label="${escapeHtml(view.backLabel)}">← ${escapeHtml(view.backLabel)}</button><span class="practice-lab-status is-preview">DEVELOPER PREVIEW</span></header>
+    <div class="practice-lab-shell"><header class="practice-lab-header"><button type="button" class="practice-lab-back" data-practice-action="back" aria-label="${escapeHtml(view.backLabel)}">← ${escapeHtml(view.backLabel)}</button><span class="practice-lab-status is-preview">PRACTICE LAB</span></header>
     <main class="practice-lab-detail practice-combination-detail">
       <div class="eyebrow">${escapeHtml(view.category)} · precision intervention</div><h1>${escapeHtml(view.title)}</h1><p class="practice-lab-lead">${escapeHtml(view.description)}</p><p>${escapeHtml(view.longDescription)}</p>
       <section class="practice-lab-empty-state"><div class="practice-lab-card-meta"><span>Fixed dose</span><span>${view.totalOpportunityCount} target opportunities</span></div><h2>Target one combination</h2><p>One session trains exactly one lowercase bigram or trigram. Assessment is optional; a manual target is allowed.</p>
