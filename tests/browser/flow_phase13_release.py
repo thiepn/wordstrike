@@ -130,22 +130,43 @@ def certify_public_journey(browser, browser_name, base, evidence):
     assert page.evaluate('window.wordstrikeFlowReleasePhase13.runtimeReady()') is True
     assert 'flowRelease=1' in page.url and 'dev=1' not in page.url, page.url
 
-    default_plan = page.evaluate('window.wordstrikeFlowPhase1.getRunPlan()')
+    persisted_plan = page.evaluate('window.wordstrikeFlowPhase1.getRunPlan()')
+    assert persisted_plan['sessionLength'] == 'quick', persisted_plan
+    assert persisted_plan['modifiers'] == ['sprint'], persisted_plan
+    assert persisted_plan['passageCount'] == 1, persisted_plan
+    assert not errors, errors
+    context.close()
+
+    fresh_context = context_for(browser, base)
+    fresh_page = fresh_context.new_page()
+    fresh_errors = []
+    fresh_page.on('pageerror', lambda error: fresh_errors.append(str(error)))
+    open_modes(fresh_page, base)
+    launch_public_flow(fresh_page)
+
+    default_plan = fresh_page.evaluate('window.wordstrikeFlowPhase1.getRunPlan()')
+    assert default_plan['sessionLength'] == 'standard', default_plan
+    assert default_plan['modifiers'] == [], default_plan
     assert default_plan['coherent'] is True, default_plan
+    assert default_plan['continuous'] is True, default_plan
     assert default_plan['passageCount'] == 3, default_plan
     assert default_plan['chapterCount'] == 1, default_plan
+    assert default_plan['seriesTitle'], default_plan
     assert all('"' not in segment['text'] for segment in default_plan['segments']), default_plan
+    assert all(32 <= ord(char) <= 126 for segment in default_plan['segments'] for char in segment['text']), default_plan
+    assert not fresh_errors, fresh_errors
 
-    assert not errors, errors
     evidence.append({
         'browser': browser_name,
-        'case': 'public Mode Select -> persisted short Flow run -> clean exit -> coherent default relaunch',
+        'case': 'public Flow persists explicit setup while a fresh profile starts coherent Standard',
         'completedRuns': summary['progress']['completedRuns'],
         'canonicalSessions': summary['generic']['completedSessions'],
+        'persistedLength': persisted_plan['sessionLength'],
+        'persistedModifiers': persisted_plan['modifiers'],
         'defaultStory': default_plan['seriesTitle'],
         'defaultSections': default_plan['passageCount'],
     })
-    context.close()
+    fresh_context.close()
 
 
 def certify_mobile(browser, browser_name, base, evidence):
