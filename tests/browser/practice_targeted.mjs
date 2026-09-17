@@ -9,7 +9,15 @@ const root=path.resolve(import.meta.dirname,'../..');
 const server=http.createServer((req,res)=>{
   const pathname=decodeURIComponent(new URL(req.url,'http://localhost').pathname);
   const file=path.join(root,pathname==='/'?'index.html':pathname);
-  try {
+  try {res.setHeader('Content-Type',({'.html':'text/html','.js':'text/javascript','.css':'text/css','.json':'application/json','.svg':'image/svg+xml'})[path.extname(file)]??'application/octet-stream');res.end(fs.readFileSync(file));}
+  catch {res.writeHead(404);res.end();}
+}).listen(0,'127.0.0.1');
+await new Promise(resolve=>server.once('listening',resolve));
+const browser=await chromium.launch(process.env.PRACTICE_CHROMIUM_PATH?{executablePath:process.env.PRACTICE_CHROMIUM_PATH,args:['--no-sandbox','--disable-dev-shm-usage','--disable-gpu']}:{});
+const out=path.join(root,'browser-artifacts/practice-targeted');fs.mkdirSync(out,{recursive:true});
+const report={checks:[]};
+const check=message=>{report.checks.push(message);console.log(message);};
+try {
  for (const width of [1280, 390]) {
  const context=await browser.newContext({viewport:{width,height:900}});
  await context.addInitScript(()=>localStorage.setItem('wordstrike.onboarding.general.v3','seen'));
@@ -18,6 +26,7 @@ const server=http.createServer((req,res)=>{
  await page.locator('[data-action="modes"]').click();
  await page.locator('button[data-mode-id="practice"]').click();
  for (const mode of [
+  {id:'combination-repair', target:'[data-combination-target]', value:'th', start:'prepare-combination-repair', input:'[data-combination-input]', exit:'[data-combination-session-action="abandon"]'},
   {id:'weak-keys', target:'[data-weak-key-target]', value:'e', start:'start-weak-keys', input:'[data-weak-keys-input]', exit:'[data-weak-keys-session-action="abandon"]'},
   {id:'problem-words', target:'[data-problem-word-target]', value:'the', start:'start-problem-words', input:'[data-problem-words-input]', exit:'[data-problem-words-session-action="abandon"]'},
   {id:'accuracy-control', target:'[data-accuracy-recovery-target]', value:'e', start:'start-accuracy-recovery', input:'[data-accuracy-recovery-input]', exit:'[data-accuracy-recovery-session-action="abandon"]'},

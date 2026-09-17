@@ -15,10 +15,6 @@ const finite = (value) => Number.isFinite(value);
 const formatNumber = (value, digits = 1) => finite(value) ? Number(value).toFixed(digits).replace(/\.0$/, "") : "—";
 const formatPercent = (value) => finite(value) ? `${formatNumber(value, 1)}%` : "—";
 
-function lower(value, language = "en") {
-  try { return String(value).normalize("NFC").toLocaleLowerCase(language || undefined); }
-  catch { return String(value).normalize("NFC").toLowerCase(); }
-}
 
 function phaseForCursor(contentPlan, cursorIndex) {
   const phases = contentPlan?.metadata?.combinationRepair?.phaseRanges ?? [];
@@ -36,7 +32,7 @@ function targetHighlightPositions(contentPlan, phase) {
   const needle = Array.from(target);
   const positions = new Set();
   for (let index = phase.startIndex; index <= phase.endIndex - needle.length; index += 1) {
-    const candidate = lower(graphemes.slice(index, index + needle.length).join(""), language);
+    const candidate = graphemes.slice(index, index + needle.length).join("").normalize("NFC");
     if (candidate !== target) continue;
     for (let offset = 0; offset < needle.length; offset += 1) positions.add(index + offset);
   }

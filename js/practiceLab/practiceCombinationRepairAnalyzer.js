@@ -9,7 +9,7 @@ export const PRACTICE_COMBINATION_REPAIR_ANALYSIS_VERSION = 1;
 const INSERTION_TYPES = new Set(["character", "space"]);
 const freezeDeep = (value) => { if (!value || typeof value !== "object" || Object.isFrozen(value)) return value; Object.values(value).forEach(freezeDeep); return Object.freeze(value); };
 const correctness = (event) => event?.correctness === "correct" || event?.correctness === true;
-const normalizeText = (value, language) => { try { return String(value).normalize("NFC").toLocaleLowerCase(language || undefined); } catch { return String(value).normalize("NFC").toLowerCase(); } };
+const normalizeText = value => String(value).normalize("NFC");
 
 function compactTiming(record) {
   if (!record || !["fluent", "disfluent"].includes(record.classification)) return null;

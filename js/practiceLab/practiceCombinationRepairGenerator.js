@@ -130,9 +130,7 @@ function buildProbeCandidates(candidates, quota, prefix) {
 }
 
 function countTargetOccurrences(text, entityKey, language) {
-  let normalized;
-  try { normalized = String(text).normalize("NFC").toLocaleLowerCase(language || undefined); }
-  catch { normalized = String(text).normalize("NFC").toLowerCase(); }
+  const normalized = String(text).normalize("NFC");
   const haystack = Array.from(normalized);
   const needle = Array.from(entityKey);
   let count = 0;
