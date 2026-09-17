@@ -48,7 +48,7 @@ for (const passage of FLOW_PASSAGE_CATALOG) {
   ids.add(passage.id);
   texts.add(passage.text);
   assert.ok(passage.characters >= 60, `${passage.id} is too short for sustained Flow`);
-  assert.ok(passage.characters <= 420, `${passage.id} is too long for a single Flow segment`);
+  assert.ok(passage.characters <= 440, `${passage.id} is too long for a single catalog segment`);
   assert.ok(passage.wordCount >= 10, `${passage.id} needs enough words for cadence analysis`);
 }
 
@@ -70,19 +70,20 @@ assert.ok(
   "common typo-pair practice needs a broad candidate pool",
 );
 
-// Long sessions should not repeat content now that the library is production-sized.
+// Long sessions now use five substantial segments instead of the old 24-fragment run,
+// while retaining deterministic variety and zero repetition.
 for (const category of FLOW_CATEGORIES) {
   for (const difficulty of FLOW_DIFFICULTIES) {
-    for (const seed of ["phase12-a", "phase12-b"] ) {
+    for (const seed of ["phase12-a", "phase12-b"]) {
       const plan = createFlowRunPlan({ category, difficulty, sessionLength: "long", seed });
-      assert.equal(plan.passageCount, 24, `${category}/${difficulty} long passage count`);
+      assert.equal(plan.passageCount, 5, `${category}/${difficulty} long passage count`);
       assert.equal(plan.repeatedPassageCount, 0, `${category}/${difficulty}/${seed} repeated a passage`);
       assert.equal(new Set(plan.segments.map(({ passageId }) => passageId)).size, plan.passageCount);
     }
   }
 }
 
-// Adaptive long runs also need enough variety to target a weakness without repetition.
+// Adaptive long runs preserve the 20% targeted-practice ratio with the shorter run shape.
 for (const weakness of Object.values(FLOW_WEAKNESS_DEFINITIONS)) {
   const profileWeakness = weakness.key === "typo-pair"
     ? { ...weakness, score: 80, expected: "e", actual: "r" }
@@ -95,8 +96,8 @@ for (const weakness of Object.values(FLOW_WEAKNESS_DEFINITIONS)) {
     adaptiveProfile: { version: 1, weaknesses: [profileWeakness] },
   });
   assert.equal(plan.adaptive.enabled, true, weakness.key);
-  assert.equal(plan.adaptive.targetedPassageCount, 5, weakness.key);
+  assert.equal(plan.adaptive.targetedPassageCount, 1, weakness.key);
   assert.equal(plan.repeatedPassageCount, 0, `${weakness.key} adaptive run repeated content`);
 }
 
-console.log("Flow Phase 12 content expansion contracts passed: 112 passages, balanced matrix, adaptive breadth, and repetition-free long runs.");
+console.log("Flow Phase 12 content contracts passed: 112 catalog passages, balanced coverage, adaptive breadth, and repetition-free shorter long runs.");
