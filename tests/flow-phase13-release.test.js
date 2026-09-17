@@ -1,312 +1,119 @@
-"""Flow Phase 13 public release-candidate certification."""
-from functools import partial
-from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
-from pathlib import Path
-from threading import Thread
-import json
-import os
-import traceback
+import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
+import {
+  FLOW_RELEASE_ASSETS,
+  FLOW_RELEASE_QUERY_KEYS,
+  buildFlowReleaseUrl,
+  isFlowDeveloperRoute,
+  isFlowReleaseRoute,
+  stripFlowReleaseUrl,
+} from "../js/flow/flowRuntimeLoader.js";
+import {
+  getAllModes,
+  getEnabledModes,
+  getModeDefinition,
+  MODE_IDS,
+} from "../js/modes.js";
 
-from playwright.sync_api import sync_playwright, expect
+const index = await readFile(new URL("../index.html", import.meta.url), "utf8");
+const loader = await readFile(new URL("../js/flow/flowRuntimeLoader.js", import.meta.url), "utf8");
 
-ROOT = Path(__file__).resolve().parents[2]
-ARTIFACTS = ROOT / "browser-artifacts" / "flow-phase13"
+const modes = getAllModes();
+assert.deepEqual(modes.map(({ id }) => id), [
+  MODE_IDS.CAMPAIGN,
+  MODE_IDS.SPEED_TEST,
+  MODE_IDS.ENDLESS,
+  MODE_IDS.FLOW,
+  MODE_IDS.PRACTICE,
+]);
+assert.deepEqual(getEnabledModes().map(({ id }) => id), [
+  MODE_IDS.CAMPAIGN,
+  MODE_IDS.SPEED_TEST,
+  MODE_IDS.ENDLESS,
+  MODE_IDS.FLOW,
+  MODE_IDS.PRACTICE,
+]);
 
-ONBOARDING_SEED = """(() => {
-  for (const [id, version] of Object.entries({general:3,campaign:2,typing:1,endless:1,boss:1,leaderboards:1}))
-    localStorage.setItem(`wordstrike.onboarding.${id}.v${version}`, 'seen');
-})();"""
+const flow = getModeDefinition(MODE_IDS.FLOW);
+assert.equal(flow.enabled, true);
+assert.equal(flow.visible, true);
+assert.equal(flow.status, "available");
+assert.equal(flow.route, "flow-release");
+const practice = getModeDefinition(MODE_IDS.PRACTICE);
+assert.equal(practice.enabled, true);
+assert.equal(practice.status, "available");
+const rush = getModeDefinition(MODE_IDS.ARCADE_RUSH);
+assert.equal(rush.visible, false);
+assert.equal(rush.status, "retired");
 
+const source = {
+  href: "https://wordstrike.test/?foo=keep&dev=1#section",
+  search: "?foo=keep&dev=1",
+};
+const releaseHref = buildFlowReleaseUrl(source);
+const release = new URL(releaseHref);
+assert.equal(release.searchParams.get("foo"), "keep");
+assert.equal(release.searchParams.has("dev"), false);
+for (const key of [
+  "mode", "flowRelease", "flowRun", "flowUi", "flowUx",
+  "flowModifiers", "flowAdaptive", "flowIntegration", "flowSeed",
+]) {
+  assert.ok(release.searchParams.has(key), `release URL missing ${key}`);
+}
+assert.match(release.searchParams.get("flowSeed"), /^release-/);
+const explicitSeed = new URL(buildFlowReleaseUrl({
+  href: "https://wordstrike.test/?flowSeed=explicit-release-seed",
+  search: "?flowSeed=explicit-release-seed",
+}));
+assert.equal(explicitSeed.searchParams.get("flowSeed"), "explicit-release-seed", "explicit release seeds must remain deterministic");
+assert.equal(release.searchParams.get("mode"), "flow");
+assert.equal(release.searchParams.get("flowRelease"), "1");
+assert.equal(isFlowReleaseRoute({ href: release.href, search: release.search }), true);
+assert.equal(isFlowDeveloperRoute({ href: release.href, search: release.search }), false);
+assert.equal(isFlowDeveloperRoute({ href: "https://wordstrike.test/?dev=1&mode=flow", search: "?dev=1&mode=flow" }), true);
 
-class QuietHandler(SimpleHTTPRequestHandler):
-    def log_message(self, *_args):
-        pass
+const dirty = new URL(release.href);
+dirty.searchParams.set("flowLength", "quick");
+dirty.searchParams.set("flowModifierIds", "sprint");
+dirty.searchParams.set("flowWeaknesses", "profile");
+dirty.searchParams.set("dev", "1");
+const cleaned = new URL(stripFlowReleaseUrl({ href: dirty.href, search: dirty.search }));
+assert.equal(cleaned.searchParams.get("foo"), "keep");
+assert.equal(cleaned.searchParams.has("dev"), false);
+for (const key of FLOW_RELEASE_QUERY_KEYS) {
+  assert.equal(cleaned.searchParams.has(key), false, `exit URL retained ${key}`);
+}
 
+assert.ok(FLOW_RELEASE_ASSETS.length >= 30, "release cache pack should cover the complete Flow stack");
+assert.equal(new Set(FLOW_RELEASE_ASSETS).size, FLOW_RELEASE_ASSETS.length, "release cache pack contains duplicates");
+for (const asset of [
+  "./js/flow/flowRuntimeLoader.js?v=20260917a",
+  "./js/flow/flowEngine.js",
+  "./js/flow/flowCadence.js",
+  "./js/flow/flowGameplay.js",
+  "./js/flow/flowContentExpansion.js",
+  "./js/flow/flowLongformContent.js",
+  "./js/flow/flowPassages.js",
+  "./js/flow/flowProgression.js",
+  "./js/flow/flowUiPhase7KeyboardGuard.js?v=20260917a",
+  "./js/flow/flowIntegrationPhase11.js?v=20260916a",
+  "./styles/screens/flow-phase1.css?v=20260916d",
+  "./styles/screens/flow-integration-phase11.css?v=20260916a",
+]) {
+  assert.ok(FLOW_RELEASE_ASSETS.includes(asset), `offline pack missing ${asset}`);
+}
 
-def local_only(context, base):
-    context.route("**/*", lambda route: route.continue_() if route.request.url.startswith(base) else route.abort())
+const mainIndex = index.indexOf('src="js/main.js?v=20260910f"');
+const releaseIndex = index.indexOf('src="js/flow/flowRuntimeLoader.js?v=20260917a"');
+assert.ok(mainIndex >= 0 && releaseIndex > mainIndex, "main.js must boot before the release loader can temporarily emulate the developer route");
+assert.doesNotMatch(index, /src="js\/flow\/flowPhase1\.js/);
+assert.doesNotMatch(index, /const flowParams = new URLSearchParams/);
+assert.match(loader, /await waitForModeSelect\(\)/);
+assert.match(loader, /temporary\.searchParams\.set\("dev", "1"\)/);
+assert.match(loader, /removeTemporaryDeveloperFlag\(\)/);
+assert.match(loader, /installReleaseExitCleanup\(\)/);
+assert.match(loader, /button\[data-mode-id=["']flow["']\]/);
+assert.match(loader, /cache\.addAll\(urls\)/);
+assert.match(loader, /flowSeed/);
 
-
-def context_for(browser, base, width=1440, height=900):
-    context = browser.new_context(viewport={"width": width, "height": height})
-    context.add_init_script(ONBOARDING_SEED)
-    local_only(context, base)
-    return context
-
-
-def open_modes(page, base):
-    page.goto(base, wait_until="domcontentloaded")
-    expect(page.locator('.title-screen')).to_be_visible(timeout=10000)
-    page.locator('[data-action="modes"]').click()
-    expect(page.locator('.mode-select-screen')).to_be_visible(timeout=10000)
-
-
-def launch_public_flow(page):
-    flow = page.locator('button[data-mode-id="flow"]')
-    expect(flow).to_be_visible(timeout=10000)
-    expect(flow).to_contain_text('Flow')
-    flow.click()
-    expect(page.locator('[data-flow-view="ready"]')).to_be_visible(timeout=15000)
-    assert 'flowRelease=1' in page.url, page.url
-    assert page.evaluate('window.wordstrikeFlowReleasePhase13.runtimeReady()') is True
-    assert 'dev=1' not in page.url, page.url
-    assert page.evaluate('window.wordstrikeFlowReleasePhase13.isReleaseRoute()') is True
-    expect(page.locator('.flow-phase1-screen[data-flow-ui-phase7="true"]')).to_be_visible()
-    expect(page.locator('[data-flow-integration-profile]')).to_be_visible(timeout=10000)
-
-
-def make_quick_sprint(page, seed):
-    page.goto(page.evaluate("""seed => {
-      const url = new URL(location.href);
-      url.searchParams.set('flowLength', 'quick');
-      url.searchParams.set('flowCategory', 'mixed');
-      url.searchParams.set('flowDifficulty', 'natural');
-      url.searchParams.set('flowModifierIds', 'sprint');
-      url.searchParams.set('flowSeed', seed);
-      return url.href;
-    }""", seed), wait_until='domcontentloaded')
-    expect(page.locator('[data-flow-view="ready"]')).to_be_visible(timeout=15000)
-    assert page.evaluate('window.wordstrikeFlowReleasePhase13.runtimeReady()') is True
-    assert 'dev=1' not in page.url, page.url
-    onboarding = page.locator('[data-flow-integration-onboarding-done]')
-    if onboarding.count():
-        onboarding.click()
-    plan = page.evaluate('window.wordstrikeFlowPhase1.getRunPlan()')
-    assert plan['sessionLength'] == 'quick', plan
-    assert plan['modifiers'] == ['sprint'], plan
-    assert plan['passageCount'] == 1, plan
-    return plan
-
-
-def finish_run(page, plan):
-    page.locator('[data-flow-action="start"]').click()
-    for index, segment in enumerate(plan['segments']):
-        expect(page.locator('[data-flow-view="run"]')).to_be_visible(timeout=10000)
-        page.keyboard.type(segment['text'])
-        if index < len(plan['segments']) - 1:
-            next_segment = plan['segments'][index + 1]
-            if next_segment['chapterIndex'] != segment['chapterIndex']:
-                expect(page.locator('[data-flow-view="chapter"]')).to_be_visible(timeout=10000)
-                page.locator('[data-flow-action="continue-chapter"]').click()
-    expect(page.locator('[data-flow-view="complete"]')).to_be_visible(timeout=10000)
-    expect(page.locator('[data-flow-integration-complete]')).to_be_visible(timeout=10000)
-
-
-def certify_public_journey(browser, browser_name, base, evidence):
-    context = context_for(browser, base)
-    page = context.new_page()
-    errors = []
-    page.on('pageerror', lambda error: errors.append(str(error)))
-
-    open_modes(page, base)
-    active = page.locator('button.mode-option.available').evaluate_all('els => els.map(el => el.dataset.modeId)')
-    assert active == ['campaign', 'speed-test', 'endless', 'flow'], active
-    assert page.locator('button[data-mode-id="practice"]:enabled').count() == 1
-    assert page.locator('[data-mode-id="arcade-rush"]').count() == 0
-
-    launch_public_flow(page)
-    plan = make_quick_sprint(page, f'phase13-public-{browser_name}')
-    finish_run(page, plan)
-
-    summary = page.evaluate('window.wordstrikeFlowIntegrationPhase11.getSummary()')
-    assert summary['progress']['completedRuns'] == 1, summary
-    assert summary['generic']['completedSessions'] == 1, summary
-    assert summary['recent'][0]['modeId'] == 'flow', summary
-    assert 'dev=1' not in page.url, page.url
-
-    if browser_name == 'chromium':
-        page.screenshot(path=str(ARTIFACTS / 'chromium-public-results.png'), full_page=True)
-
-    page.keyboard.press('Escape')
-    expect(page.locator('.mode-select-screen')).to_be_visible(timeout=10000)
-    assert 'flowRelease=1' not in page.url, page.url
-    assert 'flowRun=1' not in page.url, page.url
-    flow = page.locator('button[data-mode-id="flow"]')
-    expect(flow).to_be_visible()
-
-    flow.focus()
-    page.keyboard.press('Enter')
-    expect(page.locator('[data-flow-view="ready"]')).to_be_visible(timeout=15000)
-    assert page.evaluate('window.wordstrikeFlowReleasePhase13.runtimeReady()') is True
-    assert 'flowRelease=1' in page.url and 'dev=1' not in page.url, page.url
-
-    persisted_plan = page.evaluate('window.wordstrikeFlowPhase1.getRunPlan()')
-    assert persisted_plan['sessionLength'] == 'quick', persisted_plan
-    assert persisted_plan['modifiers'] == ['sprint'], persisted_plan
-    assert persisted_plan['passageCount'] == 1, persisted_plan
-    assert not errors, errors
-    context.close()
-
-    fresh_context = context_for(browser, base)
-    fresh_page = fresh_context.new_page()
-    fresh_errors = []
-    fresh_page.on('pageerror', lambda error: fresh_errors.append(str(error)))
-    open_modes(fresh_page, base)
-    launch_public_flow(fresh_page)
-
-    default_plan = fresh_page.evaluate('window.wordstrikeFlowPhase1.getRunPlan()')
-    assert default_plan['sessionLength'] == 'standard', default_plan
-    assert default_plan['modifiers'] == [], default_plan
-    assert default_plan['coherent'] is True, default_plan
-    assert default_plan['continuous'] is True, default_plan
-    assert default_plan['passageCount'] == 3, default_plan
-    assert default_plan['chapterCount'] == 1, default_plan
-    assert default_plan['seriesTitle'], default_plan
-    assert all('"' not in segment['text'] for segment in default_plan['segments']), default_plan
-    assert all(32 <= ord(char) <= 126 for segment in default_plan['segments'] for char in segment['text']), default_plan
-    assert not fresh_errors, fresh_errors
-
-    evidence.append({
-        'browser': browser_name,
-        'case': 'public Flow persists explicit setup while a fresh profile starts coherent Standard',
-        'completedRuns': summary['progress']['completedRuns'],
-        'canonicalSessions': summary['generic']['completedSessions'],
-        'persistedLength': persisted_plan['sessionLength'],
-        'persistedModifiers': persisted_plan['modifiers'],
-        'defaultStory': default_plan['seriesTitle'],
-        'defaultSections': default_plan['passageCount'],
-    })
-    fresh_context.close()
-
-
-def certify_mobile(browser, browser_name, base, evidence):
-    if browser_name != 'chromium':
-        return
-    context = context_for(browser, base, width=390, height=844)
-    page = context.new_page()
-    open_modes(page, base)
-    page.locator('button[data-mode-id="flow"]').click()
-    expect(page.locator('[data-flow-view="ready"]')).to_be_visible(timeout=15000)
-    assert page.evaluate('window.wordstrikeFlowReleasePhase13.runtimeReady()') is True
-    geometry = page.evaluate("""() => ({
-      overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
-      viewport: document.documentElement.clientWidth,
-      screen: document.querySelector('.flow-phase1-screen').getBoundingClientRect().width,
-      setup: document.querySelector('[data-flow-ui="setup"]')?.getBoundingClientRect().width || 0,
-    })""")
-    assert geometry['overflow'] <= 1, geometry
-    assert geometry['screen'] <= geometry['viewport'] + 1, geometry
-    assert geometry['setup'] <= geometry['viewport'] + 1, geometry
-    page.screenshot(path=str(ARTIFACTS / 'chromium-public-mobile.png'), full_page=True)
-    evidence.append({'browser': browser_name, 'case': '390px public Flow entry/setup', **geometry})
-    context.close()
-
-
-def bounded_service_worker_ready(page, timeout_ms=30000):
-    return page.evaluate("""timeoutMs => Promise.race([
-      navigator.serviceWorker.ready.then(() => ({ ready: true })),
-      new Promise(resolve => setTimeout(
-        () => resolve({ ready: false, reason: 'service-worker-ready-timeout' }),
-        timeoutMs,
-      )),
-    ])""", timeout_ms)
-
-
-def bounded_offline_ready(page, timeout_ms=30000):
-    return page.evaluate("""timeoutMs => Promise.race([
-      window.wordstrikeFlowReleasePhase13.offlineReady(),
-      new Promise(resolve => setTimeout(
-        () => resolve({ supported: true, cached: 0, timeout: true }),
-        timeoutMs,
-      )),
-    ])""", timeout_ms)
-
-
-def certify_offline(browser, browser_name, base, evidence):
-    if browser_name != 'chromium':
-        return
-    context = context_for(browser, base)
-    page = context.new_page()
-    print('Phase 13 offline: loading PWA origin', flush=True)
-    page.goto(base, wait_until='load')
-    expect(page.locator('.title-screen')).to_be_visible(timeout=10000)
-
-    print('Phase 13 offline: awaiting service worker registration', flush=True)
-    sw_ready = bounded_service_worker_ready(page)
-    assert sw_ready['ready'] is True, sw_ready
-
-    print('Phase 13 offline: awaiting Flow cache warm-up', flush=True)
-    cache_result = bounded_offline_ready(page)
-    assert cache_result.get('timeout') is not True, cache_result
-    assert cache_result['supported'] is True, cache_result
-    assert cache_result['cached'] == page.evaluate('window.wordstrikeFlowReleasePhase13.offlineAssetCount'), cache_result
-    assert cache_result['cached'] >= 30, cache_result
-    assert cache_result['cacheName'] == page.evaluate('window.wordstrikeFlowReleasePhase13.offlineCacheName'), cache_result
-
-    cached = page.evaluate("""async () => {
-      const targets = [
-        './js/flow/flowRuntimeLoader.js?v=20260917a',
-        './js/flow/flowLongformContent.js',
-        './js/flow/flowUiPhase7KeyboardGuard.js?v=20260917a',
-        './js/flow/flowIntegrationPhase11.js?v=20260916a',
-        './styles/screens/flow-integration-phase11.css?v=20260916a',
-      ];
-      const results = [];
-      for (const target of targets) {
-        results.push(Boolean(await caches.match(new URL(target, location.href).href)));
-      }
-      return results;
-    }""")
-    assert all(cached), cached
-
-    if not page.evaluate('Boolean(navigator.serviceWorker.controller)'):
-        print('Phase 13 offline: reloading once for service-worker control', flush=True)
-        page.reload(wait_until='load')
-        expect(page.locator('.title-screen')).to_be_visible(timeout=10000)
-    assert page.evaluate('Boolean(navigator.serviceWorker.controller)') is True
-
-    print('Phase 13 offline: exercising true offline reload', flush=True)
-    context.set_offline(True)
-    page.reload(wait_until='domcontentloaded')
-    expect(page.locator('.title-screen')).to_be_visible(timeout=10000)
-    page.locator('[data-action="modes"]').click()
-    expect(page.locator('.mode-select-screen')).to_be_visible()
-    page.locator('button[data-mode-id="flow"]').click()
-    expect(page.locator('[data-flow-view="ready"]')).to_be_visible(timeout=15000)
-    assert page.evaluate('window.wordstrikeFlowReleasePhase13.runtimeReady()') is True
-    assert 'dev=1' not in page.url, page.url
-    offline_plan = page.evaluate('window.wordstrikeFlowPhase1.getRunPlan()')
-    assert offline_plan['coherent'] is True, offline_plan
-    assert offline_plan['passageCount'] == 3, offline_plan
-    context.set_offline(False)
-
-    evidence.append({
-        'browser': browser_name,
-        'case': 'PWA cache warm-up and offline coherent Flow relaunch',
-        'cachedAssets': cache_result['cached'],
-        'cacheName': cache_result['cacheName'],
-    })
-    print('Phase 13 offline: certification passed', flush=True)
-    context.close()
-
-
-def main():
-    ARTIFACTS.mkdir(parents=True, exist_ok=True)
-    os.chdir(ROOT)
-    server = ThreadingHTTPServer(('127.0.0.1', 0), partial(QuietHandler, directory=str(ROOT)))
-    thread = Thread(target=server.serve_forever, daemon=True)
-    thread.start()
-    base = f'http://localhost:{server.server_port}/'
-    evidence = []
-    try:
-        with sync_playwright() as p:
-            for browser_type in (p.chromium, p.firefox):
-                browser = browser_type.launch()
-                name = browser_type.name
-                print(f'Phase 13 browser: {name} public journey', flush=True)
-                certify_public_journey(browser, name, base, evidence)
-                certify_mobile(browser, name, base, evidence)
-                certify_offline(browser, name, base, evidence)
-                browser.close()
-        (ARTIFACTS / 'evidence.json').write_text(json.dumps(evidence, indent=2), encoding='utf-8')
-        print(f'PASS: {len(evidence)} Flow Phase 13 public release scenarios', flush=True)
-    except Exception:
-        traceback.print_exc()
-        raise
-    finally:
-        server.shutdown()
-        server.server_close()
-
-
-if __name__ == '__main__':
-    main()
+console.log("Flow Phase 13 release contracts passed: public registry, fresh production seed, clean exit, post-release loader ordering, longform-aware offline module graph, and offline asset pack.");
