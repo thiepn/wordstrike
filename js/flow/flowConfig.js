@@ -19,9 +19,9 @@ export const FLOW_DIFFICULTIES = Object.freeze([
 ]);
 
 export const FLOW_SESSION_LENGTHS = Object.freeze({
-  quick: Object.freeze({ id: "quick", targetMinutes: 3 }),
-  standard: Object.freeze({ id: "standard", targetMinutes: 6 }),
-  long: Object.freeze({ id: "long", targetMinutes: 10 }),
+  quick: Object.freeze({ id: "quick", targetMinutes: 2 }),
+  standard: Object.freeze({ id: "standard", targetMinutes: 5 }),
+  long: Object.freeze({ id: "long", targetMinutes: 8 }),
 });
 
 export const FLOW_DEFAULTS = Object.freeze({
