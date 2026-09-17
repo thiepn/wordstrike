@@ -1,97 +1,18 @@
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
-const TOPICS = [
-  ['Harbor Tide Markers','a working harbor beside a sheltered bay','tide marks,stone steps,mooring lines,wind flags,brass gauges,dock boards'],
-  ['Neighborhood Library Morning','a public library before opening','return carts,shelf labels,reading tables,holds cabinets,book jackets,repair trays'],
-  ['Community Garden Paths','a shared garden divided by narrow paths','mulch edges,seed labels,watering cans,bean poles,compost bins,rain barrels'],
-  ['Train Platform Signals','a regional station at midday','platform numbers,departure boards,edge lines,signal lights,station clocks,route maps'],
-  ['Museum Workshop Table','a museum workroom preparing displays','cotton gloves,label cards,foam supports,measuring rules,soft brushes,photo records'],
-  ['Riverside Bicycle Route','a paved riverside route','distance signs,bridge ramps,tree shade,lane arrows,repair stands,route markers'],
-  ['Courtyard Rain Gauge','a school courtyard after steady rain','clear cylinders,brick paving,drain channels,roof edges,puddle rims,weather boards'],
-  ['Bread Bakery Schedule','a bakery preparing its first trays','mixing bowls,proofing baskets,oven stones,cooling racks,wall timers,weighing scales'],
-  ['Hilltop Map Survey','a low hill used for a mapping project','contour lines,stone walls,field gates,compasses,survey flags,path junctions'],
-  ['Woodworking Bench','a workshop fitting a cabinet door','steel squares,pencil lines,wood shavings,clamps,hinges,hand planes'],
-  ['Coastal Photography Walk','a windy coastal trail','rock pools,cloud shadows,camera straps,sea grass,wet stones,reflected light'],
-  ['City Tree Inventory','a residential street during a tree survey','trunk tags,tree pits,branch spread,paving joints,young stakes,survey sheets'],
-  ['Ferry Terminal Routine','a ferry terminal between river towns','ticket gates,gangway rails,arrival screens,life rings,painted arrows,mooring posts'],
-  ['Pottery Studio Shelves','a ceramics studio after a firing day','clay boards,glaze jars,kiln shelves,test tiles,drying racks,firing notes'],
-  ['Canal Lock Visit','a canal lock on a quiet weekday','lock gates,water marks,towpaths,balance beams,bollards,spillways'],
-  ['Archive Reading Room','a local archive where old maps are consulted','document boxes,foam rests,catalog numbers,map weights,reading lamps,protective folders'],
-  ['Solar Roof Inspection','a community hall with a rooftop solar array','panel rows,mounting rails,cable clips,shade lines,roof drains,inverter readings'],
-  ['Night Market Cleanup','a covered market after stalls close','folding tables,floor drains,stacked crates,string lights,waste bins,hand carts'],
-  ['Mountain Hut Supplies','a trail hut receiving a weekly delivery','food boxes,water tanks,boot racks,weather boards,storage shelves,radio notes'],
-  ['Glasshouse Ventilation','a botanical glasshouse in spring','roof vents,shade cloth,thermometers,gravel paths,mist lines,water trays'],
-  ['Old Bridge Maintenance','a stone footbridge under routine inspection','mortar joints,drain holes,handrails,paving stones,arch shadows,inspection marks'],
-  ['Recording Studio Setup','a recording room before an ensemble arrives','microphone stands,cable runs,music chairs,acoustic panels,input labels,control desks'],
-  ['Lake Water Sampling','a lakeside pier during a monthly visit','sample bottles,depth marks,Secchi disks,cool boxes,field labels,reed beds'],
-  ['Bookbinding Workshop','a craft room binding notebooks by hand','folded signatures,linen thread,bone folders,cutting mats,cover boards,press boards'],
-  ['Bus Depot Dispatch','a bus depot before the morning peak','route boards,vehicle bays,driver packets,charging points,inspection cones,departure clocks'],
-  ['Public Fountain Survey','a civic square with a restored fountain','water jets,basin tiles,pump access,drain covers,stone carvings,maintenance hatches'],
-  ['Hill Farm Water Trough','a hillside farm during a dry week','trough valves,fence posts,grass lanes,stone walls,water pipes,storage tanks'],
-  ['Theater Stage Changeover','a community theater between rehearsal and a show','curtains,stage marks,prop tables,light cues,cable covers,call sheets'],
-  ['Wetland Boardwalk Survey','a timber boardwalk crossing a wetland','reed beds,water channels,board planks,viewing screens,depth posts,trail signs'],
-  ['Clock Repair Desk','a repair bench for mechanical clocks','gear trays,spring barrels,small screws,brass plates,oil cups,parts labels'],
-  ['Orchard Harvest Route','a mixed orchard during early autumn','apple crates,pear rows,ladder feet,grass lanes,tree tags,packing notes'],
-  ['Aquarium Service Morning','an aquarium before visitors arrive','filter gauges,viewing glass,feed bins,water tests,tank lights,backup pumps'],
-  ['Stone Mason Yard','an outdoor yard preparing cut stone','stone blocks,measuring tapes,wood templates,dust sheets,chisels,lifting straps'],
-  ['Forest Trail Marking','a woodland trail where markers are renewed','painted blazes,path forks,fallen branches,stream crossings,map posts,wooden bridges'],
-  ['Cafe Opening Routine','a small cafe preparing for customers','coffee grinders,water pitchers,menu boards,clean cups,pastry trays,window blinds'],
-  ['Workshop Tool Library','a cooperative tool library on inventory day','drill cases,hand saws,loan tags,storage hooks,charging shelves,return carts'],
-  ['Seaside Weather Station','a weather station above a headland','wind cups,rain gauges,temperature screens,data cables,cloud charts,service boxes'],
-  ['Campus Bicycle Shed','a bicycle shed during maintenance','repair stands,air pumps,lock rails,tool drawers,tire levers,spare tubes'],
-  ['Rural Post Route','a rural postal route between villages','sorting trays,route cards,mail sacks,stone lanes,parcel shelves,delivery notes'],
-  ['Small Observatory Night','a hilltop observatory preparing for darkness','telescope mounts,star charts,red lamps,dome shutters,focus knobs,weather sensors'],
-  ['River Mill Restoration','an old watermill during conservation work','timber gears,mill stones,water channels,floor beams,sluice gates,repair notes'],
-  ['Community Kitchen Prep','a shared kitchen preparing a neighborhood meal','cutting boards,stock pots,ingredient crates,oven timers,serving trays,prep tables'],
-  ['Island Footpath Check','a coastal footpath after winter storms','waymark posts,stone steps,grass edges,drainage cuts,cliff fences,route maps'],
-  ['Printmaking Studio','a print studio preparing a small edition','ink rollers,metal plates,paper stacks,press blankets,drying racks,registration marks'],
-  ['Reservoir Dam Walk','a reservoir service path along a low dam','water level marks,inspection doors,drain channels,grass slopes,railings,measurement points'],
-  ['Local History Exhibit','a town museum arranging a local display','photo mounts,caption cards,glass cases,map panels,object supports,inventory sheets'],
-  ['Mineral Specimen Catalog','a geology classroom cataloging minerals','quartz crystals,zinc labels,boxed specimens,x-ray notes,feldspar trays,cabinet drawers'],
-  ['Wildlife Rescue Intake','a wildlife care center during morning intake','quail boxes,fox carriers,exam lamps,quiet zones,weighing pads,intake forms'],
-  ['Letterpress Type Cases','a print shop preparing loose type','type cases,wood furniture,metal quads,ink rollers,proof paper,composing sticks'],
-  ['Botanical Seed Exchange','a seed library preparing spring packets','seed envelopes,species cards,date stamps,sorting bowls,storage tins,germination notes'],
-  ['Civic Hall Notice Board','a civic hall arranging weekly notices','meeting cards,date headings,room numbers,pin rails,event notes,calendar boxes'],
-  ['Editorial Proof Desk','an editorial desk checking a feature','headline sheets,margin notes,quotation marks,caption cards,page numbers,style guides'],
-  ['Workshop Parts Ledger','a repair workshop tracking parts','bin labels,shelf codes,invoices,small washers,stock counts,order sheets'],
-  ['Trail Distance Board','a trail office updating route information','distance markers,bridge codes,grade notices,map years,gates,shelter numbers'],
-  ['Natural History Reading Room','a museum reading room comparing field journals','field journals,species indexes,regional maps,reference shelves,specimen sketches,catalog drawers'],
-  ['Architecture Model Room','a design studio reviewing building models','section drawings,foam models,timber samples,window studies,site plans,material boards'],
-  ['Mechanical Toy Collection','a conservation bench examining mechanical toys','tin gears,spring keys,painted wheels,axle pins,clockwork drums,maker marks'],
-  ['Urban Wayfinding Study','a pedestrian district reviewing signs','street names,corner maps,crossing signals,building numbers,direction arrows,information kiosks'],
-  ['Textile Dye Workshop','a craft studio testing plant dyes','linen swatches,dye baths,sample tags,wood tongs,rinse bowls,color cards'],
-  ['Regional Food Market','an indoor market preparing morning stalls','vegetable crates,bread baskets,price cards,herb bundles,cool boxes,stall signs'],
-  ['Field Sketching Class','an outdoor drawing class by a viaduct','stone arches,shadow edges,track lines,grass banks,drawing boards,pencil grades'],
-  ['Town Square Mixed Use','a central square becoming busy at noon','market canopies,bus stops,stone paving,cafe chairs,tree planters,crossing lights']
-];
-
-const clean = (s) => s.normalize('NFC').replace(/\r\n?/g,'\n').replace(/[ \t]+\n/g,'\n').trim();
-const words = (csv) => csv.split(',');
-const actions = ['check the reference','record a short note','compare two positions','clear the working area','inspect the next item','measure a visible change','return a tool','review the sequence','mark the result','leave the route clear'];
-const observations = [
-  'small changes are easier to judge when the reference stays fixed',
-  'consistent notes are more useful than vivid memory after several days',
-  'a quiet routine gives people time to notice an error before it spreads',
-  'clear labels reduce repeated questions without making the work rigid',
-  'shared spaces work best when the next person can understand what happened',
-  'simple tools become reliable when they are used in the same way each time'
-];
-function passage(topic, seed, minimum, extra='') {
-  const [title,setting,csv] = topic; const e=words(csv); const rot=(arr,n)=>arr[(seed+n)%arr.length];
-  const p=[];
-  p.push(`${title} is easiest to understand by spending time in ${setting} and noticing how ordinary details support one another. ${rot(e,0)[0].toUpperCase()+rot(e,0).slice(1)} draws attention first, while ${rot(e,1)} provides a quieter reference. People ${rot(actions,0)}, then ${rot(actions,1)}, because ${rot(observations,0)}. The work is practical rather than dramatic, and its quality depends on small decisions made in a sensible order.`);
-  p.push(`A second walk through the area changes the emphasis. ${rot(e,2)[0].toUpperCase()+rot(e,2).slice(1)} may look different as light, weather, or use changes, whereas ${rot(e,3)} often reveals a slower pattern. Experienced workers ${rot(actions,2)} before they ${rot(actions,3)}. This habit keeps attention on evidence instead of guesswork. It also leaves a clear trail for someone who arrives later and needs to understand the same scene without a long explanation.`);
-  p.push(`Coordination matters even when each task is small. One person can ${rot(actions,4)} while another can ${rot(actions,5)}; neither action is impressive alone, but together they prevent avoidable delay. ${rot(e,4)[0].toUpperCase()+rot(e,4).slice(1)} serves as a useful checkpoint, especially when ${rot(e,5)} changes unexpectedly. Good practice favors clear signals, enough working space, and time to correct a minor problem before it becomes a larger one.`);
-  p.push(`The setting becomes more informative when observations are compared rather than isolated. Instead of rushing toward a conclusion, people ${rot(actions,6)}, ${rot(actions,7)}, and ${rot(actions,8)} in a sequence that leaves room for review. This works because ${rot(observations,2)}. Over time, repeated records form a dependable picture of what is normal, what is seasonal, and what deserves a closer look.`);
-  p.push(`There is also value in leaving the place ready for the next cycle. ${rot(e,1)[0].toUpperCase()+rot(e,1).slice(1)} should be returned to a clear state, ${rot(e,3)} should remain easy to inspect, and the final note should describe what actually changed. ${rot(observations,4)[0].toUpperCase()+rot(observations,4).slice(1)}. That principle sounds modest, but it makes routine work easier to repeat and easier to trust.`);
-  let text=p.join('\n\n'); let n=0;
-  while ([...text].length < minimum) {
-    text += `\n\nAnother useful detail concerns ${rot(e,n+2)}. When conditions shift, careful observers ${rot(actions,n+3)} before deciding whether an adjustment is needed. They compare notes, check the immediate surroundings, and keep the explanation tied to what can be seen or measured. ${rot(observations,n+1)[0].toUpperCase()+rot(observations,n+1).slice(1)}. By the end of a normal cycle, the group can describe what changed, what stayed stable, and what should be checked next.`; n++;
-  }
-  return clean(text + (extra ? `\n\n${extra}` : ''));
+// Long passages are curated independently; never synthesize assessment prose
+// by swapping nouns inside a shared sentence template.
+const editorial = JSON.parse(await readFile(path.join(root, 'data/practice/editorial/en-v1.passages.json'), 'utf8'));
+function passage(seed, minimum, extra='') {
+  const text = editorial[String(seed)];
+  if (typeof text !== 'string' || !text.trim()) throw new Error(`Missing independently authored passage ${seed}`);
+  const result = text.trim() + (extra ? `\n\n${extra}` : '');
+  // The downstream form builders enforce each canonical protocol's capacity.
+  if ([...result].length < minimum) throw new Error(`Editorial passage ${seed} is too short`);
+  return result;
 }
 function family(partition, sourceId, prefix, index, text, tags) {
   return { familyId:`fam_${prefix}_${String(index).padStart(3,'0')}`, partition, locale:'en-US', sourceId,
@@ -105,7 +26,7 @@ const specs = [
   ['gc3-realtext-en-v1.source.json','ws-original-gc3-realtext-en-v1','training','gc3_realtext',22,20,1650,['training','real-text','gc3','wordstrike-original']]
 ];
 for (const [file,sourceId,partition,prefix,start,count,min,tags] of specs) {
-  const families=[]; for(let i=0;i<count;i++) families.push(family(prefix==='gc3_realtext'&&i>=16?'research-holdout':partition,sourceId,prefix,i+1,passage(TOPICS[start+i],start+i,min),tags));
+  const families=[]; for(let i=0;i<count;i++) families.push(family(prefix==='gc3_realtext'&&i>=16?'research-holdout':partition,sourceId,prefix,i+1,passage(start+i,min),tags));
   if(prefix==='gc3_realtext') {
     const simple = ['The red boat sat by the shore. A boy saw it move in the wind. He ran to tell his dad, who came down the path and tied it to a post.', 'We went out at dawn to see the sun. The air was cool and the grass was wet. I took a bag of food and my friend took a cup of tea.', 'A cat lay on the wall in the yard. It woke when the gate swung wide, then ran to the house and hid by the door.', 'She put the bread on a plate and cut it in two. We ate it with jam, then washed the cups and put them back on the shelf.', 'The bus was late, so we chose to walk. We took the short path by the park and got there just as the rain came down.', 'He had a map but no pen. I gave him mine so he could mark the way to the lake and the best place to stop.', 'The dog ran up the hill to find a stick. We sat on a rock and watched the clouds drift by while he ran back to us.', 'A girl stood at the door with a small box. She said it was for us and asked if we could sign for it.', 'I saw a light in the hall and went to look. My son was there with a book and said he could not sleep.', 'We left our bags in the room and went out for a meal. The town was still quiet and most shops were shut.', 'Dad took the old chair out to the shed. He said he would fix the leg and paint it blue when the wood was dry.', 'They sat by the fire and told us how the trip had gone. It was a long way home, but they were glad to be back.'];
     const complex = ['Interdisciplinary coordination requires unambiguous documentation, reproducible measurements, and independent verification of operational assumptions.', 'Photochemical decomposition accelerates when ultraviolet irradiation interacts with temperature-sensitive compounds under oxygen-rich conditions.', 'Microscopic crystallization patterns distinguish heterogeneous nucleation from homogeneous transformation in supersaturated experimental solutions.', 'Contemporary architectural conservation balances archaeological interpretation, structural reinforcement, and accessibility requirements.', 'Electromagnetic interference compromises measurement reproducibility unless instrumentation incorporates appropriate shielding and differential amplification.', 'Organizational decentralization redistributes administrative responsibility while preserving accountability through standardized evaluation procedures.', 'Biogeographical distributions reflect evolutionary diversification, ecological specialization, and historical fragmentation of interconnected habitats.', 'Computational reconstruction combines probabilistic inference with geometrical constraints to estimate otherwise inaccessible anatomical characteristics.', 'Lexicographical classifications distinguish morphological derivation, semantic specialization, and sociolinguistic variation across documented communities.', 'Hydrogeological investigations characterize subterranean permeability through repeated measurements of pressure differentials and contaminant concentrations.', 'Thermodynamic equilibrium constrains microscopic configurations without prescribing the trajectories of individual interacting constituents.', 'Astronomical spectroscopy identifies characteristic absorption signatures despite atmospheric distortion and instrumental calibration uncertainties.'];
@@ -132,7 +53,7 @@ const nums=[
 const assess=[]; const sourceId='ws-original-gc3-assessment-en-v1';
 for(let b=0;b<blocks.length;b++) for(let v=0;v<2;v++){
   let extra=''; if(b===0) extra=rare[v]; if(b===3) extra=punct[v]; if(b===4) extra=nums[v];
-  const idx=b*2+v; const text=passage(TOPICS[46+idx],46+idx,blocks[b][1]+150,extra);
+  const idx=b*2+v; const text=passage(46+idx,blocks[b][1]+150,extra);
   assess.push(family('diagnostic',sourceId,'gc3_assess',idx+1,text,['diagnostic',`assessment:${blocks[b][0]}`,'gc3','wordstrike-original']));
 }
 const at=path.join(root,'data/practice/authoring/gc3-assessment-en-v1.source.json'); await writeFile(at,JSON.stringify(doc(sourceId,assess),null,2)+'\n','utf8');

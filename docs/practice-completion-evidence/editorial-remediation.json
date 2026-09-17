@@ -1,0 +1,28 @@
+{
+  "date": "2026-09-17",
+  "decision": "EDITORIAL_REMEDIATION_PASS_PUBLIC_ACTIVATION_PENDING_DEVICE_ACCEPTANCE",
+  "independentlyAuthoredLongPassages": 58,
+  "families": 87,
+  "repeatedLongSentences": 0,
+  "crossPartitionModerateWarnings": 0,
+  "exactDuplicates": 0,
+  "hardNearDuplicates": 0,
+  "corpusChecksum": "sha256-3945d33b4195a8a076535c950ea84e38cfb3433a23aabf7f059844b39178505f",
+  "trainingOnlyModelFit": true,
+  "holdoutScored": false,
+  "matchingThresholdsChanged": false,
+  "benchmarkForms": 6,
+  "transferUnits": 16,
+  "realTextUnits": 16,
+  "diagnosticSets": 8,
+  "diagnosticVariantsPerSet": 2,
+  "benchmarkSuiteVersion": 2,
+  "transferPoolVersion": 2,
+  "publicEnabled": false,
+  "remainingAcceptance": [
+    "physical browser/device and installed PWA checks",
+    "screen-reader checks",
+    "long-session Android performance"
+  ],
+  "scope": "Independently composed and reviewed prose; automated sentence independence, capacity and engineering difficulty matching. No external human editorial or physical-device certification claimed."
+}

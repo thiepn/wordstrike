@@ -30,6 +30,8 @@ const scoreComposite = (text) => {
   return { features, textDifficulty: scorePracticeTextTypability({ features, reference, language: corpus.language }) };
 };
 const artifact = buildPracticeBenchmarkSuiteArtifact({
+  // Independently authored editorial revision; keep prior exposure lanes separate.
+  suiteVersion: 2,
   corpus,
   typabilityArtifact,
   scoreComposite,

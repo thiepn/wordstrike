@@ -75,7 +75,7 @@ test("Full Assessment fixture integrates catalog through registry without activa
   assert.equal(normalizePracticeLabRoute(createPracticeLabRoute(PRACTICE_LAB_ROUTES.EXPERIMENT_SETUP, { experimentId: "full-assessment" }), { featureGate: gate }).name, "home");
   registry.unregister("full-assessment");
   assert.equal(registry.getResolvedExperiment("full-assessment").runnable, false);
-  const publicRegistry = createPracticeExperimentRegistry({ featureGate: createPracticeFeatureGate() });
+  const publicRegistry = createPracticeExperimentRegistry({ featureGate: createPracticeFeatureGate({ publicEnabled: false }) });
   publicRegistry.register({ experimentId: "full-assessment", implementationVersion: 1, descriptorFactory: () => descriptor });
   assert.equal(publicRegistry.getResolvedExperiment("full-assessment").availability, "gated");
   assert.equal(publicRegistry.getResolvedExperiment("full-assessment").runnable, false);

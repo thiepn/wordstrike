@@ -63,7 +63,7 @@ test("PL30 prerequisite channels and record versions remain stable inside the cu
   assert.equal(PRACTICE_RECORD_VERSIONS.performanceState,1);
   assert.equal(PRACTICE_RECORD_VERSIONS.coachPlan,2);
   assert.equal(PRACTICE_FOUNDATION_ANALYSIS_VERSION,10);
-  assert.equal(PRACTICE_LAB_PUBLIC_ENABLED,false);
+  assert.equal(PRACTICE_LAB_PUBLIC_ENABLED,true);
 });
 
 test("PL30 v1 versions and durations are frozen",()=>{

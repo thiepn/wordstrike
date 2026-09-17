@@ -29,7 +29,7 @@ VIEWPORTS = [
     (390, 360, "mobile-keyboard-height"),
 ]
 
-ACTIVE_IDS = ["campaign", "speed-test", "endless", "flow"]
+ACTIVE_IDS = ["campaign", "speed-test", "endless", "flow", "practice"]
 PUBLIC_IDS = ["campaign", "speed-test", "endless", "flow", "practice"]
 
 
@@ -89,9 +89,9 @@ def assert_mode_select(page):
     flow = page.locator('button[data-mode-id="flow"]')
     assert flow.count() == 1
     assert flow.get_attribute("aria-disabled") is None
-    practice = page.locator('article[data-mode-id="practice"]')
+    practice = page.locator('button[data-mode-id="practice"]')
     assert practice.count() == 1
-    assert practice.get_attribute("aria-disabled") == "true"
+    assert practice.get_attribute("aria-disabled") is None
     assert page.locator('[data-mode-home-index="5"]').count() == 1
     assert page.locator(".mode-panel").count() == 0
     assert page.locator(".mode-grid").count() == 0
@@ -144,10 +144,10 @@ def inspect_foundation(browser, base, browser_name, evidence):
     expect(page.locator(".mode-showcase-heading h2")).to_have_text("Flow")
     assert page.locator(".mode-motif-neutral").count() == 1
     expect(page.locator(".mode-showcase-command")).to_contain_text("Launch Flow")
-    page.locator('article[data-mode-id="practice"]').hover()
+    page.locator('button[data-mode-id="practice"]').hover()
     expect(page.locator(".mode-showcase-heading h2")).to_have_text("Practice Lab")
     assert page.locator(".mode-motif-neutral").count() == 1
-    expect(page.locator(".mode-showcase-command")).to_contain_text("Not available yet")
+    expect(page.locator(".mode-showcase-command")).to_contain_text("Launch Practice Lab")
 
     # Return to a production-active visual before capturing evidence.
     page.locator('[data-mode-id="campaign"]').hover()
@@ -206,14 +206,14 @@ def inspect_keyboard_and_routes(browser, base, browser_name, evidence):
     expect(page.locator(".mode-select-screen")).to_be_visible(timeout=10000)
     assert "flowRelease=1" not in page.url, page.url
 
-    # Practice remains disabled and must not borrow another mode's route.
+    # Practice now opens its own public route.
     practice = page.locator('[data-mode-id="practice"]')
-    practice.click(force=True)
-    expect(page.locator(".mode-select-screen")).to_be_visible()
+    practice.click()
+    expect(page.locator('[data-route="skill-map"]')).to_be_visible()
 
     evidence.append({
         "browser": browser_name,
-        "case": "six-position keyboard wrap, four public routes, Practice disabled",
+        "case": "six-position keyboard wrap, five public routes including Practice Lab",
         "activeModes": ACTIVE_IDS,
         "publicModes": PUBLIC_IDS,
     })

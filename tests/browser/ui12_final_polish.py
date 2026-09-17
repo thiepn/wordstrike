@@ -249,7 +249,7 @@ def certify_touch_hint_cleanup(browser, browser_name, base, evidence):
     page.locator('[data-action="modes"]').click()
     expect(page.locator('.mode-select-screen')).to_be_visible()
     mode_state = page.evaluate("""() => {
-      const practice = document.querySelector('.mode-option.coming-soon');
+      const practice = document.querySelector('.mode-option[data-mode-id="practice"]');
       const commandKey = document.querySelector('.mode-showcase-command kbd');
       return {
         hintDisplay:getComputedStyle(document.querySelector('.mode-select-hint')).display,

@@ -72,7 +72,7 @@ export function renderPracticeCoach(root, view, { focusSelector = null } = {}) {
     ${(plan.suggestions?.assessmentSuggestion || plan.suggestions?.coldTransferSuggestion) ? `<section class="practice-coach-suggestions" aria-labelledby="practice-coach-suggestions-title"><div class="practice-lab-section-heading"><div><div class="eyebrow">Separate measurements</div><h2 id="practice-coach-suggestions-title">Optional suggestions</h2></div><p>These are outside today's training block count and never start automatically.</p></div><div class="practice-coach-suggestion-grid">${renderSuggestion(plan.suggestions.assessmentSuggestion, "assessment")}${renderSuggestion(plan.suggestions.coldTransferSuggestion, "cold")}</div></section>` : ""}` : "";
 
   root.innerHTML = `<section class="screen practice-lab-screen practice-coach-screen" data-practice-view="daily-training"><div class="practice-lab-shell">
-    <header class="practice-lab-header"><div><button type="button" class="practice-lab-back" data-practice-action="back">← Back to Practice Lab</button><div class="eyebrow">Coach · orchestration</div><h1 tabindex="-1" data-practice-heading>${escapeHtml(view.title)}</h1><p>${escapeHtml(view.subtitle)}</p></div>${view.preview ? '<span class="practice-lab-status is-preview">DEVELOPER PREVIEW</span>' : ""}</header>
+    <header class="practice-lab-header"><div><button type="button" class="practice-lab-back" data-practice-action="back">← Back to Practice Lab</button><div class="eyebrow">Coach · orchestration</div><h1 tabindex="-1" data-practice-heading>${escapeHtml(view.title)}</h1><p>${escapeHtml(view.subtitle)}</p></div>${view.preview ? '<span class="practice-lab-status is-preview">PRACTICE LAB</span>' : ""}</header>
     <main>${error}${view.status === "loading" ? '<div class="practice-lab-empty-state" aria-busy="true"><h2>Loading today’s plan…</h2></div>' : ""}${beforePlan}${planSection}</main>
   </div></section>`;
   (root.querySelector?.(focusSelector) ?? root.querySelector?.("[data-practice-action='start-coach-next']") ?? root.querySelector?.("[data-practice-action='create-coach-plan']") ?? root.querySelector?.("[data-practice-heading]"))?.focus?.({ preventScroll: true });
@@ -93,7 +93,7 @@ export function renderPracticeLabV25(root, view, options = {}) {
       button.textContent = "OPEN DAILY TRAINING";
     }
     const status = card?.querySelector?.("li");
-    if (status) status.textContent = "Available in developer preview";
+    if (status) status.textContent = "Available";
   }
   return rendered;
 }

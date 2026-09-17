@@ -84,6 +84,6 @@ assert.match(workflow, /browser-artifacts\/ui9-arcade-rush\//);
 
 // Practice remains disabled and outside UI9.
 assert.match(modes, /PRACTICE: "practice"/);
-assert.match(modes, /id: MODE_IDS\.PRACTICE,[\s\S]*enabled: false,[\s\S]*status: "coming-soon",[\s\S]*route: null/);
+assert.match(modes, /id: MODE_IDS\.PRACTICE,[\s\S]*enabled: true,[\s\S]*status: "available",[\s\S]*route: "practice-lab"/);
 
 console.log("UI9 Arcade Rush source contracts passed: presentation-only route/HUD/Core/word/wave/boss treatment, responsive and reduced-motion coverage, AR6 runtime preservation, and Practice isolation.");

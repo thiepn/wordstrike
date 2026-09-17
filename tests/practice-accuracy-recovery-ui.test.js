@@ -47,8 +47,8 @@ test("PL23 active session shows only phase/progress and repair status, never liv
   assert.doesNotMatch(target.innerHTML, /secret/);
 });
 
-test("PL23 remains behind the existing Practice feature gate", () => {
-  const gate = createPracticeFeatureGate({ developerMode: false });
+test("PL23 honors the explicitly disabled Practice feature gate", () => {
+  const gate = createPracticeFeatureGate({ developerMode: false, publicEnabled: false });
   const registry = createPracticeExperimentRegistry({ featureGate: gate });
   registerPracticeAccuracyRecoveryExperiment(registry, { runtime: { prepare() { throw new Error("not used"); } } });
   const resolved = registry.getResolvedExperiment("accuracy-control");

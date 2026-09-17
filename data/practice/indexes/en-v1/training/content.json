@@ -3,13 +3,13 @@
   "indexGeneratorVersion": 1,
   "corpusId": "practice-en-v1",
   "corpusVersion": 1,
-  "corpusChecksum": "sha256-55b276a4628d6c29f5ce47ced81e4ed5f571866c5e3afa56ee7ee3d9c1fd1438",
+  "corpusChecksum": "sha256-3945d33b4195a8a076535c950ea84e38cfb3433a23aabf7f059844b39178505f",
   "language": "en",
   "partition": "training",
   "indexType": "content",
   "items": [
     {
-      "contentId": "cnt_gc3_breadth_001_s000_0",
+      "contentId": "cnt_gc3_breadth_001_s000_34",
       "familyId": "fam_gc3_breadth_001",
       "sourceId": "ws-original-gc3-realtext-en-v1",
       "contentType": "passage",
@@ -24,7 +24,7 @@
       "punctuationCount": 4
     },
     {
-      "contentId": "cnt_gc3_breadth_002_s000_9",
+      "contentId": "cnt_gc3_breadth_002_s000_7",
       "familyId": "fam_gc3_breadth_002",
       "sourceId": "ws-original-gc3-realtext-en-v1",
       "contentType": "passage",
@@ -39,7 +39,7 @@
       "punctuationCount": 3
     },
     {
-      "contentId": "cnt_gc3_breadth_003_s000_11",
+      "contentId": "cnt_gc3_breadth_003_s000_0",
       "familyId": "fam_gc3_breadth_003",
       "sourceId": "ws-original-gc3-realtext-en-v1",
       "contentType": "passage",
@@ -54,7 +54,7 @@
       "punctuationCount": 3
     },
     {
-      "contentId": "cnt_gc3_breadth_004_s000_22",
+      "contentId": "cnt_gc3_breadth_004_s000_23",
       "familyId": "fam_gc3_breadth_004",
       "sourceId": "ws-original-gc3-realtext-en-v1",
       "contentType": "passage",
@@ -69,7 +69,7 @@
       "punctuationCount": 3
     },
     {
-      "contentId": "cnt_gc3_breadth_005_s000_11",
+      "contentId": "cnt_gc3_breadth_005_s000_16",
       "familyId": "fam_gc3_breadth_005",
       "sourceId": "ws-original-gc3-realtext-en-v1",
       "contentType": "passage",
@@ -84,7 +84,7 @@
       "punctuationCount": 3
     },
     {
-      "contentId": "cnt_gc3_breadth_006_s000_23",
+      "contentId": "cnt_gc3_breadth_006_s000_22",
       "familyId": "fam_gc3_breadth_006",
       "sourceId": "ws-original-gc3-realtext-en-v1",
       "contentType": "passage",
@@ -114,7 +114,7 @@
       "punctuationCount": 2
     },
     {
-      "contentId": "cnt_gc3_breadth_008_s000_8",
+      "contentId": "cnt_gc3_breadth_008_s000_18",
       "familyId": "fam_gc3_breadth_008",
       "sourceId": "ws-original-gc3-realtext-en-v1",
       "contentType": "passage",
@@ -129,7 +129,7 @@
       "punctuationCount": 2
     },
     {
-      "contentId": "cnt_gc3_breadth_009_s000_4",
+      "contentId": "cnt_gc3_breadth_009_s000_29",
       "familyId": "fam_gc3_breadth_009",
       "sourceId": "ws-original-gc3-realtext-en-v1",
       "contentType": "passage",
@@ -144,7 +144,7 @@
       "punctuationCount": 2
     },
     {
-      "contentId": "cnt_gc3_breadth_010_s000_5",
+      "contentId": "cnt_gc3_breadth_010_s000_2",
       "familyId": "fam_gc3_breadth_010",
       "sourceId": "ws-original-gc3-realtext-en-v1",
       "contentType": "passage",
@@ -159,7 +159,7 @@
       "punctuationCount": 2
     },
     {
-      "contentId": "cnt_gc3_breadth_011_s000_7",
+      "contentId": "cnt_gc3_breadth_011_s000_5",
       "familyId": "fam_gc3_breadth_011",
       "sourceId": "ws-original-gc3-realtext-en-v1",
       "contentType": "passage",
@@ -174,7 +174,7 @@
       "punctuationCount": 2
     },
     {
-      "contentId": "cnt_gc3_breadth_012_s000_28",
+      "contentId": "cnt_gc3_breadth_012_s000_4",
       "familyId": "fam_gc3_breadth_012",
       "sourceId": "ws-original-gc3-realtext-en-v1",
       "contentType": "passage",
@@ -189,7 +189,7 @@
       "punctuationCount": 3
     },
     {
-      "contentId": "cnt_gc3_breadth_013_s000_2",
+      "contentId": "cnt_gc3_breadth_013_s000_4",
       "familyId": "fam_gc3_breadth_013",
       "sourceId": "ws-original-gc3-realtext-en-v1",
       "contentType": "passage",
@@ -204,7 +204,7 @@
       "punctuationCount": 3
     },
     {
-      "contentId": "cnt_gc3_breadth_014_s000_1",
+      "contentId": "cnt_gc3_breadth_014_s000_7",
       "familyId": "fam_gc3_breadth_014",
       "sourceId": "ws-original-gc3-realtext-en-v1",
       "contentType": "passage",
@@ -219,7 +219,7 @@
       "punctuationCount": 3
     },
     {
-      "contentId": "cnt_gc3_breadth_015_s000_8",
+      "contentId": "cnt_gc3_breadth_015_s000_2",
       "familyId": "fam_gc3_breadth_015",
       "sourceId": "ws-original-gc3-realtext-en-v1",
       "contentType": "passage",
@@ -234,7 +234,7 @@
       "punctuationCount": 1
     },
     {
-      "contentId": "cnt_gc3_breadth_016_s000_14",
+      "contentId": "cnt_gc3_breadth_016_s000_11",
       "familyId": "fam_gc3_breadth_016",
       "sourceId": "ws-original-gc3-realtext-en-v1",
       "contentType": "passage",
@@ -249,7 +249,7 @@
       "punctuationCount": 3
     },
     {
-      "contentId": "cnt_gc3_breadth_017_s000_19",
+      "contentId": "cnt_gc3_breadth_017_s000_18",
       "familyId": "fam_gc3_breadth_017",
       "sourceId": "ws-original-gc3-realtext-en-v1",
       "contentType": "passage",
@@ -264,7 +264,7 @@
       "punctuationCount": 1
     },
     {
-      "contentId": "cnt_gc3_breadth_018_s000_8",
+      "contentId": "cnt_gc3_breadth_018_s000_7",
       "familyId": "fam_gc3_breadth_018",
       "sourceId": "ws-original-gc3-realtext-en-v1",
       "contentType": "passage",
@@ -279,7 +279,7 @@
       "punctuationCount": 1
     },
     {
-      "contentId": "cnt_gc3_breadth_019_s000_14",
+      "contentId": "cnt_gc3_breadth_019_s000_7",
       "familyId": "fam_gc3_breadth_019",
       "sourceId": "ws-original-gc3-realtext-en-v1",
       "contentType": "passage",
@@ -294,7 +294,7 @@
       "punctuationCount": 3
     },
     {
-      "contentId": "cnt_gc3_breadth_020_s000_5",
+      "contentId": "cnt_gc3_breadth_020_s000_22",
       "familyId": "fam_gc3_breadth_020",
       "sourceId": "ws-original-gc3-realtext-en-v1",
       "contentType": "passage",
@@ -309,7 +309,7 @@
       "punctuationCount": 1
     },
     {
-      "contentId": "cnt_gc3_breadth_021_s000_9",
+      "contentId": "cnt_gc3_breadth_021_s000_0",
       "familyId": "fam_gc3_breadth_021",
       "sourceId": "ws-original-gc3-realtext-en-v1",
       "contentType": "passage",
@@ -324,7 +324,7 @@
       "punctuationCount": 3
     },
     {
-      "contentId": "cnt_gc3_breadth_022_s000_2",
+      "contentId": "cnt_gc3_breadth_022_s000_6",
       "familyId": "fam_gc3_breadth_022",
       "sourceId": "ws-original-gc3-realtext-en-v1",
       "contentType": "passage",
@@ -339,7 +339,7 @@
       "punctuationCount": 1
     },
     {
-      "contentId": "cnt_gc3_breadth_023_s000_11",
+      "contentId": "cnt_gc3_breadth_023_s000_0",
       "familyId": "fam_gc3_breadth_023",
       "sourceId": "ws-original-gc3-realtext-en-v1",
       "contentType": "passage",
@@ -354,7 +354,7 @@
       "punctuationCount": 1
     },
     {
-      "contentId": "cnt_gc3_breadth_024_s000_7",
+      "contentId": "cnt_gc3_breadth_024_s000_13",
       "familyId": "fam_gc3_breadth_024",
       "sourceId": "ws-original-gc3-realtext-en-v1",
       "contentType": "passage",
@@ -375,13 +375,13 @@
       "contentType": "passage",
       "partition": "training",
       "language": "en",
-      "contentHash": "sha256-6b6fde6554325b40780c0eea0c435231e0215044f53ef55b58ac3a7ae24c560f",
-      "graphemeCount": 2191,
-      "wordCount": 355,
-      "uniqueWordCount": 222,
-      "uppercaseCount": 23,
+      "contentHash": "sha256-f89437a6ea45c84963df2d3017b44fd698c65bb97b731a513be5ee69c8f9eae5",
+      "graphemeCount": 1715,
+      "wordCount": 309,
+      "uniqueWordCount": 185,
+      "uppercaseCount": 29,
       "digitCount": 0,
-      "punctuationCount": 42
+      "punctuationCount": 38
     },
     {
       "contentId": "cnt_gc3_realtext_002_s000_1",
@@ -390,13 +390,13 @@
       "contentType": "passage",
       "partition": "training",
       "language": "en",
-      "contentHash": "sha256-43cfecaf3296bcc5ac9b3d3ef367768b13c8413033047ba60c5e36545cd4c57f",
-      "graphemeCount": 2211,
-      "wordCount": 354,
-      "uniqueWordCount": 223,
-      "uppercaseCount": 22,
+      "contentHash": "sha256-99785fbd6aa7058e9db986eb2ac61db92d667d11cdc9a82da7e1bd4123f1e115",
+      "graphemeCount": 1698,
+      "wordCount": 293,
+      "uniqueWordCount": 184,
+      "uppercaseCount": 21,
       "digitCount": 0,
-      "punctuationCount": 42
+      "punctuationCount": 28
     },
     {
       "contentId": "cnt_gc3_realtext_003_s000_3",
@@ -405,13 +405,13 @@
       "contentType": "passage",
       "partition": "training",
       "language": "en",
-      "contentHash": "sha256-fd3356ed0f4d570b126133c503651179763a73a91a01b9c606c54a48f8caa8e6",
-      "graphemeCount": 2208,
-      "wordCount": 355,
-      "uniqueWordCount": 220,
-      "uppercaseCount": 23,
+      "contentHash": "sha256-1e03181ed823faf9196eb661fa0d8480db7c628375e5ec6425e81ab0798a34ec",
+      "graphemeCount": 1706,
+      "wordCount": 295,
+      "uniqueWordCount": 178,
+      "uppercaseCount": 20,
       "digitCount": 0,
-      "punctuationCount": 42
+      "punctuationCount": 28
     },
     {
       "contentId": "cnt_gc3_realtext_004_s000_5",
@@ -420,13 +420,13 @@
       "contentType": "passage",
       "partition": "training",
       "language": "en",
-      "contentHash": "sha256-99834cdd71b5176d8e76d4e34b72791e9eaa7f595b40388269e76c7a2f6f44d9",
-      "graphemeCount": 2210,
-      "wordCount": 354,
-      "uniqueWordCount": 227,
-      "uppercaseCount": 23,
+      "contentHash": "sha256-6b63b58050aa778482efea689cf8a6d619d6cc5e5e8402c56e868a04b016a46f",
+      "graphemeCount": 1741,
+      "wordCount": 288,
+      "uniqueWordCount": 186,
+      "uppercaseCount": 22,
       "digitCount": 0,
-      "punctuationCount": 42
+      "punctuationCount": 29
     },
     {
       "contentId": "cnt_gc3_realtext_005_s000_3",
@@ -435,13 +435,13 @@
       "contentType": "passage",
       "partition": "training",
       "language": "en",
-      "contentHash": "sha256-83800cfffd0fb1c7ccc99a9f496da22693de4e2cd8c62b7385d2dc1fce12a749",
-      "graphemeCount": 2190,
-      "wordCount": 356,
-      "uniqueWordCount": 219,
-      "uppercaseCount": 24,
+      "contentHash": "sha256-5374d8ce49df6cecda19a09f2de1da2a368a1ffe3105ed35e70f19774c02425d",
+      "graphemeCount": 1717,
+      "wordCount": 277,
+      "uniqueWordCount": 180,
+      "uppercaseCount": 18,
       "digitCount": 0,
-      "punctuationCount": 42
+      "punctuationCount": 30
     },
     {
       "contentId": "cnt_gc3_realtext_006_s000_1",
@@ -450,13 +450,13 @@
       "contentType": "passage",
       "partition": "training",
       "language": "en",
-      "contentHash": "sha256-0f000a06c9eb64d3be493aa55f27976196e805f0e48753ce90f11e5c85fac69a",
-      "graphemeCount": 2210,
-      "wordCount": 354,
-      "uniqueWordCount": 223,
-      "uppercaseCount": 23,
+      "contentHash": "sha256-063e8e262385ce351b184aec486da485b0c0ea7ef2f62d068c8152a298fb123a",
+      "graphemeCount": 1727,
+      "wordCount": 295,
+      "uniqueWordCount": 184,
+      "uppercaseCount": 27,
       "digitCount": 0,
-      "punctuationCount": 42
+      "punctuationCount": 32
     },
     {
       "contentId": "cnt_gc3_realtext_007_s000_3",
@@ -465,13 +465,13 @@
       "contentType": "passage",
       "partition": "training",
       "language": "en",
-      "contentHash": "sha256-b848ec548af76c7e520da80fbb63dfa370eb1f54f4135cd82d8a1efe0cb407b2",
-      "graphemeCount": 2204,
-      "wordCount": 355,
-      "uniqueWordCount": 220,
-      "uppercaseCount": 23,
+      "contentHash": "sha256-a7a58454fad14376d4c0b681ea3627b469738c201ad04ebb8483d243eded9d41",
+      "graphemeCount": 1666,
+      "wordCount": 281,
+      "uniqueWordCount": 179,
+      "uppercaseCount": 22,
       "digitCount": 0,
-      "punctuationCount": 42
+      "punctuationCount": 28
     },
     {
       "contentId": "cnt_gc3_realtext_008_s000_34",
@@ -480,13 +480,13 @@
       "contentType": "passage",
       "partition": "training",
       "language": "en",
-      "contentHash": "sha256-e878577c0d761d1d83ded79bfe433e37decbaf8a5ed5c5716b198d3de3dd524f",
-      "graphemeCount": 2196,
-      "wordCount": 354,
-      "uniqueWordCount": 223,
-      "uppercaseCount": 23,
+      "contentHash": "sha256-1e73c197a6e899d551b4849cdcf662bd85a2042839742d56d8e38e2c47d106ce",
+      "graphemeCount": 1705,
+      "wordCount": 289,
+      "uniqueWordCount": 181,
+      "uppercaseCount": 26,
       "digitCount": 0,
-      "punctuationCount": 42
+      "punctuationCount": 28
     },
     {
       "contentId": "cnt_gc3_realtext_009_s000_3",
@@ -495,13 +495,13 @@
       "contentType": "passage",
       "partition": "training",
       "language": "en",
-      "contentHash": "sha256-bd5b386ac6cb3020f40fab11ab4a497e09e90848c06e87169f3714f44ca4eb7e",
-      "graphemeCount": 2185,
-      "wordCount": 354,
-      "uniqueWordCount": 221,
-      "uppercaseCount": 23,
+      "contentHash": "sha256-0233aaf94f6931fa67416bb2a8d85d6b0047b82464dd985eaad0ea99a32cd8f3",
+      "graphemeCount": 1714,
+      "wordCount": 279,
+      "uniqueWordCount": 179,
+      "uppercaseCount": 19,
       "digitCount": 0,
-      "punctuationCount": 42
+      "punctuationCount": 32
     },
     {
       "contentId": "cnt_gc3_realtext_010_s000_22",
@@ -510,13 +510,13 @@
       "contentType": "passage",
       "partition": "training",
       "language": "en",
-      "contentHash": "sha256-c52db1b2f8ae95a19d7e3d6d82a113f1a34a61cf1ad74e2a7652187d1db3b28a",
-      "graphemeCount": 2196,
-      "wordCount": 353,
-      "uniqueWordCount": 226,
-      "uppercaseCount": 23,
+      "contentHash": "sha256-fb86e19dc18513f802339bf043f872858495cb6b7d1ccd485e2c5d781cfb2eb8",
+      "graphemeCount": 1743,
+      "wordCount": 285,
+      "uniqueWordCount": 178,
+      "uppercaseCount": 21,
       "digitCount": 0,
-      "punctuationCount": 42
+      "punctuationCount": 28
     },
     {
       "contentId": "cnt_gc3_realtext_011_s000_0",
@@ -525,13 +525,13 @@
       "contentType": "passage",
       "partition": "training",
       "language": "en",
-      "contentHash": "sha256-897aeb7d5406b1b1f8ca88b183a51a8fce870561cfa206369162c3c06abfa24b",
-      "graphemeCount": 2195,
-      "wordCount": 353,
-      "uniqueWordCount": 218,
-      "uppercaseCount": 23,
+      "contentHash": "sha256-3591989b875d8b06efe701f2a2474642c7d784e4bc7dc4b0b4c8d35dddb743b5",
+      "graphemeCount": 1748,
+      "wordCount": 281,
+      "uniqueWordCount": 183,
+      "uppercaseCount": 19,
       "digitCount": 0,
-      "punctuationCount": 42
+      "punctuationCount": 28
     },
     {
       "contentId": "cnt_gc3_realtext_012_s000_26",
@@ -540,13 +540,13 @@
       "contentType": "passage",
       "partition": "training",
       "language": "en",
-      "contentHash": "sha256-42b8bbd4944ab1683146d038df5510e23922d853b174ceb3c265bef82d6cce4c",
-      "graphemeCount": 2210,
-      "wordCount": 355,
-      "uniqueWordCount": 224,
-      "uppercaseCount": 23,
+      "contentHash": "sha256-eb48604c3cad10246afe5fd94cfe19182809274d7c43bb8ac5d614412c0d0623",
+      "graphemeCount": 1694,
+      "wordCount": 272,
+      "uniqueWordCount": 173,
+      "uppercaseCount": 19,
       "digitCount": 0,
-      "punctuationCount": 42
+      "punctuationCount": 29
     },
     {
       "contentId": "cnt_gc3_realtext_013_s000_8",
@@ -555,13 +555,13 @@
       "contentType": "passage",
       "partition": "training",
       "language": "en",
-      "contentHash": "sha256-edf328d9a8bab6ffa02ce06cc190a6996362d57730a3114fed2cf58b2b1faf13",
-      "graphemeCount": 2201,
-      "wordCount": 354,
-      "uniqueWordCount": 220,
-      "uppercaseCount": 23,
+      "contentHash": "sha256-9ca63500c90ab991e10b65af4855371727623d4f1cbee55504908f4e6f54ba6f",
+      "graphemeCount": 1689,
+      "wordCount": 303,
+      "uniqueWordCount": 176,
+      "uppercaseCount": 24,
       "digitCount": 0,
-      "punctuationCount": 42
+      "punctuationCount": 27
     },
     {
       "contentId": "cnt_gc3_realtext_014_s000_2",
@@ -570,13 +570,13 @@
       "contentType": "passage",
       "partition": "training",
       "language": "en",
-      "contentHash": "sha256-ed12eaaec6330a7224e598655787e7819fcd9bc0e1f457487be94b2952ddcb1e",
-      "graphemeCount": 2201,
-      "wordCount": 354,
-      "uniqueWordCount": 224,
-      "uppercaseCount": 23,
+      "contentHash": "sha256-e65cf00326b2ccd9745e32d219d4efbe8ff58d0ba8fe51427b235d90aaa891bc",
+      "graphemeCount": 1712,
+      "wordCount": 285,
+      "uniqueWordCount": 175,
+      "uppercaseCount": 18,
       "digitCount": 0,
-      "punctuationCount": 42
+      "punctuationCount": 33
     },
     {
       "contentId": "cnt_gc3_realtext_015_s000_8",
@@ -585,13 +585,13 @@
       "contentType": "passage",
       "partition": "training",
       "language": "en",
-      "contentHash": "sha256-81e54f111d1f21aef36054d8775389a6c36a423b2415083f84e212c5e8ab5505",
-      "graphemeCount": 2195,
-      "wordCount": 354,
-      "uniqueWordCount": 217,
-      "uppercaseCount": 23,
+      "contentHash": "sha256-cbfd63a0246735e636e73c4c47e90778c9d6eccd370bbaf6a60f3503d28fa850",
+      "graphemeCount": 1687,
+      "wordCount": 288,
+      "uniqueWordCount": 186,
+      "uppercaseCount": 22,
       "digitCount": 0,
-      "punctuationCount": 42
+      "punctuationCount": 27
     },
     {
       "contentId": "cnt_gc3_realtext_016_s000_48",
@@ -600,13 +600,13 @@
       "contentType": "passage",
       "partition": "training",
       "language": "en",
-      "contentHash": "sha256-f59bd25873554d0d5f52d6ed0e75dd09ed0dd2c314084f5c37121ac3759b530a",
-      "graphemeCount": 2194,
-      "wordCount": 353,
-      "uniqueWordCount": 224,
-      "uppercaseCount": 23,
+      "contentHash": "sha256-6e172a9342eabda1b678689ba1c4d2f187f7f81fd3a462a61c3408cfe2bdba3d",
+      "graphemeCount": 1665,
+      "wordCount": 287,
+      "uniqueWordCount": 175,
+      "uppercaseCount": 22,
       "digitCount": 0,
-      "punctuationCount": 42
+      "punctuationCount": 29
     },
     {
       "contentId": "practice-en-ws-foundation-001-s1",

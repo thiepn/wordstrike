@@ -1,7 +1,7 @@
 import { MODE_IDS } from "../modes.js";
 
 export const PRACTICE_LAB_ROUTE = "practice-lab";
-export const PRACTICE_LAB_PUBLIC_ENABLED = false;
+export const PRACTICE_LAB_PUBLIC_ENABLED = true;
 
 export function createPracticeFeatureGate({
   developerMode = false,
@@ -17,8 +17,10 @@ export function createPracticeFeatureGate({
     canAccess: () => snapshot.allowed,
     getSnapshot: () => snapshot,
     resolveModeDefinitions(modes = []) {
-      return modes.map((mode) => mode.id === MODE_IDS.PRACTICE && snapshot.allowed
-        ? Object.freeze({ ...mode, enabled: true, status: "preview", route: PRACTICE_LAB_ROUTE })
+      return modes.map((mode) => mode.id === MODE_IDS.PRACTICE
+        ? Object.freeze({ ...mode, enabled: snapshot.allowed,
+          status: snapshot.allowed ? (snapshot.developerMode ? "preview" : "available") : "coming-soon",
+          route: snapshot.allowed ? PRACTICE_LAB_ROUTE : null })
         : mode);
     },
   });

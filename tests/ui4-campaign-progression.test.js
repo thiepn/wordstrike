@@ -56,6 +56,6 @@ assert.equal(moveLevelGridSelection(17, "ArrowRight", 17, 5), 17);
 
 // UI4 must not alter or special-case the disabled Practice Lab registry boundary.
 assert.match(modes, /PRACTICE: "practice"/);
-assert.match(modes, /id: MODE_IDS\.PRACTICE,[\s\S]*enabled: false,[\s\S]*status: "coming-soon",[\s\S]*route: null/);
+assert.match(modes, /id: MODE_IDS\.PRACTICE,[\s\S]*enabled: true,[\s\S]*status: "available",[\s\S]*route: "practice-lab"/);
 
 console.log("UI4 Campaign progression source contracts passed: route sectors, boss identity, responsive keyboard geometry, legacy retirement, and Practice exclusion.");

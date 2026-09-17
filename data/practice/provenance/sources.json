@@ -212,7 +212,7 @@
         "notes": "GC3 release-critical prose authored for WordStrike and reviewed for local Practice display."
       },
       "retrievedAt": null,
-      "sourceChecksum": "sha256-da42c77b574a7f583961d234bcdafb03475a157daf69ff8767d0d1fc26714202",
+      "sourceChecksum": "sha256-ff4ed90ad05865f5232d5b850f004f88552950af99311aef75a764461b046a4a",
       "snapshotPath": "authoring/gc3-assessment-en-v1.source.json",
       "usageApproval": "practice-display-approved",
       "notes": "GC3 governed original content; partition and family boundaries are enforced by the canonical corpus builder."
@@ -230,7 +230,7 @@
         "notes": "GC3 release-critical prose authored for WordStrike and reviewed for local Practice display."
       },
       "retrievedAt": null,
-      "sourceChecksum": "sha256-605dd54550c8ff9740b96b15b8f444ea762da019285c3472ca00303efc20d3dd",
+      "sourceChecksum": "sha256-2c9bd7085eadda521067c2ad869bc68c656ee51a34944296048e1b3d4ac8b4a7",
       "snapshotPath": "authoring/gc3-benchmark-en-v1.source.json",
       "usageApproval": "practice-display-approved",
       "notes": "GC3 governed original content; partition and family boundaries are enforced by the canonical corpus builder."
@@ -248,7 +248,7 @@
         "notes": "GC3 release-critical prose authored for WordStrike and reviewed for local Practice display."
       },
       "retrievedAt": null,
-      "sourceChecksum": "sha256-bdbfb80983d45f2fe0f9759fb4f8adb1e524bcf86f722b1e06b4f0dc485e0124",
+      "sourceChecksum": "sha256-9548cc6af2c7a166d79e25a0e299b9ff6db6a78e7d9f1ed05949ab844ba77fb1",
       "snapshotPath": "authoring/gc3-realtext-en-v1.source.json",
       "usageApproval": "practice-display-approved",
       "notes": "GC3 governed original content; partition and family boundaries are enforced by the canonical corpus builder."
@@ -266,7 +266,7 @@
         "notes": "GC3 release-critical prose authored for WordStrike and reviewed for local Practice display."
       },
       "retrievedAt": null,
-      "sourceChecksum": "sha256-21f6a4b2af2125ea27bb77fe0e1affa2c67dce360e6f4aabf348cd8a603338fe",
+      "sourceChecksum": "sha256-871dd31ff0693012142cd11f32cc59eeeda4794b1f719145579b73a556291e53",
       "snapshotPath": "authoring/gc3-transfer-en-v1.source.json",
       "usageApproval": "practice-display-approved",
       "notes": "GC3 governed original content; partition and family boundaries are enforced by the canonical corpus builder."

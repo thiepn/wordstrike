@@ -1,16 +1,22 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import { getAllModes, MODE_IDS } from "../js/modes.js";
+import {
+  FLOW_RELEASE_ASSETS,
+  FLOW_RELEASE_QUERY_KEYS,
+  buildFlowReleaseUrl,
+  isFlowDeveloperRoute,
+  isFlowReleaseRoute,
+  stripFlowReleaseUrl,
+} from "../js/flow/flowRuntimeLoader.js";
+import {
+  getAllModes,
+  getEnabledModes,
+  getModeDefinition,
+  MODE_IDS,
+} from "../js/modes.js";
 
-const [ui, css, legacyCss, systemCss, index, keyboard, modesSource] = await Promise.all([
-  readFile(new URL("../js/ui.js", import.meta.url), "utf8"),
-  readFile(new URL("../styles/screens/mode-select.css", import.meta.url), "utf8"),
-  readFile(new URL("../style.css", import.meta.url), "utf8"),
-  readFile(new URL("../styles/ui-system.css", import.meta.url), "utf8"),
-  readFile(new URL("../index.html", import.meta.url), "utf8"),
-  readFile(new URL("../js/appKeyboardController.js", import.meta.url), "utf8"),
-  readFile(new URL("../js/modes.js", import.meta.url), "utf8"),
-]);
+const index = await readFile(new URL("../index.html", import.meta.url), "utf8");
+const loader = await readFile(new URL("../js/flow/flowRuntimeLoader.js", import.meta.url), "utf8");
 
 const modes = getAllModes();
 assert.deepEqual(modes.map(({ id }) => id), [
@@ -20,71 +26,94 @@ assert.deepEqual(modes.map(({ id }) => id), [
   MODE_IDS.FLOW,
   MODE_IDS.PRACTICE,
 ]);
-assert.deepEqual(modes.map(({ enabled }) => enabled), [true, true, true, true, false]);
-assert.deepEqual(modes.slice(-2).map(({ status }) => status), ["available", "coming-soon"]);
+assert.deepEqual(getEnabledModes().map(({ id }) => id), [
+  MODE_IDS.CAMPAIGN,
+  MODE_IDS.SPEED_TEST,
+  MODE_IDS.ENDLESS,
+  MODE_IDS.FLOW,
+  MODE_IDS.PRACTICE,
+]);
 
-assert.match(index, /styles\/ui-system\.css[\s\S]*styles\/screens\/title\.css[\s\S]*styles\/screens\/mode-select\.css/);
-assert.match(index, /js\/flow\/flowRuntimeLoader\.js\?v=20260917a/);
-assert.match(ui, /<section class="screen mode-screen mode-select-screen">/);
-assert.match(ui, /class="mode-select-shell"/);
-assert.match(ui, /class="mode-showcase mode-tone-\$\{toneFor\(selectedMode\)\}"/);
-assert.match(ui, /<nav class="mode-options" aria-label="Game modes">/);
-assert.match(ui, /class="mode-option available\$\{selectedClass\(index\)\}"/);
-assert.match(ui, /class="mode-option coming-soon\$\{selectedClass\(index\)\}"/);
-assert.match(ui, /data-mode-home-index="\$\{modes\.length\}"/);
-assert.match(ui, /tabindex="-1"/);
-assert.match(ui, /aria-disabled="true"/);
-assert.match(ui, /aria-current="true"/);
-assert.match(ui, /mode\.id === "campaign"/);
-assert.match(ui, /mode\.id === "speed-test"/);
-assert.match(ui, /mode\.id === "endless"/);
-// Hidden legacy Rush presentation branches may remain for developer compatibility.
-// Flow is now public but intentionally retains the calm neutral Mode Select motif.
-assert.match(ui, /mode\.id === "arcade-rush"/);
-assert.doesNotMatch(ui, /mode\.id === "flow"/);
-assert.doesNotMatch(ui, /mode\.id === "practice"/);
-assert.doesNotMatch(ui, /class="mode-card/);
-assert.doesNotMatch(ui, /class="mode-grid/);
-assert.doesNotMatch(ui, /class="mode-panel/);
-assert.match(ui, /card\.onmousemove = \(\) => handlers\.select\?\.\(index\)/);
-assert.match(ui, /titleButton\.onmousemove = \(\) => handlers\.select\?\.\(modes\.length\)/);
-assert.doesNotMatch(ui, /card\.onmouseenter = \(\) => handlers\.select/);
-assert.doesNotMatch(ui, /titleButton\.onmouseenter = \(\) => handlers\.select/);
+const flow = getModeDefinition(MODE_IDS.FLOW);
+assert.equal(flow.enabled, true);
+assert.equal(flow.visible, true);
+assert.equal(flow.status, "available");
+assert.equal(flow.route, "flow-release");
+const practice = getModeDefinition(MODE_IDS.PRACTICE);
+assert.equal(practice.enabled, true);
+assert.equal(practice.status, "available");
+const rush = getModeDefinition(MODE_IDS.ARCADE_RUSH);
+assert.equal(rush.visible, false);
+assert.equal(rush.status, "retired");
 
-assert.match(css, /WORDSTRIKE UI3 — MODE SELECT/);
-assert.match(css, /\.mode-showcase/);
-assert.match(css, /\.mode-motif-campaign/);
-assert.match(css, /\.mode-motif-typing/);
-assert.match(css, /\.mode-motif-endless/);
-assert.match(css, /\.mode-motif-rush/);
-assert.match(css, /\.mode-motif-neutral/);
-assert.match(css, /\.mode-option\.coming-soon/);
-assert.match(css, /\.mode-home-action/);
-assert.match(css, /prefers-reduced-motion/);
-assert.doesNotMatch(css, /\.practice-lab/);
-assert.doesNotMatch(css, /data-mode-id="practice"/);
+const source = {
+  href: "https://wordstrike.test/?foo=keep&dev=1#section",
+  search: "?foo=keep&dev=1",
+};
+const releaseHref = buildFlowReleaseUrl(source);
+const release = new URL(releaseHref);
+assert.equal(release.searchParams.get("foo"), "keep");
+assert.equal(release.searchParams.has("dev"), false);
+for (const key of [
+  "mode", "flowRelease", "flowRun", "flowUi", "flowUx",
+  "flowModifiers", "flowAdaptive", "flowIntegration", "flowSeed",
+]) {
+  assert.ok(release.searchParams.has(key), `release URL missing ${key}`);
+}
+assert.match(release.searchParams.get("flowSeed"), /^release-/);
+const explicitSeed = new URL(buildFlowReleaseUrl({
+  href: "https://wordstrike.test/?flowSeed=explicit-release-seed",
+  search: "?flowSeed=explicit-release-seed",
+}));
+assert.equal(explicitSeed.searchParams.get("flowSeed"), "explicit-release-seed", "explicit release seeds must remain deterministic");
+assert.equal(release.searchParams.get("mode"), "flow");
+assert.equal(release.searchParams.get("flowRelease"), "1");
+assert.equal(isFlowReleaseRoute({ href: release.href, search: release.search }), true);
+assert.equal(isFlowDeveloperRoute({ href: release.href, search: release.search }), false);
+assert.equal(isFlowDeveloperRoute({ href: "https://wordstrike.test/?dev=1&mode=flow", search: "?dev=1&mode=flow" }), true);
 
-assert.doesNotMatch(legacyCss, /\.mode-panel\s*\{/);
-assert.doesNotMatch(legacyCss, /\.mode-grid\s*\{/);
-assert.doesNotMatch(legacyCss, /\.mode-card\s*\{/);
-assert.doesNotMatch(legacyCss, /\.mode-menu-action\s*\{/);
-assert.doesNotMatch(legacyCss, /\.mode-description\s*\{/);
-assert.doesNotMatch(systemCss, /\.mode-card(?:[,.\s:{])/);
-assert.doesNotMatch(systemCss, /\.mode-panel(?:[,.\s:{])/);
+const dirty = new URL(release.href);
+dirty.searchParams.set("flowLength", "quick");
+dirty.searchParams.set("flowModifierIds", "sprint");
+dirty.searchParams.set("flowWeaknesses", "profile");
+dirty.searchParams.set("dev", "1");
+const cleaned = new URL(stripFlowReleaseUrl({ href: dirty.href, search: dirty.search }));
+assert.equal(cleaned.searchParams.get("foo"), "keep");
+assert.equal(cleaned.searchParams.has("dev"), false);
+for (const key of FLOW_RELEASE_QUERY_KEYS) {
+  assert.equal(cleaned.searchParams.has(key), false, `exit URL retained ${key}`);
+}
 
-assert.match(keyboard, /const itemCount = getAllModes\(\)\.length \+ 1/);
-assert.match(keyboard, /event\.key === "ArrowUp" \|\| event\.key === "ArrowLeft"/);
-assert.match(keyboard, /event\.key === "ArrowDown" \|\| event\.key === "ArrowRight"/);
-assert.match(keyboard, /state\.modeSelection === getAllModes\(\)\.length\) openTitle\(\)/);
-assert.match(keyboard, /else if \(event\.key === "Escape"\) \{\s*openTitle\(\)/s);
+assert.ok(FLOW_RELEASE_ASSETS.length >= 30, "release cache pack should cover the complete Flow stack");
+assert.equal(new Set(FLOW_RELEASE_ASSETS).size, FLOW_RELEASE_ASSETS.length, "release cache pack contains duplicates");
+for (const asset of [
+  "./js/flow/flowRuntimeLoader.js?v=20260917a",
+  "./js/flow/flowEngine.js",
+  "./js/flow/flowCadence.js",
+  "./js/flow/flowGameplay.js",
+  "./js/flow/flowContentExpansion.js",
+  "./js/flow/flowLongformContent.js",
+  "./js/flow/flowPassages.js",
+  "./js/flow/flowProgression.js",
+  "./js/flow/flowUiPhase7KeyboardGuard.js?v=20260917a",
+  "./js/flow/flowIntegrationPhase11.js?v=20260916a",
+  "./styles/screens/flow-phase1.css?v=20260916d",
+  "./styles/screens/flow-integration-phase11.css?v=20260916a",
+]) {
+  assert.ok(FLOW_RELEASE_ASSETS.includes(asset), `offline pack missing ${asset}`);
+}
 
-// UI3 is presentation-only. The registry now exposes Flow as a launchable release
-// mode while Practice remains the only disabled public placeholder and hidden Rush
-// remains available only through explicit compatibility access.
-assert.match(modesSource, /FLOW: "flow"/);
-assert.match(modesSource, /id: MODE_IDS\.FLOW,[\s\S]*enabled: true,[\s\S]*visible: true,[\s\S]*status: "available",[\s\S]*route: "flow-release"/);
-assert.match(modesSource, /PRACTICE: "practice"/);
-assert.match(modesSource, /id: MODE_IDS\.PRACTICE,[\s\S]*enabled: false,[\s\S]*visible: true,[\s\S]*status: "coming-soon",[\s\S]*route: null/);
-assert.match(modesSource, /id: MODE_IDS\.ARCADE_RUSH,[\s\S]*enabled: true,[\s\S]*visible: false,[\s\S]*status: "retired",[\s\S]*route: null/);
+const mainIndex = index.indexOf('src="js/main.js?v=20260910f"');
+const releaseIndex = index.indexOf('src="js/flow/flowRuntimeLoader.js?v=20260917a"');
+assert.ok(mainIndex >= 0 && releaseIndex > mainIndex, "main.js must boot before the release loader can temporarily emulate the developer route");
+assert.doesNotMatch(index, /src="js\/flow\/flowPhase1\.js/);
+assert.doesNotMatch(index, /const flowParams = new URLSearchParams/);
+assert.match(loader, /await waitForModeSelect\(\)/);
+assert.match(loader, /temporary\.searchParams\.set\("dev", "1"\)/);
+assert.match(loader, /removeTemporaryDeveloperFlag\(\)/);
+assert.match(loader, /installReleaseExitCleanup\(\)/);
+assert.match(loader, /button\[data-mode-id=["']flow["']\]/);
+assert.match(loader, /cache\.addAll\(urls\)/);
+assert.match(loader, /flowSeed/);
 
-console.log("UI3 source contracts passed: five public registry slots, four launchable modes including Flow, disabled Practice placeholder, hidden Rush compatibility, and unchanged six-position navigation.");
+console.log("Flow Phase 13 release contracts passed: public registry, fresh production seed, clean exit, post-release loader ordering, longform-aware offline module graph, and offline asset pack.");

@@ -100,8 +100,8 @@ def certify_public_journey(browser, browser_name, base, evidence):
 
     open_modes(page, base)
     active = page.locator('button.mode-option.available').evaluate_all('els => els.map(el => el.dataset.modeId)')
-    assert active == ['campaign', 'speed-test', 'endless', 'flow'], active
-    assert page.locator('article[data-mode-id="practice"][aria-disabled="true"]').count() == 1
+    assert active == ['campaign', 'speed-test', 'endless', 'flow', 'practice'], active
+    assert page.locator('button[data-mode-id="practice"]:enabled').count() == 1
     assert page.locator('[data-mode-id="arcade-rush"]').count() == 0
 
     launch_public_flow(page)

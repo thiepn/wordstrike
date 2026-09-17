@@ -1,3 +1,4 @@
+import { auditPracticeEditorialContent } from './auditPracticeEditorialContent.mjs';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -30,3 +31,5 @@ req(real.status==='ready',`Real Text status ${real.status}`);req(real.units.leng
 req(assess.status==='ready','Assessment diagnostic artifact not ready');req(assess.formSets.length===BLOCKS.length,'Assessment set count must be exactly 8');for(const blockId of BLOCKS){const set=assess.formSets.find(s=>s.blockId===blockId);req(set&&set.status==='ready',`${blockId} not ready`);req(set.forms.length>=2,`${blockId} has fewer than 2 variants`);validateRecords(set.forms,'diagnostic',blockId);}
 const all=[...bench.forms,...transfer.units,...real.units,...assess.formSets.flatMap(s=>s.forms)];req(new Set(all.map(x=>x.contentHash??x.formHash??x.unitHash)).size===all.length,'cross-family duplicate content hash');
 console.log(JSON.stringify({benchmark:{ready:bench.forms.length,required:BENCH},transfer:{ready:transfer.units.length,required:TRANSFER},realText:{ready:real.units.length,required:REAL},assessment:{readySets:assess.formSets.filter(s=>s.status==='ready').length,requiredSets:8,minVariants:2},status:'PASS'},null,2));
+
+await auditPracticeEditorialContent();

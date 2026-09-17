@@ -588,11 +588,7 @@
       "releaseCertification": "open"
     }
   ],
-  "openGates": [
-    "cross-platform-physical-devices",
-    "assistive-technology",
-    "Android-performance"
-  ],
+  "openGates": [],
   "verification": {
     "repositoryTestFiles": 390,
     "integratedFirstRunPassed": 389,
@@ -637,5 +633,29 @@
       "minimumNativeInputContrast": 16.2034,
       "report": "practice-completion-evidence/accessibility-report.json"
     }
-  }
+  },
+  "finalAcceptance": {
+    "sourceCommit": "f9d4aaa1b7124674c3680e026fda2e9610b0bc5f",
+    "decision": "PUBLIC_RELEASE_AUTHORIZED",
+    "report": "practice-completion-evidence/final-acceptance-review.json",
+    "note": "User explicitly authorized public release with remaining physical-device, screen-reader and Android endurance checks waived. Automated evidence remains valid; unperformed checks are not marked passed.",
+    "editorialRemediation": "practice-completion-evidence/editorial-remediation.json"
+  },
+  "waivedGates": [
+    {
+      "gate": "cross-platform-physical-devices",
+      "status": "waived-for-public-release",
+      "reason": "Explicit user authorization to release for hands-on testing; not a recorded test pass."
+    },
+    {
+      "gate": "assistive-technology",
+      "status": "waived-for-public-release",
+      "reason": "Explicit user authorization to release for hands-on testing; not a recorded test pass."
+    },
+    {
+      "gate": "Android-performance",
+      "status": "waived-for-public-release",
+      "reason": "Explicit user authorization to release for hands-on testing; not a recorded test pass."
+    }
+  ]
 }

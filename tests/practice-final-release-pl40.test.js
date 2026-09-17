@@ -13,22 +13,22 @@ const packageJson = JSON.parse(
   readFileSync(new URL("../package.json", import.meta.url), "utf8"),
 );
 
-test("PL40 keeps the public Practice Lab release boundary closed", () => {
+test("PL40 enables the authorized public Practice Lab release", () => {
   const practiceMode = getModeDefinition(MODE_IDS.PRACTICE);
 
   assert.ok(practiceMode, "Practice Lab mode must remain registered");
-  assert.equal(PRACTICE_LAB_PUBLIC_ENABLED, false);
+  assert.equal(PRACTICE_LAB_PUBLIC_ENABLED, true);
   assert.equal(PRACTICE_LAB_ROUTE, "practice-lab");
-  assert.equal(isPracticeLabAvailable(), false);
+  assert.equal(isPracticeLabAvailable(), true);
 
-  assert.equal(practiceMode.enabled, false);
+  assert.equal(practiceMode.enabled, true);
   assert.equal(practiceMode.visible, true);
-  assert.equal(practiceMode.status, "coming-soon");
-  assert.equal(practiceMode.route, null);
+  assert.equal(practiceMode.status, "available");
+  assert.equal(practiceMode.route, PRACTICE_LAB_ROUTE);
   assert.equal(
     getEnabledModes().some((mode) => mode.id === MODE_IDS.PRACTICE),
-    false,
-    "Practice Lab must not appear in the enabled public mode set",
+    true,
+    "Practice Lab must appear in the enabled public mode set",
   );
 });
 
@@ -40,7 +40,7 @@ test("PL40 developer preview is explicit and cannot mutate the canonical mode", 
   assert.equal(gate.canAccess(), true);
   assert.deepEqual(gate.getSnapshot(), {
     developerMode: true,
-    publicEnabled: false,
+    publicEnabled: true,
     allowed: true,
     reason: "developer-preview",
   });
@@ -50,9 +50,9 @@ test("PL40 developer preview is explicit and cannot mutate the canonical mode", 
   assert.equal(previewMode.status, "preview");
   assert.equal(previewMode.route, PRACTICE_LAB_ROUTE);
 
-  assert.equal(practiceMode.enabled, false);
-  assert.equal(practiceMode.status, "coming-soon");
-  assert.equal(practiceMode.route, null);
+  assert.equal(practiceMode.enabled, true);
+  assert.equal(practiceMode.status, "available");
+  assert.equal(practiceMode.route, PRACTICE_LAB_ROUTE);
 });
 
 test("PL40 retains every cumulative Practice Lab certification entry point", () => {

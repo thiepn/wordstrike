@@ -17,7 +17,7 @@
     "training": 42,
     "transfer": 17,
     "benchmark": 7,
-    "diagnostic": 86,
+    "diagnostic": 78,
     "research-holdout": 5
   },
   "familyCounts": {
@@ -31,12 +31,12 @@
     }
   },
   "contentCounts": {
-    "total": 157,
+    "total": 149,
     "byPartition": {
       "training": 42,
       "transfer": 17,
       "benchmark": 7,
-      "diagnostic": 86,
+      "diagnostic": 78,
       "research-holdout": 5
     }
   },
@@ -478,5 +478,5 @@
     }
   ],
   "status": "foundation",
-  "buildChecksum": "sha256-55b276a4628d6c29f5ce47ced81e4ed5f571866c5e3afa56ee7ee3d9c1fd1438"
+  "buildChecksum": "sha256-3945d33b4195a8a076535c950ea84e38cfb3433a23aabf7f059844b39178505f"
 }
