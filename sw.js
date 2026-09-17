@@ -1,5 +1,5 @@
 const CACHE_PREFIX = "wordstrike-pwa-";
-const CACHE_NAME = CACHE_PREFIX + "v11";
+const CACHE_NAME = CACHE_PREFIX + "v12";
 const APP_SHELL = [
   "./assets/branding/wordstrike-logo.webp",
   "./data/practice/read-ahead/en-v1/WS-READAHEAD-EN-1.forms.json",

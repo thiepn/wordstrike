@@ -1,3 +1,4 @@
+import { createPracticeSessionId } from "./practiceIds.js";
 import { practicePlanCharacters, practicePhaseWindow, updatePracticeTargetSession } from "./practiceTargetSessionRendering.js";
 import { createPracticeIndexedDbStore } from "./practiceIndexedDbStore.js";
 import { createPracticeManifestStore } from "./practiceManifestStore.js";
@@ -168,6 +169,7 @@ export async function mountPracticeCombinationRepairSession({
   const engineFactory = dependencies.engineFactory ?? createPracticeSessionEngine;
   const engine = engineFactory({
     repository,
+    sessionId: session.sessionId ?? createPracticeSessionId(),
     profileId: initialized.profile.profileId,
     contextId: initialized.context.contextId,
     logger,

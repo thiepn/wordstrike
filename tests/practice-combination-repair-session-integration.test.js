@@ -137,3 +137,19 @@ test("PL20 completes through the normal Practice engine and contributes exactly 
   assert.equal(engine.getTrustedEvaluationMeasurementKind(), null);
   assert.equal(engine.getTrustedAssessmentBinding(), null);
 });
+
+test('Combination Repair session host supplies the real engine with a session identity', async () => {
+  const { mountPracticeCombinationRepairSession } = await import('../js/practiceLab/practiceCombinationRepairSessionHost.js');
+  const harness = await createPracticeSessionHarness({ suffix: 'combination-host', text: 'stub' });
+  const session = await preparedSession();
+  const root = { innerHTML: '', addEventListener() {}, removeEventListener() {}, querySelector() { return null; } };
+  const host = await mountPracticeCombinationRepairSession({ root, session, dependencies: {
+    dataStore: harness.dataStore, repository: harness.repository,
+    initialized: { profile: { profileId: harness.profileId }, context: { contextId: harness.contextId } },
+    engineFactory: options => createPracticeSessionEngine({ ...options, clock: harness.time.clock, wallClock: harness.time.wallClock, scheduler: harness.time.scheduler }),
+  } });
+  assert.equal(host.engine.getSnapshot().lifecycleState, 'active');
+  assert.ok(host.engine.getSnapshot().sessionId);
+  assert.match(root.innerHTML, /data-combination-input/);
+  await host.exit();
+});

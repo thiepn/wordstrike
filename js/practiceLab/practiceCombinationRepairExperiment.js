@@ -61,6 +61,7 @@ export function createPracticeCombinationRepairRegistration({
       if (!prepared?.contentPlan || !prepared?.plan) throw new TypeError("Combination Repair sessionFactory requires a prepared plan");
       trustPracticeCombinationRepairContentPlan(prepared.contentPlan, prepared.plan);
       return freezeDeep({
+        sessionId: prepared.sessionId ?? null,
         experiment: createPracticeCombinationRepairDescriptor({ contentPlan: prepared.contentPlan }),
         configuration: {
           correctionBehavior: "allow",
