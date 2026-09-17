@@ -28,19 +28,19 @@
   "bindings": {
     "corpusId": "practice-en-v1",
     "corpusVersion": 1,
-    "corpusChecksum": "sha256-55b276a4628d6c29f5ce47ced81e4ed5f571866c5e3afa56ee7ee3d9c1fd1438",
+    "corpusChecksum": "sha256-3945d33b4195a8a076535c950ea84e38cfb3433a23aabf7f059844b39178505f",
     "indexSchemaVersion": 1,
-    "indexChecksum": "sha256-91fa2d94960c10da646ae5473b9d1a555eef849dfef7526b6c2ca3954fe109d8",
+    "indexChecksum": "sha256-9e85dee05b692977875e868adfd43455e4ca522584a4d95c11f3485f99055151",
     "typabilityModelVersion": 1,
     "typabilityFeatureVersion": 1,
     "typabilityReferenceVersion": 1,
-    "typabilityReferenceChecksum": "sha256-2a3070a839af7e294dfd826ce5e6ff473bf82f3bf34eb335ce1d52c936aac111",
+    "typabilityReferenceChecksum": "sha256-8d77b6204ae9a63088cd03f8b86cb2bb8d148cfb603f9e9ee210889cc4d54dcc",
     "frequencyReferenceVersion": 1,
     "frequencyReferenceId": "ws-en-frequency-v1",
     "frequencyReferenceChecksum": "sha256-b9bc8dde064335c2258844919c6dd62537f95ac4a2d5920fdd7213a9cb5d45ad"
   },
   "formsPath": "data/practice/pace-ladder/en-v1/WS-PACE-EN-1.forms.json",
-  "formsChecksum": "sha256-5b4395ba92180aa8cf5247114d3ef67d0dd43a7d4110af0882f911c4207ed2c4",
+  "formsChecksum": "sha256-1bce3ac0d0f400accf02637907b9b1cf48a1bebd292d4ebd3733527d1338db84",
   "forms": [
     {
       "formId": "pace-en-01",
@@ -49,7 +49,7 @@
       "availableModelWeight": 1,
       "relativeDifficultyPercentile": 66.66666666666667,
       "windowCount": 39,
-      "windowDifficultySpread": 0.1415966789623999,
+      "windowDifficultySpread": 0.13524758694912278,
       "ready": true,
       "reasons": []
     },
@@ -60,7 +60,7 @@
       "availableModelWeight": 1,
       "relativeDifficultyPercentile": 66.66666666666667,
       "windowCount": 39,
-      "windowDifficultySpread": 0.11253390601934467,
+      "windowDifficultySpread": 0.11247601096918305,
       "ready": true,
       "reasons": []
     },
@@ -71,7 +71,7 @@
       "availableModelWeight": 1,
       "relativeDifficultyPercentile": 66.66666666666667,
       "windowCount": 39,
-      "windowDifficultySpread": 0.12315450424107187,
+      "windowDifficultySpread": 0.12007461044904244,
       "ready": true,
       "reasons": []
     },
@@ -82,7 +82,7 @@
       "availableModelWeight": 1,
       "relativeDifficultyPercentile": 66.66666666666667,
       "windowCount": 39,
-      "windowDifficultySpread": 0.12313637466305118,
+      "windowDifficultySpread": 0.11827426873385577,
       "ready": true,
       "reasons": []
     },
@@ -93,7 +93,7 @@
       "availableModelWeight": 1,
       "relativeDifficultyPercentile": 66.66666666666667,
       "windowCount": 39,
-      "windowDifficultySpread": 0.14403412303400093,
+      "windowDifficultySpread": 0.14324925582921672,
       "ready": true,
       "reasons": []
     },
@@ -104,7 +104,7 @@
       "availableModelWeight": 1,
       "relativeDifficultyPercentile": 66.66666666666667,
       "windowCount": 39,
-      "windowDifficultySpread": 0.13547973215772324,
+      "windowDifficultySpread": 0.1319898508547788,
       "ready": true,
       "reasons": []
     },
@@ -115,7 +115,7 @@
       "availableModelWeight": 1,
       "relativeDifficultyPercentile": 66.66666666666667,
       "windowCount": 39,
-      "windowDifficultySpread": 0.10812120079922967,
+      "windowDifficultySpread": 0.10752763543612284,
       "ready": true,
       "reasons": []
     },
@@ -126,7 +126,7 @@
       "availableModelWeight": 1,
       "relativeDifficultyPercentile": 66.66666666666667,
       "windowCount": 39,
-      "windowDifficultySpread": 0.1620923195269956,
+      "windowDifficultySpread": 0.160283358894798,
       "ready": true,
       "reasons": []
     }

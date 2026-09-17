@@ -637,5 +637,12 @@
       "minimumNativeInputContrast": 16.2034,
       "report": "practice-completion-evidence/accessibility-report.json"
     }
+  },
+  "finalAcceptance": {
+    "sourceCommit": "f9d4aaa1b7124674c3680e026fda2e9610b0bc5f",
+    "decision": "NOT_READY_FOR_PUBLIC_RELEASE",
+    "report": "practice-completion-evidence/final-acceptance-review.json",
+    "note": "Prior failure retained as historical evidence. All 58 long passages replaced; editorial independence and required form matching pass. Physical-device, assistive-technology and Android endurance acceptance remain open.",
+    "editorialRemediation": "practice-completion-evidence/editorial-remediation.json"
   }
 }

@@ -3,7 +3,7 @@
   "indexGeneratorVersion": 1,
   "corpusId": "practice-en-v1",
   "corpusVersion": 1,
-  "corpusChecksum": "sha256-55b276a4628d6c29f5ce47ced81e4ed5f571866c5e3afa56ee7ee3d9c1fd1438",
+  "corpusChecksum": "sha256-3945d33b4195a8a076535c950ea84e38cfb3433a23aabf7f059844b39178505f",
   "language": "en",
   "partition": "transfer",
   "indexType": "content",
@@ -15,13 +15,13 @@
       "contentType": "passage",
       "partition": "transfer",
       "language": "en",
-      "contentHash": "sha256-c7483708fd0d0da7e44a00975bb1902738612851425bc8c4261b606a27874350",
-      "graphemeCount": 2663,
-      "wordCount": 428,
-      "uniqueWordCount": 244,
-      "uppercaseCount": 28,
+      "contentHash": "sha256-f8b39fde8416dbb04411fb2f3d2451c57f7c029cb324f53ed522d4eb919d61a6",
+      "graphemeCount": 2495,
+      "wordCount": 419,
+      "uniqueWordCount": 231,
+      "uppercaseCount": 34,
       "digitCount": 0,
-      "punctuationCount": 53
+      "punctuationCount": 45
     },
     {
       "contentId": "cnt_gc3_transfer_002_s000_9",
@@ -30,13 +30,13 @@
       "contentType": "passage",
       "partition": "transfer",
       "language": "en",
-      "contentHash": "sha256-12cb91171f2de721a8c47c878e87c5cff55b45b00aa686e2e8e45259f93daa4e",
-      "graphemeCount": 2676,
-      "wordCount": 429,
-      "uniqueWordCount": 251,
-      "uppercaseCount": 28,
+      "contentHash": "sha256-c574fc5d4f76b484f98946ad829ba311616a1bdd3d7ee60da8044ca42b973754",
+      "graphemeCount": 2392,
+      "wordCount": 409,
+      "uniqueWordCount": 234,
+      "uppercaseCount": 30,
       "digitCount": 0,
-      "punctuationCount": 53
+      "punctuationCount": 48
     },
     {
       "contentId": "cnt_gc3_transfer_003_s000_12",
@@ -45,13 +45,13 @@
       "contentType": "passage",
       "partition": "transfer",
       "language": "en",
-      "contentHash": "sha256-fa6442304f4864791b43da9529ee384da88ca56104b44ea509b74ed3a0457fab",
-      "graphemeCount": 2657,
-      "wordCount": 428,
-      "uniqueWordCount": 249,
-      "uppercaseCount": 28,
+      "contentHash": "sha256-c00e5119ab50d5a66c9b73a3810c839238ef3a172cc8bc1eb08d086ec5f2ea0f",
+      "graphemeCount": 2303,
+      "wordCount": 400,
+      "uniqueWordCount": 232,
+      "uppercaseCount": 27,
       "digitCount": 0,
-      "punctuationCount": 53
+      "punctuationCount": 41
     },
     {
       "contentId": "cnt_gc3_transfer_004_s000_16",
@@ -60,13 +60,13 @@
       "contentType": "passage",
       "partition": "transfer",
       "language": "en",
-      "contentHash": "sha256-58c08a732688554d3f058a1bf1b5bbaac18b2b219637ea8cb372c4306bc256f6",
-      "graphemeCount": 2652,
-      "wordCount": 424,
-      "uniqueWordCount": 249,
-      "uppercaseCount": 27,
+      "contentHash": "sha256-4a3f37c3e4f47674e7e136c2b289a476a855f4f60ed27403b3052c1a6ecd2fb1",
+      "graphemeCount": 2344,
+      "wordCount": 412,
+      "uniqueWordCount": 220,
+      "uppercaseCount": 34,
       "digitCount": 0,
-      "punctuationCount": 53
+      "punctuationCount": 45
     },
     {
       "contentId": "cnt_gc3_transfer_005_s000_23",
@@ -75,13 +75,13 @@
       "contentType": "passage",
       "partition": "transfer",
       "language": "en",
-      "contentHash": "sha256-593aa8d8c25351e866fc015173b4b5d6db2eaa7f801ffa42188fb6b08f993ecb",
-      "graphemeCount": 2656,
-      "wordCount": 429,
-      "uniqueWordCount": 244,
-      "uppercaseCount": 28,
+      "contentHash": "sha256-668cdb4d075f3e104a595a9ad3a708acb8315af1ca9f6b0dc74acdae253e3217",
+      "graphemeCount": 2382,
+      "wordCount": 410,
+      "uniqueWordCount": 245,
+      "uppercaseCount": 27,
       "digitCount": 0,
-      "punctuationCount": 53
+      "punctuationCount": 46
     },
     {
       "contentId": "cnt_gc3_transfer_006_s000_9",
@@ -90,13 +90,13 @@
       "contentType": "passage",
       "partition": "transfer",
       "language": "en",
-      "contentHash": "sha256-e621832a9df3e6293291bd56a85bcaa8a4cffb09e8c6936fcc74dc3109e179ec",
-      "graphemeCount": 2660,
-      "wordCount": 429,
-      "uniqueWordCount": 251,
+      "contentHash": "sha256-95ddf843be980ccd62f975ab719056de9e43a5bb3a6628327f29e690a8b979d5",
+      "graphemeCount": 2531,
+      "wordCount": 412,
+      "uniqueWordCount": 245,
       "uppercaseCount": 28,
       "digitCount": 0,
-      "punctuationCount": 53
+      "punctuationCount": 44
     },
     {
       "contentId": "cnt_gc3_transfer_007_s000_23",
@@ -105,13 +105,13 @@
       "contentType": "passage",
       "partition": "transfer",
       "language": "en",
-      "contentHash": "sha256-1868d9ebeb52782fe1e85a7537b6b73f5a7b9429d3e239e1b9ac863836c91fd1",
-      "graphemeCount": 2676,
-      "wordCount": 428,
-      "uniqueWordCount": 247,
-      "uppercaseCount": 28,
+      "contentHash": "sha256-6242ab0697f16d1fa99706a1accfdbf10920c01836e82e4f98ba0b19992fd07f",
+      "graphemeCount": 2558,
+      "wordCount": 417,
+      "uniqueWordCount": 254,
+      "uppercaseCount": 31,
       "digitCount": 0,
-      "punctuationCount": 53
+      "punctuationCount": 43
     },
     {
       "contentId": "cnt_gc3_transfer_008_s000_5",
@@ -120,13 +120,13 @@
       "contentType": "passage",
       "partition": "transfer",
       "language": "en",
-      "contentHash": "sha256-5a299baf1f6b1871311d38857fbba332b0bd5212aea552a4b74a94b01585daae",
-      "graphemeCount": 2653,
-      "wordCount": 430,
-      "uniqueWordCount": 249,
-      "uppercaseCount": 28,
+      "contentHash": "sha256-7a0ac00959a3b7190708d6a87c08f0fda7ab38472449b7ddae84b169d4bb2b13",
+      "graphemeCount": 2368,
+      "wordCount": 397,
+      "uniqueWordCount": 234,
+      "uppercaseCount": 29,
       "digitCount": 0,
-      "punctuationCount": 53
+      "punctuationCount": 41
     },
     {
       "contentId": "cnt_gc3_transfer_009_s000_38",
@@ -135,13 +135,13 @@
       "contentType": "passage",
       "partition": "transfer",
       "language": "en",
-      "contentHash": "sha256-e39acf109cdcc5daabc8a4615b470b6cd1c5248a2353220ee108f72435e0a11b",
-      "graphemeCount": 2630,
-      "wordCount": 422,
-      "uniqueWordCount": 243,
-      "uppercaseCount": 28,
+      "contentHash": "sha256-d37b2144d212a7588d5c6d2bdefca53d398a76453d5a49a91b7835f61b629ed8",
+      "graphemeCount": 2545,
+      "wordCount": 431,
+      "uniqueWordCount": 249,
+      "uppercaseCount": 33,
       "digitCount": 0,
-      "punctuationCount": 53
+      "punctuationCount": 48
     },
     {
       "contentId": "cnt_gc3_transfer_010_s000_2",
@@ -150,13 +150,13 @@
       "contentType": "passage",
       "partition": "transfer",
       "language": "en",
-      "contentHash": "sha256-4ae484686ca9dd5202fc6b3c4d10f017e786adfef9f53d60b6784c4ad5207191",
-      "graphemeCount": 2689,
-      "wordCount": 429,
-      "uniqueWordCount": 252,
-      "uppercaseCount": 28,
+      "contentHash": "sha256-4b4e401e066c16eb61ea1681768b210efe543371f689336547dab40be2162636",
+      "graphemeCount": 2468,
+      "wordCount": 411,
+      "uniqueWordCount": 236,
+      "uppercaseCount": 30,
       "digitCount": 0,
-      "punctuationCount": 53
+      "punctuationCount": 45
     },
     {
       "contentId": "cnt_gc3_transfer_011_s000_8",
@@ -165,13 +165,13 @@
       "contentType": "passage",
       "partition": "transfer",
       "language": "en",
-      "contentHash": "sha256-5b004bc86a320aa2c68c7231dadf7ab911b23907c5b309b6466c02151f00afe1",
-      "graphemeCount": 2678,
-      "wordCount": 433,
-      "uniqueWordCount": 248,
-      "uppercaseCount": 28,
+      "contentHash": "sha256-91685ad01e0284c113815848bcd31f7e5cfd8a2b271f688b28803444c06a3b36",
+      "graphemeCount": 2495,
+      "wordCount": 417,
+      "uniqueWordCount": 240,
+      "uppercaseCount": 29,
       "digitCount": 0,
-      "punctuationCount": 53
+      "punctuationCount": 48
     },
     {
       "contentId": "cnt_gc3_transfer_012_s000_6",
@@ -180,13 +180,13 @@
       "contentType": "passage",
       "partition": "transfer",
       "language": "en",
-      "contentHash": "sha256-28ed4acaea53468a08d30017a6bcafc9cdcdd85ff6e3f1108310de8306fc95e5",
-      "graphemeCount": 2670,
-      "wordCount": 427,
-      "uniqueWordCount": 250,
-      "uppercaseCount": 28,
+      "contentHash": "sha256-7201fb4d4bb59c99783f5954c8b7961ab6cf3dfaa29778411812ecab2d97413a",
+      "graphemeCount": 2483,
+      "wordCount": 417,
+      "uniqueWordCount": 245,
+      "uppercaseCount": 30,
       "digitCount": 0,
-      "punctuationCount": 53
+      "punctuationCount": 42
     },
     {
       "contentId": "cnt_gc3_transfer_013_s000_0",
@@ -195,13 +195,13 @@
       "contentType": "passage",
       "partition": "transfer",
       "language": "en",
-      "contentHash": "sha256-5cea4333c12801bab92e837f827393794bcf663625993062286e497731bdcf2b",
-      "graphemeCount": 2664,
-      "wordCount": 430,
-      "uniqueWordCount": 248,
-      "uppercaseCount": 28,
+      "contentHash": "sha256-2cf55e9ca0dcf013b92a5efb8debeed9d5110a0357dc9625dfeab2eb7e6d169a",
+      "graphemeCount": 2550,
+      "wordCount": 420,
+      "uniqueWordCount": 250,
+      "uppercaseCount": 29,
       "digitCount": 0,
-      "punctuationCount": 53
+      "punctuationCount": 48
     },
     {
       "contentId": "cnt_gc3_transfer_014_s000_13",
@@ -210,13 +210,13 @@
       "contentType": "passage",
       "partition": "transfer",
       "language": "en",
-      "contentHash": "sha256-04aa903ea73af8cb31cdb6de462de48504b40058ee4232ef678bc0515cc91af2",
-      "graphemeCount": 2662,
-      "wordCount": 425,
-      "uniqueWordCount": 249,
-      "uppercaseCount": 27,
+      "contentHash": "sha256-bb88b276c1772c91494f0043a71ded89f00dc504cb7ee6df0af97de87f7023e7",
+      "graphemeCount": 2527,
+      "wordCount": 423,
+      "uniqueWordCount": 237,
+      "uppercaseCount": 30,
       "digitCount": 0,
-      "punctuationCount": 53
+      "punctuationCount": 44
     },
     {
       "contentId": "cnt_gc3_transfer_015_s000_0",
@@ -225,13 +225,13 @@
       "contentType": "passage",
       "partition": "transfer",
       "language": "en",
-      "contentHash": "sha256-4ead0429eedba8f97056959fd51757a85e78fd7e86cd27c61a92bb63f4f43f73",
-      "graphemeCount": 2678,
-      "wordCount": 426,
-      "uniqueWordCount": 246,
+      "contentHash": "sha256-bffb0bd65bc176a166773649f9f867c41e8e9160e0dbbe1fb132ab291cde130c",
+      "graphemeCount": 2534,
+      "wordCount": 408,
+      "uniqueWordCount": 250,
       "uppercaseCount": 28,
       "digitCount": 0,
-      "punctuationCount": 53
+      "punctuationCount": 44
     },
     {
       "contentId": "cnt_gc3_transfer_016_s000_6",
@@ -240,13 +240,13 @@
       "contentType": "passage",
       "partition": "transfer",
       "language": "en",
-      "contentHash": "sha256-06f6c98624915fd99b896372da304e14714ae695e277bbbc2b947324a7f7737e",
-      "graphemeCount": 2693,
-      "wordCount": 430,
-      "uniqueWordCount": 250,
-      "uppercaseCount": 28,
+      "contentHash": "sha256-390ccd5a8ccf0f1d7a4131aa524f3010df78bdc4b1903ca9e8a17140e7f3f5a4",
+      "graphemeCount": 2476,
+      "wordCount": 403,
+      "uniqueWordCount": 252,
+      "uppercaseCount": 27,
       "digitCount": 0,
-      "punctuationCount": 53
+      "punctuationCount": 43
     },
     {
       "contentId": "practice-en-ws-foundation-002-s1",

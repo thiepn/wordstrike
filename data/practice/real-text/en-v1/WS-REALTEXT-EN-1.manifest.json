@@ -9,18 +9,18 @@
   "corpusBinding": {
     "corpusId": "practice-en-v1",
     "corpusVersion": 1,
-    "corpusChecksum": "sha256-55b276a4628d6c29f5ce47ced81e4ed5f571866c5e3afa56ee7ee3d9c1fd1438"
+    "corpusChecksum": "sha256-3945d33b4195a8a076535c950ea84e38cfb3433a23aabf7f059844b39178505f"
   },
   "indexBinding": {
     "indexSchemaVersion": 1,
-    "indexChecksum": "sha256-91fa2d94960c10da646ae5473b9d1a555eef849dfef7526b6c2ca3954fe109d8"
+    "indexChecksum": "sha256-9e85dee05b692977875e868adfd43455e4ca522584a4d95c11f3485f99055151"
   },
   "typabilityBinding": {
     "modelVersion": 1,
     "featureVersion": 1,
     "referenceVersion": 1,
-    "referenceChecksum": "sha256-2a3070a839af7e294dfd826ce5e6ff473bf82f3bf34eb335ce1d52c936aac111",
-    "trainingArtifactChecksum": "sha256-d8ee8261ebd8ad47d4bc36ef435ddeee4ca7f67f8906cabf951c78a9f6b5bcc1"
+    "referenceChecksum": "sha256-8d77b6204ae9a63088cd03f8b86cb2bb8d148cfb603f9e9ee210889cc4d54dcc",
+    "trainingArtifactChecksum": "sha256-9f4dc9ea568cc9ef79fd17947ac03fc4296f6079701a9e5811c399620ba92735"
   },
   "units": [
     {
@@ -33,17 +33,17 @@
         "cnt_gc3_realtext_001_s000_3"
       ],
       "contentHashes": {
-        "cnt_gc3_realtext_001_s000_3": "sha256-6b6fde6554325b40780c0eea0c435231e0215044f53ef55b58ac3a7ae24c560f"
+        "cnt_gc3_realtext_001_s000_3": "sha256-f89437a6ea45c84963df2d3017b44fd698c65bb97b731a513be5ee69c8f9eae5"
       },
-      "graphemeCount": 2191,
-      "wordCount": 355,
-      "difficultyIndex": -0.0008962957257556096,
-      "relativeDifficultyPercentile": 29.761904761904763,
+      "graphemeCount": 1715,
+      "wordCount": 309,
+      "difficultyIndex": 0.08198776344365795,
+      "relativeDifficultyPercentile": 65.47619047619048,
       "availableModelWeight": 1,
       "digitRatio": 0,
       "symbolRatio": 0,
       "separator": " ",
-      "unitHash": "fnv1a32-a297270c"
+      "unitHash": "fnv1a32-a6159915"
     },
     {
       "unitId": "realtext-cnt_gc3_realtext_002_s000_1",
@@ -55,17 +55,17 @@
         "cnt_gc3_realtext_002_s000_1"
       ],
       "contentHashes": {
-        "cnt_gc3_realtext_002_s000_1": "sha256-43cfecaf3296bcc5ac9b3d3ef367768b13c8413033047ba60c5e36545cd4c57f"
+        "cnt_gc3_realtext_002_s000_1": "sha256-99785fbd6aa7058e9db986eb2ac61db92d667d11cdc9a82da7e1bd4123f1e115"
       },
-      "graphemeCount": 2211,
-      "wordCount": 354,
-      "difficultyIndex": -0.006470894765741496,
-      "relativeDifficultyPercentile": 13.095238095238095,
+      "graphemeCount": 1698,
+      "wordCount": 293,
+      "difficultyIndex": -0.03738534845398299,
+      "relativeDifficultyPercentile": 10.714285714285714,
       "availableModelWeight": 1,
       "digitRatio": 0,
       "symbolRatio": 0,
       "separator": " ",
-      "unitHash": "fnv1a32-6237a31e"
+      "unitHash": "fnv1a32-c4d09a4a"
     },
     {
       "unitId": "realtext-cnt_gc3_realtext_003_s000_3",
@@ -77,17 +77,17 @@
         "cnt_gc3_realtext_003_s000_3"
       ],
       "contentHashes": {
-        "cnt_gc3_realtext_003_s000_3": "sha256-fd3356ed0f4d570b126133c503651179763a73a91a01b9c606c54a48f8caa8e6"
+        "cnt_gc3_realtext_003_s000_3": "sha256-1e03181ed823faf9196eb661fa0d8480db7c628375e5ec6425e81ab0798a34ec"
       },
-      "graphemeCount": 2208,
-      "wordCount": 355,
-      "difficultyIndex": -0.0017415260341274445,
-      "relativeDifficultyPercentile": 20.238095238095237,
+      "graphemeCount": 1706,
+      "wordCount": 295,
+      "difficultyIndex": -0.03671478523097609,
+      "relativeDifficultyPercentile": 13.095238095238095,
       "availableModelWeight": 1,
       "digitRatio": 0,
       "symbolRatio": 0,
       "separator": " ",
-      "unitHash": "fnv1a32-0747ca9d"
+      "unitHash": "fnv1a32-5749397b"
     },
     {
       "unitId": "realtext-cnt_gc3_realtext_004_s000_5",
@@ -99,17 +99,17 @@
         "cnt_gc3_realtext_004_s000_5"
       ],
       "contentHashes": {
-        "cnt_gc3_realtext_004_s000_5": "sha256-99834cdd71b5176d8e76d4e34b72791e9eaa7f595b40388269e76c7a2f6f44d9"
+        "cnt_gc3_realtext_004_s000_5": "sha256-6b63b58050aa778482efea689cf8a6d619d6cc5e5e8402c56e868a04b016a46f"
       },
-      "graphemeCount": 2210,
-      "wordCount": 354,
-      "difficultyIndex": -0.0010307012633713145,
-      "relativeDifficultyPercentile": 27.38095238095238,
+      "graphemeCount": 1741,
+      "wordCount": 288,
+      "difficultyIndex": -0.0036676469599705164,
+      "relativeDifficultyPercentile": 36.904761904761905,
       "availableModelWeight": 1,
       "digitRatio": 0,
       "symbolRatio": 0,
       "separator": " ",
-      "unitHash": "fnv1a32-e2768261"
+      "unitHash": "fnv1a32-e41ed87f"
     },
     {
       "unitId": "realtext-cnt_gc3_realtext_005_s000_3",
@@ -121,17 +121,17 @@
         "cnt_gc3_realtext_005_s000_3"
       ],
       "contentHashes": {
-        "cnt_gc3_realtext_005_s000_3": "sha256-83800cfffd0fb1c7ccc99a9f496da22693de4e2cd8c62b7385d2dc1fce12a749"
+        "cnt_gc3_realtext_005_s000_3": "sha256-5374d8ce49df6cecda19a09f2de1da2a368a1ffe3105ed35e70f19774c02425d"
       },
-      "graphemeCount": 2190,
-      "wordCount": 356,
-      "difficultyIndex": 0.003831253103986619,
-      "relativeDifficultyPercentile": 53.57142857142857,
+      "graphemeCount": 1717,
+      "wordCount": 277,
+      "difficultyIndex": -0.007303229228939845,
+      "relativeDifficultyPercentile": 34.523809523809526,
       "availableModelWeight": 1,
       "digitRatio": 0,
       "symbolRatio": 0,
       "separator": " ",
-      "unitHash": "fnv1a32-57d00eb1"
+      "unitHash": "fnv1a32-95e98a07"
     },
     {
       "unitId": "realtext-cnt_gc3_realtext_006_s000_1",
@@ -143,17 +143,17 @@
         "cnt_gc3_realtext_006_s000_1"
       ],
       "contentHashes": {
-        "cnt_gc3_realtext_006_s000_1": "sha256-0f000a06c9eb64d3be493aa55f27976196e805f0e48753ce90f11e5c85fac69a"
+        "cnt_gc3_realtext_006_s000_1": "sha256-063e8e262385ce351b184aec486da485b0c0ea7ef2f62d068c8152a298fb123a"
       },
-      "graphemeCount": 2210,
-      "wordCount": 354,
-      "difficultyIndex": -0.0010307012633715255,
-      "relativeDifficultyPercentile": 25,
+      "graphemeCount": 1727,
+      "wordCount": 295,
+      "difficultyIndex": 0.03070177846260318,
+      "relativeDifficultyPercentile": 53.57142857142857,
       "availableModelWeight": 1,
       "digitRatio": 0,
       "symbolRatio": 0,
       "separator": " ",
-      "unitHash": "fnv1a32-5d60440a"
+      "unitHash": "fnv1a32-68f302ff"
     },
     {
       "unitId": "realtext-cnt_gc3_realtext_007_s000_3",
@@ -165,17 +165,17 @@
         "cnt_gc3_realtext_007_s000_3"
       ],
       "contentHashes": {
-        "cnt_gc3_realtext_007_s000_3": "sha256-b848ec548af76c7e520da80fbb63dfa370eb1f54f4135cd82d8a1efe0cb407b2"
+        "cnt_gc3_realtext_007_s000_3": "sha256-a7a58454fad14376d4c0b681ea3627b469738c201ad04ebb8483d243eded9d41"
       },
-      "graphemeCount": 2204,
-      "wordCount": 355,
-      "difficultyIndex": -0.001548745557646553,
-      "relativeDifficultyPercentile": 22.61904761904762,
+      "graphemeCount": 1666,
+      "wordCount": 281,
+      "difficultyIndex": -0.001420488221791276,
+      "relativeDifficultyPercentile": 41.666666666666664,
       "availableModelWeight": 1,
       "digitRatio": 0,
       "symbolRatio": 0,
       "separator": " ",
-      "unitHash": "fnv1a32-99aa9e05"
+      "unitHash": "fnv1a32-540fa6c0"
     },
     {
       "unitId": "realtext-cnt_gc3_realtext_008_s000_34",
@@ -187,17 +187,17 @@
         "cnt_gc3_realtext_008_s000_34"
       ],
       "contentHashes": {
-        "cnt_gc3_realtext_008_s000_34": "sha256-e878577c0d761d1d83ded79bfe433e37decbaf8a5ed5c5716b198d3de3dd524f"
+        "cnt_gc3_realtext_008_s000_34": "sha256-1e73c197a6e899d551b4849cdcf662bd85a2042839742d56d8e38e2c47d106ce"
       },
-      "graphemeCount": 2196,
-      "wordCount": 354,
-      "difficultyIndex": -0.0003560001627416433,
-      "relativeDifficultyPercentile": 36.904761904761905,
+      "graphemeCount": 1705,
+      "wordCount": 289,
+      "difficultyIndex": 0.0019382056671920305,
+      "relativeDifficultyPercentile": 44.04761904761905,
       "availableModelWeight": 1,
       "digitRatio": 0,
       "symbolRatio": 0,
       "separator": " ",
-      "unitHash": "fnv1a32-53864c77"
+      "unitHash": "fnv1a32-dba63fa4"
     },
     {
       "unitId": "realtext-cnt_gc3_realtext_009_s000_3",
@@ -209,17 +209,17 @@
         "cnt_gc3_realtext_009_s000_3"
       ],
       "contentHashes": {
-        "cnt_gc3_realtext_009_s000_3": "sha256-bd5b386ac6cb3020f40fab11ab4a497e09e90848c06e87169f3714f44ca4eb7e"
+        "cnt_gc3_realtext_009_s000_3": "sha256-0233aaf94f6931fa67416bb2a8d85d6b0047b82464dd985eaad0ea99a32cd8f3"
       },
-      "graphemeCount": 2185,
-      "wordCount": 354,
-      "difficultyIndex": 0.0002065258911260917,
-      "relativeDifficultyPercentile": 41.666666666666664,
+      "graphemeCount": 1714,
+      "wordCount": 279,
+      "difficultyIndex": 0.012979566518368235,
+      "relativeDifficultyPercentile": 48.80952380952381,
       "availableModelWeight": 1,
       "digitRatio": 0,
       "symbolRatio": 0,
       "separator": " ",
-      "unitHash": "fnv1a32-66ea9f9b"
+      "unitHash": "fnv1a32-99ec52f9"
     },
     {
       "unitId": "realtext-cnt_gc3_realtext_010_s000_22",
@@ -231,17 +231,17 @@
         "cnt_gc3_realtext_010_s000_22"
       ],
       "contentHashes": {
-        "cnt_gc3_realtext_010_s000_22": "sha256-c52db1b2f8ae95a19d7e3d6d82a113f1a34a61cf1ad74e2a7652187d1db3b28a"
+        "cnt_gc3_realtext_010_s000_22": "sha256-fb86e19dc18513f802339bf043f872858495cb6b7d1ccd485e2c5d781cfb2eb8"
       },
-      "graphemeCount": 2196,
-      "wordCount": 353,
-      "difficultyIndex": 0.0004459345069100571,
-      "relativeDifficultyPercentile": 44.04761904761905,
+      "graphemeCount": 1743,
+      "wordCount": 285,
+      "difficultyIndex": -0.014611072719743354,
+      "relativeDifficultyPercentile": 32.142857142857146,
       "availableModelWeight": 1,
       "digitRatio": 0,
       "symbolRatio": 0,
       "separator": " ",
-      "unitHash": "fnv1a32-31d1702b"
+      "unitHash": "fnv1a32-d285110a"
     },
     {
       "unitId": "realtext-cnt_gc3_realtext_011_s000_0",
@@ -253,17 +253,17 @@
         "cnt_gc3_realtext_011_s000_0"
       ],
       "contentHashes": {
-        "cnt_gc3_realtext_011_s000_0": "sha256-897aeb7d5406b1b1f8ca88b183a51a8fce870561cfa206369162c3c06abfa24b"
+        "cnt_gc3_realtext_011_s000_0": "sha256-3591989b875d8b06efe701f2a2474642c7d784e4bc7dc4b0b4c8d35dddb743b5"
       },
-      "graphemeCount": 2195,
-      "wordCount": 353,
-      "difficultyIndex": 0.0004951756018443603,
-      "relativeDifficultyPercentile": 46.42857142857143,
+      "graphemeCount": 1748,
+      "wordCount": 281,
+      "difficultyIndex": -0.02239287314547295,
+      "relativeDifficultyPercentile": 22.61904761904762,
       "availableModelWeight": 1,
       "digitRatio": 0,
       "symbolRatio": 0,
       "separator": " ",
-      "unitHash": "fnv1a32-25996813"
+      "unitHash": "fnv1a32-1ed294e9"
     },
     {
       "unitId": "realtext-cnt_gc3_realtext_012_s000_26",
@@ -275,17 +275,17 @@
         "cnt_gc3_realtext_012_s000_26"
       ],
       "contentHashes": {
-        "cnt_gc3_realtext_012_s000_26": "sha256-42b8bbd4944ab1683146d038df5510e23922d853b174ceb3c265bef82d6cce4c"
+        "cnt_gc3_realtext_012_s000_26": "sha256-eb48604c3cad10246afe5fd94cfe19182809274d7c43bb8ac5d614412c0d0623"
       },
-      "graphemeCount": 2210,
-      "wordCount": 355,
-      "difficultyIndex": -0.001836523651499988,
-      "relativeDifficultyPercentile": 17.857142857142858,
+      "graphemeCount": 1694,
+      "wordCount": 272,
+      "difficultyIndex": -0.0026919247738979154,
+      "relativeDifficultyPercentile": 39.285714285714285,
       "availableModelWeight": 1,
       "digitRatio": 0,
       "symbolRatio": 0,
       "separator": " ",
-      "unitHash": "fnv1a32-f108bfb0"
+      "unitHash": "fnv1a32-2f4186ac"
     },
     {
       "unitId": "realtext-cnt_gc3_realtext_013_s000_8",
@@ -297,17 +297,17 @@
         "cnt_gc3_realtext_013_s000_8"
       ],
       "contentHashes": {
-        "cnt_gc3_realtext_013_s000_8": "sha256-edf328d9a8bab6ffa02ce06cc190a6996362d57730a3114fed2cf58b2b1faf13"
+        "cnt_gc3_realtext_013_s000_8": "sha256-9ca63500c90ab991e10b65af4855371727623d4f1cbee55504908f4e6f54ba6f"
       },
-      "graphemeCount": 2201,
-      "wordCount": 354,
-      "difficultyIndex": -0.0006022212669757499,
-      "relativeDifficultyPercentile": 34.523809523809526,
+      "graphemeCount": 1689,
+      "wordCount": 303,
+      "difficultyIndex": -0.03495879437827439,
+      "relativeDifficultyPercentile": 15.476190476190476,
       "availableModelWeight": 1,
       "digitRatio": 0,
       "symbolRatio": 0,
       "separator": " ",
-      "unitHash": "fnv1a32-a9d11341"
+      "unitHash": "fnv1a32-75928e97"
     },
     {
       "unitId": "realtext-cnt_gc3_realtext_014_s000_2",
@@ -319,17 +319,17 @@
         "cnt_gc3_realtext_014_s000_2"
       ],
       "contentHashes": {
-        "cnt_gc3_realtext_014_s000_2": "sha256-ed12eaaec6330a7224e598655787e7819fcd9bc0e1f457487be94b2952ddcb1e"
+        "cnt_gc3_realtext_014_s000_2": "sha256-e65cf00326b2ccd9745e32d219d4efbe8ff58d0ba8fe51427b235d90aaa891bc"
       },
-      "graphemeCount": 2201,
-      "wordCount": 354,
-      "difficultyIndex": -0.0006022212669765936,
-      "relativeDifficultyPercentile": 32.142857142857146,
+      "graphemeCount": 1712,
+      "wordCount": 285,
+      "difficultyIndex": 0.008349417199370475,
+      "relativeDifficultyPercentile": 46.42857142857143,
       "availableModelWeight": 1,
       "digitRatio": 0,
       "symbolRatio": 0,
       "separator": " ",
-      "unitHash": "fnv1a32-c2626350"
+      "unitHash": "fnv1a32-ef07d4dd"
     },
     {
       "unitId": "realtext-cnt_gc3_realtext_015_s000_8",
@@ -341,17 +341,17 @@
         "cnt_gc3_realtext_015_s000_8"
       ],
       "contentHashes": {
-        "cnt_gc3_realtext_015_s000_8": "sha256-81e54f111d1f21aef36054d8775389a6c36a423b2415083f84e212c5e8ab5505"
+        "cnt_gc3_realtext_015_s000_8": "sha256-cbfd63a0246735e636e73c4c47e90778c9d6eccd370bbaf6a60f3503d28fa850"
       },
-      "graphemeCount": 2195,
-      "wordCount": 354,
-      "difficultyIndex": -0.0003060493654456798,
-      "relativeDifficultyPercentile": 39.285714285714285,
+      "graphemeCount": 1687,
+      "wordCount": 288,
+      "difficultyIndex": -0.03338929772326092,
+      "relativeDifficultyPercentile": 17.857142857142858,
       "availableModelWeight": 1,
       "digitRatio": 0,
       "symbolRatio": 0,
       "separator": " ",
-      "unitHash": "fnv1a32-87dda517"
+      "unitHash": "fnv1a32-8e7f571a"
     },
     {
       "unitId": "realtext-cnt_gc3_realtext_016_s000_48",
@@ -363,21 +363,21 @@
         "cnt_gc3_realtext_016_s000_48"
       ],
       "contentHashes": {
-        "cnt_gc3_realtext_016_s000_48": "sha256-f59bd25873554d0d5f52d6ed0e75dd09ed0dd2c314084f5c37121ac3759b530a"
+        "cnt_gc3_realtext_016_s000_48": "sha256-6e172a9342eabda1b678689ba1c4d2f187f7f81fd3a462a61c3408cfe2bdba3d"
       },
-      "graphemeCount": 2194,
-      "wordCount": 353,
-      "difficultyIndex": 0.0005446527342730546,
-      "relativeDifficultyPercentile": 48.80952380952381,
+      "graphemeCount": 1665,
+      "wordCount": 287,
+      "difficultyIndex": -0.014661233888386555,
+      "relativeDifficultyPercentile": 29.761904761904763,
       "availableModelWeight": 1,
       "digitRatio": 0,
       "symbolRatio": 0,
       "separator": " ",
-      "unitHash": "fnv1a32-bd6bf2e9"
+      "unitHash": "fnv1a32-4c2ea95f"
     }
   ],
   "releaseReport": {
     "releaseBlockers": []
   },
-  "checksum": "fnv1a32-4dc4d655"
+  "checksum": "fnv1a32-163ec36e"
 }

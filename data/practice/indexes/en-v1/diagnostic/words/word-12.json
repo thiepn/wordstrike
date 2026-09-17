@@ -3,7 +3,7 @@
   "indexGeneratorVersion": 1,
   "corpusId": "practice-en-v1",
   "corpusVersion": 1,
-  "corpusChecksum": "sha256-55b276a4628d6c29f5ce47ced81e4ed5f571866c5e3afa56ee7ee3d9c1fd1438",
+  "corpusChecksum": "sha256-3945d33b4195a8a076535c950ea84e38cfb3433a23aabf7f059844b39178505f",
   "language": "en",
   "partition": "diagnostic",
   "indexType": "words",
@@ -18,6 +18,146 @@
       "surfaceForms": [
         {
           "surfaceText": "about",
+          "corpusOccurrenceCount": 19
+        }
+      ],
+      "corpusOccurrenceCount": 19,
+      "contentCoverageCount": 15,
+      "familyCoverageCount": 9,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_001_s000_6",
+          "familyId": "fam_gc3_assess_001",
+          "count": 1,
+          "positions": [
+            376
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_002_s000_18",
+          "familyId": "fam_gc3_assess_002",
+          "count": 1,
+          "positions": [
+            454
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_002_s003_18",
+          "familyId": "fam_gc3_assess_002",
+          "count": 5,
+          "positions": [
+            46,
+            135,
+            162,
+            184,
+            328
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_002_s004_18",
+          "familyId": "fam_gc3_assess_002",
+          "count": 1,
+          "positions": [
+            102
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_002_s005_3",
+          "familyId": "fam_gc3_assess_002",
+          "count": 1,
+          "positions": [
+            224
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_003_s001_2",
+          "familyId": "fam_gc3_assess_003",
+          "count": 1,
+          "positions": [
+            622
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_008_s000_24",
+          "familyId": "fam_gc3_assess_008",
+          "count": 1,
+          "positions": [
+            581
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_008_s001_2",
+          "familyId": "fam_gc3_assess_008",
+          "count": 1,
+          "positions": [
+            600
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_008_s002_4",
+          "familyId": "fam_gc3_assess_008",
+          "count": 1,
+          "positions": [
+            456
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_012_s000_1",
+          "familyId": "fam_gc3_assess_012",
+          "count": 1,
+          "positions": [
+            548
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_013_s000_2",
+          "familyId": "fam_gc3_assess_013",
+          "count": 1,
+          "positions": [
+            550
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_013_s003_11",
+          "familyId": "fam_gc3_assess_013",
+          "count": 1,
+          "positions": [
+            188
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_014_s000_2",
+          "familyId": "fam_gc3_assess_014",
+          "count": 1,
+          "positions": [
+            68
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_015_s002_23",
+          "familyId": "fam_gc3_assess_015",
+          "count": 1,
+          "positions": [
+            438
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_016_s000_27",
+          "familyId": "fam_gc3_assess_016",
+          "count": 1,
+          "positions": [
+            40
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "actor",
+      "lexicalKey": "actor",
+      "surfaceForms": [
+        {
+          "surfaceText": "actor",
           "corpusOccurrenceCount": 1
         }
       ],
@@ -26,11 +166,35 @@
       "familyCoverageCount": 1,
       "contents": [
         {
-          "contentId": "cnt_gc3_assess_002_s005_3",
-          "familyId": "fam_gc3_assess_002",
+          "contentId": "cnt_gc3_assess_005_s000_15",
+          "familyId": "fam_gc3_assess_005",
           "count": 1,
           "positions": [
-            495
+            455
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "amateur",
+      "lexicalKey": "amateur",
+      "surfaceForms": [
+        {
+          "surfaceText": "amateur",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_005_s000_15",
+          "familyId": "fam_gc3_assess_005",
+          "count": 1,
+          "positions": [
+            4
           ]
         }
       ]
@@ -42,24 +206,39 @@
       "surfaceForms": [
         {
           "surfaceText": "an",
-          "corpusOccurrenceCount": 55
+          "corpusOccurrenceCount": 47
         },
         {
           "surfaceText": "An",
-          "corpusOccurrenceCount": 1
+          "corpusOccurrenceCount": 2
         }
       ],
-      "corpusOccurrenceCount": 56,
-      "contentCoverageCount": 42,
-      "familyCoverageCount": 16,
+      "corpusOccurrenceCount": 49,
+      "contentCoverageCount": 36,
+      "familyCoverageCount": 15,
       "contents": [
+        {
+          "contentId": "cnt_gc3_assess_001_s001_4",
+          "familyId": "fam_gc3_assess_001",
+          "count": 1,
+          "positions": [
+            123
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_001_s002_28",
+          "familyId": "fam_gc3_assess_001",
+          "count": 1,
+          "positions": [
+            610
+          ]
+        },
         {
           "contentId": "cnt_gc3_assess_001_s003_0",
           "familyId": "fam_gc3_assess_001",
-          "count": 2,
+          "count": 1,
           "positions": [
-            145,
-            403
+            558
           ]
         },
         {
@@ -67,7 +246,7 @@
           "familyId": "fam_gc3_assess_001",
           "count": 1,
           "positions": [
-            220
+            252
           ]
         },
         {
@@ -75,16 +254,17 @@
           "familyId": "fam_gc3_assess_001",
           "count": 2,
           "positions": [
-            35,
-            662
+            114,
+            464
           ]
         },
         {
-          "contentId": "cnt_gc3_assess_002_s003_18",
+          "contentId": "cnt_gc3_assess_002_s001_18",
           "familyId": "fam_gc3_assess_002",
-          "count": 1,
+          "count": 2,
           "positions": [
-            402
+            172,
+            603
           ]
         },
         {
@@ -92,315 +272,379 @@
           "familyId": "fam_gc3_assess_002",
           "count": 1,
           "positions": [
-            209
+            593
           ]
         },
         {
           "contentId": "cnt_gc3_assess_002_s005_3",
           "familyId": "fam_gc3_assess_002",
+          "count": 1,
+          "positions": [
+            171
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_004_s000_2",
+          "familyId": "fam_gc3_assess_004",
+          "count": 1,
+          "positions": [
+            385
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_004_s004_9",
+          "familyId": "fam_gc3_assess_004",
+          "count": 1,
+          "positions": [
+            628
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_005_s003_8",
+          "familyId": "fam_gc3_assess_005",
           "count": 3,
           "positions": [
-            24,
-            210,
-            442
+            101,
+            139,
+            321
           ]
         },
         {
-          "contentId": "cnt_gc3_assess_003_s002_8",
-          "familyId": "fam_gc3_assess_003",
+          "contentId": "cnt_gc3_assess_005_s004_5",
+          "familyId": "fam_gc3_assess_005",
           "count": 1,
           "positions": [
-            367
+            539
           ]
         },
         {
-          "contentId": "cnt_gc3_assess_003_s003_48",
-          "familyId": "fam_gc3_assess_003",
+          "contentId": "cnt_gc3_assess_006_s002_3",
+          "familyId": "fam_gc3_assess_006",
           "count": 1,
           "positions": [
-            388
+            423
           ]
         },
         {
-          "contentId": "cnt_gc3_assess_003_s004_2",
-          "familyId": "fam_gc3_assess_003",
+          "contentId": "cnt_gc3_assess_006_s004_26",
+          "familyId": "fam_gc3_assess_006",
+          "count": 1,
+          "positions": [
+            94
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_006_s005_19",
+          "familyId": "fam_gc3_assess_006",
           "count": 2,
           "positions": [
-            208,
-            394
+            186,
+            471
           ]
         },
         {
-          "contentId": "cnt_gc3_assess_003_s005_25",
-          "familyId": "fam_gc3_assess_003",
+          "contentId": "cnt_gc3_assess_006_s006_27",
+          "familyId": "fam_gc3_assess_006",
           "count": 1,
           "positions": [
-            24
+            364
           ]
         },
         {
-          "contentId": "cnt_gc3_assess_004_s003_1",
-          "familyId": "fam_gc3_assess_004",
+          "contentId": "cnt_gc3_assess_007_s000_35",
+          "familyId": "fam_gc3_assess_007",
+          "count": 3,
+          "positions": [
+            311,
+            339,
+            592
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_007_s001_1",
+          "familyId": "fam_gc3_assess_007",
+          "count": 1,
+          "positions": [
+            206
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_007_s003_4",
+          "familyId": "fam_gc3_assess_007",
+          "count": 1,
+          "positions": [
+            726
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_008_s000_24",
+          "familyId": "fam_gc3_assess_008",
+          "count": 5,
+          "positions": [
+            102,
+            247,
+            348,
+            378,
+            535
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_008_s001_2",
+          "familyId": "fam_gc3_assess_008",
+          "count": 1,
+          "positions": [
+            268
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_008_s002_4",
+          "familyId": "fam_gc3_assess_008",
+          "count": 1,
+          "positions": [
+            478
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_008_s003_3",
+          "familyId": "fam_gc3_assess_008",
+          "count": 1,
+          "positions": [
+            433
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_009_s001_26",
+          "familyId": "fam_gc3_assess_009",
+          "count": 1,
+          "positions": [
+            321
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_009_s003_1",
+          "familyId": "fam_gc3_assess_009",
+          "count": 1,
+          "positions": [
+            222
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_010_s002_2",
+          "familyId": "fam_gc3_assess_010",
+          "count": 1,
+          "positions": [
+            116
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_011_s000_9",
+          "familyId": "fam_gc3_assess_011",
+          "count": 1,
+          "positions": [
+            516
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_011_s001_6",
+          "familyId": "fam_gc3_assess_011",
           "count": 2,
           "positions": [
-            405,
-            591
+            63,
+            596
           ]
         },
         {
-          "contentId": "cnt_gc3_assess_004_s004_7",
-          "familyId": "fam_gc3_assess_004",
+          "contentId": "cnt_gc3_assess_012_s000_1",
+          "familyId": "fam_gc3_assess_012",
           "count": 1,
           "positions": [
-            224
+            387
           ]
         },
         {
-          "contentId": "cnt_gc3_assess_004_s005_5",
-          "familyId": "fam_gc3_assess_004",
+          "contentId": "cnt_gc3_assess_012_s002_16",
+          "familyId": "fam_gc3_assess_012",
           "count": 1,
           "positions": [
-            46
+            516
           ]
         },
         {
-          "contentId": "cnt_gc3_assess_005_s000_11",
-          "familyId": "fam_gc3_assess_005",
+          "contentId": "cnt_gc3_assess_012_s003_3",
+          "familyId": "fam_gc3_assess_012",
           "count": 1,
           "positions": [
-            350
+            358
           ]
         },
         {
-          "contentId": "cnt_gc3_assess_005_s003_6",
-          "familyId": "fam_gc3_assess_005",
-          "count": 1,
-          "positions": [
-            388
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_005_s004_8",
-          "familyId": "fam_gc3_assess_005",
-          "count": 1,
-          "positions": [
-            211
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_005_s005_5",
-          "familyId": "fam_gc3_assess_005",
+          "contentId": "cnt_gc3_assess_013_s000_2",
+          "familyId": "fam_gc3_assess_013",
           "count": 2,
           "positions": [
-            39,
-            502
+            330,
+            594
           ]
         },
         {
-          "contentId": "cnt_gc3_assess_005_s006_1",
-          "familyId": "fam_gc3_assess_005",
+          "contentId": "cnt_gc3_assess_014_s003_49",
+          "familyId": "fam_gc3_assess_014",
           "count": 1,
           "positions": [
-            311
+            98
           ]
         },
         {
-          "contentId": "cnt_gc3_assess_005_s007_6",
+          "contentId": "cnt_gc3_assess_015_s002_23",
+          "familyId": "fam_gc3_assess_015",
+          "count": 1,
+          "positions": [
+            181
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_016_s001_1",
+          "familyId": "fam_gc3_assess_016",
+          "count": 1,
+          "positions": [
+            210
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_016_s003_1",
+          "familyId": "fam_gc3_assess_016",
+          "count": 1,
+          "positions": [
+            376
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "announcement",
+      "lexicalKey": "announcement",
+      "surfaceForms": [
+        {
+          "surfaceText": "announcement",
+          "corpusOccurrenceCount": 2
+        }
+      ],
+      "corpusOccurrenceCount": 2,
+      "contentCoverageCount": 2,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_008_s000_24",
+          "familyId": "fam_gc3_assess_008",
+          "count": 1,
+          "positions": [
+            42
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_008_s002_4",
+          "familyId": "fam_gc3_assess_008",
+          "count": 1,
+          "positions": [
+            292
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "architectural",
+      "lexicalKey": "architectural",
+      "surfaceForms": [
+        {
+          "surfaceText": "architectural",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_012_s003_3",
+          "familyId": "fam_gc3_assess_012",
+          "count": 1,
+          "positions": [
+            260
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "argument",
+      "lexicalKey": "argument",
+      "surfaceForms": [
+        {
+          "surfaceText": "argument",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_002_s001_18",
+          "familyId": "fam_gc3_assess_002",
+          "count": 1,
+          "positions": [
+            175
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "association's",
+      "lexicalKey": "association's",
+      "surfaceForms": [
+        {
+          "surfaceText": "association's",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_015_s003_0",
+          "familyId": "fam_gc3_assess_015",
+          "count": 1,
+          "positions": [
+            178
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "attempt",
+      "lexicalKey": "attempt",
+      "surfaceForms": [
+        {
+          "surfaceText": "attempt",
+          "corpusOccurrenceCount": 2
+        }
+      ],
+      "corpusOccurrenceCount": 2,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_005_s003_8",
           "familyId": "fam_gc3_assess_005",
           "count": 2,
           "positions": [
             130,
-            316
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_006_s000_7",
-          "familyId": "fam_gc3_assess_006",
-          "count": 1,
-          "positions": [
-            66
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_006_s003_9",
-          "familyId": "fam_gc3_assess_006",
-          "count": 1,
-          "positions": [
-            403
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_006_s004_19",
-          "familyId": "fam_gc3_assess_006",
-          "count": 1,
-          "positions": [
-            229
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_006_s005_4",
-          "familyId": "fam_gc3_assess_006",
-          "count": 2,
-          "positions": [
-            48,
-            510
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_006_s006_7",
-          "familyId": "fam_gc3_assess_006",
-          "count": 2,
-          "positions": [
-            329,
             515
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_006_s007_6",
-          "familyId": "fam_gc3_assess_006",
-          "count": 1,
-          "positions": [
-            147
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_007_s003_3",
-          "familyId": "fam_gc3_assess_007",
-          "count": 2,
-          "positions": [
-            126,
-            382
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_007_s004_3",
-          "familyId": "fam_gc3_assess_007",
-          "count": 1,
-          "positions": [
-            368
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_008_s003_19",
-          "familyId": "fam_gc3_assess_008",
-          "count": 1,
-          "positions": [
-            392
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_008_s004_0",
-          "familyId": "fam_gc3_assess_008",
-          "count": 1,
-          "positions": [
-            77
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_009_s002_7",
-          "familyId": "fam_gc3_assess_009",
-          "count": 1,
-          "positions": [
-            402
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_009_s003_23",
-          "familyId": "fam_gc3_assess_009",
-          "count": 1,
-          "positions": [
-            435
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_010_s003_7",
-          "familyId": "fam_gc3_assess_010",
-          "count": 2,
-          "positions": [
-            405,
-            591
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_011_s000_18",
-          "familyId": "fam_gc3_assess_011",
-          "count": 1,
-          "positions": [
-            357
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_011_s003_16",
-          "familyId": "fam_gc3_assess_011",
-          "count": 1,
-          "positions": [
-            391
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_012_s003_5",
-          "familyId": "fam_gc3_assess_012",
-          "count": 1,
-          "positions": [
-            419
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_013_s003_3",
-          "familyId": "fam_gc3_assess_013",
-          "count": 2,
-          "positions": [
-            114,
-            369
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_014_s000_9",
-          "familyId": "fam_gc3_assess_014",
-          "count": 1,
-          "positions": [
-            66
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_014_s003_3",
-          "familyId": "fam_gc3_assess_014",
-          "count": 1,
-          "positions": [
-            399
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_015_s000_1",
-          "familyId": "fam_gc3_assess_015",
-          "count": 1,
-          "positions": [
-            67
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_015_s002_3",
-          "familyId": "fam_gc3_assess_015",
-          "count": 1,
-          "positions": [
-            359
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_015_s003_9",
-          "familyId": "fam_gc3_assess_015",
-          "count": 1,
-          "positions": [
-            384
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_016_s003_6",
-          "familyId": "fam_gc3_assess_016",
-          "count": 2,
-          "positions": [
-            399,
-            585
           ]
         }
       ]
@@ -412,139 +656,19 @@
       "surfaceForms": [
         {
           "surfaceText": "avoidable",
-          "corpusOccurrenceCount": 16
+          "corpusOccurrenceCount": 1
         }
       ],
-      "corpusOccurrenceCount": 16,
-      "contentCoverageCount": 16,
-      "familyCoverageCount": 16,
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
       "contents": [
         {
-          "contentId": "cnt_gc3_assess_001_s001_4",
-          "familyId": "fam_gc3_assess_001",
-          "count": 1,
-          "positions": [
-            472
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_002_s001_18",
-          "familyId": "fam_gc3_assess_002",
-          "count": 1,
-          "positions": [
-            478
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_003_s001_2",
+          "contentId": "cnt_gc3_assess_003_s002_8",
           "familyId": "fam_gc3_assess_003",
           "count": 1,
           "positions": [
-            462
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_004_s001_0",
-          "familyId": "fam_gc3_assess_004",
-          "count": 1,
-          "positions": [
-            481
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_005_s001_38",
-          "familyId": "fam_gc3_assess_005",
-          "count": 1,
-          "positions": [
-            476
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_006_s001_7",
-          "familyId": "fam_gc3_assess_006",
-          "count": 1,
-          "positions": [
-            470
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_007_s001_0",
-          "familyId": "fam_gc3_assess_007",
-          "count": 1,
-          "positions": [
-            465
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_008_s001_19",
-          "familyId": "fam_gc3_assess_008",
-          "count": 1,
-          "positions": [
-            483
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_009_s001_9",
-          "familyId": "fam_gc3_assess_009",
-          "count": 1,
-          "positions": [
-            490
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_010_s001_5",
-          "familyId": "fam_gc3_assess_010",
-          "count": 1,
-          "positions": [
-            472
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_011_s001_9",
-          "familyId": "fam_gc3_assess_011",
-          "count": 1,
-          "positions": [
-            472
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_012_s001_49",
-          "familyId": "fam_gc3_assess_012",
-          "count": 1,
-          "positions": [
-            478
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_013_s001_11",
-          "familyId": "fam_gc3_assess_013",
-          "count": 1,
-          "positions": [
-            462
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_014_s001_7",
-          "familyId": "fam_gc3_assess_014",
-          "count": 1,
-          "positions": [
-            481
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_015_s001_5",
-          "familyId": "fam_gc3_assess_015",
-          "count": 1,
-          "positions": [
-            469
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_016_s001_3",
-          "familyId": "fam_gc3_assess_016",
-          "count": 1,
-          "positions": [
-            468
+            416
           ]
         }
       ]
@@ -556,50 +680,6 @@
       "surfaceForms": [
         {
           "surfaceText": "bin",
-          "corpusOccurrenceCount": 2
-        },
-        {
-          "surfaceText": "Bin",
-          "corpusOccurrenceCount": 1
-        }
-      ],
-      "corpusOccurrenceCount": 3,
-      "contentCoverageCount": 3,
-      "familyCoverageCount": 2,
-      "contents": [
-        {
-          "contentId": "cnt_gc3_assess_007_s000_3",
-          "familyId": "fam_gc3_assess_007",
-          "count": 1,
-          "positions": [
-            549
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_007_s003_3",
-          "familyId": "fam_gc3_assess_007",
-          "count": 1,
-          "positions": [
-            280
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_009_s004_1",
-          "familyId": "fam_gc3_assess_009",
-          "count": 1,
-          "positions": [
-            160
-          ]
-        }
-      ]
-    },
-    {
-      "entityType": "word",
-      "entityKey": "bundles",
-      "lexicalKey": "bundles",
-      "surfaceForms": [
-        {
-          "surfaceText": "bundles",
           "corpusOccurrenceCount": 1
         }
       ],
@@ -608,11 +688,131 @@
       "familyCoverageCount": 1,
       "contents": [
         {
-          "contentId": "cnt_gc3_assess_014_s001_7",
-          "familyId": "fam_gc3_assess_014",
+          "contentId": "cnt_gc3_assess_009_s003_1",
+          "familyId": "fam_gc3_assess_009",
           "count": 1,
           "positions": [
-            503
+            406
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "brought",
+      "lexicalKey": "brought",
+      "surfaceForms": [
+        {
+          "surfaceText": "brought",
+          "corpusOccurrenceCount": 2
+        }
+      ],
+      "corpusOccurrenceCount": 2,
+      "contentCoverageCount": 2,
+      "familyCoverageCount": 2,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_002_s002_9",
+          "familyId": "fam_gc3_assess_002",
+          "count": 1,
+          "positions": [
+            352
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_008_s000_24",
+          "familyId": "fam_gc3_assess_008",
+          "count": 1,
+          "positions": [
+            421
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "calculation",
+      "lexicalKey": "calculation",
+      "surfaceForms": [
+        {
+          "surfaceText": "calculation",
+          "corpusOccurrenceCount": 2
+        }
+      ],
+      "corpusOccurrenceCount": 2,
+      "contentCoverageCount": 2,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_009_s000_8",
+          "familyId": "fam_gc3_assess_009",
+          "count": 1,
+          "positions": [
+            328
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_009_s001_26",
+          "familyId": "fam_gc3_assess_009",
+          "count": 1,
+          "positions": [
+            10
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "changing",
+      "lexicalKey": "changing",
+      "surfaceForms": [
+        {
+          "surfaceText": "changing",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_010_s000_7",
+          "familyId": "fam_gc3_assess_010",
+          "count": 1,
+          "positions": [
+            361
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "choice",
+      "lexicalKey": "choice",
+      "surfaceForms": [
+        {
+          "surfaceText": "choice",
+          "corpusOccurrenceCount": 2
+        }
+      ],
+      "corpusOccurrenceCount": 2,
+      "contentCoverageCount": 2,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_011_s001_6",
+          "familyId": "fam_gc3_assess_011",
+          "count": 1,
+          "positions": [
+            538
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_011_s003_1",
+          "familyId": "fam_gc3_assess_011",
+          "count": 1,
+          "positions": [
+            254
           ]
         }
       ]
@@ -632,11 +832,11 @@
       "familyCoverageCount": 1,
       "contents": [
         {
-          "contentId": "cnt_gc3_assess_009_s004_1",
+          "contentId": "cnt_gc3_assess_009_s003_1",
           "familyId": "fam_gc3_assess_009",
           "count": 1,
           "positions": [
-            309
+            555
           ]
         }
       ]
@@ -648,19 +848,67 @@
       "surfaceForms": [
         {
           "surfaceText": "complete",
-          "corpusOccurrenceCount": 1
+          "corpusOccurrenceCount": 7
         }
       ],
-      "corpusOccurrenceCount": 1,
-      "contentCoverageCount": 1,
-      "familyCoverageCount": 1,
+      "corpusOccurrenceCount": 7,
+      "contentCoverageCount": 7,
+      "familyCoverageCount": 6,
       "contents": [
         {
-          "contentId": "cnt_gc3_assess_007_s004_3",
+          "contentId": "cnt_gc3_assess_003_s004_9",
+          "familyId": "fam_gc3_assess_003",
+          "count": 1,
+          "positions": [
+            263
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_006_s003_10",
+          "familyId": "fam_gc3_assess_006",
+          "count": 1,
+          "positions": [
+            590
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_006_s006_27",
+          "familyId": "fam_gc3_assess_006",
+          "count": 1,
+          "positions": [
+            680
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_007_s003_4",
           "familyId": "fam_gc3_assess_007",
           "count": 1,
           "positions": [
-            267
+            625
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_010_s000_7",
+          "familyId": "fam_gc3_assess_010",
+          "count": 1,
+          "positions": [
+            322
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_012_s002_16",
+          "familyId": "fam_gc3_assess_012",
+          "count": 1,
+          "positions": [
+            220
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_014_s001_0",
+          "familyId": "fam_gc3_assess_014",
+          "count": 1,
+          "positions": [
+            449
           ]
         }
       ]
@@ -672,294 +920,6 @@
       "surfaceForms": [
         {
           "surfaceText": "conclusion",
-          "corpusOccurrenceCount": 16
-        }
-      ],
-      "corpusOccurrenceCount": 16,
-      "contentCoverageCount": 16,
-      "familyCoverageCount": 16,
-      "contents": [
-        {
-          "contentId": "cnt_gc3_assess_001_s002_28",
-          "familyId": "fam_gc3_assess_001",
-          "count": 1,
-          "positions": [
-            183
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_002_s002_9",
-          "familyId": "fam_gc3_assess_002",
-          "count": 1,
-          "positions": [
-            187
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_003_s002_8",
-          "familyId": "fam_gc3_assess_003",
-          "count": 1,
-          "positions": [
-            175
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_004_s002_19",
-          "familyId": "fam_gc3_assess_004",
-          "count": 1,
-          "positions": [
-            194
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_005_s002_16",
-          "familyId": "fam_gc3_assess_005",
-          "count": 1,
-          "positions": [
-            187
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_006_s002_2",
-          "familyId": "fam_gc3_assess_006",
-          "count": 1,
-          "positions": [
-            183
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_007_s002_24",
-          "familyId": "fam_gc3_assess_007",
-          "count": 1,
-          "positions": [
-            175
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_008_s002_26",
-          "familyId": "fam_gc3_assess_008",
-          "count": 1,
-          "positions": [
-            183
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_009_s002_7",
-          "familyId": "fam_gc3_assess_009",
-          "count": 1,
-          "positions": [
-            209
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_010_s002_18",
-          "familyId": "fam_gc3_assess_010",
-          "count": 1,
-          "positions": [
-            187
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_011_s002_7",
-          "familyId": "fam_gc3_assess_011",
-          "count": 1,
-          "positions": [
-            175
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_012_s002_7",
-          "familyId": "fam_gc3_assess_012",
-          "count": 1,
-          "positions": [
-            187
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_013_s002_19",
-          "familyId": "fam_gc3_assess_013",
-          "count": 1,
-          "positions": [
-            165
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_014_s002_6",
-          "familyId": "fam_gc3_assess_014",
-          "count": 1,
-          "positions": [
-            187
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_015_s002_3",
-          "familyId": "fam_gc3_assess_015",
-          "count": 1,
-          "positions": [
-            178
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_016_s002_3",
-          "familyId": "fam_gc3_assess_016",
-          "count": 1,
-          "positions": [
-            183
-          ]
-        }
-      ]
-    },
-    {
-      "entityType": "word",
-      "entityKey": "deserves",
-      "lexicalKey": "deserves",
-      "surfaceForms": [
-        {
-          "surfaceText": "deserves",
-          "corpusOccurrenceCount": 16
-        }
-      ],
-      "corpusOccurrenceCount": 16,
-      "contentCoverageCount": 16,
-      "familyCoverageCount": 16,
-      "contents": [
-        {
-          "contentId": "cnt_gc3_assess_001_s002_28",
-          "familyId": "fam_gc3_assess_001",
-          "count": 1,
-          "positions": [
-            503
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_002_s002_9",
-          "familyId": "fam_gc3_assess_002",
-          "count": 1,
-          "positions": [
-            515
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_003_s002_8",
-          "familyId": "fam_gc3_assess_003",
-          "count": 1,
-          "positions": [
-            495
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_004_s002_19",
-          "familyId": "fam_gc3_assess_004",
-          "count": 1,
-          "positions": [
-            510
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_005_s002_16",
-          "familyId": "fam_gc3_assess_005",
-          "count": 1,
-          "positions": [
-            499
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_006_s002_2",
-          "familyId": "fam_gc3_assess_006",
-          "count": 1,
-          "positions": [
-            503
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_007_s002_24",
-          "familyId": "fam_gc3_assess_007",
-          "count": 1,
-          "positions": [
-            486
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_008_s002_26",
-          "familyId": "fam_gc3_assess_008",
-          "count": 1,
-          "positions": [
-            503
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_009_s002_7",
-          "familyId": "fam_gc3_assess_009",
-          "count": 1,
-          "positions": [
-            530
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_010_s002_18",
-          "familyId": "fam_gc3_assess_010",
-          "count": 1,
-          "positions": [
-            509
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_011_s002_7",
-          "familyId": "fam_gc3_assess_011",
-          "count": 1,
-          "positions": [
-            504
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_012_s002_7",
-          "familyId": "fam_gc3_assess_012",
-          "count": 1,
-          "positions": [
-            519
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_013_s002_19",
-          "familyId": "fam_gc3_assess_013",
-          "count": 1,
-          "positions": [
-            479
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_014_s002_6",
-          "familyId": "fam_gc3_assess_014",
-          "count": 1,
-          "positions": [
-            504
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_015_s002_3",
-          "familyId": "fam_gc3_assess_015",
-          "count": 1,
-          "positions": [
-            487
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_016_s002_3",
-          "familyId": "fam_gc3_assess_016",
-          "count": 1,
-          "positions": [
-            498
-          ]
-        }
-      ]
-    },
-    {
-      "entityType": "word",
-      "entityKey": "dyes",
-      "lexicalKey": "dyes",
-      "surfaceForms": [
-        {
-          "surfaceText": "dyes",
           "corpusOccurrenceCount": 1
         }
       ],
@@ -968,11 +928,748 @@
       "familyCoverageCount": 1,
       "contents": [
         {
+          "contentId": "cnt_gc3_assess_015_s001_19",
+          "familyId": "fam_gc3_assess_015",
+          "count": 1,
+          "positions": [
+            565
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "consulted",
+      "lexicalKey": "consulted",
+      "surfaceForms": [
+        {
+          "surfaceText": "consulted",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_003_s002_8",
+          "familyId": "fam_gc3_assess_003",
+          "count": 1,
+          "positions": [
+            181
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "contributor",
+      "lexicalKey": "contributor",
+      "surfaceForms": [
+        {
+          "surfaceText": "contributor",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_006_s002_3",
+          "familyId": "fam_gc3_assess_006",
+          "count": 1,
+          "positions": [
+            367
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "could",
+      "lexicalKey": "could",
+      "surfaceForms": [
+        {
+          "surfaceText": "could",
+          "corpusOccurrenceCount": 51
+        },
+        {
+          "surfaceText": "Could",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 52,
+      "contentCoverageCount": 40,
+      "familyCoverageCount": 16,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_001_s004_6",
+          "familyId": "fam_gc3_assess_001",
+          "count": 1,
+          "positions": [
+            368
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_002_s001_18",
+          "familyId": "fam_gc3_assess_002",
+          "count": 1,
+          "positions": [
+            324
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_002_s003_18",
+          "familyId": "fam_gc3_assess_002",
+          "count": 1,
+          "positions": [
+            460
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_003_s002_8",
+          "familyId": "fam_gc3_assess_003",
+          "count": 1,
+          "positions": [
+            29
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_003_s003_48",
+          "familyId": "fam_gc3_assess_003",
+          "count": 1,
+          "positions": [
+            345
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_004_s000_2",
+          "familyId": "fam_gc3_assess_004",
+          "count": 1,
+          "positions": [
+            510
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_004_s001_16",
+          "familyId": "fam_gc3_assess_004",
+          "count": 2,
+          "positions": [
+            9,
+            601
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_004_s002_49",
+          "familyId": "fam_gc3_assess_004",
+          "count": 1,
+          "positions": [
+            517
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_004_s003_11",
+          "familyId": "fam_gc3_assess_004",
+          "count": 1,
+          "positions": [
+            434
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_004_s004_9",
+          "familyId": "fam_gc3_assess_004",
+          "count": 2,
+          "positions": [
+            710,
+            805
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_005_s001_8",
+          "familyId": "fam_gc3_assess_005",
+          "count": 3,
+          "positions": [
+            250,
+            422,
+            626
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_005_s002_15",
+          "familyId": "fam_gc3_assess_005",
+          "count": 1,
+          "positions": [
+            283
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_005_s004_5",
+          "familyId": "fam_gc3_assess_005",
+          "count": 1,
+          "positions": [
+            37
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_005_s006_7",
+          "familyId": "fam_gc3_assess_005",
+          "count": 1,
+          "positions": [
+            178
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_006_s001_14",
+          "familyId": "fam_gc3_assess_006",
+          "count": 1,
+          "positions": [
+            584
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_006_s003_10",
+          "familyId": "fam_gc3_assess_006",
+          "count": 1,
+          "positions": [
+            525
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_006_s005_19",
+          "familyId": "fam_gc3_assess_006",
+          "count": 1,
+          "positions": [
+            492
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_006_s006_27",
+          "familyId": "fam_gc3_assess_006",
+          "count": 3,
+          "positions": [
+            107,
+            392,
+            661
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_007_s002_26",
+          "familyId": "fam_gc3_assess_007",
+          "count": 1,
+          "positions": [
+            457
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_008_s000_24",
+          "familyId": "fam_gc3_assess_008",
+          "count": 1,
+          "positions": [
+            224
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_009_s000_8",
+          "familyId": "fam_gc3_assess_009",
+          "count": 2,
+          "positions": [
+            312,
+            348
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_009_s001_26",
+          "familyId": "fam_gc3_assess_009",
+          "count": 1,
+          "positions": [
+            116
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_009_s002_29",
+          "familyId": "fam_gc3_assess_009",
+          "count": 1,
+          "positions": [
+            199
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_010_s002_2",
+          "familyId": "fam_gc3_assess_010",
+          "count": 1,
+          "positions": [
+            44
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_010_s003_6",
+          "familyId": "fam_gc3_assess_010",
+          "count": 1,
+          "positions": [
+            217
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_011_s000_9",
+          "familyId": "fam_gc3_assess_011",
+          "count": 1,
+          "positions": [
+            347
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_011_s002_14",
+          "familyId": "fam_gc3_assess_011",
+          "count": 1,
+          "positions": [
+            98
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_011_s003_1",
+          "familyId": "fam_gc3_assess_011",
+          "count": 1,
+          "positions": [
+            412
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_012_s000_1",
+          "familyId": "fam_gc3_assess_012",
+          "count": 1,
+          "positions": [
+            311
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_012_s002_16",
+          "familyId": "fam_gc3_assess_012",
+          "count": 2,
+          "positions": [
+            426,
+            531
+          ]
+        },
+        {
           "contentId": "cnt_gc3_assess_013_s000_2",
           "familyId": "fam_gc3_assess_013",
           "count": 1,
           "positions": [
-            95
+            317
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_013_s002_0",
+          "familyId": "fam_gc3_assess_013",
+          "count": 1,
+          "positions": [
+            46
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_014_s000_2",
+          "familyId": "fam_gc3_assess_014",
+          "count": 1,
+          "positions": [
+            308
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_014_s001_0",
+          "familyId": "fam_gc3_assess_014",
+          "count": 3,
+          "positions": [
+            65,
+            284,
+            582
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_014_s002_16",
+          "familyId": "fam_gc3_assess_014",
+          "count": 1,
+          "positions": [
+            264
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_015_s000_18",
+          "familyId": "fam_gc3_assess_015",
+          "count": 1,
+          "positions": [
+            354
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_015_s002_23",
+          "familyId": "fam_gc3_assess_015",
+          "count": 2,
+          "positions": [
+            160,
+            586
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_015_s003_0",
+          "familyId": "fam_gc3_assess_015",
+          "count": 1,
+          "positions": [
+            418
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_016_s002_9",
+          "familyId": "fam_gc3_assess_016",
+          "count": 1,
+          "positions": [
+            246
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_016_s003_1",
+          "familyId": "fam_gc3_assess_016",
+          "count": 2,
+          "positions": [
+            361,
+            483
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "cupboards",
+      "lexicalKey": "cupboards",
+      "surfaceForms": [
+        {
+          "surfaceText": "Cupboards",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_003_s004_9",
+          "familyId": "fam_gc3_assess_003",
+          "count": 1,
+          "positions": [
+            33
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "darker",
+      "lexicalKey": "darker",
+      "surfaceForms": [
+        {
+          "surfaceText": "darker",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_005_s002_15",
+          "familyId": "fam_gc3_assess_005",
+          "count": 1,
+          "positions": [
+            457
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "delete",
+      "lexicalKey": "delete",
+      "surfaceForms": [
+        {
+          "surfaceText": "delete",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_006_s000_9",
+          "familyId": "fam_gc3_assess_006",
+          "count": 1,
+          "positions": [
+            597
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "deliver",
+      "lexicalKey": "deliver",
+      "surfaceForms": [
+        {
+          "surfaceText": "deliver",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_004_s000_2",
+          "familyId": "fam_gc3_assess_004",
+          "count": 1,
+          "positions": [
+            516
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "displays",
+      "lexicalKey": "displays",
+      "surfaceForms": [
+        {
+          "surfaceText": "displays",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_007_s003_4",
+          "familyId": "fam_gc3_assess_007",
+          "count": 1,
+          "positions": [
+            216
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "distinctions",
+      "lexicalKey": "distinctions",
+      "surfaceForms": [
+        {
+          "surfaceText": "distinctions",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_012_s002_16",
+          "familyId": "fam_gc3_assess_012",
+          "count": 1,
+          "positions": [
+            364
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "distinguish",
+      "lexicalKey": "distinguish",
+      "surfaceForms": [
+        {
+          "surfaceText": "distinguish",
+          "corpusOccurrenceCount": 2
+        }
+      ],
+      "corpusOccurrenceCount": 2,
+      "contentCoverageCount": 2,
+      "familyCoverageCount": 2,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_006_s003_10",
+          "familyId": "fam_gc3_assess_006",
+          "count": 1,
+          "positions": [
+            18
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_015_s003_0",
+          "familyId": "fam_gc3_assess_015",
+          "count": 1,
+          "positions": [
+            162
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "divider",
+      "lexicalKey": "divider",
+      "surfaceForms": [
+        {
+          "surfaceText": "divider",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_001_s003_0",
+          "familyId": "fam_gc3_assess_001",
+          "count": 1,
+          "positions": [
+            59
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "elaborate",
+      "lexicalKey": "elaborate",
+      "surfaceForms": [
+        {
+          "surfaceText": "elaborate",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_011_s001_6",
+          "familyId": "fam_gc3_assess_011",
+          "count": 1,
+          "positions": [
+            66
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "elena",
+      "lexicalKey": "elena",
+      "surfaceForms": [
+        {
+          "surfaceText": "Elena",
+          "corpusOccurrenceCount": 4
+        }
+      ],
+      "corpusOccurrenceCount": 4,
+      "contentCoverageCount": 3,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_008_s000_24",
+          "familyId": "fam_gc3_assess_008",
+          "count": 2,
+          "positions": [
+            22,
+            279
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_008_s001_2",
+          "familyId": "fam_gc3_assess_008",
+          "count": 1,
+          "positions": [
+            345
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_008_s002_4",
+          "familyId": "fam_gc3_assess_008",
+          "count": 1,
+          "positions": [
+            270
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "emphatic",
+      "lexicalKey": "emphatic",
+      "surfaceForms": [
+        {
+          "surfaceText": "emphatic",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_015_s001_19",
+          "familyId": "fam_gc3_assess_015",
+          "count": 1,
+          "positions": [
+            128
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "empty",
+      "lexicalKey": "empty",
+      "surfaceForms": [
+        {
+          "surfaceText": "empty",
+          "corpusOccurrenceCount": 4
+        }
+      ],
+      "corpusOccurrenceCount": 4,
+      "contentCoverageCount": 4,
+      "familyCoverageCount": 4,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_003_s004_9",
+          "familyId": "fam_gc3_assess_003",
+          "count": 1,
+          "positions": [
+            147
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_005_s000_15",
+          "familyId": "fam_gc3_assess_005",
+          "count": 1,
+          "positions": [
+            190
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_008_s002_4",
+          "familyId": "fam_gc3_assess_008",
+          "count": 1,
+          "positions": [
+            481
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_015_s001_19",
+          "familyId": "fam_gc3_assess_015",
+          "count": 1,
+          "positions": [
+            266
           ]
         }
       ]
@@ -984,309 +1681,256 @@
       "surfaceForms": [
         {
           "surfaceText": "end",
-          "corpusOccurrenceCount": 34
+          "corpusOccurrenceCount": 3
         }
       ],
-      "corpusOccurrenceCount": 34,
-      "contentCoverageCount": 32,
-      "familyCoverageCount": 16,
+      "corpusOccurrenceCount": 3,
+      "contentCoverageCount": 3,
+      "familyCoverageCount": 3,
       "contents": [
         {
-          "contentId": "cnt_gc3_assess_001_s003_0",
-          "familyId": "fam_gc3_assess_001",
-          "count": 1,
-          "positions": [
-            627
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_001_s004_6",
-          "familyId": "fam_gc3_assess_001",
-          "count": 1,
-          "positions": [
-            435
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_001_s005_4",
-          "familyId": "fam_gc3_assess_001",
-          "count": 1,
-          "positions": [
-            255
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_002_s003_18",
-          "familyId": "fam_gc3_assess_002",
-          "count": 1,
-          "positions": [
-            617
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_002_s004_18",
-          "familyId": "fam_gc3_assess_002",
-          "count": 1,
-          "positions": [
-            429
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_002_s005_3",
-          "familyId": "fam_gc3_assess_002",
-          "count": 1,
-          "positions": [
-            245
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_003_s003_48",
-          "familyId": "fam_gc3_assess_003",
-          "count": 1,
-          "positions": [
-            608
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_003_s004_2",
-          "familyId": "fam_gc3_assess_003",
-          "count": 1,
-          "positions": [
-            429
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_003_s005_25",
-          "familyId": "fam_gc3_assess_003",
-          "count": 1,
-          "positions": [
-            243
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_004_s003_1",
-          "familyId": "fam_gc3_assess_004",
-          "count": 1,
-          "positions": [
-            626
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_004_s004_7",
-          "familyId": "fam_gc3_assess_004",
-          "count": 1,
-          "positions": [
-            443
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_004_s005_5",
-          "familyId": "fam_gc3_assess_004",
-          "count": 1,
-          "positions": [
-            270
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_005_s003_6",
+          "contentId": "cnt_gc3_assess_005_s003_8",
           "familyId": "fam_gc3_assess_005",
           "count": 1,
           "positions": [
-            607
+            350
           ]
         },
         {
-          "contentId": "cnt_gc3_assess_005_s004_8",
-          "familyId": "fam_gc3_assess_005",
-          "count": 1,
-          "positions": [
-            435
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_005_s005_5",
-          "familyId": "fam_gc3_assess_005",
-          "count": 1,
-          "positions": [
-            263
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_005_s006_1",
-          "familyId": "fam_gc3_assess_005",
-          "count": 2,
-          "positions": [
-            67,
-            531
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_005_s007_6",
-          "familyId": "fam_gc3_assess_005",
-          "count": 1,
-          "positions": [
-            351
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_006_s003_9",
-          "familyId": "fam_gc3_assess_006",
-          "count": 1,
-          "positions": [
-            627
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_006_s004_19",
-          "familyId": "fam_gc3_assess_006",
-          "count": 1,
-          "positions": [
-            453
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_006_s005_4",
-          "familyId": "fam_gc3_assess_006",
-          "count": 1,
-          "positions": [
-            263
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_006_s006_7",
-          "familyId": "fam_gc3_assess_006",
-          "count": 2,
-          "positions": [
-            88,
-            550
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_006_s007_6",
-          "familyId": "fam_gc3_assess_006",
-          "count": 1,
-          "positions": [
-            366
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_007_s003_3",
-          "familyId": "fam_gc3_assess_007",
-          "count": 1,
-          "positions": [
-            606
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_008_s003_19",
+          "contentId": "cnt_gc3_assess_008_s002_4",
           "familyId": "fam_gc3_assess_008",
           "count": 1,
           "positions": [
-            607
+            265
           ]
         },
         {
-          "contentId": "cnt_gc3_assess_009_s004_1",
-          "familyId": "fam_gc3_assess_009",
-          "count": 1,
-          "positions": [
-            4
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_010_s003_7",
+          "contentId": "cnt_gc3_assess_010_s002_2",
           "familyId": "fam_gc3_assess_010",
           "count": 1,
           "positions": [
-            626
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_011_s003_16",
-          "familyId": "fam_gc3_assess_011",
-          "count": 1,
-          "positions": [
-            610
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_012_s003_5",
-          "familyId": "fam_gc3_assess_012",
-          "count": 1,
-          "positions": [
-            643
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_013_s003_3",
-          "familyId": "fam_gc3_assess_013",
-          "count": 1,
-          "positions": [
-            593
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_014_s003_3",
-          "familyId": "fam_gc3_assess_014",
-          "count": 1,
-          "positions": [
-            614
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_015_s003_9",
-          "familyId": "fam_gc3_assess_015",
-          "count": 1,
-          "positions": [
-            604
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_016_s003_6",
-          "familyId": "fam_gc3_assess_016",
-          "count": 1,
-          "positions": [
-            620
+            216
           ]
         }
       ]
     },
     {
       "entityType": "word",
-      "entityKey": "exam",
-      "lexicalKey": "exam",
+      "entityKey": "escaped",
+      "lexicalKey": "escaped",
       "surfaceForms": [
         {
-          "surfaceText": "exam",
+          "surfaceText": "escaped",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_003_s001_2",
+          "familyId": "fam_gc3_assess_003",
+          "count": 1,
+          "positions": [
+            284
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "examples",
+      "lexicalKey": "examples",
+      "surfaceForms": [
+        {
+          "surfaceText": "examples",
+          "corpusOccurrenceCount": 2
+        }
+      ],
+      "corpusOccurrenceCount": 2,
+      "contentCoverageCount": 2,
+      "familyCoverageCount": 2,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_006_s006_27",
+          "familyId": "fam_gc3_assess_006",
+          "count": 1,
+          "positions": [
+            155
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_008_s001_2",
+          "familyId": "fam_gc3_assess_008",
+          "count": 1,
+          "positions": [
+            21
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "extensive",
+      "lexicalKey": "extensive",
+      "surfaceForms": [
+        {
+          "surfaceText": "extensive",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_014_s002_16",
+          "familyId": "fam_gc3_assess_014",
+          "count": 1,
+          "positions": [
+            203
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "familiarity",
+      "lexicalKey": "familiarity",
+      "surfaceForms": [
+        {
+          "surfaceText": "Familiarity",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_007_s002_26",
+          "familyId": "fam_gc3_assess_007",
+          "count": 1,
+          "positions": [
+            530
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "feasibility",
+      "lexicalKey": "feasibility",
+      "surfaceForms": [
+        {
+          "surfaceText": "feasibility",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_016_s003_1",
+          "familyId": "fam_gc3_assess_016",
+          "count": 1,
+          "positions": [
+            219
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "fewer",
+      "lexicalKey": "fewer",
+      "surfaceForms": [
+        {
+          "surfaceText": "fewer",
           "corpusOccurrenceCount": 3
         }
       ],
       "corpusOccurrenceCount": 3,
-      "contentCoverageCount": 3,
+      "contentCoverageCount": 2,
+      "familyCoverageCount": 2,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_006_s005_19",
+          "familyId": "fam_gc3_assess_006",
+          "count": 2,
+          "positions": [
+            595,
+            623
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_016_s000_27",
+          "familyId": "fam_gc3_assess_016",
+          "count": 1,
+          "positions": [
+            216
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "folding",
+      "lexicalKey": "folding",
+      "surfaceForms": [
+        {
+          "surfaceText": "folding",
+          "corpusOccurrenceCount": 1
+        },
+        {
+          "surfaceText": "Folding",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 2,
+      "contentCoverageCount": 2,
+      "familyCoverageCount": 2,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_004_s000_2",
+          "familyId": "fam_gc3_assess_004",
+          "count": 1,
+          "positions": [
+            98
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_009_s000_8",
+          "familyId": "fam_gc3_assess_009",
+          "count": 1,
+          "positions": [
+            33
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "formed",
+      "lexicalKey": "formed",
+      "surfaceForms": [
+        {
+          "surfaceText": "formed",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
       "familyCoverageCount": 1,
       "contents": [
         {
-          "contentId": "cnt_gc3_assess_002_s000_18",
-          "familyId": "fam_gc3_assess_002",
+          "contentId": "cnt_gc3_assess_008_s000_24",
+          "familyId": "fam_gc3_assess_008",
           "count": 1,
           "positions": [
-            627
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_002_s003_18",
-          "familyId": "fam_gc3_assess_002",
-          "count": 1,
-          "positions": [
-            7
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_002_s004_18",
-          "familyId": "fam_gc3_assess_002",
-          "count": 1,
-          "positions": [
-            112
+            509
           ]
         }
       ]
@@ -1299,14 +1943,10 @@
         {
           "surfaceText": "fox",
           "corpusOccurrenceCount": 3
-        },
-        {
-          "surfaceText": "Fox",
-          "corpusOccurrenceCount": 1
         }
       ],
-      "corpusOccurrenceCount": 4,
-      "contentCoverageCount": 4,
+      "corpusOccurrenceCount": 3,
+      "contentCoverageCount": 3,
       "familyCoverageCount": 2,
       "contents": [
         {
@@ -1314,7 +1954,7 @@
           "familyId": "fam_gc3_assess_001",
           "count": 1,
           "positions": [
-            700
+            502
           ]
         },
         {
@@ -1322,15 +1962,7 @@
           "familyId": "fam_gc3_assess_002",
           "count": 1,
           "positions": [
-            552
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_002_s003_18",
-          "familyId": "fam_gc3_assess_002",
-          "count": 1,
-          "positions": [
-            303
+            470
           ]
         },
         {
@@ -1338,18 +1970,18 @@
           "familyId": "fam_gc3_assess_002",
           "count": 1,
           "positions": [
-            636
+            365
           ]
         }
       ]
     },
     {
       "entityType": "word",
-      "entityKey": "herb",
-      "lexicalKey": "herb",
+      "entityKey": "gone",
+      "lexicalKey": "gone",
       "surfaceForms": [
         {
-          "surfaceText": "Herb",
+          "surfaceText": "gone",
           "corpusOccurrenceCount": 1
         }
       ],
@@ -1358,22 +1990,22 @@
       "familyCoverageCount": 1,
       "contents": [
         {
-          "contentId": "cnt_gc3_assess_014_s001_7",
-          "familyId": "fam_gc3_assess_014",
+          "contentId": "cnt_gc3_assess_004_s004_9",
+          "familyId": "fam_gc3_assess_004",
           "count": 1,
           "positions": [
-            498
+            610
           ]
         }
       ]
     },
     {
       "entityType": "word",
-      "entityKey": "indoor",
-      "lexicalKey": "indoor",
+      "entityKey": "great",
+      "lexicalKey": "great",
       "surfaceForms": [
         {
-          "surfaceText": "indoor",
+          "surfaceText": "great",
           "corpusOccurrenceCount": 1
         }
       ],
@@ -1382,11 +2014,324 @@
       "familyCoverageCount": 1,
       "contents": [
         {
-          "contentId": "cnt_gc3_assess_014_s000_9",
+          "contentId": "cnt_gc3_assess_014_s000_2",
           "familyId": "fam_gc3_assess_014",
           "count": 1,
           "positions": [
-            69
+            57
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "habits",
+      "lexicalKey": "habits",
+      "surfaceForms": [
+        {
+          "surfaceText": "habits",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_002_s000_18",
+          "familyId": "fam_gc3_assess_002",
+          "count": 1,
+          "positions": [
+            341
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "handover",
+      "lexicalKey": "handover",
+      "surfaceForms": [
+        {
+          "surfaceText": "handover",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_003_s004_9",
+          "familyId": "fam_gc3_assess_003",
+          "count": 1,
+          "positions": [
+            185
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "help",
+      "lexicalKey": "help",
+      "surfaceForms": [
+        {
+          "surfaceText": "help",
+          "corpusOccurrenceCount": 6
+        }
+      ],
+      "corpusOccurrenceCount": 6,
+      "contentCoverageCount": 6,
+      "familyCoverageCount": 5,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_001_s001_4",
+          "familyId": "fam_gc3_assess_001",
+          "count": 1,
+          "positions": [
+            245
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_004_s003_11",
+          "familyId": "fam_gc3_assess_004",
+          "count": 1,
+          "positions": [
+            440
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_006_s000_9",
+          "familyId": "fam_gc3_assess_006",
+          "count": 1,
+          "positions": [
+            298
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_006_s006_27",
+          "familyId": "fam_gc3_assess_006",
+          "count": 1,
+          "positions": [
+            667
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_007_s001_1",
+          "familyId": "fam_gc3_assess_007",
+          "count": 1,
+          "positions": [
+            499
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_015_s003_0",
+          "familyId": "fam_gc3_assess_015",
+          "count": 1,
+          "positions": [
+            30
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "idea",
+      "lexicalKey": "idea",
+      "surfaceForms": [
+        {
+          "surfaceText": "idea",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_016_s000_27",
+          "familyId": "fam_gc3_assess_016",
+          "count": 1,
+          "positions": [
+            267
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "if",
+      "lexicalKey": "if",
+      "surfaceForms": [
+        {
+          "surfaceText": "if",
+          "corpusOccurrenceCount": 5
+        }
+      ],
+      "corpusOccurrenceCount": 5,
+      "contentCoverageCount": 4,
+      "familyCoverageCount": 4,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_004_s002_49",
+          "familyId": "fam_gc3_assess_004",
+          "count": 2,
+          "positions": [
+            67,
+            564
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_005_s006_7",
+          "familyId": "fam_gc3_assess_005",
+          "count": 1,
+          "positions": [
+            170
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_010_s003_6",
+          "familyId": "fam_gc3_assess_010",
+          "count": 1,
+          "positions": [
+            328
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_016_s002_9",
+          "familyId": "fam_gc3_assess_016",
+          "count": 1,
+          "positions": [
+            640
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "intended",
+      "lexicalKey": "intended",
+      "surfaceForms": [
+        {
+          "surfaceText": "intended",
+          "corpusOccurrenceCount": 5
+        }
+      ],
+      "corpusOccurrenceCount": 5,
+      "contentCoverageCount": 5,
+      "familyCoverageCount": 5,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_007_s001_1",
+          "familyId": "fam_gc3_assess_007",
+          "count": 1,
+          "positions": [
+            186
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_008_s002_4",
+          "familyId": "fam_gc3_assess_008",
+          "count": 1,
+          "positions": [
+            238
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_011_s002_14",
+          "familyId": "fam_gc3_assess_011",
+          "count": 1,
+          "positions": [
+            175
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_013_s000_2",
+          "familyId": "fam_gc3_assess_013",
+          "count": 1,
+          "positions": [
+            474
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_015_s002_23",
+          "familyId": "fam_gc3_assess_015",
+          "count": 1,
+          "positions": [
+            274
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "interacted",
+      "lexicalKey": "interacted",
+      "surfaceForms": [
+        {
+          "surfaceText": "interacted",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_011_s000_9",
+          "familyId": "fam_gc3_assess_011",
+          "count": 1,
+          "positions": [
+            326
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "interpret",
+      "lexicalKey": "interpret",
+      "surfaceForms": [
+        {
+          "surfaceText": "interpret",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_009_s001_26",
+          "familyId": "fam_gc3_assess_009",
+          "count": 1,
+          "positions": [
+            377
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "introduce",
+      "lexicalKey": "introduce",
+      "surfaceForms": [
+        {
+          "surfaceText": "introduce",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_007_s001_1",
+          "familyId": "fam_gc3_assess_007",
+          "count": 1,
+          "positions": [
+            348
           ]
         }
       ]
@@ -1398,163 +2343,243 @@
       "surfaceForms": [
         {
           "surfaceText": "labels",
-          "corpusOccurrenceCount": 19
+          "corpusOccurrenceCount": 9
         }
       ],
-      "corpusOccurrenceCount": 19,
-      "contentCoverageCount": 19,
-      "familyCoverageCount": 13,
+      "corpusOccurrenceCount": 9,
+      "contentCoverageCount": 9,
+      "familyCoverageCount": 6,
       "contents": [
         {
-          "contentId": "cnt_gc3_assess_001_s000_6",
-          "familyId": "fam_gc3_assess_001",
-          "count": 1,
-          "positions": [
-            636
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_001_s003_0",
-          "familyId": "fam_gc3_assess_001",
-          "count": 1,
-          "positions": [
-            5
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_001_s004_6",
-          "familyId": "fam_gc3_assess_001",
-          "count": 1,
-          "positions": [
-            127
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_002_s003_18",
-          "familyId": "fam_gc3_assess_002",
-          "count": 1,
-          "positions": [
-            113
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_003_s005_25",
+          "contentId": "cnt_gc3_assess_003_s000_0",
           "familyId": "fam_gc3_assess_003",
           "count": 1,
           "positions": [
-            172
+            455
           ]
         },
         {
-          "contentId": "cnt_gc3_assess_004_s002_19",
-          "familyId": "fam_gc3_assess_004",
+          "contentId": "cnt_gc3_assess_003_s004_9",
+          "familyId": "fam_gc3_assess_003",
           "count": 1,
           "positions": [
-            346
+            521
           ]
         },
         {
-          "contentId": "cnt_gc3_assess_004_s004_7",
-          "familyId": "fam_gc3_assess_004",
-          "count": 1,
-          "positions": [
-            372
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_005_s003_6",
+          "contentId": "cnt_gc3_assess_005_s001_8",
           "familyId": "fam_gc3_assess_005",
           "count": 1,
           "positions": [
-            536
+            478
           ]
         },
         {
-          "contentId": "cnt_gc3_assess_006_s000_7",
-          "familyId": "fam_gc3_assess_006",
-          "count": 1,
-          "positions": [
-            314
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_006_s007_6",
-          "familyId": "fam_gc3_assess_006",
-          "count": 1,
-          "positions": [
-            295
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_007_s000_3",
+          "contentId": "cnt_gc3_assess_007_s002_26",
           "familyId": "fam_gc3_assess_007",
           "count": 1,
           "positions": [
-            553
+            522
           ]
         },
         {
-          "contentId": "cnt_gc3_assess_007_s003_3",
+          "contentId": "cnt_gc3_assess_007_s003_4",
           "familyId": "fam_gc3_assess_007",
           "count": 1,
           "positions": [
-            284
+            474
           ]
         },
         {
-          "contentId": "cnt_gc3_assess_007_s004_3",
-          "familyId": "fam_gc3_assess_007",
+          "contentId": "cnt_gc3_assess_009_s000_8",
+          "familyId": "fam_gc3_assess_009",
           "count": 1,
           "positions": [
-            116
+            605
           ]
         },
         {
-          "contentId": "cnt_gc3_assess_008_s003_19",
-          "familyId": "fam_gc3_assess_008",
-          "count": 1,
-          "positions": [
-            109
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_010_s002_18",
+          "contentId": "cnt_gc3_assess_010_s002_2",
           "familyId": "fam_gc3_assess_010",
           "count": 1,
           "positions": [
-            345
+            360
           ]
         },
         {
-          "contentId": "cnt_gc3_assess_011_s003_16",
-          "familyId": "fam_gc3_assess_011",
+          "contentId": "cnt_gc3_assess_010_s003_6",
+          "familyId": "fam_gc3_assess_010",
           "count": 1,
           "positions": [
-            539
+            154
           ]
         },
         {
-          "contentId": "cnt_gc3_assess_012_s000_14",
+          "contentId": "cnt_gc3_assess_015_s003_0",
+          "familyId": "fam_gc3_assess_015",
+          "count": 1,
+          "positions": [
+            201
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "like",
+      "lexicalKey": "like",
+      "surfaceForms": [
+        {
+          "surfaceText": "like",
+          "corpusOccurrenceCount": 2
+        }
+      ],
+      "corpusOccurrenceCount": 2,
+      "contentCoverageCount": 2,
+      "familyCoverageCount": 2,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_008_s003_3",
+          "familyId": "fam_gc3_assess_008",
+          "count": 1,
+          "positions": [
+            224
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_013_s002_0",
+          "familyId": "fam_gc3_assess_013",
+          "count": 1,
+          "positions": [
+            58
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "lit",
+      "lexicalKey": "lit",
+      "surfaceForms": [
+        {
+          "surfaceText": "lit",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_012_s002_16",
           "familyId": "fam_gc3_assess_012",
           "count": 1,
           "positions": [
-            318
+            70
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "machine",
+      "lexicalKey": "machine",
+      "surfaceForms": [
+        {
+          "surfaceText": "machine",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_006_s003_10",
+          "familyId": "fam_gc3_assess_006",
+          "count": 1,
+          "positions": [
+            399
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "matches",
+      "lexicalKey": "matches",
+      "surfaceForms": [
+        {
+          "surfaceText": "matches",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_006_s000_9",
+          "familyId": "fam_gc3_assess_006",
+          "count": 1,
+          "positions": [
+            550
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "meal",
+      "lexicalKey": "meal",
+      "surfaceForms": [
+        {
+          "surfaceText": "meal",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_003_s004_9",
+          "familyId": "fam_gc3_assess_003",
+          "count": 1,
+          "positions": [
+            428
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "memories",
+      "lexicalKey": "memories",
+      "surfaceForms": [
+        {
+          "surfaceText": "memories",
+          "corpusOccurrenceCount": 2
+        }
+      ],
+      "corpusOccurrenceCount": 2,
+      "contentCoverageCount": 2,
+      "familyCoverageCount": 2,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_001_s001_4",
+          "familyId": "fam_gc3_assess_001",
+          "count": 1,
+          "positions": [
+            591
           ]
         },
         {
-          "contentId": "cnt_gc3_assess_014_s003_3",
-          "familyId": "fam_gc3_assess_014",
+          "contentId": "cnt_gc3_assess_002_s002_9",
+          "familyId": "fam_gc3_assess_002",
           "count": 1,
           "positions": [
-            107
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_016_s002_3",
-          "familyId": "fam_gc3_assess_016",
-          "count": 1,
-          "positions": [
-            334
+            6
           ]
         }
       ]
@@ -1565,60 +2590,92 @@
       "lexicalKey": "model",
       "surfaceForms": [
         {
-          "surfaceText": "Model",
-          "corpusOccurrenceCount": 1
+          "surfaceText": "model",
+          "corpusOccurrenceCount": 2
         }
       ],
-      "corpusOccurrenceCount": 1,
-      "contentCoverageCount": 1,
+      "corpusOccurrenceCount": 2,
+      "contentCoverageCount": 2,
       "familyCoverageCount": 1,
       "contents": [
         {
-          "contentId": "cnt_gc3_assess_010_s000_1",
-          "familyId": "fam_gc3_assess_010",
+          "contentId": "cnt_gc3_assess_014_s000_2",
+          "familyId": "fam_gc3_assess_014",
           "count": 1,
           "positions": [
             13
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_014_s002_16",
+          "familyId": "fam_gc3_assess_014",
+          "count": 1,
+          "positions": [
+            32
           ]
         }
       ]
     },
     {
       "entityType": "word",
-      "entityKey": "notices",
-      "lexicalKey": "notices",
+      "entityKey": "name",
+      "lexicalKey": "name",
       "surfaceForms": [
         {
-          "surfaceText": "notices",
-          "corpusOccurrenceCount": 3
+          "surfaceText": "name",
+          "corpusOccurrenceCount": 6
         }
       ],
-      "corpusOccurrenceCount": 3,
-      "contentCoverageCount": 3,
-      "familyCoverageCount": 2,
+      "corpusOccurrenceCount": 6,
+      "contentCoverageCount": 6,
+      "familyCoverageCount": 5,
       "contents": [
         {
-          "contentId": "cnt_gc3_assess_005_s000_11",
-          "familyId": "fam_gc3_assess_005",
+          "contentId": "cnt_gc3_assess_003_s000_0",
+          "familyId": "fam_gc3_assess_003",
           "count": 1,
           "positions": [
-            99
+            485
           ]
         },
         {
-          "contentId": "cnt_gc3_assess_008_s001_19",
-          "familyId": "fam_gc3_assess_008",
+          "contentId": "cnt_gc3_assess_006_s002_3",
+          "familyId": "fam_gc3_assess_006",
           "count": 1,
           "positions": [
-            0
+            412
           ]
         },
         {
-          "contentId": "cnt_gc3_assess_008_s003_19",
+          "contentId": "cnt_gc3_assess_007_s001_1",
+          "familyId": "fam_gc3_assess_007",
+          "count": 1,
+          "positions": [
+            219
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_008_s000_24",
           "familyId": "fam_gc3_assess_008",
           "count": 1,
           "positions": [
-            6
+            553
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_008_s001_2",
+          "familyId": "fam_gc3_assess_008",
+          "count": 1,
+          "positions": [
+            282
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_010_s000_7",
+          "familyId": "fam_gc3_assess_010",
+          "count": 1,
+          "positions": [
+            147
           ]
         }
       ]
@@ -1630,19 +2687,61 @@
       "surfaceForms": [
         {
           "surfaceText": "object",
-          "corpusOccurrenceCount": 1
+          "corpusOccurrenceCount": 8
         }
       ],
-      "corpusOccurrenceCount": 1,
-      "contentCoverageCount": 1,
-      "familyCoverageCount": 1,
+      "corpusOccurrenceCount": 8,
+      "contentCoverageCount": 6,
+      "familyCoverageCount": 6,
       "contents": [
+        {
+          "contentId": "cnt_gc3_assess_001_s001_4",
+          "familyId": "fam_gc3_assess_001",
+          "count": 1,
+          "positions": [
+            126
+          ]
+        },
         {
           "contentId": "cnt_gc3_assess_002_s005_3",
           "familyId": "fam_gc3_assess_002",
           "count": 1,
           "positions": [
-            669
+            398
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_003_s004_9",
+          "familyId": "fam_gc3_assess_003",
+          "count": 1,
+          "positions": [
+            297
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_007_s000_35",
+          "familyId": "fam_gc3_assess_007",
+          "count": 2,
+          "positions": [
+            158,
+            325
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_008_s000_24",
+          "familyId": "fam_gc3_assess_008",
+          "count": 2,
+          "positions": [
+            105,
+            250
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_009_s000_8",
+          "familyId": "fam_gc3_assess_009",
+          "count": 1,
+          "positions": [
+            388
           ]
         }
       ]
@@ -1654,187 +2753,533 @@
       "surfaceForms": [
         {
           "surfaceText": "observations",
-          "corpusOccurrenceCount": 17
+          "corpusOccurrenceCount": 4
         }
       ],
-      "corpusOccurrenceCount": 17,
-      "contentCoverageCount": 17,
-      "familyCoverageCount": 16,
+      "corpusOccurrenceCount": 4,
+      "contentCoverageCount": 3,
+      "familyCoverageCount": 2,
       "contents": [
         {
-          "contentId": "cnt_gc3_assess_001_s002_28",
-          "familyId": "fam_gc3_assess_001",
-          "count": 1,
-          "positions": [
-            107
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_002_s002_9",
-          "familyId": "fam_gc3_assess_002",
-          "count": 1,
-          "positions": [
-            111
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_003_s002_8",
-          "familyId": "fam_gc3_assess_003",
-          "count": 1,
-          "positions": [
-            99
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_004_s002_19",
-          "familyId": "fam_gc3_assess_004",
-          "count": 1,
-          "positions": [
-            118
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_005_s002_16",
-          "familyId": "fam_gc3_assess_005",
-          "count": 1,
-          "positions": [
-            111
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_006_s002_2",
-          "familyId": "fam_gc3_assess_006",
-          "count": 1,
-          "positions": [
-            107
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_007_s002_24",
-          "familyId": "fam_gc3_assess_007",
-          "count": 1,
-          "positions": [
-            99
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_008_s002_26",
+          "contentId": "cnt_gc3_assess_008_s003_3",
           "familyId": "fam_gc3_assess_008",
           "count": 1,
           "positions": [
-            107
+            633
           ]
         },
         {
-          "contentId": "cnt_gc3_assess_008_s004_0",
-          "familyId": "fam_gc3_assess_008",
-          "count": 1,
-          "positions": [
-            277
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_009_s002_7",
-          "familyId": "fam_gc3_assess_009",
-          "count": 1,
-          "positions": [
-            133
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_010_s002_18",
-          "familyId": "fam_gc3_assess_010",
-          "count": 1,
-          "positions": [
-            111
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_011_s002_7",
-          "familyId": "fam_gc3_assess_011",
-          "count": 1,
-          "positions": [
-            99
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_012_s002_7",
+          "contentId": "cnt_gc3_assess_012_s001_18",
           "familyId": "fam_gc3_assess_012",
           "count": 1,
           "positions": [
-            111
+            46
           ]
         },
         {
-          "contentId": "cnt_gc3_assess_013_s002_19",
-          "familyId": "fam_gc3_assess_013",
-          "count": 1,
+          "contentId": "cnt_gc3_assess_012_s002_16",
+          "familyId": "fam_gc3_assess_012",
+          "count": 2,
           "positions": [
-            89
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_014_s002_6",
-          "familyId": "fam_gc3_assess_014",
-          "count": 1,
-          "positions": [
-            111
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_015_s002_3",
-          "familyId": "fam_gc3_assess_015",
-          "count": 1,
-          "positions": [
-            102
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_016_s002_3",
-          "familyId": "fam_gc3_assess_016",
-          "count": 1,
-          "positions": [
-            107
+            85,
+            167
           ]
         }
       ]
     },
     {
       "entityType": "word",
-      "entityKey": "rails",
-      "lexicalKey": "rails",
+      "entityKey": "off",
+      "lexicalKey": "off",
       "surfaceForms": [
         {
-          "surfaceText": "rails",
+          "surfaceText": "off",
+          "corpusOccurrenceCount": 2
+        }
+      ],
+      "corpusOccurrenceCount": 2,
+      "contentCoverageCount": 2,
+      "familyCoverageCount": 2,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_003_s002_8",
+          "familyId": "fam_gc3_assess_003",
+          "count": 1,
+          "positions": [
+            279
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_005_s002_15",
+          "familyId": "fam_gc3_assess_005",
+          "count": 1,
+          "positions": [
+            301
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "openly",
+      "lexicalKey": "openly",
+      "surfaceForms": [
+        {
+          "surfaceText": "openly",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_011_s002_14",
+          "familyId": "fam_gc3_assess_011",
+          "count": 1,
+          "positions": [
+            417
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "owner's",
+      "lexicalKey": "owner's",
+      "surfaceForms": [
+        {
+          "surfaceText": "owner's",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_005_s001_8",
+          "familyId": "fam_gc3_assess_005",
+          "count": 1,
+          "positions": [
+            322
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "percentages",
+      "lexicalKey": "percentages",
+      "surfaceForms": [
+        {
+          "surfaceText": "percentages",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_016_s002_9",
+          "familyId": "fam_gc3_assess_016",
+          "count": 1,
+          "positions": [
+            109
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "pictures",
+      "lexicalKey": "pictures",
+      "surfaceForms": [
+        {
+          "surfaceText": "pictures",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_001_s000_6",
+          "familyId": "fam_gc3_assess_001",
+          "count": 1,
+          "positions": [
+            261
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "pieces",
+      "lexicalKey": "pieces",
+      "surfaceForms": [
+        {
+          "surfaceText": "pieces",
+          "corpusOccurrenceCount": 2
+        }
+      ],
+      "corpusOccurrenceCount": 2,
+      "contentCoverageCount": 2,
+      "familyCoverageCount": 2,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_003_s002_8",
+          "familyId": "fam_gc3_assess_003",
+          "count": 1,
+          "positions": [
+            246
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_014_s001_0",
+          "familyId": "fam_gc3_assess_014",
+          "count": 1,
+          "positions": [
+            406
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "points",
+      "lexicalKey": "points",
+      "surfaceForms": [
+        {
+          "surfaceText": "points",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_006_s004_26",
+          "familyId": "fam_gc3_assess_006",
+          "count": 1,
+          "positions": [
+            365
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "position",
+      "lexicalKey": "position",
+      "surfaceForms": [
+        {
+          "surfaceText": "position",
           "corpusOccurrenceCount": 3
         }
       ],
       "corpusOccurrenceCount": 3,
       "contentCoverageCount": 3,
+      "familyCoverageCount": 2,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_004_s001_16",
+          "familyId": "fam_gc3_assess_004",
+          "count": 1,
+          "positions": [
+            429
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_005_s001_8",
+          "familyId": "fam_gc3_assess_005",
+          "count": 1,
+          "positions": [
+            186
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_005_s002_15",
+          "familyId": "fam_gc3_assess_005",
+          "count": 1,
+          "positions": [
+            584
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "precise",
+      "lexicalKey": "precise",
+      "surfaceForms": [
+        {
+          "surfaceText": "Precise",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
       "familyCoverageCount": 1,
       "contents": [
         {
-          "contentId": "cnt_gc3_assess_005_s000_11",
+          "contentId": "cnt_gc3_assess_015_s002_23",
+          "familyId": "fam_gc3_assess_015",
+          "count": 1,
+          "positions": [
+            620
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "process",
+      "lexicalKey": "process",
+      "surfaceForms": [
+        {
+          "surfaceText": "process",
+          "corpusOccurrenceCount": 3
+        }
+      ],
+      "corpusOccurrenceCount": 3,
+      "contentCoverageCount": 3,
+      "familyCoverageCount": 3,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_005_s005_1",
           "familyId": "fam_gc3_assess_005",
           "count": 1,
           "positions": [
-            208
+            163
           ]
         },
         {
-          "contentId": "cnt_gc3_assess_005_s002_16",
-          "familyId": "fam_gc3_assess_005",
+          "contentId": "cnt_gc3_assess_006_s002_3",
+          "familyId": "fam_gc3_assess_006",
           "count": 1,
           "positions": [
-            595
+            611
           ]
         },
         {
-          "contentId": "cnt_gc3_assess_005_s007_6",
+          "contentId": "cnt_gc3_assess_013_s000_2",
+          "familyId": "fam_gc3_assess_013",
+          "count": 1,
+          "positions": [
+            560
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "project",
+      "lexicalKey": "project",
+      "surfaceForms": [
+        {
+          "surfaceText": "project",
+          "corpusOccurrenceCount": 4
+        }
+      ],
+      "corpusOccurrenceCount": 4,
+      "contentCoverageCount": 4,
+      "familyCoverageCount": 4,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_005_s006_7",
           "familyId": "fam_gc3_assess_005",
           "count": 1,
           "positions": [
-            42
+            552
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_006_s005_19",
+          "familyId": "fam_gc3_assess_006",
+          "count": 1,
+          "positions": [
+            576
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_012_s003_3",
+          "familyId": "fam_gc3_assess_012",
+          "count": 1,
+          "positions": [
+            212
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_013_s000_2",
+          "familyId": "fam_gc3_assess_013",
+          "count": 1,
+          "positions": [
+            420
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "promise",
+      "lexicalKey": "promise",
+      "surfaceForms": [
+        {
+          "surfaceText": "promise",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_004_s000_2",
+          "familyId": "fam_gc3_assess_004",
+          "count": 1,
+          "positions": [
+            373
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "prompted",
+      "lexicalKey": "prompted",
+      "surfaceForms": [
+        {
+          "surfaceText": "prompted",
+          "corpusOccurrenceCount": 2
+        }
+      ],
+      "corpusOccurrenceCount": 2,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_008_s002_4",
+          "familyId": "fam_gc3_assess_008",
+          "count": 2,
+          "positions": [
+            439,
+            493
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "proposing",
+      "lexicalKey": "proposing",
+      "surfaceForms": [
+        {
+          "surfaceText": "proposing",
+          "corpusOccurrenceCount": 2
+        }
+      ],
+      "corpusOccurrenceCount": 2,
+      "contentCoverageCount": 2,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_012_s000_1",
+          "familyId": "fam_gc3_assess_012",
+          "count": 1,
+          "positions": [
+            67
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_012_s001_18",
+          "familyId": "fam_gc3_assess_012",
+          "count": 1,
+          "positions": [
+            222
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "quotations",
+      "lexicalKey": "quotations",
+      "surfaceForms": [
+        {
+          "surfaceText": "quotations",
+          "corpusOccurrenceCount": 2
+        }
+      ],
+      "corpusOccurrenceCount": 2,
+      "contentCoverageCount": 2,
+      "familyCoverageCount": 2,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_008_s003_3",
+          "familyId": "fam_gc3_assess_008",
+          "count": 1,
+          "positions": [
+            116
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_016_s002_9",
+          "familyId": "fam_gc3_assess_016",
+          "count": 1,
+          "positions": [
+            548
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "rainy",
+      "lexicalKey": "rainy",
+      "surfaceForms": [
+        {
+          "surfaceText": "rainy",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_001_s000_6",
+          "familyId": "fam_gc3_assess_001",
+          "count": 1,
+          "positions": [
+            465
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "recent",
+      "lexicalKey": "recent",
+      "surfaceForms": [
+        {
+          "surfaceText": "recent",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_002_s002_9",
+          "familyId": "fam_gc3_assess_002",
+          "count": 1,
+          "positions": [
+            558
           ]
         }
       ]
@@ -1846,341 +3291,123 @@
       "surfaceForms": [
         {
           "surfaceText": "reference",
-          "corpusOccurrenceCount": 50
+          "corpusOccurrenceCount": 4
         }
       ],
-      "corpusOccurrenceCount": 50,
-      "contentCoverageCount": 40,
-      "familyCoverageCount": 16,
+      "corpusOccurrenceCount": 4,
+      "contentCoverageCount": 4,
+      "familyCoverageCount": 4,
       "contents": [
-        {
-          "contentId": "cnt_gc3_assess_001_s000_6",
-          "familyId": "fam_gc3_assess_001",
-          "count": 1,
-          "positions": [
-            244
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_001_s001_4",
-          "familyId": "fam_gc3_assess_001",
-          "count": 1,
-          "positions": [
-            361
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_001_s002_28",
-          "familyId": "fam_gc3_assess_001",
-          "count": 1,
-          "positions": [
-            380
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_001_s004_6",
-          "familyId": "fam_gc3_assess_001",
-          "count": 2,
-          "positions": [
-            186,
-            405
-          ]
-        },
         {
           "contentId": "cnt_gc3_assess_001_s005_4",
           "familyId": "fam_gc3_assess_001",
           "count": 1,
           "positions": [
-            671
+            473
           ]
         },
         {
-          "contentId": "cnt_gc3_assess_002_s000_18",
-          "familyId": "fam_gc3_assess_002",
+          "contentId": "cnt_gc3_assess_004_s002_49",
+          "familyId": "fam_gc3_assess_004",
           "count": 1,
           "positions": [
-            241
+            226
           ]
         },
         {
-          "contentId": "cnt_gc3_assess_002_s001_18",
-          "familyId": "fam_gc3_assess_002",
+          "contentId": "cnt_gc3_assess_006_s000_9",
+          "familyId": "fam_gc3_assess_006",
           "count": 1,
           "positions": [
-            90
+            437
           ]
         },
         {
-          "contentId": "cnt_gc3_assess_002_s003_18",
-          "familyId": "fam_gc3_assess_002",
-          "count": 2,
+          "contentId": "cnt_gc3_assess_009_s001_26",
+          "familyId": "fam_gc3_assess_009",
+          "count": 1,
           "positions": [
-            368,
-            587
+            477
           ]
-        },
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "resisted",
+      "lexicalKey": "resisted",
+      "surfaceForms": [
         {
-          "contentId": "cnt_gc3_assess_003_s000_0",
-          "familyId": "fam_gc3_assess_003",
-          "count": 2,
-          "positions": [
-            231,
-            345
-          ]
-        },
+          "surfaceText": "resisted",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
         {
           "contentId": "cnt_gc3_assess_003_s001_2",
           "familyId": "fam_gc3_assess_003",
           "count": 1,
           "positions": [
-            39
+            398
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "response",
+      "lexicalKey": "response",
+      "surfaceForms": [
+        {
+          "surfaceText": "response",
+          "corpusOccurrenceCount": 5
+        }
+      ],
+      "corpusOccurrenceCount": 5,
+      "contentCoverageCount": 5,
+      "familyCoverageCount": 4,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_002_s000_18",
+          "familyId": "fam_gc3_assess_002",
+          "count": 1,
+          "positions": [
+            315
           ]
         },
         {
-          "contentId": "cnt_gc3_assess_004_s000_0",
+          "contentId": "cnt_gc3_assess_002_s003_18",
+          "familyId": "fam_gc3_assess_002",
+          "count": 1,
+          "positions": [
+            279
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_004_s003_11",
           "familyId": "fam_gc3_assess_004",
-          "count": 2,
-          "positions": [
-            238,
-            294
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_005_s000_11",
-          "familyId": "fam_gc3_assess_005",
-          "count": 2,
-          "positions": [
-            233,
-            261
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_005_s003_6",
-          "familyId": "fam_gc3_assess_005",
           "count": 1,
           "positions": [
-            138
+            131
           ]
         },
         {
-          "contentId": "cnt_gc3_assess_005_s006_1",
-          "familyId": "fam_gc3_assess_005",
-          "count": 1,
-          "positions": [
-            37
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_006_s000_7",
-          "familyId": "fam_gc3_assess_006",
-          "count": 1,
-          "positions": [
-            233
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_006_s005_4",
-          "familyId": "fam_gc3_assess_006",
-          "count": 1,
-          "positions": [
-            233
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_007_s000_3",
-          "familyId": "fam_gc3_assess_007",
-          "count": 1,
-          "positions": [
-            229
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_007_s002_24",
-          "familyId": "fam_gc3_assess_007",
-          "count": 2,
-          "positions": [
-            248,
-            363
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_008_s000_9",
+          "contentId": "cnt_gc3_assess_008_s002_4",
           "familyId": "fam_gc3_assess_008",
           "count": 1,
           "positions": [
-            244
+            631
           ]
         },
         {
-          "contentId": "cnt_gc3_assess_008_s002_26",
-          "familyId": "fam_gc3_assess_008",
-          "count": 1,
-          "positions": [
-            235
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_008_s003_19",
-          "familyId": "fam_gc3_assess_008",
-          "count": 1,
-          "positions": [
-            577
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_009_s000_1",
-          "familyId": "fam_gc3_assess_009",
-          "count": 2,
-          "positions": [
-            255,
-            378
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_009_s001_9",
-          "familyId": "fam_gc3_assess_009",
-          "count": 1,
-          "positions": [
-            0
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_009_s002_7",
-          "familyId": "fam_gc3_assess_009",
-          "count": 1,
-          "positions": [
-            238
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_009_s003_23",
-          "familyId": "fam_gc3_assess_009",
-          "count": 1,
-          "positions": [
-            27
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_010_s000_1",
-          "familyId": "fam_gc3_assess_010",
-          "count": 1,
-          "positions": [
-            241
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_010_s001_5",
-          "familyId": "fam_gc3_assess_010",
-          "count": 1,
-          "positions": [
-            399
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_011_s000_18",
-          "familyId": "fam_gc3_assess_011",
-          "count": 1,
-          "positions": [
-            246
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_011_s001_9",
-          "familyId": "fam_gc3_assess_011",
-          "count": 1,
-          "positions": [
-            361
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_011_s003_16",
-          "familyId": "fam_gc3_assess_011",
-          "count": 1,
-          "positions": [
-            138
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_012_s000_14",
-          "familyId": "fam_gc3_assess_012",
-          "count": 1,
-          "positions": [
-            243
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_012_s001_49",
-          "familyId": "fam_gc3_assess_012",
-          "count": 1,
-          "positions": [
-            90
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_012_s003_5",
-          "familyId": "fam_gc3_assess_012",
-          "count": 1,
-          "positions": [
-            385
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_013_s000_2",
-          "familyId": "fam_gc3_assess_013",
-          "count": 1,
-          "positions": [
-            227
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_013_s001_11",
-          "familyId": "fam_gc3_assess_013",
-          "count": 1,
-          "positions": [
-            39
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_013_s002_19",
-          "familyId": "fam_gc3_assess_013",
-          "count": 1,
-          "positions": [
-            356
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_014_s000_9",
-          "familyId": "fam_gc3_assess_014",
-          "count": 2,
-          "positions": [
-            240,
-            296
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_014_s003_3",
-          "familyId": "fam_gc3_assess_014",
-          "count": 1,
-          "positions": [
-            584
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_015_s000_1",
+          "contentId": "cnt_gc3_assess_015_s002_23",
           "familyId": "fam_gc3_assess_015",
-          "count": 3,
-          "positions": [
-            234,
-            262,
-            350
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_016_s000_3",
-          "familyId": "fam_gc3_assess_016",
           "count": 1,
           "positions": [
-            232
+            610
           ]
         }
       ]
@@ -2200,195 +3427,131 @@
       "familyCoverageCount": 1,
       "contents": [
         {
-          "contentId": "cnt_gc3_assess_010_s004_17",
+          "contentId": "cnt_gc3_assess_010_s003_6",
           "familyId": "fam_gc3_assess_010",
           "count": 1,
           "positions": [
-            366
+            638
           ]
         }
       ]
     },
     {
       "entityType": "word",
-      "entityKey": "rollers",
-      "lexicalKey": "rollers",
+      "entityKey": "rhythms",
+      "lexicalKey": "rhythms",
       "surfaceForms": [
         {
-          "surfaceText": "rollers",
-          "corpusOccurrenceCount": 3
+          "surfaceText": "rhythms",
+          "corpusOccurrenceCount": 1
         }
       ],
-      "corpusOccurrenceCount": 3,
-      "contentCoverageCount": 3,
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
       "familyCoverageCount": 1,
       "contents": [
         {
-          "contentId": "cnt_gc3_assess_003_s000_0",
-          "familyId": "fam_gc3_assess_003",
+          "contentId": "cnt_gc3_assess_011_s002_14",
+          "familyId": "fam_gc3_assess_011",
           "count": 1,
           "positions": [
-            613
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_003_s002_8",
-          "familyId": "fam_gc3_assess_003",
-          "count": 1,
-          "positions": [
-            643
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_003_s004_2",
-          "familyId": "fam_gc3_assess_003",
-          "count": 1,
-          "positions": [
-            112
+            303
           ]
         }
       ]
     },
     {
       "entityType": "word",
-      "entityKey": "sensible",
-      "lexicalKey": "sensible",
+      "entityKey": "sacrificed",
+      "lexicalKey": "sacrificed",
       "surfaceForms": [
         {
-          "surfaceText": "sensible",
-          "corpusOccurrenceCount": 16
+          "surfaceText": "sacrificed",
+          "corpusOccurrenceCount": 1
         }
       ],
-      "corpusOccurrenceCount": 16,
-      "contentCoverageCount": 16,
-      "familyCoverageCount": 16,
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
       "contents": [
         {
-          "contentId": "cnt_gc3_assess_001_s000_6",
-          "familyId": "fam_gc3_assess_001",
-          "count": 1,
-          "positions": [
-            483
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_002_s000_18",
-          "familyId": "fam_gc3_assess_002",
-          "count": 1,
-          "positions": [
-            482
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_003_s000_0",
-          "familyId": "fam_gc3_assess_003",
-          "count": 1,
-          "positions": [
-            465
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_004_s000_0",
-          "familyId": "fam_gc3_assess_004",
-          "count": 1,
-          "positions": [
-            481
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_005_s000_11",
-          "familyId": "fam_gc3_assess_005",
-          "count": 1,
-          "positions": [
-            475
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_006_s000_7",
-          "familyId": "fam_gc3_assess_006",
-          "count": 1,
-          "positions": [
-            475
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_007_s000_3",
-          "familyId": "fam_gc3_assess_007",
-          "count": 1,
-          "positions": [
-            479
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_008_s000_9",
-          "familyId": "fam_gc3_assess_008",
-          "count": 1,
-          "positions": [
-            494
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_009_s000_1",
-          "familyId": "fam_gc3_assess_009",
-          "count": 1,
-          "positions": [
-            498
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_010_s000_1",
-          "familyId": "fam_gc3_assess_010",
-          "count": 1,
-          "positions": [
-            481
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_011_s000_18",
+          "contentId": "cnt_gc3_assess_011_s001_6",
           "familyId": "fam_gc3_assess_011",
           "count": 1,
           "positions": [
-            482
+            545
           ]
-        },
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "scheme",
+      "lexicalKey": "scheme",
+      "surfaceForms": [
         {
-          "contentId": "cnt_gc3_assess_012_s000_14",
-          "familyId": "fam_gc3_assess_012",
+          "surfaceText": "scheme",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_006_s002_3",
+          "familyId": "fam_gc3_assess_006",
           "count": 1,
           "positions": [
-            479
+            237
           ]
-        },
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "settlement",
+      "lexicalKey": "settlement",
+      "surfaceForms": [
         {
-          "contentId": "cnt_gc3_assess_013_s000_2",
-          "familyId": "fam_gc3_assess_013",
+          "surfaceText": "settlement",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_011_s001_6",
+          "familyId": "fam_gc3_assess_011",
           "count": 1,
           "positions": [
-            470
+            389
           ]
-        },
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "shorter",
+      "lexicalKey": "shorter",
+      "surfaceForms": [
         {
-          "contentId": "cnt_gc3_assess_014_s000_9",
-          "familyId": "fam_gc3_assess_014",
+          "surfaceText": "shorter",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_005_s005_1",
+          "familyId": "fam_gc3_assess_005",
           "count": 1,
           "positions": [
-            487
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_015_s000_1",
-          "familyId": "fam_gc3_assess_015",
-          "count": 1,
-          "positions": [
-            470
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_016_s000_3",
-          "familyId": "fam_gc3_assess_016",
-          "count": 1,
-          "positions": [
-            475
+            507
           ]
         }
       ]
@@ -2400,79 +3563,19 @@
       "surfaceForms": [
         {
           "surfaceText": "should",
-          "corpusOccurrenceCount": 82
+          "corpusOccurrenceCount": 2
         }
       ],
-      "corpusOccurrenceCount": 82,
-      "contentCoverageCount": 52,
-      "familyCoverageCount": 16,
+      "corpusOccurrenceCount": 2,
+      "contentCoverageCount": 2,
+      "familyCoverageCount": 1,
       "contents": [
         {
-          "contentId": "cnt_gc3_assess_001_s002_28",
-          "familyId": "fam_gc3_assess_001",
+          "contentId": "cnt_gc3_assess_003_s000_0",
+          "familyId": "fam_gc3_assess_003",
           "count": 1,
           "positions": [
-            611
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_001_s003_0",
-          "familyId": "fam_gc3_assess_001",
-          "count": 2,
-          "positions": [
-            12,
-            62
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_001_s004_6",
-          "familyId": "fam_gc3_assess_001",
-          "count": 2,
-          "positions": [
-            66,
-            524
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_001_s005_4",
-          "familyId": "fam_gc3_assess_001",
-          "count": 1,
-          "positions": [
-            344
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_002_s002_9",
-          "familyId": "fam_gc3_assess_002",
-          "count": 1,
-          "positions": [
-            619
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_002_s003_18",
-          "familyId": "fam_gc3_assess_002",
-          "count": 2,
-          "positions": [
-            18,
-            68
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_002_s004_18",
-          "familyId": "fam_gc3_assess_002",
-          "count": 2,
-          "positions": [
-            56,
-            518
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_002_s005_3",
-          "familyId": "fam_gc3_assess_002",
-          "count": 1,
-          "positions": [
-            334
+            95
           ]
         },
         {
@@ -2480,522 +3583,111 @@
           "familyId": "fam_gc3_assess_003",
           "count": 1,
           "positions": [
-            602
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_003_s003_48",
-          "familyId": "fam_gc3_assess_003",
-          "count": 2,
-          "positions": [
-            0,
-            50
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_003_s004_2",
-          "familyId": "fam_gc3_assess_003",
-          "count": 2,
-          "positions": [
-            52,
-            518
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_003_s005_25",
-          "familyId": "fam_gc3_assess_003",
-          "count": 1,
-          "positions": [
-            332
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_004_s002_19",
-          "familyId": "fam_gc3_assess_004",
-          "count": 1,
-          "positions": [
-            614
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_004_s003_1",
-          "familyId": "fam_gc3_assess_004",
-          "count": 2,
-          "positions": [
-            13,
-            63
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_004_s004_7",
-          "familyId": "fam_gc3_assess_004",
-          "count": 2,
-          "positions": [
-            66,
-            532
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_004_s005_5",
-          "familyId": "fam_gc3_assess_004",
-          "count": 1,
-          "positions": [
-            359
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_005_s002_16",
-          "familyId": "fam_gc3_assess_005",
-          "count": 1,
-          "positions": [
-            601
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_005_s003_6",
-          "familyId": "fam_gc3_assess_005",
-          "count": 2,
-          "positions": [
-            6,
-            56
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_005_s004_8",
-          "familyId": "fam_gc3_assess_005",
-          "count": 2,
-          "positions": [
-            52,
-            524
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_005_s005_5",
-          "familyId": "fam_gc3_assess_005",
-          "count": 1,
-          "positions": [
-            352
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_005_s006_1",
-          "familyId": "fam_gc3_assess_005",
-          "count": 2,
-          "positions": [
-            156,
-            620
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_005_s007_6",
-          "familyId": "fam_gc3_assess_005",
-          "count": 1,
-          "positions": [
-            440
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_006_s002_2",
-          "familyId": "fam_gc3_assess_006",
-          "count": 1,
-          "positions": [
-            608
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_006_s003_9",
-          "familyId": "fam_gc3_assess_006",
-          "count": 2,
-          "positions": [
-            16,
-            66
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_006_s004_19",
-          "familyId": "fam_gc3_assess_006",
-          "count": 2,
-          "positions": [
-            66,
-            542
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_006_s005_4",
-          "familyId": "fam_gc3_assess_006",
-          "count": 1,
-          "positions": [
-            352
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_006_s006_7",
-          "familyId": "fam_gc3_assess_006",
-          "count": 2,
-          "positions": [
-            177,
-            639
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_006_s007_6",
-          "familyId": "fam_gc3_assess_006",
-          "count": 1,
-          "positions": [
-            455
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_007_s002_24",
-          "familyId": "fam_gc3_assess_007",
-          "count": 2,
-          "positions": [
-            591,
-            640
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_007_s003_3",
-          "familyId": "fam_gc3_assess_007",
-          "count": 1,
-          "positions": [
-            43
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_007_s004_3",
-          "familyId": "fam_gc3_assess_007",
-          "count": 1,
-          "positions": [
-            52
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_008_s002_26",
-          "familyId": "fam_gc3_assess_008",
-          "count": 1,
-          "positions": [
-            612
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_008_s003_19",
-          "familyId": "fam_gc3_assess_008",
-          "count": 2,
-          "positions": [
-            14,
-            64
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_008_s004_0",
-          "familyId": "fam_gc3_assess_008",
-          "count": 1,
-          "positions": [
-            52
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_009_s002_7",
-          "familyId": "fam_gc3_assess_009",
-          "count": 1,
-          "positions": [
-            638
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_009_s003_23",
-          "familyId": "fam_gc3_assess_009",
-          "count": 2,
-          "positions": [
-            45,
-            95
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_009_s004_1",
-          "familyId": "fam_gc3_assess_009",
-          "count": 1,
-          "positions": [
-            93
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_010_s002_18",
-          "familyId": "fam_gc3_assess_010",
-          "count": 1,
-          "positions": [
-            616
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_010_s003_7",
-          "familyId": "fam_gc3_assess_010",
-          "count": 2,
-          "positions": [
-            18,
-            68
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_010_s004_17",
-          "familyId": "fam_gc3_assess_010",
-          "count": 1,
-          "positions": [
-            66
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_011_s002_7",
-          "familyId": "fam_gc3_assess_011",
-          "count": 1,
-          "positions": [
-            606
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_011_s003_16",
-          "familyId": "fam_gc3_assess_011",
-          "count": 3,
-          "positions": [
-            6,
-            56,
-            699
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_012_s002_7",
-          "familyId": "fam_gc3_assess_012",
-          "count": 1,
-          "positions": [
-            628
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_012_s003_5",
-          "familyId": "fam_gc3_assess_012",
-          "count": 3,
-          "positions": [
-            28,
-            78,
-            732
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_013_s002_19",
-          "familyId": "fam_gc3_assess_013",
-          "count": 2,
-          "positions": [
-            583,
-            630
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_013_s003_3",
-          "familyId": "fam_gc3_assess_013",
-          "count": 2,
-          "positions": [
-            31,
-            682
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_014_s002_6",
-          "familyId": "fam_gc3_assess_014",
-          "count": 1,
-          "positions": [
-            613
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_014_s003_3",
-          "familyId": "fam_gc3_assess_014",
-          "count": 3,
-          "positions": [
-            12,
-            62,
-            703
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_015_s002_3",
-          "familyId": "fam_gc3_assess_015",
-          "count": 2,
-          "positions": [
-            592,
-            641
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_015_s003_9",
-          "familyId": "fam_gc3_assess_015",
-          "count": 2,
-          "positions": [
-            43,
-            693
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_016_s002_3",
-          "familyId": "fam_gc3_assess_016",
-          "count": 1,
-          "positions": [
-            603
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_016_s003_6",
-          "familyId": "fam_gc3_assess_016",
-          "count": 3,
-          "positions": [
-            9,
-            59,
-            709
+            374
           ]
         }
       ]
     },
     {
       "entityType": "word",
-      "entityKey": "signals",
-      "lexicalKey": "signals",
+      "entityKey": "soon",
+      "lexicalKey": "soon",
       "surfaceForms": [
         {
-          "surfaceText": "signals",
-          "corpusOccurrenceCount": 17
+          "surfaceText": "soon",
+          "corpusOccurrenceCount": 1
         }
       ],
-      "corpusOccurrenceCount": 17,
-      "contentCoverageCount": 16,
-      "familyCoverageCount": 16,
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
       "contents": [
         {
-          "contentId": "cnt_gc3_assess_001_s001_4",
+          "contentId": "cnt_gc3_assess_001_s000_6",
           "familyId": "fam_gc3_assess_001",
           "count": 1,
           "positions": [
-            613
+            275
           ]
-        },
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "stated",
+      "lexicalKey": "stated",
+      "surfaceForms": [
         {
-          "contentId": "cnt_gc3_assess_002_s001_18",
-          "familyId": "fam_gc3_assess_002",
-          "count": 1,
-          "positions": [
-            617
-          ]
-        },
+          "surfaceText": "stated",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
         {
-          "contentId": "cnt_gc3_assess_003_s001_2",
-          "familyId": "fam_gc3_assess_003",
-          "count": 1,
-          "positions": [
-            604
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_004_s001_0",
-          "familyId": "fam_gc3_assess_004",
-          "count": 1,
-          "positions": [
-            627
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_005_s001_38",
-          "familyId": "fam_gc3_assess_005",
-          "count": 1,
-          "positions": [
-            617
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_006_s001_7",
-          "familyId": "fam_gc3_assess_006",
-          "count": 1,
-          "positions": [
-            612
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_007_s001_0",
-          "familyId": "fam_gc3_assess_007",
-          "count": 1,
-          "positions": [
-            601
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_008_s001_19",
-          "familyId": "fam_gc3_assess_008",
-          "count": 1,
-          "positions": [
-            612
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_009_s001_9",
-          "familyId": "fam_gc3_assess_009",
-          "count": 1,
-          "positions": [
-            637
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_010_s001_5",
-          "familyId": "fam_gc3_assess_010",
-          "count": 1,
-          "positions": [
-            618
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_011_s001_9",
-          "familyId": "fam_gc3_assess_011",
-          "count": 1,
-          "positions": [
-            607
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_012_s001_49",
-          "familyId": "fam_gc3_assess_012",
-          "count": 2,
-          "positions": [
-            563,
-            620
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_013_s001_11",
-          "familyId": "fam_gc3_assess_013",
-          "count": 1,
-          "positions": [
-            598
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_014_s001_7",
-          "familyId": "fam_gc3_assess_014",
-          "count": 1,
-          "positions": [
-            618
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_015_s001_5",
-          "familyId": "fam_gc3_assess_015",
-          "count": 1,
-          "positions": [
-            611
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_016_s001_3",
+          "contentId": "cnt_gc3_assess_016_s002_9",
           "familyId": "fam_gc3_assess_016",
           "count": 1,
           "positions": [
-            613
+            57
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "stopped",
+      "lexicalKey": "stopped",
+      "surfaceForms": [
+        {
+          "surfaceText": "stopped",
+          "corpusOccurrenceCount": 5
+        }
+      ],
+      "corpusOccurrenceCount": 5,
+      "contentCoverageCount": 5,
+      "familyCoverageCount": 4,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_003_s000_0",
+          "familyId": "fam_gc3_assess_003",
+          "count": 1,
+          "positions": [
+            232
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_003_s003_48",
+          "familyId": "fam_gc3_assess_003",
+          "count": 1,
+          "positions": [
+            146
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_006_s006_27",
+          "familyId": "fam_gc3_assess_006",
+          "count": 1,
+          "positions": [
+            725
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_013_s000_2",
+          "familyId": "fam_gc3_assess_013",
+          "count": 1,
+          "positions": [
+            364
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_014_s002_16",
+          "familyId": "fam_gc3_assess_014",
+          "count": 1,
+          "positions": [
+            300
           ]
         }
       ]
@@ -3015,317 +3707,195 @@
       "familyCoverageCount": 1,
       "contents": [
         {
-          "contentId": "cnt_gc3_assess_016_s000_3",
-          "familyId": "fam_gc3_assess_016",
+          "contentId": "cnt_gc3_assess_010_s000_7",
+          "familyId": "fam_gc3_assess_010",
           "count": 1,
           "positions": [
-            165
+            351
           ]
         }
       ]
     },
     {
       "entityType": "word",
-      "entityKey": "studies",
-      "lexicalKey": "studies",
+      "entityKey": "story",
+      "lexicalKey": "story",
       "surfaceForms": [
         {
-          "surfaceText": "studies",
-          "corpusOccurrenceCount": 2
+          "surfaceText": "story",
+          "corpusOccurrenceCount": 4
         }
       ],
-      "corpusOccurrenceCount": 2,
-      "contentCoverageCount": 2,
-      "familyCoverageCount": 1,
+      "corpusOccurrenceCount": 4,
+      "contentCoverageCount": 4,
+      "familyCoverageCount": 3,
       "contents": [
         {
-          "contentId": "cnt_gc3_assess_010_s000_1",
-          "familyId": "fam_gc3_assess_010",
-          "count": 1,
-          "positions": [
-            558
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_010_s003_7",
-          "familyId": "fam_gc3_assess_010",
-          "count": 1,
-          "positions": [
-            315
-          ]
-        }
-      ]
-    },
-    {
-      "entityType": "word",
-      "entityKey": "surroundings",
-      "lexicalKey": "surroundings",
-      "surfaceForms": [
-        {
-          "surfaceText": "surroundings",
-          "corpusOccurrenceCount": 34
-        }
-      ],
-      "corpusOccurrenceCount": 34,
-      "contentCoverageCount": 32,
-      "familyCoverageCount": 16,
-      "contents": [
-        {
-          "contentId": "cnt_gc3_assess_001_s003_0",
-          "familyId": "fam_gc3_assess_001",
-          "count": 1,
-          "positions": [
-            468
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_001_s004_6",
-          "familyId": "fam_gc3_assess_001",
-          "count": 1,
-          "positions": [
-            285
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_001_s005_4",
-          "familyId": "fam_gc3_assess_001",
-          "count": 1,
-          "positions": [
-            100
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_002_s003_18",
-          "familyId": "fam_gc3_assess_002",
-          "count": 1,
-          "positions": [
-            467
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_002_s004_18",
-          "familyId": "fam_gc3_assess_002",
-          "count": 1,
-          "positions": [
-            274
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_002_s005_3",
-          "familyId": "fam_gc3_assess_002",
-          "count": 1,
-          "positions": [
-            89
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_003_s003_48",
-          "familyId": "fam_gc3_assess_003",
-          "count": 1,
-          "positions": [
-            453
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_003_s004_2",
-          "familyId": "fam_gc3_assess_003",
-          "count": 1,
-          "positions": [
-            273
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_003_s005_25",
-          "familyId": "fam_gc3_assess_003",
-          "count": 1,
-          "positions": [
-            89
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_004_s003_1",
-          "familyId": "fam_gc3_assess_004",
-          "count": 1,
-          "positions": [
-            470
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_004_s004_7",
-          "familyId": "fam_gc3_assess_004",
-          "count": 1,
-          "positions": [
-            289
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_004_s005_5",
-          "familyId": "fam_gc3_assess_004",
-          "count": 1,
-          "positions": [
-            111
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_005_s003_6",
+          "contentId": "cnt_gc3_assess_005_s000_15",
           "familyId": "fam_gc3_assess_005",
           "count": 1,
           "positions": [
-            453
+            109
           ]
         },
         {
-          "contentId": "cnt_gc3_assess_005_s004_8",
-          "familyId": "fam_gc3_assess_005",
-          "count": 1,
-          "positions": [
-            276
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_005_s005_5",
-          "familyId": "fam_gc3_assess_005",
-          "count": 2,
-          "positions": [
-            104,
-            567
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_005_s006_1",
-          "familyId": "fam_gc3_assess_005",
-          "count": 1,
-          "positions": [
-            376
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_005_s007_6",
-          "familyId": "fam_gc3_assess_005",
-          "count": 1,
-          "positions": [
-            195
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_006_s003_9",
-          "familyId": "fam_gc3_assess_006",
-          "count": 1,
-          "positions": [
-            468
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_006_s004_19",
-          "familyId": "fam_gc3_assess_006",
-          "count": 1,
-          "positions": [
-            294
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_006_s005_4",
-          "familyId": "fam_gc3_assess_006",
-          "count": 2,
-          "positions": [
-            113,
-            575
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_006_s006_7",
-          "familyId": "fam_gc3_assess_006",
-          "count": 1,
-          "positions": [
-            394
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_006_s007_6",
-          "familyId": "fam_gc3_assess_006",
-          "count": 1,
-          "positions": [
-            212
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_007_s003_3",
-          "familyId": "fam_gc3_assess_007",
-          "count": 1,
-          "positions": [
-            447
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_008_s003_19",
+          "contentId": "cnt_gc3_assess_008_s000_24",
           "familyId": "fam_gc3_assess_008",
           "count": 1,
           "positions": [
-            457
+            78
           ]
         },
         {
-          "contentId": "cnt_gc3_assess_009_s003_23",
-          "familyId": "fam_gc3_assess_009",
+          "contentId": "cnt_gc3_assess_008_s002_4",
+          "familyId": "fam_gc3_assess_008",
           "count": 1,
           "positions": [
-            500
+            450
           ]
         },
         {
-          "contentId": "cnt_gc3_assess_010_s003_7",
-          "familyId": "fam_gc3_assess_010",
-          "count": 1,
-          "positions": [
-            470
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_011_s003_16",
+          "contentId": "cnt_gc3_assess_011_s000_9",
           "familyId": "fam_gc3_assess_011",
           "count": 1,
           "positions": [
-            456
+            446
           ]
-        },
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "succeeded",
+      "lexicalKey": "succeeded",
+      "surfaceForms": [
         {
-          "contentId": "cnt_gc3_assess_012_s003_5",
-          "familyId": "fam_gc3_assess_012",
+          "surfaceText": "succeeded",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_006_s006_27",
+          "familyId": "fam_gc3_assess_006",
           "count": 1,
           "positions": [
-            484
+            638
           ]
-        },
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "surprise",
+      "lexicalKey": "surprise",
+      "surfaceForms": [
         {
-          "contentId": "cnt_gc3_assess_013_s003_3",
+          "surfaceText": "surprise",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_013_s000_2",
           "familyId": "fam_gc3_assess_013",
           "count": 1,
           "positions": [
-            434
+            612
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "take",
+      "lexicalKey": "take",
+      "surfaceForms": [
+        {
+          "surfaceText": "take",
+          "corpusOccurrenceCount": 3
+        }
+      ],
+      "corpusOccurrenceCount": 3,
+      "contentCoverageCount": 3,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_005_s003_8",
+          "familyId": "fam_gc3_assess_005",
+          "count": 1,
+          "positions": [
+            167
           ]
         },
         {
-          "contentId": "cnt_gc3_assess_014_s003_3",
-          "familyId": "fam_gc3_assess_014",
+          "contentId": "cnt_gc3_assess_005_s005_1",
+          "familyId": "fam_gc3_assess_005",
           "count": 1,
           "positions": [
-            464
+            85
           ]
         },
         {
-          "contentId": "cnt_gc3_assess_015_s003_9",
-          "familyId": "fam_gc3_assess_015",
+          "contentId": "cnt_gc3_assess_005_s006_7",
+          "familyId": "fam_gc3_assess_005",
           "count": 1,
           "positions": [
-            449
+            41
           ]
-        },
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "taught",
+      "lexicalKey": "taught",
+      "surfaceForms": [
         {
-          "contentId": "cnt_gc3_assess_016_s003_6",
-          "familyId": "fam_gc3_assess_016",
+          "surfaceText": "taught",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_011_s003_1",
+          "familyId": "fam_gc3_assess_011",
           "count": 1,
           "positions": [
-            464
+            102
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "temptation",
+      "lexicalKey": "temptation",
+      "surfaceForms": [
+        {
+          "surfaceText": "temptation",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_003_s001_2",
+          "familyId": "fam_gc3_assess_003",
+          "count": 1,
+          "positions": [
+            411
           ]
         }
       ]
@@ -3337,163 +3907,99 @@
       "surfaceForms": [
         {
           "surfaceText": "then",
-          "corpusOccurrenceCount": 17
+          "corpusOccurrenceCount": 8
+        },
+        {
+          "surfaceText": "Then",
+          "corpusOccurrenceCount": 1
         }
       ],
-      "corpusOccurrenceCount": 17,
-      "contentCoverageCount": 17,
-      "familyCoverageCount": 16,
+      "corpusOccurrenceCount": 9,
+      "contentCoverageCount": 9,
+      "familyCoverageCount": 8,
       "contents": [
-        {
-          "contentId": "cnt_gc3_assess_001_s000_6",
-          "familyId": "fam_gc3_assess_001",
-          "count": 1,
-          "positions": [
-            277
-          ]
-        },
         {
           "contentId": "cnt_gc3_assess_001_s005_4",
           "familyId": "fam_gc3_assess_001",
           "count": 1,
           "positions": [
-            429
+            231
           ]
         },
         {
-          "contentId": "cnt_gc3_assess_002_s000_18",
-          "familyId": "fam_gc3_assess_002",
-          "count": 1,
-          "positions": [
-            280
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_003_s000_0",
+          "contentId": "cnt_gc3_assess_003_s004_9",
           "familyId": "fam_gc3_assess_003",
           "count": 1,
           "positions": [
-            266
+            213
           ]
         },
         {
-          "contentId": "cnt_gc3_assess_004_s000_0",
-          "familyId": "fam_gc3_assess_004",
-          "count": 1,
-          "positions": [
-            279
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_005_s000_11",
+          "contentId": "cnt_gc3_assess_005_s004_5",
           "familyId": "fam_gc3_assess_005",
           "count": 1,
           "positions": [
-            272
+            43
           ]
         },
         {
-          "contentId": "cnt_gc3_assess_006_s000_7",
+          "contentId": "cnt_gc3_assess_006_s003_10",
           "familyId": "fam_gc3_assess_006",
           "count": 1,
           "positions": [
-            272
+            495
           ]
         },
         {
-          "contentId": "cnt_gc3_assess_007_s000_3",
-          "familyId": "fam_gc3_assess_007",
-          "count": 1,
-          "positions": [
-            270
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_008_s000_9",
-          "familyId": "fam_gc3_assess_008",
-          "count": 1,
-          "positions": [
-            286
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_009_s000_1",
+          "contentId": "cnt_gc3_assess_009_s000_8",
           "familyId": "fam_gc3_assess_009",
           "count": 1,
           "positions": [
-            296
+            268
           ]
         },
         {
-          "contentId": "cnt_gc3_assess_010_s000_1",
-          "familyId": "fam_gc3_assess_010",
-          "count": 1,
-          "positions": [
-            285
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_011_s000_18",
+          "contentId": "cnt_gc3_assess_011_s000_9",
           "familyId": "fam_gc3_assess_011",
           "count": 1,
           "positions": [
-            279
+            136
           ]
         },
         {
-          "contentId": "cnt_gc3_assess_012_s000_14",
-          "familyId": "fam_gc3_assess_012",
-          "count": 1,
-          "positions": [
-            282
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_013_s000_2",
-          "familyId": "fam_gc3_assess_013",
-          "count": 1,
-          "positions": [
-            262
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_014_s000_9",
+          "contentId": "cnt_gc3_assess_014_s000_2",
           "familyId": "fam_gc3_assess_014",
           "count": 1,
           "positions": [
-            281
+            263
           ]
         },
         {
-          "contentId": "cnt_gc3_assess_015_s000_1",
+          "contentId": "cnt_gc3_assess_014_s001_0",
+          "familyId": "fam_gc3_assess_014",
+          "count": 1,
+          "positions": [
+            71
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_015_s003_0",
           "familyId": "fam_gc3_assess_015",
           "count": 1,
           "positions": [
-            273
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_016_s000_3",
-          "familyId": "fam_gc3_assess_016",
-          "count": 1,
-          "positions": [
-            271
+            54
           ]
         }
       ]
     },
     {
       "entityType": "word",
-      "entityKey": "timber",
-      "lexicalKey": "timber",
+      "entityKey": "took",
+      "lexicalKey": "took",
       "surfaceForms": [
         {
-          "surfaceText": "timber",
-          "corpusOccurrenceCount": 1
-        },
-        {
-          "surfaceText": "Timber",
-          "corpusOccurrenceCount": 1
+          "surfaceText": "took",
+          "corpusOccurrenceCount": 2
         }
       ],
       "corpusOccurrenceCount": 2,
@@ -3501,19 +4007,19 @@
       "familyCoverageCount": 1,
       "contents": [
         {
-          "contentId": "cnt_gc3_assess_010_s000_1",
-          "familyId": "fam_gc3_assess_010",
+          "contentId": "cnt_gc3_assess_003_s002_8",
+          "familyId": "fam_gc3_assess_003",
           "count": 1,
           "positions": [
-            207
+            621
           ]
         },
         {
-          "contentId": "cnt_gc3_assess_010_s002_18",
-          "familyId": "fam_gc3_assess_010",
+          "contentId": "cnt_gc3_assess_003_s004_9",
+          "familyId": "fam_gc3_assess_003",
           "count": 1,
           "positions": [
-            601
+            123
           ]
         }
       ]
@@ -3525,27 +4031,115 @@
       "surfaceForms": [
         {
           "surfaceText": "toward",
-          "corpusOccurrenceCount": 16
+          "corpusOccurrenceCount": 2
         }
       ],
-      "corpusOccurrenceCount": 16,
-      "contentCoverageCount": 16,
-      "familyCoverageCount": 16,
+      "corpusOccurrenceCount": 2,
+      "contentCoverageCount": 2,
+      "familyCoverageCount": 2,
       "contents": [
-        {
-          "contentId": "cnt_gc3_assess_001_s002_28",
-          "familyId": "fam_gc3_assess_001",
-          "count": 1,
-          "positions": [
-            174
-          ]
-        },
         {
           "contentId": "cnt_gc3_assess_002_s002_9",
           "familyId": "fam_gc3_assess_002",
           "count": 1,
           "positions": [
-            178
+            288
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_014_s001_0",
+          "familyId": "fam_gc3_assess_014",
+          "count": 1,
+          "positions": [
+            607
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "trains",
+      "lexicalKey": "trains",
+      "surfaceForms": [
+        {
+          "surfaceText": "trains",
+          "corpusOccurrenceCount": 3
+        }
+      ],
+      "corpusOccurrenceCount": 3,
+      "contentCoverageCount": 3,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_014_s000_2",
+          "familyId": "fam_gc3_assess_014",
+          "count": 1,
+          "positions": [
+            74
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_014_s001_0",
+          "familyId": "fam_gc3_assess_014",
+          "count": 1,
+          "positions": [
+            575
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_014_s003_49",
+          "familyId": "fam_gc3_assess_014",
+          "count": 1,
+          "positions": [
+            403
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "transport",
+      "lexicalKey": "transport",
+      "surfaceForms": [
+        {
+          "surfaceText": "transport",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_004_s000_2",
+          "familyId": "fam_gc3_assess_004",
+          "count": 1,
+          "positions": [
+            585
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "turn",
+      "lexicalKey": "turn",
+      "surfaceForms": [
+        {
+          "surfaceText": "turn",
+          "corpusOccurrenceCount": 2
+        }
+      ],
+      "corpusOccurrenceCount": 2,
+      "contentCoverageCount": 2,
+      "familyCoverageCount": 2,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_002_s001_18",
+          "familyId": "fam_gc3_assess_002",
+          "count": 1,
+          "positions": [
+            133
           ]
         },
         {
@@ -3553,111 +4147,205 @@
           "familyId": "fam_gc3_assess_003",
           "count": 1,
           "positions": [
-            166
+            55
           ]
-        },
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "turning",
+      "lexicalKey": "turning",
+      "surfaceForms": [
         {
-          "contentId": "cnt_gc3_assess_004_s002_19",
-          "familyId": "fam_gc3_assess_004",
-          "count": 1,
-          "positions": [
-            185
-          ]
-        },
+          "surfaceText": "turning",
+          "corpusOccurrenceCount": 3
+        }
+      ],
+      "corpusOccurrenceCount": 3,
+      "contentCoverageCount": 3,
+      "familyCoverageCount": 3,
+      "contents": [
         {
-          "contentId": "cnt_gc3_assess_005_s002_16",
-          "familyId": "fam_gc3_assess_005",
-          "count": 1,
-          "positions": [
-            178
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_006_s002_2",
+          "contentId": "cnt_gc3_assess_006_s006_27",
           "familyId": "fam_gc3_assess_006",
           "count": 1,
           "positions": [
-            174
+            246
           ]
         },
         {
-          "contentId": "cnt_gc3_assess_007_s002_24",
-          "familyId": "fam_gc3_assess_007",
-          "count": 1,
-          "positions": [
-            166
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_008_s002_26",
+          "contentId": "cnt_gc3_assess_008_s001_2",
           "familyId": "fam_gc3_assess_008",
           "count": 1,
           "positions": [
-            174
+            108
           ]
         },
         {
-          "contentId": "cnt_gc3_assess_009_s002_7",
-          "familyId": "fam_gc3_assess_009",
-          "count": 1,
-          "positions": [
-            200
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_010_s002_18",
-          "familyId": "fam_gc3_assess_010",
-          "count": 1,
-          "positions": [
-            178
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_011_s002_7",
-          "familyId": "fam_gc3_assess_011",
-          "count": 1,
-          "positions": [
-            166
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_012_s002_7",
+          "contentId": "cnt_gc3_assess_012_s002_16",
           "familyId": "fam_gc3_assess_012",
           "count": 1,
           "positions": [
-            178
+            192
           ]
-        },
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "unloading",
+      "lexicalKey": "unloading",
+      "surfaceForms": [
         {
-          "contentId": "cnt_gc3_assess_013_s002_19",
-          "familyId": "fam_gc3_assess_013",
+          "surfaceText": "unloading",
+          "corpusOccurrenceCount": 2
+        }
+      ],
+      "corpusOccurrenceCount": 2,
+      "contentCoverageCount": 2,
+      "familyCoverageCount": 2,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_003_s002_8",
+          "familyId": "fam_gc3_assess_003",
           "count": 1,
           "positions": [
-            156
+            532
           ]
         },
         {
-          "contentId": "cnt_gc3_assess_014_s002_6",
-          "familyId": "fam_gc3_assess_014",
+          "contentId": "cnt_gc3_assess_004_s003_11",
+          "familyId": "fam_gc3_assess_004",
           "count": 1,
           "positions": [
-            178
+            235
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "unreal",
+      "lexicalKey": "unreal",
+      "surfaceForms": [
+        {
+          "surfaceText": "unreal",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_001_s002_28",
+          "familyId": "fam_gc3_assess_001",
+          "count": 1,
+          "positions": [
+            59
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "venue's",
+      "lexicalKey": "venue's",
+      "surfaceForms": [
+        {
+          "surfaceText": "venue's",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_004_s004_9",
+          "familyId": "fam_gc3_assess_004",
+          "count": 1,
+          "positions": [
+            142
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "volunteers",
+      "lexicalKey": "volunteers",
+      "surfaceForms": [
+        {
+          "surfaceText": "volunteers",
+          "corpusOccurrenceCount": 8
+        },
+        {
+          "surfaceText": "Volunteers",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 9,
+      "contentCoverageCount": 7,
+      "familyCoverageCount": 5,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_004_s004_9",
+          "familyId": "fam_gc3_assess_004",
+          "count": 2,
+          "positions": [
+            215,
+            783
           ]
         },
         {
-          "contentId": "cnt_gc3_assess_015_s002_3",
+          "contentId": "cnt_gc3_assess_006_s000_9",
+          "familyId": "fam_gc3_assess_006",
+          "count": 1,
+          "positions": [
+            45
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_006_s004_26",
+          "familyId": "fam_gc3_assess_006",
+          "count": 2,
+          "positions": [
+            40,
+            305
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_009_s003_1",
+          "familyId": "fam_gc3_assess_009",
+          "count": 1,
+          "positions": [
+            177
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_010_s000_7",
+          "familyId": "fam_gc3_assess_010",
+          "count": 1,
+          "positions": [
+            415
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_010_s002_2",
+          "familyId": "fam_gc3_assess_010",
+          "count": 1,
+          "positions": [
+            556
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_015_s003_0",
           "familyId": "fam_gc3_assess_015",
           "count": 1,
           "positions": [
-            169
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_016_s002_3",
-          "familyId": "fam_gc3_assess_016",
-          "count": 1,
-          "positions": [
-            174
+            16
           ]
         }
       ]
@@ -3669,27 +4357,99 @@
       "surfaceForms": [
         {
           "surfaceText": "washers",
-          "corpusOccurrenceCount": 2
+          "corpusOccurrenceCount": 1
         }
       ],
-      "corpusOccurrenceCount": 2,
-      "contentCoverageCount": 2,
-      "familyCoverageCount": 2,
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
       "contents": [
         {
-          "contentId": "cnt_gc3_assess_007_s001_0",
-          "familyId": "fam_gc3_assess_007",
-          "count": 1,
-          "positions": [
-            544
-          ]
-        },
-        {
-          "contentId": "cnt_gc3_assess_009_s004_1",
+          "contentId": "cnt_gc3_assess_009_s003_1",
           "familyId": "fam_gc3_assess_009",
           "count": 1,
           "positions": [
-            149
+            395
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "weakness",
+      "lexicalKey": "weakness",
+      "surfaceForms": [
+        {
+          "surfaceText": "weakness",
+          "corpusOccurrenceCount": 1
+        }
+      ],
+      "corpusOccurrenceCount": 1,
+      "contentCoverageCount": 1,
+      "familyCoverageCount": 1,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_002_s003_18",
+          "familyId": "fam_gc3_assess_002",
+          "count": 1,
+          "positions": [
+            432
+          ]
+        }
+      ]
+    },
+    {
+      "entityType": "word",
+      "entityKey": "within",
+      "lexicalKey": "within",
+      "surfaceForms": [
+        {
+          "surfaceText": "within",
+          "corpusOccurrenceCount": 5
+        }
+      ],
+      "corpusOccurrenceCount": 5,
+      "contentCoverageCount": 5,
+      "familyCoverageCount": 5,
+      "contents": [
+        {
+          "contentId": "cnt_gc3_assess_003_s004_9",
+          "familyId": "fam_gc3_assess_003",
+          "count": 1,
+          "positions": [
+            847
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_004_s001_16",
+          "familyId": "fam_gc3_assess_004",
+          "count": 1,
+          "positions": [
+            611
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_005_s002_15",
+          "familyId": "fam_gc3_assess_005",
+          "count": 1,
+          "positions": [
+            174
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_013_s001_9",
+          "familyId": "fam_gc3_assess_013",
+          "count": 1,
+          "positions": [
+            91
+          ]
+        },
+        {
+          "contentId": "cnt_gc3_assess_014_s002_16",
+          "familyId": "fam_gc3_assess_014",
+          "count": 1,
+          "positions": [
+            116
           ]
         }
       ]
@@ -3701,27 +4461,19 @@
       "surfaceForms": [
         {
           "surfaceText": "x-ray",
-          "corpusOccurrenceCount": 3
+          "corpusOccurrenceCount": 2
         }
       ],
-      "corpusOccurrenceCount": 3,
-      "contentCoverageCount": 3,
+      "corpusOccurrenceCount": 2,
+      "contentCoverageCount": 2,
       "familyCoverageCount": 2,
       "contents": [
-        {
-          "contentId": "cnt_gc3_assess_001_s001_4",
-          "familyId": "fam_gc3_assess_001",
-          "count": 1,
-          "positions": [
-            552
-          ]
-        },
         {
           "contentId": "cnt_gc3_assess_001_s005_4",
           "familyId": "fam_gc3_assess_001",
           "count": 1,
           "positions": [
-            665
+            467
           ]
         },
         {
@@ -3729,7 +4481,7 @@
           "familyId": "fam_gc3_assess_002",
           "count": 1,
           "positions": [
-            445
+            174
           ]
         }
       ]
