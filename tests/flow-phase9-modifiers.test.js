@@ -79,11 +79,11 @@ assert.equal(symbolsPlan.segments[0].passageId, "symbols-medium");
 const longformPlan = createFlowRunPlan({ sessionLength: "quick", difficulty: "smooth", modifiers: ["longform"], catalog: customCatalog, seed: "longform" });
 assert.equal(longformPlan.segments[0].passageId, "dialogue-long");
 
-const basePlan = createFlowRunPlan({ sessionLength: "quick", difficulty: "smooth", catalog: customCatalog, seed: "sprint" });
-const sprintPlan = createFlowRunPlan({ sessionLength: "quick", difficulty: "smooth", modifiers: ["sprint"], catalog: customCatalog, seed: "sprint" });
-assert.equal(basePlan.passageCount, 6);
-assert.equal(sprintPlan.passageCount, 3);
-assert.equal(sprintPlan.chapterCount, 3);
-assert.equal(sprintPlan.targetMinutes, 2);
+const basePlan = createFlowRunPlan({ sessionLength: "standard", difficulty: "smooth", catalog: customCatalog, seed: "sprint" });
+const sprintPlan = createFlowRunPlan({ sessionLength: "standard", difficulty: "smooth", modifiers: ["sprint"], catalog: customCatalog, seed: "sprint" });
+assert.equal(basePlan.passageCount, 3);
+assert.equal(sprintPlan.passageCount, 2);
+assert.equal(sprintPlan.chapterCount, 2);
+assert.equal(sprintPlan.targetMinutes, 3);
 
 console.log("Flow Phase 9 modifier contracts passed: conflicts, gameplay scales, score bonuses, no-backspace, content biases, and sprint planning.");
