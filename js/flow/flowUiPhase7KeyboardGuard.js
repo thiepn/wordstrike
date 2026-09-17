@@ -92,34 +92,48 @@ function decorateSetup() {
   updateTrack(setup.querySelector(".flow-itinerary-track"), presentation.labels);
 }
 
-function decorateConnectedRun() {
+function actualSegmentLabels(plan) {
+  return plan.segments.map((segment, index) => (
+    segment.title
+    || plan.chapters?.[segment.chapterIndex]?.title
+    || `Section ${index + 1}`
+  ));
+}
+
+function decorateRunRail() {
   const plan = controller()?.getRunPlan?.();
-  if (!plan?.coherent) return;
-  const segmentIndex = controller()?.getActiveSegmentIndex?.() ?? 0;
+  if (!plan?.segments?.length) return;
+  const segmentIndex = Math.max(0, Math.min(
+    controller()?.getActiveSegmentIndex?.() ?? 0,
+    plan.segments.length - 1,
+  ));
   const screen = document.querySelector(".flow-phase1-screen");
   if (!(screen instanceof HTMLElement)) return;
   const complete = screen.dataset.flowView === "complete";
-  const labels = plan.segments.map((segment, index) => segment.title || `Section ${index + 1}`);
+  const labels = actualSegmentLabels(plan);
   const rail = screen.querySelector('[data-flow-ui="session-rail"]');
-  if (rail instanceof HTMLElement) {
-    updateTrack(rail.querySelector(".flow-itinerary-track"), labels, complete ? labels.length : segmentIndex, complete);
-    const copy = rail.querySelector(".flow-session-rail-copy");
-    if (copy) {
-      const eyebrow = copy.querySelector("span");
-      const heading = copy.querySelector("strong");
-      const detail = copy.querySelector("small");
-      if (eyebrow) eyebrow.textContent = complete ? "Run complete" : `Section ${segmentIndex + 1} of ${plan.passageCount}`;
-      if (heading) heading.textContent = plan.seriesTitle || "Connected Flow";
-      if (detail) detail.textContent = complete
-        ? `${plan.passageCount} connected section${plan.passageCount === 1 ? "" : "s"}`
-        : labels[segmentIndex];
-    }
-  }
+  if (!(rail instanceof HTMLElement)) return;
+
+  updateTrack(rail.querySelector(".flow-itinerary-track"), labels, complete ? labels.length : segmentIndex, complete);
+  const copy = rail.querySelector(".flow-session-rail-copy");
+  if (!copy) return;
+  const eyebrow = copy.querySelector("span");
+  const heading = copy.querySelector("strong");
+  const detail = copy.querySelector("small");
+  if (eyebrow) eyebrow.textContent = complete
+    ? "Run complete"
+    : `Section ${segmentIndex + 1} of ${plan.passageCount}`;
+  if (heading) heading.textContent = plan.coherent
+    ? plan.seriesTitle || "Connected Flow"
+    : plan.chapters?.[plan.segments[segmentIndex]?.chapterIndex]?.title || "Flow";
+  if (detail) detail.textContent = complete
+    ? `${plan.passageCount} section${plan.passageCount === 1 ? "" : "s"} complete`
+    : labels[segmentIndex];
 }
 
 function decorateStructure() {
   decorateSetup();
-  decorateConnectedRun();
+  decorateRunRail();
 }
 
 if (enabled) {
