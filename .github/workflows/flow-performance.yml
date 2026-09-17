@@ -1,0 +1,27 @@
+name: Flow performance hot-path certification
+on:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  flow-performance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    container:
+      image: mcr.microsoft.com/playwright/python:v1.57.0-noble
+      options: --ipc=host
+    env:
+      HOME: /root
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install browser test dependencies
+        run: python3 -m pip install -r tests/browser/requirements.txt
+      - name: Certify Flow longform typing hot path
+        run: python3 tests/browser/flow_performance_hotpath.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: flow-performance-evidence
+          path: browser-artifacts/flow-performance/
+          retention-days: 7

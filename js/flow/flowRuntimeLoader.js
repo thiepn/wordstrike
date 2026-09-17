@@ -23,7 +23,7 @@ const FLOW_RELEASE_QUERY_KEYS = Object.freeze([
 ]);
 
 const FLOW_RELEASE_ASSETS = Object.freeze([
-  "./js/flow/flowRuntimeLoader.js?v=20260917a",
+  "./js/flow/flowRuntimeLoader.js?v=20260917b",
   "./js/flow/flowMigrationPresentation.js?v=20260915a",
   "./js/flow/flowAdaptive.js",
   "./js/flow/flowAdaptivePhase10.js?v=20260916a",
@@ -40,7 +40,7 @@ const FLOW_RELEASE_ASSETS = Object.freeze([
   "./js/flow/flowModifiers.js",
   "./js/flow/flowModifiersPhase9.js?v=20260916a",
   "./js/flow/flowPassages.js",
-  "./js/flow/flowPhase1.js?v=20260916d",
+  "./js/flow/flowPhase1.js?v=20260917b",
   "./js/flow/flowProgression.js",
   "./js/flow/flowRunPlan.js",
   "./js/flow/flowSelection.js",
@@ -145,6 +145,12 @@ function installModeEntryRouting() {
     event.stopImmediatePropagation();
     launchPublicFlow();
   }, true);
+
+  // The listener above is intentionally installed on release pages too so it
+  // survives a same-document Flow exit and can launch Flow again afterwards.
+  // The MutationObserver is only needed on non-release pages and stays disabled
+  // during active Flow typing to avoid waking on gameplay DOM mutations.
+  if (isFlowReleaseRoute()) return;
   const app = document.querySelector("#app");
   if (app) new MutationObserver(bindPublicModeEntry).observe(app, { childList: true, subtree: true });
   bindPublicModeEntry();
@@ -224,7 +230,7 @@ function installReleaseExitCleanup() {
     replaceUrl(stripFlowReleaseUrl());
     bindPublicModeEntry();
   };
-  new MutationObserver(() => queueMicrotask(inspect)).observe(app, { childList: true, subtree: true });
+  new MutationObserver(() => queueMicrotask(inspect)).observe(app, { childList: true });
   queueMicrotask(inspect);
 }
 
@@ -268,7 +274,7 @@ async function importFlowRuntime() {
 
   try {
     await import("./flowIntegrationBootstrap.js?v=20260916a");
-    await import("./flowPhase1.js?v=20260916d");
+    await import("./flowPhase1.js?v=20260917b");
     await import("./flowVisualPhase6.js?v=20260916a");
 
     const params = new URLSearchParams(globalThis.location.search);
