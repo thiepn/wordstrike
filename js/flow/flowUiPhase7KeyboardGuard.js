@@ -58,6 +58,10 @@ function handleWordBackspace(event) {
   return true;
 }
 
+function setTextIfChanged(element, value) {
+  if (element && element.textContent !== value) element.textContent = value;
+}
+
 function trackMarkup(labels, activeIndex = -1, complete = false) {
   return labels.map((label, index) => {
     const state = complete || index < activeIndex ? "complete" : index === activeIndex ? "current" : "upcoming";
@@ -82,12 +86,11 @@ function decorateSetup() {
   if (!(setup instanceof HTMLElement)) return;
   const length = selectedLength();
   const presentation = LENGTH_PRESENTATION[length] || LENGTH_PRESENTATION.standard;
-  const summary = setup.querySelector("[data-flow-setup-summary]");
-  if (summary && summary.textContent !== presentation.summary) summary.textContent = presentation.summary;
+  setTextIfChanged(setup.querySelector("[data-flow-setup-summary]"), presentation.summary);
   const lead = document.querySelector('.flow-ready-screen .flow-phase1-lead');
   if (lead && !lead.dataset.flowPostreleaseCopy) {
     lead.dataset.flowPostreleaseCopy = "true";
-    lead.textContent = "Choose the shape of the session. Default Flow now uses longer connected prose, while category and complexity options let you target a specific kind of practice.";
+    setTextIfChanged(lead, "Choose the shape of the session. Default Flow now uses longer connected prose, while category and complexity options let you target a specific kind of practice.");
   }
   updateTrack(setup.querySelector(".flow-itinerary-track"), presentation.labels);
 }
@@ -120,15 +123,22 @@ function decorateRunRail() {
   const eyebrow = copy.querySelector("span");
   const heading = copy.querySelector("strong");
   const detail = copy.querySelector("small");
-  if (eyebrow) eyebrow.textContent = complete
-    ? "Run complete"
-    : `Section ${segmentIndex + 1} of ${plan.passageCount}`;
-  if (heading) heading.textContent = plan.coherent
-    ? plan.seriesTitle || "Connected Flow"
-    : plan.chapters?.[plan.segments[segmentIndex]?.chapterIndex]?.title || "Flow";
-  if (detail) detail.textContent = complete
-    ? `${plan.passageCount} section${plan.passageCount === 1 ? "" : "s"} complete`
-    : labels[segmentIndex];
+  setTextIfChanged(
+    eyebrow,
+    complete ? "Run complete" : `Section ${segmentIndex + 1} of ${plan.passageCount}`,
+  );
+  setTextIfChanged(
+    heading,
+    plan.coherent
+      ? plan.seriesTitle || "Connected Flow"
+      : plan.chapters?.[plan.segments[segmentIndex]?.chapterIndex]?.title || "Flow",
+  );
+  setTextIfChanged(
+    detail,
+    complete
+      ? `${plan.passageCount} section${plan.passageCount === 1 ? "" : "s"} complete`
+      : labels[segmentIndex],
+  );
 }
 
 function decorateStructure() {
