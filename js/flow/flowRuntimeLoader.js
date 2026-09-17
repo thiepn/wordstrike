@@ -23,7 +23,7 @@ const FLOW_RELEASE_QUERY_KEYS = Object.freeze([
 ]);
 
 const FLOW_RELEASE_ASSETS = Object.freeze([
-  "./js/flow/flowRuntimeLoader.js?v=20260917a",
+  "./js/flow/flowRuntimeLoader.js?v=20260917b",
   "./js/flow/flowMigrationPresentation.js?v=20260915a",
   "./js/flow/flowAdaptive.js",
   "./js/flow/flowAdaptivePhase10.js?v=20260916a",
@@ -40,7 +40,7 @@ const FLOW_RELEASE_ASSETS = Object.freeze([
   "./js/flow/flowModifiers.js",
   "./js/flow/flowModifiersPhase9.js?v=20260916a",
   "./js/flow/flowPassages.js",
-  "./js/flow/flowPhase1.js?v=20260916d",
+  "./js/flow/flowPhase1.js?v=20260917b",
   "./js/flow/flowProgression.js",
   "./js/flow/flowRunPlan.js",
   "./js/flow/flowSelection.js",
@@ -136,9 +136,8 @@ function bindPublicModeEntry() {
 }
 
 function installModeEntryRouting() {
-  if (typeof document === "undefined") return;
+  if (typeof document === "undefined" || isFlowReleaseRoute()) return;
   document.addEventListener("click", (event) => {
-    if (isFlowReleaseRoute()) return;
     const target = event.target?.closest?.('button[data-mode-id="flow"]');
     if (!target) return;
     event.preventDefault();
@@ -224,7 +223,7 @@ function installReleaseExitCleanup() {
     replaceUrl(stripFlowReleaseUrl());
     bindPublicModeEntry();
   };
-  new MutationObserver(() => queueMicrotask(inspect)).observe(app, { childList: true, subtree: true });
+  new MutationObserver(() => queueMicrotask(inspect)).observe(app, { childList: true });
   queueMicrotask(inspect);
 }
 
@@ -268,7 +267,7 @@ async function importFlowRuntime() {
 
   try {
     await import("./flowIntegrationBootstrap.js?v=20260916a");
-    await import("./flowPhase1.js?v=20260916d");
+    await import("./flowPhase1.js?v=20260917b");
     await import("./flowVisualPhase6.js?v=20260916a");
 
     const params = new URLSearchParams(globalThis.location.search);
