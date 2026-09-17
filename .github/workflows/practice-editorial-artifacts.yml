@@ -1,0 +1,33 @@
+name: Practice Editorial Artifacts
+on:
+  push:
+    branches: [practice-final-acceptance-audit]
+    paths:
+      - 'data/practice/editorial/**'
+      - 'scripts/generatePracticeGc3OriginalSources.mjs'
+      - 'scripts/rebuildPracticeEditorialRelease.mjs'
+      - '.github/workflows/practice-editorial-artifacts.yml'
+permissions:
+  contents: write
+jobs:
+  regenerate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: practice-final-acceptance-audit
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node scripts/rebuildPracticeEditorialRelease.mjs
+      - run: node tests/practice-editorial-independence.test.js
+      - name: Commit only governed generated artifacts
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add data/practice js/practiceLab/generated
+          if ! git diff --cached --quiet; then
+            git commit -m 'Rebuild Practice Lab artifacts from independent editorial passages'
+            git push origin HEAD:practice-final-acceptance-audit
+          fi

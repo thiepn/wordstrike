@@ -72,3 +72,12 @@ test("PL19 repeated benchmark comparison preserves PL18 exposure contamination s
   assert.equal(result.benchmark.quality, "exposure-contaminated");
   assert.equal(result.benchmark.status, "uncertain");
 });
+
+
+test("Editorial replacement does not compare prior assessment aggregates as the same content", () => {
+  const earlier = run({ id: "old" });
+  const later = run({ id: "new" });
+  later.blocks[0].result.evaluationSummary.suiteVersion = 2;
+  assert.deepEqual(comparePracticeAssessmentRuns(earlier, later), { status: "not-comparable", reasons: ["content-revision-mismatch"] });
+  assert.equal(comparePracticeAssessmentRuns(earlier, structuredClone(earlier)).status, "comparable");
+});

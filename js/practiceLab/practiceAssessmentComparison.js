@@ -31,6 +31,14 @@ export function comparePracticeAssessmentRuns(earlier, later) {
   if (earlier.protocolVersion !== later.protocolVersion) return freezeDeep({ status: "not-comparable", reasons: ["protocol-mismatch"] });
   if (!earlier.report || !later.report || earlier.report.reportStatus === "invalid" || later.report.reportStatus === "invalid") return freezeDeep({ status: "not-comparable", reasons: ["invalid-or-missing-report"] });
 
+  // All assessment depths include the benchmark. Its suite revision identifies
+  // the governed content generation; do not label old/new diagnostic aggregates
+  // comparable just because their durations and protocol are unchanged.
+  const contentRevision = run => findBlock(run, "benchmark-natural")?.result?.evaluationSummary?.suiteVersion
+    ?? run.plan?.blocks?.find(block => block.blockId === "benchmark-natural")?.evaluationArtifactVersion
+    ?? null;
+  if (contentRevision(earlier) !== contentRevision(later)) return freezeDeep({ status: "not-comparable", reasons: ["content-revision-mismatch"] });
+
   const earlierIds = getPracticeAssessmentBlocksForDepth(earlier.depth).map((block) => block.blockId);
   const laterIds = new Set(getPracticeAssessmentBlocksForDepth(later.depth).map((block) => block.blockId));
   const overlappingBlockIds = earlierIds.filter((id) => laterIds.has(id));
