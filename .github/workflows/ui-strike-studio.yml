@@ -1,0 +1,48 @@
+name: Strike Studio visual and interaction checks
+on:
+  push:
+    branches: [ui-strike-studio]
+  pull_request:
+    paths:
+      - 'index.html'
+      - 'js/strikeStudioPresentation.js'
+      - 'styles/strike-studio.css'
+      - 'tests/ui-strike-studio.test.js'
+      - 'tests/browser/ui_strike_studio.py'
+      - '.github/workflows/ui-strike-studio.yml'
+permissions:
+  contents: read
+concurrency:
+  group: strike-studio-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  visual:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r tests/browser/requirements.txt
+      - run: python -m playwright install --with-deps chromium firefox
+      - run: node --test tests/ui-strike-studio.test.js
+      - name: Real UI and offline checks
+        run: python tests/browser/ui_strike_studio.py
+      - name: Protect Flow typing performance
+        if: ${{ !cancelled() }}
+        run: python tests/browser/flow_performance_hotpath.py
+      - name: Public Flow regression
+        if: ${{ !cancelled() }}
+        run: python tests/browser/flow_phase13_release.py
+      - name: Preserve title keyboard navigation
+        if: ${{ !cancelled() }}
+        run: python tests/browser/ui2_title_navigation.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: strike-studio-visual-evidence
+          path: browser-artifacts/
