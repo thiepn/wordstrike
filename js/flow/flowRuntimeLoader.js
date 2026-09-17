@@ -136,14 +136,21 @@ function bindPublicModeEntry() {
 }
 
 function installModeEntryRouting() {
-  if (typeof document === "undefined" || isFlowReleaseRoute()) return;
+  if (typeof document === "undefined") return;
   document.addEventListener("click", (event) => {
+    if (isFlowReleaseRoute()) return;
     const target = event.target?.closest?.('button[data-mode-id="flow"]');
     if (!target) return;
     event.preventDefault();
     event.stopImmediatePropagation();
     launchPublicFlow();
   }, true);
+
+  // The listener above is intentionally installed on release pages too so it
+  // survives a same-document Flow exit and can launch Flow again afterwards.
+  // The MutationObserver is only needed on non-release pages and stays disabled
+  // during active Flow typing to avoid waking on gameplay DOM mutations.
+  if (isFlowReleaseRoute()) return;
   const app = document.querySelector("#app");
   if (app) new MutationObserver(bindPublicModeEntry).observe(app, { childList: true, subtree: true });
   bindPublicModeEntry();
