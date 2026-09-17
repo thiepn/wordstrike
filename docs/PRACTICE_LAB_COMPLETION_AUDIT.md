@@ -82,3 +82,11 @@ Certified executable source: `b21eb7b42a16b9821e3308ec74469dc69bb7146a`.
 - Both checks are part of the Practice Completion workflow. Offline cache version v4 distributes the updated shell.
 
 Physical-device, assistive-technology and Android endurance certification remain open. No local/CI emulation result is substituted for those requirements. Public activation remains disabled.
+
+## Offline startup and production navigation follow-up — 2026-09-17
+
+A fresh service-worker install followed by an offline document load reproduced a blank startup: the precache omitted the exact versioned entry URLs in `index.html`. Read-Ahead forms and newer runtime assets were also absent. Cache v5 includes those assets, the production logo, and all shipped JavaScript/styles. Query strings are preserved exactly; the fallback does not indiscriminately ignore request parameters. The addition is 1,768,714 bytes (66 entries), rather than precaching the entire annotation corpus.
+
+Real menu clicks also exposed a controller integration defect: the base click handler navigated directly, bypassing the later controllers' route-loading hooks. Real Text remained on “Checking availability” although direct API navigation worked. DOM back, experiment and evidence navigation now dispatch through the complete controller stack.
+
+`tests/practice-offline-shell.test.js` prevents startup URL/runtime asset drift. `tests/browser/practice_offline.mjs` uses the production document, real service worker and actual menu clicks; it checks fresh offline startup, unopened Assessment/Real Text/Read-Ahead/Metronome content, meaningful interrupted-session persistence across reload, and network recovery. The browser workflow retains its report and screenshot. These checks do not constitute installed iOS/Android PWA certification. Public activation remains gated.

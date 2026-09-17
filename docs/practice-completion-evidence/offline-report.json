@@ -1,0 +1,14 @@
+{
+  "checks": [
+    "fresh service worker install",
+    "fresh offline document boots production shell",
+    "offline production navigation opens Practice Lab",
+    "protected assessment starts offline",
+    "natural Real Text starts offline",
+    "read-ahead starts with previously unopened content offline",
+    "metronome-typing starts with previously unopened content offline",
+    "offline session history survives full reload",
+    "network recovery succeeds"
+  ],
+  "status": "PASS"
+}
