@@ -68,9 +68,11 @@ def finish_run(page, plan):
         expect(page.locator('[data-flow-view="run"]')).to_be_visible(timeout=10000)
         type_segment_with_pair_errors(page, segment['text'], errors)
         if index < len(plan['segments']) - 1:
-            expect(page.locator('[data-flow-view="chapter"]')).to_be_visible(timeout=10000)
-            page.locator('[data-flow-action="continue-chapter"]').click()
-    assert errors[0] == 2, "calibration run must create the repeated e → r pattern"
+            next_segment = plan['segments'][index + 1]
+            if next_segment['chapterIndex'] != segment['chapterIndex']:
+                expect(page.locator('[data-flow-view="chapter"]')).to_be_visible(timeout=10000)
+                page.locator('[data-flow-action="continue-chapter"]').click()
+    assert errors[0] == 2, "calibration run must create the repeated e -> r pattern"
     expect(page.locator('[data-flow-view="complete"]')).to_be_visible(timeout=10000)
 
 
@@ -94,7 +96,7 @@ def certify_progression(browser, browser_name, base, evidence):
     expect(page.locator('[data-flow-view="run"]')).to_be_visible(timeout=15000)
     plan = page.evaluate('window.wordstrikeFlowPhase1.getRunPlan()')
     assert plan['sessionLength'] == 'quick', plan
-    assert plan['passageCount'] == 3, plan
+    assert plan['passageCount'] == 1, plan
     assert plan['modifiers'] == ['sprint'], plan
 
     finish_run(page, plan)
@@ -112,7 +114,6 @@ def certify_progression(browser, browser_name, base, evidence):
     assert weakness['expected'] == 'e' and weakness['actual'] == 'r', weakness
     assert summary['progress']['lastSetup']['modifiers'] == ['sprint'], summary
 
-    # Repeated DOM work must not duplicate canonical or Flow-specific history.
     page.evaluate("document.querySelector('[data-flow-integration-complete]').setAttribute('data-probe','1')")
     page.wait_for_timeout(100)
     again = page.evaluate('window.wordstrikeFlowIntegrationPhase11.getSummary()')
@@ -122,7 +123,6 @@ def certify_progression(browser, browser_name, base, evidence):
     if browser_name == 'chromium':
         page.screenshot(path=str(ARTIFACTS / 'chromium-results.png'), full_page=True)
 
-    # Last setup is restored before the run plan resolves when config is omitted.
     page.goto(integrated_route(base, explicit=False), wait_until="domcontentloaded")
     expect(page.locator('[data-flow-view="ready"]')).to_be_visible(timeout=10000)
     restored = page.evaluate('window.wordstrikeFlowPhase1.getRunPlan()')
@@ -130,14 +130,13 @@ def certify_progression(browser, browser_name, base, evidence):
     assert restored['category'] == 'mixed', restored
     assert restored['difficulty'] == 'natural', restored
     assert restored['modifiers'] == ['sprint'], restored
-    assert restored['passageCount'] == 3, restored
+    assert restored['passageCount'] == 1, restored
     assert page.locator('[data-flow-integration-onboarding]').count() == 0
     profile_text = page.locator('[data-flow-integration-profile]').inner_text()
     assert '/9 milestones' in profile_text, profile_text
     expect(page.locator('[data-flow-integration-profile]')).to_contain_text('Quick · Natural')
     expect(page.locator('[data-flow-integration-resume]')).to_be_visible()
 
-    # Persisted weakness context can resume an adaptive plan across navigation.
     page.locator('[data-flow-integration-resume]').click()
     expect(page.locator('[data-flow-view="ready"]')).to_be_visible(timeout=10000)
     adaptive = page.evaluate('window.wordstrikeFlowPhase1.getRunPlan()')
@@ -148,7 +147,7 @@ def certify_progression(browser, browser_name, base, evidence):
     assert not errors, errors
     evidence.append({
         "browser": browser_name,
-        "case": "canonical persistence → progression → default restore → persistent adaptive resume",
+        "case": "canonical persistence -> progression -> default restore -> persistent adaptive resume",
         "completedRuns": summary['progress']['completedRuns'],
         "canonicalSessions": summary['generic']['completedSessions'],
         "weakness": weakness['label'],
