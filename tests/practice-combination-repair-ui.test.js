@@ -128,8 +128,8 @@ test("Combination Repair reveals aggregate metrics only from the persisted compl
   assert.match(target.innerHTML, /Not established:/);
 });
 
-test("Combination Repair remains hidden behind the existing public Practice gate", () => {
-  const gate = createPracticeFeatureGate({ developerMode: false });
+test("Combination Repair honors the explicitly disabled public Practice gate", () => {
+  const gate = createPracticeFeatureGate({ developerMode: false, publicEnabled: false });
   const registry = createPracticeExperimentRegistry({ featureGate: gate });
   registerPracticeCombinationRepairExperiment(registry, { runtime: { prepare() { throw new Error("not used"); } } });
   const resolved = registry.getResolvedExperiment("combination-repair");
