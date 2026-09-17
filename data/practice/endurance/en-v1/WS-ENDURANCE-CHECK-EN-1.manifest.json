@@ -18,13 +18,13 @@
   "bindings": {
     "corpusId": "practice-en-v1",
     "corpusVersion": 1,
-    "corpusChecksum": "sha256-55b276a4628d6c29f5ce47ced81e4ed5f571866c5e3afa56ee7ee3d9c1fd1438",
+    "corpusChecksum": "sha256-3945d33b4195a8a076535c950ea84e38cfb3433a23aabf7f059844b39178505f",
     "indexSchemaVersion": 1,
-    "indexChecksum": "sha256-91fa2d94960c10da646ae5473b9d1a555eef849dfef7526b6c2ca3954fe109d8",
+    "indexChecksum": "sha256-9e85dee05b692977875e868adfd43455e4ca522584a4d95c11f3485f99055151",
     "typabilityModelVersion": 1,
     "typabilityFeatureVersion": 1,
     "typabilityReferenceVersion": 1,
-    "typabilityReferenceChecksum": "sha256-2a3070a839af7e294dfd826ce5e6ff473bf82f3bf34eb335ce1d52c936aac111",
+    "typabilityReferenceChecksum": "sha256-8d77b6204ae9a63088cd03f8b86cb2bb8d148cfb603f9e9ee210889cc4d54dcc",
     "frequencyReferenceVersion": 1,
     "frequencyReferenceId": "ws-en-frequency-v1",
     "frequencyReferenceChecksum": "sha256-b9bc8dde064335c2258844919c6dd62537f95ac4a2d5920fdd7213a9cb5d45ad"
@@ -35,7 +35,7 @@
     "maximumDifficultySpread": 0.4
   },
   "formsPath": "data/practice/endurance/en-v1/WS-ENDURANCE-CHECK-EN-1.forms.json",
-  "formsChecksum": "sha256-695bb888dfe47f57244eb0ef09be9a49ea1e8f5ad09e767412d0ebf22b04a601",
+  "formsChecksum": "sha256-1b18ee6d39dea7eac2d02083ccde5a739ac2725e8ff741110bd7cf45d8bc9eb4",
   "forms": [
     {
       "formId": "endurance-check-en-01",
@@ -46,7 +46,7 @@
       "warnings": [],
       "availableModelWeight": 1,
       "relativeDifficultyPercentile": 66.66666666666667,
-      "windowDifficultySpread": 0.07414870597789759
+      "windowDifficultySpread": 0.0710508354919761
     },
     {
       "formId": "endurance-check-en-02",
@@ -57,7 +57,7 @@
       "warnings": [],
       "availableModelWeight": 1,
       "relativeDifficultyPercentile": 66.66666666666667,
-      "windowDifficultySpread": 0.08384270595670787
+      "windowDifficultySpread": 0.08249630884420081
     },
     {
       "formId": "endurance-check-en-03",
@@ -68,7 +68,7 @@
       "warnings": [],
       "availableModelWeight": 1,
       "relativeDifficultyPercentile": 66.66666666666667,
-      "windowDifficultySpread": 0.06591607365121088
+      "windowDifficultySpread": 0.06517637277398469
     },
     {
       "formId": "endurance-check-en-04",
@@ -79,7 +79,7 @@
       "warnings": [],
       "availableModelWeight": 1,
       "relativeDifficultyPercentile": 66.66666666666667,
-      "windowDifficultySpread": 0.06646855325050448
+      "windowDifficultySpread": 0.06321118206179013
     },
     {
       "formId": "endurance-check-en-05",
@@ -90,7 +90,7 @@
       "warnings": [],
       "availableModelWeight": 1,
       "relativeDifficultyPercentile": 66.66666666666667,
-      "windowDifficultySpread": 0.06875423432261196
+      "windowDifficultySpread": 0.0666058024797
     },
     {
       "formId": "endurance-check-en-06",
@@ -101,7 +101,7 @@
       "warnings": [],
       "availableModelWeight": 1,
       "relativeDifficultyPercentile": 66.66666666666667,
-      "windowDifficultySpread": 0.07582447213765847
+      "windowDifficultySpread": 0.0731268913308509
     }
   ]
 }

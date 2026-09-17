@@ -3,7 +3,7 @@
   "indexGeneratorVersion": 1,
   "corpusId": "practice-en-v1",
   "corpusVersion": 1,
-  "corpusChecksum": "sha256-55b276a4628d6c29f5ce47ced81e4ed5f571866c5e3afa56ee7ee3d9c1fd1438",
+  "corpusChecksum": "sha256-3945d33b4195a8a076535c950ea84e38cfb3433a23aabf7f059844b39178505f",
   "language": "en",
   "partition": "benchmark",
   "indexType": "content",
@@ -15,13 +15,13 @@
       "contentType": "passage",
       "partition": "benchmark",
       "language": "en",
-      "contentHash": "sha256-f830ad68db98f6951680a4f3324608af81b879be8bf83fa1e06e77de6e7dade6",
-      "graphemeCount": 2658,
-      "wordCount": 429,
+      "contentHash": "sha256-bab910dd95a6e6630784f8cbdbce6c12dc34393843dd33c17f6c514f4072b1e5",
+      "graphemeCount": 2411,
+      "wordCount": 425,
       "uniqueWordCount": 247,
-      "uppercaseCount": 28,
+      "uppercaseCount": 34,
       "digitCount": 0,
-      "punctuationCount": 53
+      "punctuationCount": 47
     },
     {
       "contentId": "cnt_gc3_bench_002_s000_2",
@@ -30,13 +30,13 @@
       "contentType": "passage",
       "partition": "benchmark",
       "language": "en",
-      "contentHash": "sha256-bf08d969402ce66aea0b2ac7a2945ab18e07d98d0190c5ca2b21c6c9c82743ce",
-      "graphemeCount": 2679,
-      "wordCount": 429,
-      "uniqueWordCount": 251,
-      "uppercaseCount": 28,
+      "contentHash": "sha256-e7b13f1bc3cb7c0ef2a7f4a980bc5ace1c0037a4e4fe6791cd3ba0a5e1584b7e",
+      "graphemeCount": 2476,
+      "wordCount": 424,
+      "uniqueWordCount": 247,
+      "uppercaseCount": 31,
       "digitCount": 0,
-      "punctuationCount": 53
+      "punctuationCount": 49
     },
     {
       "contentId": "cnt_gc3_bench_003_s000_8",
@@ -45,13 +45,13 @@
       "contentType": "passage",
       "partition": "benchmark",
       "language": "en",
-      "contentHash": "sha256-840dca548c24e558c729e4feba0d0919674d0320a2628459a61978f143f36710",
-      "graphemeCount": 2666,
-      "wordCount": 428,
-      "uniqueWordCount": 245,
-      "uppercaseCount": 28,
+      "contentHash": "sha256-4019d832631a81ac238ca47961d5e6d14a373565ff466c10a6f03b804dcfdfbb",
+      "graphemeCount": 2485,
+      "wordCount": 424,
+      "uniqueWordCount": 261,
+      "uppercaseCount": 32,
       "digitCount": 0,
-      "punctuationCount": 53
+      "punctuationCount": 47
     },
     {
       "contentId": "cnt_gc3_bench_004_s000_39",
@@ -60,13 +60,13 @@
       "contentType": "passage",
       "partition": "benchmark",
       "language": "en",
-      "contentHash": "sha256-9b5b66f35e495e6729c8aea19e47d312e1058e41a2aa3c798e066820abdb641b",
-      "graphemeCount": 2666,
-      "wordCount": 427,
+      "contentHash": "sha256-764459b51dadd47bf20db680154e429912df4144b8b30654046e58845e5d16e7",
+      "graphemeCount": 2538,
+      "wordCount": 434,
       "uniqueWordCount": 248,
-      "uppercaseCount": 28,
+      "uppercaseCount": 33,
       "digitCount": 0,
-      "punctuationCount": 53
+      "punctuationCount": 48
     },
     {
       "contentId": "cnt_gc3_bench_005_s000_35",
@@ -75,13 +75,13 @@
       "contentType": "passage",
       "partition": "benchmark",
       "language": "en",
-      "contentHash": "sha256-ac3be53f466afaac0dfcdb8df69fcd76666f695ce042aff69e41fd211e17ecac",
-      "graphemeCount": 2670,
-      "wordCount": 429,
-      "uniqueWordCount": 249,
-      "uppercaseCount": 28,
+      "contentHash": "sha256-5413e3725f4ec7d19e306219635f069121a7094f5fbc1612c2c46bb639df2f82",
+      "graphemeCount": 2493,
+      "wordCount": 424,
+      "uniqueWordCount": 246,
+      "uppercaseCount": 33,
       "digitCount": 0,
-      "punctuationCount": 53
+      "punctuationCount": 47
     },
     {
       "contentId": "cnt_gc3_bench_006_s000_13",
@@ -90,13 +90,13 @@
       "contentType": "passage",
       "partition": "benchmark",
       "language": "en",
-      "contentHash": "sha256-14c835c75a5e517e1e3e43526fd663c832e2bc206a52c7ac8617417ca3e3276f",
-      "graphemeCount": 2645,
-      "wordCount": 424,
-      "uniqueWordCount": 247,
-      "uppercaseCount": 28,
+      "contentHash": "sha256-d4461df1e4bf7c5886c215fea34c13339660cd2f2308351633036226af47d599",
+      "graphemeCount": 2454,
+      "wordCount": 428,
+      "uniqueWordCount": 252,
+      "uppercaseCount": 32,
       "digitCount": 0,
-      "punctuationCount": 53
+      "punctuationCount": 51
     },
     {
       "contentId": "practice-en-ws-foundation-003-s1",

@@ -3,7 +3,7 @@
   "indexGeneratorVersion": 1,
   "corpusId": "practice-en-v1",
   "corpusVersion": 1,
-  "corpusChecksum": "sha256-55b276a4628d6c29f5ce47ced81e4ed5f571866c5e3afa56ee7ee3d9c1fd1438",
+  "corpusChecksum": "sha256-3945d33b4195a8a076535c950ea84e38cfb3433a23aabf7f059844b39178505f",
   "language": "en",
   "partition": "research-holdout",
   "indexType": "content",
@@ -15,13 +15,13 @@
       "contentType": "passage",
       "partition": "research-holdout",
       "language": "en",
-      "contentHash": "sha256-625dda0bf6bfae6e70afd4208db2e97653a8fbacc2c6e650df762b622f6ba61c",
-      "graphemeCount": 2197,
-      "wordCount": 355,
-      "uniqueWordCount": 220,
+      "contentHash": "sha256-0791a7f1df2a7689da6af9146c44b8ce4d801c2c1f66e7409c1588c07f05b7ba",
+      "graphemeCount": 1689,
+      "wordCount": 288,
+      "uniqueWordCount": 185,
       "uppercaseCount": 23,
       "digitCount": 0,
-      "punctuationCount": 42
+      "punctuationCount": 32
     },
     {
       "contentId": "cnt_gc3_realtext_018_s000_22",
@@ -30,13 +30,13 @@
       "contentType": "passage",
       "partition": "research-holdout",
       "language": "en",
-      "contentHash": "sha256-20804e0ea4b39af8c41395284525dfc50ab1f0d867aa1c1eb0e8da65198e57f1",
-      "graphemeCount": 2222,
-      "wordCount": 354,
-      "uniqueWordCount": 223,
-      "uppercaseCount": 23,
+      "contentHash": "sha256-86486c504626be1f3cffe37335dd8505303ae519e3f651f198829ac91464441f",
+      "graphemeCount": 1669,
+      "wordCount": 269,
+      "uniqueWordCount": 180,
+      "uppercaseCount": 19,
       "digitCount": 0,
-      "punctuationCount": 42
+      "punctuationCount": 28
     },
     {
       "contentId": "cnt_gc3_realtext_019_s000_0",
@@ -45,13 +45,13 @@
       "contentType": "passage",
       "partition": "research-holdout",
       "language": "en",
-      "contentHash": "sha256-42cd7a6351069fef0e2c036772719f84695e9e2231ab564837bfb6f63747da81",
-      "graphemeCount": 2202,
-      "wordCount": 354,
-      "uniqueWordCount": 220,
-      "uppercaseCount": 23,
+      "contentHash": "sha256-32509903e7d7b4d2221af2634b5cd71aedc6a29bad757287dbd9bca862aa8a2e",
+      "graphemeCount": 1653,
+      "wordCount": 278,
+      "uniqueWordCount": 178,
+      "uppercaseCount": 20,
       "digitCount": 0,
-      "punctuationCount": 42
+      "punctuationCount": 27
     },
     {
       "contentId": "cnt_gc3_realtext_020_s000_3",
@@ -60,13 +60,13 @@
       "contentType": "passage",
       "partition": "research-holdout",
       "language": "en",
-      "contentHash": "sha256-be1a56837ec0268a09828ce578bd056fd203c5fa39f265c11293094e44e65a45",
-      "graphemeCount": 2224,
-      "wordCount": 355,
-      "uniqueWordCount": 226,
-      "uppercaseCount": 23,
+      "contentHash": "sha256-3cb1c4caa2a637704f2c0a1f37b50202d9d9603955c8b533c5e2a929de566e1b",
+      "graphemeCount": 1758,
+      "wordCount": 283,
+      "uniqueWordCount": 169,
+      "uppercaseCount": 18,
       "digitCount": 0,
-      "punctuationCount": 42
+      "punctuationCount": 24
     },
     {
       "contentId": "practice-en-ws-foundation-004-s1",
