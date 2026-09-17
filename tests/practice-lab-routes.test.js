@@ -15,5 +15,5 @@ test("Practice routes normalize known routes and preserve controlled unknown exp
 test("unknown and reserved routes fall back home while a public gate cannot be bypassed", () => {
   assert.equal(normalizePracticeLabRoute({ name: "wat" }, { featureGate: devGate }).name, "home");
   assert.equal(normalizePracticeLabRoute(createPracticeLabRoute(PRACTICE_LAB_ROUTES.ACTIVE_SESSION), { featureGate: devGate }).name, "home");
-  assert.equal(normalizePracticeLabRoute(createPracticeLabRoute(PRACTICE_LAB_ROUTES.SKILL_MAP), { featureGate: createPracticeFeatureGate() }).name, "unavailable");
+  assert.equal(normalizePracticeLabRoute(createPracticeLabRoute(PRACTICE_LAB_ROUTES.SKILL_MAP), { featureGate: createPracticeFeatureGate({ publicEnabled: false }) }).name, "unavailable");
 });

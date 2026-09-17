@@ -103,6 +103,6 @@ assert.match(workflow, /browser-artifacts\/ui6-endless-gameplay\//);
 
 // Practice Lab registry stays disabled and outside UI6.
 assert.match(modes, /PRACTICE: "practice"/);
-assert.match(modes, /id: MODE_IDS\.PRACTICE,[\s\S]*enabled: false,[\s\S]*status: "coming-soon",[\s\S]*route: null/);
+assert.match(modes, /id: MODE_IDS\.PRACTICE,[\s\S]*enabled: true,[\s\S]*status: "available",[\s\S]*route: "practice-lab"/);
 
 console.log("UI6 Endless gameplay source contracts passed: presentation-only HUD/Core/pressure/risk/stage/input treatment, reduced motion, mode isolation, and Practice exclusion.");

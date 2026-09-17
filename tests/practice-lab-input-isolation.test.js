@@ -24,7 +24,7 @@ test("app keyboard controller recognizes Practice as a non-gameplay screen and p
   assert.match(keyboard, /state\.screen === Screens\.PRACTICE_LAB/);
   assert.match(keyboard, /if \(event\.key === "Escape"\) backPracticeLab\?\.\(\)/);
   assert.match(main, /backPracticeLab:\s*\(\) => practiceLabController\?\.back\(\)/);
-  assert.match(modes, /id: MODE_IDS\.PRACTICE,[\s\S]*?enabled: false,[\s\S]*?status: "coming-soon"/);
+  assert.match(modes, /id: MODE_IDS\.PRACTICE,[\s\S]*?enabled: true,[\s\S]*?status: "available"/);
 });
 
 test("Practice renderer uses native buttons, labels disabled controls, and provides landmark structure", async () => {

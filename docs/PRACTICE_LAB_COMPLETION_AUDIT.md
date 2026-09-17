@@ -123,3 +123,8 @@ Six benchmark forms, sixteen transfer units, sixteen Real Text units and eight d
 Benchmark suite and transfer pool revisions advance to 2 so existing exposure records remain in their original lanes. Prior history is retained. Assessment comparisons reject different content revisions instead of presenting aggregate differences across the replacement as directly comparable. Content hashes and checksum bindings identify the new texts; storage schema versions are unchanged. Service-worker cache v6 distributes the new content and comparison logic.
 
 Evidence: [editorial-remediation.json](practice-completion-evidence/editorial-remediation.json). Publication remains a gated implementation release. Actual physical-browser/device/PWA, screen-reader and long-session Android acceptance are still required before enabling the public mode; automated engine or viewport tests do not close those requirements.
+
+
+## Public release authorization — 2026-09-17
+
+The user explicitly requested public activation so they can test the mode. This supersedes the earlier decision to hold public release for physical-device/PWA, screen-reader and Android endurance acceptance. Those checks are waived as pre-release gates, not represented as performed or passed. Practice Lab is now an enabled public mode with its own route; no developer query is required. Cache v7 distributes the activation. The explicit feature-off configuration remains tested. Automated public-menu, session and offline verification accompanies this release.

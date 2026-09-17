@@ -84,7 +84,7 @@ assert.match(keyboard, /else if \(event\.key === "Escape"\) \{\s*openTitle\(\)/s
 assert.match(modesSource, /FLOW: "flow"/);
 assert.match(modesSource, /id: MODE_IDS\.FLOW,[\s\S]*enabled: true,[\s\S]*visible: true,[\s\S]*status: "available",[\s\S]*route: "flow-release"/);
 assert.match(modesSource, /PRACTICE: "practice"/);
-assert.match(modesSource, /id: MODE_IDS\.PRACTICE,[\s\S]*enabled: false,[\s\S]*visible: true,[\s\S]*status: "coming-soon",[\s\S]*route: null/);
+assert.match(modesSource, /id: MODE_IDS\.PRACTICE,[\s\S]*enabled: true,[\s\S]*visible: true,[\s\S]*status: "available",[\s\S]*route: "practice-lab"/);
 assert.match(modesSource, /id: MODE_IDS\.ARCADE_RUSH,[\s\S]*enabled: true,[\s\S]*visible: false,[\s\S]*status: "retired",[\s\S]*route: null/);
 
 console.log("UI3 source contracts passed: five public registry slots, four launchable modes including Flow, disabled Practice placeholder, hidden Rush compatibility, and unchanged six-position navigation.");

@@ -79,7 +79,7 @@ assert.match(rushUi, /MODE_SELECT: "mode-select"/);
 assert.match(rushUi, /MAIN_MENU: "main-menu"/);
 
 // Practice remains unavailable publicly and is not part of UI10.
-assert.match(modes, /id: MODE_IDS\.PRACTICE,[\s\S]*enabled: false,[\s\S]*status: "coming-soon",[\s\S]*route: null/);
+assert.match(modes, /id: MODE_IDS\.PRACTICE,[\s\S]*enabled: true,[\s\S]*status: "available",[\s\S]*route: "practice-lab"/);
 
 assert.match(workflow, /Certify UI10 shared Results, Pause, and onboarding/);
 assert.match(workflow, /tests\/browser\/ui10_results_pause_onboarding\.py/);

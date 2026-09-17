@@ -71,7 +71,7 @@ test("controller delegates native button clicks and registry emits one controlle
 
 test("controller cannot navigate through a closed feature gate", () => {
   const root = fakeRoot();
-  const gate = createPracticeFeatureGate();
+  const gate = createPracticeFeatureGate({ publicEnabled: false });
   const registry = createPracticeExperimentRegistry({ featureGate: gate });
   let kind = "";
   const controller = createPracticeLabController({ root, featureGate: gate, experimentRegistry: registry, renderer: (_root, view) => { kind = view.kind; } });

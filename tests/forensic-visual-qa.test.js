@@ -33,7 +33,7 @@ assert.match(ui12Css, /\.campaign-progress-footer\s*\{\s*justify-content:\s*flex
 // Coming-soon modes stay non-interactive but must remain readable.
 assert.match(ui12Css, /\.mode-select-screen \.mode-option\.coming-soon\s*\{\s*opacity:\s*0\.8/);
 assert.match(ui12Css, /\.mode-select-screen \.mode-option\.coming-soon\.selected\s*\{\s*opacity:\s*1/);
-assert.match(modes, /id: MODE_IDS\.PRACTICE,[\s\S]*enabled: false,[\s\S]*status: "coming-soon",[\s\S]*route: null/);
+assert.match(modes, /id: MODE_IDS\.PRACTICE,[\s\S]*enabled: true,[\s\S]*status: "available",[\s\S]*route: "practice-lab"/);
 
 // The forensic pass must not weaken the established Practice styling boundary.
 assert.match(ui12Css, /#app > \.screen:not\(\.practice-lab-screen\)/);

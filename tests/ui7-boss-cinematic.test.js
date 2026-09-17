@@ -101,6 +101,6 @@ assert.match(workflow, /browser-artifacts\/ui7-boss-gameplay\//);
 
 // Practice Lab stays disabled and outside the UI redesign boundary.
 assert.match(modes, /PRACTICE: "practice"/);
-assert.match(modes, /id: MODE_IDS\.PRACTICE,[\s\S]*enabled: false,[\s\S]*status: "coming-soon",[\s\S]*route: null/);
+assert.match(modes, /id: MODE_IDS\.PRACTICE,[\s\S]*enabled: true,[\s\S]*status: "available",[\s\S]*route: "practice-lab"/);
 
 console.log("UI7 Boss source contracts passed: runtime-clock cinematic, Boss Resolve/sequence progress, phrase states, responsive/reduced-motion treatment, no fake HP, and Practice isolation.");
