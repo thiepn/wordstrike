@@ -31,6 +31,7 @@ assert.deepEqual(getEnabledModes().map(({ id }) => id), [
   MODE_IDS.SPEED_TEST,
   MODE_IDS.ENDLESS,
   MODE_IDS.FLOW,
+  MODE_IDS.PRACTICE,
 ]);
 
 const flow = getModeDefinition(MODE_IDS.FLOW);
