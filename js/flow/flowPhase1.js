@@ -1,10 +1,10 @@
 import {
   backspaceFlowText,
   createFlowTypingRun,
-  getFlowCharacterView,
   getFlowTypingSnapshot,
   insertFlowText,
 } from "./flowEngine.js";
+import { analyzeFlowCadence } from "./flowCadence.js";
 import { resolveFlowRunPlan } from "./flowRunPlan.js";
 import { resolveFlowSelection } from "./flowSelection.js";
 import { FLOW_PHASES } from "./flowState.js";
@@ -15,6 +15,7 @@ const search = new URLSearchParams(globalThis.location?.search || "");
 const developerFlowRequested = search.get("dev") === "1" && search.get("mode") === "flow";
 const resolvedRunPlan = resolveFlowRunPlan(search);
 const resolvedSelection = resolvedRunPlan ? null : resolveFlowSelection(search);
+const LIVE_CADENCE_INTERVAL_MS = 180;
 
 let active = false;
 let dismissed = false;
@@ -23,6 +24,17 @@ let storedReturnNodes = [];
 let run = null;
 let activeSegmentIndex = 0;
 let chapterPauseStartedAt = null;
+let mountedCharacterNodes = new Map();
+let cadenceRefreshTimer = null;
+let lastCadenceRefreshAt = -Infinity;
+let performanceStats = createPerformanceStats();
+
+function createPerformanceStats() {
+  return {
+    characterNodeUpdates: 0,
+    cadenceRefreshes: 0,
+  };
+}
 
 function escapeHtml(value) {
   return String(value)
@@ -32,6 +44,10 @@ function escapeHtml(value) {
     .replaceAll('"', "&quot;");
 }
 
+function setTextIfChanged(element, value) {
+  if (element && element.textContent !== value) element.textContent = value;
+}
+
 function preserveReturnSurface() {
   const app = root();
   if (!app) return false;
@@ -39,9 +55,20 @@ function preserveReturnSurface() {
   return storedReturnNodes.length > 0;
 }
 
+function clearCadenceRefresh() {
+  if (cadenceRefreshTimer != null) globalThis.clearTimeout?.(cadenceRefreshTimer);
+  cadenceRefreshTimer = null;
+}
+
+function resetMountedCharacterNodes() {
+  mountedCharacterNodes = new Map();
+}
+
 function restoreReturnSurface() {
   const app = root();
   if (!app) return;
+  clearCadenceRefresh();
+  resetMountedCharacterNodes();
   dismissed = true;
   active = false;
   view = "idle";
@@ -105,6 +132,8 @@ function renderRunPlanReady(app) {
 function renderReady() {
   const app = root();
   if (!app) return;
+  clearCadenceRefresh();
+  resetMountedCharacterNodes();
   if (resolvedRunPlan) {
     renderRunPlanReady(app);
   } else {
@@ -137,6 +166,19 @@ function renderReady() {
   app.querySelector('[data-flow-action="start"]')?.focus?.({ preventScroll: true });
 }
 
+function flowCharacterAt(index) {
+  if (!run?.passage || index < 0 || index >= run.passage.length) return null;
+  const expected = run.passage[index];
+  const typed = run.typedCharacters[index];
+  return {
+    index,
+    expected,
+    actual: typed?.actual ?? null,
+    status: typed ? (typed.correct ? "correct" : "incorrect") : "pending",
+    current: index === run.currentIndex && run.phase !== FLOW_PHASES.COMPLETE,
+  };
+}
+
 function charMarkup(character) {
   const shown = character.actual ?? character.expected;
   const classes = ["flow-char", `flow-char--${character.status}`];
@@ -145,9 +187,53 @@ function charMarkup(character) {
 }
 
 function visibleCharacterView() {
-  const characters = getFlowCharacterView(run);
+  if (!run?.passage) return [];
   const segment = currentSegment();
-  return segment ? characters.slice(segment.startIndex, segment.endIndex + 1) : characters;
+  const startIndex = segment?.startIndex ?? 0;
+  const endIndex = segment?.endIndex ?? (run.passage.length - 1);
+  const characters = [];
+  for (let index = startIndex; index <= endIndex; index += 1) {
+    const character = flowCharacterAt(index);
+    if (character) characters.push(character);
+  }
+  return characters;
+}
+
+function rebuildMountedCharacterNodes(app) {
+  mountedCharacterNodes = new Map();
+  for (const node of app.querySelectorAll("[data-flow-char]")) {
+    const index = Number(node.dataset.flowChar);
+    if (Number.isInteger(index)) mountedCharacterNodes.set(index, node);
+  }
+}
+
+function updateCharacterNode(index) {
+  const node = mountedCharacterNodes.get(index);
+  const character = flowCharacterAt(index);
+  if (!node || !character) return;
+  const shown = character.actual ?? character.expected;
+  const className = `flow-char flow-char--${character.status}${character.current ? " flow-char--current" : ""}`;
+  let changed = false;
+  if (node.textContent !== shown) {
+    node.textContent = shown;
+    changed = true;
+  }
+  if (node.dataset.status !== character.status) {
+    node.dataset.status = character.status;
+    changed = true;
+  }
+  if (node.className !== className) {
+    node.className = className;
+    changed = true;
+  }
+  if (changed) performanceStats.characterNodeUpdates += 1;
+}
+
+function updateCharacterRange(startIndex, endIndex) {
+  if (!run?.passage) return;
+  const low = Math.max(0, Math.min(startIndex, endIndex));
+  const high = Math.min(run.passage.length - 1, Math.max(startIndex, endIndex));
+  for (let index = low; index <= high; index += 1) updateCharacterNode(index);
 }
 
 function runHeaderLabel() {
@@ -161,9 +247,81 @@ function visiblePassageText() {
   return currentSegment()?.text || run?.passage || "";
 }
 
+function currentAccuracyPercent() {
+  const correct = Number(run?.correctKeystrokes) || 0;
+  const incorrect = Number(run?.incorrectKeystrokes) || 0;
+  const total = correct + incorrect;
+  return total <= 0 ? 100 : (correct / total) * 100;
+}
+
+function liveGameplaySnapshot() {
+  if (!run) return null;
+  return {
+    score: Number(run.score) || 0,
+    flowValue: Number(run.flowValue) || 0,
+    momentum: Number(run.momentum) || 1,
+    accuracyPercent: currentAccuracyPercent(),
+  };
+}
+
+function updateGameplayHud(app, gameplay, cadence) {
+  if (gameplay) {
+    setTextIfChanged(app.querySelector("[data-flow-score]"), gameplay.score.toLocaleString("en-US"));
+    const roundedFlow = String(Math.round(gameplay.flowValue));
+    setTextIfChanged(app.querySelector("[data-flow-value]"), roundedFlow);
+    const meter = app.querySelector("[data-flow-meter]");
+    if (meter?.getAttribute("aria-valuenow") !== roundedFlow) meter?.setAttribute("aria-valuenow", roundedFlow);
+    const fill = app.querySelector("[data-flow-meter-fill]");
+    const width = `${gameplay.flowValue}%`;
+    if (fill && fill.style.width !== width) fill.style.width = width;
+    setTextIfChanged(app.querySelector("[data-flow-momentum]"), `×${gameplay.momentum.toFixed(1)}`);
+    setTextIfChanged(app.querySelector("[data-flow-accuracy]"), `${gameplay.accuracyPercent.toFixed(1)}%`);
+  }
+  if (cadence) {
+    setTextIfChanged(
+      app.querySelector("[data-flow-cadence]"),
+      cadence.cadenceScore == null ? "—" : String(cadence.cadenceScore),
+    );
+    setTextIfChanged(app.querySelector("[data-flow-cadence-label]"), cadence.cadenceLabel);
+    setTextIfChanged(app.querySelector("[data-flow-final-wpm]"), cadence.finalWpm.toFixed(1));
+    setTextIfChanged(app.querySelector("[data-flow-pauses]"), String(cadence.pauseCount));
+  }
+}
+
+function refreshCadenceHud() {
+  cadenceRefreshTimer = null;
+  if (!run || view !== "run") return;
+  const app = root();
+  if (!app) return;
+  lastCadenceRefreshAt = now();
+  performanceStats.cadenceRefreshes += 1;
+  updateGameplayHud(app, null, analyzeFlowCadence(run));
+}
+
+function scheduleCadenceHud(immediate = false) {
+  if (!run || view !== "run") return;
+  if (immediate) {
+    clearCadenceRefresh();
+    refreshCadenceHud();
+    return;
+  }
+  if (cadenceRefreshTimer != null) return;
+  const elapsed = now() - lastCadenceRefreshAt;
+  const delay = Math.max(0, LIVE_CADENCE_INTERVAL_MS - elapsed);
+  cadenceRefreshTimer = globalThis.setTimeout?.(refreshCadenceHud, delay) ?? null;
+}
+
+function syncRunHud(app) {
+  setTextIfChanged(app.querySelector("[data-flow-progress]"), `${run.currentIndex} / ${run.passage.length}`);
+  setTextIfChanged(app.querySelector("[data-flow-corrected]"), String(run.correctedErrors));
+  setTextIfChanged(app.querySelector("[data-flow-unresolved]"), String(run.uncorrectedErrors));
+  updateGameplayHud(app, liveGameplaySnapshot(), null);
+}
+
 function renderRun() {
   const app = root();
   if (!app || !run) return;
+  clearCadenceRefresh();
   view = "run";
   const chapter = currentChapter();
   app.innerHTML = `
@@ -201,16 +359,19 @@ function renderRun() {
         <textarea class="flow-input-capture" data-flow-input aria-label="Flow typing input" autocapitalize="off" autocomplete="off" autocorrect="off" spellcheck="false"></textarea>
       </main>
     </section>`;
+  rebuildMountedCharacterNodes(app);
   app.querySelector('[data-flow-action="back"]')?.addEventListener("click", restoreReturnSurface);
   const input = app.querySelector("[data-flow-input]");
   input?.addEventListener("beforeinput", handleBeforeInput);
   input?.addEventListener("input", () => { input.value = ""; });
   app.querySelector("[data-flow-passage]")?.addEventListener("pointerdown", () => input?.focus?.({ preventScroll: true }));
   input?.focus?.({ preventScroll: true });
-  updateRunView();
+  syncRunHud(app);
+  scheduleCadenceHud(true);
 }
 
 function startRun() {
+  clearCadenceRefresh();
   if (resolvedRunPlan) {
     run = createFlowTypingRun(resolvedRunPlan.fullText, {
       category: resolvedRunPlan.category,
@@ -231,42 +392,19 @@ function startRun() {
     });
     run.passageId = passage.id;
   }
+  performanceStats = createPerformanceStats();
+  lastCadenceRefreshAt = -Infinity;
   chapterPauseStartedAt = null;
   active = true;
   view = "run";
   renderRun();
 }
 
-function updateGameplayHud(app, gameplay, cadence) {
-  if (gameplay) {
-    const score = app.querySelector("[data-flow-score]");
-    if (score) score.textContent = gameplay.score.toLocaleString("en-US");
-    const flowValue = app.querySelector("[data-flow-value]");
-    if (flowValue) flowValue.textContent = String(Math.round(gameplay.flowValue));
-    const meter = app.querySelector("[data-flow-meter]");
-    meter?.setAttribute("aria-valuenow", String(Math.round(gameplay.flowValue)));
-    const fill = app.querySelector("[data-flow-meter-fill]");
-    if (fill) fill.style.width = `${gameplay.flowValue}%`;
-    const momentum = app.querySelector("[data-flow-momentum]");
-    if (momentum) momentum.textContent = `×${gameplay.momentum.toFixed(1)}`;
-    const accuracy = app.querySelector("[data-flow-accuracy]");
-    if (accuracy) accuracy.textContent = `${gameplay.accuracyPercent.toFixed(1)}%`;
-  }
-  if (cadence) {
-    const cadenceValue = app.querySelector("[data-flow-cadence]");
-    if (cadenceValue) cadenceValue.textContent = cadence.cadenceScore == null ? "—" : String(cadence.cadenceScore);
-    const cadenceLabel = app.querySelector("[data-flow-cadence-label]");
-    if (cadenceLabel) cadenceLabel.textContent = cadence.cadenceLabel;
-    const wpm = app.querySelector("[data-flow-final-wpm]");
-    if (wpm) wpm.textContent = cadence.finalWpm.toFixed(1);
-    const pauses = app.querySelector("[data-flow-pauses]");
-    if (pauses) pauses.textContent = String(cadence.pauseCount);
-  }
-}
-
 function renderChapterTransition(chapterIndex) {
   const app = root();
   if (!app || !resolvedRunPlan || !run) return;
+  clearCadenceRefresh();
+  resetMountedCharacterNodes();
   const chapter = resolvedRunPlan.chapters[chapterIndex];
   view = "chapter";
   chapterPauseStartedAt = now();
@@ -320,9 +458,10 @@ function maybeAdvanceRunPlan() {
   return true;
 }
 
-function updateRunView() {
+function updateRunView(startIndex = run?.currentIndex ?? 0, endIndex = startIndex) {
   if (!run || view !== "run") return;
   if (run.phase === FLOW_PHASES.COMPLETE) {
+    clearCadenceRefresh();
     renderComplete();
     return;
   }
@@ -330,21 +469,9 @@ function updateRunView() {
 
   const app = root();
   if (!app) return;
-  const snapshot = getFlowTypingSnapshot(run);
-  for (const character of visibleCharacterView()) {
-    const node = app.querySelector(`[data-flow-char="${character.index}"]`);
-    if (!node) continue;
-    node.textContent = character.actual ?? character.expected;
-    node.dataset.status = character.status;
-    node.className = `flow-char flow-char--${character.status}${character.current ? " flow-char--current" : ""}`;
-  }
-  const progress = app.querySelector("[data-flow-progress]");
-  if (progress) progress.textContent = `${run.currentIndex} / ${run.passage.length}`;
-  const corrected = app.querySelector("[data-flow-corrected]");
-  if (corrected) corrected.textContent = String(run.correctedErrors);
-  const unresolved = app.querySelector("[data-flow-unresolved]");
-  if (unresolved) unresolved.textContent = String(run.uncorrectedErrors);
-  updateGameplayHud(app, snapshot.gameplay, snapshot.cadence);
+  updateCharacterRange(startIndex, endIndex);
+  syncRunHud(app);
+  scheduleCadenceHud();
 }
 
 function renderHesitationAnalysis(cadence) {
@@ -363,6 +490,8 @@ function renderHesitationAnalysis(cadence) {
 function renderComplete() {
   const app = root();
   if (!app || !run) return;
+  clearCadenceRefresh();
+  resetMountedCharacterNodes();
   view = "complete";
   const snapshot = getFlowTypingSnapshot(run);
   const gameplay = snapshot.gameplay;
@@ -412,18 +541,30 @@ function renderComplete() {
   app.querySelector('[data-flow-action="restart"]')?.focus?.({ preventScroll: true });
 }
 
+function deleteBackward() {
+  if (!run) return;
+  const beforeIndex = run.currentIndex;
+  if (!backspaceFlowText(run, now())) return;
+  updateRunView(run.currentIndex, beforeIndex);
+}
+
+function insertText(value) {
+  if (!run || typeof value !== "string" || !value.length) return;
+  const beforeIndex = run.currentIndex;
+  if (!insertFlowText(run, value, now())) return;
+  updateRunView(Math.max(0, beforeIndex - 1), run.currentIndex);
+}
+
 function handleBeforeInput(event) {
   if (!active || view !== "run" || !run) return;
   if (event.inputType === "deleteContentBackward") {
     event.preventDefault();
-    backspaceFlowText(run, now());
-    updateRunView();
+    deleteBackward();
     return;
   }
   if (event.inputType?.startsWith("insert") && typeof event.data === "string" && event.data.length) {
     event.preventDefault();
-    insertFlowText(run, event.data, now());
-    updateRunView();
+    insertText(event.data);
   }
 }
 
@@ -456,15 +597,13 @@ function handleDocumentKeydown(event) {
   if (event.key === "Backspace") {
     event.preventDefault();
     event.stopImmediatePropagation();
-    backspaceFlowText(run, now());
-    updateRunView();
+    deleteBackward();
     return;
   }
   if (event.key.length === 1) {
     event.preventDefault();
     event.stopImmediatePropagation();
-    insertFlowText(run, event.key, now());
-    updateRunView();
+    insertText(event.key);
   }
 }
 
@@ -491,6 +630,7 @@ if (globalThis.window) {
     getSelection: () => resolvedSelection,
     getRunPlan: () => resolvedRunPlan,
     getActiveSegmentIndex: () => activeSegmentIndex,
+    getPerformanceStats: () => ({ ...performanceStats }),
     isActive: () => active,
     developerRouteEnabled: developerFlowRequested,
   });
