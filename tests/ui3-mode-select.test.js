@@ -20,8 +20,8 @@ assert.deepEqual(modes.map(({ id }) => id), [
   MODE_IDS.FLOW,
   MODE_IDS.PRACTICE,
 ]);
-assert.deepEqual(modes.map(({ enabled }) => enabled), [true, true, true, true, false]);
-assert.deepEqual(modes.slice(-2).map(({ status }) => status), ["available", "coming-soon"]);
+assert.deepEqual(modes.map(({ enabled }) => enabled), [true, true, true, true, true]);
+assert.deepEqual(modes.slice(-2).map(({ status }) => status), ["available", "available"]);
 
 assert.match(index, /styles\/ui-system\.css[\s\S]*styles\/screens\/title\.css[\s\S]*styles\/screens\/mode-select\.css/);
 assert.match(index, /js\/flow\/flowRuntimeLoader\.js\?v=20260916a/);
@@ -79,7 +79,7 @@ assert.match(keyboard, /state\.modeSelection === getAllModes\(\)\.length\) openT
 assert.match(keyboard, /else if \(event\.key === "Escape"\) \{\s*openTitle\(\)/s);
 
 // UI3 is presentation-only. The registry now exposes Flow as a launchable release
-// mode while Practice remains the only disabled public placeholder and hidden Rush
+// mode alongside Practice; hidden Rush
 // remains available only through explicit compatibility access.
 assert.match(modesSource, /FLOW: "flow"/);
 assert.match(modesSource, /id: MODE_IDS\.FLOW,[\s\S]*enabled: true,[\s\S]*visible: true,[\s\S]*status: "available",[\s\S]*route: "flow-release"/);
@@ -87,4 +87,4 @@ assert.match(modesSource, /PRACTICE: "practice"/);
 assert.match(modesSource, /id: MODE_IDS\.PRACTICE,[\s\S]*enabled: true,[\s\S]*visible: true,[\s\S]*status: "available",[\s\S]*route: "practice-lab"/);
 assert.match(modesSource, /id: MODE_IDS\.ARCADE_RUSH,[\s\S]*enabled: true,[\s\S]*visible: false,[\s\S]*status: "retired",[\s\S]*route: null/);
 
-console.log("UI3 source contracts passed: five public registry slots, four launchable modes including Flow, disabled Practice placeholder, hidden Rush compatibility, and unchanged six-position navigation.");
+console.log("UI3 source contracts passed: five public registry slots, five launchable modes including Flow and Practice, hidden Rush compatibility, and unchanged six-position navigation.");
