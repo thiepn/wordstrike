@@ -37,7 +37,20 @@ try {
   await page.locator(`[data-practice-action="${mode.start}"]:enabled`).waitFor({timeout:30000}).catch(async error=>{throw new Error(error.message+'\n'+await page.locator('body').innerText());});
   check(`${width} ${mode.id} available in ${Date.now()-begin}ms`);
   await page.locator(`[data-practice-action="${mode.start}"]`).click();
-  await page.locator(mode.input).waitFor({timeout:30000}).catch(async error=>{throw new Error(error.message+'\n'+await page.locator('body').innerText()+'\nErrors: '+JSON.stringify(errors));});
+  await page.locator(mode.input).waitFor({timeout:30000}).catch(async error=>{const diagnostic = await page.evaluate(async () => {
+    try {
+      const {createPracticeCombinationRepairRuntime} = await import('/js/practiceLab/practiceCombinationRepairRuntime.js');
+      const {createPracticeCombinationRepairRegistration} = await import('/js/practiceLab/practiceCombinationRepairExperiment.js');
+      const {mountPracticeCombinationRepairSession} = await import('/js/practiceLab/practiceCombinationRepairSessionHost.js');
+      const runtime = createPracticeCombinationRepairRuntime();
+      const prepared = await runtime.prepare({entityType:'bigram',entityKey:'th'});
+      const session = createPracticeCombinationRepairRegistration({runtime}).sessionFactory(prepared);
+      const root = document.createElement('div'); const warnings=[];
+      const host = await mountPracticeCombinationRepairSession({root,session,logger:{warn:(message,error)=>warnings.push({message,error:error?.message,stack:error?.stack})}});
+      const result = {text:root.textContent, warnings}; await host.exit(); return result;
+    } catch(error) {return {error:error.message,stack:error.stack,code:error.code};}
+   });
+   throw new Error(error.message+'\n'+await page.locator('body').innerText()+'\nErrors: '+JSON.stringify(errors)+'\nDiagnostic: '+JSON.stringify(diagnostic));});
   await page.evaluate(selector=>window.capture=document.querySelector(selector),mode.input);
   for(let i=0;i<30;i++) {
    const expected=await page.locator('.is-current').first().textContent();

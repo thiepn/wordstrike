@@ -66,8 +66,9 @@ export function buildPracticeCombinationRepairDetailViewModel({ entry, resolved,
     recommendationStatus: ui.recommendationStatus,
     recommendationErrorCode: ui.recommendationErrorCode,
     totalOpportunityCount: quotas.total,
-    phases: PRACTICE_COMBINATION_REPAIR_PHASES.map((phase) => ({
+    phases: PRACTICE_COMBINATION_REPAIR_PHASES.map((phase, index) => ({
       ...phase,
+      ordinal: index + 1,
       opportunityQuota: quotas[phase.id],
     })),
     canPrepare: resolved?.runnable === true && ui.status !== "preparing",
