@@ -1,3 +1,4 @@
+import { createPracticeTargetWorkerClient } from "./practiceTargetWorkerClient.js";
 import { createPracticeIndexLoader } from "./practiceIndexLoader.js";
 import { createPracticeTargetIndex } from "./practiceTargetIndex.js";
 import { createPracticeIndexedDbStore } from "./practiceIndexedDbStore.js";
@@ -36,6 +37,10 @@ export function createPracticeProblemWordsRuntime({ fetchImpl = globalThis.fetch
     const dataStore = createPracticeIndexedDbStore(); const manifestStore = createPracticeManifestStore(); const repository = createPracticeRepository({ dataStore, manifestStore });
     try { const initialized = await repository.initializePracticeStorage(); return await task(initialized.context, initialized.profile); } finally { try { dataStore.close?.(); } catch {} }
   };
+  if (!contextProvider && fetchImpl === globalThis.fetch && typeof Worker === "function") {
+    return createPracticeTargetWorkerClient({ kind: "ProblemWords", options: { language, corpusVersion, indexBaseUrl, corpusBaseUrl }, withContext });
+  }
+
   return Object.freeze({
     async inspectTarget({ entityKey } = {}) {
       try { const assets = await loadAssets(); return withContext((context) => inspectPracticeProblemWordsAvailability({ sessionId: `problem-words-availability:${entityKey ?? ""}`, context, targetIndex: assets.targetIndex, contentItems: assets.trainingCorpus.items, entityKey, language: context?.dataLocale ?? language })); }

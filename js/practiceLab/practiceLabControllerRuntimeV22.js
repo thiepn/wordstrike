@@ -18,6 +18,7 @@ export function createPracticeLabController(options = {}) {
   let mounted = false;
   let lastView = null;
   let inspectEpoch = 0;
+  let inspectTimer = null;
   let prepareEpoch = 0;
   let recommendationEpoch = 0;
   let problemListenersAttached = false;
@@ -31,6 +32,7 @@ export function createPracticeLabController(options = {}) {
   }
 
   function detachProblemListeners() {
+    clearTimeout(inspectTimer);
     if (!problemListenersAttached) return;
     root?.removeEventListener?.("click", click, true);
     root?.removeEventListener?.("input", input, true);
@@ -97,6 +99,7 @@ export function createPracticeLabController(options = {}) {
   };
 
   const inspect = async ({ entityKey, targetSource = "manual" } = {}) => {
+    clearTimeout(inspectTimer);
     const normalized = normalizePracticeProblemWordsManualInput(entityKey, "en");
     const epoch = ++inspectEpoch;
     if (!normalized.valid) {
@@ -175,7 +178,12 @@ export function createPracticeLabController(options = {}) {
   const input = (event) => {
     const target = event.target?.closest?.("[data-problem-word-target]");
     if (!target || !root?.contains?.(target)) return;
-    void inspect({ entityKey: target.value, targetSource: "manual" });
+    clearTimeout(inspectTimer);
+    inspectEpoch += 1;
+    state = normalizePracticeProblemWordsUiState({ ...state, targetValue: target.value, selectedSource: "manual", status: "checking", availability: null });
+    const start = root.querySelector?.('[data-practice-action="start-problem-words"]');
+    if (start) start.disabled = true;
+    inspectTimer = setTimeout(() => { if (mounted && isProblemRoute()) void inspect({ entityKey: state.targetValue, targetSource: "manual" }); }, 250);
   };
 
   const afterRoute = () => {

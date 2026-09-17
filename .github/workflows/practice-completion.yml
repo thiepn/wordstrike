@@ -38,6 +38,7 @@ jobs:
       - run: node tests/browser/practice_completion.mjs
       - run: node tests/browser/practice_accessibility.mjs
       - run: node tests/browser/practice_offline.mjs
+      - run: node tests/browser/practice_targeted.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -46,6 +47,7 @@ jobs:
             browser-artifacts/practice-completion/
             browser-artifacts/practice-accessibility/
             browser-artifacts/practice-offline/
+            browser-artifacts/practice-targeted/
   performance:
     runs-on: ubuntu-latest
     timeout-minutes: 12

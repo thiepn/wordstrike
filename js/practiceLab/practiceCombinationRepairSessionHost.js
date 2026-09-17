@@ -1,3 +1,4 @@
+import { practicePlanCharacters, practicePhaseWindow, updatePracticeTargetSession } from "./practiceTargetSessionRendering.js";
 import { createPracticeIndexedDbStore } from "./practiceIndexedDbStore.js";
 import { createPracticeManifestStore } from "./practiceManifestStore.js";
 import { createPracticeRepository } from "./practiceRepository.js";
@@ -31,7 +32,7 @@ function targetHighlightPositions(contentPlan, phase) {
   if (!phase || phase.cue === "none") return new Set();
   const language = contentPlan?.metadata?.language ?? "en";
   const target = contentPlan?.metadata?.combinationRepair?.target?.entityKey ?? contentPlan?.targetEntities?.[0]?.entityKey ?? "";
-  const graphemes = Array.from(contentPlan.text);
+  const graphemes = practicePlanCharacters(contentPlan);
   const needle = Array.from(target);
   const positions = new Set();
   for (let index = phase.startIndex; index <= phase.endIndex - needle.length; index += 1) {
@@ -44,13 +45,12 @@ function targetHighlightPositions(contentPlan, phase) {
 
 function renderTypingText(contentPlan, snapshot, phase) {
   if (!phase) return "";
-  const graphemes = Array.from(contentPlan.text);
+  const graphemes = practicePlanCharacters(contentPlan);
   const cursor = snapshot.cursorIndex ?? 0;
   const errors = new Set(snapshot.errorPositions ?? []);
   const highlighted = targetHighlightPositions(contentPlan, phase);
   const cueClass = phase.cue === "strong" ? "strong" : phase.cue === "subtle" ? "subtle" : "none";
-  const visibleStart = Math.max(0, Math.min(cursor, phase.startIndex));
-  const visibleEnd = Math.min(graphemes.length, phase.endIndex);
+  const { start: visibleStart, end: visibleEnd } = practicePhaseWindow(phase, cursor, graphemes.length);
   const output = [];
   for (let index = visibleStart; index < visibleEnd; index += 1) {
     const value = graphemes[index];
@@ -85,9 +85,10 @@ export function renderPracticeCombinationRepairSessionSnapshot(root, { contentPl
   const phase = phaseForCursor(contentPlan, snapshot.cursorIndex ?? 0);
   const target = contentPlan.metadata.combinationRepair.target.entityKey;
   const quota = phase?.opportunityQuota ?? null;
-  const totalLength = snapshot.content?.expectedLength ?? Array.from(contentPlan.text).length;
+  const totalLength = snapshot.content?.expectedLength ?? practicePlanCharacters(contentPlan).length;
   const progress = totalLength > 0 ? Math.min(100, ((snapshot.cursorIndex ?? 0) / totalLength) * 100) : 0;
   const paused = snapshot.lifecycleState === "paused";
+  if (updatePracticeTargetSession(root, { contentPlan, phase, snapshot, passageSelector: ".practice-combination-typing", text: renderTypingText(contentPlan, snapshot, phase), progress })) return;
   root.innerHTML = `<section class="screen practice-lab-screen practice-combination-session" data-practice-view="session">
     <div class="practice-lab-shell">
       <header class="practice-combination-session-header">

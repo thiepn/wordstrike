@@ -1,5 +1,5 @@
 const CACHE_PREFIX = "wordstrike-pwa-";
-const CACHE_NAME = CACHE_PREFIX + "v8";
+const CACHE_NAME = CACHE_PREFIX + "v9";
 const APP_SHELL = [
   "./assets/branding/wordstrike-logo.webp",
   "./data/practice/read-ahead/en-v1/WS-READAHEAD-EN-1.forms.json",
@@ -421,6 +421,9 @@ const APP_SHELL = [
   "./js/practiceLab/practiceIndexAssembler.js",
   "./js/practiceLab/practiceIndexConstants.js",
   "./js/practiceLab/practiceIndexLoader.js",
+  "./js/practiceLab/practiceTargetSessionRendering.js",
+  "./js/practiceLab/practiceTargetWorker.js",
+  "./js/practiceLab/practiceTargetWorkerClient.js",
   "./js/practiceLab/practiceIndexRegistry.js",
   "./js/practiceLab/practiceIndexSharding.js",
   "./js/practiceLab/practiceIndexValidation.js",

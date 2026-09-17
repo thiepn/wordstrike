@@ -1,3 +1,4 @@
+import { practicePlanCharacters, practicePhaseWindow, updatePracticeTargetSession } from "./practiceTargetSessionRendering.js";
 import { createPracticeIndexedDbStore } from "./practiceIndexedDbStore.js";
 import { createPracticeManifestStore } from "./practiceManifestStore.js";
 import { createPracticeRepository } from "./practiceRepository.js";
@@ -22,13 +23,12 @@ function phaseForCursor(contentPlan, cursorIndex) {
 
 function renderTypingText(contentPlan, snapshot, phase) {
   if (!phase) return "";
-  const graphemes = Array.from(contentPlan.text);
+  const graphemes = practicePlanCharacters(contentPlan);
   const cursor = snapshot.cursorIndex ?? 0;
   const errors = new Set(snapshot.errorPositions ?? []);
   const highlighted = phase.cue === "none" ? new Set() : new Set(phase.targetPositions ?? []);
   const cueClass = phase.cue === "strong" ? "strong" : phase.cue === "subtle" ? "subtle" : "none";
-  const visibleStart = Math.max(0, Math.min(cursor, phase.startIndex));
-  const visibleEnd = Math.min(graphemes.length, phase.endIndex);
+  const { start: visibleStart, end: visibleEnd } = practicePhaseWindow(phase, cursor, graphemes.length);
   const output = [];
   for (let index = visibleStart; index < visibleEnd; index += 1) {
     const classes = ["practice-weak-key-char"];
@@ -62,9 +62,10 @@ function phaseStrip(contentPlan, activePhase) {
 export function renderPracticeWeakKeysSessionSnapshot(root, { contentPlan, snapshot }) {
   const phase = phaseForCursor(contentPlan, snapshot.cursorIndex ?? 0);
   const target = contentPlan.metadata.weakKeys.target.entityKey;
-  const totalLength = snapshot.content?.expectedLength ?? Array.from(contentPlan.text).length;
+  const totalLength = snapshot.content?.expectedLength ?? practicePlanCharacters(contentPlan).length;
   const progress = totalLength > 0 ? Math.min(100, ((snapshot.cursorIndex ?? 0) / totalLength) * 100) : 0;
   const paused = snapshot.lifecycleState === "paused";
+  if (updatePracticeTargetSession(root, { contentPlan, phase, snapshot, passageSelector: ".practice-weak-key-typing", text: renderTypingText(contentPlan, snapshot, phase), progress })) return;
   root.innerHTML = `<section class="screen practice-lab-screen practice-weak-key-session" data-practice-view="weak-keys-session">
     <div class="practice-lab-shell">
       <header class="practice-weak-key-session-header">

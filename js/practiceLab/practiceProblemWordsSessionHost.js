@@ -1,3 +1,4 @@
+import { practicePlanCharacters, practicePhaseWindow, updatePracticeTargetSession } from "./practiceTargetSessionRendering.js";
 import { createPracticeIndexedDbStore } from "./practiceIndexedDbStore.js";
 import { createPracticeManifestStore } from "./practiceManifestStore.js";
 import { createPracticeRepository } from "./practiceRepository.js";
@@ -23,9 +24,9 @@ function highlightedPositions(phase) {
   return result;
 }
 function renderText(contentPlan, snapshot, phase) {
-  const graphemes = Array.from(contentPlan.text); const cursor = snapshot.cursorIndex ?? 0; const errors = new Set(snapshot.errorPositions ?? []); const cue = highlightedPositions(phase);
+  const graphemes = practicePlanCharacters(contentPlan); const cursor = snapshot.cursorIndex ?? 0; const errors = new Set(snapshot.errorPositions ?? []); const cue = highlightedPositions(phase);
   const cueClass = phase?.cue === "strong-word" ? "strong" : phase?.cue === "subtle-word" ? "subtle" : "none";
-  const start = Math.max(0, Math.min(cursor, phase?.startIndex ?? 0)); const end = Math.min(graphemes.length, phase?.endIndex ?? graphemes.length); const out = [];
+  const { start, end } = practicePhaseWindow(phase, cursor, graphemes.length); const out = [];
   for (let index = start; index < end; index += 1) {
     const classes = ["practice-weak-key-char", "practice-problem-word-char"];
     if (index < cursor) classes.push(errors.has(index) ? "is-error" : "is-typed"); if (index === cursor) classes.push("is-current"); if (cue.has(index)) classes.push(`is-target-${cueClass}`);
@@ -45,7 +46,8 @@ function phaseStrip(contentPlan, active) {
   return `<ol class="practice-weak-key-phase-strip" aria-label="Problem Words phases">${(contentPlan?.metadata?.problemWords?.phaseRanges ?? []).map((phase) => `<li data-phase-state="${phase.ordinal < (active?.ordinal ?? 1) ? "complete" : phase.id === active?.id ? "active" : "upcoming"}"><span>${phase.ordinal}</span><strong>${escapeHtml(phase.label)}</strong></li>`).join("")}</ol>`;
 }
 export function renderPracticeProblemWordsSessionSnapshot(root, { contentPlan, snapshot }) {
-  const phase = phaseForCursor(contentPlan, snapshot.cursorIndex ?? 0); const target = contentPlan.metadata.problemWords.target.entityKey; const total = snapshot.content?.expectedLength ?? Array.from(contentPlan.text).length; const progress = total > 0 ? Math.min(100, ((snapshot.cursorIndex ?? 0) / total) * 100) : 0; const paused = snapshot.lifecycleState === "paused";
+  const phase = phaseForCursor(contentPlan, snapshot.cursorIndex ?? 0); const target = contentPlan.metadata.problemWords.target.entityKey; const total = snapshot.content?.expectedLength ?? practicePlanCharacters(contentPlan).length; const progress = total > 0 ? Math.min(100, ((snapshot.cursorIndex ?? 0) / total) * 100) : 0; const paused = snapshot.lifecycleState === "paused";
+  if (updatePracticeTargetSession(root, { contentPlan, phase, snapshot, passageSelector: ".practice-weak-key-typing", text: renderText(contentPlan, snapshot, phase), progress })) return;
   root.innerHTML = `<section class="screen practice-lab-screen practice-weak-key-session practice-problem-word-session" data-practice-view="problem-words-session"><div class="practice-lab-shell">
     <header class="practice-weak-key-session-header"><div><div class="eyebrow">Problem Words</div><h1>Practicing: ${escapeHtml(target)}</h1></div><div class="practice-weak-key-session-actions"><button type="button" data-problem-words-session-action="${paused ? "resume" : "pause"}">${paused ? "RESUME" : "PAUSE"}</button><button type="button" data-problem-words-session-action="abandon">EXIT SESSION</button></div></header>
     ${phaseStrip(contentPlan, phase)}

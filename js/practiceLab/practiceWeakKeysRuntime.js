@@ -1,3 +1,4 @@
+import { createPracticeTargetWorkerClient } from "./practiceTargetWorkerClient.js";
 import { createPracticeIndexLoader } from "./practiceIndexLoader.js";
 import { createPracticeTargetIndex } from "./practiceTargetIndex.js";
 import { createPracticeIndexedDbStore } from "./practiceIndexedDbStore.js";
@@ -90,6 +91,10 @@ export function createPracticeWeakKeysRuntime({
       try { dataStore.close?.(); } catch {}
     }
   };
+
+  if (!contextProvider && fetchImpl === globalThis.fetch && typeof Worker === "function") {
+    return createPracticeTargetWorkerClient({ kind: "WeakKeys", options: { language, corpusVersion, indexBaseUrl, corpusBaseUrl }, withContext });
+  }
 
   return Object.freeze({
     async inspectTarget({ entityKey } = {}) {
