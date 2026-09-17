@@ -45,6 +45,7 @@ const PRIVACY_OVERCLAIMS = Object.freeze([
 ]);
 
 const STATIC_FETCH_FILES = Object.freeze(new Set([
+  "js/practiceLab/practiceTargetWorker.js",
   "js/practiceLab/practiceCommonWordReference.js",
   "js/practiceLab/practiceCorpusRegistry.js",
   "js/practiceLab/practiceEvaluationContentLoader.js",
@@ -56,6 +57,7 @@ const STATIC_FETCH_FILES = Object.freeze(new Set([
 // Exact current sink counts are certified. A new occurrence is not inherited by
 // this review: it changes the count and fails PL39 until explicitly audited.
 const REVIEWED_INNER_HTML = Object.freeze({
+  "js/practiceLab/practiceTargetSessionRendering.js": [1, "bounded markup supplied exclusively by the four escaped target-session renderers; feedback uses textContent"],
   "js/practiceLab/practiceAssessmentSessionHost.js": [2, "fixed shell and bounded visible passage window; all dynamic strings HTML-escaped"],
   "js/practiceLab/practiceEvidenceViews.js": [1, "escaped entity/session strings and finite numeric formatting; no raw source content"],
   "js/practiceLab/practiceAccuracyRecoverySessionHost.js": [2, "fixed shell/results and bounded metrics"],

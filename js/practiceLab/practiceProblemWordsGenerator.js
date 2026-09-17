@@ -37,7 +37,16 @@ async function loadAnnotation(index, cache, content) {
   try { return await promise; } catch (error) { cache.delete(content.contentId); throw error; }
 }
 
-function surfaceForWord(content, word, segment) { return segment(content.text).slice(word.startIndex, word.endIndex).join(""); }
+const segmentedContent = new WeakMap();
+function contentCharacters(content, segment) {
+  let cached = segmentedContent.get(content);
+  if (!cached || cached.text !== content.text || cached.segment !== segment) {
+    cached = { text: content.text, segment, characters: segment(content.text) };
+    segmentedContent.set(content, cached);
+  }
+  return cached.characters;
+}
+function surfaceForWord(content, word, segment) { return contentCharacters(content, segment).slice(word.startIndex, word.endIndex).join(""); }
 function wordOrder(annotation) { return [...(annotation?.words ?? [])].sort((a, b) => a.startIndex - b.startIndex || a.endIndex - b.endIndex); }
 function launchSignature({ words, index, content, segment, target }) {
   if (index <= 0) return "text-start|word-start|unknown|letter";
@@ -66,14 +75,27 @@ async function naturalCandidates({ targetIndex, summary, contentItems, target, c
     });
     const indexedCount = Number(ref?.count ?? ref?.positions?.length ?? matches.length);
     if (indexedCount !== (annotation.words ?? []).filter((word) => word.lexicalKey === target.entityKey).length) throw createPracticeProblemWordsError(PRACTICE_PROBLEM_WORDS_ERRORS.CONTENT_HASH_MISMATCH, "Problem Words word annotation no longer matches the training reverse index", { contentId: content.contentId });
-    if (matches.length !== 1) continue;
-    const match = matches[0];
-    const beforeWords = match.index;
-    const afterWords = words.length - match.index - 1;
+    if (!matches.length) continue;
+    // Long passages can contain the word many times. Use a source-bound
+    // excerpt with one occurrence instead of discarding the entire family.
+    const match = matches.length === 1 ? matches[0] : matches.find(candidate => {
+      const neighbors = words.slice(Math.max(0, candidate.index - 3), candidate.index + 3);
+      return candidate.index >= 3 && candidate.index + 2 < words.length
+        && neighbors.filter(word => word.lexicalKey === target.entityKey).length === 1;
+    });
+    if (!match) continue;
+    const firstWord = matches.length === 1 ? 0 : match.index - 3;
+    const lastWord = matches.length === 1 ? words.length - 1 : match.index + 2;
+    const sourceStartIndex = matches.length === 1 ? 0 : words[firstWord].startIndex;
+    const sourceEndIndex = matches.length === 1 ? contentCharacters(content, segment).length : words[lastWord].endIndex;
+    const excerpt = contentCharacters(content, segment).slice(sourceStartIndex, sourceEndIndex).join("");
+    const beforeWords = match.index - firstWord;
+    const afterWords = lastWord - match.index;
     const signature = launchSignature({ words, index: match.index, content: { ...content, keyboardLayout: context?.keyboardLayout }, segment, target: target.entityKey });
-    const difficulty = scoreText(content.text, language);
+    const difficulty = scoreText(excerpt, language);
     out.push(freezeDeep({
-      candidateId: `natural:${content.contentId}`,
+      candidateId: `natural:${content.contentId}:${sourceStartIndex}:${sourceEndIndex}`,
+      sourceStartIndex, sourceEndIndex,
       kind: "natural",
       compositionMode: "natural-text-bundle",
       partition: "training",
@@ -81,11 +103,11 @@ async function naturalCandidates({ targetIndex, summary, contentItems, target, c
       contentHash: content.contentHash,
       familyId: content.familyId,
       targetOpportunityCount: 1,
-      targetWordLocalRanges: [{ startIndex: match.word.startIndex, endIndex: match.word.endIndex }],
+      targetWordLocalRanges: [{ startIndex: match.word.startIndex - sourceStartIndex, endIndex: match.word.endIndex - sourceStartIndex }],
       beforeTargetWordCount: beforeWords,
       afterTargetWordCount: afterWords,
       launchSignatures: [signature],
-      lexicalKeys: words.map((word) => word.lexicalKey).filter(Boolean),
+      lexicalKeys: words.slice(firstWord, lastWord + 1).map((word) => word.lexicalKey).filter(Boolean),
       ...difficulty,
     }));
   }
@@ -302,7 +324,10 @@ function unitText(unit, byId) {
   if (unit.kind === "natural") {
     const content = byId.get(unit.contentId);
     if (!content || content.contentHash !== unit.contentHash || content.familyId !== unit.familyId || !approvedTraining(content)) throw createPracticeProblemWordsError(PRACTICE_PROBLEM_WORDS_ERRORS.CONTENT_HASH_MISMATCH, `Problem Words source content no longer matches ${unit.contentId}`);
-    return content.text;
+    if (unit.sourceStartIndex == null && unit.sourceEndIndex == null) return content.text;
+    const characters = createPracticeSegmenter()(content.text);
+    if (!Number.isInteger(unit.sourceStartIndex) || !Number.isInteger(unit.sourceEndIndex) || unit.sourceStartIndex < 0 || unit.sourceEndIndex > characters.length || unit.sourceStartIndex >= unit.sourceEndIndex) throw new TypeError("Invalid Problem Words source excerpt");
+    return characters.slice(unit.sourceStartIndex, unit.sourceEndIndex).join("");
   }
   return (unit.wordKeys ?? []).join(" ");
 }

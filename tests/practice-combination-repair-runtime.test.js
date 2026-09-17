@@ -215,3 +215,14 @@ test("PL20 expanded English corpus supplies matched probes for common combinatio
   assert.equal(availability.status, "ready");
   assert.deepEqual(availability.reasons, []);
 });
+
+test("PL20 common th target starts from the real corpus without counting uppercase aliases", async () => {
+  const runtime = createPracticeCombinationRepairRuntime({ fetchImpl: fileFetch });
+  assert.equal((await runtime.inspectTarget({ entityType: 'bigram', entityKey: 'th' })).status, 'ready');
+  const { contentPlan, plan } = await runtime.prepare({ entityType: 'bigram', entityKey: 'th' });
+  const characters = Array.from(contentPlan.text);
+  for (const phase of contentPlan.metadata.combinationRepair.phaseRanges) {
+    const text = characters.slice(phase.startIndex, phase.endIndex).join('');
+    assert.equal([...text.matchAll(/(?=th)/g)].length, plan.phases.find(item => item.id === phase.id).opportunityQuota);
+  }
+});

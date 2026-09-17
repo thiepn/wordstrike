@@ -291,13 +291,8 @@ function candidateIsDisjointFromProbe(candidate, probe) {
     && candidateContents.every((id) => !probeContents.has(id));
 }
 
-function probePairTieKey(pair) {
-  return `${pair?.entry?.probeId ?? ""}|${pair?.exit?.probeId ?? ""}`;
-}
-
 function selectConstructedProbePair(candidates, options) {
   const entryBundles = buildProbeBundles(candidates, options);
-  let best = null;
   for (const entry of entryBundles) {
     const disjointCandidates = candidates.filter((candidate) => candidateIsDisjointFromProbe(candidate, entry));
     if (!disjointCandidates.length) continue;
@@ -311,13 +306,11 @@ function selectConstructedProbePair(candidates, options) {
       policy: options.policy,
     });
     if (!pair) continue;
-    if (!best
-      || pair.match.score < best.match.score
-      || (pair.match.score === best.match.score && probePairTieKey(pair).localeCompare(probePairTieKey(best)) < 0)) {
-      best = pair;
-    }
+    // A passing pair already satisfies every matching and disjointness gate.
+    // Searching all remaining bundles adds no eligibility evidence.
+    return pair;
   }
-  return best;
+  return null;
 }
 
 async function buildNeutralMaterial({ targetIndex, contentItems, targetKey, language, policy, annotationCache }) {
@@ -431,7 +424,7 @@ async function composeWeakKeysPhases({ sessionId, context, target, targetIndex, 
     salt: "natural-probe",
   });
   const availableDistinctWords = new Set(wordCandidates.map((entry) => entry.wordKey)).size;
-  const preferredGeneratedProbePair = selectConstructedProbePair(generatedProbePool, {
+  const preferredGeneratedProbePair = naturalProbePair ? null : selectConstructedProbePair(generatedProbePool, {
     sessionId,
     entityKey: target.entityKey,
     policy,
@@ -439,7 +432,7 @@ async function composeWeakKeysPhases({ sessionId, context, target, targetIndex, 
     salt: "generated-probe-preferred",
     requiredDistinctLexical: availableDistinctWords >= policy.probes.preferredGeneratedDistinctLexicalItems ? policy.probes.preferredGeneratedDistinctLexicalItems : 0,
   });
-  const fallbackGeneratedProbePair = selectConstructedProbePair(generatedProbePool, {
+  const fallbackGeneratedProbePair = (naturalProbePair || preferredGeneratedProbePair) ? null : selectConstructedProbePair(generatedProbePool, {
     sessionId,
     entityKey: target.entityKey,
     policy,

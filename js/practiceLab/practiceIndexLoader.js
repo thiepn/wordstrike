@@ -59,14 +59,14 @@ export function createPracticeIndexLoader({
     return value;
   };
 
-  const loadText = async (url, cacheKey) => {
+  const loadValue = async (url, cacheKey, decode) => {
     if (cache.has(cacheKey)) return touch(cacheKey, cache.get(cacheKey));
     if (inFlight.has(cacheKey)) return inFlight.get(cacheKey);
     const promise = (async () => {
       const response = await fetchImpl(url);
       if (!response?.ok) throw loaderError(PRACTICE_INDEX_ERROR_CODES.INDEX_NOT_FOUND, `Practice index asset was not found: ${url}`, { status: response?.status ?? null });
       const text = await response.text();
-      return touch(cacheKey, text);
+      return touch(cacheKey, await decode(text));
     })();
     inFlight.set(cacheKey, promise);
     try { return await promise; } finally { inFlight.delete(cacheKey); }
@@ -76,31 +76,34 @@ export function createPracticeIndexLoader({
     if (typeof language !== "string" || !Number.isInteger(corpusVersion) || corpusVersion < 1) throw new TypeError("Practice index manifest lookup requires language and corpusVersion");
     const relativeRoot = `${language}-v${corpusVersion}`;
     const cacheKey = `manifest|${relativeRoot}`;
-    const text = await loadText(`${root}/${relativeRoot}/manifest.json`, cacheKey);
-    let manifest;
-    try { manifest = JSON.parse(text); } catch { throw loaderError(PRACTICE_INDEX_ERROR_CODES.SHARD_INVALID, "Practice index manifest is not valid JSON"); }
-    const validation = validatePracticeIndexManifest(manifest);
-    if (!validation.valid) throw loaderError(PRACTICE_INDEX_ERROR_CODES.INDEX_VERSION_MISMATCH, "Practice index manifest failed validation", validation.errors);
-    return freezeDeep(manifest);
+    return loadValue(`${root}/${relativeRoot}/manifest.json`, cacheKey, (text) => {
+      let manifest;
+      try { manifest = JSON.parse(text); } catch { throw loaderError(PRACTICE_INDEX_ERROR_CODES.SHARD_INVALID, "Practice index manifest is not valid JSON"); }
+      const validation = validatePracticeIndexManifest(manifest);
+      if (!validation.valid) throw loaderError(PRACTICE_INDEX_ERROR_CODES.INDEX_VERSION_MISMATCH, "Practice index manifest failed validation", validation.errors);
+      return freezeDeep(manifest);
+    });
   };
 
   const loadArtifact = async ({ manifest, relativePath, partition, indexType, shardId = null } = {}) => {
     const inventory = manifest?.artifactChecksums?.find((entry) => entry.path === relativePath);
     if (!inventory) throw loaderError(PRACTICE_INDEX_ERROR_CODES.INDEX_NOT_FOUND, `Practice index manifest does not declare ${relativePath}`);
-    const cacheKey = [manifest.corpusId, manifest.corpusVersion, manifest.indexSchemaVersion, manifest.indexGeneratorVersion, partition, indexType, shardId ?? "content"].join("|");
-    const text = await loadText(`${root}/${manifest.language}-v${manifest.corpusVersion}/${relativePath}`, cacheKey);
-    const actualHash = await hashText(text);
-    if (actualHash !== inventory.sha256) {
-      cache.delete(cacheKey);
-      throw loaderError(PRACTICE_INDEX_ERROR_CODES.ARTIFACT_CHECKSUM_MISMATCH, "Practice index artifact checksum does not match manifest", { path: relativePath, partition, indexType, shardId });
-    }
-    let artifact;
-    try { artifact = JSON.parse(text); } catch { cache.delete(cacheKey); throw loaderError(PRACTICE_INDEX_ERROR_CODES.SHARD_INVALID, "Practice index artifact is not valid JSON", { path: relativePath }); }
-    const validation = validatePracticeIndexArtifact(artifact, { manifest, expectedPartition: partition, expectedIndexType: indexType, expectedShardId: shardId });
-    try { assertPracticeIndexArtifact(validation, relativePath); } catch (cause) { cache.delete(cacheKey); throw cause; }
-    const frozen = freezeDeep(artifact);
-    touch(cacheKey, text); // raw integrity cache remains bounded; parsed objects are returned immutable and not persisted.
-    return frozen;
+    // Cache the verified immutable artifact, not its serialized bytes. Generators
+    // request the same shard many times while composing a single target plan.
+    // Bind the cache to both content digest and corpus identity so a changed
+    // manifest cannot reuse validation from an earlier release.
+    const cacheKey = JSON.stringify([manifest.corpusId, manifest.corpusVersion,
+      manifest.corpusChecksum, manifest.language, manifest.indexSchemaVersion,
+      manifest.indexGeneratorVersion, relativePath, inventory.sha256,
+      partition, indexType, shardId]);
+    return loadValue(`${root}/${manifest.language}-v${manifest.corpusVersion}/${relativePath}`, cacheKey, async (text) => {
+      const actualHash = await hashText(text);
+      if (actualHash !== inventory.sha256) throw loaderError(PRACTICE_INDEX_ERROR_CODES.ARTIFACT_CHECKSUM_MISMATCH, "Practice index artifact checksum does not match manifest", { path: relativePath, partition, indexType, shardId });
+      let artifact;
+      try { artifact = JSON.parse(text); } catch { throw loaderError(PRACTICE_INDEX_ERROR_CODES.SHARD_INVALID, "Practice index artifact is not valid JSON", { path: relativePath }); }
+      assertPracticeIndexArtifact(validatePracticeIndexArtifact(artifact, { manifest, expectedPartition: partition, expectedIndexType: indexType, expectedShardId: shardId }), relativePath);
+      return freezeDeep(artifact);
+    });
   };
 
   const loadContentIndex = ({ manifest, partition }) => loadArtifact({ manifest, relativePath: `${partition}/content.json`, partition, indexType: "content" });

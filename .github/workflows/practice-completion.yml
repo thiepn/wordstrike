@@ -35,6 +35,7 @@ jobs:
         with:
           node-version: 22
       - run: npm install --no-save playwright@1.57.0 axe-core@4.10.3
+      - run: node tests/browser/practice_targeted.mjs
       - run: node tests/browser/practice_completion.mjs
       - run: node tests/browser/practice_accessibility.mjs
       - run: node tests/browser/practice_offline.mjs
@@ -46,6 +47,7 @@ jobs:
             browser-artifacts/practice-completion/
             browser-artifacts/practice-accessibility/
             browser-artifacts/practice-offline/
+            browser-artifacts/practice-targeted/
   performance:
     runs-on: ubuntu-latest
     timeout-minutes: 12

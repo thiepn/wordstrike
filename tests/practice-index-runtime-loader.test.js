@@ -76,3 +76,22 @@ test("failed shard loads are retryable and do not poison cache", async () => {
   assert.equal(recovered.shardId, targets[0].shardId);
   assert.equal(counter.count, 2);
 });
+
+test("warm and concurrent shard reads reuse verified objects; changed manifests cannot reuse verification", async () => {
+  const { manifest, targets } = await manifestAndTargets();
+  const counter = { count: 0, urls: [] };
+  let hashes = 0;
+  const loader = createPracticeIndexLoader({ fetchImpl: repoFetch(counter), hashText: async text => { hashes++; return hashText(text); }, maxCacheEntries: 1 });
+  const query = { manifest, partition: "training", entityType: targets[0].entry.entityType, entityKey: targets[0].entry.entityKey };
+  const results = await Promise.all(Array.from({ length: 20 }, () => loader.loadTargetShard(query)));
+  assert.ok(results.every(value => value === results[0]));
+  assert.ok(Object.isFrozen(results[0].entries));
+  assert.equal(await loader.loadTargetShard(query), results[0]);
+  assert.equal(hashes, 1, "warm lookups must not repeat hashing, parsing or validation");
+  const changed = structuredClone(manifest);
+  changed.artifactChecksums.find(entry => counter.urls[0].endsWith(entry.path)).sha256 = `sha256-${'0'.repeat(64)}`;
+  await assert.rejects(loader.loadTargetShard({ ...query, manifest: changed }), error => error.code === 'ARTIFACT_CHECKSUM_MISMATCH');
+  await loader.loadTargetShard({ ...query, entityType: targets[1].entry.entityType, entityKey: targets[1].entry.entityKey });
+  assert.equal(loader.getCacheSize(), 1);
+  assert.notEqual(await loader.loadTargetShard(query), results[0], "evicted shards must be verified again");
+});

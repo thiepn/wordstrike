@@ -1,3 +1,4 @@
+import { createPracticeTargetWorkerClient } from "./practiceTargetWorkerClient.js";
 import { createPracticeIndexLoader } from "./practiceIndexLoader.js";
 import { createPracticeTargetIndex } from "./practiceTargetIndex.js";
 import { createPracticeIndexedDbStore } from "./practiceIndexedDbStore.js";
@@ -28,6 +29,10 @@ export function createPracticeAccuracyRecoveryRuntime({ fetchImpl = globalThis.f
     const dataStore = createPracticeIndexedDbStore(); const manifestStore = createPracticeManifestStore(); const repository = createPracticeRepository({ dataStore, manifestStore });
     try { const initialized = await repository.initializePracticeStorage(); return await task(initialized.context, initialized.profile); } finally { try { dataStore.close?.(); } catch {} }
   };
+  if (!contextProvider && fetchImpl === globalThis.fetch && typeof Worker === "function") {
+    return createPracticeTargetWorkerClient({ kind: "AccuracyRecovery", options: { language, corpusVersion, indexBaseUrl, corpusBaseUrl }, withContext });
+  }
+
   return Object.freeze({
     async inspectTarget({ entityType, entityKey, manualType = null } = {}) {
       try { const assets = await loadAssets(); return await withContext((context) => inspectPracticeAccuracyRecoveryAvailability({ sessionId: `accuracy-recovery-availability:${entityType}:${entityKey}`, context, targetIndex: assets.targetIndex, contentItems: assets.trainingCorpus.items, corpusBinding: assets.corpusBinding, entityType, entityKey, manualType, language: context?.dataLocale ?? language })); }
