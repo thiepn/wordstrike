@@ -67,6 +67,7 @@ const customCatalog = Object.freeze([
   passage("plain-short", "everyday", "smooth", 8, ["common-words"]),
   passage("dialogue-long", "dialogue", "smooth", 30, ["quotes", "apostrophes", "long-sentences"]),
   passage("symbols-medium", "numbers-symbols", "smooth", 20, ["numbers", "symbols", "mixed-punctuation"]),
+  passage("prose-long", "everyday", "smooth", 32, ["long-sentences"]),
 ]);
 
 const dialoguePlan = createFlowRunPlan({ sessionLength: "quick", difficulty: "smooth", modifiers: ["dialogue"], catalog: customCatalog, seed: "dialogue" });
@@ -77,7 +78,8 @@ const symbolsPlan = createFlowRunPlan({ sessionLength: "quick", difficulty: "smo
 assert.equal(symbolsPlan.segments[0].passageId, "symbols-medium");
 
 const longformPlan = createFlowRunPlan({ sessionLength: "quick", difficulty: "smooth", modifiers: ["longform"], catalog: customCatalog, seed: "longform" });
-assert.equal(longformPlan.segments[0].passageId, "dialogue-long");
+assert.equal(longformPlan.segments[0].passageId, "prose-long");
+assert.equal(longformPlan.segments[0].passageId === "dialogue-long", false, "longform must not imply dialogue/quote pressure");
 
 const basePlan = createFlowRunPlan({ sessionLength: "standard", difficulty: "smooth", catalog: customCatalog, seed: "sprint" });
 const sprintPlan = createFlowRunPlan({ sessionLength: "standard", difficulty: "smooth", modifiers: ["sprint"], catalog: customCatalog, seed: "sprint" });
@@ -86,4 +88,4 @@ assert.equal(sprintPlan.passageCount, 2);
 assert.equal(sprintPlan.chapterCount, 2);
 assert.equal(sprintPlan.targetMinutes, 3);
 
-console.log("Flow Phase 9 modifier contracts passed: conflicts, gameplay scales, score bonuses, no-backspace, content biases, and sprint planning.");
+console.log("Flow Phase 9 modifier contracts passed: conflicts, gameplay scales, score bonuses, no-backspace, quote-safe content biases, and sprint planning.");
