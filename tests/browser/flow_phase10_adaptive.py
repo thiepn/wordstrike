@@ -100,7 +100,8 @@ def certify_learning_loop(browser, browser_name, base, evidence):
     page.locator('[data-flow-action="start"]').click()
     expect(page.locator('[data-flow-view="run"]')).to_be_visible(timeout=10000)
     plan = page.evaluate('window.wordstrikeFlowPhase1.getRunPlan()')
-    assert plan['passageCount'] == 6, plan
+    assert plan['passageCount'] == 1, plan
+    assert plan['coherent'] is True, plan
     assert plan['adaptive']['enabled'] is False, plan
 
     finish_quick_run_with_typo_pair(page, plan)
@@ -121,7 +122,7 @@ def certify_learning_loop(browser, browser_name, base, evidence):
     adaptive_plan = page.evaluate('window.wordstrikeFlowPhase1.getRunPlan()')
     assert adaptive_plan['adaptive']['enabled'] is True, adaptive_plan
     assert adaptive_plan['adaptive']['targetedPassageCount'] == 1, adaptive_plan
-    assert adaptive_plan['adaptive']['normalPassageCount'] == 5, adaptive_plan
+    assert adaptive_plan['adaptive']['normalPassageCount'] == 0, adaptive_plan
     focused = [segment for segment in adaptive_plan['segments'] if segment['adaptiveFocus']]
     assert len(focused) == 1, focused
     assert focused[0]['adaptiveFocus']['key'] == 'typo-pair', focused
@@ -129,7 +130,7 @@ def certify_learning_loop(browser, browser_name, base, evidence):
 
     evidence.append({
         "browser": browser_name,
-        "case": "calibration → repeated typo profile → adaptive next run",
+        "case": "short calibration -> repeated typo profile -> focused adaptive next run",
         "weakness": typo['label'],
         "targeted": adaptive_plan['adaptive']['targetedPassageCount'],
         "normal": adaptive_plan['adaptive']['normalPassageCount'],
@@ -145,15 +146,16 @@ def certify_preloaded_profile(browser, browser_name, base, evidence):
     expect(page.locator('[data-flow-view="ready"]')).to_be_visible(timeout=10000)
     ready = page.locator('[data-flow-adaptive="ready"]')
     expect(ready).to_be_visible(timeout=10000)
-    expect(ready).to_contain_text('1 / 6 passages')
+    expect(ready).to_contain_text('1 / 1 passages')
     expect(ready.locator('[data-flow-weakness="numbers"]')).to_be_visible()
     expect(ready.locator('[data-flow-weakness="apostrophes"]')).to_be_visible()
     plan = page.evaluate('window.wordstrikeFlowPhase1.getRunPlan()')
     assert plan['adaptive']['targetedPassageCount'] == 1, plan
+    assert plan['adaptive']['normalPassageCount'] == 0, plan
     focus = next(segment for segment in plan['segments'] if segment['adaptiveFocus'])
     assert focus['adaptiveFocus']['key'] == 'numbers', focus
 
-    evidence.append({"browser": browser_name, "case": "preloaded profile produces deterministic 80/20 focus slot"})
+    evidence.append({"browser": browser_name, "case": "preloaded profile focuses the single short-run passage"})
     context.close()
 
 
