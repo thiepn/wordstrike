@@ -16,6 +16,21 @@ concurrency:
   group: strike-studio-${{ github.ref }}
   cancel-in-progress: true
 jobs:
+  source:
+    name: Reproducible public-source snapshot
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Archive tracked source only (no git configuration or credentials)
+        run: git archive --format=tar.gz -o /tmp/wordstrike-source.tar.gz HEAD
+      - uses: actions/upload-artifact@v4
+        with:
+          name: strike-studio-source
+          path: /tmp/wordstrike-source.tar.gz
+          retention-days: 1
   visual:
     runs-on: ubuntu-latest
     timeout-minutes: 20
