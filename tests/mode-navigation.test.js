@@ -72,15 +72,29 @@ renderModeSelect(modes, 0, {
 assert.match(app.html, /Mode Select/);
 assert.match(app.html, /Choose your challenge/i);
 assert.match(app.html, /Campaign/);
-assert.match(app.html, /Arcade Rush/);
+assert.match(app.html, /Flow/);
+assert.doesNotMatch(app.html, /Arcade Rush/);
 assert.doesNotMatch(app.html, /DAILY STRIKE/i);
 assert.equal(app.cards.length, 5);
+assert.deepEqual(app.cards.map((card) => card.dataset.modeId), [
+  "campaign",
+  "speed-test",
+  "endless",
+  "flow",
+  "practice",
+]);
 assert.equal(app.cards.filter((card) => card.button).length, 4);
+assert.equal(app.cards[3].button, true);
 assert.equal(app.cards[4].button, false);
+assert.doesNotMatch(app.html, /data-mode-id="flow"[^>]*aria-disabled="true"/);
 assert.match(app.html, /data-mode-id="practice"[^>]*aria-disabled="true"/);
 assert.match(app.html, /data-mode-home-index="5"[^>]*data-action="mode-title"/);
 assert.equal(app.cards[0].focused, true);
 
+app.cards[3].onmousemove();
+assert.equal(selected.at(-1), 3);
+app.cards[3].onclick();
+assert.equal(activated.at(-1), "flow");
 app.cards[4].onmousemove();
 assert.equal(selected.at(-1), 4);
 assert.equal(app.cards[4].onclick, undefined);
@@ -90,8 +104,8 @@ app.cards[1].onclick();
 assert.equal(activated.at(-1), "speed-test");
 app.cards[2].onclick();
 assert.equal(activated.at(-1), "endless");
-app.cards[3].onclick();
-assert.equal(activated.at(-1), "arcade-rush");
+assert.equal(activated.includes("flow"), true);
+assert.equal(activated.includes("arcade-rush"), false);
 
 const footerHome = app.titleButtons.find((button) => button.dataset.modeHomeIndex === "5");
 assert.ok(footerHome);
@@ -122,4 +136,4 @@ assert.match(mainSource, /back: openModeSelect/);
 assert.match(mainSource, /renderDevSessionDiagnostics/);
 assert.equal(mainSource.split('addEventListener("keydown"').length - 1, 1);
 
-console.log("UI3 Mode Select preserves five registry entries, four public activations, Main Menu index ownership, and extracted keyboard routing.");
+console.log("UI3 Mode Select preserves five public registry entries, four launchable modes including Flow, disabled Practice, Main Menu index ownership, and extracted keyboard routing while Rush remains absent from discovery.");

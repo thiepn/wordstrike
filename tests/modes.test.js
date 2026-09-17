@@ -13,29 +13,49 @@ assert.equal(getModeDefinition(MODE_IDS.CAMPAIGN).enabled, true);
 assert.equal(getModeDefinition(MODE_IDS.SPEED_TEST).enabled, true);
 assert.equal(getModeDefinition(MODE_IDS.SPEED_TEST).supportsPause, true);
 assert.equal(getModeDefinition(MODE_IDS.ENDLESS).enabled, true);
-assert.equal(getModeDefinition(MODE_IDS.ARCADE_RUSH).enabled, true);
-assert.equal(getModeDefinition(MODE_IDS.ARCADE_RUSH).visible, true);
-assert.equal(getModeDefinition(MODE_IDS.ARCADE_RUSH).route, "arcade-rush-ready");
-assert.equal(getModeDefinition(MODE_IDS.ARCADE_RUSH).status, "available");
+
+const rush = getModeDefinition(MODE_IDS.ARCADE_RUSH);
+assert.equal(rush.enabled, true, "legacy Rush runtime remains available for compatibility diagnostics");
+assert.equal(rush.visible, false, "retired Rush must not be publicly discoverable");
+assert.equal(rush.route, null, "retired Rush must not expose a production route");
+assert.equal(rush.status, "retired");
+
+const flow = getModeDefinition(MODE_IDS.FLOW);
+assert.equal(flow.enabled, true, "Phase 13 releases Flow as a normal public mode");
+assert.equal(flow.visible, true);
+assert.equal(flow.route, "flow-release");
+assert.equal(flow.status, "available");
+
 assert.equal(MODE_IDS.DAILY, undefined);
 assert.equal(getModeDefinition("daily"), null);
 assert.equal(isValidModeId("daily"), false);
 assert.equal(getModeDefinition(MODE_IDS.PRACTICE).enabled, false);
+
 assert.deepEqual(
   getEnabledModes().map(({ id }) => id),
-  [MODE_IDS.CAMPAIGN, MODE_IDS.SPEED_TEST, MODE_IDS.ENDLESS, MODE_IDS.ARCADE_RUSH],
+  [MODE_IDS.CAMPAIGN, MODE_IDS.SPEED_TEST, MODE_IDS.ENDLESS, MODE_IDS.FLOW],
+);
+assert.deepEqual(
+  getEnabledModes({ includeHidden: true }).map(({ id }) => id),
+  [MODE_IDS.CAMPAIGN, MODE_IDS.SPEED_TEST, MODE_IDS.ENDLESS, MODE_IDS.ARCADE_RUSH, MODE_IDS.FLOW],
 );
 assert.deepEqual(
   getAllModes().map(({ id }) => id),
-  [MODE_IDS.CAMPAIGN, MODE_IDS.SPEED_TEST, MODE_IDS.ENDLESS, MODE_IDS.ARCADE_RUSH, MODE_IDS.PRACTICE],
+  [MODE_IDS.CAMPAIGN, MODE_IDS.SPEED_TEST, MODE_IDS.ENDLESS, MODE_IDS.FLOW, MODE_IDS.PRACTICE],
+);
+assert.deepEqual(
+  getAllModes({ includeHidden: true }).map(({ id }) => id),
+  [MODE_IDS.CAMPAIGN, MODE_IDS.SPEED_TEST, MODE_IDS.ENDLESS, MODE_IDS.ARCADE_RUSH, MODE_IDS.FLOW, MODE_IDS.PRACTICE],
 );
 assert.deepEqual(
   getRegisteredModes().map(({ id }) => id),
-  [MODE_IDS.CAMPAIGN, MODE_IDS.SPEED_TEST, MODE_IDS.ENDLESS, MODE_IDS.ARCADE_RUSH, MODE_IDS.PRACTICE],
+  [MODE_IDS.CAMPAIGN, MODE_IDS.SPEED_TEST, MODE_IDS.ENDLESS, MODE_IDS.ARCADE_RUSH, MODE_IDS.FLOW, MODE_IDS.PRACTICE],
 );
+
 assert.equal(isModeEnabled(MODE_IDS.CAMPAIGN), true);
 assert.equal(isModeEnabled(MODE_IDS.ENDLESS), true);
 assert.equal(isModeEnabled(MODE_IDS.ARCADE_RUSH), true);
+assert.equal(isModeEnabled(MODE_IDS.FLOW), true);
 assert.equal(isValidModeId("unknown"), false);
 assert.equal(getModeDefinition("unknown"), null);
 
@@ -45,4 +65,4 @@ assert.equal(Object.isFrozen(modes[0]), true);
 assert.throws(() => { modes[0].enabled = false; }, TypeError);
 assert.equal(getModeDefinition(MODE_IDS.CAMPAIGN).enabled, true);
 
-console.log("AR16 final mode registry exposes Arcade Rush publicly, removes Daily entirely, and preserves disabled entries, safe lookup, and immutability.");
+console.log("Final mode registry exposes Campaign, Typing Test, Endless, and Flow; keeps Practice gated; hides retired Rush while preserving compatibility runtime access; removes Daily; and remains immutable.");

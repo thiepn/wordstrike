@@ -21,22 +21,29 @@ assert.deepEqual(publicModes.map(({ id }) => id), [
   MODE_IDS.CAMPAIGN,
   MODE_IDS.SPEED_TEST,
   MODE_IDS.ENDLESS,
-  MODE_IDS.ARCADE_RUSH,
+  MODE_IDS.FLOW,
   MODE_IDS.PRACTICE,
 ]);
 assert.equal(Object.hasOwn(MODE_IDS, "DAILY"), false);
 assert.equal(getModeDefinition("daily"), null);
-assert.equal(getModeDefinition(MODE_IDS.ARCADE_RUSH)?.visible, true);
-assert.equal(getModeDefinition(MODE_IDS.ARCADE_RUSH)?.status, "available");
+assert.equal(getModeDefinition(MODE_IDS.ARCADE_RUSH)?.visible, false);
+assert.equal(getModeDefinition(MODE_IDS.ARCADE_RUSH)?.status, "retired");
+assert.equal(getModeDefinition(MODE_IDS.ARCADE_RUSH)?.route, null);
 assert.equal(getModeDefinition(MODE_IDS.ARCADE_RUSH)?.storesProgress, true);
+assert.equal(getModeDefinition(MODE_IDS.FLOW)?.visible, true);
+assert.equal(getModeDefinition(MODE_IDS.FLOW)?.enabled, true);
+assert.equal(getModeDefinition(MODE_IDS.FLOW)?.status, "available");
+assert.equal(getModeDefinition(MODE_IDS.FLOW)?.route, "flow-release");
 
 const endTarget = getLeaderboardKeyboardTarget({
   selectedCategory: LEADERBOARD_CATEGORIES.CAMPAIGN,
   selectedBoardKey: LEADERBOARD_BOARDS.CAMPAIGN,
   selectedTypingDuration: 60,
 }, "End");
-assert.equal(endTarget, LEADERBOARD_BOARDS.ARCADE_RUSH);
+assert.equal(endTarget, LEADERBOARD_BOARDS.ENDLESS);
 
+// Historical Arcade Rush boards remain directly addressable even though public
+// leaderboard keyboard/tab navigation no longer exposes the retired category.
 const calls = [];
 const service = createLeaderboardService({
   getClient: () => ({
@@ -98,9 +105,10 @@ renderLeaderboards({
   selectedTypingDuration: 60,
   entries: [],
 }, { status: "signed-out" }, { status: "idle", profile: null });
-assert.match(app.html, /ARCADE RUSH/);
+assert.doesNotMatch(app.html, /ARCADE RUSH/);
 assert.doesNotMatch(app.html, /DAILY STRIKE/);
-assert.match(app.html, /leaderboard-select-arcade-rush/);
+assert.doesNotMatch(app.html, /leaderboard-select-arcade-rush/);
+assert.match(app.html, /ENDLESS/);
 
 const [mainSource, adapterSource] = await Promise.all([
   readFile(new URL("../js/main.js", import.meta.url), "utf8"),
@@ -111,6 +119,8 @@ assert.doesNotMatch(mainSource, /function startArcadeRush[\s\S]{0,120}if \(!appS
 assert.match(mainSource, /route === "arcade-rush-ready"\) openArcadeRushReady\("mode-select"\)/);
 assert.match(mainSource, /prepareAutomaticResultSubmission\("arcade-rush", result\)/);
 assert.doesNotMatch(mainSource, /Screens\.DAILY_|MODE_IDS\.DAILY|openDailyReady|startDaily/);
+// Internal handlers survive for historical result/return-state compatibility;
+// the rendered public leaderboard has no action that can invoke them normally.
 assert.match(mainSource, /leaderboard-select-arcade-rush/);
 assert.match(mainSource, /LEADERBOARD_CATEGORIES\.ARCADE_RUSH[\s\S]*LEADERBOARD_BOARDS\.ARCADE_RUSH/);
 assert.doesNotMatch(mainSource, /getUtcDateKey\(\)/);
@@ -118,4 +128,4 @@ assert.match(adapterSource, /function openArcadeRushLeaderboard\(\)/);
 assert.doesNotMatch(adapterSource, /function openShadowArcadeRushLeaderboard/);
 assert.match(adapterSource, /leaderboardAvailable: true/);
 
-console.log("Arcade Rush public mode, public leaderboard, legacy redirects, router wiring, and submission contracts remain valid after AR16.");
+console.log("Phase 13 production cutover passed: released Flow owns public mode discovery while legacy Rush routing/data remain addressable internally.");

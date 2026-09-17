@@ -35,26 +35,37 @@ function backspaceEvent() {
   };
 }
 
-test("Arcade Rush is registered and public after the AR14 cutover", () => {
+test("Arcade Rush is retained only as hidden legacy compatibility while Flow owns the released public slot", () => {
   const rush = getModeDefinition(MODE_IDS.ARCADE_RUSH);
   assert.equal(MODE_IDS.ARCADE_RUSH, "arcade-rush");
   assert.ok(rush);
   assert.equal(rush.enabled, true);
-  assert.equal(rush.visible, true);
-  assert.equal(rush.route, "arcade-rush-ready");
+  assert.equal(rush.visible, false);
+  assert.equal(rush.route, null);
   assert.equal(rush.storesProgress, true);
-  assert.equal(rush.status, "available");
+  assert.equal(rush.status, "retired");
   assert.equal(isValidModeId(MODE_IDS.ARCADE_RUSH), true);
   assert.equal(isModeEnabled(MODE_IDS.ARCADE_RUSH), true);
-  assert.equal(getAllModes().some(({ id }) => id === MODE_IDS.ARCADE_RUSH), true);
+  assert.equal(getAllModes().some(({ id }) => id === MODE_IDS.ARCADE_RUSH), false);
   assert.equal(getRegisteredModes().some(({ id }) => id === MODE_IDS.ARCADE_RUSH), true);
+
+  const flow = getModeDefinition(MODE_IDS.FLOW);
+  assert.ok(flow);
+  assert.equal(flow.name, "Flow");
+  assert.equal(flow.shortLabel, "Natural Typing");
+  assert.equal(flow.enabled, true);
+  assert.equal(flow.visible, true);
+  assert.equal(flow.route, "flow-release");
+  assert.equal(flow.status, "available");
+  assert.equal(getAllModes().some(({ id }) => id === MODE_IDS.FLOW), true);
+
   assert.equal(Object.hasOwn(MODE_IDS, "DAILY"), false);
   assert.equal(getModeDefinition("daily"), null);
   assert.equal(getAllModes().some(({ id }) => id === "daily"), false);
   assert.equal(getRegisteredModes().some(({ id }) => id === "daily"), false);
 });
 
-test("Arcade Rush owns one isolated state domain and two valid app screens", () => {
+test("legacy Arcade Rush state/screens remain valid and Flow screens are reserved", () => {
   resetStateDomains();
   const domain = getStateDomain("arcadeRush");
   assert.ok(domain);
@@ -70,9 +81,13 @@ test("Arcade Rush owns one isolated state domain and two valid app screens", () 
   assert.equal(appState.screen, Screens.ARCADE_RUSH_READY);
   changeScreen(Screens.ARCADE_RUSH_RESULTS);
   assert.equal(appState.screen, Screens.ARCADE_RUSH_RESULTS);
+  changeScreen(Screens.FLOW_READY);
+  assert.equal(appState.screen, Screens.FLOW_READY);
+  changeScreen(Screens.FLOW_RESULTS);
+  assert.equal(appState.screen, Screens.FLOW_RESULTS);
 });
 
-test("shared session manager accepts Arcade Rush sessions", () => {
+test("shared session manager still accepts legacy Arcade Rush sessions", () => {
   clearSession();
   const session = beginSession({
     modeId: MODE_IDS.ARCADE_RUSH,
@@ -88,7 +103,7 @@ test("shared session manager accepts Arcade Rush sessions", () => {
   clearSession();
 });
 
-test("developer seed override is explicit and normal retries are not date-bound", () => {
+test("legacy developer seed override remains parseable for historical runtime support", () => {
   assert.equal(parseArcadeRushDeveloperSeed("?dev=1&rushSeed=123456"), 123456);
   assert.equal(parseArcadeRushDeveloperSeed("rushSeed=0"), 0);
   assert.equal(parseArcadeRushDeveloperSeed("4294967295"), 0xffffffff);
@@ -98,7 +113,7 @@ test("developer seed override is explicit and normal retries are not date-bound"
   assert.equal(parseArcadeRushDeveloperSeed("?date=2026-09-02"), null);
 });
 
-test("Arcade Rush backspace is prevented from browser navigation and forwarded to gameplay", () => {
+test("legacy Arcade Rush backspace handling remains safe", () => {
   const event = backspaceEvent();
   let forwarded = 0;
   assert.equal(captureGameplayBackspace(event, {
@@ -109,15 +124,18 @@ test("Arcade Rush backspace is prevented from browser navigation and forwarded t
   assert.equal(forwarded, 1);
 });
 
-test("production mode selection reaches Arcade Rush and retired Daily routes are absent", async () => {
-  const [main, modes] = await Promise.all([
+test("production mode selection cannot launch Arcade Rush and Flow uses only its dedicated release route", async () => {
+  const [main, modes, release] = await Promise.all([
     readFile(new URL("../js/main.js", import.meta.url), "utf8"),
     readFile(new URL("../js/modes.js", import.meta.url), "utf8"),
+    readFile(new URL("../js/flow/flowRuntimeLoader.js", import.meta.url), "utf8"),
   ]);
   assert.match(main, /route === "arcade-rush-ready"\) openArcadeRushReady\("mode-select"\)/);
-  assert.match(main, /appState\.devMode && search\.get\("mode"\) === MODE_IDS\.ARCADE_RUSH/);
   assert.doesNotMatch(main, /MODE_IDS\.DAILY|openDailyReady|startDaily|daily-ready/);
   assert.match(main, /renderModeSelect\(getPracticeLabFeatureGate\(\)\.resolveModeDefinitions\(getAllModes\(\)\)/);
   assert.doesNotMatch(modes, /Daily Strike|MODE_IDS\.DAILY|daily-ready/);
-  assert.match(modes, /name: "Arcade Rush"[\s\S]*visible: true/);
+  assert.match(modes, /name: "Arcade Rush"[\s\S]*enabled: true[\s\S]*visible: false[\s\S]*route: null/);
+  assert.match(modes, /name: "Flow"[\s\S]*enabled: true[\s\S]*visible: true[\s\S]*route: "flow-release"/);
+  assert.match(release, /button\[data-mode-id=["']flow["']\]/);
+  assert.match(release, /flowRelease/);
 });

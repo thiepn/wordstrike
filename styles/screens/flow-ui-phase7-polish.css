@@ -1,0 +1,140 @@
+/* Phase 7 visual QA corrections.
+   Native fieldset/legend layout does not participate in CSS Grid like an
+   ordinary element in every browser. Keep the semantic fieldset, but let the
+   option rows own their full width so labels never collapse or overlap. */
+
+.flow-phase1-screen[data-flow-ui-phase7="true"] .flow-choice-group {
+  display: block;
+  min-inline-size: 0;
+  padding: 16px 0 18px;
+}
+
+.flow-phase1-screen[data-flow-ui-phase7="true"] .flow-choice-group legend {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 0 0 12px;
+}
+
+.flow-phase1-screen[data-flow-ui-phase7="true"] .flow-choice-row {
+  width: 100%;
+}
+
+.flow-phase1-screen[data-flow-ui-phase7="true"] .flow-choice-row--length {
+  grid-template-columns: repeat(3, minmax(150px, 1fr));
+}
+
+.flow-phase1-screen[data-flow-ui-phase7="true"] .flow-choice-row--categories {
+  grid-template-columns: repeat(4, minmax(140px, 1fr));
+}
+
+.flow-phase1-screen[data-flow-ui-phase7="true"] .flow-choice-row--difficulty {
+  grid-template-columns: repeat(4, minmax(170px, 1fr));
+}
+
+.flow-phase1-screen[data-flow-ui-phase7="true"] .flow-choice {
+  min-width: 0;
+}
+
+.flow-phase1-screen[data-flow-ui-phase7="true"] .flow-choice span,
+.flow-phase1-screen[data-flow-ui-phase7="true"] .flow-choice small {
+  overflow-wrap: anywhere;
+}
+
+/* ARIA is the canonical setup state. Explicitly neutralize false choices so
+   stale classes, focus history, or upstream button styling can never make a
+   second option look selected after the draft changes. */
+.flow-phase1-screen[data-flow-ui-phase7="true"] .flow-choice[aria-pressed="false"] {
+  border-left-color: var(--flow-ui-rule-strong);
+  background: transparent;
+  color: var(--flow-ink-muted);
+  box-shadow: none;
+}
+
+.flow-phase1-screen[data-flow-ui-phase7="true"] .flow-choice[aria-pressed="false"]::before {
+  background: transparent;
+  box-shadow: none;
+}
+
+.flow-phase1-screen[data-flow-ui-phase7="true"] .flow-choice[aria-pressed="false"] small {
+  color: var(--flow-ink-muted);
+}
+
+.flow-phase1-screen[data-flow-ui-phase7="true"] .flow-choice[aria-pressed="false"]:hover,
+.flow-phase1-screen[data-flow-ui-phase7="true"] .flow-choice[aria-pressed="false"]:focus-visible {
+  border-left-color: var(--flow-line-strong);
+  background: rgb(255 255 255 / 2.5%);
+  color: var(--flow-ink);
+}
+
+/* Selected choices need to stay unmistakable even where Quiet Signal's
+   atmospheric teal sits directly behind the controls. Keep the treatment
+   restrained, but give the canonical selection a stronger local surface. */
+.flow-phase1-screen[data-flow-ui-phase7="true"] .flow-choice[aria-pressed="true"] {
+  border-left-color: var(--flow-signal);
+  background: color-mix(in srgb, var(--flow-signal) 18%, var(--flow-bg-deep) 82%);
+  color: var(--flow-ink);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--flow-signal) 18%, transparent);
+}
+
+.flow-phase1-screen[data-flow-ui-phase7="true"] .flow-choice[aria-pressed="true"]::before {
+  background: var(--flow-signal);
+  box-shadow: 0 0 14px var(--flow-signal-soft);
+}
+
+.flow-phase1-screen[data-flow-ui-phase7="true"] .flow-choice[aria-pressed="true"] span {
+  font-weight: 700;
+}
+
+.flow-phase1-screen[data-flow-ui-phase7="true"] .flow-choice[aria-pressed="true"] small {
+  color: var(--flow-ink-soft);
+}
+
+/* Phase 5's run id/category notes describe the already-resolved plan. Phase 7
+   stages a new configuration before that plan is rebuilt, so keeping those
+   notes visible would present two conflicting states. */
+.flow-ready-screen[data-flow-ui-phase7="true"] .flow-phase1-note {
+  display: none;
+}
+
+.flow-ready-screen[data-flow-ui-phase7="true"] .flow-phase1-shell {
+  grid-template-areas:
+    "back back"
+    "kicker kicker"
+    "title brief"
+    "lead brief"
+    "setup setup"
+    "start start";
+}
+
+@media (max-width: 900px) {
+  .flow-phase1-screen[data-flow-ui-phase7="true"] .flow-choice-row--categories,
+  .flow-phase1-screen[data-flow-ui-phase7="true"] .flow-choice-row--difficulty {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .flow-ready-screen[data-flow-ui-phase7="true"] .flow-phase1-shell {
+    grid-template-areas:
+      "back"
+      "kicker"
+      "title"
+      "lead"
+      "brief"
+      "setup"
+      "start";
+  }
+}
+
+@media (max-width: 640px) {
+  .flow-phase1-screen[data-flow-ui-phase7="true"] .flow-choice-row--length {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .flow-phase1-screen[data-flow-ui-phase7="true"] .flow-choice-row--categories {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .flow-phase1-screen[data-flow-ui-phase7="true"] .flow-choice-row--difficulty {
+    grid-template-columns: 1fr;
+  }
+}

@@ -51,7 +51,8 @@ assert.equal(ordinaryDevPolicy.allowDeveloperSeedOverride, true);
 assert.equal(ordinaryDevPolicy.ignoredDeveloperSeedOverride, false);
 
 const publicModeIds = getAllModes().map(({ id }) => id);
-assert.equal(publicModeIds.includes(MODE_IDS.ARCADE_RUSH), true);
+assert.equal(publicModeIds.includes(MODE_IDS.ARCADE_RUSH), false);
+assert.equal(publicModeIds.includes(MODE_IDS.FLOW), true);
 assert.equal(publicModeIds.includes("daily"), false);
 assert.equal(Object.hasOwn(MODE_IDS, "DAILY"), false);
 
@@ -229,7 +230,8 @@ assert.match(adapterSource, /shadowCoordinator\.onTerminal/);
 assert.match(adapterSource, /getShadowCertification/);
 assert.match(adapterSource, /verifyShadowLeaderboard/);
 assert.match(mainSource, /appState\.devMode\s*&&\s*search\.get\("mode"\)\s*===\s*MODE_IDS\.ARCADE_RUSH/);
-assert.match(modesSource, /id:\s*MODE_IDS\.ARCADE_RUSH[\s\S]*visible:\s*true/);
+assert.match(modesSource, /id:\s*MODE_IDS\.ARCADE_RUSH[\s\S]*enabled:\s*true[\s\S]*visible:\s*false[\s\S]*status:\s*"retired"[\s\S]*route:\s*null/);
+assert.match(modesSource, /id:\s*MODE_IDS\.FLOW[\s\S]*visible:\s*true[\s\S]*status:\s*"coming-soon"/);
 assert.doesNotMatch(modesSource, /MODE_IDS\.DAILY|Daily Strike|daily-ready/);
 
-console.log("Arcade Rush AR13 ranked shadow route remains a valid production diagnostic after AR16 removes Daily Strike.");
+console.log("Arcade Rush AR13 ranked shadow route remains a valid developer-only diagnostic after Flow Phase 0 retires public Rush discovery.");

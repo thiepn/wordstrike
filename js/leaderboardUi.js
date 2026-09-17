@@ -117,7 +117,7 @@ export function renderLeaderboards(
   const typing = category === LEADERBOARD_CATEGORIES.TYPING;
   const rush = boardKey === LEADERBOARD_BOARDS.ARCADE_RUSH;
   const meta = rush
-    ? "RULES V1 // COMPLETED RUNS ONLY // ALL-TIME"
+    ? "LEGACY BOARD // RETIRED MODE // ALL-TIME"
       : boardKey === LEADERBOARD_BOARDS.CAMPAIGN
         ? "HIGHEST SUCCESSFULLY COMPLETED LEVEL"
         : typing
@@ -127,7 +127,6 @@ export function renderLeaderboards(
     [LEADERBOARD_CATEGORIES.CAMPAIGN, "CAMPAIGN", "leaderboard-select-campaign"],
     [LEADERBOARD_CATEGORIES.TYPING, "TYPING TEST", "leaderboard-select-typing"],
     [LEADERBOARD_CATEGORIES.ENDLESS, "ENDLESS", "leaderboard-select-endless"],
-    [LEADERBOARD_CATEGORIES.ARCADE_RUSH, "ARCADE RUSH", "leaderboard-select-arcade-rush"],
   ];
   app().innerHTML = `<section class="screen leaderboards-screen"><main class="leaderboards-panel">
     <button type="button" class="screen-back-button" data-action="leaderboard-main-menu" aria-label="Go back">BACK</button>

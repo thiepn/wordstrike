@@ -6,7 +6,7 @@ import {
 } from "./arcadeRush/arcadeRushContract.js";
 import { validateArcadeRushCanonicalResult } from "./arcadeRush/arcadeRushResult.js";
 import { ARCADE_RUSH_LEADERBOARD_BOARD_KEY } from "./arcadeRushLeaderboard.js";
-import { getAllModes, MODE_IDS } from "./modes.js";
+import { getAllModes, getModeDefinition, MODE_IDS } from "./modes.js";
 
 export const ARCADE_RUSH_SHADOW_CERTIFICATION_VERSION = 1;
 export const ARCADE_RUSH_SHADOW_QUERY_VALUE = "v1";
@@ -49,7 +49,18 @@ export function getArcadeRushShadowRunPolicy(
 
 function productionIsolationGate() {
   const publicIds = getAllModes().map(({ id }) => id);
-  return publicIds.includes(MODE_IDS.ARCADE_RUSH) && !publicIds.includes("daily");
+  const rush = getModeDefinition(MODE_IDS.ARCADE_RUSH);
+  const flow = getModeDefinition(MODE_IDS.FLOW);
+  return Boolean(
+    rush &&
+    rush.enabled === true &&
+    rush.visible === false &&
+    rush.route == null &&
+    flow?.visible === true &&
+    !publicIds.includes(MODE_IDS.ARCADE_RUSH) &&
+    publicIds.includes(MODE_IDS.FLOW) &&
+    !publicIds.includes("daily")
+  );
 }
 
 function validShadowResult(result) {

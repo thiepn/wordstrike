@@ -17,13 +17,14 @@ assert.deepEqual(modes.map(({ id }) => id), [
   MODE_IDS.CAMPAIGN,
   MODE_IDS.SPEED_TEST,
   MODE_IDS.ENDLESS,
-  MODE_IDS.ARCADE_RUSH,
+  MODE_IDS.FLOW,
   MODE_IDS.PRACTICE,
 ]);
 assert.deepEqual(modes.map(({ enabled }) => enabled), [true, true, true, true, false]);
-assert.equal(modes.at(-1).status, "coming-soon");
+assert.deepEqual(modes.slice(-2).map(({ status }) => status), ["available", "coming-soon"]);
 
 assert.match(index, /styles\/ui-system\.css[\s\S]*styles\/screens\/title\.css[\s\S]*styles\/screens\/mode-select\.css/);
+assert.match(index, /js\/flow\/flowRuntimeLoader\.js\?v=20260916a/);
 assert.match(ui, /<section class="screen mode-screen mode-select-screen">/);
 assert.match(ui, /class="mode-select-shell"/);
 assert.match(ui, /class="mode-showcase mode-tone-\$\{toneFor\(selectedMode\)\}"/);
@@ -37,7 +38,10 @@ assert.match(ui, /aria-current="true"/);
 assert.match(ui, /mode\.id === "campaign"/);
 assert.match(ui, /mode\.id === "speed-test"/);
 assert.match(ui, /mode\.id === "endless"/);
+// Hidden legacy Rush presentation branches may remain for developer compatibility.
+// Flow is now public but intentionally retains the calm neutral Mode Select motif.
 assert.match(ui, /mode\.id === "arcade-rush"/);
+assert.doesNotMatch(ui, /mode\.id === "flow"/);
 assert.doesNotMatch(ui, /mode\.id === "practice"/);
 assert.doesNotMatch(ui, /class="mode-card/);
 assert.doesNotMatch(ui, /class="mode-grid/);
@@ -74,8 +78,13 @@ assert.match(keyboard, /event\.key === "ArrowDown" \|\| event\.key === "ArrowRig
 assert.match(keyboard, /state\.modeSelection === getAllModes\(\)\.length\) openTitle\(\)/);
 assert.match(keyboard, /else if \(event\.key === "Escape"\) \{\s*openTitle\(\)/s);
 
-// UI3 is presentation-only. The registry still owns the disabled Practice state and route.
+// UI3 is presentation-only. The registry now exposes Flow as a launchable release
+// mode while Practice remains the only disabled public placeholder and hidden Rush
+// remains available only through explicit compatibility access.
+assert.match(modesSource, /FLOW: "flow"/);
+assert.match(modesSource, /id: MODE_IDS\.FLOW,[\s\S]*enabled: true,[\s\S]*visible: true,[\s\S]*status: "available",[\s\S]*route: "flow-release"/);
 assert.match(modesSource, /PRACTICE: "practice"/);
-assert.match(modesSource, /id: MODE_IDS\.PRACTICE,[\s\S]*enabled: false,[\s\S]*status: "coming-soon",[\s\S]*route: null/);
+assert.match(modesSource, /id: MODE_IDS\.PRACTICE,[\s\S]*enabled: false,[\s\S]*visible: true,[\s\S]*status: "coming-soon",[\s\S]*route: null/);
+assert.match(modesSource, /id: MODE_IDS\.ARCADE_RUSH,[\s\S]*enabled: true,[\s\S]*visible: false,[\s\S]*status: "retired",[\s\S]*route: null/);
 
-console.log("UI3 source contracts passed: dedicated Mode Select ownership, four active identities, neutral disabled fallback, and unchanged six-position navigation.");
+console.log("UI3 source contracts passed: five public registry slots, four launchable modes including Flow, disabled Practice placeholder, hidden Rush compatibility, and unchanged six-position navigation.");

@@ -24,6 +24,11 @@ const LEGACY_DAILY_BOARD_KEY = "daily-strike-v1";
 const LEGACY_DAILY_CATEGORY = "daily";
 const VALID_BOARDS = Object.freeze(Object.values(LEADERBOARD_BOARDS));
 const VALID_CATEGORIES = Object.freeze(Object.values(LEADERBOARD_CATEGORIES));
+const PUBLIC_CATEGORIES = Object.freeze([
+  LEADERBOARD_CATEGORIES.CAMPAIGN,
+  LEADERBOARD_CATEGORIES.TYPING,
+  LEADERBOARD_CATEGORIES.ENDLESS,
+]);
 const CACHE_TTL_MS = 30000;
 
 export const EXPECTED_LEADERBOARD_RULES_VERSIONS = Object.freeze({
@@ -70,13 +75,9 @@ export function getBoardKeyForSelection(category, typingDuration = 60) {
   return LEADERBOARD_BOARDS.CAMPAIGN;
 }
 
-// Public keyboard order after the Arcade Rush cutover.
-const PUBLIC_KEYBOARD_CATEGORY_ORDER = Object.freeze([
-  LEADERBOARD_CATEGORIES.CAMPAIGN,
-  LEADERBOARD_CATEGORIES.TYPING,
-  LEADERBOARD_CATEGORIES.ENDLESS,
-  LEADERBOARD_CATEGORIES.ARCADE_RUSH,
-]);
+// Public navigation excludes retired modes. Legacy boards remain addressable
+// directly so old saved/submitted results can still be inspected safely.
+const PUBLIC_KEYBOARD_CATEGORY_ORDER = PUBLIC_CATEGORIES;
 
 export function getLeaderboardKeyboardTarget(state, key) {
   const selection = getLeaderboardSelection(state?.selectedBoardKey || state?.selectedBoard);
@@ -87,8 +88,10 @@ export function getLeaderboardKeyboardTarget(state, key) {
   }
   const order = PUBLIC_KEYBOARD_CATEGORY_ORDER;
   let index = order.indexOf(category);
-  // Legacy pre-cutover Daily selections normalize to Arcade Rush.
-  if (index < 0 && category === LEGACY_DAILY_CATEGORY) index = order.length - 1;
+  // A legacy Arcade Rush/Daily selection falls back to the final public tab.
+  if (index < 0 && [LEGACY_DAILY_CATEGORY, LEADERBOARD_CATEGORIES.ARCADE_RUSH].includes(category)) {
+    index = order.length - 1;
+  }
   index = Math.max(0, index);
   if (key === "ArrowLeft") index = (index - 1 + order.length) % order.length;
   else if (key === "ArrowRight") index = (index + 1) % order.length;
@@ -262,11 +265,8 @@ export function createLeaderboardService({
     },
     selectLeaderboardBoard: selectBoard,
     selectLeaderboardCategory(category) {
-      if (!VALID_CATEGORIES.includes(category)) return Promise.resolve(state);
-      const publicCategory = category === LEGACY_DAILY_CATEGORY
-        ? LEADERBOARD_CATEGORIES.ARCADE_RUSH
-        : category;
-      return selectBoard(getBoardKeyForSelection(publicCategory, 60));
+      if (!PUBLIC_CATEGORIES.includes(category)) return Promise.resolve(state);
+      return selectBoard(getBoardKeyForSelection(category, 60));
     },
     selectTypingDuration(duration) {
       if (![15, 60].includes(duration)) return Promise.resolve(state);

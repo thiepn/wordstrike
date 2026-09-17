@@ -1,0 +1,278 @@
+/* =========================================================
+   WORDSTRIKE FLOW PHASE 8 — UX REFINEMENT
+   Usability only. No gameplay, scoring, cadence, or run-plan changes.
+   ========================================================= */
+
+.flow-phase1-screen[data-flow-ux-phase8="true"] {
+  --flow-ux-surface: color-mix(in srgb, var(--flow-bg-deep) 84%, var(--flow-signal) 16%);
+  --flow-ux-surface-soft: color-mix(in srgb, var(--flow-bg-deep) 94%, var(--flow-signal) 6%);
+}
+
+/* ---------- SETUP: less scrolling, clearer ownership ---------- */
+
+.flow-ready-screen[data-flow-ux-phase8="true"] .flow-phase1-shell {
+  padding-bottom: 112px;
+}
+
+.flow-ux-setup-action-dock {
+  position: fixed;
+  left: 50%;
+  bottom: max(18px, env(safe-area-inset-bottom));
+  z-index: 12;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  width: min(calc(100% - 48px), 1180px);
+  min-height: 64px;
+  padding: 10px 12px 10px 18px;
+  border: 1px solid var(--flow-line-strong);
+  background: color-mix(in srgb, var(--flow-bg-deep) 92%, transparent 8%);
+  box-shadow: 0 18px 50px rgb(0 0 0 / 32%);
+  backdrop-filter: blur(14px);
+  transform: translateX(-50%);
+}
+
+.flow-ux-setup-action-copy {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.flow-ux-setup-action-copy span {
+  color: var(--flow-ink-muted);
+  font-family: var(--flow-data-face);
+  font-size: 0.58rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.flow-ux-setup-action-copy strong {
+  overflow: hidden;
+  color: var(--flow-ink-soft);
+  font-family: var(--flow-ui-face);
+  font-size: 0.82rem;
+  font-weight: 620;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.flow-ux-setup-action-dock .flow-phase1-start {
+  flex: 0 0 auto;
+  min-width: 188px;
+}
+
+.flow-ready-screen[data-flow-ux-phase8="true"] .flow-phase1-kicker {
+  letter-spacing: 0.16em;
+}
+
+/* ---------- RUN: readable upcoming text + focus recovery ---------- */
+
+.flow-run-screen[data-flow-ux-phase8="true"] .flow-char--pending {
+  opacity: 0.56;
+}
+
+.flow-run-screen[data-flow-ux-phase8="true"] .flow-char--current {
+  opacity: 1;
+}
+
+.flow-run-screen[data-flow-ux-phase8="true"] .flow-passage {
+  scroll-margin-block: 24vh;
+}
+
+.flow-ux-focus-hint {
+  display: inline-flex;
+  width: fit-content;
+  margin: 0 0 2px;
+  padding: 5px 8px;
+  border-left: 1px solid var(--flow-signal);
+  color: var(--flow-ink-soft);
+  background: var(--flow-signal-faint);
+  font-family: var(--flow-data-face);
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.flow-ux-focus-hint[hidden] {
+  display: none;
+}
+
+.flow-run-screen[data-flow-ux-phase8="true"][data-typing-focus="inactive"] .flow-passage {
+  cursor: text;
+}
+
+/* ---------- CHAPTERS: reduce eye travel ---------- */
+
+.flow-chapter-screen[data-flow-ux-phase8="true"] .flow-chapter-transition {
+  row-gap: clamp(18px, 3vw, 28px);
+}
+
+.flow-ux-chapter-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 18px;
+  width: min(100%, 680px);
+  margin-top: 4px;
+}
+
+.flow-ux-chapter-actions .ui-button {
+  min-width: 176px;
+}
+
+.flow-ux-key-hint {
+  color: var(--flow-ink-muted);
+  font-family: var(--flow-data-face);
+  font-size: 0.62rem;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.flow-ux-chapter-actions .flow-phase1-note {
+  flex-basis: 100%;
+  margin: 0;
+}
+
+/* ---------- RESULTS: answer first, analysis second ---------- */
+
+.flow-complete-screen[data-flow-ux-phase8="true"] .flow-complete-shell {
+  gap: clamp(20px, 3vw, 30px);
+}
+
+.flow-ux-primary-results {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  width: 100%;
+  border-top: 1px solid var(--flow-line-strong);
+  border-bottom: 1px solid var(--flow-line-strong);
+}
+
+.flow-ux-primary-metric {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  padding: 17px 18px 18px 0;
+  border-right: 1px solid var(--flow-line);
+}
+
+.flow-ux-primary-metric:not(:first-child) {
+  padding-left: 18px;
+}
+
+.flow-ux-primary-metric:last-child {
+  border-right: 0;
+}
+
+.flow-ux-primary-metric span {
+  color: var(--flow-ink-muted);
+  font-family: var(--flow-data-face);
+  font-size: 0.58rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.flow-ux-primary-metric strong {
+  color: var(--flow-ink);
+  font-family: var(--flow-reading-face);
+  font-size: clamp(1.75rem, 4vw, 2.8rem);
+  font-weight: 400;
+  letter-spacing: -0.025em;
+}
+
+.flow-complete-screen[data-flow-ux-phase8="true"] .flow-complete-actions {
+  margin-top: 0;
+}
+
+.flow-ux-details {
+  width: 100%;
+  border-top: 1px solid var(--flow-line);
+  border-bottom: 1px solid var(--flow-line);
+}
+
+.flow-ux-details > summary {
+  padding: 15px 0;
+  color: var(--flow-ink-soft);
+  cursor: pointer;
+  font-family: var(--flow-data-face);
+  font-size: 0.68rem;
+  font-weight: 650;
+  letter-spacing: 0.13em;
+  list-style-position: inside;
+  text-transform: uppercase;
+}
+
+.flow-ux-details > summary:hover,
+.flow-ux-details > summary:focus-visible {
+  color: var(--flow-signal);
+  outline: none;
+}
+
+.flow-ux-details-body {
+  display: grid;
+  gap: 22px;
+  padding: 4px 0 24px;
+}
+
+.flow-ux-details:not([open]) .flow-result-metrics,
+.flow-ux-details:not([open]) .flow-natural-analysis,
+.flow-ux-details:not([open]) .flow-score-breakdown {
+  display: none;
+}
+
+@media (max-width: 760px) {
+  .flow-ux-setup-action-dock {
+    width: calc(100% - 24px);
+    min-height: 58px;
+    gap: 12px;
+    padding-left: 14px;
+  }
+
+  .flow-ux-setup-action-dock .flow-phase1-start {
+    min-width: 132px;
+    padding-inline: 0.8rem;
+  }
+
+  .flow-ux-primary-results {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .flow-ux-primary-metric:nth-child(2) {
+    border-right: 0;
+  }
+
+  .flow-ux-primary-metric:nth-child(n + 3) {
+    border-top: 1px solid var(--flow-line);
+  }
+
+  .flow-ux-primary-metric:nth-child(3) {
+    padding-left: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .flow-ready-screen[data-flow-ux-phase8="true"] .flow-phase1-shell {
+    padding-bottom: 104px;
+  }
+
+  .flow-ux-setup-action-copy strong {
+    max-width: 42vw;
+    font-size: 0.72rem;
+  }
+
+  .flow-ux-setup-action-dock .flow-phase1-start {
+    min-width: 118px;
+    min-height: 42px;
+    font-size: 0.65rem;
+  }
+
+  .flow-run-screen[data-flow-ux-phase8="true"] .flow-char--pending {
+    opacity: 0.62;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flow-ux-setup-action-dock {
+    backdrop-filter: none;
+  }
+}

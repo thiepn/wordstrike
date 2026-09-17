@@ -138,7 +138,7 @@ export function renderTitle(menuIndex, handlers) {
               draggable="false"
             >
             <p class="title-tagline">Precision under pressure.</p>
-            <p class="title-description">Campaign, Typing Test, Endless and Arcade Rush turn clean, controlled typing into competitive play.</p>
+            <p class="title-description">Campaign, Typing Test, Endless and Flow turn clean, controlled typing into competitive play.</p>
             <button type="button" class="ui-button ui-button--primary title-start-button${selected(0)}" data-title-index="0" data-action="modes">
               <span class="title-action-icon">${icon("play")}</span>
               <span class="title-start-copy"><strong>START</strong><small>Choose a mode</small></span>
@@ -1600,8 +1600,7 @@ export function renderSettings(save, selectedIndex, handlers, accountMarkup = ""
             ${[
     ["general", "GENERAL INTRODUCTION"], ["campaign", "CAMPAIGN GUIDE"],
     ["typing", "TYPING TEST GUIDE"], ["endless", "ENDLESS GUIDE"],
-    ["arcade-rush", "ARCADE RUSH GUIDE"], ["boss", "BOSS GUIDE"],
-    ["leaderboards", "LEADERBOARD GUIDE"],
+    ["boss", "BOSS GUIDE"], ["leaderboards", "LEADERBOARD GUIDE"],
   ].map(([id, label]) => `<button type="button" class="text-action" data-tutorial-id="${id}">REPLAY ${label}</button>`).join("")}
           </div>
           <div class="settings-tutorial-resets">
