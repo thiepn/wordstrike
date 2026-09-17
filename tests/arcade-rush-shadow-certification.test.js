@@ -231,7 +231,7 @@ assert.match(adapterSource, /getShadowCertification/);
 assert.match(adapterSource, /verifyShadowLeaderboard/);
 assert.match(mainSource, /appState\.devMode\s*&&\s*search\.get\("mode"\)\s*===\s*MODE_IDS\.ARCADE_RUSH/);
 assert.match(modesSource, /id:\s*MODE_IDS\.ARCADE_RUSH[\s\S]*enabled:\s*true[\s\S]*visible:\s*false[\s\S]*status:\s*"retired"[\s\S]*route:\s*null/);
-assert.match(modesSource, /id:\s*MODE_IDS\.FLOW[\s\S]*visible:\s*true[\s\S]*status:\s*"coming-soon"/);
+assert.match(modesSource, /id:\s*MODE_IDS\.FLOW[\s\S]*visible:\s*true[\s\S]*status:\s*"available"/);
 assert.doesNotMatch(modesSource, /MODE_IDS\.DAILY|Daily Strike|daily-ready/);
 
 console.log("Arcade Rush AR13 ranked shadow route remains a valid developer-only diagnostic after Flow Phase 0 retires public Rush discovery.");

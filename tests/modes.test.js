@@ -29,15 +29,15 @@ assert.equal(flow.status, "available");
 assert.equal(MODE_IDS.DAILY, undefined);
 assert.equal(getModeDefinition("daily"), null);
 assert.equal(isValidModeId("daily"), false);
-assert.equal(getModeDefinition(MODE_IDS.PRACTICE).enabled, false);
+assert.equal(getModeDefinition(MODE_IDS.PRACTICE).enabled, true);
 
 assert.deepEqual(
   getEnabledModes().map(({ id }) => id),
-  [MODE_IDS.CAMPAIGN, MODE_IDS.SPEED_TEST, MODE_IDS.ENDLESS, MODE_IDS.FLOW],
+  [MODE_IDS.CAMPAIGN, MODE_IDS.SPEED_TEST, MODE_IDS.ENDLESS, MODE_IDS.FLOW, MODE_IDS.PRACTICE],
 );
 assert.deepEqual(
   getEnabledModes({ includeHidden: true }).map(({ id }) => id),
-  [MODE_IDS.CAMPAIGN, MODE_IDS.SPEED_TEST, MODE_IDS.ENDLESS, MODE_IDS.ARCADE_RUSH, MODE_IDS.FLOW],
+  [MODE_IDS.CAMPAIGN, MODE_IDS.SPEED_TEST, MODE_IDS.ENDLESS, MODE_IDS.ARCADE_RUSH, MODE_IDS.FLOW, MODE_IDS.PRACTICE],
 );
 assert.deepEqual(
   getAllModes().map(({ id }) => id),

@@ -44,7 +44,7 @@ export function renderPracticeTreatmentResponseProgress(root, view, { focusSelec
     ? `<section class="practice-lab-empty-state"><div class="eyebrow">Prospective episode log</div><h2>Recent tracked treatments</h2><p>These rows show tracking state only. They are not effectiveness rankings.</p><ul>${view.recentEpisodes.map(episodeRow).join("")}</ul></section>`
     : "";
   root.innerHTML = `<section class="screen practice-lab-screen" data-practice-view="treatment-response-progress"><div class="practice-lab-shell">
-    <header class="practice-lab-header"><button type="button" class="practice-lab-back" data-practice-action="back">← ${escapeHtml(view.backLabel ?? "Back to Practice Lab")}</button><span class="practice-lab-status is-preview">DEVELOPER PREVIEW</span></header>
+    <header class="practice-lab-header"><button type="button" class="practice-lab-back" data-practice-action="back">← ${escapeHtml(view.backLabel ?? "Back to Practice Lab")}</button><span class="practice-lab-status is-preview">PRACTICE LAB</span></header>
     <main class="practice-lab-detail">
       <div class="eyebrow">Progress · longitudinal observation</div><h1>${escapeHtml(view.sectionTitle ?? "Treatment Response")}</h1>
       <p class="practice-lab-lead">See how later compatible measurements have differed after specific Practice treatments.</p>

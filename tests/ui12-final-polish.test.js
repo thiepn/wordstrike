@@ -60,7 +60,7 @@ assert.match(designSystem, /UI12 — final motion\/audio\/responsive\/accessibil
 assert.match(designSystem, /Motion explains state changes/);
 assert.match(designSystem, /prefers-reduced-motion/);
 
-assert.match(modes, /id: MODE_IDS\.PRACTICE,[\s\S]*enabled: false,[\s\S]*status: "coming-soon",[\s\S]*route: null/);
+assert.match(modes, /id: MODE_IDS\.PRACTICE,[\s\S]*enabled: true,[\s\S]*status: "available",[\s\S]*route: "practice-lab"/);
 
 assert.match(workflow, /Certify UI12 final motion, audio, and consistency/);
 assert.match(workflow, /tests\/browser\/ui12_final_polish\.py/);

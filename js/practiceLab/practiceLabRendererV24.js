@@ -14,7 +14,7 @@ function availabilityCopy(status, availability, kind) {
 
 export function renderPracticeRealTextDetail(root, view, { focusSelector = null } = {}) {
   root.innerHTML = `<section class="screen practice-lab-screen" data-practice-view="real-text-detail"><div class="practice-lab-shell">
-    <header class="practice-lab-header"><button type="button" class="practice-lab-back" data-practice-action="back">← Back to Practice Lab</button><span class="practice-lab-status is-preview">DEVELOPER PREVIEW</span></header>
+    <header class="practice-lab-header"><button type="button" class="practice-lab-back" data-practice-action="back">← Back to Practice Lab</button><span class="practice-lab-status is-preview">PRACTICE LAB</span></header>
     <main class="practice-lab-detail"><div class="eyebrow">Real-world · broad context</div><h1>Real Text</h1><p class="practice-lab-lead">Practice broad natural text without target-specific cues, or run a protected Cold Transfer Check to measure generalization on fresh material.</p>
       <div class="practice-real-text-flow-grid">
         <section class="practice-lab-empty-state practice-real-text-flow is-primary"><div class="practice-lab-card-meta"><span>Natural Practice</span><span>Training partition</span></div><h2>Broad untargeted prose</h2><p>Repeatable natural-text training. No weak target, limiter, mastery state, or learning state is used to choose the text.</p>

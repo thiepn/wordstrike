@@ -31,6 +31,7 @@ assert.deepEqual(getEnabledModes().map(({ id }) => id), [
   MODE_IDS.SPEED_TEST,
   MODE_IDS.ENDLESS,
   MODE_IDS.FLOW,
+  MODE_IDS.PRACTICE,
 ]);
 
 const flow = getModeDefinition(MODE_IDS.FLOW);
@@ -39,8 +40,8 @@ assert.equal(flow.visible, true);
 assert.equal(flow.status, "available");
 assert.equal(flow.route, "flow-release");
 const practice = getModeDefinition(MODE_IDS.PRACTICE);
-assert.equal(practice.enabled, false);
-assert.equal(practice.status, "coming-soon");
+assert.equal(practice.enabled, true);
+assert.equal(practice.status, "available");
 const rush = getModeDefinition(MODE_IDS.ARCADE_RUSH);
 assert.equal(rush.visible, false);
 assert.equal(rush.status, "retired");

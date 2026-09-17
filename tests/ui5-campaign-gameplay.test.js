@@ -99,6 +99,6 @@ assert.match(visualTest, /390x360/);
 
 // UI5 does not alter the disabled Practice Lab registry boundary.
 assert.match(modes, /PRACTICE: "practice"/);
-assert.match(modes, /id: MODE_IDS\.PRACTICE,[\s\S]*enabled: false,[\s\S]*status: "coming-soon",[\s\S]*route: null/);
+assert.match(modes, /id: MODE_IDS\.PRACTICE,[\s\S]*enabled: true,[\s\S]*status: "available",[\s\S]*route: "practice-lab"/);
 
 console.log("UI5 Campaign gameplay source contracts passed: real Campaign control binding, scoped HUD/Core/word/input presentation, desktop/mobile keyboard visibility, clean visual evidence, short-mobile layout, renderer feedback, reduced motion, mode isolation, and Practice exclusion.");

@@ -32,13 +32,14 @@ try {
  await page.close();page=await context.newPage();
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  page.on('requestfailed',r=>{if(r.url().startsWith(base))(report.failedRequests??=[]).push(r.url());});
- await page.goto(base+'?dev=1');
+ await page.goto(base);
  await page.locator('.menu-screen').waitFor({timeout:15000});
  check('fresh offline document boots production shell');
  await page.locator('[data-action="modes"]').click();
  await page.locator('button[data-mode-id="practice"]').click();
  await page.locator('[data-route="skill-map"]').waitFor();
- check('offline production navigation opens Practice Lab');
+ assert.ok(!page.url().includes('dev='));
+ check('public offline navigation opens Practice Lab without developer flags');
  await page.locator('[data-practice-action="open-experiment"][data-experiment-id="full-assessment"]').first().click();
  await page.locator('[data-practice-action="start-assessment"][data-assessment-depth="quick"]:enabled').click();
  await page.locator('[data-assessment-action="next"]').click();

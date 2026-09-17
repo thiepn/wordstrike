@@ -10,7 +10,7 @@ export function renderPracticePunctuationCapitalsDetail(root, view, { focusSelec
   const practiceAvailable = view.availability?.practiceAvailable === true && !view.starting;
   const checkAvailable = view.availability?.checkAvailable === true && !view.starting;
   root.innerHTML = `<section class="screen practice-lab-screen" data-practice-view="punctuation-capitals-detail"><div class="practice-lab-shell">
-    <header class="practice-lab-header"><button type="button" class="practice-lab-back" data-practice-action="back">← Back to Practice Lab</button><span class="practice-lab-status is-preview">DEVELOPER PREVIEW</span></header>
+    <header class="practice-lab-header"><button type="button" class="practice-lab-back" data-practice-action="back">← Back to Practice Lab</button><span class="practice-lab-status is-preview">PRACTICE LAB</span></header>
     <main class="practice-lab-detail">
       <div class="eyebrow">Real-world · sentence mechanics</div><h1>Punctuation & Capitals</h1>
       <p class="practice-lab-lead">Practice reliable capitalization, sentence punctuation, quotes, separators, and punctuation boundaries in realistic typing contexts.</p>
@@ -33,7 +33,7 @@ export function renderPracticeNumbersSymbolsDetail(root, view, { focusSelector =
   const practiceAvailable = view.availability?.practiceAvailable === true && !view.starting;
   const checkAvailable = view.availability?.checkAvailable === true && !view.starting;
   root.innerHTML = `<section class="screen practice-lab-screen" data-practice-view="numbers-symbols-detail"><div class="practice-lab-shell">
-    <header class="practice-lab-header"><button type="button" class="practice-lab-back" data-practice-action="back">← Back to Practice Lab</button><span class="practice-lab-status is-preview">DEVELOPER PREVIEW</span></header>
+    <header class="practice-lab-header"><button type="button" class="practice-lab-back" data-practice-action="back">← Back to Practice Lab</button><span class="practice-lab-status is-preview">PRACTICE LAB</span></header>
     <main class="practice-lab-detail">
       <div class="eyebrow">Real-world · practical transcription</div><h1>Numbers & Symbols</h1>
       <p class="practice-lab-lead">Practice digits and common practical symbols in structured text without assuming one keyboard layout or physical key technique.</p>

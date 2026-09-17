@@ -83,11 +83,11 @@ assert.deepEqual(app.cards.map((card) => card.dataset.modeId), [
   "flow",
   "practice",
 ]);
-assert.equal(app.cards.filter((card) => card.button).length, 4);
+assert.equal(app.cards.filter((card) => card.button).length, 5);
 assert.equal(app.cards[3].button, true);
-assert.equal(app.cards[4].button, false);
+assert.equal(app.cards[4].button, true);
 assert.doesNotMatch(app.html, /data-mode-id="flow"[^>]*aria-disabled="true"/);
-assert.match(app.html, /data-mode-id="practice"[^>]*aria-disabled="true"/);
+assert.doesNotMatch(app.html, /data-mode-id="practice"[^>]*aria-disabled="true"/);
 assert.match(app.html, /data-mode-home-index="5"[^>]*data-action="mode-title"/);
 assert.equal(app.cards[0].focused, true);
 
@@ -97,7 +97,8 @@ app.cards[3].onclick();
 assert.equal(activated.at(-1), "flow");
 app.cards[4].onmousemove();
 assert.equal(selected.at(-1), 4);
-assert.equal(app.cards[4].onclick, undefined);
+app.cards[4].onclick();
+assert.equal(activated.at(-1), "practice");
 app.cards[0].onclick();
 assert.equal(activated.at(-1), "campaign");
 app.cards[1].onclick();
@@ -136,4 +137,4 @@ assert.match(mainSource, /back: openModeSelect/);
 assert.match(mainSource, /renderDevSessionDiagnostics/);
 assert.equal(mainSource.split('addEventListener("keydown"').length - 1, 1);
 
-console.log("UI3 Mode Select preserves five public registry entries, four launchable modes including Flow, disabled Practice, Main Menu index ownership, and extracted keyboard routing while Rush remains absent from discovery.");
+console.log("UI3 Mode Select preserves five public registry entries, five launchable modes including Flow and Practice, Main Menu index ownership, and extracted keyboard routing while Rush remains absent from discovery.");

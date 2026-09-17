@@ -98,7 +98,7 @@ assert.match(ui, /RESET PROGRESS/);
 assert.doesNotMatch(ui, /data-tutorial-id="arcade-rush"/);
 
 // The disabled mode registry boundary remains untouched.
-assert.match(modes, /id: MODE_IDS\.PRACTICE,[\s\S]*enabled: false,[\s\S]*status: "coming-soon",[\s\S]*route: null/);
+assert.match(modes, /id: MODE_IDS\.PRACTICE,[\s\S]*enabled: true,[\s\S]*status: "available",[\s\S]*route: "practice-lab"/);
 
 assert.match(workflow, /Certify UI11 Profile, Leaderboards, and Settings/);
 assert.match(workflow, /tests\/browser\/ui11_profile_leaderboards_settings\.py/);

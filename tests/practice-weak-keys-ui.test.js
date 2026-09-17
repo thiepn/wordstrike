@@ -157,7 +157,7 @@ test("Weak Keys results report same-session probe comparison without mastery, re
 });
 
 test("Weak Keys remains behind the existing public Practice feature gate", () => {
-  const gate = createPracticeFeatureGate({ developerMode: false });
+  const gate = createPracticeFeatureGate({ developerMode: false, publicEnabled: false });
   const registry = createPracticeExperimentRegistry({ featureGate: gate });
   registerPracticeWeakKeysExperiment(registry, { runtime: { prepare() { throw new Error("not used"); } } });
   const resolved = registry.getResolvedExperiment("weak-keys");
