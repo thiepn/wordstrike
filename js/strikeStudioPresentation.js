@@ -64,11 +64,10 @@ function enhanceModes(screen) {
     <div class="studio-mode-art-caption"><strong>${art.label}</strong><span>${art.detail}</span></div>
   `);
   illustration.setAttribute('aria-hidden', 'true');
-  // Preserve the public motif hook on the replacement SVG for existing consumers.
+  // Preserve the released motif DOM invisibly for legacy consumers and reduced-motion probes.
+  // Strike Studio's authored SVG remains the only visible artwork.
   const motif = visual.querySelector('[class^="mode-motif-"]');
-  if (motif) illustration.querySelector('svg').setAttribute('class', motif.getAttribute('class'));
-  // Keep the validated preview metadata; replace decorative artwork only.
-  visual.querySelectorAll('[class^="mode-motif-"]').forEach(node => node.remove());
+  motif?.classList.add('studio-legacy-motif');
   visual.append(illustration);
 }
 

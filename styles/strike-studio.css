@@ -101,6 +101,7 @@ button:disabled { cursor: not-allowed; }
 .mode-option-status { font-size: 9px; align-self: center; color: var(--color-text-secondary); }
 .mode-home-action, .screen-back-button { min-height: 44px; }
 .studio-mode-art { position: absolute; inset: 0; color: var(--studio-accent); overflow: hidden; }
+.studio-legacy-motif { display: none !important; }
 .studio-mode-number { position: absolute; right: 12px; top: 28px; font: 900 190px/.95 var(--studio-display); color: rgb(var(--custom-accent-rgb,0 255 242) / 5%); letter-spacing: -.1em; }
 .studio-mode-art svg { display: block; transform: none; aspect-ratio: auto; border: 0; border-radius: 0; position: absolute; inset: 28px 5% 58px; width: 90%; height: calc(100% - 86px); }
 .studio-mode-art-caption { position: absolute; left: 24px; right: 24px; bottom: 18px; display: grid; gap: 6px; }
