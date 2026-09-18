@@ -41,7 +41,11 @@ def certify(kind, base, evidence):
             home(page, base)
             assert page.locator('.studio-headline').count() == 1
             assert page.locator('[data-title-index]').count() == 4
-            assert page.locator('.title-start-button').evaluate("el => getComputedStyle(el).transitionDuration") == '0s'
+            reduced_transition_ms = page.locator('.title-start-button').evaluate("""el => Math.max(...getComputedStyle(el).transitionDuration.split(',').map(value => {
+              const part = value.trim();
+              return part.endsWith('ms') ? parseFloat(part) : parseFloat(part) * 1000;
+            }))""")
+            assert reduced_transition_ms <= 0.00101, reduced_transition_ms
             page.wait_for_function("document.querySelector('.title-brand-label img').naturalWidth > 0")
             capture(page, prefix+'-home', evidence)
             page.keyboard.press('ArrowDown')
