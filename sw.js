@@ -1,6 +1,11 @@
 const CACHE_PREFIX = "wordstrike-pwa-";
-const CACHE_NAME = CACHE_PREFIX + "v12";
+const CACHE_NAME = CACHE_PREFIX + "v13";
 const APP_SHELL = [
+  "./js/strikeStudioPresentation.js",
+  "./js/strikeStudioPresentation.js?v=20260918a",
+  "./styles/strike-studio.css",
+  "./styles/strike-studio.css?v=20260918a",
+  "./js/flow/flowUiPhase7Polish.js?v=20260918a",
   "./assets/branding/wordstrike-logo.webp",
   "./data/practice/read-ahead/en-v1/WS-READAHEAD-EN-1.forms.json",
   "./data/practice/read-ahead/en-v1/WS-READAHEAD-EN-1.manifest.json",
@@ -26,7 +31,7 @@ const APP_SHELL = [
   "./js/flow/flowProgression.js",
   "./js/flow/flowRunPlan.js",
   "./js/flow/flowRuntimeLoader.js",
-  "./js/flow/flowRuntimeLoader.js?v=20260917b",
+  "./js/flow/flowRuntimeLoader.js?v=20260918a",
   "./js/flow/flowSelection.js",
   "./js/flow/flowShell.js",
   "./js/flow/flowState.js",

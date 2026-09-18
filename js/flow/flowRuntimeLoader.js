@@ -23,7 +23,7 @@ const FLOW_RELEASE_QUERY_KEYS = Object.freeze([
 ]);
 
 const FLOW_RELEASE_ASSETS = Object.freeze([
-  "./js/flow/flowRuntimeLoader.js?v=20260917b",
+  "./js/flow/flowRuntimeLoader.js?v=20260918a",
   "./js/flow/flowMigrationPresentation.js?v=20260915a",
   "./js/flow/flowAdaptive.js",
   "./js/flow/flowAdaptivePhase10.js?v=20260916a",
@@ -48,7 +48,7 @@ const FLOW_RELEASE_ASSETS = Object.freeze([
   "./js/flow/flowState.js",
   "./js/flow/flowUiPhase7.js?v=20260916a",
   "./js/flow/flowUiPhase7KeyboardGuard.js?v=20260917a",
-  "./js/flow/flowUiPhase7Polish.js?v=20260916a",
+  "./js/flow/flowUiPhase7Polish.js?v=20260918a",
   "./js/flow/flowUxPhase8.js?v=20260916a",
   "./js/flow/flowVisualPhase6.js?v=20260916a",
   "./styles/screens/flow-phase1.css?v=20260916d",
@@ -281,7 +281,7 @@ async function importFlowRuntime() {
     if (params.get("flowUi") === "1") {
       await import("./flowUiPhase7KeyboardGuard.js?v=20260917a");
       await import("./flowUiPhase7.js?v=20260916a");
-      await import("./flowUiPhase7Polish.js?v=20260916a");
+      await import("./flowUiPhase7Polish.js?v=20260918a");
       if (params.get("flowUx") === "1") {
         await import("./flowUxPhase8.js?v=20260916a");
         if (params.get("flowModifiers") === "1") {
