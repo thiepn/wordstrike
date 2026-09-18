@@ -30,6 +30,8 @@ function enhanceTitle(screen) {
     <div class="studio-art-top"><span>THE TYPING ARCADE</span><span>WS / 01</span></div>
     <div class="studio-key-orbit"></div>
     <div class="studio-key-shadow"></div>
+    <div class="studio-key-satellite studio-key-satellite--shift"><span>SHIFT</span><strong>↑</strong></div>
+    <div class="studio-key-satellite studio-key-satellite--enter"><span>KEEP GOING</span><strong>↵</strong></div>
     <div class="studio-keycap"><span class="studio-keycap-label">WORDSTRIKE</span><strong>W</strong><span class="studio-keycap-enter">ENTER ↵</span></div>
     <div class="studio-art-ticker"><span>SPEED</span><i></i><span>ACCURACY</span><i></i><span>CONTROL</span></div>
   `);
@@ -48,6 +50,14 @@ function enhanceModes(screen) {
   if (!visual || !art || selected?.getAttribute('aria-disabled') === 'true') return;
   const document = screen.ownerDocument;
   screen.dataset.studioMode = modeId;
+  for (const option of screen.querySelectorAll('.mode-option.available')) {
+    const identity = ART[option.dataset.modeId];
+    const index = option.querySelector('.mode-option-index');
+    if (!identity || !index || index.querySelector('.studio-mode-icon')) continue;
+    const icon = element(document, 'span', 'studio-mode-icon', `<svg viewBox="0 0 640 340" fill="none" stroke="currentColor" stroke-width="22" stroke-linecap="round" stroke-linejoin="round">${identity.path}</svg>`);
+    icon.setAttribute('aria-hidden', 'true');
+    index.prepend(icon);
+  }
   const illustration = element(document, 'div', 'studio-mode-art', `
     <span class="studio-mode-number">${art.symbol}</span>
     <svg viewBox="0 0 640 340" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">${art.path}</svg>
@@ -56,7 +66,7 @@ function enhanceModes(screen) {
   illustration.setAttribute('aria-hidden', 'true');
   // Preserve the public motif hook on the replacement SVG for existing consumers.
   const motif = visual.querySelector('[class^="mode-motif-"]');
-  if (motif) illustration.querySelector('svg').setAttribute('class', motif.className);
+  if (motif) illustration.querySelector('svg').setAttribute('class', motif.getAttribute('class'));
   // Keep the validated preview metadata; replace decorative artwork only.
   visual.querySelectorAll('[class^="mode-motif-"]').forEach(node => node.remove());
   visual.append(illustration);
@@ -88,9 +98,9 @@ export function mountStrikeStudio(root) {
  * fallback. The shared shell and its release/cache ownership remain unchanged. */
 export async function warmStudioAssets(storage = globalThis.caches, moduleUrl = import.meta.url) {
   if (!storage?.open) return false;
-  const cacheName = 'wordstrike-ui-studio-20260917a';
-  const assets = [new URL('../styles/strike-studio.css?v=20260917a', moduleUrl).href,
-    new URL('./strikeStudioPresentation.js?v=20260917a', moduleUrl).href];
+  const cacheName = 'wordstrike-ui-studio-20260918a';
+  const assets = [new URL('../styles/strike-studio.css?v=20260918a', moduleUrl).href,
+    new URL('./strikeStudioPresentation.js?v=20260918a', moduleUrl).href];
   try {
     const cache = await storage.open(cacheName);
     const missing = [];

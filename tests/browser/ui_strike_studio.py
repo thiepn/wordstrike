@@ -13,6 +13,12 @@ class Quiet(SimpleHTTPRequestHandler):
     def log_message(self, *_args): pass
 
 def capture(page, name, evidence):
+    page.evaluate("""async () => {
+      await document.fonts.ready;
+      await Promise.all([...document.querySelectorAll('img')].filter(img => img.getBoundingClientRect().width > 0)
+        .map(img => img.decode().catch(() => {})));
+      await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    }""")
     geometry = page.evaluate('''() => ({width: innerWidth, overflow: document.documentElement.scrollWidth-innerWidth})''')
     assert geometry['overflow'] <= 1, (name, geometry)
     page.screenshot(path=str(OUT / f'{name}.png'), full_page=True)
@@ -35,6 +41,8 @@ def certify(kind, base, evidence):
             home(page, base)
             assert page.locator('.studio-headline').count() == 1
             assert page.locator('[data-title-index]').count() == 4
+            assert page.locator('.title-start-button').evaluate("el => getComputedStyle(el).transitionDuration") == '0s'
+            page.wait_for_function("document.querySelector('.title-brand-label img').naturalWidth > 0")
             capture(page, prefix+'-home', evidence)
             page.keyboard.press('ArrowDown')
             assert page.evaluate('document.activeElement.dataset.titleIndex') == '1'
@@ -46,6 +54,7 @@ def certify(kind, base, evidence):
                 if index: page.keyboard.press('ArrowDown')
                 expect(page.locator('.mode-select-screen')).to_have_attribute('data-studio-mode',mode_id)
                 assert page.locator('.studio-mode-art').count() == 1
+                assert page.locator('.studio-mode-icon').count() == 5
                 capture(page, prefix+'-mode-'+mode_id, evidence)
             page.locator('[data-mode-id="practice"]').click()
             expect(page.locator('[data-route="skill-map"]')).to_be_visible(timeout=15000)
@@ -56,6 +65,8 @@ def certify(kind, base, evidence):
                 capture(page,prefix+'-'+label,evidence)
             home(page,base);page.locator('[data-action="modes"]').click();page.locator('[data-mode-id="flow"]').click()
             expect(page.locator('[data-flow-integration-profile]')).to_be_visible(timeout=15000)
+            expect(page.locator('[aria-label="Selected Flow run setup"]')).to_contain_text('3 sections')
+            expect(page.locator('[aria-label="Selected Flow run setup"]')).to_contain_text('~5 min')
             capture(page,prefix+'-flow-setup',evidence)
             page.locator('[data-flow-action="start"]').click()
             expect(page.locator('[data-flow-view="run"]')).to_be_visible(timeout=15000)
@@ -68,21 +79,23 @@ def certify(kind, base, evidence):
         # Real service worker + cold UI asset warmup + offline navigation.
         context=browser.new_context(viewport={'width':1280,'height':900})
         context.add_init_script(SEED)
-        context.route('**/*', lambda r: r.continue_() if r.request.url.startswith(base) else r.abort())
+        # Do not intercept same-origin requests: the browser must exercise its own SW fetch path.
         page=context.new_page();home(page,base)
         page.evaluate('navigator.serviceWorker.register("./sw.js")')
         page.evaluate('navigator.serviceWorker.ready')
         assert page.evaluate('''async () => {
-          const ui=await import('./js/strikeStudioPresentation.js?v=20260917a');
+          const ui=await import('./js/strikeStudioPresentation.js?v=20260918a');
           return ui.warmStudioAssets();
         }''') is True
         await_assets=page.evaluate('''async () => {
-          const c=await caches.open('wordstrike-ui-studio-20260917a');
+          const c=await caches.open('wordstrike-ui-studio-20260918a');
           return (await c.keys()).map(r=>r.url);
         }''')
         assert len(await_assets)==2, await_assets
-        page.reload();expect(page.locator('.studio-headline')).to_be_visible(timeout=15000)
-        context.set_offline(True);page.reload()
+        page.reload(wait_until='domcontentloaded');expect(page.locator('.studio-headline')).to_be_visible(timeout=15000)
+        page.wait_for_function('navigator.serviceWorker.controller !== null')
+        assert page.evaluate("async () => Boolean(await caches.match(new URL('./index.html', location.href).href))")
+        context.set_offline(True);page.reload(wait_until='domcontentloaded')
         expect(page.locator('.studio-headline')).to_be_visible(timeout=15000)
         assert page.evaluate("getComputedStyle(document.querySelector('.studio-headline')).fontWeight")=='900'
         evidence.append({'screen':kind.name+'-offline','assets':await_assets,'passed':True})

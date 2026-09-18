@@ -1,11 +1,14 @@
 name: Strike Studio visual and interaction checks
 on:
   push:
-    branches: [ui-strike-studio]
+    branches: [main, ui-strike-studio]
   pull_request:
     paths:
       - 'index.html'
       - 'js/strikeStudioPresentation.js'
+      - 'js/flow/flowUiPhase7Polish.js'
+      - 'js/flow/flowRuntimeLoader.js'
+      - 'sw.js'
       - 'styles/strike-studio.css'
       - 'tests/ui-strike-studio.test.js'
       - 'tests/browser/ui_strike_studio.py'
@@ -30,7 +33,7 @@ jobs:
         with:
           name: strike-studio-source
           path: /tmp/wordstrike-source.tar.gz
-          retention-days: 1
+          retention-days: 7
   visual:
     runs-on: ubuntu-latest
     timeout-minutes: 20

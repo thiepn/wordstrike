@@ -1,26 +1,51 @@
 # Strike Studio UI
 
-## Scope
+## Shipped scope
 
-One coordinated identity layer for the existing WordStrike application. No new mode, scoring rule, persistence format, account flow, or typing engine. The home composition, mode illustrations, navigation rows, controls, Flow furniture, Practice cards, profile, settings, and results surfaces share semantic color and border tokens.
+One coordinated identity layer over the existing WordStrike renderers: a typographic
+home with layered CSS keycaps, authored artwork and glyphs for all five public modes,
+clearer secondary text, coherent controls, Flow setup/HUD furniture, Practice cards,
+profile, settings, leaderboards, results and overlays. No new fonts, third-party
+artwork, animation libraries, fake player statistics or additional network services.
+Semantic palette tokens, danger/success colors and appearance settings remain authoritative.
 
-The home uses a large typographic headline and an authored, CSS-rendered key sculpture. Each released mode gets a specific SVG illustration. No new fonts, third-party assets, animation library, canvas loop, network service, or fake player statistics are introduced. Existing appearance preferences and semantic danger/success colors remain authoritative.
+## Preservation and performance
 
-## Runtime contract
+The presentation observer watches only direct child replacements of `#app` and
+idempotently decorates Title and Mode Select. It adds no typing listeners, frame
+loop, interval or HUD-subtree observer. Native buttons, keyboard indexes and routes
+remain authoritative. Existing mode motif hooks are retained on the new SVGs.
 
-`strikeStudioPresentation.js` observes only direct child replacements of `#app`. It decorates Title and Mode Select once per new screen. It does not observe character/HUD subtrees, subscribe to typing events, or schedule frame/interval work. Existing buttons, focus handlers, keyboard indexes, routes, and mode availability remain the source of truth. Existing motif hooks move to the replacement SVGs.
+Flow's typing engine, scoring, cadence, content, save formats and incremental
+character renderer are untouched. The setup side summary now derives section count,
+word count and duration from the real planner instead of the obsolete 12-passage
+table. Preview computation runs only on setup changes, preserving seed, modifier
+and adaptive context without modifying the active plan. Its old subtree observer
+is removed. The quiet serif reading lane and square Flow controls are retained.
 
-The reading lane's metrics and layout are preserved. Flow character transitions and text shadows are disabled in this layer; upcoming text contrast is increased. The fixed setup dock uses an opaque surface instead of backdrop blur.
+OS reduced-motion and in-app reduced-effects preferences suppress every transition
+introduced by the redesign. Forced colors and visible keyboard focus are supported.
 
-## PWA
+## Offline and versioning
 
-The existing shared service worker remains unchanged. After it is ready, the UI module warms its two versioned assets into `wordstrike-ui-studio-20260917a`. The existing same-origin network-first service worker falls back to `caches.match`, including this separate presentation cache. Warmup is idempotent, asynchronous, and fail-soft. It neither clears user storage nor changes shared cache ownership. Bump the stamp in the HTML, module, and stylesheet reference together for a subsequent UI release.
+PWA cache v13 explicitly precaches both bare and versioned UI assets and the revised
+Flow loader/setup-summary module. The existing network-first fetch strategy and
+user data are unchanged. The independent fail-soft UI cache remains for upgrades
+from older installed shells. Startup, loader and cache references use one release
+stamp, `20260918a`; the proven Flow engine hotfix remains `20260917b`.
 
-## Verification
+## Verification contract
 
-- `node --test tests/ui-strike-studio.test.js`
-- `python tests/browser/ui_strike_studio.py`
-- Existing full Node suite, public Flow release, typing performance, title navigation, and repository regression workflows.
-- Dedicated browser checks render the real application in Chromium and Firefox at 1440, 390, and 360 pixels, including all five mode illustrations, Practice hub, Flow setup and paced typing, profile, settings, and leaderboards. They also verify cold UI caching and offline reload with the actual service worker.
+- Full repository Node suite and focused UI/planner-preview regression tests.
+- Chromium and Firefox public-route screenshots at 1440, 390 and 360 pixels.
+- All five mode illustrations, keyboard focus, responsive overflow, Practice hub,
+  profile, settings, leaderboards, actual Flow setup counts and paced typing.
+- Real service-worker control, explicit cache membership and offline reload.
+- Existing Flow hot-path, public-release and full mode/browser regressions.
+- The appearance matrix still tests every theme/accent/effects combination,
+  contrast, persistence, keyboard controls, resets and responsive target sizes.
+  Pixel equivalence now tests the current design before customization versus after
+  Reset, rather than requiring an intentional redesign to equal an obsolete UI.
 
-Test results and human screenshot review must be reported from the exact tested revision, not inferred from this document or from static source checks.
+Runtime evidence and visual review must come from the exact tested revision.
+This document alone is not release certification.

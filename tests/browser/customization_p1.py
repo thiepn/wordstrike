@@ -1,7 +1,7 @@
 """P1 appearance regression matrix. Static frontend; external requests blocked.
 
-Run against both real browser engines. BASELINE_DIR optionally enables byte-for-byte
-screenshots against the pre-customization release, using the same browser/fonts.
+Run against both real browser engines. Byte-for-byte screenshots compare the current
+redesign before customization and after Reset, using the same browser/fonts.
 """
 from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
@@ -213,33 +213,36 @@ def responsive(browser,name,base,checks):
   context.close()
 
 def default_equivalence(browser,name,base,baseline_base,checks):
- if not baseline_base:return
- outputs=[]
- for origin in [baseline_base,base]:
-  context=context_for(browser,origin);page=context.new_page();open_title(page,origin)
-  # P1 customization defaults remain exact outside intentional product migration
-  # surfaces. Hide mode-local controls plus the Phase-0 title/mode-card content.
-  mask=page.add_style_tag(content='[data-mode-presentation], .title-description, .mode-option { visibility: hidden !important; }')
+ # An intentional redesign must not be frozen against a pre-redesign screenshot.
+ # Preserve the stronger user contract: changing/resetting appearance restores the
+ # CURRENT design byte-for-byte, including the artwork and every mode option.
+ context=context_for(browser,base);page=context.new_page();outputs=[]
+ for reset in [False,True]:
+  open_title(page,base)
+  if reset:
+   open_settings(page)
+   select(page,'theme','midnight');select(page,'accent','orange');select(page,'effectsIntensity','reduced')
+   page.locator('[data-reset-appearance]').click()
+   expect(page.locator('html')).to_have_attribute('data-theme','wordstrike')
+   expect(page.locator('html')).to_have_attribute('data-accent','cyan')
+   open_title(page,base)
+  expect(page.locator('.title-screen')).to_have_attribute('data-studio-ready','true')
   title=page.screenshot(animations='disabled',caret='hide')
-  page.locator('[data-action="modes"]').click();expect(page.locator('.mode-select-screen')).to_be_visible()
+  page.locator('[data-action="modes"]').click()
+  expect(page.locator('.mode-select-screen')).to_have_attribute('data-studio-ready','true')
+  page.evaluate("() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))")
   modes=page.screenshot(animations='disabled',caret='hide')
-  mask.evaluate('el=>el.remove()')
-  page.locator('[data-mode-id="campaign"]').click();expect(page.locator('.campaign-progress-screen')).to_be_visible()
-  # Campaign Route intentionally evolves with Campaign features and has its own
-  # browser certifications. P1 only freezes global surfaces that customization
-  # itself promises to leave pixel-identical.
-  outputs.append([title,modes]);context.close()
+  outputs.append([title,modes])
+ context.close()
  for i,label in enumerate(['title','mode-select']):
   (ARTIFACTS/f'{name}-default-{label}-before.png').write_bytes(outputs[0][i])
   (ARTIFACTS/f'{name}-default-{label}-after.png').write_bytes(outputs[1][i])
-  assert outputs[0][i]==outputs[1][i],f'{name}: default {label} changed pixels'
- checks.append({'browser':name,'case':'default screenshot equivalence','screens':['title','mode-select']})
+  assert outputs[0][i]==outputs[1][i],f'{name}: reset {label} changed pixels'
+ checks.append({'browser':name,'case':'current-design reset screenshot equivalence','screens':['title','mode-select']})
 
 def main():
  ARTIFACTS.mkdir(parents=True,exist_ok=True)
- server,base=server_for(ROOT);baseline_server=None;baseline_base=None
- if os.getenv('BASELINE_DIR'):
-  baseline_server,baseline_base=server_for(Path(os.environ['BASELINE_DIR']))
+ server,base=server_for(ROOT);baseline_base=None
  result={'sha':os.getenv('GITHUB_SHA'),'success':False,'checks':[]}
  try:
   with sync_playwright() as pw:
@@ -256,6 +259,5 @@ def main():
  finally:
   (ARTIFACTS/'customization-p1.json').write_text(json.dumps(result,indent=2))
   server.shutdown();server.server_close()
-  if baseline_server:baseline_server.shutdown();baseline_server.server_close()
 
 if __name__=='__main__':main()
