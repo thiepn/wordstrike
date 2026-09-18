@@ -12,6 +12,7 @@ on:
       - 'styles/strike-studio.css'
       - 'tests/ui-strike-studio.test.js'
       - 'tests/browser/ui_strike_studio.py'
+      - 'tests/browser/ui_live_smoke.py'
       - '.github/workflows/ui-strike-studio.yml'
 permissions:
   contents: read
@@ -48,6 +49,8 @@ jobs:
       - run: pip install -r tests/browser/requirements.txt
       - run: python -m playwright install --with-deps chromium firefox
       - run: node --test tests/ui-strike-studio.test.js
+      - name: Validate public smoke-check syntax
+        run: python -m py_compile tests/browser/ui_live_smoke.py
       - name: Real UI and offline checks
         run: python tests/browser/ui_strike_studio.py
       - name: Protect Flow typing performance
@@ -59,6 +62,9 @@ jobs:
       - name: Preserve title keyboard navigation
         if: ${{ !cancelled() }}
         run: python tests/browser/ui2_title_navigation.py
+      - name: Verify published assets and public browser routes after merge
+        if: ${{ success() && github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        run: python tests/browser/ui_live_smoke.py
       - uses: actions/upload-artifact@v4
         if: always()
         with:
