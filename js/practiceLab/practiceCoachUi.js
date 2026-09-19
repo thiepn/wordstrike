@@ -147,6 +147,7 @@ export function createDefaultPracticeCoachUiState({ requestedMinutes = PRACTICE_
     requestedMinutes: normalized.minutes,
     plan: null,
     errorCode: null,
+    errorDetail: null,
     startingBlockId: null,
   });
 }
@@ -158,6 +159,7 @@ export function normalizePracticeCoachUiState(value = {}) {
     requestedMinutes: normalized.minutes,
     plan: value.plan ?? null,
     errorCode: value.errorCode ?? null,
+    errorDetail: value.errorDetail && typeof value.errorDetail === "object" ? { ...value.errorDetail } : null,
     startingBlockId: value.startingBlockId ?? null,
   });
 }
@@ -172,6 +174,7 @@ export function buildPracticeCoachViewModel({ state, preview = true } = {}) {
     preview,
     status: normalized.status,
     errorCode: normalized.errorCode,
+    errorDetail: normalized.errorDetail,
     requestedMinutes: normalized.requestedMinutes,
     durationChoices: PRACTICE_COACH_ALLOWED_MINUTES.map((minutes) => ({ minutes, selected: minutes === normalized.requestedMinutes })),
     plan: null,
@@ -187,6 +190,7 @@ export function buildPracticeCoachViewModel({ state, preview = true } = {}) {
     preview,
     status: normalized.status,
     errorCode: normalized.errorCode,
+    errorDetail: normalized.errorDetail,
     requestedMinutes: plan.requestedMinutes,
     durationChoices: PRACTICE_COACH_ALLOWED_MINUTES.map((minutes) => ({ minutes, selected: minutes === plan.requestedMinutes })),
     plan: {
