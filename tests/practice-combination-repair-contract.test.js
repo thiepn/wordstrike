@@ -69,8 +69,8 @@ function opportunity(correct, residual = 0) {
   };
 }
 
-test("PL20 contracts remain intact inside the current PL38 DB12/session14/foundation10 envelope and its fixed policy is exactly one PL16 dose", () => {
-  assert.equal(PRACTICE_DATABASE_VERSION, 12);
+test("PL20 contracts remain intact inside the current PL38 DB13/session14/foundation10 envelope and its fixed policy is exactly one PL16 dose", () => {
+  assert.equal(PRACTICE_DATABASE_VERSION, 13);
   assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 14);
   assert.equal(PRACTICE_FOUNDATION_ANALYSIS_VERSION, 10);
   assert.equal(validatePracticeCombinationRepairPolicy().valid, true);
