@@ -31,6 +31,59 @@ function containsName(collection, name) {
   return Array.from(collection || []).includes(name);
 }
 
+function normalizeKeyPath(value) {
+  if (Array.isArray(value)) return value.map((entry) => String(entry));
+  return value == null ? value : String(value);
+}
+
+function sameKeyPath(left, right) {
+  return JSON.stringify(normalizeKeyPath(left)) === JSON.stringify(normalizeKeyPath(right));
+}
+
+function indexMatchesDefinition(store, definition) {
+  if (typeof store?.index !== "function") return true;
+  try {
+    const current = store.index(definition.name);
+    return sameKeyPath(current.keyPath, definition.keyPath)
+      && Boolean(current.unique) === Boolean(definition.options?.unique)
+      && Boolean(current.multiEntry) === Boolean(definition.options?.multiEntry);
+  } catch {
+    return false;
+  }
+}
+
+export function getPracticeDatabaseSchemaIssues(database) {
+  const issues = [];
+  for (const [storeName, definition] of Object.entries(PRACTICE_STORE_DEFINITIONS)) {
+    if (!containsName(database.objectStoreNames, storeName)) {
+      issues.push({ storeName, issue: "missing-store" });
+      continue;
+    }
+    let transaction;
+    let store;
+    try {
+      transaction = database.transaction([storeName], "readonly");
+      store = transaction.objectStore(storeName);
+    } catch (cause) {
+      issues.push({ storeName, issue: "unreadable-store", cause: cause?.name ?? "unknown" });
+      continue;
+    }
+    if (!sameKeyPath(store.keyPath, definition.keyPath)) {
+      issues.push({ storeName, issue: "key-path-mismatch", expected: definition.keyPath, actual: store.keyPath });
+    }
+    for (const indexDefinition of definition.indexes) {
+      if (!containsName(store.indexNames, indexDefinition.name)) {
+        issues.push({ storeName, indexName: indexDefinition.name, issue: "missing-index" });
+        continue;
+      }
+      if (!indexMatchesDefinition(store, indexDefinition)) {
+        issues.push({ storeName, indexName: indexDefinition.name, issue: "index-definition-mismatch" });
+      }
+    }
+  }
+  return issues;
+}
+
 export function applyPracticeDatabaseUpgrade(database, transaction = null) {
   for (const [storeName, definition] of Object.entries(PRACTICE_STORE_DEFINITIONS)) {
     const exists = database.objectStoreNames.contains(storeName);
@@ -44,6 +97,9 @@ export function applyPracticeDatabaseUpgrade(database, transaction = null) {
       }
     }
     for (const index of definition.indexes) {
+      if (containsName(store.indexNames, index.name) && transaction && !indexMatchesDefinition(store, index)) {
+        store.deleteIndex(index.name);
+      }
       if (!containsName(store.indexNames, index.name)) store.createIndex(index.name, index.keyPath, index.options || {});
     }
   }
@@ -109,12 +165,23 @@ export function createPracticeIndexedDbStore({
         const request = indexedDB.open(databaseName, databaseVersion);
         request.onupgradeneeded = () => applyPracticeDatabaseUpgrade(request.result, request.transaction);
         database = await requestPromise(request);
+        const schemaIssues = getPracticeDatabaseSchemaIssues(database);
+        if (schemaIssues.length) {
+          database.close();
+          database = null;
+          throw practiceStorageError(
+            PRACTICE_STORAGE_ERROR_CODES.RECOVERY_REQUIRED,
+            "Practice database schema repair did not converge",
+            { operation: "open", recoverable: true, cause: { schemaIssues } },
+          );
+        }
         database.onversionchange = () => {
           database?.close();
           database = null;
         };
         return this;
       } catch (cause) {
+        if (cause?.code) throw cause;
         throw practiceStorageError(
           PRACTICE_STORAGE_ERROR_CODES.OPEN_FAILED,
           "Unable to open the Practice database",
