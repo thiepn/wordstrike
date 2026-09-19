@@ -163,7 +163,7 @@ test("PL37 is a distinct advanced catalog experiment and PL32 targeted family ex
 });
 
 test("PL37 Boss protocol remains frozen inside the current PL38 storage/session envelope", () => {
-  assert.equal(PRACTICE_DATABASE_VERSION, 12);
+  assert.equal(PRACTICE_DATABASE_VERSION, 13);
   assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 14);
   assert.equal(PRACTICE_FOUNDATION_ANALYSIS_VERSION, 10);
   assert.equal(PRACTICE_WEAKNESS_BOSS_VERSION, 1);

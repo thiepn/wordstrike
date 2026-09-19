@@ -17,8 +17,8 @@ const profileId = "practice-profile_123456789";
 const contextId = "practice-context_123456789";
 const sessionId = "practice-session_123456789";
 
-test("PL18 evaluation contracts remain intact inside the current PL38 DB12/session14/foundation10 envelope", () => {
-  assert.equal(PRACTICE_DATABASE_VERSION, 12);
+test("PL18 evaluation contracts remain intact inside the current PL38 DB13/session14/foundation10 envelope", () => {
+  assert.equal(PRACTICE_DATABASE_VERSION, 13);
   assert.equal(PRACTICE_RECORD_VERSIONS.evaluationState, 1);
   assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 14);
   assert.equal(PRACTICE_FOUNDATION_ANALYSIS_VERSION, 10);

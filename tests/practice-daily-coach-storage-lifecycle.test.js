@@ -54,8 +54,8 @@ function activateFirst(plan) {
   return value;
 }
 
-test("PL25 storage behavior remains intact inside the current PL38 DB12/session14 Coach v2 envelope", () => {
-  assert.equal(PRACTICE_DATABASE_VERSION, 12);
+test("PL25 storage behavior remains intact inside the current PL38 DB13/session14 Coach v2 envelope", () => {
+  assert.equal(PRACTICE_DATABASE_VERSION, 13);
   assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 14);
   assert.equal(PRACTICE_RECORD_VERSIONS.coachPlan, 2);
   assert.equal(PRACTICE_STORE_DEFINITIONS.coachPlans.keyPath, "coachPlanId");

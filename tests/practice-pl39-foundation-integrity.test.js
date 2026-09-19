@@ -25,7 +25,7 @@ function baseStore() {
 }
 
 test("PL39 prerequisite versions and store inventory are the certified PL38 envelope", () => {
-  assert.equal(PRACTICE_DATABASE_VERSION, 12);
+  assert.equal(PRACTICE_DATABASE_VERSION, 13);
   assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 14);
   assert.equal(PRACTICE_FOUNDATION_ANALYSIS_VERSION, 10);
   assert.equal(PRACTICE_RECORD_VERSIONS.coachPlan, 2);

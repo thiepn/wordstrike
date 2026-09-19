@@ -23,7 +23,7 @@ function ids() {
 
 test("GC2 makes the active PL11 entity allowlist exactly canonical key/bigram/trigram/word", () => {
   assert.deepEqual(ENTITY_TYPES, ["key", "bigram", "trigram", "word"]);
-  assert.equal(PRACTICE_DATABASE_VERSION, 12);
+  assert.equal(PRACTICE_DATABASE_VERSION, 13);
 
   for (const [entityType, entityKey] of [
     ["key", "a"],
@@ -63,7 +63,7 @@ test("GC2 persistent skill/review validators reject retired PL30 pattern entity 
   }
 });
 
-test("GC2 explicit DB12 cleanup removes only retired entity records and preserves canonical evidence, abilities, and sessions", async () => {
+test("GC2 explicit DB13 cleanup removes only retired entity records and preserves canonical evidence, abilities, and sessions", async () => {
   const canonicalSkill = { statId: "canonical-skill", entityType: "word", entityKey: "practice", payload: "keep" };
   const retiredSkill = { statId: "retired-skill", entityType: "punctuation-transition", entityKey: "comma-space" };
   const canonicalLearning = { learningStateId: "canonical-learning", entityType: "bigram", entityKey: "th", payload: "keep" };
@@ -87,7 +87,7 @@ test("GC2 explicit DB12 cleanup removes only retired entity records and preserve
 
   const repair = await reconcilePracticePl30ModelBoundary(dataStore, { now });
   assert.equal(repair.strategy, "explicit-cleanup-migration");
-  assert.equal(repair.databaseVersion, 12);
+  assert.equal(repair.databaseVersion, 13);
   assert.deepEqual(repair.removedByStore, { skillStats: 1, learningStates: 1, reviewItems: 1 });
   assert.deepEqual(repair.removedEntityTypes, ["number-pattern", "punctuation-transition", "symbol-pattern"]);
 
@@ -110,7 +110,7 @@ test("GC2 explicit DB12 cleanup removes only retired entity records and preserve
   assert.deepEqual(second.removedByStore, repair.removedByStore);
 });
 
-test("GC2 fresh DB12 cleanup is an idempotent no-op", async () => {
+test("GC2 fresh DB13 cleanup is an idempotent no-op", async () => {
   const dataStore = createPracticeMemoryStore();
   await dataStore.open();
   const first = await reconcilePracticePl30ModelBoundary(dataStore, { now });

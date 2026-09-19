@@ -76,6 +76,8 @@ jobs:
         with:
           node-version: 22
       - run: npm install --no-save playwright@1.57.0 axe-core@4.10.3
+      - name: Repair stale DB12 Practice storage
+        run: node tests/browser/practice_storage_repair.mjs
       - name: Workshop interaction accessibility and reflow
         run: node tests/browser/practice_workshop.mjs
       - name: Custom editor selection save and responsive setup

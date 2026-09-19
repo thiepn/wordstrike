@@ -26,7 +26,7 @@ function emptyErrorSummary() {
 }
 
 test("PL9 contracts remain intact inside the current PL38 storage/session envelope", () => {
-  assert.equal(PRACTICE_DATABASE_VERSION, 12);
+  assert.equal(PRACTICE_DATABASE_VERSION, 13);
   assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 14);
   assert.equal(PRACTICE_RECORD_VERSIONS.reviewItem, 3);
   assert.equal(PRACTICE_RECORD_VERSIONS.evaluationState, 1);

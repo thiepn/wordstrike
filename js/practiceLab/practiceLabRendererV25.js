@@ -4,6 +4,20 @@ const escapeHtml = (value = "") => String(value).replace(/[&<>'"]/g, (character)
 const statusClass = (value) => String(value ?? "pending").replace(/[^a-z0-9-]/gi, "");
 const number = (value, digits = 2) => Number.isFinite(value) ? Number(value).toFixed(digits).replace(/\.00$/, "").replace(/(\.\d)0$/, "$1") : "—";
 
+const COACH_ERROR_COPY = Object.freeze({
+  PRACTICE_STORAGE_TRANSACTION_FAILED: "WordStrike could not update the local Practice database. Reload once so the storage repair can finish, then create the plan again. Existing Practice data is not intentionally cleared.",
+  PRACTICE_STORAGE_OPEN_FAILED: "WordStrike could not open the local Practice database. Reload the page and try again.",
+  PRACTICE_STORAGE_RECOVERY_REQUIRED: "Your local Practice database needs a schema repair. Reload WordStrike once to complete the upgrade; do not clear site data.",
+  PRACTICE_STORAGE_QUOTA_EXCEEDED: "Your browser could not allocate enough local storage for Practice. Free some site storage and try again.",
+  PRACTICE_STORAGE_UNAVAILABLE: "Local browser storage is unavailable, so Daily Training cannot save its plan in this session.",
+  PRACTICE_COACH_PLAN_FAILED: "Daily Training could not create today's plan. Try again after reloading WordStrike.",
+  PRACTICE_COACH_UNAVAILABLE: "Daily Training could not load its local Practice data. Reload WordStrike and try again.",
+});
+
+function coachErrorCopy(code) {
+  return COACH_ERROR_COPY[code] ?? "Daily Training could not complete this action. Reload WordStrike and try again.";
+}
+
 function renderDurationChoices(view) {
   return `<div class="practice-coach-duration" role="group" aria-label="Daily Training duration">${view.durationChoices.map((item) => `<button type="button" data-practice-action="set-coach-duration" data-coach-minutes="${item.minutes}" aria-pressed="${item.selected}" ${view.plan ? "disabled" : ""}>${item.minutes} MIN</button>`).join("")}</div>`;
 }
@@ -56,7 +70,7 @@ function renderDeveloperDiagnostics(plan, view) {
 
 export function renderPracticeCoach(root, view, { focusSelector = null } = {}) {
   const plan = view.plan;
-  const error = view.errorCode ? `<div class="practice-lab-notice" role="alert">${escapeHtml(String(view.errorCode).replaceAll("_", " "))}</div>` : "";
+  const error = view.errorCode ? `<div class="practice-lab-notice is-warning practice-coach-error" role="alert"><strong>Daily Training could not save or load its local plan.</strong><span>${escapeHtml(coachErrorCopy(view.errorCode))}</span><details><summary>Technical details</summary><code>${escapeHtml(String(view.errorCode))}</code></details></div>` : "";
   const beforePlan = !plan ? `<section class="practice-coach-create">
       <div class="practice-lab-section-heading"><div><div class="eyebrow">Choose today's budget</div><h2>${view.requestedMinutes} minutes</h2></div><p>This sets a planning budget, not a quota. The Coach may intentionally underfill it when no useful block fits.</p></div>
       ${renderDurationChoices(view)}
