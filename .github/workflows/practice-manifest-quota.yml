@@ -1,0 +1,39 @@
+name: Practice Manifest Quota
+on:
+  push:
+    branches: [fix/practice-manifest-quota]
+    paths:
+      - 'js/practiceLab/practiceManifestStore.js'
+      - 'tests/practice-manifest-storage.test.js'
+      - 'tests/browser/practice_storage_repair.mjs'
+      - '.github/workflows/practice-manifest-quota.yml'
+permissions:
+  contents: read
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: node tests/practice-manifest-storage.test.js
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, firefox, webkit]
+    container:
+      image: mcr.microsoft.com/playwright:v1.57.0-noble
+      options: --ipc=host
+    env:
+      HOME: /root
+      PRACTICE_BROWSER: ${{ matrix.browser }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: npm install --no-save playwright@1.57.0
+      - run: node tests/browser/practice_storage_repair.mjs
