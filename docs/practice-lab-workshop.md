@@ -35,6 +35,7 @@ The references inform the choices above; they do not prove that this particular 
 
 - `practiceLabWorkshop.js` builds presentation with native DOM methods and textContent. It contains no HTML sinks, persistent storage, telemetry, timers, mutation observers or engine imports.
 - Layout preference is a WeakMap entry removed when Practice Lab unmounts. It is not added to saved user data.
+- The outer setup renderer preserves picker focus when recommendations finish loading; live keyboard captures remain outside this path.
 - Letter selection dispatches existing `choose-weak-key` actions. Validation and session construction remain in the existing controller.
 - The setup orientation strip is not interactive navigation, and does not pretend that a session or result already exists.
 - `practiceLabIdentity.js` calls the enhancement only in existing home/setup render paths. Existing dependency-injected and fake-DOM renderers remain supported.

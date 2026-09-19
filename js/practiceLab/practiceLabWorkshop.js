@@ -3,7 +3,7 @@ const preferences = new WeakMap();
 const families = Object.freeze({
   'full-assessment':'assessment','weak-keys':'precision','combination-repair':'precision',
   'problem-words':'precision','accuracy-control':'precision','burst-sprints':'speed',
-  'pace-ladder':'speed','common-words':'fluency','real-text':'real-world',
+  'pace-ladder':'advanced','common-words':'fluency','real-text':'real-world',
   'consistency-trainer':'fluency','metronome-typing':'fluency','read-ahead':'fluency',
   'endurance':'fluency','punctuation-capitals':'real-world','numbers-symbols':'real-world',
   'custom-text':'custom','weakness-boss':'advanced',
@@ -16,6 +16,19 @@ export function practiceLetterIndex(index, key) {
   if (key === 'ArrowRight') return (index + 1) % 26;
   if (key === 'ArrowLeft') return (index + 25) % 26;
   return index;
+}
+/** Preserve only the new picker focus across existing asynchronous setup refreshes. */
+export function capturePracticeWorkshopFocus(root) {
+  const active = root.ownerDocument?.activeElement;
+  return active?.matches?.('[data-lab-letter]') && root.contains?.(active) && /^[a-z]$/.test(active.dataset.labLetter)
+    ? active.dataset.labLetter : null;
+}
+export function restorePracticeWorkshopFocus(root, letter) {
+  if (!/^[a-z]$/.test(letter ?? '')) return;
+  const button = root.querySelector?.(`[data-lab-letter="${letter}"]`);
+  if (!button) return;
+  for (const key of root.querySelectorAll('[data-lab-letter]')) key.tabIndex = key === button ? 0 : -1;
+  button.focus({preventScroll:true});
 }
 function node(document, tag, className, text) {
   const element = document.createElement(tag);
@@ -81,6 +94,10 @@ function enhanceLetterPicker(screen, document) {
     button.tabIndex = letter === (selected || 'a') ? 0 : -1;
     group.append(button);
   }
+  group.addEventListener('click', event => {
+    const button = event.target.closest?.('[data-lab-letter]');
+    if (button && group.contains(button)) button.focus({preventScroll:true});
+  }, true);
   group.addEventListener('keydown', event => {
     if (!['ArrowLeft','ArrowRight','Home','End'].includes(event.key)) return;
     const buttons = [...group.querySelectorAll('button')];
