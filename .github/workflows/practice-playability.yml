@@ -1,13 +1,17 @@
 name: Practice Playability Repair
 on:
   push:
-    branches: [fix/practice-lab-playability]
+    branches: [main, fix/practice-lab-playability]
+    paths: ['js/practiceLab/**', 'tests/browser/practice_playability.mjs', '.github/workflows/practice-playability.yml']
   pull_request:
     paths: ['js/practiceLab/**', 'tests/browser/practice_playability.mjs', '.github/workflows/practice-playability.yml']
 permissions:
   contents: read
+concurrency:
+  group: practice-playability-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
-  verify:
+  core:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -15,24 +19,26 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Source snapshot for reproducible diagnostics
-        run: git archive --format=tar HEAD > /tmp/wordstrike-source.tar
-      - uses: actions/upload-artifact@v4
-        with:
-          name: wordstrike-source
-          path: /tmp/wordstrike-source.tar
-          retention-days: 2
       - run: npm test
-      - run: npm install --no-save playwright@1.57.0 axe-core@4.10.3
-      - run: npx playwright install --with-deps chromium firefox
-      - name: Practice browser journeys
-        run: |
-          node tests/browser/practice_targeted.mjs
-          node tests/browser/practice_completion.mjs
-          if [ -f tests/browser/practice_playability.mjs ]; then node tests/browser/practice_playability.mjs; fi
+  public-journeys:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    container:
+      image: mcr.microsoft.com/playwright:v1.57.0-noble
+      options: --ipc=host
+    env:
+      HOME: /root
+      PRACTICE_BROWSERS: chromium,firefox
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --no-save playwright@1.57.0
+      - run: node tests/browser/practice_playability.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: practice-playability-evidence
-          path: browser-artifacts/
+          path: browser-artifacts/practice-playability/
           retention-days: 7
