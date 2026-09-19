@@ -149,9 +149,13 @@ export function enhancePracticeLabView(root, view) {
   if (!screen || screen.dataset.labIdentity || !screen.ownerDocument?.createElement) return;
   screen.dataset.labIdentity = 'studio';
   const document = screen.ownerDocument;
-  const shell = screen.querySelector('.practice-lab-shell');
+  let shell = screen.querySelector('.practice-lab-shell');
   const main = screen.querySelector('main');
   if (!shell || !main) return;
+  if (shell === main) {
+    const wrapper = document.createElement('div'); wrapper.className = 'practice-lab-shell';
+    main.before(wrapper); main.classList.remove('practice-lab-shell'); wrapper.append(main); shell = wrapper;
+  }
   const state = wire(root);
   const title = main.querySelector('h1') ?? screen.querySelector('h1');
   const navHolder = document.createElement('div');
