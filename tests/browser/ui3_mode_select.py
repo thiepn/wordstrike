@@ -209,7 +209,10 @@ def inspect_keyboard_and_routes(browser, base, browser_name, evidence):
     # Practice now opens its own public route.
     practice = page.locator('[data-mode-id="practice"]')
     practice.click()
-    expect(page.locator('[data-route="skill-map"]')).to_be_visible()
+    # Practice Lab mounts asynchronously; verify the public destination itself
+    # rather than a specific optional navigation tile.
+    expect(page.locator('.practice-lab-screen')).to_be_visible(timeout=10000)
+    expect(page.locator('[data-practice-view="home"]')).to_be_visible(timeout=10000)
 
     evidence.append({
         "browser": browser_name,

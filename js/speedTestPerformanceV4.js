@@ -4,7 +4,7 @@ import {
   installSpeedTestWordProfiler,
 } from "./speedTestWordProfileV4.js";
 
-const V4_STYLE_HREF = "styles/screens/typing-performance-v4.css?v=20260911a";
+const V4_STYLE_HREF = "styles/screens/typing-performance-v4.css?v=20260919a";
 const MAX_WORD_MARKERS = 160;
 const MAX_MISTAKE_ROWS = 10;
 
@@ -355,12 +355,12 @@ function bindWordInspector(section, analysis) {
     button.classList.add("is-selected");
     inspector.innerHTML = inspectorMarkup(word);
   };
+  // Selection is deliberate (click or keyboard focus), never hover-driven.
+  // During wheel scrolling the pointer stays stationary while word markers move
+  // underneath it; pointerover used to rewrite the inspector repeatedly, change
+  // layout height, and trigger browser scroll anchoring jumps.
   section.addEventListener("click", (event) => select(event.target.closest?.("[data-v4-word]")));
   section.addEventListener("focusin", (event) => select(event.target.closest?.("[data-v4-word]")));
-  section.addEventListener("pointerover", (event) => {
-    if (event.pointerType && event.pointerType !== "mouse") return;
-    select(event.target.closest?.("[data-v4-word]"));
-  });
 }
 
 function enhanceV4() {

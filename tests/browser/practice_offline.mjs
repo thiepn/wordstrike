@@ -37,7 +37,7 @@ try {
  check('fresh offline document boots production shell');
  await page.locator('[data-action="modes"]').click();
  await page.locator('button[data-mode-id="practice"]').click();
- await page.locator('[data-route="skill-map"]').waitFor();
+ await page.locator('[data-practice-view="home"]').waitFor();
  assert.ok(!page.url().includes('dev='));
  check('public offline navigation opens Practice Lab without developer flags');
  await page.locator('[data-practice-action="open-experiment"][data-experiment-id="full-assessment"]').first().click();

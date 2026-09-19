@@ -1,5 +1,5 @@
 const CACHE_PREFIX = "wordstrike-pwa-";
-const CACHE_NAME = CACHE_PREFIX + "v23-practice-finalization";
+const CACHE_NAME = CACHE_PREFIX + "v24-typing-coach-scroll";
 const APP_SHELL = [
   "./js/practiceLab/practiceAssessmentInput.js",
   "./js/practiceLab/practiceDurableManifest.js",
@@ -57,9 +57,9 @@ const APP_SHELL = [
   "./js/speedTestPerformanceV1.js?v=20260910a",
   "./js/speedTestPerformanceV2.js?v=20260910b",
   "./js/speedTestPerformanceV3.js?v=20260911a",
-  "./js/speedTestPerformanceV4.js?v=20260911a",
+  "./js/speedTestPerformanceV4.js?v=20260919a",
   "./js/speedTestPerformanceV5.js?v=20260911a",
-  "./js/speedTestResultsV6.js?v=20260911a",
+  "./js/speedTestResultsV6.js?v=20260919a",
   "./js/thiepnAccountPresentation.js",
   "./js/thiepnAccountPresentation.js?v=20260912a",
   "./practiceLabV31.css",
@@ -713,12 +713,14 @@ const APP_SHELL = [
   "./styles/screens/results-pause-onboarding.css",
   "./styles/screens/title.css",
   "./styles/screens/typing-coach-v6.css",
+  "./styles/screens/typing-coach-v6.css?v=20260919a",
   "./styles/screens/typing-coach-v7.css",
   "./styles/screens/typing-customization-v2.css",
   "./styles/screens/typing-performance-v1.css",
   "./styles/screens/typing-performance-v2.css",
   "./styles/screens/typing-performance-v3.css",
   "./styles/screens/typing-performance-v4.css",
+  "./styles/screens/typing-performance-v4.css?v=20260919a",
   "./styles/screens/typing-performance-v5.css",
   "./styles/screens/typing-test-ui8-contract.css",
   "./styles/screens/typing-test.css",

@@ -82,12 +82,87 @@ def main():
                 expect(shell.locator('[data-v6-panel="overview"]')).to_be_visible()
                 expect(shell).to_contain_text('Recommended next step')
 
+                if touch:
+                    mobile_scroll = page.evaluate("""() => {
+                      const panel = document.querySelector('.speed-results-panel');
+                      const screen = document.querySelector('.speed-results-screen');
+                      const panelStyle = getComputedStyle(panel);
+                      const screenStyle = getComputedStyle(screen);
+                      return {
+                        panelOverflowY: panelStyle.overflowY,
+                        panelMaxHeight: panelStyle.maxHeight,
+                        screenHeight: screenStyle.height,
+                        screenMinHeight: screenStyle.minHeight,
+                      };
+                    }""")
+                    assert mobile_scroll['panelOverflowY'] == 'visible', mobile_scroll
+                    assert mobile_scroll['panelMaxHeight'] == 'none', mobile_scroll
+
+                # Regression: the exact overview PRACTICE NOW card from production
+                # must still open its drill if localStorage is full.
+                if width == 1280:
+                    page.evaluate("""() => {
+                      const original = Storage.prototype.setItem;
+                      window.__restoreCoachStorage = () => {
+                        Storage.prototype.setItem = original;
+                        delete window.__restoreCoachStorage;
+                      };
+                      Storage.prototype.setItem = function(key, value) {
+                        if (key === 'wordstrike_typing_coach_v6_active') {
+                          throw new DOMException('Quota exceeded', 'QuotaExceededError');
+                        }
+                        return original.call(this, key, value);
+                      };
+                    }""")
+                    overview_practice = shell.locator('[data-v6-panel="overview"] [data-coach-practice-type]')
+                    expect(overview_practice).to_be_visible()
+                    overview_practice.click()
+                    overview_overlay = page.locator('[data-typing-coach-practice-overlay]')
+                    expect(overview_overlay).to_be_visible(timeout=5000)
+                    expect(overview_overlay.locator('[data-coach-practice-root] .practice-lab-shell')).to_be_visible(timeout=10000)
+                    quota_cycle = page.evaluate("""async () => {
+                      const coach = await import('./js/speedTestCoachV6.js');
+                      return coach.loadActiveTypingCoachCycle();
+                    }""")
+                    assert quota_cycle and quota_cycle['drill']['target'], quota_cycle
+                    overview_overlay.locator('[data-coach-close-practice]').click()
+                    expect(overview_overlay).to_have_count(0)
+                    page.evaluate("""async () => {
+                      const coach = await import('./js/speedTestCoachV6.js');
+                      coach.clearActiveTypingCoachCycle();
+                      window.__restoreCoachStorage?.();
+                    }""")
+
                 timeline_tab = shell.locator('[data-v6-tab="timeline"]')
                 timeline_tab.click()
                 expect(shell.locator('[data-v6-panel="timeline"]')).to_be_visible()
                 expect(shell.locator('[data-speed-performance]')).to_be_visible()
 
                 words_tab = shell.locator('[data-v6-tab="words"]')
+                words_tab.click()
+                words_panel = shell.locator('[data-v6-panel="words"]')
+                expect(words_panel).to_be_visible()
+
+                # Regression: wheel scrolling through the word analysis must not
+                # change selection merely because markers pass under the mouse,
+                # and downward scrolling must never jump upward.
+                if not touch:
+                    word_map = words_panel.locator('[data-speed-performance-v4]')
+                    expect(word_map).to_be_visible()
+                    word_map.scroll_into_view_if_needed()
+                    selected_before = words_panel.locator('[data-v4-word].is-selected').first.get_attribute('data-v4-word')
+                    box = word_map.bounding_box()
+                    assert box is not None, 'word analysis has no layout box'
+                    page.mouse.move(box['x'] + min(60, box['width'] / 2), box['y'] + min(80, box['height'] / 2))
+                    scroll_positions = [page.evaluate('window.scrollY')]
+                    for _ in range(5):
+                        page.mouse.wheel(0, 220)
+                        page.wait_for_timeout(70)
+                        scroll_positions.append(page.evaluate('window.scrollY'))
+                    assert all(current >= previous - 2 for previous, current in zip(scroll_positions, scroll_positions[1:])), scroll_positions
+                    selected_after = words_panel.locator('[data-v4-word].is-selected').first.get_attribute('data-v4-word')
+                    assert selected_after == selected_before, (selected_before, selected_after, scroll_positions)
+
                 words_tab.focus()
                 page.keyboard.press('ArrowRight')
                 expect(shell.locator('[data-v6-tab="progress"]')).to_have_attribute('aria-selected', 'true')

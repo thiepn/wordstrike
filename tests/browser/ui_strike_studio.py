@@ -61,7 +61,8 @@ def certify(kind, base, evidence):
                 assert page.locator('.studio-mode-icon').count() == 5
                 capture(page, prefix+'-mode-'+mode_id, evidence)
             page.locator('[data-mode-id="practice"]').click()
-            expect(page.locator('[data-route="skill-map"]')).to_be_visible(timeout=15000)
+            expect(page.locator('[data-practice-view="home"]')).to_be_visible(timeout=15000)
+            expect(page.get_by_role("button", name="Skill Map", exact=True)).to_be_visible(timeout=15000)
             capture(page, prefix+'-practice', evidence)
             for label, action, target in [('profile','profile','.profile-stats-screen'),('settings','settings','.settings-screen'),('leaderboards','open-leaderboards','.leaderboards-screen')]:
                 home(page,base);page.locator(f'[data-action="{action}"]').click()

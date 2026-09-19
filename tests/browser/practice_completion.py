@@ -27,7 +27,7 @@ try:
      page=context.new_page();errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
      page.goto(f'http://127.0.0.1:{server.server_port}/practice-harness.html')
      page.evaluate('''async()=>{const [{createPracticeLabController},{createPracticeFeatureGate},{createPracticeExperimentRegistry}]=await Promise.all([import('/js/practiceLab/practiceLabController.js'),import('/js/practiceLab/practiceFeatureGate.js'),import('/js/practiceLab/practiceExperimentRegistry.js')]);const gate=createPracticeFeatureGate({developerMode:true});window.lab=createPracticeLabController({root:document.querySelector('#app'),featureGate:gate,experimentRegistry:createPracticeExperimentRegistry({featureGate:gate})});lab.mount();}''')
-     page.locator('[data-route="skill-map"]').click();page.get_by_text('No skill evidence yet',exact=True).wait_for();page.screenshot(path=str(OUT/f'{name}-{width}-skills.png'))
+     page.locator('[data-practice-view="home"]').wait_for();page.get_by_role('button',name='Skill Map',exact=True).click();page.get_by_text('No skill evidence yet',exact=True).wait_for();page.screenshot(path=str(OUT/f'{name}-{width}-skills.png'))
      page.locator('[data-practice-action="back"]').click();page.locator('[data-route="review-queue"]').click();page.get_by_text('No reviews scheduled',exact=True).wait_for()
      page.locator('[data-practice-action="back"]').click();page.locator('[data-route="progress"]').click();page.get_by_text('No training history',exact=True).wait_for()
      page.evaluate("lab.navigate({name:'experiment-detail',params:{experimentId:'full-assessment'}})")

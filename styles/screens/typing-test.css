@@ -826,6 +826,21 @@ body.gameplay-active .speed-test-screen {
   .speed-result-details {
     gap: 0 1.2rem;
   }
+
+  /* Results use one document scroll surface. The legacy base stylesheet used
+     an 86vh nested scrolling panel on small viewports, which could hand wheel/
+     touch scrolling back and forth between the panel and page and appear to
+     jump upward. */
+  .speed-results-screen {
+    height: auto;
+    min-height: 100dvh;
+    align-items: start;
+  }
+
+  .speed-results-panel {
+    max-height: none;
+    overflow: visible;
+  }
 }
 
 @media (max-width: 520px) {
