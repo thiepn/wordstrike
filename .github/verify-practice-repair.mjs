@@ -18,7 +18,3 @@ const diagnostic=`\n// The test server exposes read-only engine diagnostics; eng
 code=code.replace('const cases=[',diagnostic+'\nconst cases=[');
 code=code.replace("record.error=String(e);record.body=", "record.error=String(e);record.diagnostics=await page.evaluate(()=>({snapshot:globalThis.__practiceEngine?.getSnapshot?.(),warnings:globalThis.__practiceWarnings??[]})).catch(()=>null);record.body=");
 fs.writeFileSync(test,code);
-const workflow='.github/workflows/practice-playability.yml';let yml=fs.readFileSync(workflow,'utf8');
-yml=yml.replace("if: always() && matrix.browser != 'webkit'","if: ${{ !cancelled() && matrix.browser != 'webkit' }}");
-yml=yml.replace('      - name: Assessment and protected protocol regression\n        if: always()', '      - name: Assessment and protected protocol regression\n        if: ${{ !cancelled() }}');
-fs.writeFileSync(workflow,yml);
