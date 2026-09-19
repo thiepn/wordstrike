@@ -83,6 +83,81 @@ async function exercise(page, databaseName) {
   }, databaseName);
 }
 
+
+async function exerciseCoachRecovery(page, databaseName) {
+  return page.evaluate(async (databaseName) => {
+    const { createPracticeIndexedDbStore } = await import("/js/practiceLab/practiceIndexedDbStore.js");
+    const { createPracticeRepository } = await import("/js/practiceLab/practiceRepository.js");
+    const { createPracticeManifestStore } = await import("/js/practiceLab/practiceManifestStore.js");
+    const { createDefaultPracticeManifest, createDefaultPracticeProfile } = await import("/js/practiceLab/practiceDefaults.js");
+    const { createDefaultPracticeContext } = await import("/js/practiceLab/practiceContext.js");
+    const { createPracticeCoachPlanRecord } = await import("/js/practiceLab/practiceCoachPlan.js");
+    const { initializePracticeCoachRuntimeData } = await import("/js/practiceLab/practiceLabControllerRuntimeV25.js");
+
+    const now = () => new Date("2026-09-19T18:00:00.000Z");
+    const profileId = "practice-profile_browser-coach-recovery-12345678";
+    const profile = createDefaultPracticeProfile({ profileId, now });
+    const context = createDefaultPracticeContext({ profileId, now });
+    const baseStore = createPracticeIndexedDbStore({ databaseName });
+    await baseStore.open();
+    await baseStore.put("profiles", profile);
+    await baseStore.put("contexts", context);
+
+    let transactionCalls = 0;
+    const dataStore = {
+      kind: baseStore.kind,
+      open: (...args) => baseStore.open(...args),
+      close: (...args) => baseStore.close(...args),
+      get: (...args) => baseStore.get(...args),
+      put: (...args) => baseStore.put(...args),
+      delete: (...args) => baseStore.delete(...args),
+      list: (...args) => baseStore.list(...args),
+      query: (...args) => baseStore.query(...args),
+      clearStore: (...args) => baseStore.clearStore(...args),
+      get isOpen() { return baseStore.isOpen; },
+      async runTransaction() {
+        transactionCalls += 1;
+        throw new Error("simulated broad transaction failure");
+      },
+    };
+
+    const values = new Map();
+    const storage = {
+      getItem: key => values.get(key) ?? null,
+      setItem: (key, value) => values.set(key, String(value)),
+      removeItem: key => values.delete(key),
+    };
+    const manifestStore = createPracticeManifestStore({
+      storage,
+      createDefault: options => createDefaultPracticeManifest({ profileId, now, ...options }),
+      defaultOptions: { profileId, now },
+    });
+    const repository = createPracticeRepository({ dataStore, manifestStore, now });
+    const initialized = await initializePracticeCoachRuntimeData({ dataStore, repository, manifestStore });
+    const plan = createPracticeCoachPlanRecord({
+      profileId,
+      contextId: context.contextId,
+      localDayKey: "2026-09-19",
+      requestedMinutes: 5,
+      inputFingerprint: "browser-recovery",
+      blocks: [],
+      now,
+    });
+    const created = await repository.createCoachPlan(plan);
+    const saved = await baseStore.get("coachPlans", plan.coachPlanId);
+    baseStore.close();
+    return {
+      fastPath: initialized.reconciliation?.fastPath === true,
+      initializedProfileId: initialized.profile.profileId,
+      initializedContextId: initialized.context.contextId,
+      transactionCalls,
+      created: created.created,
+      recovered: created.recoveredFromTransactionFailure === true,
+      saved: saved?.coachPlanId === plan.coachPlanId,
+    };
+  }, databaseName);
+}
+
 try {
   const context = await browser.newContext({ serviceWorkers: "block" });
   const page = await context.newPage();
@@ -100,6 +175,16 @@ try {
     assert.deepEqual(result.issues, []);
     report.cases.push({ mode, ...result });
   }
+
+  const recovery = await exerciseCoachRecovery(page, `wordstrike-practice-coach-recovery-${browserName}`);
+  assert.equal(recovery.fastPath, true);
+  assert.equal(recovery.initializedProfileId, "practice-profile_browser-coach-recovery-12345678");
+  assert.ok(recovery.initializedContextId.startsWith("practice-context_"));
+  assert.equal(recovery.transactionCalls, 1, "only the plan write should encounter the simulated wrapper failure");
+  assert.equal(recovery.created, true);
+  assert.equal(recovery.recovered, true);
+  assert.equal(recovery.saved, true);
+  report.cases.push({ mode: "coach-runtime-transaction-recovery", ...recovery });
   report.status = "PASS";
   await context.close();
 } catch (error) {
