@@ -1,0 +1,38 @@
+name: Daily Coach Storage V2
+on:
+  push:
+    branches: [fix/daily-coach-storage-v2]
+    paths:
+      - 'js/practiceLab/practiceLabControllerRuntimeV25.js'
+      - 'js/practiceLab/practiceCoachUi.js'
+      - 'js/practiceLab/practiceLabRendererV25.js'
+      - 'js/practiceLab/practiceRepositoryV30.js'
+      - 'tests/practice-daily-coach-storage-lifecycle.test.js'
+      - 'tests/browser/practice_storage_repair.mjs'
+      - '.github/workflows/daily-coach-storage-v2.yml'
+permissions:
+  contents: read
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: node --test tests/practice-daily-coach-storage-lifecycle.test.js tests/practice-daily-coach-ui.test.js tests/practice-db13-storage-repair.test.js
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    container:
+      image: mcr.microsoft.com/playwright:v1.57.0-noble
+      options: --ipc=host
+    env:
+      HOME: /root
+      PRACTICE_BROWSER: chromium
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: npm install --no-save playwright@1.57.0
+      - run: node tests/browser/practice_storage_repair.mjs
