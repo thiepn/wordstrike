@@ -53,7 +53,7 @@ try{
  });
  assert.equal(rollback.transactionError?.code,'PRACTICE_STORAGE_TRANSACTION_FAILED');
  assert.equal(rollback.transactionError?.cause,'ConstraintError');
- assert.equal(rollback.singleError,'ConstraintError');assert.equal(rollback.partial,null);
+ assert.equal(rollback.singleError,'ConstraintError');assert.equal(rollback.partial,undefined);
  assert.equal(rollback.plans.length,1);assert.equal(rollback.plans[0].planHash,created[0].hash);assert.equal(rollback.profiles,1);
  await pages[0].evaluate(async()=>{const {manifest}=globalThis.__resources;const current=manifest.load().manifest;await manifest.saveDurable({...current,settings:{...current.settings,dailySessionLengthMinutes:8}});});
  await pages[1].evaluate(async()=>{const {manifest}=globalThis.__resources;const current=manifest.load().manifest;await manifest.saveDurable({...current,settings:{...current.settings,soundEnabled:true}});});
