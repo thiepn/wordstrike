@@ -2,7 +2,7 @@ name: Practice Workshop UI
 on:
   push:
     branches: [main, ui/practice-workshop]
-    paths: ['js/practiceLab/**', 'practiceLab*.css', 'index.html', 'sw.js', 'tests/practice-workshop.test.js', 'tests/browser/practice_workshop.mjs', '.github/apply-practice-workshop.mjs', '.github/workflows/practice-workshop.yml']
+    paths: ['js/practiceLab/**', 'practiceLab*.css', 'index.html', 'sw.js', 'tests/practice-*.test.js', 'tests/browser/practice_*.mjs', '.github/apply-practice-workshop.mjs', '.github/workflows/practice-workshop.yml']
 permissions:
   contents: read
 concurrency:
@@ -27,12 +27,11 @@ jobs:
           if [ -f .github/apply-practice-workshop.mjs ]; then
             test "$GITHUB_REF_NAME" = ui/practice-workshop
             node .github/apply-practice-workshop.mjs
-            node --check js/practiceLab/practiceLabIdentity.js
-            node --test tests/practice-workshop.test.js tests/practice-lab-identity.test.js
+            node --test tests/practice-editor-ui.test.js tests/practice-workshop.test.js tests/practice-lab-identity.test.js
             git config user.name 'github-actions[bot]'
             git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-            git add js/practiceLab/practiceLabIdentity.js index.html sw.js .github/apply-practice-workshop.mjs
-            git commit -m 'feat(practice): integrate the precision workshop without changing session hosts'
+            git add .github/apply-practice-workshop.mjs
+            git commit -m 'feat(practice): polish setup controls and preserve custom text selection'
             git push origin HEAD:ui/practice-workshop
           fi
           echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
@@ -95,6 +94,9 @@ jobs:
       - run: npm install --no-save playwright@1.57.0 axe-core@4.10.3
       - name: Workshop interaction accessibility and reflow
         run: node tests/browser/practice_workshop.mjs
+      - name: Custom editor selection save and responsive setup
+        if: ${{ !cancelled() }}
+        run: node tests/browser/practice_editor_ui.mjs
       - name: Existing studio discovery and setup regression
         if: ${{ !cancelled() }}
         run: node tests/browser/practice_identity.mjs
@@ -105,6 +107,7 @@ jobs:
           path: |
             browser-artifacts/practice-workshop/
             browser-artifacts/practice-identity/
+            browser-artifacts/practice-editor-ui/
           retention-days: 7
       - name: Complete all fifteen public drills
         if: ${{ !cancelled() }}
@@ -144,7 +147,7 @@ jobs:
           node --input-type=module <<'JS'
           import fs from 'node:fs';
           import {setTimeout as wait} from 'node:timers/promises';
-          const files=['sw.js','practiceLabWorkshop.css','js/practiceLab/practiceLabWorkshop.js','js/practiceLab/practiceLabIdentity.js'];
+          const files=['sw.js','practiceLabWorkshop.css','js/practiceLab/practiceLabWorkshop.js','js/practiceLab/practiceLabIdentity.js','js/practiceLab/practiceLabRendererV31.js','js/practiceLab/practiceLabControllerRuntimeV31.js'];
           const deadline=Date.now()+300000;
           for(;;){
             const ok=await Promise.all(files.map(async file=>{
@@ -156,10 +159,14 @@ jobs:
           }
           JS
       - name: Verify the deployed public UI
-        run: node tests/browser/practice_workshop.mjs
+        run: |
+          node tests/browser/practice_workshop.mjs
+          node tests/browser/practice_editor_ui.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: workshop-production
-          path: browser-artifacts/practice-workshop/
+          path: |
+            browser-artifacts/practice-workshop/
+            browser-artifacts/practice-editor-ui/
           retention-days: 7
