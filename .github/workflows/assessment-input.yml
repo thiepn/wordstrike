@@ -1,0 +1,105 @@
+name: Assessment Input Regression
+on:
+  push:
+    branches: [main, fix/assessment-typing]
+    paths: ['js/practiceLab/practiceAssessmentSessionHost.js', 'js/practiceLab/practiceAssessmentInput.js', 'tests/browser/assessment_input.mjs', 'tests/practice-assessment-input.test.js', '.github/workflows/assessment-input.yml', 'sw.js']
+  pull_request:
+    paths: ['js/practiceLab/practiceAssessmentSessionHost.js', 'js/practiceLab/practiceAssessmentInput.js', 'tests/browser/assessment_input.mjs', 'tests/practice-assessment-input.test.js', '.github/workflows/assessment-input.yml']
+permissions:
+  contents: read
+concurrency:
+  group: assessment-input-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  core:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: |
+          mkdir -p browser-artifacts/assessment-core
+          npm test > browser-artifacts/assessment-core/unit.log 2>&1
+          node scripts/auditPracticePrivacySecurity.mjs > browser-artifacts/assessment-core/privacy.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: assessment-core
+          path: browser-artifacts/assessment-core/
+          retention-days: 7
+  browser:
+    if: github.ref != 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, firefox, webkit]
+    container:
+      image: mcr.microsoft.com/playwright:v1.57.0-noble
+      options: --ipc=host
+    env:
+      HOME: /root
+      PRACTICE_BROWSER: ${{ matrix.browser }}
+      PRACTICE_FULL_STORAGE: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --no-save playwright@1.57.0
+      - run: node tests/browser/assessment_input.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: assessment-input-${{ matrix.browser }}
+          path: browser-artifacts/assessment-input/
+          retention-days: 7
+  live:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, firefox, webkit]
+    container:
+      image: mcr.microsoft.com/playwright:v1.57.0-noble
+      options: --ipc=host
+    env:
+      HOME: /root
+      PRACTICE_BROWSER: ${{ matrix.browser }}
+      PRACTICE_FULL_STORAGE: '1'
+      PRACTICE_URL: https://thiepn.dev/wordstrike/
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --no-save playwright@1.57.0
+      - name: Wait for the exact deployed assessment repair
+        run: |
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';
+          import {setTimeout as wait} from 'node:timers/promises';
+          const files=['sw.js','js/practiceLab/practiceAssessmentInput.js','js/practiceLab/practiceAssessmentSessionHost.js'];
+          const deadline=Date.now()+480000;
+          for(;;){
+            const results=await Promise.all(files.map(async file=>{
+              try{const response=await fetch(process.env.PRACTICE_URL+file+'?assessment-release='+process.env.GITHUB_SHA,{signal:AbortSignal.timeout(15000)});return response.ok&&(await response.text())===fs.readFileSync(file,'utf8');}catch{return false;}
+            }));
+            if(results.every(Boolean)){console.log('Deployed assessment assets match',process.env.GITHUB_SHA);break;}
+            if(Date.now()>deadline)throw Error('Production did not serve the tested assessment repair within the deadline');
+            await wait(10000);
+          }
+          JS
+      - name: Type correct complete and reload all assessment depths on production
+        run: node tests/browser/assessment_input.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: assessment-live-${{ matrix.browser }}
+          path: browser-artifacts/assessment-input/
+          retention-days: 7
