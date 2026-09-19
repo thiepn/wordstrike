@@ -61,5 +61,69 @@ assert.equal(storage.values.has(PRACTICE_MANIFEST_KEY), false);
 assert.equal(storage.values.has(PRACTICE_MANIFEST_BACKUP_KEY), false);
 assert.equal(storage.values.get("wordstrike_save"), '{"currentFurthestLevel":42}');
 
-console.log("Practice manifest creation, round-trip, bounded writes, backup recovery, controlled corruption, and scoped reset passed.");
+
+
+function quotaError() {
+  const error = new Error("The quota has been exceeded.");
+  error.name = "QuotaExceededError";
+  return error;
+}
+
+{
+  const legacy = createDefaultPracticeManifest({
+    profileId,
+    now,
+    overrides: { databaseVersion: 12 },
+  });
+  const values = new Map([[PRACTICE_MANIFEST_KEY, JSON.stringify(legacy)]]);
+  const quotaStorage = {
+    getItem(key) { return values.get(key) ?? null; },
+    setItem() { throw quotaError(); },
+    removeItem(key) { values.delete(key); },
+  };
+  const quotaStore = createPracticeManifestStore({ storage: quotaStorage, defaultOptions: { profileId, now } });
+  const loaded = quotaStore.load();
+  assert.equal(loaded.manifest.databaseVersion, 13);
+  assert.equal(loaded.recovery, "quota-readonly");
+  assert.equal(JSON.parse(values.get(PRACTICE_MANIFEST_KEY)).databaseVersion, 12, "full localStorage must not make a valid existing manifest unreadable");
+}
+
+{
+  const legacy = createDefaultPracticeManifest({
+    profileId,
+    now,
+    overrides: { databaseVersion: 12 },
+  });
+  const values = new Map([[PRACTICE_MANIFEST_KEY, JSON.stringify(legacy)]]);
+  const quotaStorage = {
+    getItem(key) { return values.get(key) ?? null; },
+    setItem(key, value) {
+      if (key !== PRACTICE_MANIFEST_KEY) throw quotaError();
+      values.set(key, String(value));
+    },
+    removeItem(key) { values.delete(key); },
+  };
+  const quotaStore = createPracticeManifestStore({ storage: quotaStorage, defaultOptions: { profileId, now } });
+  const loaded = quotaStore.load();
+  assert.equal(loaded.recovery, "quota-direct");
+  assert.equal(JSON.parse(values.get(PRACTICE_MANIFEST_KEY)).databaseVersion, 13, "in-place overwrite should recover when only temporary headroom is missing");
+}
+
+{
+  const current = createDefaultPracticeManifest({ profileId, now });
+  const values = new Map([[PRACTICE_MANIFEST_KEY, JSON.stringify(current)]]);
+  const quotaStorage = {
+    getItem(key) { return values.get(key) ?? null; },
+    setItem() { throw quotaError(); },
+    removeItem(key) { values.delete(key); },
+  };
+  const quotaStore = createPracticeManifestStore({ storage: quotaStorage, defaultOptions: { profileId, now } });
+  assert.throws(
+    () => quotaStore.save({ ...current, updatedAt: "2026-07-05T18:44:13.000Z" }),
+    (error) => error.code === "PRACTICE_STORAGE_QUOTA_EXCEEDED" && error.operation === "manifest-write",
+    "explicit writes that truly cannot persist must report quota instead of a generic transaction failure",
+  );
+}
+
+console.log("Practice manifest creation, round-trip, low-quota recovery, backup recovery, controlled corruption, and scoped reset passed.");
 
