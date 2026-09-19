@@ -86,7 +86,7 @@ export function createLeaderboardProfileService({ getClient = getSupabaseClient 
     }
   };
 
-  const initialize = (user) => {
+  const initialize = (user, { force = false } = {}) => {
     const userId = typeof user?.id === "string" ? user.id : null;
     if (!userId) {
       activeUserId = null;
@@ -94,9 +94,15 @@ export function createLeaderboardProfileService({ getClient = getSupabaseClient 
       return Promise.resolve(publish(makeState()));
     }
     if (userId === activeUserId && initializationPromise) return initializationPromise;
+    if (
+      !force &&
+      userId === activeUserId &&
+      ["ready", "needs-username"].includes(state.status)
+    ) return Promise.resolve(state);
+
     activeUserId = userId;
     publish({ status: "loading" });
-    initializationPromise = (async () => {
+    const request = (async () => {
       const result = await invoke("get");
       if (activeUserId !== userId) return state;
       if (result.unavailable) return publish({ status: "unavailable" });
@@ -107,7 +113,11 @@ export function createLeaderboardProfileService({ getClient = getSupabaseClient 
         profile,
       });
     })();
-    return initializationPromise;
+    initializationPromise = request;
+    void request.finally(() => {
+      if (initializationPromise === request) initializationPromise = null;
+    });
+    return request;
   };
 
   const baseState = (overrides = {}) => ({
