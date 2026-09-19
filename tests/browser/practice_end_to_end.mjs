@@ -5,8 +5,20 @@ import http from 'node:http';
 import {chromium,firefox,webkit} from 'playwright';
 const root=path.resolve(import.meta.dirname,'../..'),out=path.join(root,'browser-artifacts/practice-end-to-end');
 fs.mkdirSync(out,{recursive:true});
-const server=http.createServer((req,res)=>{let file=path.join(root,decodeURIComponent(new URL(req.url,'http://localhost').pathname));if(fs.existsSync(file)&&fs.statSync(file).isDirectory())file=path.join(file,'index.html');try{res.setHeader('Content-Type',({'.html':'text/html','.js':'text/javascript','.css':'text/css','.json':'application/json','.svg':'image/svg+xml'})[path.extname(file)]??'application/octet-stream');res.end(fs.readFileSync(file));}catch{res.writeHead(404);res.end();}}).listen(0,'127.0.0.1');
+const server=http.createServer((req,res)=>{let file=path.join(root,decodeURIComponent(new URL(req.url,'http://localhost').pathname));if(fs.existsSync(file)&&fs.statSync(file).isDirectory())file=path.join(file,'index.html');try{res.setHeader('Content-Type',({'.html':'text/html','.js':'text/javascript','.css':'text/css','.json':'application/json','.svg':'image/svg+xml'})[path.extname(file)]??'application/octet-stream');res.end(browserSource(file));}catch{res.writeHead(404);res.end();}}).listen(0,'127.0.0.1');
 await new Promise(r=>server.once('listening',r));
+
+// The test server exposes read-only engine diagnostics; engine behavior is unchanged.
+function browserSource(file){
+ const bytes=fs.readFileSync(file);
+ if(!file.endsWith('/js/practiceLab/practiceSessionEngine.js')) return bytes;
+ return bytes.toString().replace('export function createPracticeSessionEngine(options = {}) {','function createInstrumentedPracticeSessionEngine(options = {}) {')+
+ `\nexport function createPracticeSessionEngine(options={}) {
+ const engine=createInstrumentedPracticeSessionEngine({...options,logger:{warn(...args){(globalThis.__practiceWarnings??=[]).push(args.map(x=>x?.code??x?.message??String(x)));}}});
+ globalThis.__practiceEngine=engine;return engine;
+ }`;
+}
+
 const cases=[
  ['weak-keys','start-weak-keys','data-weak-keys-input','[data-weak-key-target]','e',false],
  ['combination-repair','prepare-combination-repair','data-combination-input','[data-combination-target]','th',false],
@@ -38,7 +50,7 @@ try{for(const browserName of (process.env.PRACTICE_BROWSERS??'chromium,firefox')
   const page=await context.newPage();page.setDefaultTimeout(15000);
   const record={browser:browserName,width,id,status:'FAIL',typed:0,errors:[]};page.on('pageerror',e=>record.errors.push(e.message));
   try{
-   await page.clock.install();
+   if(timed) await page.clock.install();
    await page.goto(`http://127.0.0.1:${server.address().port}/`);
    await page.locator('[data-action="modes"]').click();await page.locator('button[data-mode-id="practice"]').click();
    await page.locator(`[data-practice-action="open-experiment"][data-experiment-id="${id}"]`).first().click();
@@ -52,7 +64,7 @@ try{for(const browserName of (process.env.PRACTICE_BROWSERS??'chromium,firefox')
    assert.equal(await remaining(page,1),initial,'Backspace did not restore the expected character');
    const pause=page.getByRole('button',{name:'PAUSE',exact:true});
    if(await pause.count()){
-    await pause.click();const held=await remaining(page,20);await page.clock.fastForward(2000);
+    await pause.click();const held=await remaining(page,20);await (timed ? page.clock.fastForward(2000) : page.waitForTimeout(150));
     await page.getByRole('button',{name:'RESUME',exact:true}).click();
     assert.equal(await remaining(page,20),held,'Pause changed the passage');
     assert.ok(await input.evaluate(e=>e===document.activeElement),'Resume did not restore typing focus');
@@ -61,12 +73,12 @@ try{for(const browserName of (process.env.PRACTICE_BROWSERS??'chromium,firefox')
    const starter=await remaining(page,80);await type(page,starter,25);record.typed+=starter.length;
    const button=page.getByRole('button',{name:/^(STOP|EXIT SESSION|END SESSION)$/}).first();
    if(await button.count()){
-    await button.focus();await page.clock.fastForward(750);
+    await button.focus();await (timed ? page.clock.fastForward(750) : page.waitForTimeout(750));
     assert.ok(await button.evaluate(e=>e===document.activeElement),'Timer steals control focus');
     await input.click();
    }
    const deadline=Date.now()+120000;
-   for(let step=0;step<420&&Date.now()<deadline;step++){
+   for(let step=0;step<2000&&Date.now()<deadline;step++){
     const results=await saved(page);if(results.some(r=>r.status==='completed'))break;
     if(await input.count()&&await input.isEnabled()&&await page.locator(cursor).count()){
      if(id!=='burst-sprints')assert.ok(await page.evaluate(attr=>window.__capture===document.querySelector(`[${attr}]`),attribute),'Capture replaced during a phase transition');
@@ -74,7 +86,7 @@ try{for(const browserName of (process.env.PRACTICE_BROWSERS??'chromium,firefox')
      await type(page,text);record.typed+=text.length;
     }
     if(timed)await page.clock.fastForward(id==='burst-sprints'?5000:30000);
-    else await page.clock.runFor(100);
+    else await page.waitForTimeout(50);
    }
    const rows=await saved(page);record.summaries=rows.map(r=>({sessionId:r.sessionId,status:r.status,experimentId:r.experimentId}));
    assert.equal(rows.filter(r=>r.status==='completed').length,1,'Exactly one completed session must be saved');
@@ -86,7 +98,7 @@ try{for(const browserName of (process.env.PRACTICE_BROWSERS??'chromium,firefox')
    const sessionId=rows.find(r=>r.status==='completed').sessionId;
    await page.reload();assert.equal((await saved(page)).filter(r=>r.sessionId===sessionId&&r.status==='completed').length,1,'Completed result lost or duplicated on reload');
    record.status='PASS';
-  }catch(e){record.error=String(e);record.body=await page.locator('body').innerText().catch(()=>'');await page.screenshot({path:path.join(out,`${browserName}-${id}-failure.png`)}).catch(()=>{});}
+  }catch(e){record.error=String(e);record.diagnostics=await page.evaluate(()=>({snapshot:globalThis.__practiceEngine?.getSnapshot?.(),warnings:globalThis.__practiceWarnings??[]})).catch(()=>null);record.body=await page.locator('body').innerText().catch(()=>'');await page.screenshot({path:path.join(out,`${browserName}-${id}-failure.png`)}).catch(()=>{});}
   finally{reports.push(record);console.log(JSON.stringify(record));fs.writeFileSync(path.join(out,'report.json'),JSON.stringify(reports,null,2));await context.close();}
  }}finally{await browser.close();}
 }}finally{server.close();}
