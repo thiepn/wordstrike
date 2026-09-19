@@ -1,0 +1,32 @@
+name: Practice Studio Long-Passage Check
+on:
+  push:
+    branches: [ui/practice-studio]
+    paths: ['tests/browser/practice_end_to_end.mjs', '.github/workflows/practice-studio-boundary.yml']
+permissions:
+  contents: read
+jobs:
+  webkit-long-passage:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    container:
+      image: mcr.microsoft.com/playwright:v1.57.0-noble
+      options: --ipc=host
+    env:
+      HOME: /root
+      PRACTICE_BROWSERS: webkit
+      PRACTICE_CASES: combination-repair
+      PRACTICE_WIDTH: 1280
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --no-save playwright@1.57.0
+      - run: node tests/browser/practice_end_to_end.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: studio-long-passage
+          path: browser-artifacts/practice-end-to-end/
+          retention-days: 7

@@ -80,7 +80,10 @@ try{for(const browserName of (process.env.PRACTICE_BROWSERS??'chromium,firefox')
     assert.ok(await button.evaluate(e=>e===document.activeElement),'Timer steals control focus');
     await input.click();
    }
-   const deadline=Date.now()+120000;
+   // Long generated passages can exceed 4,400 characters. At the deliberately
+   // bounded typing rate, WebKit may need more than two minutes to finish them.
+   // Keep every completion/persistence assertion; do not truncate the passage.
+   const deadline=Date.now()+180000;
    for(let step=0;step<2000&&Date.now()<deadline;step++){
     assert.deepEqual(record.errors,[],'Unexpected browser runtime error');
     const results=await saved(page);if(results.some(r=>r.status==='completed'))break;
