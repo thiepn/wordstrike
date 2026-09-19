@@ -25,7 +25,7 @@ const drawings = Object.freeze({
   'weakness-boss': '<path d="m110 8 50 18-8 34-42 25-42-25-8-34Z"/><path d="m86 35 12 10m36-10-12 10M93 61h34"/>',
 });
 export function practiceDrillArtwork(id) {
-  return `<svg viewBox="0 0 220 92" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${drawings[id] ?? drawings['full-assessment']}</svg>`;
+  return `<svg viewBox="0 0 220 92" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${Object.hasOwn(drawings, id) ? drawings[id] : drawings['full-assessment']}</svg>`;
 }
 const catalogCards = view => view.categories.flatMap(category => category.experiments).sort((a,b) => (a.category === 'assessment') - (b.category === 'assessment'));
 const categoryText = Object.freeze({assessment:'Assess', precision:'Precision', speed:'Speed', fluency:'Fluency', 'real-world':'Real-world', advanced:'Advanced', custom:'Custom'});
@@ -143,7 +143,7 @@ export function renderPracticeLabHome(root, view, {focusSelector = null} = {}) {
   if (restoreSearch && selection) search?.setSelectionRange?.(...selection);
   return true;
 }
-const disclosures = new Set(['What this mode does','Evidence boundary','Why these are separate','What this assessment does not claim','Why this plan?']);
+const disclosures = new Set(['What this mode does','Evidence boundary','Why these are separate','What this assessment does not claim','Why this plan?','Interpretation boundary','Recommended keys','Recommended targets','Recommended words']);
 export function enhancePracticeLabView(root, view) {
   const screen = root.querySelector?.('.practice-lab-screen');
   if (!screen || screen.dataset.labIdentity || !screen.ownerDocument?.createElement) return;
@@ -153,8 +153,10 @@ export function enhancePracticeLabView(root, view) {
   const main = screen.querySelector('main');
   if (!shell || !main) return;
   if (shell === main) {
+    const active = document.activeElement;
     const wrapper = document.createElement('div'); wrapper.className = 'practice-lab-shell';
     main.before(wrapper); main.classList.remove('practice-lab-shell'); wrapper.append(main); shell = wrapper;
+    if (main.contains(active)) active.focus?.({preventScroll:true});
   }
   const state = wire(root);
   const title = main.querySelector('h1') ?? screen.querySelector('h1');
@@ -165,7 +167,7 @@ export function enhancePracticeLabView(root, view) {
   if (existingHeader) existingHeader.after(navHolder.firstElementChild);
   else shell.prepend(navHolder.firstElementChild);
   const id = view.experimentId;
-  if (drawings[id] && title) {
+  if (Object.hasOwn(drawings, id) && title) {
     const art = document.createElement('div'); art.className = 'pl-detail-art'; art.setAttribute('aria-hidden','true');
     art.innerHTML = practiceDrillArtwork(id); // Fixed artwork; unknown IDs use a fixed fallback.
     title.before(art);
