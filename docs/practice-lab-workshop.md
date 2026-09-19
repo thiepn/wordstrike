@@ -50,3 +50,9 @@ Browser screenshots and axe checks support visual/accessibility review. Phone-si
 ## Interaction hardening
 
 An identical catalog refresh used to replace the button between pointer-down and click. A native-browser regression reproduced zero activations before the fix and one afterward. Identical visible catalog updates now keep the mounted DOM, search field, layout controls, and button alive; changed catalog data still renders normally. This adds no timers, observers, or early pointer-down activation.
+
+## Editor and setup continuation
+
+Custom Text now separates the writing desk from the session settings and saved library. Selection modes have descriptions, source feedback explains how to proceed instead of exposing error codes, and timed readiness follows the existing capacity checks. The highlighted range is captured before a busy-state render, so Selection practices the intended excerpt. Numbers/Symbols and Punctuation/Capitals present practice and standardized checks side by side on wide screens. Setup fields and duration choices use consistently sized controls. No live host, score, schema, or stored source policy is changed.
+
+References checked during this continuation: W3C form notifications (https://www.w3.org/WAI/tutorials/forms/notifications/) for actionable error text and associated controls; W3C keyboard-interface guidance (https://www.w3.org/WAI/ARIA/apg/practices/keyboard-interface/) for native controls and visible focus; Monkeytype (https://monkeytype.com/) as a focus-first typing reference. These are design inputs, not evidence of measured learning gains.

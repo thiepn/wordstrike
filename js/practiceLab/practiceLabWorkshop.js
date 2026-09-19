@@ -136,6 +136,15 @@ function enhanceSetup(screen, view, document) {
   if (methodology) for (const paragraph of [...main.querySelectorAll(':scope > p')]) {
     if (!paragraph.hasAttribute('role') && !paragraph.querySelector('button,input,select,textarea,a')) methodology.append(paragraph);
   }
+  if (['numbers-symbols','punctuation-capitals'].includes(view.experimentId)) {
+    const sections = [...main.querySelectorAll(':scope > section.practice-lab-empty-state')];
+    if (sections.length === 2 && sections.every(section => section.querySelector('button[data-practice-action]'))) {
+      const active = document.activeElement;
+      const pair = node(document,'div','pl-dual-setup');
+      sections[0].before(pair); pair.append(...sections);
+      if (pair.contains(active)) active.focus({preventScroll:true});
+    }
+  }
   enhanceLetterPicker(screen, document);
   const protocol = main.querySelector(':scope > section .practice-weak-key-plan, :scope > section .practice-combination-plan')?.closest('section');
   const primary = main.querySelector('[data-weak-key-target], [data-combination-target]')?.closest('section');
