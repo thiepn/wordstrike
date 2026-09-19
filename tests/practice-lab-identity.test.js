@@ -11,3 +11,15 @@ test('artwork is a fixed allowlist and never incorporates untrusted IDs',()=>{as
 test('home has native controls, a labeled search, non-color filter state, and live count',()=>{const root=rootFixture();renderPracticeLabHome(root,fixture());for(const text of ['aria-label="Practice Lab navigation"','aria-current="page"','type="search"','Find a drill','aria-pressed="true"','aria-live="polite"','No matching drills','data-lab-action="reset"'])assert.ok(root.innerHTML.includes(text),text);disposePracticeLabPresentation(root);});
 test('re-rendering keeps exactly one listener pair and unmount removes both',()=>{const root=rootFixture();renderPracticeLabHome(root,fixture());renderPracticeLabHome(root,fixture());assert.equal(root.listeners.size,2);disposePracticeLabPresentation(root);assert.equal(root.listeners.size,0);disposePracticeLabPresentation(root);renderPracticeLabHome(root,fixture());assert.equal(root.listeners.size,2);disposePracticeLabPresentation(root);});
 test('optional assessment follows actionable drill groups instead of blocking them',()=>{const view=fixture();view.categories.unshift({id:'assessment',title:'Assessment',experiments:[{...card,id:'full-assessment',category:'assessment'}]});const root=rootFixture();renderPracticeLabHome(root,view);assert.ok(root.innerHTML.indexOf('data-lab-drill="weak-keys"')<root.innerHTML.indexOf('data-lab-drill="full-assessment"'));disposePracticeLabPresentation(root);});
+
+test('identical background refreshes preserve the mounted catalog but changed data is rendered',()=>{
+ const root=rootFixture();let current=null,writes=0,html='';
+ Object.defineProperty(root,'innerHTML',{get:()=>html,set:value=>{html=value;current={querySelector:()=>null,querySelectorAll:()=>[]};writes++;}});
+ root.querySelector=selector=>selector==='.pl-studio-home'?current:null;
+ const view=fixture();renderPracticeLabHome(root,view);const mounted=current;
+ renderPracticeLabHome(root,view);renderPracticeLabHome(root,structuredClone(view));
+ assert.equal(writes,1);assert.equal(current,mounted);
+ const changed=fixture();changed.categories[0].experiments=[{...card,title:'Updated title'}];
+ renderPracticeLabHome(root,changed);assert.equal(writes,2);assert.ok(html.includes('Updated title'));
+ disposePracticeLabPresentation(root);
+});

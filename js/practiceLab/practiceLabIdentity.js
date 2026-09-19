@@ -1,3 +1,4 @@
+import { enhancePracticeWorkshop, disposePracticeWorkshop } from './practiceLabWorkshop.js';
 /** Practice Studio: presentation only. No session/input observers, timers or writes. */
 const escape = (value = '') => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const safeId = (value = '') => String(value).replace(/[^a-z0-9-]/gi, '');
@@ -125,7 +126,7 @@ function wire(root) {
   return state;
 }
 export function disposePracticeLabPresentation(root) {
-  roots.get(root)?.dispose(); roots.delete(root);
+  disposePracticeWorkshop(root); roots.get(root)?.dispose(); roots.delete(root);
 }
 export function renderPracticeLabHome(root, view, {focusSelector = null} = {}) {
   const state = wire(root);
@@ -134,10 +135,21 @@ export function renderPracticeLabHome(root, view, {focusSelector = null} = {}) {
   const restoreFilter = active?.dataset?.labFilter;
   const selection = restoreSearch ? [active.selectionStart,active.selectionEnd] : null;
   state.cards = catalogCards(view); state.analysis = view.analysis;
-  root.innerHTML = homeMarkup(view); // Every model string is escaped; art is a fixed allowlist.
+  const markup = homeMarkup(view);
+  // Registry refreshes with identical visible data must not replace a pressed
+  // button or the focused search. Keep the existing catalog and its listeners.
+  const existing = root.querySelector?.('.pl-studio-home');
+  if (existing && state.homeScreen === existing && state.homeMarkup === markup) {
+    if (focusSelector) root.querySelector?.(focusSelector)?.focus?.({preventScroll:true});
+    return true;
+  }
+  root.innerHTML = markup; // Every model string is escaped; art is a fixed allowlist.
+  state.homeMarkup = markup;
+  state.homeScreen = root.querySelector?.('.pl-studio-home');
   const search = root.querySelector?.('[data-lab-search]');
   if (search) search.value = state.query;
   applyFilters(root, state);
+  enhancePracticeWorkshop(root, view);
   const target = restoreSearch ? search : (restoreFilter && root.querySelector?.(`[data-lab-filter="${safeId(restoreFilter)}"]`)) || (focusSelector && root.querySelector?.(focusSelector)) || root.querySelector?.('[data-practice-heading]');
   target?.focus?.({preventScroll:true});
   if (restoreSearch && selection) search?.setSelectionRange?.(...selection);
@@ -185,4 +197,5 @@ export function enhancePracticeLabView(root, view) {
     while (section.firstChild) details.append(section.firstChild);
     section.replaceWith(details);
   }
+  enhancePracticeWorkshop(root, view);
 }

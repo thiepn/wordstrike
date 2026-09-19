@@ -1,5 +1,5 @@
 import { createPracticeLabController as createPracticeLabControllerV30 } from "./practiceLabControllerRuntimeV30.js";
-import { renderPracticeLabV31, renderPracticeCustomTextDetail } from "./practiceLabRendererV31.js";
+import { renderPracticeLabV31, renderPracticeCustomTextDetail, updatePracticeCustomEditorUi } from "./practiceLabRendererV31.js";
 import { registerPracticeCustomTextExperiment } from "./practiceCustomTextExperiment.js";
 import { PRACTICE_CUSTOM_TEXT_DEFAULT_TIMED_DURATION_MS, PRACTICE_CUSTOM_TEXT_ERROR_CODES, PRACTICE_CUSTOM_TEXT_MIN_GRAPHEMES, PRACTICE_CUSTOM_TEXT_TIMED_DURATIONS_MS } from "./practiceCustomTextConstants.js";
 import { getPracticeCustomTextTimedAvailability } from "./practiceCustomTextAvailability.js";
@@ -90,11 +90,8 @@ export function createPracticeLabController(options = {}) {
   function scheduleDerive() { if (deriveTimer) clearTimeout(deriveTimer); deriveTimer = setTimeout(() => { deriveTimer = null; deriveEditor(); }, 120); }
   function updateDerivedDom() {
     if (routeId(base) !== CUSTOM || host) return;
-    const count = root?.querySelector?.("[data-custom-text-count]"); if (count) count.textContent = `${state.sourceGraphemeCount} source graphemes · locale ${state.contextDataLocale ?? "—"}`;
-    const dirtyNode = root?.querySelector?.("[data-custom-text-dirty]"); if (dirtyNode) dirtyNode.textContent = dirty() ? "Unsaved changes" : (state.editor.customTextId ? "Saved" : "Not saved");
-    const error = root?.querySelector?.("[data-custom-text-error]"); if (error) error.textContent = state.errorCode ?? state.validationErrorCode ?? "";
+    updatePracticeCustomEditorUi(root, { ...state, dirty: dirty() });
     const save = root?.querySelector?.("[data-practice-action='custom-save']"); if (save) save.disabled = state.saving || !dirty() || Boolean(state.localeMismatch);
-    const start = root?.querySelector?.("[data-practice-action='custom-start']"); if (start) start.disabled = state.starting || Boolean(state.localeMismatch) || Boolean(state.validationErrorCode);
     for (const button of root?.querySelectorAll?.("[data-practice-action='custom-duration']") ?? []) {
       const value = Number(button.dataset.durationMs); const available = state.timedAvailability.find((row) => row.durationMs === value)?.available === true; button.disabled = !available;
     }
@@ -169,11 +166,12 @@ export function createPracticeLabController(options = {}) {
   async function startCustom() {
     if (state.starting || state.localeMismatch) return false;
     const epoch = ++startEpoch;
+    // Capture the user's highlighted range before the busy-state render replaces the editor.
+    const source = root?.querySelector?.("[data-custom-text-source]");
+    const selectionRange = state.sessionMode === "selection" ? { start: source?.selectionStart ?? -1, end: source?.selectionEnd ?? -1 } : null;
     state = { ...state, starting: true, errorCode: null }; rerender();
     try {
       const registration = experimentRegistry.getRegistration(CUSTOM);
-      const source = root?.querySelector?.("[data-custom-text-source]");
-      const selectionRange = state.sessionMode === "selection" ? { start: source?.selectionStart ?? -1, end: source?.selectionEnd ?? -1 } : null;
       const savedIdentity = Boolean(state.editor.customTextId) && !sourceDirty();
       const prepared = await registration.setupFactory({
         sourceText: state.editor.sourceText,

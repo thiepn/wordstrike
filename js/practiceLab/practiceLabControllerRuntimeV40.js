@@ -1,3 +1,4 @@
+import { capturePracticeWorkshopFocus, restorePracticeWorkshopFocus } from './practiceLabWorkshop.js';
 import { renderPracticeLabHome, enhancePracticeLabView, disposePracticeLabPresentation } from './practiceLabIdentity.js';
 import { renderPracticePreviewProtocolSetup } from './practicePreviewProtocolSetup.js';
 import { createPracticeLabController as createBase } from './practiceLabControllerRuntimeV38.js';
@@ -7,7 +8,7 @@ import { loadPracticeEvidenceViews, renderPracticeEvidenceView } from './practic
 export function createPracticeLabController(options={}) {
   const {root}=options;let listening=false;const attach=()=>{if(!listening){root.addEventListener('click',click,true);listening=true;}};const detach=()=>{if(listening){root.removeEventListener('click',click,true);listening=false;}};let mounted=false,lastView=null,key=null,state={status:'loading'},epoch=0,runtime=null,runtimePromise=null,host=null,report=null;
   const ensureRuntime=()=>runtimePromise??=(import('./practiceAssessmentRuntime.js').then(m=>m.createPracticeAssessmentRuntime()).then(r=>{runtime=r;return r;}).catch(e=>{runtimePromise=null;throw e;}));
-  function renderer(renderRoot,view,renderOptions={}) {
+  function renderContent(renderRoot,view,renderOptions={}) {
     if(host)return true;lastView=view;
     const protocolId=['read-ahead','metronome-typing'].includes(view.experimentId)?view.experimentId:null;
     if(protocolId){attach();const result=renderPracticePreviewProtocolSetup(renderRoot,protocolId);if(!options.renderer)enhancePracticeLabView(renderRoot,view);return result;}
@@ -21,6 +22,12 @@ export function createPracticeLabController(options={}) {
     if(view.kind==='treatment-response-progress') {const main=renderRoot.querySelector?.('main');if(main){const section=renderRoot.ownerDocument.createElement('section');section.setAttribute('data-practice-history','');main.prepend(section);renderPracticeEvidenceView(section,'history',state,{embedded:true});}}
     if(view.kind==='full-assessment-detail'&&state.status==='error'){const alert=renderRoot.ownerDocument.createElement('p');alert.setAttribute('role','alert');alert.textContent='Assessment could not load. Return to Practice Lab and try again.';renderRoot.querySelector('main')?.append(alert);}
     if(!options.renderer)enhancePracticeLabView(renderRoot,view);
+    return result;
+  }
+  function renderer(renderRoot,view,renderOptions={}) {
+    const focus = options.renderer ? null : capturePracticeWorkshopFocus(renderRoot);
+    const result = renderContent(renderRoot,view,renderOptions);
+    if (!options.renderer) restorePracticeWorkshopFocus(renderRoot,focus);
     return result;
   }
   // DOM navigation must traverse every versioned controller so route loading hooks run.
