@@ -7,8 +7,7 @@ const root=path.resolve(import.meta.dirname,'../..'),out=path.join(root,'browser
 fs.mkdirSync(out,{recursive:true});
 const server=http.createServer((req,res)=>{let file=path.join(root,decodeURIComponent(new URL(req.url,'http://localhost').pathname));if(fs.existsSync(file)&&fs.statSync(file).isDirectory())file=path.join(file,'index.html');try{res.setHeader('Content-Type',({'.html':'text/html','.js':'text/javascript','.css':'text/css','.json':'application/json','.svg':'image/svg+xml'})[path.extname(file)]??'application/octet-stream');res.end(browserSource(file));}catch{res.writeHead(404);res.end();}}).listen(0,'127.0.0.1');
 await new Promise(r=>server.once('listening',r));
-
-// The test server exposes read-only engine diagnostics; engine behavior is unchanged.
+// Read-only test diagnostics; production source and engine behavior are unchanged.
 function browserSource(file){
  const bytes=fs.readFileSync(file);
  if(!file.endsWith('/js/practiceLab/practiceSessionEngine.js')) return bytes;
@@ -18,7 +17,6 @@ function browserSource(file){
  globalThis.__practiceEngine=engine;return engine;
  }`;
 }
-
 const cases=[
  ['weak-keys','start-weak-keys','data-weak-keys-input','[data-weak-key-target]','e',false],
  ['combination-repair','prepare-combination-repair','data-combination-input','[data-combination-target]','th',false],
@@ -44,9 +42,14 @@ async function saved(page){return page.evaluate(async()=>{const {createPracticeI
 try{for(const browserName of (process.env.PRACTICE_BROWSERS??'chromium,firefox').split(',')){
  const browser=await ({chromium,firefox,webkit}[browserName]).launch();
  try{for(const [id,action,attribute,target,value,timed] of cases){
+  if(process.env.PRACTICE_CASES&&!process.env.PRACTICE_CASES.split(',').includes(id))continue;
   const width=Number(process.env.PRACTICE_WIDTH??1280);
   const context=await browser.newContext({viewport:{width,height:900},reducedMotion:'reduce',hasTouch:width<600});
-  await context.addInitScript(()=>localStorage.setItem('wordstrike.onboarding.general.v3','seen'));
+  await context.addInitScript(()=>{
+   localStorage.setItem('wordstrike.onboarding.general.v3','seen');
+   globalThis.__practiceRejections=[];
+   addEventListener('unhandledrejection',event=>globalThis.__practiceRejections.push({message:event.reason?.message,code:event.reason?.code,details:event.reason?.details,stack:event.reason?.stack}));
+  });
   const page=await context.newPage();page.setDefaultTimeout(15000);
   const record={browser:browserName,width,id,status:'FAIL',typed:0,errors:[]};page.on('pageerror',e=>record.errors.push(e.message));
   try{
@@ -79,11 +82,13 @@ try{for(const browserName of (process.env.PRACTICE_BROWSERS??'chromium,firefox')
    }
    const deadline=Date.now()+120000;
    for(let step=0;step<2000&&Date.now()<deadline;step++){
+    assert.deepEqual(record.errors,[],'Unexpected browser runtime error');
     const results=await saved(page);if(results.some(r=>r.status==='completed'))break;
     if(await input.count()&&await input.isEnabled()&&await page.locator(cursor).count()){
      if(id!=='burst-sprints')assert.ok(await page.evaluate(attr=>window.__capture===document.querySelector(`[${attr}]`),attribute),'Capture replaced during a phase transition');
      const text=await remaining(page,timed?32:100);assert.ok(text.length,'No next character while session active');
-     await type(page,text);record.typed+=text.length;
+     // Count sessions use real time and stay below the schema's 1000-WPM ceiling.
+     await type(page,text,timed?0:15);record.typed+=text.length;
     }
     if(timed)await page.clock.fastForward(id==='burst-sprints'?5000:30000);
     else await page.waitForTimeout(50);
@@ -98,7 +103,7 @@ try{for(const browserName of (process.env.PRACTICE_BROWSERS??'chromium,firefox')
    const sessionId=rows.find(r=>r.status==='completed').sessionId;
    await page.reload();assert.equal((await saved(page)).filter(r=>r.sessionId===sessionId&&r.status==='completed').length,1,'Completed result lost or duplicated on reload');
    record.status='PASS';
-  }catch(e){record.error=String(e);record.diagnostics=await page.evaluate(()=>({snapshot:globalThis.__practiceEngine?.getSnapshot?.(),warnings:globalThis.__practiceWarnings??[]})).catch(()=>null);record.body=await page.locator('body').innerText().catch(()=>'');await page.screenshot({path:path.join(out,`${browserName}-${id}-failure.png`)}).catch(()=>{});}
+  }catch(e){record.error=String(e);record.diagnostics=await page.evaluate(()=>({snapshot:globalThis.__practiceEngine?.getSnapshot?.(),warnings:globalThis.__practiceWarnings??[],rejections:globalThis.__practiceRejections??[]})).catch(()=>null);record.body=await page.locator('body').innerText().catch(()=>'');await page.screenshot({path:path.join(out,`${browserName}-${id}-failure.png`)}).catch(()=>{});}
   finally{reports.push(record);console.log(JSON.stringify(record));fs.writeFileSync(path.join(out,'report.json'),JSON.stringify(reports,null,2));await context.close();}
  }}finally{await browser.close();}
 }}finally{server.close();}
