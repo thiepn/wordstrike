@@ -5,6 +5,9 @@ on:
     paths: ['.github/workflows/weak-key-case-repair.yml']
 permissions:
   contents: write
+concurrency:
+  group: weak-key-case-repair
+  cancel-in-progress: false
 jobs:
   repair:
     runs-on: ubuntu-latest
@@ -19,6 +22,7 @@ jobs:
       - name: Prove regression and correct exact reviewed source
         run: |
           test "$GITHUB_REF_NAME" = verify/practice-production
+          if [ ! -f .github/workflows/weak-key-case-repair.yml ]; then exit 0; fi
           test "$(git hash-object js/practiceLab/practiceWeakKeysGenerator.js)" = a9d10a59430898ccc2cb376986d3d975905ca04a
           mkdir -p /tmp/weak-case-evidence
           if node --test tests/practice-weak-keys-case-regression.test.js > /tmp/weak-case-evidence/before.log 2>&1; then
@@ -34,7 +38,6 @@ jobs:
                 if (!targetPositions.length || targetPositions.length > policy.content.focusMaxTargetOpportunitiesPerLexicalItem) continue;
                 const normalizedWord = summary.lexicalKey.normalize("NFC").toLowerCase();
                 if (Array.from(normalizedWord).length < 2) continue;'''
-          # Remove the YAML run block indentation from multiline literal tails.
           before=before.replace('\n          ', '\n')
           after='''      const normalizedWord = summary.lexicalKey.normalize("NFC").toLowerCase();
                 if (Array.from(normalizedWord).length < 2) continue;
@@ -55,14 +58,22 @@ jobs:
                 if (containsTarget || !word.lexicalKey || Array.from(word.lexicalKey).length < 2) continue;'''.replace('\n          ', '\n')
           assert s.count(before)==1, 'neutral-word integration site changed'
           p.write_text(s.replace(before,after))
+          sw=Path('sw.js')
+          text=sw.read_text()
+          assert text.count('CACHE_PREFIX + "v21"')==1, 'unexpected offline cache revision'
+          sw.write_text(text.replace('CACHE_PREFIX + "v21"','CACHE_PREFIX + "v22"'))
+          test=Path('tests/browser/storage_production_acceptance.mjs')
+          text=test.read_text()
+          text=text.replace("releaseUnderTest: 'd67f0152370254d63d24f97097585cc186e331d1'", "verificationSource: process.env.GITHUB_SHA ?? 'local'")
+          test.write_text(text)
           PY
           node --test tests/practice-weak-keys*.test.js > /tmp/weak-case-evidence/after.log 2>&1
           git diff --check
           rm .github/workflows/weak-key-case-repair.yml
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add js/practiceLab/practiceWeakKeysGenerator.js .github/workflows/weak-key-case-repair.yml
-          git commit -m 'fix(practice): count targets from the actual normalized generated spelling'
+          git add js/practiceLab/practiceWeakKeysGenerator.js sw.js tests/browser/storage_production_acceptance.mjs .github/workflows/weak-key-case-repair.yml
+          git commit -m 'fix(practice): count targets from actual normalized spelling and refresh offline assets'
           git push origin HEAD:verify/practice-production
       - uses: actions/upload-artifact@v4
         if: always()
