@@ -195,12 +195,14 @@ async function buildTargetWordCandidates({ targetIndex, wordKeys, contentItems, 
       const word = annotation.words?.find((entry) => entry.lexicalKey === summary.lexicalKey && entry.startIndex === ref.positions?.[0])
         ?? annotation.words?.find((entry) => entry.lexicalKey === summary.lexicalKey);
       if (!word) continue;
-      const targetPositions = (annotation.keyOccurrences ?? [])
-        .filter((occurrence) => exactKey(occurrence.target, targetKey) && occurrence.startIndex >= word.startIndex && occurrence.startIndex < word.endIndex)
-        .map((occurrence) => occurrence.startIndex - word.startIndex);
-      if (!targetPositions.length || targetPositions.length > policy.content.focusMaxTargetOpportunitiesPerLexicalItem) continue;
       const normalizedWord = summary.lexicalKey.normalize("NFC").toLowerCase();
       if (Array.from(normalizedWord).length < 2) continue;
+      // Generated units use the normalized spelling, not the source sentence's
+      // capitalization. Count the exact text that the learner will type.
+      const targetPositions = (analyzePracticeText({ text: normalizedWord, language }).keyOccurrences ?? [])
+        .filter((occurrence) => exactKey(occurrence.target, targetKey))
+        .map((occurrence) => occurrence.startIndex);
+      if (!targetPositions.length || targetPositions.length > policy.content.focusMaxTargetOpportunitiesPerLexicalItem) continue;
       const metadata = generatedWordContext(normalizedWord, targetKey, context, targetPositions);
       const difficulty = scoreText(normalizedWord, language);
       candidates.push(freezeDeep({
@@ -339,7 +341,9 @@ async function buildNeutralMaterial({ targetIndex, contentItems, targetKey, lang
       }));
     }
     for (const word of annotation.words ?? []) {
-      const containsTarget = (annotation.keyOccurrences ?? []).some((occurrence) => exactKey(occurrence.target, targetKey) && occurrence.startIndex >= word.startIndex && occurrence.startIndex < word.endIndex);
+      // A source capital (e.g. "The") becomes lowercase in generated text.
+      // Such a word is not neutral for "t" even if the source had no lowercase t.
+      const containsTarget = typeof word.lexicalKey === "string" && word.lexicalKey.includes(targetKey);
       if (containsTarget || !word.lexicalKey || Array.from(word.lexicalKey).length < 2) continue;
       const identity = `${word.lexicalKey}|${content.contentId}`;
       if (!wordsByIdentity.has(identity)) wordsByIdentity.set(identity, freezeDeep({

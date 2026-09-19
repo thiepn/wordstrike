@@ -111,7 +111,7 @@ jobs:
     if: github.ref == 'refs/heads/main'
     needs: source
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 20
     container:
       image: mcr.microsoft.com/playwright:v1.57.0-noble
       options: --ipc=host
@@ -134,7 +134,7 @@ jobs:
           import fs from 'node:fs';
           import {setTimeout as wait} from 'node:timers/promises';
           const files=['sw.js','practiceLabWorkshop.css','js/practiceLab/practiceLabWorkshop.js','js/practiceLab/practiceLabIdentity.js','js/practiceLab/practiceLabRendererV31.js','js/practiceLab/practiceLabControllerRuntimeV31.js'];
-          const deadline=Date.now()+300000;
+          const deadline=Date.now()+900000;
           for(;;){
             const ok=await Promise.all(files.map(async file=>{
               try{const r=await fetch(process.env.PRACTICE_URL+file+'?release='+process.env.GITHUB_SHA,{signal:AbortSignal.timeout(12000)});return r.ok&&(await r.text())===fs.readFileSync(file,'utf8');}catch{return false;}

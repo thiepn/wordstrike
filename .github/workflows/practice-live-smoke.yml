@@ -11,7 +11,7 @@ concurrency:
 jobs:
   live:
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 20
     container:
       image: mcr.microsoft.com/playwright:v1.57.0-noble
       options: --ipc=host

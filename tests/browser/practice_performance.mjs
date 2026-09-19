@@ -24,7 +24,7 @@ try {
  console.log('Page loaded');
  const cdp=await context.newCDPSession(page);await cdp.send('Emulation.setCPUThrottlingRate',{rate:4});await cdp.send('Performance.enable');console.log('CPU throttle configured');
  await page.evaluate(async()=>{const [{createPracticeLabController},{createPracticeFeatureGate},{createPracticeExperimentRegistry}]=await Promise.all([import('/js/practiceLab/practiceLabController.js'),import('/js/practiceLab/practiceFeatureGate.js'),import('/js/practiceLab/practiceExperimentRegistry.js')]);const featureGate=createPracticeFeatureGate({developerMode:true});window.lab=createPracticeLabController({root:document.querySelector('#app'),featureGate,experimentRegistry:createPracticeExperimentRegistry({featureGate})});lab.mount();window.inputDurations=[];let start;document.addEventListener('beforeinput',()=>start=performance.now(),true);window.addEventListener('beforeinput',()=>inputDurations.push(performance.now()-start));});
- await page.locator('[data-route="skill-map"]').waitFor();console.log('Practice ready');
+ await page.locator('.pl-navigation [data-route="skill-map"]').waitFor();console.log('Practice ready');
  const metrics=async()=>Object.fromEntries((await cdp.send('Performance.getMetrics')).metrics.map(m=>[m.name,m.value]));
  for(const id of ['read-ahead','metronome-typing']) {
   await page.evaluate(id=>lab.navigate({name:'experiment-detail',params:{experimentId:id}}),id);

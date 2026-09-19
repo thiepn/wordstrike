@@ -52,7 +52,7 @@ try {
    results.nativeContrast=nativeContrast;
    report.push({width,name,...results});console.log(JSON.stringify(report.at(-1)));
   };
-  await page.locator('[data-route="skill-map"]').waitFor();await audit('home');
+  await page.locator('.pl-navigation [data-route="skill-map"]').waitFor();await audit('home');
   for(const [route,text] of [['skill-map','No skill evidence yet'],['review-queue','No reviews scheduled'],['progress','No training history']]){await page.evaluate(name=>lab.navigate({name}),route);await page.getByText(text,{exact:true}).waitFor();await audit(route);if(route!=='progress'&&!await page.locator('h1').evaluate(el=>el===document.activeElement))throw Error(`${route} lost focus while loading`);}
   for(const id of ['full-assessment','real-text','read-ahead','metronome-typing']){
    await page.evaluate(id=>lab.navigate({name:'experiment-detail',params:{experimentId:id}}),id);
