@@ -1,3 +1,4 @@
+import { renderPracticeSessionMarkup, focusPracticeSessionInput } from "./practiceSessionDom.js";
 import { createPracticeSessionPulse } from "./practiceSessionPulse.js";
 import { createPracticeIndexedDbStore } from "./practiceIndexedDbStore.js";
 import { createPracticeManifestStore } from "./practiceManifestStore.js";
@@ -21,7 +22,7 @@ function textWindow(contentPlan, snapshot) {
   const chars = Array.from(contentPlan.text); const cursor = snapshot.cursorIndex ?? 0; const errors = new Set(snapshot.errorPositions ?? []); const start = Math.max(0, cursor - 120); const end = Math.min(chars.length, cursor + 360);
   return chars.slice(start, end).map((value, offset) => { const index = start + offset; const classes = ["practice-real-text-char"]; if (index < cursor) classes.push(errors.has(index) ? "is-error" : "is-typed"); if (index === cursor) classes.push("is-current"); return `<span class="${classes.join(" ")}">${value === " " ? "&nbsp;" : esc(value)}</span>`; }).join("");
 }
-function shell(root, body, view) { root.innerHTML = `<section class="screen practice-lab-screen" data-practice-view="${view}"><div class="practice-lab-shell">${body}</div></section>`; }
+function shell(root, body, view) { renderPracticeSessionMarkup(root, `<section class="screen practice-lab-screen" data-practice-view="${view}"><div class="practice-lab-shell">${body}</div></section>`); }
 function stopButton() { return `<button type="button" data-burst-session-action="stop" aria-label="Stop Burst Sprints">STOP</button>`; }
 function renderWarmup(root, session, snapshot) {
   const remaining = Math.max(0, PRACTICE_BURST_WARMUP_DURATION_MS - (snapshot.timing?.activeDurationMs ?? 0));
@@ -65,7 +66,7 @@ export async function mountPracticeBurstSprintsSession({ root, session, onExit =
       burstProtocol: Object.freeze({ phase, sprintOrdinal, recoveryRemainingMs: phase === "recovery" ? remainingMs : 0, previewRemainingMs: phase === "preview" ? remainingMs : 0, protocolInactiveMs }),
     });
   };
-  const focus = () => queueMicrotask(() => { if (running() && inputEnabled()) root.querySelector?.("[data-burst-input]")?.focus?.({ preventScroll: true }); });
+  const focus = () => queueMicrotask(() => { if (running() && inputEnabled()) focusPracticeSessionInput(root, "[data-burst-input]"); });
   const cleanup = async (notify = true) => { if (closed) return; closed = true; pulseLoop?.stop(); unsubscribe?.(); root.removeEventListener("beforeinput", beforeInput); root.removeEventListener("keydown", keyDown); root.removeEventListener("click", click); globalThis.document?.removeEventListener?.("visibilitychange", visibilityChange); try { await engine.destroy(); } catch {} try { dataStore.close?.(); } catch {} if (notify) onExit(finalResult); };
   const interruptedArtifact = async () => { const snapshot = engine.getSnapshot(); const result = session.experiment.burstAccumulator?.finalize({ finalActiveDurationMs: snapshot.timing?.activeDurationMs ?? 0 }); const { analyzePracticeBurstSprintsResult } = await import("./practiceBurstSprintsAnalyzer.js"); return analyzePracticeBurstSprintsResult({ burstResult: result, plan: session.plan }).trainingQuality; };
   const interrupt = async (reason = "manual-stop") => {
