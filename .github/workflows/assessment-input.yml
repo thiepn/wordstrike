@@ -2,16 +2,63 @@ name: Assessment Input Regression
 on:
   push:
     branches: [main, fix/assessment-typing]
-    paths: ['js/practiceLab/practiceAssessmentSessionHost.js', 'js/practiceLab/practiceAssessmentInput.js', 'tests/browser/assessment_input.mjs', 'tests/practice-assessment-input.test.js', '.github/workflows/assessment-input.yml']
+    paths: ['js/practiceLab/practiceAssessmentSessionHost.js', 'js/practiceLab/practiceAssessmentInput.js', 'tests/browser/assessment_input.mjs', 'tests/practice-assessment-input.test.js', '.github/apply-assessment-offline.mjs', '.github/workflows/assessment-input.yml']
 permissions:
   contents: read
 concurrency:
   group: assessment-input-${{ github.ref }}
   cancel-in-progress: true
 jobs:
-  browser:
+  source:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    outputs:
+      sha: ${{ steps.prepare.outputs.sha }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - id: prepare
+        run: |
+          if [ -f .github/apply-assessment-offline.mjs ]; then
+            test "$GITHUB_REF_NAME" = fix/assessment-typing
+            node .github/apply-assessment-offline.mjs
+            node tests/practice-offline-shell.test.js
+            git config user.name 'github-actions[bot]'
+            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+            git add sw.js .github/apply-assessment-offline.mjs
+            git commit -m 'fix(assessment): include repaired input in the offline shell'
+            git push origin HEAD:fix/assessment-typing
+          fi
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+  core:
+    needs: source
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.source.outputs.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: |
+          mkdir -p browser-artifacts/assessment-core
+          npm test > browser-artifacts/assessment-core/unit.log 2>&1
+          node scripts/auditPracticePrivacySecurity.mjs > browser-artifacts/assessment-core/privacy.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: assessment-core
+          path: browser-artifacts/assessment-core/
+          retention-days: 7
+  browser:
+    needs: source
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:
@@ -22,8 +69,11 @@ jobs:
     env:
       HOME: /root
       PRACTICE_BROWSER: ${{ matrix.browser }}
+      PRACTICE_FULL_STORAGE: '1'
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.source.outputs.sha }}
       - uses: actions/setup-node@v4
         with:
           node-version: 22
