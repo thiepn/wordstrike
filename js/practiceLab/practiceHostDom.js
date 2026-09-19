@@ -42,6 +42,14 @@ export function focusPracticeSessionInput(root, selector, { force = false } = {}
   if (!force && active && active !== doc.body && active !== doc.documentElement && active.isConnected) return;
   input.focus?.({ preventScroll: true });
 }
+export function scrollPracticeTypingCursor(root) {
+  const cursor = root.querySelector?.('.practice-real-text-typing .is-current, .practice-weak-key-typing .is-current, .practice-combination-typing .is-current, [data-protocol-text] [aria-current="true"]');
+  const box = cursor?.closest?.('.practice-real-text-typing, .practice-weak-key-typing, .practice-combination-typing, [data-protocol-text]');
+  if (!box || box.scrollHeight <= box.clientHeight) return;
+  const region = box.getBoundingClientRect(), rect = cursor.getBoundingClientRect();
+  if (rect.bottom > region.bottom - 20) box.scrollTop += rect.bottom - region.bottom + 20;
+  else if (rect.top < region.top + 20) box.scrollTop -= region.top - rect.top + 20;
+}
 /** Empty textareas do not emit native delete-beforeinput consistently.
  * Route physical Backspace through the existing normalizer exactly once.
  * Touch keyboard beforeinput and IME composition remain owned by each host.
@@ -62,6 +70,9 @@ export function wirePracticeKeyboardCorrections(root) {
       inputType: event.ctrlKey || event.altKey || event.metaKey ? 'deleteWordBackward' : 'deleteContentBackward',
     }));
   }, true);
+  root.addEventListener('beforeinput', event => {
+    if (event.target?.closest?.('textarea')) queueMicrotask(() => scrollPracticeTypingCursor(root));
+  });
 }
 export function renderPracticeSessionMarkup(root, markup) {
   wirePracticeKeyboardCorrections(root);
@@ -70,7 +81,8 @@ export function renderPracticeSessionMarkup(root, markup) {
   const previous = renders.get(root);
   if (previous?.markup === markup && previous.first === root.firstChild) return;
   const template = doc.createElement('template');
-  template.innerHTML = markup;
+  // The passage uses pre-wrap; real spaces allow word-boundary line wrapping.
+  template.innerHTML = markup.replaceAll('>&nbsp;</span>', '> </span>');
   for (const input of template.content.querySelectorAll('textarea')) {
     input.classList.add('practice-session-input');
     input.setAttribute('data-practice-session-capture', '');
