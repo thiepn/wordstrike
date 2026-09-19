@@ -168,6 +168,9 @@ async function exerciseManifestQuota(page) {
     const now = () => new Date("2026-09-19T18:00:00.000Z");
     localStorage.clear();
     const legacy = createDefaultPracticeManifest({ profileId, now, overrides: { databaseVersion: 12 } });
+    // Force a valid legacy normalization delta so load() has to persist the
+    // migrated manifest while localStorage is saturated.
+    delete legacy.settings.physicalKeyboardTelemetryEnabled;
     localStorage.setItem(constants.PRACTICE_MANIFEST_KEY, JSON.stringify(legacy));
 
     let fillers = 0;
