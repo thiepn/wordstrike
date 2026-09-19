@@ -30,7 +30,7 @@ jobs:
           node-version: 22
       - name: Preserve tested source for reproducibility
         if: matrix.browser == 'chromium'
-        run: git archive --format=tar HEAD > /tmp/wordstrike-acceptance-source.tar
+        run: git -c safe.directory="$GITHUB_WORKSPACE" archive --format=tar HEAD > /tmp/wordstrike-acceptance-source.tar
       - uses: actions/upload-artifact@v4
         if: matrix.browser == 'chromium'
         with:
@@ -43,13 +43,13 @@ jobs:
           node --input-type=module <<'JS'
           import fs from 'node:fs';
           import {setTimeout as wait} from 'node:timers/promises';
-          const files=['sw.js','js/practiceLab/practiceDurableManifest.js','js/practiceLab/practiceManifestStore.js','js/practiceLab/practiceRepositoryLegacyV17.js','js/practiceLab/practiceRepositoryV30.js','js/practiceLab/practiceIndexedDbStore.js','js/practiceLab/practiceLabControllerRuntimeV25.js'];
+          const files=['sw.js','js/practiceLab/practiceDurableManifest.js','js/practiceLab/practiceManifestStore.js','js/practiceLab/practiceRepositoryLegacyV17.js','js/practiceLab/practiceRepositoryV30.js','js/practiceLab/practiceIndexedDbStore.js','js/practiceLab/practiceLabControllerRuntimeV25.js','js/practiceLab/practiceWeakKeysGenerator.js'];
           const deadline=Date.now()+480000;
           for(;;){
             const results=await Promise.all(files.map(async file=>{
               try{const response=await fetch(process.env.PRACTICE_URL+file+'?acceptance='+process.env.GITHUB_SHA,{signal:AbortSignal.timeout(15000)});return response.ok&&(await response.text())===fs.readFileSync(file,'utf8');}catch{return false;}
             }));
-            if(results.every(Boolean)){console.log('Verified matching deployed storage modules');break;}
+            if(results.every(Boolean)){console.log('Verified matching deployed storage and generator modules');break;}
             if(Date.now()>deadline)throw Error('Deployed repair modules do not match source');
             await wait(10000);
           }
