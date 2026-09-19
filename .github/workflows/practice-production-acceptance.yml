@@ -1,0 +1,64 @@
+name: Practice Production Acceptance
+on:
+  push:
+    branches: [main, verify/practice-production]
+    paths: ['js/practiceLab/**', 'sw.js', 'tests/browser/storage_production_acceptance.mjs', '.github/workflows/practice-production-acceptance.yml']
+permissions:
+  contents: read
+concurrency:
+  group: practice-production-acceptance-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  production:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, firefox, webkit]
+    container:
+      image: mcr.microsoft.com/playwright:v1.57.0-noble
+      options: --ipc=host
+    env:
+      HOME: /root
+      PRACTICE_BROWSER: ${{ matrix.browser }}
+      PRACTICE_URL: https://thiepn.dev/wordstrike/
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Preserve tested source for reproducibility
+        if: matrix.browser == 'chromium'
+        run: git archive --format=tar HEAD > /tmp/wordstrike-acceptance-source.tar
+      - uses: actions/upload-artifact@v4
+        if: matrix.browser == 'chromium'
+        with:
+          name: practice-acceptance-source
+          path: /tmp/wordstrike-acceptance-source.tar
+          retention-days: 2
+      - run: npm install --no-save playwright@1.57.0
+      - name: Wait for matching deployed repair modules
+        run: |
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';
+          import {setTimeout as wait} from 'node:timers/promises';
+          const files=['sw.js','js/practiceLab/practiceDurableManifest.js','js/practiceLab/practiceManifestStore.js','js/practiceLab/practiceRepositoryLegacyV17.js','js/practiceLab/practiceRepositoryV30.js','js/practiceLab/practiceIndexedDbStore.js','js/practiceLab/practiceLabControllerRuntimeV25.js'];
+          const deadline=Date.now()+480000;
+          for(;;){
+            const results=await Promise.all(files.map(async file=>{
+              try{const response=await fetch(process.env.PRACTICE_URL+file+'?acceptance='+process.env.GITHUB_SHA,{signal:AbortSignal.timeout(15000)});return response.ok&&(await response.text())===fs.readFileSync(file,'utf8');}catch{return false;}
+            }));
+            if(results.every(Boolean)){console.log('Verified matching deployed storage modules');break;}
+            if(Date.now()>deadline)throw Error('Deployed repair modules do not match source');
+            await wait(10000);
+          }
+          JS
+      - name: Exercise real public UI with storage full and service workers enabled
+        run: node tests/browser/storage_production_acceptance.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: practice-production-acceptance-${{ matrix.browser }}
+          path: browser-artifacts/storage-production-acceptance/
+          retention-days: 7
