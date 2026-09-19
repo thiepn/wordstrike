@@ -3,8 +3,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { chromium, firefox, webkit } from 'playwright';
 
-// This suite uses an isolated browser profile on the real public application.
-// It never clears site data, substitutes an engine, or submits online scores.
+// Isolated browser profiles on the real app. Never clears user storage,
+// substitutes an engine, or submits an online score.
 const base = process.env.PRACTICE_URL ?? 'https://thiepn.dev/wordstrike/';
 const name = process.env.PRACTICE_BROWSER ?? 'chromium';
 const out = path.resolve('browser-artifacts/storage-production-acceptance');
@@ -29,28 +29,23 @@ async function openLab(page) {
 async function remaining(page, limit = 80) {
   return page.locator('.practice-lab-screen .is-current').first().evaluate((el, limit) => {
     let text = '';
-    for (let node = el; node && text.length < limit; node = node.nextElementSibling) {
-      text += node.querySelector('br') ? '\n' : node.textContent;
-    }
+    for (let node = el; node && text.length < limit; node = node.nextElementSibling) text += node.querySelector('br') ? '\n' : node.textContent;
     return text.replaceAll('\u00a0', ' ').slice(0, limit);
   }, limit);
 }
 async function type(page, text, delay = 20) {
-  const lines = text.split('\n');
-  for (let i = 0; i < lines.length; i++) {
-    if (i) await page.keyboard.press('Enter');
-    await page.keyboard.type(lines[i], { delay });
+  for (const [index, line] of text.split('\n').entries()) {
+    if (index) await page.keyboard.press('Enter');
+    await page.keyboard.type(line, { delay });
   }
 }
 async function fillStorage(page) {
   return page.evaluate(() => {
     localStorage.setItem('production-acceptance-preserve', 'another app must remain untouched');
     let fillers = 0;
-    for (const size of [131072, 32768, 8192, 2048, 512, 128, 16, 1]) {
-      for (let attempt = 0; attempt < 200; attempt++) {
-        try { localStorage.setItem('production-quota-' + fillers, 'q'.repeat(size)); fillers++; }
-        catch (error) { if (error.name !== 'QuotaExceededError') throw error; break; }
-      }
+    for (const size of [131072, 32768, 8192, 2048, 512, 128, 16, 1]) for (let attempt = 0; attempt < 200; attempt++) {
+      try { localStorage.setItem('production-quota-' + fillers, 'q'.repeat(size)); fillers++; }
+      catch (error) { if (error.name !== 'QuotaExceededError') throw error; break; }
     }
     try { localStorage.setItem('production-quota-probe', 'x'.repeat(1024)); }
     catch (error) { if (error.name === 'QuotaExceededError') return fillers; throw error; }
@@ -66,7 +61,7 @@ try {
     });
     const page = await context.newPage();
     page.setDefaultTimeout(30000);
-    const record = { scenario, browser: name, width, base, releaseUnderTest: 'd67f0152370254d63d24f97097585cc186e331d1', status: 'FAIL', errors: [], failedRequests: [] };
+    const record = { scenario, browser: name, width, base, verificationSource: process.env.GITHUB_SHA ?? 'local', status: 'FAIL', errors: [], failedRequests: [] };
     page.on('pageerror', error => record.errors.push(error.message));
     page.on('requestfailed', request => {
       if (request.url().includes('/js/practiceLab/') || request.url().includes('/data/practice/')) record.failedRequests.push({ url: request.url(), error: request.failure()?.errorText });
@@ -85,22 +80,35 @@ try {
         assert.ok(!(await page.locator('.practice-lab-screen').textContent()).includes('PRACTICE_STORAGE_'), 'Recommendations still have a storage failure');
         await page.screenshot({ path: path.join(out, `${name}-weak-keys-b-ready.png`), fullPage: true });
         await page.locator('[data-practice-action="start-weak-keys"]').click();
-        const capture = page.locator('[data-weak-keys-input]');
-        await capture.waitFor({ state: 'visible' });
-        await capture.evaluate(el => { window.__stablePracticeCapture = el; });
+        await page.locator('[data-weak-keys-input]').waitFor({ state: 'visible' });
+        await page.locator('[data-weak-keys-input]').evaluate(el => { window.__stablePracticeCapture = el; });
         const first = await remaining(page, 1);
         await type(page, first === 'x' ? 'z' : 'x');
         await page.keyboard.press('Backspace');
         assert.equal(await remaining(page, 1), first);
         record.typed = 0;
         for (let batch = 0; batch < 250; batch++) {
-          if (await page.locator('[data-practice-view="weak-keys-result"]').count()) break;
-          assert.equal(await page.locator('[data-practice-view="weak-keys-session-error"]').count(), 0);
-          assert.ok(await capture.evaluate(el => el === window.__stablePracticeCapture && el === document.activeElement), 'Typing capture replaced or focus lost');
-          const text = await remaining(page);
-          assert.ok(text.length > 0);
-          await type(page, text);
-          record.typed += text.length;
+          // Saving the final key is asynchronous. Observe the result and cursor
+          // in one DOM snapshot instead of waiting on a cursor already removed.
+          await page.waitForFunction(() => document.querySelector('[data-practice-view="weak-keys-result"], [data-practice-view="weak-keys-session-error"], .practice-lab-screen .is-current'));
+          const state = await page.evaluate(() => {
+            if (document.querySelector('[data-practice-view="weak-keys-result"]')) return { completed: true };
+            const error = document.querySelector('[data-practice-view="weak-keys-session-error"]');
+            if (error) return { error: error.textContent };
+            const capture = document.querySelector('[data-weak-keys-input]');
+            const cursor = document.querySelector('.practice-lab-screen .is-current');
+            if (!cursor) return { saving: true };
+            let text = '';
+            for (let node = cursor; node && text.length < 80; node = node.nextElementSibling) text += node.querySelector('br') ? '\n' : node.textContent;
+            return { text: text.replaceAll('\u00a0', ' ').slice(0, 80), stable: capture === window.__stablePracticeCapture && capture === document.activeElement };
+          });
+          assert.ok(!state.error, state.error);
+          if (state.completed) break;
+          if (state.saving) continue;
+          assert.ok(state.stable, 'Typing capture replaced or focus lost');
+          assert.ok(state.text.length > 0);
+          await type(page, state.text);
+          record.typed += state.text.length;
         }
         await page.locator('[data-practice-view="weak-keys-result"]').waitFor();
         const saved = (await rows(page, 'sessionSummaries')).filter(row => row.experimentId === 'weak-keys' && row.status === 'completed');
