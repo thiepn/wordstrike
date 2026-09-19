@@ -1,0 +1,78 @@
+/* Precision workshop: skill-coded training cartridges, a compact catalog,
+   tactile target selection, and focused setup. No runtime effects. */
+.practice-lab-screen[data-lab-workshop] {
+  --pl-precision:#e9c47c; --pl-speed:#7dd6c8; --pl-fluency:#b2aff0;
+  --pl-real:#8abbeb; --pl-custom:#dbacc6; --pl-advanced:#e5aa91;
+  --pl-skill:var(--pl-accent);
+}
+.practice-lab-screen [data-lab-category='precision'],.practice-lab-screen[data-lab-family='precision']{--pl-skill:var(--pl-precision)}
+.practice-lab-screen [data-lab-category='speed'],.practice-lab-screen[data-lab-family='speed']{--pl-skill:var(--pl-speed)}
+.practice-lab-screen [data-lab-category='fluency'],.practice-lab-screen[data-lab-family='fluency']{--pl-skill:var(--pl-fluency)}
+.practice-lab-screen [data-lab-category='real-world'],.practice-lab-screen[data-lab-family='real-world']{--pl-skill:var(--pl-real)}
+.practice-lab-screen [data-lab-category='custom'],.practice-lab-screen[data-lab-family='custom']{--pl-skill:var(--pl-custom)}
+.practice-lab-screen [data-lab-category='advanced'],.practice-lab-screen[data-lab-family='advanced']{--pl-skill:var(--pl-advanced)}
+/* Character belongs in the library, not in the typing field. */
+.practice-lab-screen[data-lab-workshop] .pl-hero{padding-block:26px 24px}
+.practice-lab-screen[data-lab-workshop] .pl-session-choices article{border-radius:8px;min-height:154px}
+.practice-lab-screen[data-lab-workshop] .pl-session-choices .practice-lab-daily{background:var(--pl-raised);border-top-color:var(--pl-accent)}
+.practice-lab-screen[data-lab-workshop] .pl-library-toolbar{flex-wrap:wrap;align-items:center;row-gap:14px}
+.pl-library-utility{display:flex;align-items:center;justify-content:space-between;gap:20px;width:100%;padding-top:12px;border-top:1px solid var(--pl-rule)}
+.pl-layout-switch{display:flex;gap:4px;padding:3px;border:1px solid var(--pl-rule);border-radius:6px}
+.practice-lab-screen .pl-layout-switch button{display:flex;align-items:center;gap:9px;min-width:85px;min-height:44px;border-color:transparent;background:none;font-size:12px;letter-spacing:0}
+.practice-lab-screen .pl-layout-switch button[aria-pressed='true']{color:var(--pl-ink);background:var(--pl-raised);border-color:var(--pl-rule)}
+.pl-layout-icon{display:grid;width:14px;height:14px;gap:2px;grid-template-columns:repeat(2,1fr)}
+.pl-layout-icon i{border:1px solid currentColor;border-radius:1px}.pl-layout-icon-list{grid-template-columns:1fr;gap:2px}.pl-layout-icon-list i:last-child{display:none}
+.practice-lab-screen.pl-studio-home .pl-training-cartridge{min-height:245px;padding:17px 20px 10px;border-radius:8px;border-top:3px solid var(--pl-skill);isolation:isolate}
+.practice-lab-screen .pl-training-cartridge .pl-drill-top{color:var(--pl-muted);font-size:11px;line-height:1.5}
+.pl-training-cartridge .pl-drill-top>span:first-child{color:var(--pl-skill)}
+.practice-lab-screen .pl-training-cartridge .pl-drill-art{width:150px;height:76px;margin:14px 0 12px;color:var(--pl-skill);padding:5px 10px;border-left:1px solid var(--pl-skill);background:var(--pl-raised);border-radius:0 6px 6px 0}
+.practice-lab-screen .pl-training-cartridge h3{font-size:22px;margin-block:0 7px;letter-spacing:-.035em}
+.practice-lab-screen .pl-training-cartridge p{font-size:13px;line-height:1.6;margin-block:0 12px;max-width:31em}
+.practice-lab-screen .pl-training-cartridge .practice-lab-card-footer{border-top:1px solid var(--pl-rule);padding-top:8px;margin-top:auto}
+.practice-lab-screen .pl-training-cartridge .practice-lab-card-footer button{color:var(--pl-skill);position:static;min-width:76px}
+.pl-training-cartridge .practice-lab-card-footer button::after{content:'';position:absolute;inset:0;border-radius:6px}
+.practice-lab-screen .pl-training-cartridge:focus-within{outline:2px solid var(--pl-skill);outline-offset:3px}
+.practice-lab-screen .pl-training-cartridge:hover{border-color:var(--pl-skill);background:var(--pl-raised)}
+.practice-lab-screen .pl-training-cartridge:hover .pl-drill-art{background:var(--pl-surface)}
+/* Same native controls and DOM in both layouts: filtering and focus survive. */
+.practice-lab-screen[data-lab-layout='list'] .pl-drill-grid{grid-template-columns:1fr;gap:8px}
+.practice-lab-screen[data-lab-layout='list'] .pl-training-cartridge{display:grid;grid-template-columns:100px minmax(0,1fr) 175px;grid-template-rows:auto auto auto;column-gap:22px;row-gap:0;min-height:116px;padding:15px 20px;border-top-width:1px;border-left:3px solid var(--pl-skill)}
+.practice-lab-screen[data-lab-layout='list'] .pl-drill-top{grid-column:2;grid-row:1;justify-content:flex-start;gap:15px;margin:0 0 6px}
+.practice-lab-screen[data-lab-layout='list'] .pl-drill-art{grid-column:1;grid-row:1 / 4;width:100%;height:70px;align-self:center;margin:0;padding:4px}
+.practice-lab-screen[data-lab-layout='list'] .pl-training-cartridge h3{grid-column:2;grid-row:2;font-size:21px;margin:0 0 4px}
+.practice-lab-screen[data-lab-layout='list'] .pl-training-cartridge p{grid-column:2;grid-row:3;margin:0}
+.practice-lab-screen[data-lab-layout='list'] .practice-lab-card-footer{grid-column:3;grid-row:1 / 4;border-top:0;padding:0;align-self:center;display:grid;justify-items:end;margin:0;gap:4px}
+/* Setup: one recognizable header, one workflow, controls next to the protocol. */
+.practice-lab-screen[data-lab-workshop] .practice-lab-detail{width:100%;max-width:1040px;padding-top:28px}
+.pl-setup-intro{position:relative;min-height:138px;padding:0 220px 0 0}
+.practice-lab-screen .pl-setup-intro h1{font-size:clamp(34px,4vw,56px);margin:10px 0 16px}
+.practice-lab-screen .pl-setup-intro .practice-lab-lead{font-size:16px;line-height:1.65;margin:0;max-width:40em}
+.practice-lab-screen .pl-setup-intro .pl-detail-art{width:180px;height:102px;right:0;top:12px;opacity:1;color:var(--pl-skill);background:var(--pl-surface);padding:16px;border:1px solid var(--pl-rule);border-bottom:3px solid var(--pl-skill);border-radius:7px}
+.practice-lab-screen .pl-workflow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;list-style:none;padding:0;margin:22px 0 24px;border:1px solid var(--pl-rule);border-radius:6px;overflow:hidden}
+.pl-workflow li{display:flex;align-items:center;gap:10px;padding:13px 17px;color:var(--pl-quiet);font-size:12px;background:var(--pl-surface)}
+.pl-workflow li+li{border-left:1px solid var(--pl-rule)}
+.pl-workflow li[aria-current='step']{color:var(--pl-ink);background:var(--pl-raised);box-shadow:inset 0 -2px var(--pl-skill)}
+.pl-workflow-number{color:var(--pl-skill);font:12px var(--font-game,monospace)}
+.pl-setup-workbench{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);align-items:start;gap:22px;margin-block:20px}
+.practice-lab-screen .pl-setup-workbench>section{margin:0;min-width:0;padding:22px;border-radius:8px}
+.practice-lab-screen .pl-setup-controls{border-top:3px solid var(--pl-skill)}
+.practice-lab-screen .pl-setup-protocol{background:transparent}
+.practice-lab-screen .pl-setup-protocol :is(.practice-weak-key-plan,.practice-combination-plan){gap:0;margin:14px 0 0}
+.practice-lab-screen .pl-setup-protocol li{border:0;border-bottom:1px solid var(--pl-rule);border-radius:0;background:transparent;padding:15px 0;min-width:0}
+.practice-lab-screen .pl-setup-protocol li:last-child{border-bottom:0}
+.practice-lab-screen .pl-setup-protocol :is(.practice-weak-key-plan-index,.practice-combination-plan-index){color:var(--pl-skill);background:var(--pl-raised);border:1px solid var(--pl-rule);border-radius:5px;min-width:28px;height:28px;font-size:12px}
+.practice-lab-screen .pl-setup-protocol p{font-size:13px;line-height:1.6}
+.pl-letter-picker{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:7px;margin:18px 0 12px}
+.practice-lab-screen .pl-letter-key{min-width:0;min-height:46px;padding:6px 2px;border:1px solid var(--color-border-strong,#63727e);border-bottom-width:3px;border-radius:6px;background:var(--pl-raised);font:600 17px var(--font-game,monospace);color:var(--pl-ink)}
+.practice-lab-screen .pl-letter-key[aria-pressed='true']{background:var(--pl-skill);border-color:var(--pl-skill);color:#101720;box-shadow:inset 0 0 0 2px #101720}
+.practice-lab-screen .pl-letter-key:not(:disabled):hover{border-color:var(--pl-skill);background:var(--pl-surface);color:var(--pl-skill)}
+.practice-lab-screen .pl-letter-key:focus-visible{outline-color:var(--pl-skill);outline-offset:2px}
+.practice-lab-screen .pl-picker-help{font-size:12px;line-height:1.65;color:var(--pl-muted);margin-bottom:18px}
+.practice-lab-screen .pl-setup-controls .practice-weak-key-target-field{max-width:none}
+.practice-lab-screen .pl-setup-controls [data-weak-key-target]{max-width:110px;font:700 28px var(--font-game,monospace);height:58px;text-align:center}
+@media(min-width:1100px){.practice-lab-screen[data-lab-workshop] .pl-filters{flex-wrap:wrap}.practice-lab-screen[data-lab-workshop] .pl-library-toolbar{display:grid;grid-template-columns:1fr}.practice-lab-screen[data-lab-workshop] .pl-library{margin-top:28px}}
+@media(max-width:800px){.pl-setup-workbench{grid-template-columns:1fr}.pl-letter-picker{grid-template-columns:repeat(9,minmax(0,1fr))}.pl-setup-intro{padding-right:165px}.practice-lab-screen .pl-setup-intro .pl-detail-art{width:140px}.practice-lab-screen[data-lab-layout='list'] .pl-training-cartridge{grid-template-columns:76px minmax(0,1fr) 80px;column-gap:14px}.practice-lab-screen[data-lab-layout='list'] .pl-drill-status{display:none}}
+@media(max-width:600px){.pl-setup-intro{padding:0;min-height:0}.practice-lab-screen .pl-setup-intro .pl-detail-art{position:static;width:112px;height:64px;padding:8px;margin:0 0 16px}.practice-lab-screen .pl-setup-intro h1{font-size:38px}.pl-workflow li{padding:11px 9px;gap:7px;font-size:11px}.practice-lab-screen .pl-setup-workbench>section{padding:17px}.pl-letter-picker{grid-template-columns:repeat(6,minmax(0,1fr));gap:8px}.pl-library-utility{gap:10px}.practice-lab-screen .pl-filter-count{font-size:10px;margin:0}.practice-lab-screen .pl-layout-switch button{min-width:74px;padding:10px 9px}.practice-lab-screen[data-lab-workshop] .pl-filters{flex-wrap:wrap;overflow:visible;gap:4px}.practice-lab-screen[data-lab-workshop] .pl-filters button{padding:9px 10px}.practice-lab-screen.pl-studio-home .pl-training-cartridge{min-height:218px}.practice-lab-screen[data-lab-layout='list'] .pl-training-cartridge{grid-template-columns:minmax(0,1fr) 63px;min-height:108px;padding:13px 14px;column-gap:10px}.practice-lab-screen[data-lab-layout='list'] .pl-drill-art{display:none}.practice-lab-screen[data-lab-layout='list'] :is(.pl-drill-top,.pl-training-cartridge h3,.pl-training-cartridge p){grid-column:1}.practice-lab-screen[data-lab-layout='list'] .practice-lab-card-footer{grid-column:2}.practice-lab-screen[data-lab-layout='list'] .pl-drill-top{font-size:10px;flex-wrap:wrap;gap:2px 12px}.practice-lab-screen[data-lab-layout='list'] .pl-training-cartridge h3{font-size:19px}.practice-lab-screen[data-lab-layout='list'] .pl-training-cartridge p{font-size:12px}.practice-lab-screen[data-lab-layout='list'] .practice-lab-card-footer button{min-width:60px;padding-inline:5px}}
+@media(max-width:360px){.pl-letter-picker{grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}.pl-library-utility{flex-wrap:wrap}.pl-layout-switch{margin-left:auto}}
+@media(prefers-reduced-motion:no-preference){html:not([data-effective-effects='reduced']) .pl-letter-key{transition:background-color 100ms ease,border-color 100ms ease}}
+@media(forced-colors:active){.practice-lab-screen .pl-letter-key[aria-pressed='true']{outline:2px solid Highlight;color:HighlightText;background:Highlight}.practice-lab-screen .pl-training-cartridge{border-color:ButtonText}.pl-workflow li[aria-current='step']{outline:2px solid Highlight}.pl-training-cartridge .pl-drill-top>span:first-child{color:CanvasText}}
