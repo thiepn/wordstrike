@@ -1,0 +1,72 @@
+name: Weak Key Case Repair
+on:
+  push:
+    branches: [verify/practice-production]
+    paths: ['.github/workflows/weak-key-case-repair.yml']
+permissions:
+  contents: write
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: verify/practice-production
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Prove regression and correct exact reviewed source
+        run: |
+          test "$GITHUB_REF_NAME" = verify/practice-production
+          test "$(git hash-object js/practiceLab/practiceWeakKeysGenerator.js)" = a9d10a59430898ccc2cb376986d3d975905ca04a
+          mkdir -p /tmp/weak-case-evidence
+          if node --test tests/practice-weak-keys-case-regression.test.js > /tmp/weak-case-evidence/before.log 2>&1; then
+            echo 'Expected capitalization regression was not reproduced'; exit 1
+          fi
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('js/practiceLab/practiceWeakKeysGenerator.js')
+          s=p.read_text()
+          before='''      const targetPositions = (annotation.keyOccurrences ?? [])
+                  .filter((occurrence) => exactKey(occurrence.target, targetKey) && occurrence.startIndex >= word.startIndex && occurrence.startIndex < word.endIndex)
+                  .map((occurrence) => occurrence.startIndex - word.startIndex);
+                if (!targetPositions.length || targetPositions.length > policy.content.focusMaxTargetOpportunitiesPerLexicalItem) continue;
+                const normalizedWord = summary.lexicalKey.normalize("NFC").toLowerCase();
+                if (Array.from(normalizedWord).length < 2) continue;'''
+          # Remove the YAML run block indentation from multiline literal tails.
+          before=before.replace('\n          ', '\n')
+          after='''      const normalizedWord = summary.lexicalKey.normalize("NFC").toLowerCase();
+                if (Array.from(normalizedWord).length < 2) continue;
+                // Generated units use the normalized spelling, not the source sentence's
+                // capitalization. Count the exact text that the learner will type.
+                const targetPositions = (analyzePracticeText({ text: normalizedWord, language }).keyOccurrences ?? [])
+                  .filter((occurrence) => exactKey(occurrence.target, targetKey))
+                  .map((occurrence) => occurrence.startIndex);
+                if (!targetPositions.length || targetPositions.length > policy.content.focusMaxTargetOpportunitiesPerLexicalItem) continue;'''
+          after=after.replace('\n          ', '\n')
+          assert s.count(before)==1, 'target-word integration site changed'
+          s=s.replace(before,after)
+          before='''      const containsTarget = (annotation.keyOccurrences ?? []).some((occurrence) => exactKey(occurrence.target, targetKey) && occurrence.startIndex >= word.startIndex && occurrence.startIndex < word.endIndex);
+                if (containsTarget || !word.lexicalKey || Array.from(word.lexicalKey).length < 2) continue;'''.replace('\n          ', '\n')
+          after='''      // A source capital (e.g. "The") becomes lowercase in generated text.
+                // Such a word is not neutral for "t" even if the source had no lowercase t.
+                const containsTarget = typeof word.lexicalKey === "string" && word.lexicalKey.includes(targetKey);
+                if (containsTarget || !word.lexicalKey || Array.from(word.lexicalKey).length < 2) continue;'''.replace('\n          ', '\n')
+          assert s.count(before)==1, 'neutral-word integration site changed'
+          p.write_text(s.replace(before,after))
+          PY
+          node --test tests/practice-weak-keys*.test.js > /tmp/weak-case-evidence/after.log 2>&1
+          git diff --check
+          rm .github/workflows/weak-key-case-repair.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add js/practiceLab/practiceWeakKeysGenerator.js .github/workflows/weak-key-case-repair.yml
+          git commit -m 'fix(practice): count targets from the actual normalized generated spelling'
+          git push origin HEAD:verify/practice-production
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: weak-key-case-regression-proof
+          path: /tmp/weak-case-evidence/
+          retention-days: 7
