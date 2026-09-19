@@ -8,6 +8,7 @@ import { createDefaultPracticeManifest } from "./practiceDefaults.js";
 import { migratePracticeManifest } from "./practiceMigrations.js";
 import {
   PRACTICE_STORAGE_ERROR_CODES,
+  isQuotaExceededError,
   practiceStorageError,
 } from "./practiceStorageContract.js";
 import { validatePracticeManifest } from "./practiceValidation.js";
@@ -63,6 +64,28 @@ export function createPracticeManifestStore({
       return { ok: true, manifest, recovery: "none" };
     } catch (cause) {
       try { storage.removeItem(PRACTICE_MANIFEST_TEMP_KEY); } catch {}
+      if (isQuotaExceededError(cause)) {
+        // The normal crash-safe write briefly needs a second full manifest
+        // copy. Near localStorage quota, overwriting the primary in place can
+        // still succeed because it does not require that temporary headroom.
+        try {
+          storage.setItem(PRACTICE_MANIFEST_KEY, serialized);
+          return { ok: true, manifest, recovery: "quota-direct" };
+        } catch (directCause) {
+          if (isQuotaExceededError(directCause)) {
+            throw practiceStorageError(
+              PRACTICE_STORAGE_ERROR_CODES.QUOTA_EXCEEDED,
+              "Practice manifest could not be updated because localStorage quota is exhausted",
+              { operation: "manifest-write", recoverable: true, cause: directCause },
+            );
+          }
+          throw practiceStorageError(
+            PRACTICE_STORAGE_ERROR_CODES.TRANSACTION_FAILED,
+            "Practice manifest direct recovery write failed",
+            { operation: "manifest-write", recoverable: true, cause: directCause },
+          );
+        }
+      }
       throw practiceStorageError(
         PRACTICE_STORAGE_ERROR_CODES.TRANSACTION_FAILED,
         "Practice manifest write failed",
@@ -77,15 +100,33 @@ export function createPracticeManifestStore({
       const primaryRaw = storage.getItem(PRACTICE_MANIFEST_KEY);
       const primary = parseValid(primaryRaw);
       if (primary) {
-        if (primaryRaw !== JSON.stringify(primary)) save(primary);
-        return { ok: true, manifest: primary, recovery: "none" };
+        let recovery = "none";
+        if (primaryRaw !== JSON.stringify(primary)) {
+          try {
+            recovery = save(primary).recovery;
+          } catch (error) {
+            if (error?.code !== PRACTICE_STORAGE_ERROR_CODES.QUOTA_EXCEEDED) throw error;
+            // Reads must remain usable when the browser is out of localStorage.
+            // The migrated manifest is valid in memory; IndexedDB Practice data
+            // and Daily Coach can continue without rewriting this metadata now.
+            recovery = "quota-readonly";
+          }
+        }
+        return { ok: true, manifest: primary, recovery };
       }
       const backupRaw = storage.getItem(PRACTICE_MANIFEST_BACKUP_KEY);
       const backup = parseValid(backupRaw);
       if (backup) {
-        storage.setItem(PRACTICE_MANIFEST_KEY, JSON.stringify(backup));
-        storage.removeItem(PRACTICE_MANIFEST_TEMP_KEY);
-        return { ok: true, manifest: backup, recovery: "backup" };
+        try {
+          const saved = save(backup);
+          return { ok: true, manifest: backup, recovery: saved.recovery === "quota-direct" ? "backup-quota-direct" : "backup" };
+        } catch (error) {
+          if (error?.code !== PRACTICE_STORAGE_ERROR_CODES.QUOTA_EXCEEDED) throw error;
+          try { storage.removeItem(PRACTICE_MANIFEST_TEMP_KEY); } catch {}
+          // Keep the valid backup usable in memory rather than blocking the
+          // whole Practice Lab because localStorage cannot restore the primary.
+          return { ok: true, manifest: backup, recovery: "backup-quota-readonly" };
+        }
       }
       const manifest = createDefault({
         ...defaultOptions,
