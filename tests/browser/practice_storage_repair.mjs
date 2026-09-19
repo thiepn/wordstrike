@@ -158,6 +158,49 @@ async function exerciseCoachRecovery(page, databaseName) {
   }, databaseName);
 }
 
+
+async function exerciseManifestQuota(page) {
+  return page.evaluate(async () => {
+    const constants = await import("/js/practiceLab/practiceConstants.js");
+    const { createDefaultPracticeManifest } = await import("/js/practiceLab/practiceDefaults.js");
+    const { createPracticeManifestStore } = await import("/js/practiceLab/practiceManifestStore.js");
+    const profileId = "practice-profile_manifest-quota-browser-12345678";
+    const now = () => new Date("2026-09-19T18:00:00.000Z");
+    localStorage.clear();
+    const legacy = createDefaultPracticeManifest({ profileId, now, overrides: { databaseVersion: 12 } });
+    localStorage.setItem(constants.PRACTICE_MANIFEST_KEY, JSON.stringify(legacy));
+
+    let fillers = 0;
+    const chunk = "q".repeat(128 * 1024);
+    while (fillers < 100) {
+      try {
+        localStorage.setItem(`practice-quota-filler-${fillers}`, chunk);
+        fillers += 1;
+      } catch (error) {
+        if (error?.name !== "QuotaExceededError") throw error;
+        break;
+      }
+    }
+    if (!fillers) throw new Error("Browser did not allow quota fixture allocation");
+
+    const store = createPracticeManifestStore({
+      storage: localStorage,
+      defaultOptions: { profileId, now },
+    });
+    const loaded = store.load();
+    const stored = JSON.parse(localStorage.getItem(constants.PRACTICE_MANIFEST_KEY));
+    const result = {
+      recovery: loaded.recovery,
+      loadedVersion: loaded.manifest.databaseVersion,
+      storedVersion: stored.databaseVersion,
+      currentVersion: constants.PRACTICE_DATABASE_VERSION,
+      fillers,
+    };
+    for (let i = 0; i < fillers; i += 1) localStorage.removeItem(`practice-quota-filler-${i}`);
+    return result;
+  });
+}
+
 try {
   const context = await browser.newContext({ serviceWorkers: "block" });
   const page = await context.newPage();
@@ -185,6 +228,13 @@ try {
   assert.equal(recovery.recovered, true);
   assert.equal(recovery.saved, true);
   report.cases.push({ mode: "coach-runtime-transaction-recovery", ...recovery });
+  const quota = await exerciseManifestQuota(page);
+  assert.equal(quota.loadedVersion, 13);
+  assert.equal(quota.currentVersion, 13);
+  assert.ok(["quota-direct", "quota-readonly"].includes(quota.recovery), `Unexpected quota recovery: ${quota.recovery}`);
+  assert.ok([12, 13].includes(quota.storedVersion));
+  report.cases.push({ mode: "manifest-localstorage-quota", ...quota });
+
   report.status = "PASS";
   await context.close();
 } catch (error) {
