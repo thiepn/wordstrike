@@ -5,7 +5,7 @@ const statusClass = (value) => String(value ?? "pending").replace(/[^a-z0-9-]/gi
 const number = (value, digits = 2) => Number.isFinite(value) ? Number(value).toFixed(digits).replace(/\.00$/, "").replace(/(\.\d)0$/, "$1") : "—";
 
 const COACH_ERROR_COPY = Object.freeze({
-  PRACTICE_STORAGE_TRANSACTION_FAILED: "A local Practice transaction failed. Daily Training now retries through a narrower recovery path; if this message remains, the technical details below identify the exact failing stage.",
+  PRACTICE_STORAGE_TRANSACTION_FAILED: "Practice could not complete a storage transaction. The plan has not been reported as saved. Your existing data has not been cleared; the technical details identify the failing operation.",
   PRACTICE_STORAGE_OPEN_FAILED: "WordStrike could not open the local Practice database. Reload the page and try again.",
   PRACTICE_STORAGE_RECOVERY_REQUIRED: "Your local Practice database needs a schema repair. Reload WordStrike once to complete the upgrade; do not clear site data.",
   PRACTICE_STORAGE_QUOTA_EXCEEDED: "Your browser could not allocate enough local storage for Practice. Free some site storage and try again.",
@@ -74,7 +74,7 @@ export function renderPracticeCoach(root, view, { focusSelector = null } = {}) {
   const technical = detail
     ? [view.errorCode, detail.stage && `stage=${detail.stage}`, detail.operation && `operation=${detail.operation}`, detail.name && `error=${detail.name}`, detail.causeName && `cause=${detail.causeName}`, detail.causeMessage && `message=${detail.causeMessage}`].filter(Boolean).join(" · ")
     : String(view.errorCode ?? "");
-  const error = view.errorCode ? `<div class="practice-lab-notice is-warning practice-coach-error" role="alert"><strong>Daily Training could not save or load its local plan.</strong><span>${escapeHtml(coachErrorCopy(view.errorCode))}</span><details><summary>Technical details</summary><code>${escapeHtml(technical)}</code></details></div>` : "";
+  const error = view.errorCode ? `<div class="practice-lab-notice is-warning practice-coach-error" role="alert"><strong>Daily Training could not save or load its local plan.</strong> <span>${escapeHtml(coachErrorCopy(view.errorCode))}</span><details><summary>Technical details</summary><code>${escapeHtml(technical)}</code></details></div>` : "";
   const beforePlan = !plan ? `<section class="practice-coach-create">
       <div class="practice-lab-section-heading"><div><div class="eyebrow">Choose today's budget</div><h2>${view.requestedMinutes} minutes</h2></div><p>This sets a planning budget, not a quota. The Coach may intentionally underfill it when no useful block fits.</p></div>
       ${renderDurationChoices(view)}

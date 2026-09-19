@@ -8,6 +8,7 @@ import {
 import {
   PRACTICE_STORAGE_ERROR_CODES,
   assertPracticeSerializable,
+  isQuotaExceededError,
   practiceStorageError,
 } from "./practiceStorageContract.js";
 
@@ -147,9 +148,18 @@ export function createPracticeIndexedDbStore({
   const one = async (storeName, mode, operation) => {
     const transaction = requireDatabase().transaction([storeName], mode);
     const completion = transactionPromise(transaction);
-    const value = await operation(transactionApi(transaction));
-    await completion;
-    return value;
+    // Observe completion immediately: a rejected request also aborts the
+    // transaction and must not leave a second, unhandled promise rejection.
+    void completion.catch(() => {});
+    try {
+      const value = await operation(transactionApi(transaction));
+      await completion;
+      return value;
+    } catch (cause) {
+      try { transaction.abort(); } catch {}
+      await completion.catch(() => {});
+      throw cause;
+    }
   };
 
   return Object.freeze({
@@ -220,15 +230,17 @@ export function createPracticeIndexedDbStore({
       if (invalid) throw new TypeError(`Unknown Practice store: ${invalid}`);
       const transaction = requireDatabase().transaction(names, mode);
       const completion = transactionPromise(transaction);
+      void completion.catch(() => {});
       try {
         const value = await callback(transactionApi(transaction));
         await completion;
         return value;
       } catch (cause) {
         try { transaction.abort(); } catch {}
-        if (cause?.code) throw cause;
+        await completion.catch(() => {});
+        if (typeof cause?.code === "string" && cause.code.startsWith("PRACTICE_")) throw cause;
         throw practiceStorageError(
-          PRACTICE_STORAGE_ERROR_CODES.TRANSACTION_FAILED,
+          isQuotaExceededError(cause) ? PRACTICE_STORAGE_ERROR_CODES.QUOTA_EXCEEDED : PRACTICE_STORAGE_ERROR_CODES.TRANSACTION_FAILED,
           "Practice IndexedDB transaction failed",
           { operation: "transaction", recoverable: true, cause },
         );

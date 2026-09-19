@@ -199,7 +199,7 @@ test("PL25 local-day rollover expires an unfinished plan without changing its fr
 });
 
 
-test("Daily Coach uses readable active profile/context without replaying an unrelated failing legacy transaction", async () => {
+test("Daily Coach accepts an explicitly injected initialized runtime without additional transactions", async () => {
   const localProfileId = createPracticeId("profile", { uuid: () => "coach-fast-path-profile-12345678" });
   const profile = createDefaultPracticeProfile({ profileId: localProfileId, now });
   const context = createDefaultPracticeContext({ profileId: localProfileId, now });
@@ -225,14 +225,15 @@ test("Daily Coach uses readable active profile/context without replaying an unre
     defaultOptions: { profileId: localProfileId, now },
   });
   const repository = createPracticeRepository({ dataStore, manifestStore, now });
-  const initialized = await initializePracticeCoachRuntimeData({ dataStore, repository, manifestStore });
+  const injected = { profile, context };
+  const initialized = await initializePracticeCoachRuntimeData({ dataStore, repository, manifestStore, initialized: injected });
   assert.equal(initialized.profile.profileId, localProfileId);
   assert.equal(initialized.context.contextId, profile.activeContextId);
-  assert.equal(initialized.reconciliation.fastPath, true);
+  assert.equal(initialized, injected);
   assert.equal(transactionCalls, 0, "valid current data must not enter the legacy reconciliation transaction");
 });
 
-test("Daily Coach plan creation falls back to deterministic single-store persistence when wrapper transaction fails", async () => {
+test("Daily Coach never overwrites a plan outside its failed atomic transaction", async () => {
   const localProfileId = createPracticeId("profile", { uuid: () => "coach-write-fallback-profile-12345678" });
   const localContextId = createPracticeId("context", { uuid: () => "coach-write-fallback-context-12345678" });
   const baseStore = createPracticeMemoryStore();
@@ -255,12 +256,7 @@ test("Daily Coach plan creation falls back to deterministic single-store persist
     blocks: [],
     now,
   });
-  const created = await repository.createCoachPlan(plan);
-  assert.equal(created.created, true);
-  assert.equal(created.recoveredFromTransactionFailure, true);
+  await assert.rejects(repository.createCoachPlan(plan), /simulated wrapper transaction failure/);
   assert.equal(transactionCalls, 1);
-  assert.equal((await baseStore.list("coachPlans")).length, 1);
-  const repeated = await repository.createCoachPlan(plan);
-  assert.equal(repeated.created, false);
-  assert.equal((await baseStore.list("coachPlans")).length, 1);
+  assert.equal((await baseStore.list("coachPlans")).length, 0);
 });

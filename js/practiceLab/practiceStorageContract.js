@@ -51,10 +51,12 @@ export function getPracticeStoreKey(storeName, record) {
 }
 
 export function isQuotaExceededError(error) {
-  return error?.name === "QuotaExceededError"
-    || error?.code === 22
-    || error?.code === 1014
-    || error?.code === PRACTICE_STORAGE_ERROR_CODES.QUOTA_EXCEEDED;
+  const seen = new Set();
+  for (let current = error, depth = 0; current && depth < 8 && !seen.has(current); current = current.cause, depth += 1) {
+    seen.add(current);
+    if (current.name === "QuotaExceededError" || current.name === "NS_ERROR_DOM_QUOTA_REACHED" || current.code === 22 || current.code === 1014 || current.code === PRACTICE_STORAGE_ERROR_CODES.QUOTA_EXCEEDED) return true;
+  }
+  return false;
 }
 
 function serializabilityFailure(path, reason, valueType = null) {

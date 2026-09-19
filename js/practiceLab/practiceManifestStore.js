@@ -1,3 +1,4 @@
+import { withDurablePracticeManifest } from './practiceDurableManifest.js';
 import {
   PRACTICE_LIMITS,
   PRACTICE_MANIFEST_BACKUP_KEY,
@@ -55,6 +56,7 @@ export function createPracticeManifestStore({
       { operation: "manifest-write", recoverable: true },
     );
     const previous = storage.getItem(PRACTICE_MANIFEST_KEY);
+    if (previous === serialized) return { ok: true, manifest, recovery: "none" };
     const previousValid = parseValid(previous);
     try {
       storage.setItem(PRACTICE_MANIFEST_TEMP_KEY, serialized);
@@ -94,7 +96,7 @@ export function createPracticeManifestStore({
     }
   };
 
-  return Object.freeze({
+  const legacy = Object.freeze({
     load() {
       requireStorage();
       // TEMP is staging only; it is never a recovery source. Removing a stale
@@ -154,4 +156,5 @@ export function createPracticeManifestStore({
       return true;
     },
   });
+  return withDurablePracticeManifest({legacy,storage,createDefault,defaultOptions});
 }
