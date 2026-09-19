@@ -2,16 +2,64 @@ name: Practice Storage Integrity
 on:
   push:
     branches: [main, fix/practice-durable-storage]
-    paths: ['js/practiceLab/**', 'tests/practice-*.test.js', 'tests/browser/practice_quota_journey.mjs', '.github/workflows/practice-storage-integrity.yml', 'sw.js']
+    paths: ['js/practiceLab/**', 'tests/practice-*.test.js', 'tests/browser/practice_*.mjs', '.github/durable-edits.json', '.github/workflows/practice-storage-integrity.yml', 'sw.js']
 permissions:
   contents: read
 concurrency:
   group: practice-storage-integrity-${{ github.ref }}
   cancel-in-progress: true
 jobs:
-  journeys:
+  source:
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    outputs:
+      sha: ${{ steps.source.outputs.sha }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - id: source
+        run: |
+          if [ -f .github/durable-edits.json ]; then
+            node .github/apply-durable-edits.mjs
+            node --test tests/practice-durable-manifest.test.js tests/practice-daily-coach-storage-lifecycle.test.js tests/practice-repository.test.js
+            git config user.name 'github-actions[bot]'
+            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+            git add js/practiceLab/ tests/ sw.js .github/durable-edits.json .github/apply-durable-edits.mjs
+            git commit -m 'fix(practice): persist Practice metadata in IndexedDB and restore atomic plan writes'
+            git push origin HEAD:fix/practice-durable-storage
+          fi
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+  core:
+    needs: source
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.source.outputs.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: |
+          mkdir -p browser-artifacts/storage-core
+          npm test > browser-artifacts/storage-core/unit.log 2>&1
+          node scripts/auditPracticePrivacySecurity.mjs > browser-artifacts/storage-core/security.json
+          node scripts/testPracticeMigrations.mjs > browser-artifacts/storage-core/migrations.json
+          node scripts/validatePracticeReleaseContent.mjs > browser-artifacts/storage-core/content.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: practice-storage-core
+          path: browser-artifacts/storage-core/
+          retention-days: 7
+  journeys:
+    needs: source
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
     strategy:
       fail-fast: false
       matrix:
@@ -22,16 +70,31 @@ jobs:
     env:
       HOME: /root
       PRACTICE_BROWSER: ${{ matrix.browser }}
+      PRACTICE_BROWSERS: ${{ matrix.browser }}
+      PRACTICE_WIDTH: ${{ matrix.browser == 'webkit' && '390' || '1280' }}
+      PRACTICE_FULL_STORAGE: '1'
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.source.outputs.sha }}
       - uses: actions/setup-node@v4
         with:
           node-version: 22
       - run: npm install --no-save playwright@1.57.0
-      - run: node tests/browser/practice_quota_journey.mjs
+      - name: Actual Daily Coach at full localStorage
+        run: node tests/browser/practice_quota_journey.mjs
+      - name: Every public drill at full localStorage
+        if: ${{ !cancelled() }}
+        run: node tests/browser/practice_end_to_end.mjs
+      - name: Assessments and protocols at full localStorage
+        if: ${{ !cancelled() }}
+        run: node tests/browser/practice_completion.mjs
+      - name: Schema upgrade and atomic failure regression
+        if: ${{ !cancelled() }}
+        run: node tests/browser/practice_storage_repair.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: practice-quota-${{ matrix.browser }}
-          path: browser-artifacts/practice-quota-journey/
+          name: practice-storage-${{ matrix.browser }}
+          path: browser-artifacts/
           retention-days: 7
