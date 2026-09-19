@@ -28,6 +28,12 @@
           storedFlow = sessionStorage.getItem(FLOW_KEY);
         } catch {}
 
+        // Never claim an OAuth callback merely because it contains ?code= or
+        // ?error=. WORDSTRIKE owns this root page too, and future/legacy auth
+        // flows may legitimately return query parameters here. Diet Copilot
+        // must explicitly mark the flow before leaving for the provider.
+        if (targetKind !== 'web' && targetKind !== 'native') return;
+
         const target = new URL(
           targetKind === 'native' ? '/diet/native-auth-callback.html' : '/diet/',
           source.origin
