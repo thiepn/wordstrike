@@ -61,7 +61,8 @@ export function createPracticePhysicalTelemetryViewRuntime({
   }
 
   async function setEnabled(enabled) {
-    setPracticePhysicalTelemetryEnabled(localManifestStore, enabled === true);
+    await initialize();
+    await setPracticePhysicalTelemetryEnabled(localManifestStore, enabled === true);
     return getState();
   }
 

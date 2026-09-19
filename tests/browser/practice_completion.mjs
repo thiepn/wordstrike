@@ -7,6 +7,15 @@ try{for(const name of (process.env.PRACTICE_BROWSERS??'chromium,firefox,webkit')
  const browser=await playwright[name].launch(process.env.PRACTICE_CHROMIUM_PATH&&name==='chromium'?{executablePath:process.env.PRACTICE_CHROMIUM_PATH,args:['--no-sandbox','--disable-dev-shm-usage','--disable-gpu']}:{});
  try{for(const width of [1280,390]){
   const context=await browser.newContext({viewport:{width,height:900},reducedMotion:'reduce'}),page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
+  if(process.env.PRACTICE_FULL_STORAGE==='1')await context.addInitScript(()=>{
+    if(localStorage.getItem('practice-quota-test-active'))return;
+    localStorage.setItem('practice-quota-test-active','1');
+    let i=0;
+    for(const size of [131072,32768,8192,2048,512,128,16,1])for(let j=0;j<200;j++){
+      try{localStorage.setItem('practice-quota-test-'+i,'q'.repeat(size));i++;}
+      catch(e){if(e.name!=='QuotaExceededError')throw e;break;}
+    }
+  });
   await page.goto(`http://127.0.0.1:${server.address().port}/harness`);
   await page.evaluate(async()=>{const [{createPracticeLabController},{createPracticeFeatureGate},{createPracticeExperimentRegistry}]=await Promise.all([import('/js/practiceLab/practiceLabController.js'),import('/js/practiceLab/practiceFeatureGate.js'),import('/js/practiceLab/practiceExperimentRegistry.js')]);const gate=createPracticeFeatureGate({developerMode:true});window.lab=createPracticeLabController({root:document.querySelector('#app'),featureGate:gate,experimentRegistry:createPracticeExperimentRegistry({featureGate:gate})});lab.mount();});
   await page.locator('[data-route="skill-map"]').first().waitFor();

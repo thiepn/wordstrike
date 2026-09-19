@@ -1,6 +1,6 @@
 import { PRACTICE_PHYSICAL_TELEMETRY_SETTING } from "./practicePhysicalTelemetryConstants.js";
 
-export function setPracticePhysicalTelemetryEnabled(manifestStore, enabled) {
+export async function setPracticePhysicalTelemetryEnabled(manifestStore, enabled) {
   if (!manifestStore?.load || !manifestStore?.save) throw new TypeError("Physical telemetry setting requires a Practice manifest store");
   const loaded = manifestStore.load();
   const manifest = loaded.manifest;
@@ -12,6 +12,6 @@ export function setPracticePhysicalTelemetryEnabled(manifestStore, enabled) {
       [PRACTICE_PHYSICAL_TELEMETRY_SETTING]: enabled === true,
     },
   };
-  manifestStore.save(updated);
+  await (manifestStore.saveDurable?.(updated) ?? manifestStore.save(updated));
   return Object.freeze(updated);
 }

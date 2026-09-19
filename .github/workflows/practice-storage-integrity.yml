@@ -1,0 +1,122 @@
+name: Practice Storage Integrity
+on:
+  push:
+    branches: [main, fix/practice-durable-storage]
+    paths: ['js/practiceLab/**', 'tests/practice-*.test.js', 'tests/browser/practice_*.mjs', 'tests/browser/storage_native.mjs', '.github/workflows/practice-storage-integrity.yml', 'sw.js']
+permissions:
+  contents: read
+concurrency:
+  group: practice-storage-integrity-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  core:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: |
+          mkdir -p browser-artifacts/storage-core
+          npm test > browser-artifacts/storage-core/unit.log 2>&1
+          node scripts/auditPracticePrivacySecurity.mjs > browser-artifacts/storage-core/security.json
+          node scripts/testPracticeMigrations.mjs > browser-artifacts/storage-core/migrations.json
+          node scripts/validatePracticeReleaseContent.mjs > browser-artifacts/storage-core/content.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: practice-storage-core
+          path: browser-artifacts/storage-core/
+          retention-days: 7
+  journeys:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, firefox, webkit]
+    container:
+      image: mcr.microsoft.com/playwright:v1.57.0-noble
+      options: --ipc=host
+    env:
+      HOME: /root
+      PRACTICE_BROWSER: ${{ matrix.browser }}
+      PRACTICE_BROWSERS: ${{ matrix.browser }}
+      PRACTICE_WIDTH: ${{ matrix.browser == 'webkit' && '390' || '1280' }}
+      PRACTICE_FULL_STORAGE: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --no-save playwright@1.57.0
+      - name: Actual Daily Coach at full localStorage
+        run: node tests/browser/practice_quota_journey.mjs
+      - name: Concurrent tabs and native transaction rollback
+        if: ${{ !cancelled() }}
+        run: node tests/browser/storage_native.mjs
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: practice-coach-quota-${{ matrix.browser }}
+          path: |
+            browser-artifacts/practice-quota-journey/
+            browser-artifacts/storage-native/
+          retention-days: 7
+      - name: Every public drill at full localStorage
+        if: ${{ !cancelled() }}
+        run: node tests/browser/practice_end_to_end.mjs
+      - name: Assessments and protocols at full localStorage
+        if: ${{ !cancelled() }}
+        run: node tests/browser/practice_completion.mjs
+      - name: Schema upgrade and atomic failure regression
+        if: ${{ !cancelled() }}
+        run: node tests/browser/practice_storage_repair.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: practice-storage-${{ matrix.browser }}
+          path: browser-artifacts/
+          retention-days: 7
+  live:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    container:
+      image: mcr.microsoft.com/playwright:v1.57.0-noble
+      options: --ipc=host
+    env:
+      HOME: /root
+      PRACTICE_BROWSER: chromium
+      PRACTICE_URL: https://thiepn.dev/wordstrike/
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --no-save playwright@1.57.0
+      - name: Verify exact deployed storage code
+        run: |
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';
+          import {setTimeout as wait} from 'node:timers/promises';
+          const files=['sw.js','js/practiceLab/practiceDurableManifest.js','js/practiceLab/practiceManifestStore.js','js/practiceLab/practiceRepositoryLegacyV17.js','js/practiceLab/practiceRepositoryV30.js','js/practiceLab/practiceIndexedDbStore.js','js/practiceLab/practiceLabControllerRuntimeV25.js'];
+          const deadline=Date.now()+480000;
+          for(;;){
+            const results=await Promise.all(files.map(async file=>{
+              try{const response=await fetch(process.env.PRACTICE_URL+file+'?release='+process.env.GITHUB_SHA,{signal:AbortSignal.timeout(15000)});return response.ok&&(await response.text())===fs.readFileSync(file,'utf8');}catch{return false;}
+            }));
+            if(results.every(Boolean)){console.log('Production assets match',process.env.GITHUB_SHA);break;}
+            if(Date.now()>deadline)throw Error('Deployment did not match the tested release within the deadline');
+            await wait(10000);
+          }
+          JS
+      - name: Create complete and reload Daily Training on production with localStorage full
+        run: node tests/browser/practice_quota_journey.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: practice-storage-production
+          path: browser-artifacts/practice-quota-journey/
+          retention-days: 7

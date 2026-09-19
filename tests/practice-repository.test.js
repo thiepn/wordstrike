@@ -41,7 +41,7 @@ assert.equal(initialized.backend, "memory");
 assert.equal((await repository.getPracticeProfile()).profileId, profileId);
 assert.equal(repository.getPracticeSettings().dailySessionLengthMinutes, 12);
 const settings = { ...repository.getPracticeSettings(), dailySessionLengthMinutes: 20 };
-assert.equal(repository.savePracticeSettings(settings).dailySessionLengthMinutes, 20);
+assert.equal((await repository.savePracticeSettings(settings)).dailySessionLengthMinutes, 20);
 
 const stat = createDefaultSkillStat({ profileId, entityType: "bigram", entityKey: "ou", now });
 await repository.saveSkillStat(stat);

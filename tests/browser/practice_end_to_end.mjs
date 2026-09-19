@@ -50,6 +50,15 @@ try{for(const browserName of (process.env.PRACTICE_BROWSERS??'chromium,firefox')
    globalThis.__practiceRejections=[];
    addEventListener('unhandledrejection',event=>globalThis.__practiceRejections.push({message:event.reason?.message,code:event.reason?.code,details:event.reason?.details,stack:event.reason?.stack}));
   });
+  if(process.env.PRACTICE_FULL_STORAGE==='1')await context.addInitScript(()=>{
+   if(localStorage.getItem('practice-quota-test-active'))return;
+   localStorage.setItem('practice-quota-test-active','1');
+   let i=0;
+   for(const size of [131072,32768,8192,2048,512,128,16,1])for(let j=0;j<200;j++){
+    try{localStorage.setItem('practice-quota-test-'+i,'q'.repeat(size));i++;}
+    catch(e){if(e.name!=='QuotaExceededError')throw e;break;}
+   }
+  });
   const page=await context.newPage();page.setDefaultTimeout(15000);
   const record={browser:browserName,width,id,status:'FAIL',typed:0,errors:[]};page.on('pageerror',e=>record.errors.push(e.message));
   try{

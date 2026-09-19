@@ -114,7 +114,7 @@ export function createPracticeRepository({ dataStore, manifestStore, now = Date.
   let manifest = null;
 
   const ensureManifest = () => {
-    if (!manifest) manifest = manifestStore.load().manifest;
+    if (!manifest || manifestStore.isDurable) manifest = manifestStore.load().manifest;
     return manifest;
   };
   const validate = (storeName, record) => {
@@ -122,10 +122,10 @@ export function createPracticeRepository({ dataStore, manifestStore, now = Date.
     if (outcome && !outcome.valid) throw validationError(storeName, record, outcome);
     return record;
   };
-  const saveManifestPatch = (patch) => {
+  const saveManifestPatch = async (patch) => {
     const current = ensureManifest();
     const next = { ...current, ...patch, updatedAt: toPracticeUtcIso(now) };
-    const result = manifestStore.save(next);
+    const result = await (manifestStore.saveDurable?.(next) ?? manifestStore.save(next));
     manifest = result.manifest;
     return manifest;
   };
@@ -334,7 +334,7 @@ export function createPracticeRepository({ dataStore, manifestStore, now = Date.
       await runRetention();
       try { return await write(); } catch (secondError) {
         if (!isQuotaExceededError(secondError)) throw secondError;
-        try { saveManifestPatch({ storageHealth: "quota-exceeded" }); } catch {}
+        try { await saveManifestPatch({ storageHealth: "quota-exceeded" }); } catch {}
         throw practiceStorageError(PRACTICE_STORAGE_ERROR_CODES.QUOTA_EXCEEDED, "Practice storage quota remained exceeded after one recovery attempt", { operation, recoverable: true, cause: secondError });
       }
     }
@@ -353,14 +353,14 @@ export function createPracticeRepository({ dataStore, manifestStore, now = Date.
 
   const repository = {
     async initializePracticeStorage() {
-      const manifestResult = manifestStore.load();
-      manifest = manifestResult.manifest;
       await dataStore.open();
+      const manifestResult = await (manifestStore.initialize?.(dataStore) ?? manifestStore.load());
+      manifest = manifestResult.manifest;
       const reconciliation = await reconcileContextIdentity();
       const profile = await readValidated("profiles", manifest.profileId);
       if (!profile) throw practiceStorageError(PRACTICE_STORAGE_ERROR_CODES.RECOVERY_REQUIRED, "Practice profile could not be initialized", { operation: "initialize", storeName: "profiles", recordId: manifest.profileId, recoverable: true });
       const context = await assertContextOwnership(profile.profileId, profile.activeContextId, { operation: "initialize" });
-      if (manifest.databaseVersion !== PRACTICE_DATABASE_VERSION) saveManifestPatch({ databaseVersion: PRACTICE_DATABASE_VERSION });
+      if (manifest.databaseVersion !== PRACTICE_DATABASE_VERSION) await saveManifestPatch({ databaseVersion: PRACTICE_DATABASE_VERSION });
       return { manifest: ensureManifest(), profile, context, recovery: manifestResult.recovery, backend: dataStore.kind, reconciliation };
     },
 
@@ -373,10 +373,10 @@ export function createPracticeRepository({ dataStore, manifestStore, now = Date.
     },
 
     getPracticeSettings() { return clonePracticeValue(ensureManifest().settings); },
-    savePracticeSettings(settings) {
+    async savePracticeSettings(settings) {
       const outcome = validatePracticeSettings(settings);
       if (!outcome.valid) throw validationError("manifest.settings", settings, outcome);
-      return saveManifestPatch({ settings: clonePracticeValue(settings) }).settings;
+      return (await saveManifestPatch({ settings: clonePracticeValue(settings) })).settings;
     },
 
     getPracticeContext(contextId) { return readValidated("contexts", contextId); },
@@ -708,7 +708,7 @@ export function createPracticeRepository({ dataStore, manifestStore, now = Date.
       }));
       try {
         const reconciliationProfile = transactionResult.profileSummary ?? updatedProfileSummary;
-        saveManifestPatch({
+        await saveManifestPatch({
           lastCompletedSessionAt: sessionSummary.status === "completed" ? sessionSummary.completedAtUtc : ensureManifest().lastCompletedSessionAt,
           dashboardSummary: reconciliationProfile?.dashboardSummary ?? ensureManifest().dashboardSummary,
           storageHealth: "healthy",
@@ -724,7 +724,7 @@ export function createPracticeRepository({ dataStore, manifestStore, now = Date.
 
     async resetPracticeData() {
       for (const storeName of PRACTICE_STORE_NAMES) await dataStore.clearStore(storeName);
-      manifestStore.clear();
+      await (manifestStore.clearDurable?.() ?? manifestStore.clear());
       manifest = null;
       return true;
     },
