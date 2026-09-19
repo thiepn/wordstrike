@@ -84,7 +84,7 @@ async function exercise(page, databaseName) {
 }
 
 
-async function exerciseCoachRecovery(page, databaseName) {
+async function exerciseCoachTransactionFailure(page, databaseName) {
   return page.evaluate(async (databaseName) => {
     const { createPracticeIndexedDbStore } = await import("/js/practiceLab/practiceIndexedDbStore.js");
     const { createPracticeRepository } = await import("/js/practiceLab/practiceRepository.js");
@@ -103,7 +103,7 @@ async function exerciseCoachRecovery(page, databaseName) {
     await baseStore.put("profiles", profile);
     await baseStore.put("contexts", context);
 
-    let transactionCalls = 0;
+    let transactionCalls = 0, failPlanWrites = true;
     const dataStore = {
       kind: baseStore.kind,
       open: (...args) => baseStore.open(...args),
@@ -115,9 +115,12 @@ async function exerciseCoachRecovery(page, databaseName) {
       query: (...args) => baseStore.query(...args),
       clearStore: (...args) => baseStore.clearStore(...args),
       get isOpen() { return baseStore.isOpen; },
-      async runTransaction() {
-        transactionCalls += 1;
-        throw new Error("simulated broad transaction failure");
+      async runTransaction(...args) {
+        if (args[0].includes("coachPlans") && failPlanWrites) {
+          transactionCalls += 1;
+          throw new Error("simulated atomic plan write failure");
+        }
+        return baseStore.runTransaction(...args);
       },
     };
 
@@ -143,16 +146,20 @@ async function exerciseCoachRecovery(page, databaseName) {
       blocks: [],
       now,
     });
+    let rejected = false;
+    try { await repository.createCoachPlan(plan); } catch { rejected = true; }
+    const absentAfterFailure = (await baseStore.list("coachPlans")).length === 0;
+    failPlanWrites = false;
     const created = await repository.createCoachPlan(plan);
     const saved = await baseStore.get("coachPlans", plan.coachPlanId);
     baseStore.close();
     return {
-      fastPath: initialized.reconciliation?.fastPath === true,
+      rejected, absentAfterFailure,
       initializedProfileId: initialized.profile.profileId,
       initializedContextId: initialized.context.contextId,
       transactionCalls,
       created: created.created,
-      recovered: created.recoveredFromTransactionFailure === true,
+
       saved: saved?.coachPlanId === plan.coachPlanId,
     };
   }, databaseName);
@@ -227,15 +234,16 @@ try {
     report.cases.push({ mode, ...result });
   }
 
-  const recovery = await exerciseCoachRecovery(page, `wordstrike-practice-coach-recovery-${browserName}`);
-  assert.equal(recovery.fastPath, true);
+  const recovery = await exerciseCoachTransactionFailure(page, `wordstrike-practice-coach-recovery-${browserName}`);
+  assert.equal(recovery.rejected, true);
+  assert.equal(recovery.absentAfterFailure, true);
   assert.equal(recovery.initializedProfileId, "practice-profile_browser-coach-recovery-12345678");
   assert.ok(recovery.initializedContextId.startsWith("practice-context_"));
   assert.equal(recovery.transactionCalls, 1, "only the plan write should encounter the simulated wrapper failure");
   assert.equal(recovery.created, true);
-  assert.equal(recovery.recovered, true);
+
   assert.equal(recovery.saved, true);
-  report.cases.push({ mode: "coach-runtime-transaction-recovery", ...recovery });
+  report.cases.push({ mode: "coach-atomic-failure-and-retry", ...recovery });
   const quota = await exerciseManifestQuota(page);
   assert.equal(quota.loadedVersion, 13);
   assert.equal(quota.currentVersion, 13);

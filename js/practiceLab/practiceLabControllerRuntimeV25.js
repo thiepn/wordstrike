@@ -21,39 +21,10 @@ function coachErrorDetail(error, stage) {
   });
 }
 
-/**
- * Daily Coach does not need to replay the full legacy reconciliation pipeline
- * when the active profile/context are already readable and valid. This fast
- * path is important for long-lived local databases: an unrelated historical
- * reconciliation transaction must not prevent today's Coach from opening.
- */
-export async function initializePracticeCoachRuntimeData({
-  dataStore,
-  repository,
-  manifestStore,
-  initialized = null,
-} = {}) {
-  if (initialized?.profile && initialized?.context) return initialized;
-  if (!dataStore?.open || !repository || !manifestStore?.load) throw new TypeError("Daily Coach storage runtime is incomplete");
-  await dataStore.open();
-  try {
-    const manifestResult = manifestStore.load();
-    const profile = await repository.getPracticeProfile?.();
-    const context = profile?.activeContextId ? await repository.getPracticeContext?.(profile.activeContextId) : null;
-    if (profile && context && context.profileId === profile.profileId) {
-      return Object.freeze({
-        manifest: manifestResult.manifest,
-        profile,
-        context,
-        recovery: manifestResult.recovery,
-        backend: dataStore.kind ?? "unknown",
-        reconciliation: Object.freeze({ reconciled: false, fastPath: true }),
-      });
-    }
-  } catch {
-    // Fall through to the canonical recovery path when direct reads are not
-    // sufficient. The fallback remains responsible for creating/migrating data.
-  }
+/** Use the same durable metadata initialization as every other Practice mode. */
+export async function initializePracticeCoachRuntimeData({repository,initialized=null}={}) {
+  if(initialized?.profile && initialized?.context)return initialized;
+  if(!repository?.initializePracticeStorage)throw new TypeError('Daily Coach storage runtime is incomplete');
   return repository.initializePracticeStorage();
 }
 
