@@ -6,7 +6,9 @@ export function practicePlanCharacters(plan) {
   return plans.get(plan);
 }
 export function practicePhaseWindow(phase, cursor, length) {
-  const start = Math.max(phase?.startIndex ?? 0, cursor - 80);
+  // Some immutable protocols put the separator before the next phase range.
+  // It still has to be typed: never start the visible window after the cursor.
+  const start = Math.max(Math.min(phase?.startIndex ?? 0, cursor), cursor - 80);
   return { start, end: Math.min(length, phase?.endIndex ?? length, start + 400) };
 }
 export function updatePracticeTargetSession(root, { contentPlan, phase, snapshot, passageSelector, text, progress, repairFeedback }) {
@@ -16,7 +18,7 @@ export function updatePracticeTargetSession(root, { contentPlan, phase, snapshot
     && previous?.lifecycle === snapshot.lifecycleState;
   views.set(root, { plan: contentPlan, phase, lifecycle: snapshot.lifecycleState });
   if (!stable) return false;
-  passage.innerHTML = text;
+  passage.innerHTML = text.replaceAll('>&nbsp;</span>', '> </span>');
   const bar = root.querySelector('.practice-weak-key-progress > span, .practice-combination-progress > span');
   if (bar) bar.style.width = `${progress.toFixed(2)}%`;
   const label = root.querySelector('.practice-weak-key-progress-label, .practice-combination-progress-label');
