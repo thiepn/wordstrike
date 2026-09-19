@@ -251,6 +251,7 @@
 
 .speed-performance-v4-inspector {
   min-width: 0;
+  overflow-anchor: none;
   margin-top: .75rem;
   padding-top: .75rem;
   border-top: 1px solid var(--border);

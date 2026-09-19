@@ -295,12 +295,30 @@ export function markTypingCoachV7PracticeCompleted({ sourceSessionId = null, dri
   if (!plan || plan.status === "completed") return plan;
   if (sourceSessionId && sourceSessionId !== plan.sourceSessionId) return plan;
   const steps = clone(plan.steps);
-  const index = steps.findIndex((step) => (
+  const normalizedTarget = target ? String(target).toLowerCase() : null;
+  let index = steps.findIndex((step) => (
     step.kind === "practice"
     && !isResolved(step)
     && (!drillType || step.drill?.type === drillType)
-    && (!target || step.drill?.target === String(target).toLowerCase())
+    && (!normalizedTarget || step.drill?.target === normalizedTarget)
   ));
+
+  // V6 may preflight a Weak Words target and substitute another trainable word
+  // before opening Practice Lab. V7 still represents the user's original
+  // ordered step, so an exact target match can legitimately disappear. In that
+  // case only complete the single currently-active step of the same drill type.
+  if (index < 0 && normalizedTarget && drillType) {
+    const activeMatches = steps
+      .map((step, stepIndex) => ({ step, stepIndex }))
+      .filter(({ step }) => (
+        step.kind === "practice"
+        && step.status === "active"
+        && !isResolved(step)
+        && step.drill?.type === drillType
+      ));
+    if (activeMatches.length === 1) index = activeMatches[0].stepIndex;
+  }
+
   if (index < 0) return plan;
   steps[index] = { ...steps[index], status: "complete", completedAt: Date.now() };
   return withUpdatedSteps(plan, steps);

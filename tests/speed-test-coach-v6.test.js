@@ -4,10 +4,12 @@ import {
   activateTypingCoachPlan,
   buildTypingCoachV6,
   completeTypingCoachRetest,
+  clearActiveTypingCoachCycle,
   getTypingCoachCycleForRetestSession,
   loadActiveTypingCoachCycle,
   markTypingCoachPracticeCompleted,
   markTypingCoachRetestRequested,
+  resolveTypingCoachPracticePlan,
   summarizeTypingCoachProfile,
   TYPING_COACH_V6_ACTIVE_KEY,
   TYPING_COACH_V6_HISTORY_KEY,
@@ -94,6 +96,43 @@ assert.ok(coach.drills.some((drill) => drill.type === "mistake-patterns" && dril
 assert.ok(coach.drills.some((drill) => drill.type === "accuracy-recovery"));
 assert.ok(coach.focusWords.includes("because"));
 
+const weakWordDrill = coach.drills.find((drill) => drill.type === "weak-words");
+const howeverDrill = Object.freeze({
+  ...weakWordDrill,
+  target: "however",
+  focusWords: Object.freeze(["however", "because"]),
+  rationale: "however created the strongest word-level friction in this test.",
+});
+const howeverPlan = Object.freeze({
+  ...coach,
+  primaryDrillType: "weak-words",
+  primaryDrill: howeverDrill,
+  drills: Object.freeze(coach.drills.map((drill) => (
+    drill.type === "weak-words" ? howeverDrill : drill
+  ))),
+  focusWords: Object.freeze(["however", "because"]),
+});
+const resolvedHowever = await resolveTypingCoachPracticePlan(howeverPlan, "weak-words", {
+  inspectProblemWord: async (word) => word === "however"
+    ? { eligible: false, status: "unavailable", reasons: ["WORD_NOT_IN_TRAINING_CORPUS"] }
+    : { eligible: true, status: "ready", reasons: [] },
+});
+assert.equal(resolvedHowever.drill.type, "weak-words");
+assert.equal(resolvedHowever.drill.target, "because");
+assert.equal(resolvedHowever.fallback.kind, "alternate-word");
+assert.equal(resolvedHowever.fallback.requestedTarget, "however");
+assert.equal(resolvedHowever.plan.primaryDrill.target, "because");
+assert.equal(resolvedHowever.plan.focusWords[0], "because");
+assert.match(resolvedHowever.drill.rationale, /however/i);
+assert.match(resolvedHowever.drill.rationale, /because/i);
+
+const advisoryFailure = await resolveTypingCoachPracticePlan(howeverPlan, "weak-words", {
+  inspectProblemWord: async () => { throw new Error("storage temporarily unavailable"); },
+});
+assert.equal(advisoryFailure.drill.target, "however");
+assert.equal(advisoryFailure.fallback, null,
+  "preflight infrastructure failure must not turn PRACTICE NOW into a dead action");
+
 const correctionHeavyProfile = { words: [
   word("their", { corrections: 2, clean: false }),
   word("before", { corrections: 2, clean: false }),
@@ -137,11 +176,27 @@ assert.equal(getTypingCoachCycleForRetestSession("retest")?.cycleId, completed.c
 assert.ok(memory.has(TYPING_COACH_V6_HISTORY_KEY));
 assert.ok(!memory.has(TYPING_COACH_V6_ACTIVE_KEY));
 
+// A full/blocked localStorage must never turn PRACTICE NOW into a no-op.
+// The current page keeps a volatile active cycle so the drill and retest flow
+// remain usable even though persistence is unavailable.
+const normalSetItem = globalThis.localStorage.setItem;
+globalThis.localStorage.setItem = () => {
+  throw Object.assign(new Error("quota"), { name: "QuotaExceededError" });
+};
+const volatileCycle = activateTypingCoachPlan(coach, "weak-words");
+assert.ok(volatileCycle?.cycleId);
+assert.equal(loadActiveTypingCoachCycle()?.drill?.target, "because");
+const volatileCompleted = markTypingCoachPracticeCompleted();
+assert.ok(volatileCompleted?.practiceCompletedAt);
+globalThis.localStorage.setItem = normalSetItem;
+clearActiveTypingCoachCycle();
+assert.equal(loadActiveTypingCoachCycle(), null);
+
 memory.set(TYPING_COACH_V6_ACTIVE_KEY, "{not-json");
 assert.equal(loadActiveTypingCoachCycle(), null);
 
 const index = readFileSync(new URL("../index.html", import.meta.url), "utf8");
-assert.match(index, /js\/speedTestResultsV6\.js\?v=20260911a/);
+assert.match(index, /js\/speedTestResultsV6\.js\?v=20260919a/);
 assert.doesNotMatch(index, /<link[^>]+typing-coach-v6\.css/,
   "V6 coach styling should remain lazy and not change unrelated screens");
 const submission = readFileSync(new URL("../js/leaderboardSubmissionService.js", import.meta.url), "utf8");

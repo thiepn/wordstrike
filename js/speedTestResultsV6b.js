@@ -11,13 +11,14 @@ import {
   markTypingCoachPracticeCompleted,
   markTypingCoachPracticeStarted,
   markTypingCoachRetestRequested,
+  resolveTypingCoachPracticePlan,
 } from "./speedTestCoachV6.js";
 import { createPracticeFeatureGate } from "./practiceLab/practiceFeatureGate.js";
 import { createPracticeExperimentRegistry } from "./practiceLab/practiceExperimentRegistry.js";
 import { createPracticeLabController } from "./practiceLab/practiceLabController.js";
 import { createPracticeLabRoute, PRACTICE_LAB_ROUTES } from "./practiceLab/practiceLabRoutes.js";
 
-const STYLE_HREF = "styles/screens/typing-coach-v6.css?v=20260911a";
+const STYLE_HREF = "styles/screens/typing-coach-v6.css?v=20260919a";
 const TAB_IDS = Object.freeze(["overview", "timeline", "words", "progress", "practice"]);
 const TAB_LABELS = Object.freeze({ overview: "Overview", timeline: "Timeline", words: "Words", progress: "Progress", practice: "Practice" });
 const finite = (value, fallback = 0) => Number.isFinite(Number(value)) ? Number(value) : fallback;
@@ -134,35 +135,90 @@ function driveCoachPractice() {
   }
 }
 
-function openCoachPractice(plan, drillType) {
-  const cycle = activateTypingCoachPlan(plan, drillType);
-  if (!cycle) return false;
+function coachFallbackCopy(fallback) {
+  if (fallback?.kind === "alternate-word") {
+    return `${fallback.requestedTarget} is not covered by standardized Weak Words material yet. Training ${fallback.resolvedTarget} instead.`;
+  }
+  if (fallback?.kind === "alternate-drill") {
+    return `Weak Words material for ${fallback.requestedTarget} is unavailable. Opening the next trainable Coach drill instead.`;
+  }
+  if (fallback?.kind === "unavailable-target") {
+    return `${fallback.requestedTarget} does not currently have enough standardized Weak Words material. Practice Lab will show the exact availability reason.`;
+  }
+  return "";
+}
+
+async function resolveCoachPractice(plan, drillType) {
+  if (drillType !== "weak-words") {
+    return resolveTypingCoachPracticePlan(plan, drillType);
+  }
+
+  let runtime = null;
+  try {
+    const module = await import("./practiceLab/practiceProblemWordsRuntime.js");
+    runtime = module.createPracticeProblemWordsRuntime();
+    return await resolveTypingCoachPracticePlan(plan, drillType, {
+      inspectProblemWord: (entityKey) => runtime.inspectTarget({ entityKey }),
+    });
+  } catch {
+    // If the preflight itself is unavailable, still open the requested Practice
+    // surface. It has its own recovery/availability UI and must never become a
+    // dead recommendation button because an advisory check failed.
+    return resolveTypingCoachPracticePlan(plan, drillType);
+  } finally {
+    try { runtime?.clear?.(); } catch {}
+  }
+}
+
+async function openCoachPractice(plan, drillType, trigger = null) {
+  if (trigger?.disabled) return false;
+  const originalLabel = trigger?.textContent ?? "";
+  if (trigger) {
+    trigger.disabled = true;
+    trigger.setAttribute("aria-busy", "true");
+    trigger.textContent = "OPENING…";
+  }
+
   closePracticeOverlay();
   ensureStyles();
 
-  const overlay = document.createElement("div");
-  overlay.className = "typing-coach-practice-overlay";
-  overlay.dataset.typingCoachPracticeOverlay = "";
-  overlay.innerHTML = `<div class="typing-coach-practice-chrome"><div><span>WORDSTRIKE / TYPING COACH</span><strong>${escapeHtml(cycle.drill.title)}</strong></div><div class="typing-coach-practice-chrome-actions"><button type="button" data-coach-retest-original>RETEST ORIGINAL</button><button type="button" data-coach-close-practice aria-label="Close targeted practice">CLOSE</button></div></div><div class="typing-coach-practice-root" data-coach-practice-root></div>`;
-  document.body.append(overlay);
-  practiceOverlay = overlay;
-  overlay.addEventListener("click", (event) => event.stopPropagation());
-  overlay.addEventListener("keydown", (event) => event.stopPropagation());
-  overlay.querySelector("[data-coach-close-practice]")?.addEventListener("click", closePracticeOverlay);
-  overlay.querySelector("[data-coach-retest-original]")?.addEventListener("click", retryOriginalTest);
+  try {
+    const resolution = await resolveCoachPractice(plan, drillType);
+    if (!resolution?.drill) return false;
+    const cycle = activateTypingCoachPlan(resolution.plan, resolution.drill.type);
+    if (!cycle) return false;
 
-  const root = overlay.querySelector("[data-coach-practice-root]");
-  const featureGate = createPracticeFeatureGate({ publicEnabled: true });
-  practiceRegistry = createPracticeExperimentRegistry({ featureGate });
-  practiceController = createPracticeLabController({ root, featureGate, experimentRegistry: practiceRegistry, appNavigation: { exit: closePracticeOverlay } });
-  practiceAutoStartIssued = false;
-  practiceTargetFilled = false;
-  accuracyTypeIssued = false;
-  practiceObserver = new MutationObserver(driveCoachPractice);
-  practiceObserver.observe(root, { childList: true, subtree: true, attributes: true, attributeFilter: ["disabled", "aria-disabled"] });
-  practiceController.mount(createPracticeLabRoute(PRACTICE_LAB_ROUTES.EXPERIMENT_DETAIL, { experimentId: cycle.drill.experimentId }));
-  driveCoachPractice();
-  return true;
+    const fallbackCopy = coachFallbackCopy(resolution.fallback);
+    const overlay = document.createElement("div");
+    overlay.className = "typing-coach-practice-overlay";
+    overlay.dataset.typingCoachPracticeOverlay = "";
+    overlay.innerHTML = `<div class="typing-coach-practice-chrome"><div><span>WORDSTRIKE / TYPING COACH</span><strong>${escapeHtml(cycle.drill.title)} · ${escapeHtml(cycle.drill.target)}</strong>${fallbackCopy ? `<small data-coach-practice-fallback>${escapeHtml(fallbackCopy)}</small>` : ""}</div><div class="typing-coach-practice-chrome-actions"><button type="button" data-coach-retest-original>RETEST ORIGINAL</button><button type="button" data-coach-close-practice aria-label="Close targeted practice">CLOSE</button></div></div><div class="typing-coach-practice-root" data-coach-practice-root></div>`;
+    document.body.append(overlay);
+    practiceOverlay = overlay;
+    overlay.addEventListener("click", (event) => event.stopPropagation());
+    overlay.addEventListener("keydown", (event) => event.stopPropagation());
+    overlay.querySelector("[data-coach-close-practice]")?.addEventListener("click", closePracticeOverlay);
+    overlay.querySelector("[data-coach-retest-original]")?.addEventListener("click", retryOriginalTest);
+
+    const root = overlay.querySelector("[data-coach-practice-root]");
+    const featureGate = createPracticeFeatureGate({ publicEnabled: true });
+    practiceRegistry = createPracticeExperimentRegistry({ featureGate });
+    practiceController = createPracticeLabController({ root, featureGate, experimentRegistry: practiceRegistry, appNavigation: { exit: closePracticeOverlay } });
+    practiceAutoStartIssued = false;
+    practiceTargetFilled = false;
+    accuracyTypeIssued = false;
+    practiceObserver = new MutationObserver(driveCoachPractice);
+    practiceObserver.observe(root, { childList: true, subtree: true, attributes: true, attributeFilter: ["disabled", "aria-disabled"] });
+    practiceController.mount(createPracticeLabRoute(PRACTICE_LAB_ROUTES.EXPERIMENT_DETAIL, { experimentId: cycle.drill.experimentId }));
+    driveCoachPractice();
+    return true;
+  } finally {
+    if (trigger?.isConnected) {
+      trigger.disabled = false;
+      trigger.removeAttribute("aria-busy");
+      trigger.textContent = originalLabel;
+    }
+  }
 }
 
 function comparisonMarkup(cycle) {
@@ -205,7 +261,7 @@ function bindResultInteractions(shell, plan) {
     const tab = event.target.closest?.("[data-v6-tab]");
     if (tab) return selectTab(shell, tab.dataset.v6Tab);
     const practice = event.target.closest?.("[data-coach-practice-type]");
-    if (practice) openCoachPractice(plan, practice.dataset.coachPracticeType);
+    if (practice) void openCoachPractice(plan, practice.dataset.coachPracticeType, practice);
   });
   shell.querySelector("[role=tablist]")?.addEventListener("keydown", (event) => {
     const tab = event.target.closest?.("[data-v6-tab]");
@@ -219,6 +275,30 @@ function bindResultInteractions(shell, plan) {
     event.preventDefault();
     selectTab(shell, TAB_IDS[index], { focus: true });
   });
+}
+
+function captureResultsScroll(screen) {
+  const panel = screen?.querySelector?.(".speed-results-panel") ?? null;
+  return {
+    panel,
+    panelTop: Number(panel?.scrollTop || 0),
+    pageX: Number(globalThis.scrollX || 0),
+    pageY: Number(globalThis.scrollY || 0),
+  };
+}
+
+function restoreResultsScroll(position) {
+  if (!position) return;
+  if (position.panel) position.panel.scrollTop = position.panelTop;
+  if (typeof globalThis.scrollTo !== "function") return;
+  const currentX = Number(globalThis.scrollX || 0);
+  const currentY = Number(globalThis.scrollY || 0);
+  if (Math.abs(currentX - position.pageX) < 1 && Math.abs(currentY - position.pageY) < 1) return;
+  try {
+    globalThis.scrollTo({ left: position.pageX, top: position.pageY, behavior: "auto" });
+  } catch {
+    globalThis.scrollTo(position.pageX, position.pageY);
+  }
 }
 
 function enhanceResultsV6() {
@@ -237,6 +317,7 @@ function enhanceResultsV6() {
   const comparisonCycle = completeTypingCoachRetest(result, profile) || getTypingCoachCycleForRetestSession(result.sessionId);
 
   ensureStyles();
+  const scrollPosition = captureResultsScroll(screen);
   const template = document.createElement("template");
   template.innerHTML = tabShellMarkup(plan, result, comparisonCycle).trim();
   const shell = template.content.firstElementChild;
@@ -256,6 +337,11 @@ function enhanceResultsV6() {
   if (!progress.children.length) progress.innerHTML = '<p class="typing-coach-empty">Complete more matching tests to build a progress baseline.</p>';
   bindResultInteractions(shell, plan);
   base.dataset.performanceV6 = "true";
+
+  // Reparenting the V1–V5 sections changes a large amount of layout in one
+  // mutation turn. Preserve the user's position instead of letting scroll
+  // anchoring choose a different result card as the viewport anchor.
+  restoreResultsScroll(scrollPosition);
 }
 
 function install() {

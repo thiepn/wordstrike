@@ -7,6 +7,12 @@ export const TYPING_COACH_V6_HISTORY_KEY = "wordstrike_typing_coach_v6_history";
 const MAX_FOCUS_WORDS = 8;
 const MAX_HISTORY = 12;
 const DRILL_TYPES = new Set(["weak-words", "mistake-patterns", "accuracy-recovery"]);
+
+// The active Coach handoff is runtime-critical but persistence is not.
+// Practice must still open when localStorage is full, blocked, or temporarily
+// unavailable. Persistence remains best-effort; this in-memory copy keeps the
+// current results -> drill -> retest flow alive in the active page.
+let volatileActiveCycle = null;
 const finite = (value, fallback = 0) => {
   const number = Number(value);
   return Number.isFinite(number) ? number : fallback;
@@ -58,6 +64,137 @@ function fallbackFocusWords(profile = {}, result = {}) {
 
 function currentSample(samples, result) {
   return samples.find((sample) => sample?.sessionId === result?.sessionId) || samples.at(-1) || null;
+}
+
+const TARGET_SPECIFIC_PRACTICE_LIMITS = new Set([
+  "WORD_INDEX_NOT_FOUND",
+  "WORD_NOT_IN_TRAINING_CORPUS",
+  "INSUFFICIENT_WORD_CONTEXTS",
+  "INSUFFICIENT_TARGET_FAMILIES",
+  "INSUFFICIENT_NEUTRAL_CONTENT",
+  "INSUFFICIENT_PROBE_MATCH",
+]);
+
+function replaceCoachDrill(plan, original, replacement) {
+  const drills = Object.freeze((plan.drills || []).map((drill) => (
+    drill.type === original.type ? replacement : drill
+  )));
+  const focusWords = original.type === "weak-words"
+    ? Object.freeze(unique([
+      safeWord(replacement.target),
+      ...(replacement.focusWords || []).map(safeWord),
+      ...(plan.focusWords || []).map(safeWord),
+    ]).slice(0, MAX_FOCUS_WORDS))
+    : plan.focusWords;
+  return Object.freeze({
+    ...plan,
+    primaryDrillType: plan.primaryDrillType === original.type
+      ? replacement.type
+      : plan.primaryDrillType,
+    primaryDrill: plan.primaryDrill?.type === original.type
+      ? replacement
+      : plan.primaryDrill,
+    drills,
+    focusWords,
+  });
+}
+
+export async function resolveTypingCoachPracticePlan(
+  plan,
+  drillType = plan?.primaryDrillType,
+  { inspectProblemWord = null } = {},
+) {
+  if (!plan || plan.version !== TYPING_COACH_V6_VERSION) return null;
+  const requested = sanitizeDrill(
+    plan.drills?.find((item) => item.type === drillType) || plan.primaryDrill,
+  );
+  if (!requested) return null;
+
+  const base = Object.freeze({
+    plan,
+    drill: requested,
+    requestedDrill: requested,
+    fallback: null,
+  });
+  if (requested.type !== "weak-words" || typeof inspectProblemWord !== "function") {
+    return base;
+  }
+
+  const candidates = unique([
+    safeWord(requested.target),
+    ...(requested.focusWords || []).map(safeWord),
+    ...(plan.focusWords || []).map(safeWord),
+  ]);
+
+  let targetSpecificFailure = null;
+  for (const candidate of candidates) {
+    let availability;
+    try {
+      availability = await inspectProblemWord(candidate);
+    } catch {
+      // Infrastructure problems must not convert the action into a no-op.
+      // Practice Lab owns its own storage/service recovery UI.
+      return base;
+    }
+    if (availability?.eligible === true && availability?.status === "ready") {
+      if (candidate === requested.target) return base;
+      const replacement = Object.freeze({
+        ...requested,
+        target: candidate,
+        focusWords: Object.freeze(unique([
+          candidate,
+          ...(requested.focusWords || []),
+          ...(plan.focusWords || []),
+        ]).slice(0, MAX_FOCUS_WORDS)),
+        rationale: `${requested.target} was the strongest friction word, but standardized Weak Words material is not available for it yet. Practice ${candidate}, the next trainable friction word, instead.`,
+      });
+      return Object.freeze({
+        plan: replaceCoachDrill(plan, requested, replacement),
+        drill: replacement,
+        requestedDrill: requested,
+        fallback: Object.freeze({
+          kind: "alternate-word",
+          requestedTarget: requested.target,
+          resolvedTarget: candidate,
+          reasonCode: targetSpecificFailure,
+        }),
+      });
+    }
+    const reason = availability?.reasons?.[0] ?? null;
+    if (!TARGET_SPECIFIC_PRACTICE_LIMITS.has(reason)) {
+      return base;
+    }
+    targetSpecificFailure ||= reason;
+  }
+
+  const alternate = (plan.drills || [])
+    .map(sanitizeDrill)
+    .find((drill) => drill?.type === "mistake-patterns");
+  if (alternate) {
+    return Object.freeze({
+      plan,
+      drill: alternate,
+      requestedDrill: requested,
+      fallback: Object.freeze({
+        kind: "alternate-drill",
+        requestedTarget: requested.target,
+        resolvedTarget: alternate.target,
+        reasonCode: targetSpecificFailure,
+      }),
+    });
+  }
+
+  // Keep the requested drill so Practice Lab can explain the unavailable
+  // target instead of leaving the user with a dead button.
+  return Object.freeze({
+    ...base,
+    fallback: Object.freeze({
+      kind: "unavailable-target",
+      requestedTarget: requested.target,
+      resolvedTarget: requested.target,
+      reasonCode: targetSpecificFailure,
+    }),
+  });
 }
 
 function buildDrills({ performance, focusWords, current, result }) {
@@ -267,11 +404,15 @@ export function activateTypingCoachPlan(plan, drillType = plan?.primaryDrillType
     baseline: plan.baseline,
     createdAt: Date.now(),
   });
-  if (!cycle || !writeJson(TYPING_COACH_V6_ACTIVE_KEY, cycle)) return null;
+  if (!cycle) return null;
+  volatileActiveCycle = cycle;
+  writeJson(TYPING_COACH_V6_ACTIVE_KEY, cycle);
   return cycle;
 }
 
 export function loadActiveTypingCoachCycle() {
+  const volatile = sanitizeCycle(volatileActiveCycle);
+  if (volatile) return volatile;
   return sanitizeCycle(readJson(TYPING_COACH_V6_ACTIVE_KEY, null));
 }
 
@@ -279,7 +420,9 @@ function patchActive(patch) {
   const current = loadActiveTypingCoachCycle();
   if (!current) return null;
   const next = sanitizeCycle({ ...current, ...patch });
-  if (!next || !writeJson(TYPING_COACH_V6_ACTIVE_KEY, next)) return null;
+  if (!next) return null;
+  volatileActiveCycle = next;
+  writeJson(TYPING_COACH_V6_ACTIVE_KEY, next);
   return next;
 }
 
@@ -288,6 +431,7 @@ export const markTypingCoachPracticeCompleted = () => patchActive({ practiceComp
 export const markTypingCoachRetestRequested = () => patchActive({ retestRequestedAt: Date.now() });
 
 export function clearActiveTypingCoachCycle() {
+  volatileActiveCycle = null;
   try { globalThis.localStorage?.removeItem(TYPING_COACH_V6_ACTIVE_KEY); } catch {}
 }
 

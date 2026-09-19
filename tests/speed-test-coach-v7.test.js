@@ -109,6 +109,29 @@ const firstDone = markTypingCoachV7PracticeCompleted({
 });
 assert.equal(firstDone.steps[0].status, "complete");
 assert.equal(isTypingCoachV7StepAvailable(firstDone, "reinforce"), true);
+
+// V6 can replace an untrainable Weak Words target before opening Practice.
+// The active V7 step must still complete when the actual trained target differs.
+clearTypingCoachV7Plan();
+const fallbackSaved = ensureTypingCoachV7Plan(v6Plan, { now: new Date("2026-09-11T10:00:00Z") });
+assert.ok(fallbackSaved);
+const fallbackStarted = markTypingCoachV7StepStarted("focus");
+assert.equal(fallbackStarted.steps[0].status, "active");
+const fallbackDone = markTypingCoachV7PracticeCompleted({
+  sourceSessionId: "source-1",
+  drillType: "weak-words",
+  target: "different-trainable-word",
+});
+assert.equal(fallbackDone.steps[0].status, "complete");
+clearTypingCoachV7Plan();
+ensureTypingCoachV7Plan(v6Plan, { now: new Date("2026-09-11T10:00:00Z") });
+markTypingCoachV7StepStarted("focus");
+markTypingCoachV7PracticeCompleted({
+  sourceSessionId: "source-1",
+  drillType: "weak-words",
+  target: "because",
+});
+assert.equal(isTypingCoachV7StepAvailable(loadTypingCoachV7Plan(), "reinforce"), true);
 assert.equal(getTypingCoachV7Progress(firstDone).completed, 1);
 
 const skipped = skipTypingCoachV7Step("reinforce");
@@ -163,7 +186,7 @@ assert.equal(accuracyFirst.steps[1].drill.type, "weak-words");
 const index = readFileSync(new URL("../index.html", import.meta.url), "utf8");
 // Current main ships the V6 entry. Testing the V7 plan module above does not
 // authorize switching the public results screen during Practice integration.
-assert.match(index, /js\/speedTestResultsV6\.js\?v=20260911a/);
+assert.match(index, /js\/speedTestResultsV6\.js\?v=20260919a/);
 assert.match(readFileSync(new URL("../js/speedTestResultsV6.js", import.meta.url), "utf8"), /speedTestResultsV6b\.js/);
 assert.doesNotMatch(index, /<link[^>]+typing-coach-v7\.css/,
   "V7 styling should stay lazy and not affect unrelated screens");
