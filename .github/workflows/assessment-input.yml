@@ -1,0 +1,37 @@
+name: Assessment Input Regression
+on:
+  push:
+    branches: [main, fix/assessment-typing]
+    paths: ['js/practiceLab/practiceAssessmentSessionHost.js', 'js/practiceLab/practiceAssessmentInput.js', 'tests/browser/assessment_input.mjs', 'tests/practice-assessment-input.test.js', '.github/workflows/assessment-input.yml']
+permissions:
+  contents: read
+concurrency:
+  group: assessment-input-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, firefox, webkit]
+    container:
+      image: mcr.microsoft.com/playwright:v1.57.0-noble
+      options: --ipc=host
+    env:
+      HOME: /root
+      PRACTICE_BROWSER: ${{ matrix.browser }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --no-save playwright@1.57.0
+      - run: node tests/browser/assessment_input.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: assessment-input-${{ matrix.browser }}
+          path: browser-artifacts/assessment-input/
+          retention-days: 7
