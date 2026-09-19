@@ -314,8 +314,10 @@ export function markTypingCoachV7PracticeCompleted({ sourceSessionId = null, dri
         step.kind === "practice"
         && step.status === "active"
         && !isResolved(step)
-        && step.drill?.type === drillType
       ));
+    // Only one V7 practice step may be active. V6 can legitimately substitute
+    // either another target word or another trainable drill after availability
+    // preflight, so the active step is the authoritative handoff identity.
     if (activeMatches.length === 1) index = activeMatches[0].stepIndex;
   }
 
