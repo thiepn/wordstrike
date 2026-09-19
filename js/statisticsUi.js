@@ -277,12 +277,18 @@ function signedInProfileContent(profileState = { status: "idle" }) {
   if (profileState.status === "unavailable") {
     return `<strong>Google account connected</strong>
       <p>Public profile services are unavailable. Local gameplay and records are unaffected.</p>
-      <button class="arcade-button" data-action="auth-sign-out">SIGN OUT</button>`;
+      <div class="global-account-actions">
+        <button class="arcade-button account-primary" data-action="leaderboard-profile-retry">RETRY PROFILE CHECK</button>
+        <button class="arcade-button" data-action="auth-sign-out">SIGN OUT</button>
+      </div>`;
   }
   if (profileState.status === "error" && !profileState.profile) {
     return `<strong>Google account connected</strong>
       <p>${escapeHtml(profileState.error?.message || "Public profile services are temporarily unavailable.")}</p>
-      <button class="arcade-button" data-action="auth-sign-out">SIGN OUT</button>`;
+      <div class="global-account-actions">
+        <button class="arcade-button account-primary" data-action="leaderboard-profile-retry">RETRY PROFILE CHECK</button>
+        <button class="arcade-button" data-action="auth-sign-out">SIGN OUT</button>
+      </div>`;
   }
   if (!profileState.profile) {
     return `<strong>Google account connected</strong>

@@ -1319,6 +1319,10 @@ function handleAppClick(event) {
       pendingResultCoordinator.discard();
       void signOut();
     }
+    else if (action === "leaderboard-profile-retry") {
+      const user = getAuthState().user;
+      if (user?.id) void initializeLeaderboardProfile(user, { force: true });
+    }
     else if (action === "leaderboard-username-start-change") startUsernameChange();
     else if (action === "leaderboard-username-cancel-change") cancelUsernameChange();
     else {

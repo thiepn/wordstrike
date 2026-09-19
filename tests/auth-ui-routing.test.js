@@ -99,8 +99,8 @@ storage.profile = {
   profileVersion: 1,
 };
 const snapshot = getStatisticsSnapshot(storage, { currentFurthestLevel: 1, levels: {} }, "2026-06-27");
-const render = (authState) => renderProfileStatistics({
-  snapshot, storage, activeTab: 6, authState,
+const render = (authState, leaderboardProfileState = { status: "idle" }) => renderProfileStatistics({
+  snapshot, storage, activeTab: 6, authState, leaderboardProfileState,
 }, {});
 
 render({ status: "loading" });
@@ -141,12 +141,20 @@ root.buttons[0].dispatchEvent(new MouseEvent("click", { bubbles: true, cancelabl
 assert.deepEqual(calls, ["auth-google-sign-in", "auth-sign-out"]);
 assert.equal(root.listeners.get("click").length, 1);
 
+render(
+  { status: "signed-in", user: { id: "user-retry" } },
+  { status: "error", profile: null, error: { code: "SERVER_ERROR", message: "Public profile services are temporarily unavailable." } },
+);
+assert.match(root.html, /RETRY PROFILE CHECK/);
+root.buttons[0].dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
+assert.deepEqual(calls, ["auth-google-sign-in", "auth-sign-out", "leaderboard-profile-retry"]);
+
 render({ status: "signing-in" });
 root.buttons[0].dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
 render({ status: "signed-out" });
 root.buttons[0].hidden = true;
 root.buttons[0].dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
-assert.equal(calls.length, 2);
+assert.equal(calls.length, 3);
 
 const main = await readFile(new URL("../js/main.js", import.meta.url), "utf8");
 assert.match(main, /void initializeAuth\(\)/);

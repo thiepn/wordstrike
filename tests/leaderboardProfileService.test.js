@@ -82,4 +82,27 @@ for (const code of [
 const unavailable = createLeaderboardProfileService({ getClient: () => null });
 assert.equal((await unavailable.initializeLeaderboardProfile({ id: "user-4" })).status, "unavailable");
 
-console.log("Leaderboard profile initialization, deduplication, operations, errors, and sign-out reset passed.");
+const recoveredProfile = {
+  username: "Recovered_Player",
+  usernameChangedAt: null,
+  canChangeAt: null,
+};
+const retryMock = createMock([
+  { ok: false, error: { code: "SERVER_ERROR" } },
+  { ok: true, data: { profile: recoveredProfile } },
+  { ok: true, data: { profile: recoveredProfile } },
+]);
+const retryService = createLeaderboardProfileService({ getClient: () => retryMock.client });
+assert.equal((await retryService.initializeLeaderboardProfile({ id: "user-retry" })).status, "error");
+assert.equal(
+  (await retryService.initializeLeaderboardProfile({ id: "user-retry" })).status,
+  "ready",
+  "a transient profile failure must be retryable for the same signed-in account",
+);
+assert.equal(retryMock.calls.length, 2);
+await retryService.initializeLeaderboardProfile({ id: "user-retry" });
+assert.equal(retryMock.calls.length, 2, "settled healthy profile checks stay deduplicated");
+await retryService.initializeLeaderboardProfile({ id: "user-retry" }, { force: true });
+assert.equal(retryMock.calls.length, 3, "explicit profile retry forces a fresh server check");
+
+console.log("Leaderboard profile initialization, deduplication, retry recovery, operations, errors, and sign-out reset passed.");

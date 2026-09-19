@@ -49,6 +49,7 @@ const RESULT_ACTIONS = Object.freeze({
     actions: Object.freeze([
       "auth-google-sign-in",
       "auth-sign-out",
+      "leaderboard-profile-retry",
       "leaderboard-username-check",
       "leaderboard-username-claim",
       "leaderboard-username-start-change",
@@ -65,6 +66,7 @@ const RESULT_ACTIONS = Object.freeze({
       "settings-cancel-name",
       "auth-google-sign-in",
       "auth-sign-out",
+      "leaderboard-profile-retry",
       "leaderboard-username-check",
       "leaderboard-username-claim",
       "leaderboard-username-start-change",
