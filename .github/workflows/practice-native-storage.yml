@@ -1,0 +1,34 @@
+name: Native Practice Storage Verification
+on:
+  push:
+    branches: [fix/practice-durable-storage]
+    paths: ['tests/browser/storage_native.mjs', '.github/workflows/practice-native-storage.yml']
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, firefox, webkit]
+    container:
+      image: mcr.microsoft.com/playwright:v1.57.0-noble
+      options: --ipc=host
+    env:
+      HOME: /root
+      PRACTICE_BROWSER: ${{ matrix.browser }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --no-save playwright@1.57.0
+      - run: node tests/browser/storage_native.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: native-storage-${{ matrix.browser }}
+          path: browser-artifacts/storage-native/
+          retention-days: 7
