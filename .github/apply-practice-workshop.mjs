@@ -17,7 +17,7 @@ replace(identity,'  root.innerHTML = homeMarkup(view); // Every model string is 
 const unit='tests/practice-lab-identity.test.js';
 fs.appendFileSync(unit,`\ntest('identical background refreshes preserve the mounted catalog but changed data is rendered',()=>{
  const root=rootFixture();let current=null,writes=0,html='';
- Object.defineProperty(root,'innerHTML',{get:()=>html,set:value=>{html=value;current={};writes++;}});
+ Object.defineProperty(root,'innerHTML',{get:()=>html,set:value=>{html=value;current={querySelector:()=>null,querySelectorAll:()=>[]};writes++;}});
  root.querySelector=selector=>selector==='.pl-studio-home'?current:null;
  const view=fixture();renderPracticeLabHome(root,view);const mounted=current;
  renderPracticeLabHome(root,view);renderPracticeLabHome(root,structuredClone(view));
