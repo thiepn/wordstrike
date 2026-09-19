@@ -174,14 +174,19 @@ async function exerciseManifestQuota(page) {
     localStorage.setItem(constants.PRACTICE_MANIFEST_KEY, JSON.stringify(legacy));
 
     let fillers = 0;
-    const chunk = "q".repeat(128 * 1024);
-    while (fillers < 100) {
-      try {
-        localStorage.setItem(`practice-quota-filler-${fillers}`, chunk);
-        fillers += 1;
-      } catch (error) {
-        if (error?.name !== "QuotaExceededError") throw error;
-        break;
+    // Fill coarse-to-fine so less than 128 bytes remain. The Practice manifest
+    // is larger than that, guaranteeing its temporary crash-safe copy hits the
+    // browser's actual localStorage quota.
+    for (const size of [128 * 1024, 32 * 1024, 8 * 1024, 2 * 1024, 512, 128]) {
+      const chunk = "q".repeat(size);
+      for (;;) {
+        try {
+          localStorage.setItem(`practice-quota-filler-${fillers}`, chunk);
+          fillers += 1;
+        } catch (error) {
+          if (error?.name !== "QuotaExceededError") throw error;
+          break;
+        }
       }
     }
     if (!fillers) throw new Error("Browser did not allow quota fixture allocation");
