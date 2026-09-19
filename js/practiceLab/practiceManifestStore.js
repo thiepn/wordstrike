@@ -97,6 +97,9 @@ export function createPracticeManifestStore({
   return Object.freeze({
     load() {
       requireStorage();
+      // TEMP is staging only; it is never a recovery source. Removing a stale
+      // copy here reclaims localStorage headroom left by an interrupted write.
+      try { storage.removeItem(PRACTICE_MANIFEST_TEMP_KEY); } catch {}
       const primaryRaw = storage.getItem(PRACTICE_MANIFEST_KEY);
       const primary = parseValid(primaryRaw);
       if (primary) {
