@@ -123,6 +123,18 @@ const fallbackDone = markTypingCoachV7PracticeCompleted({
   target: "different-trainable-word",
 });
 assert.equal(fallbackDone.steps[0].status, "complete");
+
+clearTypingCoachV7Plan();
+ensureTypingCoachV7Plan(v6Plan, { now: new Date("2026-09-11T10:00:00Z") });
+markTypingCoachV7StepStarted("focus");
+const alternateDrillDone = markTypingCoachV7PracticeCompleted({
+  sourceSessionId: "source-1",
+  drillType: "mistake-patterns",
+  target: "e",
+});
+assert.equal(alternateDrillDone.steps[0].status, "complete",
+  "an availability-driven alternate drill must resolve the single active V7 step");
+
 clearTypingCoachV7Plan();
 ensureTypingCoachV7Plan(v6Plan, { now: new Date("2026-09-11T10:00:00Z") });
 markTypingCoachV7StepStarted("focus");
