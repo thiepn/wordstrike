@@ -319,6 +319,14 @@
   white-space: nowrap;
 }
 
+.typing-coach-practice-chrome small {
+  max-width: 70ch;
+  color: var(--text-secondary, #b9c2cd);
+  font-size: 0.72rem;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
 .typing-coach-practice-chrome-actions {
   display: flex;
   gap: 0.5rem;

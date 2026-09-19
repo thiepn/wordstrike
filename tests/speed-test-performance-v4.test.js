@@ -48,8 +48,14 @@ assert.ok(analysis.fingerprint.confusions.length >= 3);
 assert.match(analysis.insight, /because/i);
 assert.match(analysis.insight, /clean/i);
 
+const source = readFileSync(new URL("../js/speedTestPerformanceV4.js", import.meta.url), "utf8");
+assert.doesNotMatch(source, /addEventListener\(["']pointerover["']/,
+  "Word inspector must not rerender on hover while wheel scrolling");
+assert.match(source, /addEventListener\(["']click["']/);
+assert.match(source, /addEventListener\(["']focusin["']/);
+
 const index = readFileSync(new URL("../index.html", import.meta.url), "utf8");
-assert.match(index, /js\/speedTestPerformanceV4\.js\?v=20260911a/);
+assert.match(index, /js\/speedTestPerformanceV4\.js\?v=20260919a/);
 assert.doesNotMatch(index, /<link[^>]+typing-performance-v4\.css/,
   "V4 styling should remain lazy so unrelated screens keep certified default pixels");
 
