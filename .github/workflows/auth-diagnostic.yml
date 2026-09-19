@@ -6,7 +6,17 @@ on:
       - 'js/supabaseClient.js'
       - 'js/supabaseConfig.js'
       - 'index.html'
+      - 'js/leaderboardProfileService.js'
+      - 'js/leaderboardService.js'
+      - 'js/leaderboardSubmissionService.js'
+      - 'js/automaticSubmissionController.js'
+      - 'js/pendingResultCoordinator.js'
+      - 'js/pendingResultSubmission.js'
+      - 'js/leaderboardReturnState.js'
+      - 'supabase/functions/**'
+      - 'supabase/migrations/**'
       - 'scripts/authDiagnostic.mjs'
+      - 'scripts/onlineServicesDiagnostic.mjs'
       - '.github/workflows/auth-diagnostic.yml'
   workflow_dispatch:
 permissions:
@@ -22,9 +32,13 @@ jobs:
           node-version: '22'
       - name: Verify Supabase Google OAuth path
         run: node scripts/authDiagnostic.mjs
+      - name: Verify live auth and leaderboard service boundary
+        run: node scripts/onlineServicesDiagnostic.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: google-auth-diagnostic
-          path: auth-diagnostic.json
+          path: |
+            auth-diagnostic.json
+            online-services-diagnostic.json
           retention-days: 3
