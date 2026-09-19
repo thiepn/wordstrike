@@ -135,7 +135,17 @@ export function renderPracticeLabHome(root, view, {focusSelector = null} = {}) {
   const restoreFilter = active?.dataset?.labFilter;
   const selection = restoreSearch ? [active.selectionStart,active.selectionEnd] : null;
   state.cards = catalogCards(view); state.analysis = view.analysis;
-  root.innerHTML = homeMarkup(view); // Every model string is escaped; art is a fixed allowlist.
+  const markup = homeMarkup(view);
+  // Registry refreshes with identical visible data must not replace a pressed
+  // button or the focused search. Keep the existing catalog and its listeners.
+  const existing = root.querySelector?.('.pl-studio-home');
+  if (existing && state.homeScreen === existing && state.homeMarkup === markup) {
+    if (focusSelector) root.querySelector?.(focusSelector)?.focus?.({preventScroll:true});
+    return true;
+  }
+  root.innerHTML = markup; // Every model string is escaped; art is a fixed allowlist.
+  state.homeMarkup = markup;
+  state.homeScreen = root.querySelector?.('.pl-studio-home');
   const search = root.querySelector?.('[data-lab-search]');
   if (search) search.value = state.query;
   applyFilters(root, state);

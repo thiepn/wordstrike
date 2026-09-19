@@ -46,3 +46,7 @@ The references inform the choices above; they do not prove that this particular 
 Unit checks cover the family/layout allowlists, keyboard index bounds, teardown, source isolation, the existing UI controller and offline shell. Real-browser checks cover library layouts, search/filter composition, route-return state, letter selection by keyboard, target size, no horizontal overflow, focus preservation and live input isolation. Existing all-drill completion, assessment/protocol and result-persistence tests remain regression gates.
 
 Browser screenshots and axe checks support visual/accessibility review. Phone-sized browser emulation is not a physical-device test or comprehensive assistive-technology certification. Production checks compare deployed assets before opening the live UI.
+
+## Interaction hardening
+
+An identical catalog refresh used to replace the button between pointer-down and click. A native-browser regression reproduced zero activations before the fix and one afterward. Identical visible catalog updates now keep the mounted DOM, search field, layout controls, and button alive; changed catalog data still renders normally. This adds no timers, observers, or early pointer-down activation.

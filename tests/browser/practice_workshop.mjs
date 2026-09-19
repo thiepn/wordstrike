@@ -58,6 +58,21 @@ try{for(const width of (process.env.PRACTICE_WIDTHS??'1440,390,320').split(',').
   await page.locator('[data-lab-drill="burst-sprints"] button').click();await home();assert.equal(await page.locator('.pl-studio-home').getAttribute('data-lab-layout'),'list');assert.equal(await page.locator('[data-lab-filter="speed"]').getAttribute('aria-pressed'),'true');
   await page.locator('[data-lab-filter="all"]').click();await input.fill('no-such-drill');await page.locator('[data-lab-empty]:visible').waitFor();await page.locator('[data-lab-action="reset"]').click();assert.equal(await page.locator('[data-lab-drill]:visible').count(),17);
   assert.equal(await page.locator('.pl-studio-home').getAttribute('data-lab-layout'),'list','Reset filters preserves the chosen layout');
+  // A native click must survive an identical registry refresh between down/up.
+  await page.evaluate(async url=>{
+   const {renderPracticeLabHome,disposePracticeLabPresentation}=await import(new URL('js/practiceLab/practiceLabIdentity.js',url).href);
+   const root=document.createElement('div');root.setAttribute('data-pointer-probe','');
+   Object.assign(root.style,{position:'fixed',inset:'0',zIndex:'2147483647',overflow:'auto',background:'#101720'});document.body.append(root);
+   const card={id:'weak-keys',title:'Weak Keys',description:'Letters',category:'precision',categoryLabel:'Precision',duration:'4 min',status:'available'};
+   const view={title:'Practice Lab',helpAvailable:true,categories:[{id:'precision',title:'Precision',experiments:[card]}],analysis:[]};
+   renderPracticeLabHome(root,view);globalThis.__probeClicks=0;
+   root.addEventListener('click',event=>{if(event.target.closest('[data-experiment-id="weak-keys"]'))globalThis.__probeClicks++;});
+   root.addEventListener('mousedown',()=>renderPracticeLabHome(root,structuredClone(view)),{once:true,capture:true});
+   globalThis.__disposeProbe=()=>{disposePracticeLabPresentation(root);root.remove();};
+  },base);
+  await page.locator('[data-pointer-probe] [data-experiment-id="weak-keys"]').click();
+  assert.equal(await page.evaluate(()=>globalThis.__probeClicks),1,'Background refresh must not swallow a native click');
+  await page.evaluate(()=>globalThis.__disposeProbe());record.pointerRefresh=true;
   assert.deepEqual(record.errors,[]);record.status='PASS';
  }catch(error){record.error=String(error);record.focus=await page.evaluate(()=>({tag:document.activeElement?.tagName,key:document.activeElement?.dataset?.labLetter,html:document.activeElement?.outerHTML?.slice(0,400)})).catch(()=>null);record.body=await page.locator('body').innerText().catch(()=>'');await shot('failure').catch(()=>{});}
  finally{reports.push(record);fs.writeFileSync(path.join(out,'report.json'),JSON.stringify(reports,null,2));console.log(JSON.stringify(record));await context.close();}
