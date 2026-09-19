@@ -91,17 +91,52 @@ export function createPracticeRepository(options = {}) {
   const createCoachPlan = async (plan) => {
     const validation = validatePracticeCoachPlan(plan);
     if (!validation.valid) throw coachFail(PRACTICE_STORAGE_ERROR_CODES.VALIDATION_FAILED, "Practice Coach plan failed validation", { cause: validation.errors, recordId: plan?.coachPlanId ?? null });
+
+    const resolveCanonical = async () => {
+      const byId = await dataStore.get("coachPlans", plan.coachPlanId).catch(() => null);
+      if (byId?.profileId === plan.profileId && byId?.contextId === plan.contextId && byId?.localDayKey === plan.localDayKey) {
+        const migrated = migratePracticeRecord("coachPlan", byId);
+        return migrated.ok ? migrated.value : byId;
+      }
+      const byContext = await dataStore.query("coachPlans", "contextId", plan.contextId).catch(() => []);
+      const raw = byContext.find((record) => record?.profileId === plan.profileId && record?.contextId === plan.contextId && record?.localDayKey === plan.localDayKey) ?? null;
+      if (!raw) return null;
+      const migrated = migratePracticeRecord("coachPlan", raw);
+      return migrated.ok ? migrated.value : raw;
+    };
+
+    const existing = await resolveCanonical();
+    if (existing) return { created: false, plan: existing };
+
     try {
       return await dataStore.runTransaction(["coachPlans"], "readwrite", async (transaction) => {
-        const existing = await transaction.query("coachPlans", "profileContextDay", [plan.profileId, plan.contextId, plan.localDayKey]);
-        const canonicalPlan = existing.find((record) => record.profileId === plan.profileId && record.contextId === plan.contextId && record.localDayKey === plan.localDayKey);
+        const indexed = await transaction.query("coachPlans", "profileContextDay", [plan.profileId, plan.contextId, plan.localDayKey]);
+        const canonicalPlan = indexed.find((record) => record.profileId === plan.profileId && record.contextId === plan.contextId && record.localDayKey === plan.localDayKey);
         if (canonicalPlan) return { created: false, plan: canonicalPlan };
         await transaction.put("coachPlans", plan);
         return { created: true, plan };
       });
     } catch (cause) {
-      const canonicalPlan = await getTodayCoachPlan(plan.profileId, plan.contextId, plan.localDayKey).catch(() => null);
-      if (canonicalPlan) return { created: false, raced: true, plan: canonicalPlan };
+      const raced = await resolveCanonical();
+      if (raced) return { created: false, raced: true, plan: raced };
+
+      // Daily Coach IDs are deterministic for profile/context/day. If an
+      // unrelated transaction wrapper fails on a long-lived browser database,
+      // a single-store put is a safe recovery path: it cannot create a second
+      // logical plan with a different primary key for the same identity.
+      try {
+        await dataStore.put("coachPlans", plan);
+        const stored = await resolveCanonical();
+        if (stored) return { created: true, recoveredFromTransactionFailure: true, plan: stored };
+      } catch (fallbackCause) {
+        const canonicalPlan = await resolveCanonical();
+        if (canonicalPlan) return { created: false, raced: true, recoveredFromTransactionFailure: true, plan: canonicalPlan };
+        throw practiceStorageError(
+          PRACTICE_STORAGE_ERROR_CODES.TRANSACTION_FAILED,
+          "Practice Coach plan write failed after transaction recovery",
+          { operation: "coach-plan-write", storeName: "coachPlans", recordId: plan.coachPlanId, recoverable: true, cause: fallbackCause },
+        );
+      }
       throw cause;
     }
   };
