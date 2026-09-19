@@ -80,7 +80,6 @@ export async function mountPracticeWeaknessBossSession({
     root.removeEventListener("beforeinput", beforeInput);
     root.removeEventListener("keydown", keyDown);
     root.removeEventListener("click", click);
-    root.removeEventListener("pointerdown", pointerDown);
     globalThis.document?.removeEventListener?.("visibilitychange", visibilityChange);
     try { await engine.destroy(); } catch (error) { logger?.warn?.("Weakness Boss engine destroy failed", error); }
     try { dataStore.close?.(); } catch {}
@@ -135,7 +134,6 @@ export async function mountPracticeWeaknessBossSession({
     else if (action === "repeat") void finish(true);
     else if (action === "finish") void finish(false);
   };
-  const pointerDown = () => { if (engine.getSnapshot().lifecycleState === "active") focusCapture(); };
   const visibilityChange = () => {
     const state = globalThis.document?.visibilityState;
     if (state === "hidden" || state === "visible") void engine.handleVisibilityState(state).catch((error) => logger?.warn?.("Weakness Boss visibility transition failed", error));
@@ -144,7 +142,6 @@ export async function mountPracticeWeaknessBossSession({
   root.addEventListener("beforeinput", beforeInput);
   root.addEventListener("keydown", keyDown);
   root.addEventListener("click", click);
-  root.addEventListener("pointerdown", pointerDown);
   globalThis.document?.addEventListener?.("visibilitychange", visibilityChange);
 
   try {
