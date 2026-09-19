@@ -1,0 +1,38 @@
+name: Practice Playability Repair
+on:
+  push:
+    branches: [fix/practice-lab-playability]
+  pull_request:
+    paths: ['js/practiceLab/**', 'tests/browser/practice_playability.mjs', '.github/workflows/practice-playability.yml']
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Source snapshot for reproducible diagnostics
+        run: git archive --format=tar HEAD > /tmp/wordstrike-source.tar
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wordstrike-source
+          path: /tmp/wordstrike-source.tar
+          retention-days: 2
+      - run: npm test
+      - run: npm install --no-save playwright@1.57.0 axe-core@4.10.3
+      - run: npx playwright install --with-deps chromium firefox
+      - name: Practice browser journeys
+        run: |
+          node tests/browser/practice_targeted.mjs
+          node tests/browser/practice_completion.mjs
+          if [ -f tests/browser/practice_playability.mjs ]; then node tests/browser/practice_playability.mjs; fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: practice-playability-evidence
+          path: browser-artifacts/
+          retention-days: 7
