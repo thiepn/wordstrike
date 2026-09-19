@@ -1,3 +1,4 @@
+import { validatePracticeEntityKey } from "./practiceValidation.js";
 import { createSkillStatId } from "./practiceIds.js";
 import { analyzePracticeText, normalizePracticeTarget } from "./practiceTextAnalysis.js";
 
@@ -22,6 +23,7 @@ export function createPracticeEntityResolver({
   const evidenceSegments = contentPlan.metadata?.evidenceSegments;
   const segmentAt = position => Array.isArray(evidenceSegments) ? evidenceSegments.find(s => position >= s.startIndex && position < s.endIndex) : {startIndex:0,endIndex:analysis.graphemeCount};
   const wordByPosition = Array(analysis.graphemeCount).fill(null);
+  const lexicalWordKeys = new Set(analysis.words.map(word => word.lexicalKey).filter(key => validatePracticeEntityKey("word", key).valid));
   for (const word of analysis.words) {
     for (let p = word.startIndex; p < word.endIndex; p += 1) wordByPosition[p] = word;
   }
@@ -53,7 +55,8 @@ export function createPracticeEntityResolver({
     if (position - 1 >= segment.startIndex) entities.push(entity("bigram", analysis.graphemes.slice(position - 1, position + 1).join("")));
     if (position - 2 >= segment.startIndex) entities.push(entity("trigram", analysis.graphemes.slice(position - 2, position + 1).join("")));
     const word = wordByPosition[position];
-    if (allowWordEntities && word?.lexicalKey) entities.push(entity("word", word.lexicalKey));
+    // Numeric runs and identifiers remain key/ngram evidence, not lexical word skills.
+    if (allowWordEntities && lexicalWordKeys.has(word?.lexicalKey)) entities.push(entity("word", word.lexicalKey));
     return freezeDeep(entities);
   };
 
