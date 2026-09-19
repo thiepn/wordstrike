@@ -1,0 +1,51 @@
+name: Apply Practice Input Repair
+on:
+  push:
+    branches: [fix/practice-lab-playability]
+    paths: ['.github/apply-practice-repair.mjs', '.github/workflows/apply-practice-repair.yml']
+permissions:
+  contents: write
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    container:
+      image: mcr.microsoft.com/playwright:v1.57.0-noble
+      options: --ipc=host
+    env:
+      HOME: /root
+      PRACTICE_BROWSERS: chromium,firefox
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/practice-lab-playability
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --no-save typescript@5.9.3 playwright@1.57.0
+      - name: Apply bounded source transformation
+        run: |
+          node .github/apply-practice-repair.mjs
+          for file in js/practiceLab/*SessionHost.js; do node --check "$file"; done
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add js/practiceLab/*SessionHost.js index.html
+          git commit -m 'fix(practice): preserve keyboard captures and controls across session updates'
+          git push origin HEAD:fix/practice-lab-playability
+      - name: Unit and integration tests
+        run: npm test > /tmp/practice-unit-results.log 2>&1
+      - name: Public keyboard journeys
+        if: always()
+        run: node tests/browser/practice_playability.mjs
+      - name: Completion and persistence journeys
+        if: always()
+        run: node tests/browser/practice_completion.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: practice-input-repair-evidence
+          path: |
+            browser-artifacts/
+            /tmp/practice-unit-results.log
+          retention-days: 7
