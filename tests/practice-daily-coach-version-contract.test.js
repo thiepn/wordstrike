@@ -18,8 +18,8 @@ import {
 } from "../js/practiceLab/practiceCoachConstants.js";
 import { createPracticeCoachReviewDescriptor } from "../js/practiceLab/practiceCoachReview.js";
 
-test("PL33 Coach v2 personalization remains stable inside the current PL38 DB12/session14/foundation10 envelope", () => {
-  assert.equal(PRACTICE_DATABASE_VERSION, 12);
+test("PL33 Coach v2 personalization remains stable inside the current PL38 DB13/session14/foundation10 envelope", () => {
+  assert.equal(PRACTICE_DATABASE_VERSION, 13);
   assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary, 14);
   assert.equal(PRACTICE_RECORD_VERSIONS.coachPlan, 2);
   assert.equal(PRACTICE_RECORD_VERSIONS.skillStat, 3);
