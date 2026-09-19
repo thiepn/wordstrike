@@ -28,7 +28,7 @@ import {
 } from "../js/practiceLab/practicePhysicalTelemetryPolicy.js";
 import { renderPracticePhysicalTelemetryPanel } from "../js/practiceLab/practicePhysicalTelemetryUi.js";
 
-assert.equal(PRACTICE_DATABASE_VERSION, 12);
+assert.equal(PRACTICE_DATABASE_VERSION, 13);
 assert.ok(PRACTICE_STORE_DEFINITIONS.physicalTelemetryStats);
 assert.ok(PRACTICE_STORE_DEFINITIONS.physicalTelemetrySessions);
 assert.equal(PRACTICE_RECORD_VERSIONS_V31.sessionSummary, 13, "PL36 inherited the pre-PL38 session-summary v13 envelope");
