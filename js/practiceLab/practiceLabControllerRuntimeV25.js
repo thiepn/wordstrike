@@ -10,6 +10,53 @@ import { createPracticeLabRoute, PRACTICE_LAB_ROUTES } from "./practiceLabRoutes
 const DAILY_ROUTE = PRACTICE_LAB_ROUTES.DAILY_TRAINING;
 const TERMINAL_PLAN_STATUSES = new Set(["finished", "abandoned", "expired"]);
 
+function coachErrorDetail(error, stage) {
+  const cause = error?.cause;
+  return Object.freeze({
+    stage,
+    name: String(error?.name ?? "Error").slice(0, 80),
+    operation: error?.operation ? String(error.operation).slice(0, 120) : null,
+    causeName: cause?.name ? String(cause.name).slice(0, 80) : null,
+    causeMessage: cause?.message ? String(cause.message).slice(0, 240) : null,
+  });
+}
+
+/**
+ * Daily Coach does not need to replay the full legacy reconciliation pipeline
+ * when the active profile/context are already readable and valid. This fast
+ * path is important for long-lived local databases: an unrelated historical
+ * reconciliation transaction must not prevent today's Coach from opening.
+ */
+export async function initializePracticeCoachRuntimeData({
+  dataStore,
+  repository,
+  manifestStore,
+  initialized = null,
+} = {}) {
+  if (initialized?.profile && initialized?.context) return initialized;
+  if (!dataStore?.open || !repository || !manifestStore?.load) throw new TypeError("Daily Coach storage runtime is incomplete");
+  await dataStore.open();
+  try {
+    const manifestResult = manifestStore.load();
+    const profile = await repository.getPracticeProfile?.();
+    const context = profile?.activeContextId ? await repository.getPracticeContext?.(profile.activeContextId) : null;
+    if (profile && context && context.profileId === profile.profileId) {
+      return Object.freeze({
+        manifest: manifestResult.manifest,
+        profile,
+        context,
+        recovery: manifestResult.recovery,
+        backend: dataStore.kind ?? "unknown",
+        reconciliation: Object.freeze({ reconciled: false, fastPath: true }),
+      });
+    }
+  } catch {
+    // Fall through to the canonical recovery path when direct reads are not
+    // sufficient. The fallback remains responsible for creating/migrating data.
+  }
+  return repository.initializePracticeStorage();
+}
+
 export function createPracticeLabController(options = {}) {
   const {
     root,
@@ -105,7 +152,12 @@ export function createPracticeLabController(options = {}) {
       if (!injectedCoachDataStore) ownedCoachDataStore = dataStore;
       const manifestStore = injectedCoachManifestStore ?? createPracticeManifestStore();
       const repository = injectedCoachRepository ?? createPracticeRepository({ dataStore, manifestStore });
-      const initialized = injectedCoachInitialized ?? await repository.initializePracticeStorage();
+      const initialized = await initializePracticeCoachRuntimeData({
+        dataStore,
+        repository,
+        manifestStore,
+        initialized: injectedCoachInitialized,
+      });
       const service = injectedCoachService ?? createPracticeCoachService({
         repository,
         experimentRegistry,
@@ -125,7 +177,7 @@ export function createPracticeLabController(options = {}) {
   async function loadTodayPlan({ reconcile = true } = {}) {
     if (!mounted || !isDailyRoute() || hasCoachSession()) return false;
     const epoch = ++loadEpoch;
-    setCoachState({ status: "loading", errorCode: null, startingBlockId: null });
+    setCoachState({ status: "loading", errorCode: null, errorDetail: null, startingBlockId: null });
     try {
       const runtime = await ensureCoachRuntime();
       let plan = await runtime.service.getTodayPracticeCoachPlan(runtime.initialized.profile.profileId, runtime.initialized.context.contextId);
@@ -135,12 +187,12 @@ export function createPracticeLabController(options = {}) {
       if (!plan) {
         try { requestedMinutes = runtime.repository?.getPracticeSettings?.()?.dailySessionLengthMinutes ?? requestedMinutes; } catch {}
       }
-      setCoachState({ status: "ready", plan, requestedMinutes, errorCode: null, startingBlockId: null }, "[data-practice-heading]");
+      setCoachState({ status: "ready", plan, requestedMinutes, errorCode: null, errorDetail: null, startingBlockId: null }, "[data-practice-heading]");
       return true;
     } catch (error) {
       if (!mounted || epoch !== loadEpoch) return false;
       logger?.warn?.("Daily Coach load failed", error);
-      setCoachState({ status: "error", errorCode: error?.code ?? "PRACTICE_COACH_UNAVAILABLE", startingBlockId: null });
+      setCoachState({ status: "error", errorCode: error?.code ?? "PRACTICE_COACH_UNAVAILABLE", errorDetail: coachErrorDetail(error, "load"), startingBlockId: null });
       return false;
     }
   }
@@ -148,7 +200,7 @@ export function createPracticeLabController(options = {}) {
   async function createTodayPlan() {
     if (!mounted || !isDailyRoute() || coachState.plan || coachState.status === "creating") return false;
     const epoch = ++actionEpoch;
-    setCoachState({ status: "creating", errorCode: null });
+    setCoachState({ status: "creating", errorCode: null, errorDetail: null });
     try {
       const runtime = await ensureCoachRuntime();
       const created = await runtime.service.createTodayPracticeCoachPlan({
@@ -158,12 +210,12 @@ export function createPracticeLabController(options = {}) {
         language: runtime.initialized.context.dataLocale,
       });
       if (!mounted || epoch !== actionEpoch || !isDailyRoute()) return false;
-      setCoachState({ status: "ready", plan: created.plan, requestedMinutes: created.plan.requestedMinutes, errorCode: null });
+      setCoachState({ status: "ready", plan: created.plan, requestedMinutes: created.plan.requestedMinutes, errorCode: null, errorDetail: null });
       return true;
     } catch (error) {
       if (!mounted || epoch !== actionEpoch) return false;
       logger?.warn?.("Daily Coach plan creation failed", error);
-      setCoachState({ status: "error", errorCode: error?.code ?? "PRACTICE_COACH_PLAN_FAILED" });
+      setCoachState({ status: "error", errorCode: error?.code ?? "PRACTICE_COACH_PLAN_FAILED", errorDetail: coachErrorDetail(error, "create-plan") });
       return false;
     }
   }

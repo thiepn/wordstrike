@@ -6,9 +6,18 @@ import {
   PRACTICE_STORE_DEFINITIONS,
 } from "../js/practiceLab/practiceConstants.js";
 import { migratePracticeRecord } from "../js/practiceLab/practiceMigrations.js";
-import { createDefaultSessionSummary } from "../js/practiceLab/practiceDefaults.js";
+import {
+  createDefaultPracticeManifest,
+  createDefaultPracticeProfile,
+  createDefaultSessionSummary,
+} from "../js/practiceLab/practiceDefaults.js";
+import { createDefaultPracticeContext } from "../js/practiceLab/practiceContext.js";
 import { createPracticeCoachPlanRecord } from "../js/practiceLab/practiceCoachPlan.js";
 import { createPracticeMemoryStore } from "../js/practiceLab/practiceMemoryStore.js";
+import { createPracticeManifestStore } from "../js/practiceLab/practiceManifestStore.js";
+import { createPracticeRepository } from "../js/practiceLab/practiceRepository.js";
+import { initializePracticeCoachRuntimeData } from "../js/practiceLab/practiceLabControllerRuntimeV25.js";
+import { PRACTICE_STORAGE_ERROR_CODES, practiceStorageError } from "../js/practiceLab/practiceStorageContract.js";
 import {
   applyPracticeCoachBlockDelta,
   blockPracticeCoachBlockRecord,
@@ -187,4 +196,71 @@ test("PL25 local-day rollover expires an unfinished plan without changing its fr
   });
   assert.equal(expired.status, "expired");
   assert.deepEqual(expired.blocks.map((block) => block.plannedSessionId), beforeIds);
+});
+
+
+test("Daily Coach uses readable active profile/context without replaying an unrelated failing legacy transaction", async () => {
+  const localProfileId = createPracticeId("profile", { uuid: () => "coach-fast-path-profile-12345678" });
+  const profile = createDefaultPracticeProfile({ profileId: localProfileId, now });
+  const context = createDefaultPracticeContext({ profileId: localProfileId, now });
+  const baseStore = createPracticeMemoryStore({ initialData: { profiles: [profile], contexts: [context] } });
+  await baseStore.open();
+  let transactionCalls = 0;
+  const dataStore = Object.freeze({
+    ...baseStore,
+    async runTransaction() {
+      transactionCalls += 1;
+      throw practiceStorageError(PRACTICE_STORAGE_ERROR_CODES.TRANSACTION_FAILED, "simulated unrelated reconciliation failure", { operation: "legacy-reconcile", recoverable: true });
+    },
+  });
+  const values = new Map();
+  const storage = {
+    getItem: (key) => values.get(key) ?? null,
+    setItem: (key, value) => values.set(key, String(value)),
+    removeItem: (key) => values.delete(key),
+  };
+  const manifestStore = createPracticeManifestStore({
+    storage,
+    createDefault: (options) => createDefaultPracticeManifest({ profileId: localProfileId, now, ...options }),
+    defaultOptions: { profileId: localProfileId, now },
+  });
+  const repository = createPracticeRepository({ dataStore, manifestStore, now });
+  const initialized = await initializePracticeCoachRuntimeData({ dataStore, repository, manifestStore });
+  assert.equal(initialized.profile.profileId, localProfileId);
+  assert.equal(initialized.context.contextId, profile.activeContextId);
+  assert.equal(initialized.reconciliation.fastPath, true);
+  assert.equal(transactionCalls, 0, "valid current data must not enter the legacy reconciliation transaction");
+});
+
+test("Daily Coach plan creation falls back to deterministic single-store persistence when wrapper transaction fails", async () => {
+  const localProfileId = createPracticeId("profile", { uuid: () => "coach-write-fallback-profile-12345678" });
+  const localContextId = createPracticeId("context", { uuid: () => "coach-write-fallback-context-12345678" });
+  const baseStore = createPracticeMemoryStore();
+  await baseStore.open();
+  let transactionCalls = 0;
+  const dataStore = Object.freeze({
+    ...baseStore,
+    async runTransaction() {
+      transactionCalls += 1;
+      throw new Error("simulated wrapper transaction failure");
+    },
+  });
+  const repository = createPracticeRepository({ dataStore, manifestStore: { load() { return { manifest: null }; } }, now });
+  const plan = createPracticeCoachPlanRecord({
+    profileId: localProfileId,
+    contextId: localContextId,
+    localDayKey: "2026-09-19",
+    requestedMinutes: 5,
+    inputFingerprint: "fallback-fixture",
+    blocks: [],
+    now,
+  });
+  const created = await repository.createCoachPlan(plan);
+  assert.equal(created.created, true);
+  assert.equal(created.recoveredFromTransactionFailure, true);
+  assert.equal(transactionCalls, 1);
+  assert.equal((await baseStore.list("coachPlans")).length, 1);
+  const repeated = await repository.createCoachPlan(plan);
+  assert.equal(repeated.created, false);
+  assert.equal((await baseStore.list("coachPlans")).length, 1);
 });
