@@ -87,7 +87,7 @@ test("GC2 explicit DB13 cleanup removes only retired entity records and preserve
 
   const repair = await reconcilePracticePl30ModelBoundary(dataStore, { now });
   assert.equal(repair.strategy, "explicit-cleanup-migration");
-  assert.equal(repair.databaseVersion, 12);
+  assert.equal(repair.databaseVersion, 13);
   assert.deepEqual(repair.removedByStore, { skillStats: 1, learningStates: 1, reviewItems: 1 });
   assert.deepEqual(repair.removedEntityTypes, ["number-pattern", "punctuation-transition", "symbol-pattern"]);
 
