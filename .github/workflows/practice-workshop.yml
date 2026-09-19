@@ -1,7 +1,7 @@
 name: Practice Workshop UI
 on:
   push:
-    branches: [main, ui/practice-workshop]
+    branches: [main, ui/practice-workshop, fix/daily-coach-storage-v2]
     paths: ['js/practiceLab/**', 'practiceLab*.css', 'index.html', 'sw.js', 'tests/practice-*.test.js', 'tests/browser/practice_*.mjs', '.github/workflows/practice-workshop.yml']
 permissions:
   contents: read
