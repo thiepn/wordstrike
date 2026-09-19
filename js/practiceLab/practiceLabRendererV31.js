@@ -33,7 +33,15 @@ const messages = Object.freeze({
 /** Presentation copy and readiness mirror the existing validation/capacity rules. */
 export function practiceCustomEditorFeedback(view) {
   const code = view.errorCode ?? view.validationErrorCode;
-  if (code) return { state: view.errorCode ? "error" : "waiting", message: Object.hasOwn(messages, code) ? messages[code] : "This action could not be completed. Check the passage and try again.", blocked: true };
+  const blocked = Boolean(view.validationErrorCode || view.localeMismatch || !["ready", "editing"].includes(view.status) ||
+    (view.sessionMode === "timed" && !view.timedAvailability?.some(row => row.durationMs === view.timedDurationMs && row.available)));
+  if (code) {
+    const message = view.errorCode === "CUSTOM_TEXT_TOO_SHORT" && view.sessionMode === "selection"
+      ? "Highlight at least 20 characters in the editor, then try starting again."
+      : Object.hasOwn(messages, code) ? messages[code] : "This action could not be completed. Check the passage and try again.";
+    // An operation error explains a failed attempt; it must not lock out a valid retry.
+    return { state: view.errorCode ? "error" : "waiting", message, blocked };
+  }
   if (view.localeMismatch) return { state: "waiting", message: messages.CUSTOM_TEXT_LOCALE_MISMATCH, blocked: true };
   if (!["ready", "editing"].includes(view.status)) return { state: "waiting", message: view.status === "unavailable" ? messages.CUSTOM_TEXT_UNAVAILABLE : "Preparing your local workspace…", blocked: true };
   if (view.sessionMode === "timed" && !view.timedAvailability?.some(row => row.durationMs === view.timedDurationMs && row.available)) {

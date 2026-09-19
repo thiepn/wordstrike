@@ -2,6 +2,8 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import http from 'node:http';
+import {createRequire} from 'node:module';
+const require=createRequire(import.meta.url);
 import {chromium,firefox,webkit} from 'playwright';
 const root=path.resolve(import.meta.dirname,'../..');
 const out=path.join(root,'browser-artifacts/practice-editor-ui');fs.mkdirSync(out,{recursive:true});
@@ -24,7 +26,7 @@ try{for(const width of (process.env.PRACTICE_WIDTHS??'1440,768,390,320').split('
  const context=await browser.newContext({viewport:{width,height:1000},serviceWorkers:'block',reducedMotion:'reduce',hasTouch:width<600});
  await context.addInitScript(()=>localStorage.setItem('wordstrike.onboarding.general.v3','seen'));
  const page=await context.newPage();page.setDefaultTimeout(15000);
- const report={browser:name,width,status:'FAIL',errors:[]};page.on('pageerror',e=>report.errors.push(e.message));
+ const report={browser:name,width,status:'FAIL',errors:[],accessibility:[]};page.on('pageerror',e=>report.errors.push(e.message));
  const screenshot=async label=>{assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2),'Horizontal page overflow');await page.screenshot({path:path.join(out,`${name}-${width}-${label}.png`),fullPage:true});};
  try{
   await page.goto(base);await page.locator('[data-action="modes"]').click();await page.locator('[data-mode-id="practice"]').click();
@@ -37,6 +39,9 @@ try{for(const width of (process.env.PRACTICE_WIDTHS??'1440,768,390,320').split('
   await input.waitFor();assert.ok(await start.isDisabled());
   assert.match(await page.locator('[data-custom-text-error]').innerText(),/Paste or import/);
   assert.equal(await page.locator('.practice-custom-workspace .pl-custom-sidebar').count(),1);
+  await page.addScriptTag({path:require.resolve('axe-core/axe.min.js')});
+  const a11y=await page.evaluate(()=>axe.run('.practice-lab-screen',{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21aa','wcag22aa']}}));
+  report.accessibility=a11y.violations;assert.deepEqual(a11y.violations,[],'Custom editor accessibility violations');
   await screenshot('editor-empty');
   await input.fill('brief');await page.waitForFunction(()=>document.querySelector('[data-custom-text-error]').textContent.includes('Add more text'));
   assert.ok(await start.isDisabled());
@@ -56,6 +61,9 @@ try{for(const width of (process.env.PRACTICE_WIDTHS??'1440,768,390,320').split('
   assert.equal(await minute.getAttribute('aria-pressed'),'true');
   await screenshot('editor-timed');
   await page.locator('[data-custom-mode="selection"]').click();await input.fill(passage);await isEnabled(start);
+  await input.focus();await input.evaluate(el=>el.setSelectionRange(0,5));await start.click();
+  await page.waitForFunction(()=>document.querySelector('[data-custom-text-error]')?.textContent.includes('try starting again'));
+  assert.ok(await start.isEnabled(),'Invalid selection must allow a corrected retry');
   await input.focus();await input.evaluate((el,{start,end})=>el.setSelectionRange(start,end),{start:prefix.length,end:prefix.length+selected.length});
   await start.click();
   const capture=page.locator('[data-custom-text-session-input]');await capture.waitFor({state:'visible'});
@@ -74,7 +82,9 @@ try{for(const width of (process.env.PRACTICE_WIDTHS??'1440,768,390,320').split('
   assert.equal((await records(page,'customTexts')).length,1);
   await page.locator('[data-practice-action="custom-new"]').click();await input.waitFor();
   assert.equal(await input.inputValue(),'');
-  await page.locator('[data-practice-action="custom-open"]').click();assert.equal(await input.inputValue(),passage);
+  await page.locator('[data-practice-action="custom-open"]').click();
+  await page.waitForFunction(expected=>document.querySelector('[data-custom-text-source]')?.value===expected,passage);
+  assert.equal(await input.inputValue(),passage);
   await screenshot('saved-library');
   assert.deepEqual(report.errors,[]);report.status='PASS';
  }catch(error){report.error=String(error);report.body=await page.locator('body').innerText().catch(()=>'');await screenshot('failure').catch(()=>{});}

@@ -41,3 +41,9 @@ test('the highlighted range is read before the busy render',()=>{
  const start=controller.slice(controller.indexOf('  async function startCustom()'),controller.indexOf('  function input(event)'));
  assert.ok(start.indexOf('const selectionRange') < start.indexOf('rerender()'));
 });
+
+test('an invalid selection can be corrected and retried without editing the passage',()=>{
+ const result=practiceCustomEditorFeedback(view({sessionMode:'selection',errorCode:'CUSTOM_TEXT_TOO_SHORT'}));
+ assert.equal(result.state,'error');assert.equal(result.blocked,false);assert.match(result.message,/Highlight/);
+ assert.equal(practiceCustomEditorFeedback(view({errorCode:'CUSTOM_TEXT_SAVE_FAILED'})).blocked,false);
+});

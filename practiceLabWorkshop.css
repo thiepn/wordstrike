@@ -220,3 +220,11 @@
   .practice-lab-screen .pl-custom-modes button[aria-pressed='true'] { outline:2px solid Highlight; }
   .practice-lab-screen .pl-custom-modes button[aria-pressed='true']::after { background:Highlight; border-color:Highlight; }
 }
+
+/* Keep the mobile setup header and writing desk compact without shrinking targets. */
+.practice-lab-screen[data-lab-workshop] .practice-lab-shell > .practice-lab-header {
+  display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+}
+@media(max-width:600px) {
+  .practice-lab-screen .practice-custom-editor textarea { height:260px; }
+}
