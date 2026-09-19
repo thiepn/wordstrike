@@ -1,0 +1,44 @@
+name: Auth and leaderboard browser certification
+on:
+  pull_request:
+    paths:
+      - 'js/authService.js'
+      - 'js/supabaseClient.js'
+      - 'js/supabaseConfig.js'
+      - 'js/leaderboard*.js'
+      - 'js/automaticSubmissionController.js'
+      - 'js/pendingResult*.js'
+      - 'js/statisticsUi.js'
+      - 'js/thiepnAccountPresentation.js'
+      - 'js/appClickRouting.js'
+      - 'js/main.js'
+      - 'styles/screens/profile-leaderboards-settings*.css'
+      - 'tests/browser/ui11_profile_leaderboards_settings.py'
+      - 'tests/browser/ui11_mobile_heading_contract.py'
+      - '.github/workflows/auth-leaderboard-browser.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    container:
+      image: mcr.microsoft.com/playwright/python:v1.57.0-noble
+      options: --ipc=host
+    env:
+      HOME: /root
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install browser test dependencies
+        run: python3 -m pip install -r tests/browser/requirements.txt
+      - name: Certify Profile, Leaderboards and Settings
+        run: |
+          python3 tests/browser/ui11_profile_leaderboards_settings.py
+          python3 tests/browser/ui11_mobile_heading_contract.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: auth-leaderboard-browser-evidence
+          path: browser-artifacts/ui11-profile-leaderboards-settings/
+          retention-days: 7
