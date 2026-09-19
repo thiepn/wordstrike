@@ -1,3 +1,4 @@
+import { renderPracticeSessionMarkup, focusPracticeSessionInput } from "./practiceHostDom.js";
 import { createPracticeSessionId } from "./practiceIds.js";
 import { practicePlanCharacters, practicePhaseWindow, updatePracticeTargetSession } from "./practiceTargetSessionRendering.js";
 import { createPracticeIndexedDbStore } from "./practiceIndexedDbStore.js";
@@ -86,7 +87,7 @@ export function renderPracticeCombinationRepairSessionSnapshot(root, { contentPl
   const progress = totalLength > 0 ? Math.min(100, ((snapshot.cursorIndex ?? 0) / totalLength) * 100) : 0;
   const paused = snapshot.lifecycleState === "paused";
   if (updatePracticeTargetSession(root, { contentPlan, phase, snapshot, passageSelector: ".practice-combination-typing", text: renderTypingText(contentPlan, snapshot, phase), progress })) return;
-  root.innerHTML = `<section class="screen practice-lab-screen practice-combination-session" data-practice-view="session">
+  renderPracticeSessionMarkup(root, `<section class="screen practice-lab-screen practice-combination-session" data-practice-view="session">
     <div class="practice-lab-shell">
       <header class="practice-combination-session-header">
         <div><div class="eyebrow">Combination Repair · ${escapeHtml(contentPlan.targetEntities[0].entityType)}</div><h1>${escapeHtml(target)}</h1></div>
@@ -106,7 +107,7 @@ export function renderPracticeCombinationRepairSessionSnapshot(root, { contentPl
       ${paused ? '<div class="practice-lab-notice" role="status"><strong>Paused.</strong> Resume to continue; paused time is excluded from active typing time.</div>' : ""}
       <textarea class="practice-combination-input-capture" data-combination-input aria-label="Combination Repair typing input" inputmode="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" style="position:fixed;left:-10000px;top:0;width:1px;height:1px;opacity:0"></textarea>
     </div>
-  </section>`;
+  </section>`);
 }
 
 function phaseResultRows(analysis) {
@@ -124,7 +125,7 @@ function resultInterpretation(analysis) {
 export function renderPracticeCombinationRepairResult(root, finalResult) {
   const summary = finalResult?.summary ?? null;
   const analysis = summary?.trainingQuality ?? null;
-  root.innerHTML = `<section class="screen practice-lab-screen practice-combination-results" data-practice-view="session-result">
+  renderPracticeSessionMarkup(root, `<section class="screen practice-lab-screen practice-combination-results" data-practice-view="session-result">
     <div class="practice-lab-shell"><main class="practice-lab-detail">
       <div class="eyebrow">Combination Repair complete</div>
       <h1>Session results</h1>
@@ -134,11 +135,11 @@ export function renderPracticeCombinationRepairResult(root, finalResult) {
       <section class="practice-lab-empty-state"><h2>Session</h2><dl><div><dt>WPM</dt><dd>${formatNumber(summary?.wpm)}</dd></div><div><dt>Accuracy</dt><dd>${formatPercent(summary?.accuracy)}</dd></div></dl></section>
       <button type="button" data-combination-session-action="finish">BACK TO COMBINATION REPAIR</button>
     </main></div>
-  </section>`;
+  </section>`);
 }
 
 function renderFailure(root, error) {
-  root.innerHTML = `<section class="screen practice-lab-screen" data-practice-view="session-error"><div class="practice-lab-shell"><main class="practice-lab-detail"><div class="eyebrow">Combination Repair</div><h1>Session could not start</h1><div class="practice-lab-notice" role="alert"><strong>${escapeHtml(error?.code ?? "SESSION_ERROR")}</strong><p>${escapeHtml(error?.message ?? "The Practice session could not be initialized.")}</p></div><button type="button" data-combination-session-action="finish">BACK</button></main></div></section>`;
+  renderPracticeSessionMarkup(root, `<section class="screen practice-lab-screen" data-practice-view="session-error"><div class="practice-lab-shell"><main class="practice-lab-detail"><div class="eyebrow">Combination Repair</div><h1>Session could not start</h1><div class="practice-lab-notice" role="alert"><strong>${escapeHtml(error?.code ?? "SESSION_ERROR")}</strong><p>${escapeHtml(error?.message ?? "The Practice session could not be initialized.")}</p></div><button type="button" data-combination-session-action="finish">BACK</button></main></div></section>`);
 }
 
 function normalizedInput(type, value, source = "browser-input") {
@@ -179,7 +180,7 @@ export async function mountPracticeCombinationRepairSession({
   let closed = false;
   let unsubscribe = null;
 
-  const focusCapture = () => queueMicrotask(() => root.querySelector?.("[data-combination-input]")?.focus?.({ preventScroll: true }));
+  const focusCapture = () => queueMicrotask(() => focusPracticeSessionInput(root, "[data-combination-input]"));
   const renderSnapshot = (snapshot) => {
     if (closed || finalResult) return;
     renderPracticeCombinationRepairSessionSnapshot(root, { contentPlan: session.contentPlan, snapshot });
@@ -233,7 +234,7 @@ export async function mountPracticeCombinationRepairSession({
     if (!target || !root.contains?.(target)) return;
     const action = target.dataset.combinationSessionAction;
     if (action === "pause") void engine.pause("manual");
-    else if (action === "resume") void engine.resume();
+    else if (action === "resume") void engine.resume().then(() => focusPracticeSessionInput(root, "[data-practice-session-capture]", { force: true }));
     else if (action === "abandon") void engine.abandon("manual-stop").then(() => finish()).catch((error) => { logger?.warn?.("Combination Repair abandon failed", error); void finish(); });
     else if (action === "finish") void finish();
   };

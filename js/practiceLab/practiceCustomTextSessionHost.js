@@ -1,3 +1,4 @@
+import { renderPracticeSessionMarkup, focusPracticeSessionInput } from "./practiceHostDom.js";
 import { createPracticeIndexedDbStore } from "./practiceIndexedDbStore.js";
 import { createPracticeManifestStore } from "./practiceManifestStore.js";
 import { createPracticeRepository } from "./practiceRepository.js";
@@ -19,8 +20,8 @@ function renderActive(root, session, snapshot) {
   const window = getPracticeCustomTextRenderWindow(session.customTextPlan.typingGraphemes, cursor);
   const total = window.total;
   const timed = session.customTextPlan.sessionMode === "timed";
-  const remainingMs = timed ? Math.max(0, Number(session.customTextPlan.timedDurationMs) - Number(snapshot.metrics?.activeDurationMs ?? snapshot.activeElapsedMs ?? 0)) : null;
-  root.innerHTML = `<section class="screen practice-lab-screen" data-practice-view="custom-text-session"><div class="practice-lab-shell"><header class="practice-real-text-session-header"><div><div class="eyebrow">Custom Text · local practice</div><h1>Type your text</h1><p data-custom-session-status></p></div><button type="button" data-custom-text-session-action="stop">STOP</button></header><div class="practice-custom-session-progress" role="progressbar" aria-label="Custom Text progress" aria-valuemin="0" aria-valuemax="${total}" aria-valuenow="${Math.min(cursor, total)}"><div style="width:${total ? Math.min(100, cursor / total * 100) : 0}%"></div></div><div class="practice-lab-notice">Local custom material · no leaderboard, PB, mastery, ability, transfer, or benchmark claim.</div><section class="practice-real-text-typing practice-custom-text-window" aria-label="Custom Text typing material" data-custom-text-window></section><textarea data-custom-text-session-input aria-label="Custom Text typing input" inputmode="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" style="position:fixed;left:-10000px;top:0;width:1px;height:1px;opacity:0"></textarea></div></section>`;
+  const remainingMs = timed ? Math.max(0, Number(session.customTextPlan.timedDurationMs) - Number(snapshot.timing?.activeDurationMs ?? snapshot.metrics?.activeDurationMs ?? snapshot.activeElapsedMs ?? 0)) : null;
+  renderPracticeSessionMarkup(root, `<section class="screen practice-lab-screen" data-practice-view="custom-text-session"><div class="practice-lab-shell"><header class="practice-real-text-session-header"><div><div class="eyebrow">Custom Text · local practice</div><h1>Type your text</h1><p data-custom-session-status></p></div><button type="button" data-custom-text-session-action="stop">STOP</button></header><div class="practice-custom-session-progress" role="progressbar" aria-label="Custom Text progress" aria-valuemin="0" aria-valuemax="${total}" aria-valuenow="${Math.min(cursor, total)}"><div style="width:${total ? Math.min(100, cursor / total * 100) : 0}%"></div></div><div class="practice-lab-notice">Local custom material · no leaderboard, PB, mastery, ability, transfer, or benchmark claim.</div><section class="practice-real-text-typing practice-custom-text-window" aria-label="Custom Text typing material" data-custom-text-window></section><textarea data-custom-text-session-input aria-label="Custom Text typing input" inputmode="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" style="position:fixed;left:-10000px;top:0;width:1px;height:1px;opacity:0"></textarea></div></section>`);
   const status = root.querySelector?.("[data-custom-session-status]");
   if (status) status.textContent = timed ? `${number(remainingMs / 1000, 0)} s active time remaining · ${cursor} characters typed` : `${cursor} / ${total} characters`;
   const box = root.querySelector?.("[data-custom-text-window]");
@@ -34,14 +35,14 @@ function renderActive(root, session, snapshot) {
       span.textContent = value;
       fragment.append(span);
     });
-    box.append(fragment);
+    box.replaceChildren(fragment);
   }
 }
 
 function renderResult(root, session, finalResult) {
   const summary = finalResult?.summary ?? {};
   const after = summary.afterMetrics ?? {};
-  root.innerHTML = `<section class="screen practice-lab-screen" data-practice-view="custom-text-result"><div class="practice-lab-shell"><main class="practice-lab-detail"><div class="eyebrow">Custom Text · local result</div><h1>Practice complete</h1><dl class="practice-real-text-result-grid"><div><dt>WPM</dt><dd>${number(after.wpm ?? summary.wpm)}</dd></div><div><dt>Raw WPM</dt><dd>${number(after.rawWpm ?? summary.rawWpm)}</dd></div><div><dt>Accuracy</dt><dd>${percent(after.acceptedInsertionAccuracy ?? summary.accuracy)}</dd></div><div><dt>First-pass accuracy</dt><dd>${percent(after.firstPassAccuracy)}</dd></div><div><dt>Characters</dt><dd>${after.charactersTyped ?? summary.typedCharacterCount ?? 0}</dd></div><div><dt>Words encountered</dt><dd>${after.wordsEncountered ?? summary.completedWordCount ?? 0}</dd></div><div><dt>Corrections</dt><dd>${after.correctionInputs ?? "—"}</dd></div><div><dt>Error episodes</dt><dd>${after.errorEpisodeCount ?? "—"}</dd></div></dl><div class="practice-lab-notice">These are session-local descriptive metrics. Custom Text does not update standardized ability, transfer, benchmark, retention, mastery, PBs, or rankings.</div><div class="practice-custom-actions"><button type="button" data-custom-text-session-action="again">PRACTICE AGAIN</button><button type="button" data-custom-text-session-action="finish">BACK TO CUSTOM TEXT</button></div></main></div></section>`;
+  renderPracticeSessionMarkup(root, `<section class="screen practice-lab-screen" data-practice-view="custom-text-result"><div class="practice-lab-shell"><main class="practice-lab-detail"><div class="eyebrow">Custom Text · local result</div><h1>Practice complete</h1><dl class="practice-real-text-result-grid"><div><dt>WPM</dt><dd>${number(after.wpm ?? summary.wpm)}</dd></div><div><dt>Raw WPM</dt><dd>${number(after.rawWpm ?? summary.rawWpm)}</dd></div><div><dt>Accuracy</dt><dd>${percent(after.acceptedInsertionAccuracy ?? summary.accuracy)}</dd></div><div><dt>First-pass accuracy</dt><dd>${percent(after.firstPassAccuracy)}</dd></div><div><dt>Characters</dt><dd>${after.charactersTyped ?? summary.typedCharacterCount ?? 0}</dd></div><div><dt>Words encountered</dt><dd>${after.wordsEncountered ?? summary.completedWordCount ?? 0}</dd></div><div><dt>Corrections</dt><dd>${after.correctionInputs ?? "—"}</dd></div><div><dt>Error episodes</dt><dd>${after.errorEpisodeCount ?? "—"}</dd></div></dl><div class="practice-lab-notice">These are session-local descriptive metrics. Custom Text does not update standardized ability, transfer, benchmark, retention, mastery, PBs, or rankings.</div><div class="practice-custom-actions"><button type="button" data-custom-text-session-action="again">PRACTICE AGAIN</button><button type="button" data-custom-text-session-action="finish">BACK TO CUSTOM TEXT</button></div></main></div></section>`);
   root.querySelector?.("[data-custom-text-session-action='again']")?.focus?.({ preventScroll: true });
 }
 
@@ -57,7 +58,7 @@ export async function mountPracticeCustomTextSession({ root, session, runtime = 
   let finishing = false;
   let unsubscribe = null;
   let timer = null;
-  const focus = () => queueMicrotask(() => root.querySelector?.("[data-custom-text-session-input]")?.focus?.({ preventScroll: true }));
+  const focus = () => queueMicrotask(() => focusPracticeSessionInput(root, "[data-custom-text-session-input]"));
   const cleanup = async () => {
     if (closed) return;
     closed = true;
@@ -102,7 +103,8 @@ export async function mountPracticeCustomTextSession({ root, session, runtime = 
     event.preventDefault();
     if (INSERT_TYPES.has(event.inputType) && typeof event.data === "string") {
       for (const grapheme of splitGraphemes(event.data.normalize("NFC"))) engine.handleInput(normalizedInput(grapheme === " " ? "space" : "character", grapheme));
-    } else if (event.inputType === "deleteContentBackward") engine.handleInput(normalizedInput("backspace", ""));
+    } else if (["insertLineBreak", "insertParagraph"].includes(event.inputType)) engine.handleInput(normalizedInput("character", "\n"));
+    else if (event.inputType === "deleteContentBackward") engine.handleInput(normalizedInput("backspace", ""));
     else if (event.inputType === "deleteWordBackward") engine.handleInput(normalizedInput("word-delete", ""));
     capture.value = "";
   };

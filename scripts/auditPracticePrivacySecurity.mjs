@@ -57,15 +57,11 @@ const STATIC_FETCH_FILES = Object.freeze(new Set([
 // Exact current sink counts are certified. A new occurrence is not inherited by
 // this review: it changes the count and fails PL39 until explicitly audited.
 const REVIEWED_INNER_HTML = Object.freeze({
+  "js/practiceLab/practiceHostDom.js": [2, "central host reconciler and non-DOM test fallback; markup supplied exclusively by escaped session renderers, never raw typed input; private Custom Text graphemes use textContent"],
   "js/practiceLab/practiceTargetSessionRendering.js": [1, "bounded markup supplied exclusively by the four escaped target-session renderers; feedback uses textContent"],
   "js/practiceLab/practiceAssessmentSessionHost.js": [2, "fixed shell and bounded visible passage window; all dynamic strings HTML-escaped"],
   "js/practiceLab/practiceEvidenceViews.js": [1, "escaped entity/session strings and finite numeric formatting; no raw source content"],
-  "js/practiceLab/practiceAccuracyRecoverySessionHost.js": [2, "fixed shell/results and bounded metrics"],
-  "js/practiceLab/practiceBurstSprintsSessionHost.js": [1, "GC1 central shell helper; dynamic text is escaped and protocol/result metrics are bounded"],
   "js/practiceLab/practiceCoachReviewSessionHost.js": [3, "fixed review shell/results with validated identifiers"],
-  "js/practiceLab/practiceCombinationRepairSessionHost.js": [3, "validated target identifiers plus fixed markup"],
-  "js/practiceLab/practiceCommonWordsSessionHost.js": [2, "fixed common-word session/result markup"],
-  "js/practiceLab/practiceCustomTextSessionHost.js": [2, "private graphemes use textContent; innerHTML contains only fixed shell/bounded metrics"],
   "js/practiceLab/practiceLabController.js": [1, "compile-time loading placeholder"],
   "js/practiceLab/practiceLabRenderer.js": [1, "dynamic display strings are escaped before reviewed markup composition"],
   "js/practiceLab/practiceLabRendererV20.js": [1, "reviewed renderer; dynamic display strings are escaped/validated"],
@@ -82,14 +78,9 @@ const REVIEWED_INNER_HTML = Object.freeze({
   "js/practiceLab/practiceLabRendererV31.js": [1, "Custom Text editor/library values are assigned through safe DOM properties"],
   "js/practiceLab/practiceLabRendererV32.js": [1, "reviewed treatment-response markup with bounded values"],
   "js/practiceLab/practiceLabRendererV36.js": [1, "aggregate telemetry values only"],
-  "js/practiceLab/practicePaceLadderSessionHost.js": [2, "fixed ladder shell/results with numeric metrics"],
-  "js/practiceLab/practiceProblemWordsSessionHost.js": [2, "validated lexical target plus fixed markup"],
   "js/practiceLab/practiceRealTextSessionHost.js": [3, "passage graphemes are escaped before HTML composition"],
   "js/practiceLab/practiceResearchProbeSessionHost.js": [2, "protected probe rendering follows escaped/controlled passage path"],
   "js/practiceLab/practiceResearchUi.js": [4, "research strings are escaped; consent/control markup is fixed"],
-  "js/practiceLab/practiceSpecialDomainSessionHost.js": [2, "approved static-domain content and bounded metrics"],
-  "js/practiceLab/practiceSustainedSessionHost.js": [3, "fixed sustained-session markup and bounded metrics"],
-  "js/practiceLab/practiceWeakKeysSessionHost.js": [3, "manual target is constrained to one supported key"],
   "js/practiceLab/practiceWeaknessBossSessionHost.js": [1, "fixed gameplay shell; typed material uses the session rendering path"],
   "js/practiceLab/practiceWeaknessBossUi.js": [3, "validated target/model data and fixed setup/result markup"],
 });

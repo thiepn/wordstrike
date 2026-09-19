@@ -1,3 +1,4 @@
+import { renderPracticeSessionMarkup, focusPracticeSessionInput } from "./practiceHostDom.js";
 import { createPracticeSessionPulse } from "./practiceSessionPulse.js";
 import { createPracticeIndexedDbStore } from "./practiceIndexedDbStore.js";
 import { createPracticeManifestStore } from "./practiceManifestStore.js";
@@ -50,7 +51,7 @@ function renderActive(root, session, snapshot) {
   const cursor = snapshot.cursorIndex ?? 0;
   const progress = check ? (expected ? Math.min(100, cursor / expected * 100) : 0) : Math.min(100, activeMs / session.plan.durationMs * 100);
   const secondary = check ? `${Math.round(progress)}% of standardized form` : `${formatRemaining(Math.max(0, session.plan.durationMs - activeMs))} remaining`;
-  root.innerHTML = `<section class="screen practice-lab-screen" data-practice-view="special-domain-session" data-special-domain-flow="${session.flow}">
+  renderPracticeSessionMarkup(root, `<section class="screen practice-lab-screen" data-practice-view="special-domain-session" data-special-domain-flow="${session.flow}">
     <div class="practice-lab-shell">
       <header class="practice-real-text-session-header">
         <div><div class="eyebrow">${escapeHtml(check ? names.check : `${names.mode} Practice`)}</div><h1>${escapeHtml(secondary)}</h1><p>Type the visible text exactly. Live WPM and aggregate accuracy are hidden.</p></div>
@@ -60,7 +61,7 @@ function renderActive(root, session, snapshot) {
       <section class="practice-real-text-typing" aria-label="${escapeHtml(check ? names.check : `${names.mode} Practice`)} typing material">${renderText(session.contentPlan, snapshot)}</section>
       <textarea data-special-domain-input aria-label="${escapeHtml(names.mode)} typing input" inputmode="text" autocomplete="off" autocorrect="off" spellcheck="false" style="position:fixed;left:-10000px;top:0;width:1px;height:1px;opacity:0"></textarea>
     </div>
-  </section>`;
+  </section>`);
 }
 
 const categoryLabel = (value) => ({
@@ -94,7 +95,7 @@ export function renderPracticeSpecialDomainResult(root, session, finalResult, ab
   const derived = punctuation
     ? `<section class="practice-lab-empty-state"><h2>Boundary Control</h2><dl class="practice-real-text-result-grid"><div><dt>After-punctuation spacing</dt><dd>${pct(result?.postPunctuationBoundary?.firstPassAccuracy)}</dd></div><div><dt>Sentence capitals</dt><dd>${pct(result?.sentenceCapital?.firstPassAccuracy)}</dd></div></dl></section>`
     : `<section class="practice-lab-empty-state"><h2>Sequences</h2><dl class="practice-real-text-result-grid"><div><dt>Digit runs</dt><dd>${pct(result?.digitRuns?.wholeRunFirstPassAccuracy)}</dd></div><div><dt>Mixed practical tokens</dt><dd>${pct(result?.mixedPracticalTokens?.wholeTokenFirstPassAccuracy)}</dd></div></dl></section>`;
-  root.innerHTML = `<section class="screen practice-lab-screen" data-practice-view="special-domain-result"><div class="practice-lab-shell"><main class="practice-lab-detail">
+  renderPracticeSessionMarkup(root, `<section class="screen practice-lab-screen" data-practice-view="special-domain-result"><div class="practice-lab-shell"><main class="practice-lab-detail">
     <div class="eyebrow">${escapeHtml(check ? `${names.check} result` : `${names.mode} Practice result`)}</div>
     <h1>${escapeHtml(check ? `${names.mode} Ability` : `${names.mode} Practice`)}</h1>
     <dl class="practice-real-text-result-grid">
@@ -106,7 +107,7 @@ export function renderPracticeSpecialDomainResult(root, session, finalResult, ab
     ${derived}
     <div class="practice-lab-notice">${punctuation ? "Uppercase-letter accuracy measures expected textual output; it does not score which Shift key, Caps Lock, software keyboard, or other input method produced it." : "This is a transcription protocol. It measures typing digits and symbols, not numeracy, arithmetic skill, or a required physical modifier technique."}</div>
     <button type="button" data-special-domain-session-action="finish">BACK TO ${escapeHtml(names.mode.toUpperCase())}</button>
-  </main></div></section>`;
+  </main></div></section>`);
   root.querySelector?.("[data-special-domain-session-action='finish']")?.focus?.({ preventScroll: true });
 }
 
@@ -125,7 +126,7 @@ export async function mountPracticeSpecialDomainSession({ root, session, runtime
   let unsubscribe = null;
   let pulseLoop = null;
   const running = () => !closed && !interrupted && !completing && !finalResult;
-  const focus = () => queueMicrotask(() => { if (running()) root.querySelector?.("[data-special-domain-input]")?.focus?.({ preventScroll: true }); });
+  const focus = () => queueMicrotask(() => { if (running()) focusPracticeSessionInput(root, "[data-special-domain-input]"); });
 
   async function cleanup(notify = true) {
     if (closed) return;
@@ -154,7 +155,8 @@ export async function mountPracticeSpecialDomainSession({ root, session, runtime
     event.preventDefault();
     if (INSERT_TYPES.has(event.inputType) && typeof event.data === "string") {
       for (const char of Array.from(event.data.normalize("NFC"))) engine.handleInput(normalizedInput(char === " " ? "space" : "character", char));
-    } else if (event.inputType === "deleteContentBackward") engine.handleInput(normalizedInput("backspace", ""));
+    } else if (["insertLineBreak", "insertParagraph"].includes(event.inputType)) engine.handleInput(normalizedInput("character", "\n"));
+    else if (event.inputType === "deleteContentBackward") engine.handleInput(normalizedInput("backspace", ""));
     else if (event.inputType === "deleteWordBackward") engine.handleInput(normalizedInput("word-delete", ""));
     capture.value = "";
   };

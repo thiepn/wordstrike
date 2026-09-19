@@ -1,3 +1,4 @@
+import { renderPracticeSessionMarkup, focusPracticeSessionInput } from "./practiceHostDom.js";
 import { practicePlanCharacters, practicePhaseWindow, updatePracticeTargetSession } from "./practiceTargetSessionRendering.js";
 import { createPracticeIndexedDbStore } from "./practiceIndexedDbStore.js";
 import { createPracticeManifestStore } from "./practiceManifestStore.js";
@@ -66,7 +67,7 @@ export function renderPracticeWeakKeysSessionSnapshot(root, { contentPlan, snaps
   const progress = totalLength > 0 ? Math.min(100, ((snapshot.cursorIndex ?? 0) / totalLength) * 100) : 0;
   const paused = snapshot.lifecycleState === "paused";
   if (updatePracticeTargetSession(root, { contentPlan, phase, snapshot, passageSelector: ".practice-weak-key-typing", text: renderTypingText(contentPlan, snapshot, phase), progress })) return;
-  root.innerHTML = `<section class="screen practice-lab-screen practice-weak-key-session" data-practice-view="weak-keys-session">
+  renderPracticeSessionMarkup(root, `<section class="screen practice-lab-screen practice-weak-key-session" data-practice-view="weak-keys-session">
     <div class="practice-lab-shell">
       <header class="practice-weak-key-session-header">
         <div><div class="eyebrow">Weak Keys</div><h1>Practicing: ${escapeHtml(target)}</h1></div>
@@ -86,7 +87,7 @@ export function renderPracticeWeakKeysSessionSnapshot(root, { contentPlan, snaps
       ${paused ? '<div class="practice-lab-notice" role="status"><strong>Paused.</strong> Resume to continue; paused time is excluded from active typing time.</div>' : ""}
       <textarea class="practice-weak-key-input-capture" data-weak-keys-input aria-label="Weak Keys typing input" inputmode="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" style="position:fixed;left:-10000px;top:0;width:1px;height:1px;opacity:0"></textarea>
     </div>
-  </section>`;
+  </section>`);
 }
 
 function probeRows(before, after) {
@@ -106,7 +107,7 @@ export function renderPracticeWeakKeysResult(root, finalResult) {
   const target = result?.target?.entityKey ?? summary?.configuration?.target?.entityKey ?? "—";
   const delta = result?.immediateProbeDelta ?? null;
   const contextVariety = result?.contextVariety ?? result?.trainingQuality?.contextVariety ?? "—";
-  root.innerHTML = `<section class="screen practice-lab-screen practice-weak-key-results" data-practice-view="weak-keys-result">
+  renderPracticeSessionMarkup(root, `<section class="screen practice-lab-screen practice-weak-key-results" data-practice-view="weak-keys-result">
     <div class="practice-lab-shell"><main class="practice-lab-detail">
       <div class="eyebrow">Weak Keys complete</div>
       <h1>Key: ${escapeHtml(target)}</h1>
@@ -116,11 +117,11 @@ export function renderPracticeWeakKeysResult(root, finalResult) {
       <div class="practice-lab-notice" role="note">This compares the beginning and end of this practice session. Long-term improvement requires later sessions and transfer evidence.</div>
       <div class="practice-weak-key-result-actions"><button type="button" data-weak-keys-session-action="repeat">PRACTICE AGAIN</button><button type="button" data-weak-keys-session-action="finish">BACK TO WEAK KEYS</button></div>
     </main></div>
-  </section>`;
+  </section>`);
 }
 
 function renderFailure(root, error) {
-  root.innerHTML = `<section class="screen practice-lab-screen" data-practice-view="weak-keys-session-error"><div class="practice-lab-shell"><main class="practice-lab-detail"><div class="eyebrow">Weak Keys</div><h1>Session could not start</h1><div class="practice-lab-notice" role="alert"><strong>${escapeHtml(error?.code ?? "SESSION_ERROR")}</strong><p>${escapeHtml(error?.message ?? "The Practice session could not be initialized.")}</p></div><button type="button" data-weak-keys-session-action="finish">BACK</button></main></div></section>`;
+  renderPracticeSessionMarkup(root, `<section class="screen practice-lab-screen" data-practice-view="weak-keys-session-error"><div class="practice-lab-shell"><main class="practice-lab-detail"><div class="eyebrow">Weak Keys</div><h1>Session could not start</h1><div class="practice-lab-notice" role="alert"><strong>${escapeHtml(error?.code ?? "SESSION_ERROR")}</strong><p>${escapeHtml(error?.message ?? "The Practice session could not be initialized.")}</p></div><button type="button" data-weak-keys-session-action="finish">BACK</button></main></div></section>`);
 }
 
 function normalizedInput(type, value, source = "browser-input") {
@@ -162,7 +163,7 @@ export async function mountPracticeWeakKeysSession({
   let finalResult = null;
   let closed = false;
   let unsubscribe = null;
-  const focusCapture = () => queueMicrotask(() => root.querySelector?.("[data-weak-keys-input]")?.focus?.({ preventScroll: true }));
+  const focusCapture = () => queueMicrotask(() => focusPracticeSessionInput(root, "[data-weak-keys-input]"));
   const renderSnapshot = (snapshot) => {
     if (closed || finalResult) return;
     renderPracticeWeakKeysSessionSnapshot(root, { contentPlan: session.contentPlan, snapshot });
@@ -217,7 +218,7 @@ export async function mountPracticeWeakKeysSession({
     if (!target || !root.contains?.(target)) return;
     const action = target.dataset.weakKeysSessionAction;
     if (action === "pause") void engine.pause("manual");
-    else if (action === "resume") void engine.resume();
+    else if (action === "resume") void engine.resume().then(() => focusPracticeSessionInput(root, "[data-practice-session-capture]", { force: true }));
     else if (action === "abandon") void engine.abandon("manual-stop").then(() => finish(false)).catch((error) => { logger?.warn?.("Weak Keys abandon failed", error); void finish(false); });
     else if (action === "repeat") void finish(true);
     else if (action === "finish") void finish(false);

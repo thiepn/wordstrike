@@ -1,0 +1,59 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
+import {setTimeout as delay} from 'node:timers/promises';
+import {chromium} from 'playwright';
+const root=path.resolve(import.meta.dirname,'../..');
+const base='https://thiepn.dev/wordstrike/';
+const out=path.join(root,'browser-artifacts/practice-live');
+fs.mkdirSync(out,{recursive:true});
+const report={url:base,commit:process.env.GITHUB_SHA??null,status:'FAIL',assets:[],errors:[]};
+const assetPaths=['index.html','sw.js','practiceLabPlayability.css','js/practiceLab/practiceHostDom.js','js/practiceLab/practiceEntityResolver.js','js/practiceLab/practiceTargetSessionRendering.js'];
+let browser;
+try{
+ const deadline=Date.now()+300000;
+ for(;;){
+  const matches=await Promise.all(assetPaths.map(async file=>{
+   try{
+    const response=await fetch(new URL(file+'?release='+report.commit,base),{signal:AbortSignal.timeout(15000)});
+    return {file,ok:response.ok&&(await response.text())===fs.readFileSync(path.join(root,file),'utf8')};
+   }catch(error){return {file,ok:false,error:String(error)};}
+  }));
+  report.assets=matches;
+  if(matches.every(result=>result.ok))break;
+  assert.ok(Date.now()<deadline,'Production did not serve this release before the smoke-test deadline');
+  await delay(10000);
+ }
+ browser=await chromium.launch();
+ const context=await browser.newContext({viewport:{width:1280,height:900},serviceWorkers:'block'});
+ await context.addInitScript(()=>localStorage.setItem('wordstrike.onboarding.general.v3','seen'));
+ const page=await context.newPage();page.setDefaultTimeout(30000);page.on('pageerror',error=>report.errors.push(error.message));
+ await page.goto(base,{waitUntil:'domcontentloaded'});
+ await page.locator('[data-action="modes"]').click();
+ await page.locator('button[data-mode-id="practice"]').click();
+ await page.locator('[data-practice-action="open-experiment"][data-experiment-id="custom-text"]').first().click();
+ const passage='Practice is ready. Correct a mistake, then continue.\nThe second line saves with the completed session.';
+ await page.locator('[data-custom-text-source]').fill(passage);
+ await page.locator('[data-practice-action="custom-start"]:enabled').click();
+ const input=page.locator('[data-custom-text-session-input]');await input.waitFor({state:'visible'});
+ assert.ok(await input.evaluate(node=>node===document.activeElement));
+ await page.keyboard.type('x');await page.keyboard.press('Backspace');
+ assert.equal(await page.locator('.practice-lab-screen .is-current').first().textContent(),'P');
+ for(const [index,line] of passage.split('\n').entries()){
+  if(index)await page.keyboard.press('Enter');
+  await page.keyboard.type(line,{delay:30});
+ }
+ await page.locator('[data-practice-view="custom-text-result"]').waitFor();
+ await page.screenshot({path:path.join(out,'production-result.png')});
+ const summaries=()=>page.evaluate(async()=>{
+  const {createPracticeIndexedDbStore}=await import(new URL('js/practiceLab/practiceIndexedDbStore.js',location.href).href);
+  const store=createPracticeIndexedDbStore();await store.open();
+  try{return await store.list('sessionSummaries');}finally{store.close();}
+ });
+ const saved=await summaries();assert.equal(saved.filter(row=>row.status==='completed').length,1);
+ const id=saved.find(row=>row.status==='completed').sessionId;
+ await page.reload();assert.equal((await summaries()).filter(row=>row.sessionId===id&&row.status==='completed').length,1);
+ assert.deepEqual(report.errors,[]);
+ report.status='PASS';report.savedSessionId=id;report.checkedAt=new Date().toISOString();
+}catch(error){report.error=String(error);throw error;}
+finally{await browser?.close();fs.writeFileSync(path.join(out,'report.json'),JSON.stringify(report,null,2));console.log(JSON.stringify(report));}
