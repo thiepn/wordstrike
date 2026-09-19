@@ -21,8 +21,8 @@ import { PRACTICE_DATABASE_VERSION, PRACTICE_RECORD_VERSIONS, PRACTICE_STORE_DEF
 const cryptoImpl = globalThis.crypto;
 const baseCandidate = (overrides={}) => ({ entityType:"key",statId:"stat:k",entityKey:"k",weaknessStatus:"confirmed",hierarchyStatus:"independent",stableAnchor:false,saturationStatus:"possible",learningHeadroom:10,bossTargetUtility:70,bossContentReady:true,focusedContentReady:true,canonicalTreatment:"weak-keys",retentionReviewState:"inactive",coachConflict:false,lastDirectPractisedAt:null,lastResearchAssignedAt:null,...overrides });
 
-test("PL38 storage/version envelope is DB12 + sessionSummary14 + three sidecar stores",()=>{
-  assert.equal(PRACTICE_DATABASE_VERSION,12);
+test("PL38 storage/version envelope is DB13 + sessionSummary14 + three sidecar stores",()=>{
+  assert.equal(PRACTICE_DATABASE_VERSION,13);
   assert.equal(PRACTICE_RECORD_VERSIONS.sessionSummary,14);
   assert.equal(PRACTICE_RECORD_VERSIONS.researchEnrollment,1);
   assert.equal(PRACTICE_RECORD_VERSIONS.researchAssignment,1);
