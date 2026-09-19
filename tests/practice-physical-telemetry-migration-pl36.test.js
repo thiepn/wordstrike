@@ -10,7 +10,7 @@ delete legacyDb10.settings.physicalKeyboardTelemetryEnabled;
 
 const migrated = normalizePracticeManifest(legacyDb10);
 assert.equal(PRACTICE_DATABASE_VERSION, 13);
-assert.equal(migrated.databaseVersion, 12);
+assert.equal(migrated.databaseVersion, 13);
 assert.equal(migrated.settings.physicalKeyboardTelemetryEnabled, false, "existing users must remain opted out after PL36 DB10 -> DB11 and the later PL38 DB13 normalization");
 assert.equal(validatePracticeManifest(migrated).valid, true);
 assert.ok(PRACTICE_STORE_DEFINITIONS.physicalTelemetryStats);
