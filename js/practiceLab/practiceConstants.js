@@ -8,7 +8,7 @@ import {
 
 export * from "./practiceConstantsV31.js";
 
-export const PRACTICE_DATABASE_VERSION = 12;
+export const PRACTICE_DATABASE_VERSION = 13;
 
 export const PRACTICE_RECORD_VERSIONS = Object.freeze({
   ...PRACTICE_RECORD_VERSIONS_V31,
