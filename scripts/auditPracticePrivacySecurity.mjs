@@ -57,6 +57,7 @@ const STATIC_FETCH_FILES = Object.freeze(new Set([
 // Exact current sink counts are certified. A new occurrence is not inherited by
 // this review: it changes the count and fails PL39 until explicitly audited.
 const REVIEWED_INNER_HTML = Object.freeze({
+  "js/practiceLab/practiceLabIdentity.js": [3, "HTML-escaped catalog/route strings; static allowlisted SVG diagrams; setup disclosures use textContent and move only explanatory nodes"],
   "js/practiceLab/practiceHostDom.js": [2, "central host reconciler and non-DOM test fallback; markup supplied exclusively by escaped session renderers, never raw typed input; private Custom Text graphemes use textContent"],
   "js/practiceLab/practiceTargetSessionRendering.js": [1, "bounded markup supplied exclusively by the four escaped target-session renderers; feedback uses textContent"],
   "js/practiceLab/practiceAssessmentSessionHost.js": [2, "fixed shell and bounded visible passage window; all dynamic strings HTML-escaped"],

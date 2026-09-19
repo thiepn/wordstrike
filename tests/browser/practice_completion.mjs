@@ -9,7 +9,7 @@ try{for(const name of (process.env.PRACTICE_BROWSERS??'chromium,firefox,webkit')
   const context=await browser.newContext({viewport:{width,height:900},reducedMotion:'reduce'}),page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
   await page.goto(`http://127.0.0.1:${server.address().port}/harness`);
   await page.evaluate(async()=>{const [{createPracticeLabController},{createPracticeFeatureGate},{createPracticeExperimentRegistry}]=await Promise.all([import('/js/practiceLab/practiceLabController.js'),import('/js/practiceLab/practiceFeatureGate.js'),import('/js/practiceLab/practiceExperimentRegistry.js')]);const gate=createPracticeFeatureGate({developerMode:true});window.lab=createPracticeLabController({root:document.querySelector('#app'),featureGate:gate,experimentRegistry:createPracticeExperimentRegistry({featureGate:gate})});lab.mount();});
-  await page.locator('[data-route="skill-map"]').waitFor();
+  await page.locator('[data-route="skill-map"]').first().waitFor();
   for(const [route,text] of [['skill-map','No skill evidence yet'],['review-queue','No reviews scheduled'],['progress','No training history']]){await page.evaluate(route=>lab.navigate({name:route}),route);await page.getByText(text,{exact:true}).waitFor();}
   const navigate=async id=>{await page.evaluate(id=>lab.navigate({name:'experiment-detail',params:{experimentId:id}}),id);};
   await page.clock.install();
