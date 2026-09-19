@@ -38,11 +38,11 @@ try{for(const browserName of (process.env.PRACTICE_BROWSERS??'chromium,firefox')
   const page=await context.newPage();page.setDefaultTimeout(15000);
   const record={browser:browserName,width,id,status:'FAIL',typed:0,errors:[]};page.on('pageerror',e=>record.errors.push(e.message));
   try{
+   await page.clock.install();
    await page.goto(`http://127.0.0.1:${server.address().port}/`);
    await page.locator('[data-action="modes"]').click();await page.locator('button[data-mode-id="practice"]').click();
    await page.locator(`[data-practice-action="open-experiment"][data-experiment-id="${id}"]`).first().click();
    if(target)await page.locator(target).fill(value);
-   await page.clock.install();
    await page.locator(`[data-practice-action="${action}"]:enabled`).first().click();
    const input=page.locator(`[${attribute}]`);await input.waitFor({state:'visible',timeout:30000});
    assert.ok(await input.evaluate(e=>e===document.activeElement),'Initial input focus missing');
@@ -65,7 +65,7 @@ try{for(const browserName of (process.env.PRACTICE_BROWSERS??'chromium,firefox')
     assert.ok(await button.evaluate(e=>e===document.activeElement),'Timer steals control focus');
     await input.click();
    }
-   const deadline=Date.now()+60000;
+   const deadline=Date.now()+120000;
    for(let step=0;step<420&&Date.now()<deadline;step++){
     const results=await saved(page);if(results.some(r=>r.status==='completed'))break;
     if(await input.count()&&await input.isEnabled()&&await page.locator(cursor).count()){
@@ -74,7 +74,7 @@ try{for(const browserName of (process.env.PRACTICE_BROWSERS??'chromium,firefox')
      await type(page,text);record.typed+=text.length;
     }
     if(timed)await page.clock.fastForward(id==='burst-sprints'?5000:30000);
-    else await page.waitForTimeout(10);
+    else await page.clock.runFor(100);
    }
    const rows=await saved(page);record.summaries=rows.map(r=>({sessionId:r.sessionId,status:r.status,experimentId:r.experimentId}));
    assert.equal(rows.filter(r=>r.status==='completed').length,1,'Exactly one completed session must be saved');

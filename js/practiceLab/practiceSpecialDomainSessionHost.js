@@ -1,4 +1,4 @@
-import { renderPracticeSessionMarkup, focusPracticeSessionInput } from "./practiceSessionDom.js";
+import { renderPracticeSessionMarkup, focusPracticeSessionInput } from "./practiceHostDom.js";
 import { createPracticeSessionPulse } from "./practiceSessionPulse.js";
 import { createPracticeIndexedDbStore } from "./practiceIndexedDbStore.js";
 import { createPracticeManifestStore } from "./practiceManifestStore.js";
@@ -155,7 +155,8 @@ export async function mountPracticeSpecialDomainSession({ root, session, runtime
     event.preventDefault();
     if (INSERT_TYPES.has(event.inputType) && typeof event.data === "string") {
       for (const char of Array.from(event.data.normalize("NFC"))) engine.handleInput(normalizedInput(char === " " ? "space" : "character", char));
-    } else if (event.inputType === "deleteContentBackward") engine.handleInput(normalizedInput("backspace", ""));
+    } else if (["insertLineBreak", "insertParagraph"].includes(event.inputType)) engine.handleInput(normalizedInput("character", "\n"));
+    else if (event.inputType === "deleteContentBackward") engine.handleInput(normalizedInput("backspace", ""));
     else if (event.inputType === "deleteWordBackward") engine.handleInput(normalizedInput("word-delete", ""));
     capture.value = "";
   };

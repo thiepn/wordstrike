@@ -1,4 +1,4 @@
-import { renderPracticeSessionMarkup, focusPracticeSessionInput } from "./practiceSessionDom.js";
+import { renderPracticeSessionMarkup, focusPracticeSessionInput } from "./practiceHostDom.js";
 import { createPracticeIndexedDbStore } from "./practiceIndexedDbStore.js";
 import { createPracticeManifestStore } from "./practiceManifestStore.js";
 import { createPracticeRepository } from "./practiceRepository.js";

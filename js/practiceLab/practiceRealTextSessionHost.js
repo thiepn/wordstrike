@@ -1,3 +1,4 @@
+import { wirePracticeKeyboardCorrections } from "./practiceHostDom.js";
 import { createPracticeSessionPulse } from './practiceSessionPulse.js';
 import { createPracticeIndexedDbStore } from "./practiceIndexedDbStore.js";
 import { createPracticeManifestStore } from "./practiceManifestStore.js";
@@ -72,6 +73,7 @@ function normalizedInput(type, value) {
 }
 
 export async function mountPracticeRealTextSession({ root, session, mode = "natural", onExit = () => {}, logger = null, dependencies = {} } = {}) {
+  wirePracticeKeyboardCorrections(root);
   if (!root?.addEventListener || !session?.experiment || !session?.contentPlan) throw new TypeError("Real Text session host requires root and prepared session");
   const dataStore = dependencies.dataStore ?? createPracticeIndexedDbStore();
   const manifestStore = dependencies.manifestStore ?? createPracticeManifestStore();
