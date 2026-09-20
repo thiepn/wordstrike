@@ -71,6 +71,10 @@ try{for(const browserName of (process.env.PRACTICE_BROWSERS??'chromium,firefox')
    const input=page.locator(`[${attribute}]`);await input.waitFor({state:'visible',timeout:30000});
    assert.ok(await input.evaluate(e=>e===document.activeElement),'Initial input focus missing');
    await page.evaluate(attr=>{window.__capture=document.querySelector(`[${attr}]`);},attribute);
+   if(id==='real-text'){
+    await page.locator('.practice-real-text-typing').click();
+    assert.ok(await input.evaluate(e=>e===document.activeElement),'Clicking Real Text passage did not restore typing focus');
+   }
    const initial=await remaining(page,1);
    await type(page,initial==='x'?'z':'x');await page.keyboard.press('Backspace');
    assert.equal(await remaining(page,1),initial,'Backspace did not restore the expected character');
