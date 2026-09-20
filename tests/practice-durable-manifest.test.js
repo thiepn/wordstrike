@@ -95,6 +95,73 @@ test('independent metadata edits from two writers are merged instead of overwrit
  const c=setup(a.storage,a.dataStore);const current=await c.repository.initializePracticeStorage();
  assert.equal(current.manifest.settings.dailySessionLengthMinutes,8);assert.equal(current.manifest.settings.soundEnabled,true);
 });
+test('reset stops before deleting canonical Practice data when the legacy mirror cannot be cleared',async()=>{
+ let blockRemove=false;
+ const values=new Map();
+ const storage={
+  getItem:key=>values.get(key)??null,
+  setItem:(key,value)=>values.set(key,String(value)),
+  removeItem(key){if(blockRemove)throw new DOMException('blocked','SecurityError');values.delete(key);},
+ };
+ const a=setup(storage);const initial=await a.repository.initializePracticeStorage();
+ assert.equal((await a.dataStore.list('profiles')).length,1);
+ assert.ok(await a.dataStore.get('meta',KEY));
+ blockRemove=true;
+ await assert.rejects(a.repository.resetPracticeData(),error=>error?.name==='SecurityError');
+ assert.equal((await a.dataStore.list('profiles')).length,1,'failed reset must not delete the profile');
+ assert.equal((await a.dataStore.list('contexts')).length,1,'failed reset must not delete the active context');
+ assert.ok(await a.dataStore.get('meta',KEY),'failed reset must keep durable metadata');
+ assert.equal(a.manifestStore.load().manifest.profileId,initial.profile.profileId);
+});
+
+test('reset clears IndexedDB atomically and rolls back every store if one clear fails',async()=>{
+ const storageValues=new Map();
+ const storage={
+  getItem:key=>storageValues.get(key)??null,
+  setItem:(key,value)=>storageValues.set(key,String(value)),
+  removeItem:key=>storageValues.delete(key),
+ };
+ const native=createPracticeMemoryStore();
+ let failReset=false,clearCount=0;
+ const dataStore={
+  ...native,
+  runTransaction(names,mode,callback){
+   return native.runTransaction(names,mode,async transaction=>{
+    const wrapped={...transaction,async clearStore(name){
+     const result=await transaction.clearStore(name);
+     clearCount+=1;
+     if(failReset&&clearCount===2)throw new Error('simulated reset failure');
+     return result;
+    }};
+    return callback(wrapped);
+   });
+  },
+ };
+ const a=setup(storage,dataStore);const initial=await a.repository.initializePracticeStorage();
+ const summary=createDefaultSessionSummary({profileId:initial.profile.profileId,contextId:initial.context.contextId,now});
+ await a.repository.commitCompletedPracticeSession({sessionSummary:summary,clearCheckpoint:false});
+ assert.equal((await native.list('sessionSummaries')).length,1);
+ failReset=true;clearCount=0;
+ await assert.rejects(a.repository.resetPracticeData(),error=>error?.code==='PRACTICE_STORAGE_TRANSACTION_FAILED');
+ assert.equal((await native.list('profiles')).length,1,'profile must roll back with the reset transaction');
+ assert.equal((await native.list('contexts')).length,1,'context must roll back with the reset transaction');
+ assert.equal((await native.list('sessionSummaries')).length,1,'history must roll back with the reset transaction');
+ assert.ok(await native.get('meta',KEY),'durable manifest must roll back with the reset transaction');
+ assert.equal(a.manifestStore.load().manifest.profileId,initial.profile.profileId);
+});
+
+test('successful reset clears all Practice stores and its legacy mirror together',async()=>{
+ const values=new Map();
+ const storage={getItem:key=>values.get(key)??null,setItem:(key,value)=>values.set(key,String(value)),removeItem:key=>values.delete(key)};
+ const a=setup(storage);await a.repository.initializePracticeStorage();
+ assert.ok(values.has(PRACTICE_MANIFEST_KEY));
+ await a.repository.resetPracticeData();
+ for(const storeName of ['profiles','contexts','sessionSummaries','reviewItems','skillStats','meta'])assert.equal((await a.dataStore.list(storeName)).length,0,storeName);
+ assert.equal(values.has(PRACTICE_MANIFEST_KEY),false);
+ assert.equal(values.has(PRACTICE_MANIFEST_BACKUP_KEY),false);
+ assert.equal(a.manifestStore.isDurable,false);
+});
+
 test('failed durable write is reported and never advances the hydrated saved state',async()=>{
  const a=setup();await a.repository.initializePracticeStorage();const previous=a.manifestStore.load();
  const native=a.dataStore;let rejectWrites=false;
