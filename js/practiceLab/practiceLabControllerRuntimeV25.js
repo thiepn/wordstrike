@@ -48,6 +48,7 @@ export function createPracticeLabController(options = {}) {
   let base = null;
   let mounted = false;
   let coachState = createDefaultPracticeCoachUiState();
+  let coachDurationUserSelected = false;
   let coachRuntimePromise = null;
   let ownedCoachDataStore = null;
   let coachSessionHost = null;
@@ -155,7 +156,7 @@ export function createPracticeLabController(options = {}) {
       if (plan && reconcile && !TERMINAL_PLAN_STATUSES.has(plan.status)) plan = await runtime.service.reconcilePracticeCoachPlan({ coachPlanId: plan.coachPlanId });
       if (!mounted || epoch !== loadEpoch || !isDailyRoute() || hasCoachSession()) return false;
       let requestedMinutes = coachState.requestedMinutes;
-      if (!plan) {
+      if (!plan && !coachDurationUserSelected) {
         try { requestedMinutes = runtime.repository?.getPracticeSettings?.()?.dailySessionLengthMinutes ?? requestedMinutes; } catch {}
       }
       setCoachState({ status: "ready", plan, requestedMinutes, errorCode: null, errorDetail: null, startingBlockId: null }, "[data-practice-heading]");
@@ -171,13 +172,14 @@ export function createPracticeLabController(options = {}) {
   async function createTodayPlan() {
     if (!mounted || !isDailyRoute() || coachState.plan || coachState.status === "creating") return false;
     const epoch = ++actionEpoch;
+    const requestedMinutes = coachState.requestedMinutes;
     setCoachState({ status: "creating", errorCode: null, errorDetail: null });
     try {
       const runtime = await ensureCoachRuntime();
       const created = await runtime.service.createTodayPracticeCoachPlan({
         profileId: runtime.initialized.profile.profileId,
         contextId: runtime.initialized.context.contextId,
-        requestedMinutes: coachState.requestedMinutes,
+        requestedMinutes,
         language: runtime.initialized.context.dataLocale,
       });
       if (!mounted || epoch !== actionEpoch || !isDailyRoute()) return false;
@@ -310,7 +312,10 @@ export function createPracticeLabController(options = {}) {
     event.preventDefault?.();
     event.stopPropagation?.();
     if (!isDailyRoute()) return;
-    if (action === "set-coach-duration" && !coachState.plan) setCoachState({ requestedMinutes: Number(button.dataset.coachMinutes), errorCode: null }, `[data-coach-minutes="${button.dataset.coachMinutes}"]`);
+    if (action === "set-coach-duration" && !coachState.plan) {
+      coachDurationUserSelected = true;
+      setCoachState({ requestedMinutes: Number(button.dataset.coachMinutes), errorCode: null }, `[data-coach-minutes="${button.dataset.coachMinutes}"]`);
+    }
     else if (action === "create-coach-plan") void createTodayPlan();
     else if (action === "start-coach-next") void startNextBlock();
     else if (action === "skip-coach-block") void skipBlock(button.dataset.coachBlockId);
@@ -376,6 +381,7 @@ export function createPracticeLabController(options = {}) {
       try { ownedCoachDataStore?.close?.(); } catch {}
       ownedCoachDataStore = null;
       coachRuntimePromise = null;
+      coachDurationUserSelected = false;
       coachState = createDefaultPracticeCoachUiState();
       return base.unmount();
     },
