@@ -70,6 +70,9 @@ jobs:
       - name: Weakness Boss stable typing capture
         if: ${{ !cancelled() && matrix.browser == 'chromium' }}
         run: node tests/browser/practice_boss_input.mjs
+      - name: Weakness Boss complete mobile journey
+        if: ${{ !cancelled() && matrix.browser == 'chromium' && matrix.width == 390 }}
+        run: node tests/browser/practice_boss_journey.mjs
       - name: Research local enrollment lifecycle at full storage
         if: ${{ !cancelled() && matrix.browser == 'chromium' }}
         run: node tests/browser/practice_research_smoke.mjs
