@@ -71,6 +71,9 @@ jobs:
       - name: Research local enrollment lifecycle at full storage
         if: ${{ !cancelled() && matrix.browser == 'chromium' }}
         run: node tests/browser/practice_research_smoke.mjs
+      - name: Research probe stable typing capture
+        if: ${{ !cancelled() && matrix.browser == 'chromium' }}
+        run: node tests/browser/practice_research_probe_input.mjs
       - name: Assessment and protected protocol regression
         if: ${{ !cancelled() }}
         run: node tests/browser/practice_completion.mjs
