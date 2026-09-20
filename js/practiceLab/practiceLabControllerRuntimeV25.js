@@ -48,6 +48,7 @@ export function createPracticeLabController(options = {}) {
   let base = null;
   let mounted = false;
   let coachState = createDefaultPracticeCoachUiState();
+  let coachDurationRevision = 0;
   let coachRuntimePromise = null;
   let ownedCoachDataStore = null;
   let coachSessionHost = null;
@@ -148,6 +149,7 @@ export function createPracticeLabController(options = {}) {
   async function loadTodayPlan({ reconcile = true } = {}) {
     if (!mounted || !isDailyRoute() || hasCoachSession()) return false;
     const epoch = ++loadEpoch;
+    const durationRevision = coachDurationRevision;
     setCoachState({ status: "loading", errorCode: null, errorDetail: null, startingBlockId: null });
     try {
       const runtime = await ensureCoachRuntime();
@@ -155,7 +157,7 @@ export function createPracticeLabController(options = {}) {
       if (plan && reconcile && !TERMINAL_PLAN_STATUSES.has(plan.status)) plan = await runtime.service.reconcilePracticeCoachPlan({ coachPlanId: plan.coachPlanId });
       if (!mounted || epoch !== loadEpoch || !isDailyRoute() || hasCoachSession()) return false;
       let requestedMinutes = coachState.requestedMinutes;
-      if (!plan) {
+      if (!plan && coachDurationRevision === durationRevision) {
         try { requestedMinutes = runtime.repository?.getPracticeSettings?.()?.dailySessionLengthMinutes ?? requestedMinutes; } catch {}
       }
       setCoachState({ status: "ready", plan, requestedMinutes, errorCode: null, errorDetail: null, startingBlockId: null }, "[data-practice-heading]");
@@ -310,7 +312,10 @@ export function createPracticeLabController(options = {}) {
     event.preventDefault?.();
     event.stopPropagation?.();
     if (!isDailyRoute()) return;
-    if (action === "set-coach-duration" && !coachState.plan) setCoachState({ requestedMinutes: Number(button.dataset.coachMinutes), errorCode: null }, `[data-coach-minutes="${button.dataset.coachMinutes}"]`);
+    if (action === "set-coach-duration" && !coachState.plan) {
+      coachDurationRevision += 1;
+      setCoachState({ requestedMinutes: Number(button.dataset.coachMinutes), errorCode: null }, `[data-coach-minutes="${button.dataset.coachMinutes}"]`);
+    }
     else if (action === "create-coach-plan") void createTodayPlan();
     else if (action === "start-coach-next") void startNextBlock();
     else if (action === "skip-coach-block") void skipBlock(button.dataset.coachBlockId);
@@ -376,6 +381,7 @@ export function createPracticeLabController(options = {}) {
       try { ownedCoachDataStore?.close?.(); } catch {}
       ownedCoachDataStore = null;
       coachRuntimePromise = null;
+      coachDurationRevision = 0;
       coachState = createDefaultPracticeCoachUiState();
       return base.unmount();
     },
