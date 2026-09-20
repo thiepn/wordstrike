@@ -1,0 +1,38 @@
+name: Practice Final Stabilization
+on:
+  push:
+    branches: [fix/practice-final-stabilization-v2]
+permissions:
+  contents: read
+jobs:
+  focused:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    container:
+      image: mcr.microsoft.com/playwright:v1.57.0-noble
+      options: --ipc=host
+    env:
+      HOME: /root
+      PRACTICE_BROWSERS: chromium
+      PRACTICE_WIDTH: 1280
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --no-save playwright@1.57.0 axe-core@4.10.3
+      - name: Weak Keys A-Z availability and B typing
+        run: node tests/browser/practice_weak_keys_alphabet.mjs
+      - name: Practice accessibility and click-to-type
+        run: node tests/browser/practice_accessibility.mjs
+      - name: Stabilized advanced session inputs
+        run: |
+          node tests/browser/practice_boss_input.mjs
+          node tests/browser/practice_research_probe_input.mjs
+          node tests/browser/practice_coach_review_input.mjs
+          node tests/browser/practice_research_smoke.mjs
+      - name: Core integrity and Weak Keys regressions
+        run: |
+          node --test tests/practice-weak-keys-case-regression.test.js
+          node scripts/auditPracticePrivacySecurity.mjs
+          node scripts/testPracticeMigrations.mjs
