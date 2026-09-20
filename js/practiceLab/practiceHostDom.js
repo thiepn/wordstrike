@@ -52,7 +52,7 @@ export function scrollPracticeTypingCursor(root) {
 }
 /** Empty textareas do not emit native delete-beforeinput consistently.
  * Route physical Backspace through the existing normalizer exactly once.
- * Touch keyboard beforeinput and IME composition remain owned by each host.
+ * Normalize mobile replacement/native-input and IME compatibility before host handlers.
  */
 export function wirePracticeKeyboardCorrections(root) {
   if (!root?.addEventListener || correctionRoots.has(root)) return;
@@ -173,8 +173,13 @@ export function renderPracticeSessionMarkup(root, markup) {
   const previous = renders.get(root);
   if (previous?.markup === markup && previous.first === root.firstChild) return;
   const template = doc.createElement('template');
-  // The passage uses pre-wrap; real spaces allow word-boundary line wrapping.
-  template.innerHTML = markup.replaceAll('>&nbsp;</span>', '> </span>');
+  // Ordinary spaces remain real spaces so passages wrap at word boundaries.
+  // The active/error whitespace keeps NBSP width so the caret/error marker does
+  // not visually disappear when the current character is a space.
+  template.innerHTML = markup;
+  for (const span of template.content.querySelectorAll('.practice-real-text-typing span, .practice-weak-key-typing span, .practice-combination-typing span, [data-protocol-text] span')) {
+    if (span.textContent === '\u00a0' && !span.classList.contains('is-current') && !span.classList.contains('is-error')) span.textContent = ' ';
+  }
   for (const passage of template.content.querySelectorAll('.practice-real-text-typing, .practice-weak-key-typing, .practice-combination-typing, [data-protocol-text]')) {
     if (!passage.hasAttribute('tabindex')) passage.setAttribute('tabindex', '0');
     if (!passage.hasAttribute('role')) passage.setAttribute('role', 'region');

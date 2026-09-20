@@ -62,12 +62,20 @@ try{
   const input=page.locator('[data-weak-keys-input]');await input.waitFor({state:'visible'});
   assert.ok(await input.evaluate(el=>el===document.activeElement),'B session did not receive typing focus');
   await input.evaluate(el=>window.__weakCapture=el);
+  let sawVisibleWhitespaceCaret=false;
   for(let i=0;i<40;i++){
     const current=page.locator('.is-current').first();
-    await current.waitFor();
-    const expected=(await current.textContent()).replaceAll('\u00a0',' ');
+    await current.waitFor({state:'attached'});
+    const raw=await current.textContent();
+    const expected=raw.replaceAll('\u00a0',' ');
+    if(expected===' '){
+      const box=await current.boundingBox();
+      assert.ok(box&&box.width>0&&box.height>0,'Active Weak Keys whitespace caret must remain visibly measurable');
+      sawVisibleWhitespaceCaret=true;
+    }
     await page.keyboard.insertText(expected);
   }
+  assert.equal(sawVisibleWhitespaceCaret,true,'B regression passage must certify at least one active whitespace caret');
   const currentBefore=await page.locator('.is-current').first().textContent();
   await page.keyboard.insertText(currentBefore==='x'?'z':'x');
   await page.keyboard.press('Backspace');

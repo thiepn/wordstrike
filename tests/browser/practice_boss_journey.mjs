@@ -59,6 +59,7 @@ async function typeNatural(page,text){
 
 try{
   const context=await browser.newContext({viewport:{width,height:900},hasTouch:width<600,serviceWorkers:'block',reducedMotion:'reduce'});
+  await context.addInitScript(()=>localStorage.setItem('wordstrike.onboarding.general.v3','seen'));
   const page=await context.newPage();page.setDefaultTimeout(30000);
   page.on('pageerror',error=>report.errors.push(error.message));
   await page.goto(`http://127.0.0.1:${server.address().port}/`,{waitUntil:'domcontentloaded'});
