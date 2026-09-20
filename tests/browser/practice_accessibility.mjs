@@ -78,6 +78,12 @@ try {
    const input=id==='full-assessment'?'[data-assessment-input]':id==='real-text'?'[data-real-text-input]':'[data-protocol-input]';
    await page.locator(input).waitFor();await audit(id+'-active');
    if(!await page.locator(input).evaluate(el=>el===document.activeElement))throw Error(`${id} input did not receive focus`);
+   if(id==='full-assessment'||id==='real-text'){
+    const passage=page.locator('.practice-real-text-typing');
+    if(await passage.getAttribute('tabindex')!=='0')throw Error(`${id} scrollable passage is not keyboard focusable`);
+    await passage.click();
+    if(!await page.locator(input).evaluate(el=>el===document.activeElement))throw Error(`${id} passage click did not restore typing focus`);
+   }
    await page.locator(input).press('Tab');
    await page.getByRole('button',{name:id==='full-assessment'?'END ASSESSMENT':id==='real-text'?'STOP':'END SESSION',exact:true}).focus();await page.keyboard.press('Enter');
    await page.locator(selector).waitFor();
