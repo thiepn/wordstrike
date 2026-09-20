@@ -33,7 +33,8 @@ async function openResearch(page){
   await page.waitForFunction(()=>!document.querySelector('[data-practice-view="research"] [role="status"]')?.textContent.includes('Loading local research state'));
 }
 try{
-  const context=await browser.newContext({viewport:{width:1280,height:900},serviceWorkers:'block'});
+  const width=Number(process.env.PRACTICE_WIDTH??1280);
+  const context=await browser.newContext({viewport:{width,height:900},hasTouch:width<600,serviceWorkers:'block'});
   await context.addInitScript(()=>{
     localStorage.setItem('wordstrike.onboarding.general.v3','seen');
     localStorage.setItem('practice-research-preserve','keep');
