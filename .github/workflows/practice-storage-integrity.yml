@@ -50,7 +50,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: npm install --no-save playwright@1.57.0
+      - run: npm install --no-save playwright@1.57.0 axe-core@4.10.3
       - name: Daily Coach async budget race
         if: ${{ matrix.browser == 'chromium' }}
         run: node tests/browser/practice_coach_budget_race.mjs
