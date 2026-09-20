@@ -30,7 +30,7 @@ async function type(page,text){
 const browser=await ({chromium,firefox,webkit}[name]).launch();
 try{for(const [depth,count] of [['quick',3],['standard',6],['deep',10]]){
  const report={browser:name,url:base,depth,expectedBlocks:count,status:'FAIL',blocks:[],errors:[],fullLocalStorage:process.env.PRACTICE_FULL_STORAGE==='1'};
- const width=name==='webkit'?390:1280;
+ const width=Number(process.env.PRACTICE_WIDTH??(name==='webkit'?390:1280));
  const context=await browser.newContext({viewport:{width,height:900},hasTouch:width<600,serviceWorkers:process.env.PRACTICE_URL?'allow':'block'});
  await context.addInitScript(()=>localStorage.setItem('wordstrike.onboarding.general.v3','seen'));
  const page=await context.newPage();page.setDefaultTimeout(30000);page.on('pageerror',e=>report.errors.push(e.message));
