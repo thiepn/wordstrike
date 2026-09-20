@@ -27,10 +27,14 @@ function parseValid(raw) {
 }
 
 export function createPracticeManifestStore({
-  storage = globalThis.localStorage,
+  storage = undefined,
   createDefault = createDefaultPracticeManifest,
   defaultOptions = {},
 } = {}) {
+  if (storage === undefined) {
+    try { storage = globalThis.localStorage ?? null; }
+    catch { storage = null; }
+  }
   const requireStorage = () => {
     if (!storage?.getItem || !storage?.setItem || !storage?.removeItem) {
       throw practiceStorageError(
