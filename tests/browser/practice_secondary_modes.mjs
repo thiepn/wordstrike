@@ -91,7 +91,6 @@ try{
         if(await result.count())break;
         if(await input.count()&&await input.isEnabled()&&await page.locator(cursor).count()){
           assert.ok(await input.evaluate(el=>el===window.__secondaryCapture),'Typing input was replaced during standardized check');
-          if(document?.activeElement){}
           if(!await input.evaluate(el=>el===document.activeElement))await input.focus();
           const text=await remaining(page,testCase.timed?40:120);
           assert.ok(text.length,'Active standardized check has no next character');
