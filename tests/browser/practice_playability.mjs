@@ -27,8 +27,8 @@ const reports=[];
 try{for(const name of (process.env.PRACTICE_BROWSERS??'chromium').split(',')){
  const browser=await ({chromium,firefox}[name]).launch();
  try{for(const [id,action,attribute,target,value] of cases){
-  const context=await browser.newContext({viewport:{width:1280,height:900}});await context.addInitScript(()=>localStorage.setItem('wordstrike.onboarding.general.v3','seen'));
-  const page=await context.newPage();page.setDefaultTimeout(15000);const errors=[],record={browser:name,id,status:'FAIL'};page.on('pageerror',e=>errors.push(e.message));
+  const width=Number(process.env.PRACTICE_WIDTH??1280);\n  const context=await browser.newContext({viewport:{width,height:900},hasTouch:width<600});await context.addInitScript(()=>localStorage.setItem('wordstrike.onboarding.general.v3','seen'));
+  const page=await context.newPage();page.setDefaultTimeout(15000);const errors=[],record={browser:name,width,id,status:'FAIL'};page.on('pageerror',e=>errors.push(e.message));
   try{
    await page.goto(`http://127.0.0.1:${server.address().port}/`);await page.locator('[data-action="modes"]').click();await page.locator('button[data-mode-id="practice"]').click();await page.locator(`[data-practice-action="open-experiment"][data-experiment-id="${id}"]`).first().click();
    if(target){await page.locator(target).fill(value);}
