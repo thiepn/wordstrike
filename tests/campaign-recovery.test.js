@@ -13,6 +13,10 @@ import {
   updateLevelResult,
 } from "../js/storage.js";
 import {
+  createDefaultModeData,
+  saveModeData,
+} from "../js/modeStorage.js";
+import {
   consumeLeaderboardReturnState,
   saveLeaderboardReturnState,
   validateLeaderboardReturnState,
@@ -134,6 +138,44 @@ test("Campaign recovery preserves sparse legacy level records without inventing 
     assert.deepEqual(JSON.parse(storage.getItem("wordstrike_save")).levels, {
       "1": { bestWPM: 78 },
     });
+  } finally {
+    if (previous === undefined) delete globalThis.localStorage;
+    else globalThis.localStorage = previous;
+  }
+});
+
+test("already-lost Campaign progress can recover from independent recent session history", () => {
+  const previous = globalThis.localStorage;
+  const storage = new MemoryStorage();
+  globalThis.localStorage = storage;
+  try {
+    const modeData = createDefaultModeData();
+    modeData.recentSessions = [{
+      sessionId: "campaign-recovery-history-1",
+      modeId: "campaign",
+      variantId: "normal",
+      endedAt: 123456,
+      success: true,
+      score: 8800,
+      grade: "A",
+      accuracy: 97.2,
+      wpm: 84,
+      activeDurationMs: 42000,
+      modeData: { level: 26, maxCombo: 19 },
+    }];
+    assert.equal(saveModeData(modeData), true);
+    assert.equal(storage.getItem("wordstrike_save"), null);
+    assert.equal(storage.getItem(CAMPAIGN_BACKUP_KEY), null);
+
+    const recovered = loadSave();
+    assert.equal(recovered.campaignFurthestLevel, 27);
+    assert.equal(recovered.levels["26"].bestScore, 8800);
+    assert.equal(recovered.levels["26"].bestWPM, 84);
+    assert.equal(recovered.levels["26"].grade, "A");
+    assert.ok(storage.getItem(CAMPAIGN_BACKUP_KEY),
+      "history recovery should immediately seed the durable Campaign backup");
+    assert.ok(storage.getItem("wordstrike_save"),
+      "history recovery should heal the primary Campaign save when storage is writable");
   } finally {
     if (previous === undefined) delete globalThis.localStorage;
     else globalThis.localStorage = previous;
