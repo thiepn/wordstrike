@@ -57,11 +57,103 @@ export function scrollPracticeTypingCursor(root) {
 export function wirePracticeKeyboardCorrections(root) {
   if (!root?.addEventListener || correctionRoots.has(root)) return;
   correctionRoots.add(root);
+  let composingCapture = null;
+  let compositionTail = null;
+  let tailTimer = null;
+  const clearTail = () => { clearTimeout(tailTimer); tailTimer = null; compositionTail = null; };
+  const practiceCapture = target => {
+    const capture = target?.closest?.('textarea');
+    if (!capture || capture.disabled || !capture.closest('.practice-lab-screen')) return null;
+    if (!Array.from(capture.attributes).some(a => a.name.startsWith('data-') && a.name.endsWith('-input'))) return null;
+    return capture;
+  };
+  // Full Assessment already owns a dedicated composition-safe input binder.
+  const compatibilityCapture = target => {
+    const capture = practiceCapture(target);
+    return capture?.hasAttribute?.('data-assessment-input') ? null : capture;
+  };
+  const dispatchBeforeInput = (capture, inputType, data = null) => {
+    const InputEventClass = capture?.ownerDocument?.defaultView?.InputEvent;
+    if (!InputEventClass) return false;
+    return capture.dispatchEvent(new InputEventClass('beforeinput', {
+      bubbles: true, cancelable: true, inputType, data,
+    }));
+  };
+  root.addEventListener('compositionstart', event => {
+    const capture = compatibilityCapture(event.target);
+    if (!capture) return;
+    clearTail();
+    composingCapture = capture;
+  }, true);
+  root.addEventListener('compositionend', event => {
+    const capture = compatibilityCapture(event.target);
+    if (!capture) return;
+    composingCapture = null;
+    const data = typeof event.data === 'string' ? event.data : capture.value;
+    clearTail();
+    compositionTail = data ?? '';
+    if (compositionTail) dispatchBeforeInput(capture, 'insertText', compositionTail);
+    capture.value = '';
+    tailTimer = setTimeout(clearTail, 0);
+  }, true);
+  root.addEventListener('beforeinput', event => {
+    const capture = compatibilityCapture(event.target);
+    if (!capture) return;
+    const type = event.inputType;
+    // Intermediate IME updates belong to the browser. Commit exactly once on
+    // compositionend, then suppress the browser's same-task final tail.
+    if (type === 'insertCompositionText' || type === 'deleteCompositionText' || event.isComposing || composingCapture === capture) {
+      event.stopPropagation();
+      return;
+    }
+    if (compositionTail !== null && type === 'insertFromComposition' && event.data === compositionTail) {
+      if (event.cancelable !== false) event.preventDefault();
+      event.stopPropagation();
+      capture.value = '';
+      return;
+    }
+    // Some mobile engines expose a non-cancelable beforeinput. Let the browser
+    // update the textarea and normalize it from the following native input.
+    if (event.cancelable === false && ['insertText','insertReplacementText','insertFromComposition','insertLineBreak','insertParagraph'].includes(type)) {
+      event.stopPropagation();
+      return;
+    }
+    if (type === 'insertReplacementText' || type === 'insertFromComposition') {
+      event.preventDefault();
+      event.stopPropagation();
+      const data = typeof event.data === 'string' ? event.data : capture.value;
+      if (data) dispatchBeforeInput(capture, 'insertText', data);
+      capture.value = '';
+      return;
+    }
+    if (type === 'insertLineBreak' || type === 'insertParagraph') {
+      event.preventDefault();
+      event.stopPropagation();
+      dispatchBeforeInput(capture, 'insertText', '\n');
+      capture.value = '';
+    }
+  }, true);
+  root.addEventListener('input', event => {
+    const capture = compatibilityCapture(event.target);
+    if (!capture || composingCapture === capture || event.isComposing) return;
+    const type = event.inputType;
+    const value = capture.value;
+    if (compositionTail !== null && value === compositionTail) {
+      capture.value = '';
+      return;
+    }
+    if (value && ['insertText','insertReplacementText','insertFromComposition','insertCompositionText'].includes(type)) {
+      dispatchBeforeInput(capture, 'insertText', value);
+    } else if (['insertLineBreak','insertParagraph'].includes(type)) {
+      dispatchBeforeInput(capture, 'insertText', '\n');
+    }
+    capture.value = '';
+  }, true);
   root.addEventListener('keydown', event => {
+    const capture = practiceCapture(event.target);
+    if (!capture) return;
+    if (!event.isComposing && event.key !== 'Process' && event.keyCode !== 229) clearTail();
     if (event.key !== 'Backspace' || event.defaultPrevented || event.isComposing) return;
-    const capture = event.target?.closest?.('textarea');
-    if (!capture || capture.disabled || !capture.closest('.practice-lab-screen') ||
-        !Array.from(capture.attributes).some(a => a.name.startsWith('data-') && a.name.endsWith('-input'))) return;
     const InputEventClass = capture.ownerDocument.defaultView?.InputEvent;
     if (!InputEventClass) return;
     event.preventDefault();
@@ -71,7 +163,7 @@ export function wirePracticeKeyboardCorrections(root) {
     }));
   }, true);
   root.addEventListener('beforeinput', event => {
-    if (event.target?.closest?.('textarea')) queueMicrotask(() => scrollPracticeTypingCursor(root));
+    if (practiceCapture(event.target)) queueMicrotask(() => scrollPracticeTypingCursor(root));
   });
 }
 export function renderPracticeSessionMarkup(root, markup) {

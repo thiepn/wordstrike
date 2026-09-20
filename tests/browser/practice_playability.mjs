@@ -37,6 +37,41 @@ try{for(const name of (process.env.PRACTICE_BROWSERS??'chromium').split(',')){
    const input=page.locator(`[${attribute}]`);await input.waitFor({state:'attached',timeout:30000});record.startMs=Date.now()-started;
    await page.evaluate(attr=>{window.__practiceCapture=document.querySelector(`[${attr}]`);window.__acceptedInputs=0;document.addEventListener('beforeinput',()=>window.__acceptedInputs++,true);},attribute);
    record.focusBefore=await input.evaluate(e=>e===document.activeElement);
+   const typedCount=()=>page.locator('.practice-lab-screen .is-typed').count();
+   const compatibilityExpected=await page.locator('.is-current,[aria-current="true"]').first().textContent();
+   const typedBefore=await typedCount();
+   await input.evaluate((el,value)=>el.dispatchEvent(new InputEvent('beforeinput',{bubbles:true,cancelable:true,inputType:'insertReplacementText',data:value})),compatibilityExpected);
+   await page.waitForTimeout(0);
+   assert.equal(await typedCount(),typedBefore+1,'Replacement-text input must advance exactly once');
+   await page.keyboard.press('Backspace');await page.waitForTimeout(0);
+   assert.equal(await typedCount(),typedBefore,'Replacement-text correction must restore the cursor');
+
+   const compositionExpected=await page.locator('.is-current,[aria-current="true"]').first().textContent();
+   await input.evaluate((el,value)=>{
+    el.dispatchEvent(new CompositionEvent('compositionstart',{bubbles:true,data:''}));
+    el.value=value;
+    el.dispatchEvent(new InputEvent('beforeinput',{bubbles:true,cancelable:true,inputType:'insertCompositionText',data:value,isComposing:true}));
+    el.dispatchEvent(new InputEvent('input',{bubbles:true,inputType:'insertCompositionText',data:value,isComposing:true}));
+    el.dispatchEvent(new CompositionEvent('compositionend',{bubbles:true,data:value}));
+    el.dispatchEvent(new InputEvent('beforeinput',{bubbles:true,cancelable:true,inputType:'insertFromComposition',data:value}));
+   },compositionExpected);
+   await page.waitForTimeout(0);
+   assert.equal(await typedCount(),typedBefore+1,'IME composition must commit exactly once');
+   await page.keyboard.press('Backspace');await page.waitForTimeout(0);
+   assert.equal(await typedCount(),typedBefore,'IME correction must restore the cursor');
+
+   const nativeExpected=await page.locator('.is-current,[aria-current="true"]').first().textContent();
+   await input.evaluate((el,value)=>{
+    el.value=value;
+    el.dispatchEvent(new InputEvent('beforeinput',{bubbles:true,cancelable:false,inputType:'insertText',data:value}));
+    el.dispatchEvent(new InputEvent('input',{bubbles:true,inputType:'insertText',data:value}));
+   },nativeExpected);
+   await page.waitForTimeout(0);
+   assert.equal(await typedCount(),typedBefore+1,'Non-cancelable native input must advance exactly once');
+   await page.keyboard.press('Backspace');await page.waitForTimeout(0);
+   assert.equal(await typedCount(),typedBefore,'Native-input correction must restore the cursor');
+   record.mobileInputCompatibility=true;
+
    const current=page.locator('.is-current,[aria-current="true"]').first();await current.waitFor();
    const text=await current.evaluate(e=>{let result='';for(let n=e;n&&result.length<100;n=n.nextElementSibling)result+=n.textContent;return result.replaceAll('\u00a0',' ');});
    record.initialText=text;await page.keyboard.type(text.slice(0,80),{delay:25});await page.waitForTimeout(300);
