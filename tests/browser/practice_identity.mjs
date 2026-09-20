@@ -20,7 +20,18 @@ try{for(const width of widths){
  const record={browser:browserName,width,status:'FAIL',errors:[],a11y:[],setups:[]};page.on('pageerror',error=>record.errors.push(error.message));
  const shot=async name=>page.screenshot({path:path.join(out,`${browserName}-${width}-${name}.png`),fullPage:false});
  async function noOverflow(stage){assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2),`Horizontal page overflow at ${stage}`);}
- async function home(){await page.locator('.pl-navigation [data-route="home"]').click();await page.locator('.pl-studio-home').waitFor();}
+ async function home(){
+  const nav=page.locator('.pl-navigation [data-route="home"]');
+  await nav.waitFor({state:'visible'});
+  await nav.click();
+  try{await page.locator('.pl-studio-home').waitFor({timeout:4000});}
+  catch{
+   // Firefox can replace an availability-driven setup between pointer actionability
+   // checks and click dispatch. Retry once against the current navigation node.
+   await page.locator('.pl-navigation [data-route="home"]').click({force:true});
+   await page.locator('.pl-studio-home').waitFor();
+  }
+ }
  async function audit(stage){await page.addScriptTag({path:require.resolve('axe-core/axe.min.js')});const result=await page.evaluate(async()=>axe.run('.practice-lab-screen',{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21aa','wcag22aa']}}));record.a11y.push({stage,violations:result.violations.map(v=>({id:v.id,impact:v.impact,description:v.description,nodes:v.nodes.map(n=>({target:n.target,summary:n.failureSummary}))}))});assert.equal(result.violations.length,0,`Accessibility violations at ${stage}: ${JSON.stringify(record.a11y.at(-1))}`);}
  try{
   await page.goto(base,{waitUntil:'domcontentloaded'});await page.locator('[data-action="modes"]').click();await page.locator('button[data-mode-id="practice"]').click();await page.locator('.pl-studio-home').waitFor();

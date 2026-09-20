@@ -209,7 +209,7 @@ def inspect_keyboard_and_routes(browser, base, browser_name, evidence):
     # Practice now opens its own public route.
     practice = page.locator('[data-mode-id="practice"]')
     practice.click()
-    expect(page.locator('[data-route="skill-map"]')).to_be_visible()
+    expect(page.locator('.pl-navigation [data-route="skill-map"]')).to_be_visible()
 
     evidence.append({
         "browser": browser_name,

@@ -22,14 +22,14 @@ try {
  const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto(`http://127.0.0.1:${server.address().port}/harness`);
  console.log('Page loaded');
- const cdp=await context.newCDPSession(page);await cdp.send('Emulation.setCPUThrottlingRate',{rate:4});await cdp.send('Performance.enable');console.log('CPU throttle configured');
+ const cdp=await context.newCDPSession(page);await cdp.send('Emulation.setCPUThrottlingRate',{rate:4});await cdp.send('Performance.enable');await cdp.send('HeapProfiler.enable');console.log('CPU throttle configured');
  await page.evaluate(async()=>{const [{createPracticeLabController},{createPracticeFeatureGate},{createPracticeExperimentRegistry}]=await Promise.all([import('/js/practiceLab/practiceLabController.js'),import('/js/practiceLab/practiceFeatureGate.js'),import('/js/practiceLab/practiceExperimentRegistry.js')]);const featureGate=createPracticeFeatureGate({developerMode:true});window.lab=createPracticeLabController({root:document.querySelector('#app'),featureGate,experimentRegistry:createPracticeExperimentRegistry({featureGate})});lab.mount();window.inputDurations=[];let start;document.addEventListener('beforeinput',()=>start=performance.now(),true);window.addEventListener('beforeinput',()=>inputDurations.push(performance.now()-start));});
  await page.locator('.pl-navigation [data-route="skill-map"]').waitFor();console.log('Practice ready');
  const metrics=async()=>Object.fromEntries((await cdp.send('Performance.getMetrics')).metrics.map(m=>[m.name,m.value]));
  for(const id of ['read-ahead','metronome-typing']) {
   await page.evaluate(id=>lab.navigate({name:'experiment-detail',params:{experimentId:id}}),id);
   await page.locator('[data-practice-action="start-preview-protocol"]').click();await page.locator('[data-protocol-input]').waitFor();console.log('Protocol ready',id);
-  await page.evaluate(()=>inputDurations=[]);const before=await metrics();console.log('Metrics ready',id);let maxNodes=0,characters=0;const began=Date.now();
+  await page.evaluate(()=>inputDurations=[]);await cdp.send('HeapProfiler.collectGarbage');const before=await metrics();console.log('Metrics ready',id);let maxNodes=0,characters=0;const began=Date.now();
   while(await page.locator('[data-protocol-input]').count()) {
    if(Date.now()-began>240000)throw Error('Protocol exceeded real-time duration budget: '+await page.locator('main').innerText());
    if(await page.locator('[data-protocol-input]').isEnabled()) {
@@ -44,7 +44,7 @@ try {
    maxNodes=Math.max(maxNodes,await page.locator('#app *').count());await page.waitForTimeout(200);
   }
   await page.getByRole('heading',{name:'Session complete',exact:true}).waitFor();
-  const durations=await page.evaluate(()=>inputDurations.sort((a,b)=>a-b));const after=await metrics();
+  const durations=await page.evaluate(()=>inputDurations.sort((a,b)=>a-b));await cdp.send('HeapProfiler.collectGarbage');const after=await metrics();
   const result={id,viewport:390,cpuThrottle:4,clock:'real',elapsedMs:Date.now()-began,characters,inputP95Ms:durations[Math.floor(durations.length*.95)],maxNodes,heapGrowthBytes:after.JSHeapUsedSize-before.JSHeapUsedSize};report.push(result);console.log(JSON.stringify(result));
   if(result.inputP95Ms>100||maxNodes>2000||result.heapGrowthBytes>24*1024*1024)throw Error('Controlled desktop performance budget exceeded');
   await page.getByRole('button',{name:'BACK TO SETUP',exact:true}).click();
