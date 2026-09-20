@@ -96,7 +96,7 @@ try{
       {createPracticeIndexLoader},
       {createPracticeTargetIndex},
       {buildPracticeWeaknessBossEncounter},
-      {createPracticeSessionId},
+      {createPracticeSessionId,createSkillStatId},
       {PRACTICE_WEAKNESS_BOSS_ARCHETYPES},
     ]=await Promise.all([
       import('/js/practiceLab/practiceLabControllerRuntimeV40.js'),
@@ -126,7 +126,7 @@ try{
     ]);
     const targetIndex=createPracticeTargetIndex({loader:indexLoader,corpusManifest,indexManifest});
     const candidate=Object.freeze({
-      statId:'skill:word:the',entityType:'word',entityKey:'the',
+      statId:createSkillStatId(initialized.profile.profileId,initialized.context.contextId,'word','the'),entityType:'word',entityKey:'the',
       limiterStatus:'confirmed',phenotype:'launch-limited',hierarchyStatus:'independent',
       priorityScore:90,impactScore:80,limiterConfidence:.95,weaknessScore:90,
       masteryStage:'learning',saturationStatus:'not-detected',marginalGainBand:'high',
