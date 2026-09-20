@@ -32,7 +32,7 @@ async function typeNatural(page,text){
   let buffer='',virtualChars=0;
   const advance=async()=>{
     if(virtualChars<60)return;
-    await page.clock.fastForward(Math.ceil(virtualChars/50*60000/600));
+    await page.clock.fastForward(Math.ceil(virtualChars/50*1000));
     virtualChars=0;
   };
   const flush=async()=>{
@@ -54,7 +54,7 @@ async function typeNatural(page,text){
     }
   }
   await flush();
-  if(virtualChars)await page.clock.fastForward(Math.ceil(virtualChars/50*60000/600));
+  if(virtualChars)await page.clock.fastForward(Math.ceil(virtualChars/50*1000));
 }
 
 try{
@@ -125,7 +125,7 @@ try{
         return Object.freeze({status:'ready',available:true,candidateCount:1,candidates:Object.freeze([candidate]),recommendedCandidate:candidate,profileId:initialized.profile.profileId,contextId:initialized.context.contextId});
       },
       async prepare({statId=null,targetSource=null,sessionId=createPracticeSessionId()}={}){
-        assert(statId==null||statId===candidate.statId);
+        if(statId!=null&&statId!==candidate.statId)throw new Error('Unexpected Weakness Boss candidate');
         const encounter=await buildPracticeWeaknessBossEncounter({
           sessionId,context:initialized.context,targetIndex,contentItems:trainingCorpus.items,corpusBinding,
           target:candidate,targetSource:targetSource??'recommended',language:initialized.context.dataLocale,
