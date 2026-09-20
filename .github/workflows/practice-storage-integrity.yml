@@ -51,6 +51,9 @@ jobs:
         with:
           node-version: 22
       - run: npm install --no-save playwright@1.57.0
+      - name: Daily Coach async budget race
+        if: ${{ matrix.browser == 'chromium' }}
+        run: node tests/browser/practice_coach_budget_race.mjs
       - name: Actual Daily Coach at full localStorage
         run: node tests/browser/practice_quota_journey.mjs
       - name: Concurrent tabs and native transaction rollback
