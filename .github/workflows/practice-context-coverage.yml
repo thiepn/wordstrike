@@ -1,0 +1,29 @@
+name: Practice Context Coverage Repair
+on:
+  push:
+    branches: [fix/practice-context-coverage]
+permissions:
+  contents: read
+jobs:
+  focused:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    container:
+      image: mcr.microsoft.com/playwright:v1.57.0-noble
+      options: --ipc=host
+    env:
+      HOME: /root
+      PRACTICE_BROWSERS: chromium
+      PRACTICE_WIDTH: 1280
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --no-save playwright@1.57.0 axe-core@4.10.3
+      - name: Weak Keys A-Z availability and B typing
+        run: node tests/browser/practice_weak_keys_alphabet.mjs
+      - name: Practice accessibility routes and active sessions
+        run: node tests/browser/practice_accessibility.mjs
+      - name: Weak Keys generator regressions
+        run: node --test tests/practice-weak-keys-case-regression.test.js
