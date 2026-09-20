@@ -50,7 +50,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: npm install --no-save playwright@1.57.0
+      - run: npm install --no-save playwright@1.57.0 axe-core@4.10.3
       - name: Daily Coach async budget race
         if: ${{ matrix.browser == 'chromium' }}
         run: node tests/browser/practice_coach_budget_race.mjs
@@ -70,6 +70,9 @@ jobs:
       - name: Every public drill at full localStorage
         if: ${{ !cancelled() }}
         run: node tests/browser/practice_end_to_end.mjs
+      - name: Saved Custom Text at full localStorage
+        if: ${{ !cancelled() && matrix.browser == 'chromium' }}
+        run: PRACTICE_WIDTHS=1280 node tests/browser/practice_editor_ui.mjs
       - name: Assessments and protocols at full localStorage
         if: ${{ !cancelled() }}
         run: node tests/browser/practice_completion.mjs

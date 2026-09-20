@@ -24,9 +24,18 @@ async function records(page,table){return page.evaluate(async({base,table})=>{
 },{base,table});}
 try{for(const width of (process.env.PRACTICE_WIDTHS??'1440,768,390,320').split(',').map(Number)){
  const context=await browser.newContext({viewport:{width,height:1000},serviceWorkers:'block',reducedMotion:'reduce',hasTouch:width<600});
- await context.addInitScript(()=>localStorage.setItem('wordstrike.onboarding.general.v3','seen'));
+ await context.addInitScript(fullStorage=>{
+  localStorage.setItem('wordstrike.onboarding.general.v3','seen');
+  if(!fullStorage||globalThis.__practiceFullStorage)return;
+  globalThis.__practiceFullStorage=true;
+  let i=0;
+  for(const size of [131072,32768,8192,2048,512,128,16,1])for(let n=0;n<200;n++){
+   try{localStorage.setItem('practice-editor-quota-'+i,'q'.repeat(size));i++;}
+   catch(error){if(error.name!=='QuotaExceededError')throw error;break;}
+  }
+ },process.env.PRACTICE_FULL_STORAGE==='1');
  const page=await context.newPage();page.setDefaultTimeout(15000);
- const report={browser:name,width,status:'FAIL',errors:[],accessibility:[]};page.on('pageerror',e=>report.errors.push(e.message));
+ const report={browser:name,width,status:'FAIL',errors:[],accessibility:[],fullLocalStorage:process.env.PRACTICE_FULL_STORAGE==='1'};page.on('pageerror',e=>report.errors.push(e.message));
  const screenshot=async label=>{assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2),'Horizontal page overflow');await page.screenshot({path:path.join(out,`${name}-${width}-${label}.png`),fullPage:true});};
  try{
   await page.goto(base);await page.locator('[data-action="modes"]').click();await page.locator('[data-mode-id="practice"]').click();
@@ -76,7 +85,12 @@ try{for(const width of (process.env.PRACTICE_WIDTHS??'1440,768,390,320').split('
   assert.equal((await records(page,'customTexts')).length,0,'Completion must not save the private source');
   await screenshot('selection-result');
   await page.getByRole('button',{name:/^BACK TO /}).last().click();
-  await input.waitFor();await page.locator('[data-custom-text-title]').fill('My saved practice passage');
+  await input.waitFor();
+  if(report.fullLocalStorage){
+   report.fillerCount=await page.evaluate(()=>Object.keys(localStorage).filter(key=>key.startsWith('practice-editor-quota-')).length);
+   assert.ok(report.fillerCount>0,'Full-storage fixture did not allocate filler data');
+  }
+  await page.locator('[data-custom-text-title]').fill('My saved practice passage');
   await page.locator('[data-practice-action="custom-save"]:enabled').click();
   await page.waitForFunction(()=>document.querySelector('[data-custom-text-dirty]')?.textContent==='Saved on this device');
   assert.equal((await records(page,'customTexts')).length,1);
@@ -85,6 +99,10 @@ try{for(const width of (process.env.PRACTICE_WIDTHS??'1440,768,390,320').split('
   await page.locator('[data-practice-action="custom-open"]').click();
   await page.waitForFunction(expected=>document.querySelector('[data-custom-text-source]')?.value===expected,passage);
   assert.equal(await input.inputValue(),passage);
+  if(report.fullLocalStorage){
+   assert.equal(await page.evaluate(()=>Object.keys(localStorage).filter(key=>key.startsWith('practice-editor-quota-')).length),report.fillerCount,'Custom Text must not free unrelated localStorage');
+   assert.equal((await records(page,'customTexts')).length,1,'Saved Custom Text must remain canonical in IndexedDB at full localStorage');
+  }
   await screenshot('saved-library');
   assert.deepEqual(report.errors,[]);report.status='PASS';
  }catch(error){report.error=String(error);report.body=await page.locator('body').innerText().catch(()=>'');await screenshot('failure').catch(()=>{});}
