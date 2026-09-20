@@ -172,13 +172,14 @@ export function createPracticeLabController(options = {}) {
   async function createTodayPlan() {
     if (!mounted || !isDailyRoute() || coachState.plan || coachState.status === "creating") return false;
     const epoch = ++actionEpoch;
+    const requestedMinutes = coachState.requestedMinutes;
     setCoachState({ status: "creating", errorCode: null, errorDetail: null });
     try {
       const runtime = await ensureCoachRuntime();
       const created = await runtime.service.createTodayPracticeCoachPlan({
         profileId: runtime.initialized.profile.profileId,
         contextId: runtime.initialized.context.contextId,
-        requestedMinutes: coachState.requestedMinutes,
+        requestedMinutes,
         language: runtime.initialized.context.dataLocale,
       });
       if (!mounted || epoch !== actionEpoch || !isDailyRoute()) return false;
