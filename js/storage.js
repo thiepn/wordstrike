@@ -1,6 +1,6 @@
 import { calculateGrade } from "./scoring.js";
 import { normalizeSpeedTestFontSize } from "./speedTestPresentation.js";
-import { getSpeedTestRecord } from "./modeStorage.js";
+import { getRecentSessions, getSpeedTestRecord } from "./modeStorage.js";
 
 import { createDefaultCustomization, normalizeCustomization, normalizeCustomizationValue } from "./customization.js";
 
@@ -290,6 +290,52 @@ function mergeCampaignRecords(primary, backup) {
   return merged;
 }
 
+function recoverCampaignFromRecentSessions(save) {
+  let sessions = [];
+  try {
+    sessions = getRecentSessions();
+  } catch {
+    return save;
+  }
+
+  let highestRecoveredLevel = normalizeCampaignFurthestLevel(
+    save.campaignFurthestLevel ?? save.currentFurthestLevel,
+  );
+  let recoveredAny = false;
+
+  for (const session of sessions) {
+    if (
+      session?.modeId !== "campaign" ||
+      session.success !== true ||
+      !Number.isInteger(Number(session.modeData?.level))
+    ) continue;
+
+    const level = normalizeCampaignLevel(session.modeData.level);
+    const accuracy = Number(session.accuracy);
+    const recovered = {
+      grade: typeof session.grade === "string"
+        ? session.grade
+        : calculateGrade({ accuracy: Number.isFinite(accuracy) ? accuracy : 0 }),
+      bestWPM: Math.max(0, Number(session.wpm) || 0),
+      bestAccuracy: Math.max(0, Math.min(100, Number.isFinite(accuracy) ? accuracy : 0)),
+      bestScore: Math.max(0, Number(session.score) || 0),
+      maxCombo: Math.max(0, Number(session.modeData?.maxCombo) || 0),
+      bestTimeRemaining: Math.max(0, Number(session.modeData?.bossTimeRemainingMs) || 0) / 1000,
+      bossCleared: level % 10 === 0,
+    };
+    const key = String(level);
+    save.levels[key] = mergeCampaignRecords(save.levels[key], recovered);
+    highestRecoveredLevel = Math.max(highestRecoveredLevel, Math.min(100, level + 1));
+    recoveredAny = true;
+  }
+
+  if (recoveredAny) {
+    save.campaignFurthestLevel = highestRecoveredLevel;
+    save.currentFurthestLevel = highestRecoveredLevel;
+  }
+  return save;
+}
+
 function recoverCampaignProgress(save, backup) {
   if (!backup) return save;
   const backupFurthest = normalizeCampaignFurthestLevel(backup.campaignFurthestLevel);
@@ -329,7 +375,21 @@ export function loadSave() {
     // independently-written Campaign backup may still contain valid progress.
   }
 
-  const recovered = recoverCampaignProgress(save, readCampaignBackup(storage));
+  const backup = readCampaignBackup(storage);
+  let recovered = recoverCampaignProgress(save, backup);
+  if (!validPrimary && !backup) {
+    // The mode-history store is independent of the Campaign route save. If the
+    // primary Campaign save was already lost before this repair shipped, use
+    // successful recent Campaign sessions as a best-effort high-water recovery.
+    recovered = recoverCampaignFromRecentSessions(recovered);
+    if (
+      normalizeCampaignFurthestLevel(recovered.campaignFurthestLevel) > 1 ||
+      Object.keys(recovered.levels || {}).length > 0
+    ) {
+      persistCampaignBackup(recovered, storage);
+      saveGame(recovered);
+    }
+  }
   if (validPrimary) {
     // Keep the historical migration contract: a valid primary save is normalized
     // and written back on load. Malformed primary data is never overwritten.
@@ -375,7 +435,7 @@ export function updateLevelResult(save, levelNumber, result) {
   const campaignFurthestLevel = normalizeCampaignFurthestLevel(
     save.campaignFurthestLevel ?? save.currentFurthestLevel,
   );
-  const nextCampaignFurthestLevel = Math.max(campaignFurthestLevel, levelNumber + 1);
+  const nextCampaignFurthestLevel = Math.min(100, Math.max(campaignFurthestLevel, levelNumber + 1));
   save.campaignFurthestLevel = nextCampaignFurthestLevel;
   save.currentFurthestLevel = nextCampaignFurthestLevel;
 
