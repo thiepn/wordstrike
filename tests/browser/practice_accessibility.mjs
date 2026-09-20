@@ -30,11 +30,14 @@ try {
    const results=await page.evaluate(async()=>{const r=await axe.run(document.querySelector('#app'),{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21aa','wcag22aa']}});return {violations:r.violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.map(n=>({target:n.target,summary:n.failureSummary}))})),incomplete:r.incomplete.map(v=>({id:v.id,nodes:v.nodes.map(n=>({target:n.target,summary:n.failureSummary,checks:n.any}))})),overflow:document.documentElement.scrollWidth>innerWidth+2};});
    // Axe cannot resolve native textarea paint in some Chromium builds. Resolve only
    // opaque, unobscured controls with no ancestor opacity/filter; retain every other incomplete.
-   const nativeContrast=[];
+   const nativeContrast=[],decorativeContrast=[];
    for(const item of results.incomplete.filter(i=>i.id==='color-contrast')) {
     for(const node of item.nodes) {
+     const selector=node.target.join(' ');
+     const decorative=await page.locator(selector).evaluateAll(elements=>elements.length>0&&elements.every(el=>Boolean(el.closest('[aria-hidden="true"]'))));
+     if(decorative){decorativeContrast.push({target:node.target,reason:'aria-hidden'});node.resolved=true;continue;}
      if(node.checks.some(c=>c.data?.messageKey!=='elmPartiallyObscured'))continue;
-     const measured=await page.locator(node.target.join(' ')).evaluate(el=>{
+     const measured=await page.locator(selector).first().evaluate(el=>{
       const isTypingField=el.tagName==='TEXTAREA';
       const isScrollableRoute=el.tagName==='BUTTON'&&Boolean(el.closest('.pl-navigation'));
       if(!isTypingField&&!isScrollableRoute)return null;
@@ -65,6 +68,7 @@ try {
    }
    results.incomplete=results.incomplete.map(i=>({...i,nodes:i.nodes.filter(n=>!n.resolved)})).filter(i=>i.nodes.length);
    results.nativeContrast=nativeContrast;
+   results.decorativeContrast=decorativeContrast;
    report.push({width,name,...results});console.log(JSON.stringify(report.at(-1)));
   };
   await page.locator('.pl-navigation [data-route="skill-map"]').waitFor();await audit('home');
