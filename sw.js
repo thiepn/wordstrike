@@ -1,5 +1,5 @@
 const CACHE_PREFIX = "wordstrike-pwa-";
-const CACHE_NAME = CACHE_PREFIX + "v31-campaign-recovery";
+const CACHE_NAME = CACHE_PREFIX + "v32-daily-budget";
 const APP_SHELL = [
   "./js/practiceLab/practiceAssessmentInput.js",
   "./js/practiceLab/practiceDurableManifest.js",

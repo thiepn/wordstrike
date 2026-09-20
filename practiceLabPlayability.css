@@ -8,7 +8,7 @@
 .practice-lab-screen .practice-session-input:focus-visible,.practice-lab-screen button:focus-visible {outline:2px solid var(--primary,#00dfcd);outline-offset:3px;}
 .practice-lab-screen :is(.practice-real-text-typing,.practice-weak-key-typing,.practice-combination-typing,[data-protocol-text]):focus-visible {outline:2px solid var(--primary,#00dfcd);outline-offset:3px;}
 .practice-lab-screen .practice-session-input::placeholder {color:var(--text-muted,#a6b2c1);opacity:1;}
-.practice-lab-screen .practice-real-text-time {font-size:1.2rem;margin:1rem 0;}
+.practice-lab-screen .practice-real-text-time {display:flex;align-items:baseline;gap:.35em;font-size:1.2rem;margin:1rem 0;}
 .practice-lab-screen [role="progressbar"] {min-height:5px;background:var(--border-subtle,#3b4758);}
 .practice-lab-screen [role="progressbar"] > div {height:5px;background:var(--primary,#00dfcd);}
 .practice-lab-screen .practice-real-text-result-grid {display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:1rem;}
