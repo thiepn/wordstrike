@@ -7,7 +7,8 @@ const root=path.resolve(import.meta.dirname,'../..');
 const base='https://thiepn.dev/wordstrike/';
 const out=path.join(root,'browser-artifacts/practice-live');
 fs.mkdirSync(out,{recursive:true});
-const report={url:base,commit:process.env.GITHUB_SHA??null,status:'FAIL',assets:[],errors:[]};
+const width=Number(process.env.PRACTICE_WIDTH??1280);
+const report={url:base,width,commit:process.env.GITHUB_SHA??null,status:'FAIL',assets:[],errors:[]};
 const assetPaths=['index.html','sw.js','practiceLabPlayability.css','js/practiceLab/practiceHostDom.js','js/practiceLab/practiceEntityResolver.js','js/practiceLab/practiceTargetSessionRendering.js'];
 let browser;
 try{
@@ -25,7 +26,7 @@ try{
   await delay(10000);
  }
  browser=await chromium.launch();
- const context=await browser.newContext({viewport:{width:1280,height:900},serviceWorkers:'block'});
+ const context=await browser.newContext({viewport:{width,height:900},hasTouch:width<600,serviceWorkers:'block'});
  await context.addInitScript(()=>localStorage.setItem('wordstrike.onboarding.general.v3','seen'));
  const page=await context.newPage();page.setDefaultTimeout(30000);page.on('pageerror',error=>report.errors.push(error.message));
  await page.goto(base,{waitUntil:'domcontentloaded'});
@@ -44,7 +45,7 @@ try{
   await page.keyboard.type(line,{delay:30});
  }
  await page.locator('[data-practice-view="custom-text-result"]').waitFor();
- await page.screenshot({path:path.join(out,'production-result.png')});
+ await page.screenshot({path:path.join(out,`production-result-${width}.png`)});
  const summaries=()=>page.evaluate(async()=>{
   const {createPracticeIndexedDbStore}=await import(new URL('js/practiceLab/practiceIndexedDbStore.js',location.href).href);
   const store=createPracticeIndexedDbStore();await store.open();
