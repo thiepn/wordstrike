@@ -132,7 +132,7 @@ try{
       masteryStage:'learning',saturationStatus:'not-detected',marginalGainBand:'high',
       bossTargetUtility:90,contentReady:true,
       bossTheme:Object.freeze({...PRACTICE_WEAKNESS_BOSS_ARCHETYPES['launch-limited']}),
-      reasonCodes:Object.freeze(['confirmed-limiter','high-impact','learning-headroom','independent-limiter','slow-pattern']),
+      reasonCodes:Object.freeze(['confirmed-limiter','high-impact','learning-headroom','independent-limiter','launch-pattern']),
     });
     const corpusBinding=Object.freeze({
       corpusId:corpusManifest.corpusId,
