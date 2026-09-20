@@ -579,10 +579,10 @@ function openArcadeRushReady(reason = "arcade-rush-ready") {
 function openLevelSelect(reason = "level-select") {
   cleanupCampaignAttempt(reason);
   changeScreen(Screens.LEVEL_SELECT);
-  const selectionLimit = appState.devMode ? 100 : appState.save.currentFurthestLevel;
   const resumeLevel = appState.devMode
     ? Math.min(appState.currentLevel || 1, 100)
     : getCampaignResumeLevel(appState.save);
+  const selectionLimit = appState.devMode ? 100 : resumeLevel;
   const requestedLevel = ["mode-select", "auth-return", "placement-result"].includes(reason)
     ? resumeLevel
     : appState.currentLevel || resumeLevel;
@@ -1475,13 +1475,34 @@ function getCampaignProgressionColumns() {
 }
 
 function moveLevelSelection(direction) {
-  const maximumLevel = appState.devMode ? 100 : appState.save.currentFurthestLevel;
-  appState.levelSelection = moveLevelGridSelection(
+  const maximumLevel = appState.devMode ? 100 : getCampaignResumeLevel(appState.save);
+  let next = moveLevelGridSelection(
     appState.levelSelection,
     direction,
     maximumLevel,
     getCampaignProgressionColumns(),
   );
+
+  if (!appState.devMode) {
+    let previous = appState.levelSelection;
+    while (
+      next !== previous &&
+      !isCampaignLevelAccessible(appState.save, next)
+    ) {
+      previous = next;
+      next = moveLevelGridSelection(
+        next,
+        direction,
+        maximumLevel,
+        getCampaignProgressionColumns(),
+      );
+    }
+    if (!isCampaignLevelAccessible(appState.save, next)) {
+      next = appState.levelSelection;
+    }
+  }
+
+  appState.levelSelection = next;
   renderCurrentScreen();
 }
 
