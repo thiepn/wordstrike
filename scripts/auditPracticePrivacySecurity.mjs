@@ -62,7 +62,7 @@ const REVIEWED_INNER_HTML = Object.freeze({
   "js/practiceLab/practiceTargetSessionRendering.js": [1, "bounded markup supplied exclusively by the four escaped target-session renderers; feedback uses textContent"],
   "js/practiceLab/practiceAssessmentSessionHost.js": [2, "fixed shell and bounded visible passage window; all dynamic strings HTML-escaped"],
   "js/practiceLab/practiceEvidenceViews.js": [1, "escaped entity/session strings and finite numeric formatting; no raw source content"],
-  "js/practiceLab/practiceCoachReviewSessionHost.js": [3, "fixed review shell/results with validated identifiers"],
+  "js/practiceLab/practiceCoachReviewSessionHost.js": [2, "fixed review shell/results with validated identifiers; live passage updates use the shared reviewed host reconciler"],
   "js/practiceLab/practiceLabController.js": [1, "compile-time loading placeholder"],
   "js/practiceLab/practiceLabRenderer.js": [1, "dynamic display strings are escaped before reviewed markup composition"],
   "js/practiceLab/practiceLabRendererV20.js": [1, "reviewed renderer; dynamic display strings are escaped/validated"],
@@ -80,10 +80,10 @@ const REVIEWED_INNER_HTML = Object.freeze({
   "js/practiceLab/practiceLabRendererV32.js": [1, "reviewed treatment-response markup with bounded values"],
   "js/practiceLab/practiceLabRendererV36.js": [1, "aggregate telemetry values only"],
   "js/practiceLab/practiceRealTextSessionHost.js": [3, "passage graphemes are escaped before HTML composition"],
-  "js/practiceLab/practiceResearchProbeSessionHost.js": [2, "protected probe rendering follows escaped/controlled passage path"],
+  "js/practiceLab/practiceResearchProbeSessionHost.js": [1, "protected probe rendering follows escaped/controlled passage path; live updates use the shared reviewed host reconciler"],
   "js/practiceLab/practiceResearchUi.js": [4, "research strings are escaped; consent/control markup is fixed"],
   "js/practiceLab/practiceWeaknessBossSessionHost.js": [1, "fixed gameplay shell; typed material uses the session rendering path"],
-  "js/practiceLab/practiceWeaknessBossUi.js": [3, "validated target/model data and fixed setup/result markup"],
+  "js/practiceLab/practiceWeaknessBossUi.js": [2, "validated target/model data and fixed setup/result markup; battle passage updates use the shared reviewed host reconciler"],
 });
 
 function lineFor(source, offset) {
