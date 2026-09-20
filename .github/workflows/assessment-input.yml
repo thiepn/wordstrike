@@ -32,7 +32,7 @@ jobs:
   browser:
     if: github.ref != 'refs/heads/main'
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 100
     strategy:
       fail-fast: false
       matrix:
@@ -85,7 +85,7 @@ jobs:
           import fs from 'node:fs';
           import {setTimeout as wait} from 'node:timers/promises';
           const files=['sw.js','js/practiceLab/practiceAssessmentInput.js','js/practiceLab/practiceAssessmentSessionHost.js'];
-          const deadline=Date.now()+480000;
+          const deadline=Date.now()+5400000;
           for(;;){
             const results=await Promise.all(files.map(async file=>{
               try{const response=await fetch(process.env.PRACTICE_URL+file+'?assessment-release='+process.env.GITHUB_SHA,{signal:AbortSignal.timeout(15000)});return response.ok&&(await response.text())===fs.readFileSync(file,'utf8');}catch{return false;}
