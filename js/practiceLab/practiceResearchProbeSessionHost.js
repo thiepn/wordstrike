@@ -87,6 +87,8 @@ export async function mountPracticeResearchProbeSession({
   let finalResult = null;
   let unsubscribe = null;
   const focusCapture = (force = false) => queueMicrotask(() => focusPracticeSessionInput(root, "[data-research-probe-input]", { force }));
+  const pauseTyping = () => engine.pause("manual").catch((error) => logger?.warn?.("Research probe pause failed", error));
+  const resumeTyping = () => engine.resume().then(() => focusCapture(true)).catch((error) => logger?.warn?.("Research probe resume failed", error));
 
   const cleanup = async () => {
     unsubscribe?.();
@@ -134,7 +136,7 @@ export async function mountPracticeResearchProbeSession({
     if (event.key === "Escape") {
       event.preventDefault();
       const state = engine.getSnapshot().lifecycleState;
-      void (state === "paused" ? engine.resume().then(() => focusCapture(true)) : state === "active" ? engine.pause("manual") : Promise.resolve());
+      void (state === "paused" ? resumeTyping() : state === "active" ? pauseTyping() : Promise.resolve());
     }
   };
 
@@ -142,8 +144,8 @@ export async function mountPracticeResearchProbeSession({
     const control = event.target?.closest?.(ACTION);
     if (!control || !root.contains?.(control)) return;
     const action = control.dataset.researchProbeAction;
-    if (action === "pause") void engine.pause("manual");
-    else if (action === "resume") void engine.resume().then(() => focusCapture(true));
+    if (action === "pause") void pauseTyping();
+    else if (action === "resume") void resumeTyping();
     else if (action === "exit") {
       void engine.abandon("manual-stop").catch((error) => logger?.warn?.("Research probe abandonment failed", error)).finally(() => finish(onExit));
     }
