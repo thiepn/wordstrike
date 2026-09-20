@@ -194,7 +194,6 @@ export async function mountPracticeCombinationRepairSession({
     root.removeEventListener("beforeinput", beforeInput);
     root.removeEventListener("keydown", keyDown);
     root.removeEventListener("click", click);
-    root.removeEventListener("pointerdown", pointerDown);
     globalThis.document?.removeEventListener?.("visibilitychange", visibilityChange);
     try { await engine.destroy(); } catch (error) { logger?.warn?.("Combination Repair engine destroy failed", error); }
     try { dataStore.close?.(); } catch {}
@@ -239,10 +238,6 @@ export async function mountPracticeCombinationRepairSession({
     else if (action === "finish") void finish();
   };
 
-  const pointerDown = () => {
-    if (engine.getSnapshot().lifecycleState === "active") focusCapture();
-  };
-
   const visibilityChange = () => {
     const state = globalThis.document?.visibilityState;
     if (state === "hidden" || state === "visible") void engine.handleVisibilityState(state).catch((error) => logger?.warn?.("Combination Repair visibility transition failed", error));
@@ -251,7 +246,6 @@ export async function mountPracticeCombinationRepairSession({
   root.addEventListener("beforeinput", beforeInput);
   root.addEventListener("keydown", keyDown);
   root.addEventListener("click", click);
-  root.addEventListener("pointerdown", pointerDown);
   globalThis.document?.addEventListener?.("visibilitychange", visibilityChange);
 
   try {
