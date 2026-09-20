@@ -1,7 +1,7 @@
 name: Practice Storage Integrity
 on:
   push:
-    branches: [main, fix/practice-durable-storage]
+    branches: [main, fix/practice-durable-storage, fix/practice-daily-budget-race]
     paths: ['js/practiceLab/**', 'tests/practice-*.test.js', 'tests/browser/practice_*.mjs', 'tests/browser/storage_native.mjs', '.github/workflows/practice-storage-integrity.yml', 'sw.js']
 permissions:
   contents: read
