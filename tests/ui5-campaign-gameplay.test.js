@@ -1,11 +1,12 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
-const [index, presentation, css, inputCss, renderer, workflow, modes, visualTest] = await Promise.all([
+const [index, presentation, css, inputCss, modeCss, renderer, workflow, modes, visualTest] = await Promise.all([
   readFile(new URL("../index.html", import.meta.url), "utf8"),
   readFile(new URL("../js/campaignGameplayPresentation.js", import.meta.url), "utf8"),
   readFile(new URL("../styles/screens/campaign-gameplay.css", import.meta.url), "utf8"),
   readFile(new URL("../styles/screens/campaign-gameplay-input.css", import.meta.url), "utf8"),
+  readFile(new URL("../styles/mode-customization.css", import.meta.url), "utf8"),
   readFile(new URL("../js/renderer.js", import.meta.url), "utf8"),
   readFile(new URL("../.github/workflows/non-practice-browser.yml", import.meta.url), "utf8"),
   readFile(new URL("../js/modes.js", import.meta.url), "utf8"),
@@ -31,6 +32,9 @@ assert.match(presentation, /Campaign mission progress/);
 assert.match(presentation, /Campaign Core, integrity/);
 assert.match(presentation, /TARGET LOCKED/);
 assert.match(presentation, /CANDIDATES/);
+assert.match(presentation, /campaign-typing-readout/);
+assert.match(presentation, /dataset\.campaignTypingReadoutTyped/);
+assert.match(presentation, /syncTypingReadout\(screen, game\)/);
 assert.match(presentation, /\.gameplay-keyboard-trigger/);
 assert.match(presentation, /campaign-keyboard-trigger/);
 assert.match(presentation, /trigger\.textContent = "KEYBOARD"/);
@@ -49,14 +53,18 @@ assert.match(css, /\.campaign-gameplay-screen \.campaign-core/);
 assert.match(css, /data-core-integrity="1"/);
 assert.match(css, /\.campaign-core-integrity/);
 assert.match(css, /\.campaign-gameplay-screen \.word-visual\.active[\s\S]*border:\s*0[\s\S]*background:\s*transparent/);
-assert.match(css, /\.campaign-gameplay-screen \.word-visual\.candidate[\s\S]*border:\s*0[\s\S]*ui-accent-special/);
-assert.match(css, /\.campaign-gameplay-screen \.word-visual\.wrong[\s\S]*border:\s*0[\s\S]*ui-accent-danger/);
+assert.match(css, /\.campaign-gameplay-screen \.word-visual\.candidate[\s\S]*border:\s*0[\s\S]*color-special/);
+assert.match(css, /\.campaign-gameplay-screen \.word-visual\.wrong[\s\S]*border:\s*0[\s\S]*color-danger/);
 assert.match(css, /--campaign-burst-angle/);
 assert.match(css, /--campaign-burst-reach/);
 assert.match(css, /@media \(max-width: 760px\)/);
 assert.match(css, /@media \(max-height: 430px\)/);
 assert.match(css, /@media \(max-width: 520px\) and \(max-height: 430px\)[\s\S]*\.campaign-hud-pace \{ grid-area: pace; \}[\s\S]*\.campaign-hud-primary > \.campaign-hud-metric:nth-of-type\(2\) \{ grid-area: acc; \}/);
 assert.match(css, /@media \(prefers-reduced-motion: reduce\)/);
+assert.match(css, /\.campaign-typing-readout/);
+assert.match(css, /\.word-visual \.word-text[\s\S]*background:\s*rgb\(4 8 12 \/ 52%\)/);
+assert.match(css, /\.word-visual\.active \.typed-letter[\s\S]*font-weight:\s*820/);
+assert.match(css, /\.campaign-hud-score #hud-score[\s\S]*font-weight:\s*760/);
 assert.doesNotMatch(css, /\.endless-screen/);
 assert.doesNotMatch(css, /\.boss-screen/);
 assert.doesNotMatch(css, /practice-lab/i);
@@ -68,6 +76,8 @@ assert.match(inputCss, /@media \(max-width: 760px\), \(pointer: coarse\) and \(m
 assert.match(inputCss, /\.gameplay-input-dock\.keyboard-ready \.campaign-keyboard-trigger/);
 assert.match(inputCss, /prefers-reduced-motion/);
 assert.doesNotMatch(inputCss, /endless-screen|boss-screen|practice-lab/i);
+assert.match(modeCss, /campaign-gameplay-screen\[data-gameplay-hud="minimal"\][\s\S]*campaign-hud-metric:not\(\.campaign-hud-score\)/);
+assert.match(modeCss, /campaign-gameplay-screen\[data-gameplay-hud="minimal"\] \.campaign-hud-score[\s\S]*display:\s*flex/);
 
 // UI6 extends the shared renderer, so UI5 asserts the Campaign capabilities it owns
 // without freezing the renderer to UI5-only array contents or helper naming.

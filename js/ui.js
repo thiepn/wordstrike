@@ -5,7 +5,11 @@ import {
   generateLevel,
 } from "./levelGenerator.js";
 import { getCampaignDifficultyLevel } from "./campaignDifficulty.js";
-import { isCampaignLevelAccessible } from "./storage.js";
+import {
+  CAMPAIGN_SPEED_UNLOCKS,
+  getCampaignPlacementSummary,
+  isCampaignLevelAccessible,
+} from "./storage.js";
 import { generateBossEncounter } from "./bossGenerator.js";
 import { getSessionDiagnosticText } from "./campaignSession.js";
 import {
@@ -718,13 +722,22 @@ export function updateSpeedTestRun(state, nowMs) {
   if (diagnostics) diagnostics.textContent = getSpeedTestDiagnosticText(state, now);
 }
 
-export function renderSpeedTestResults(result, recordFlags, selectedIndex, handlers, submissionState = {}) {
-  const actions = [
-    ["RETRY TEST", "retry"],
-    ["NEXT TEST", "change"],
-    ["MODE SELECT", "modes"],
-    ["MAIN MENU", "title"],
-  ];
+export function renderSpeedTestResults(result, recordFlags, selectedIndex, handlers, submissionState = {}, context = {}) {
+  const campaignPlacement = context.campaignPlacement === true;
+  const placement = campaignPlacement ? getCampaignPlacementSummary(result.wpm) : null;
+  const actions = campaignPlacement
+    ? [
+      ["RETURN TO CAMPAIGN", "campaign"],
+      ["RETRY PLACEMENT", "retry"],
+      ["MODE SELECT", "modes"],
+      ["MAIN MENU", "title"],
+    ]
+    : [
+      ["RETRY TEST", "retry"],
+      ["NEXT TEST", "change"],
+      ["MODE SELECT", "modes"],
+      ["MAIN MENU", "title"],
+    ];
   const mode = result.modeData;
   const configLabel = result.variantId === SPEED_TEST_TYPES.TIME
     ? `${mode.durationSeconds} SECOND TEST`
@@ -734,7 +747,12 @@ export function renderSpeedTestResults(result, recordFlags, selectedIndex, handl
       <div class="speed-results-panel">
         ${screenBackButton("modes", true)}
         <div class="eyebrow">ENGLISH 200 // ${configLabel}</div>
-        <h1>TEST COMPLETE</h1>
+        <h1>${campaignPlacement ? "PLACEMENT COMPLETE" : "TEST COMPLETE"}</h1>
+        ${campaignPlacement ? `<section class="campaign-placement-result" aria-label="Campaign placement result">
+          <span>Campaign starting checkpoint</span>
+          <strong>LEVEL ${String(placement.level).padStart(2, "0")}</strong>
+          <small>${result.wpm.toFixed(1)} WPM · ${placement.nextWpm ? `Next checkpoint at ${placement.nextWpm} WPM` : "Maximum placement checkpoint reached"}</small>
+        </section>` : ""}
         <div class="speed-result-headline">
           <div><span>WPM</span><strong>${result.wpm.toFixed(1)}</strong></div>
           <div><span>ACCURACY</span><strong>${result.accuracy.toFixed(1)}%</strong></div>
@@ -767,7 +785,7 @@ export function renderSpeedTestResults(result, recordFlags, selectedIndex, handl
     </section>`;
   wireMenuActions(app(), ".speed-results-panel .arcade-button", handlers);
   const speedBack = app().querySelector?.('[data-screen-back="modes"]');
-  if (speedBack) speedBack.onclick = handlers.modes;
+  if (speedBack) speedBack.onclick = campaignPlacement ? handlers.campaign : handlers.modes;
 }
 
 function renderDevPanel(selectedLevel, bossWordBank, developerSeed) {
@@ -862,6 +880,7 @@ export function renderLevelSelect(
   bossWordBank,
   developerSeed,
   handlers,
+  campaignContext = {},
 ) {
   const furthestLevel = Math.max(1, Math.min(100, Number(save.currentFurthestLevel) || 1));
   const safeSelected = Math.max(1, Math.min(100, Number(selectedLevel) || 1));
@@ -895,6 +914,19 @@ export function renderLevelSelect(
   const selectedGrade = selectedCleared ? selectedResult.grade : "—";
   const selectedWpm = metric(selectedResult?.bestWPM ?? selectedResult?.wpm);
   const selectedAccuracy = metric(selectedResult?.bestAccuracy ?? selectedResult?.accuracy, "%");
+
+  const placement = getCampaignPlacementSummary(campaignContext.bestPlacementWpm);
+  const nextPlacementCopy = placement.nextWpm
+    ? `${placement.nextWpm} WPM → Level ${placement.nextLevel}`
+    : "Maximum placement reached";
+  const accountStatus = campaignContext.authState?.status ?? "idle";
+  const publicUsername = campaignContext.profileState?.profile?.username ?? null;
+  const accountCoreMarkup = accountStatus === "signed-in"
+    ? `<span class="campaign-account-dot" aria-hidden="true"></span><span>ACCOUNT</span><strong>${publicUsername ? escapeHtml(publicUsername) : "CONNECTED"}</strong>`
+    : ["loading", "signing-in"].includes(accountStatus)
+      ? `<span class="campaign-account-dot is-pending" aria-hidden="true"></span><span>ACCOUNT</span><strong>CHECKING…</strong>`
+      : `<span>CAMPAIGN ONLINE</span><button type="button" data-campaign-account="sign-in">SIGN IN</button>`;
+  const accountMarkup = `${accountCoreMarkup}<button type="button" class="campaign-placement-mini" data-campaign-placement-mini>PLACEMENT</button>`;
 
   const sectors = Array.from({ length: 10 }, (_, sectorIndex) => {
     const sector = sectorIndex + 1;
@@ -969,6 +1001,7 @@ export function renderLevelSelect(
         <header class="campaign-progress-topline">
           ${screenBackButton()}
           <div class="campaign-progress-context"><strong>WORDSTRIKE</strong><span>CAMPAIGN ROUTE</span></div>
+          <div class="campaign-account-state" data-campaign-account-state>${accountMarkup}</div>
           <div class="campaign-progress-count">ROUTE REACH <strong>${devMode ? 100 : furthestLevel}</strong><span>/ 100</span></div>
         </header>
 
@@ -998,6 +1031,22 @@ export function renderLevelSelect(
           </aside>
         </div>
 
+        <section class="campaign-placement-strip" aria-label="Campaign placement">
+          <div class="campaign-placement-main">
+            <span class="campaign-placement-kicker">Placement</span>
+            <strong>${placement.placed ? `Level ${placement.level}` : "Not placed"}</strong>
+            <span>${placement.bestWpm > 0 ? `${Math.round(placement.bestWpm)} WPM · best 60-second test` : "Use a 60-second Typing Test to choose a starting checkpoint."}</span>
+          </div>
+          <div class="campaign-placement-next">
+            <span>Next checkpoint</span>
+            <strong>${nextPlacementCopy}</strong>
+          </div>
+          <div class="campaign-placement-actions">
+            <button type="button" data-campaign-placement>${placement.bestWpm > 0 ? "RETEST PLACEMENT" : "TAKE PLACEMENT TEST"}</button>
+            <button type="button" data-campaign-leaderboard>CAMPAIGN LEADERBOARD</button>
+          </div>
+        </section>
+
         <div class="campaign-route-scroll" data-campaign-route-scroll>
           ${devMode ? renderDevPanel(safeSelected, bossWordBank, developerSeed) : ""}
           <div class="campaign-route" id="campaign-route" aria-label="Campaign progression map">${sectors}</div>
@@ -1015,6 +1064,14 @@ export function renderLevelSelect(
   const bossHelp = app().querySelector('[data-tutorial-help="boss"]');
   if (campaignHelp) campaignHelp.onclick = handlers.helpCampaign;
   if (bossHelp) bossHelp.onclick = handlers.helpBoss;
+  const accountSignIn = app().querySelector('[data-campaign-account="sign-in"]');
+  if (accountSignIn) accountSignIn.onclick = handlers.signIn;
+  const placementButton = app().querySelector("[data-campaign-placement]");
+  if (placementButton) placementButton.onclick = handlers.placement;
+  const placementMiniButton = app().querySelector("[data-campaign-placement-mini]");
+  if (placementMiniButton) placementMiniButton.onclick = handlers.placement;
+  const leaderboardButton = app().querySelector("[data-campaign-leaderboard]");
+  if (leaderboardButton) leaderboardButton.onclick = handlers.leaderboard;
   app().querySelectorAll(".campaign-node:not(:disabled)").forEach((node) => {
     node.onclick = () => handlers.select(Number(node.dataset.level));
   });
@@ -1564,6 +1621,7 @@ export function renderResults(result, selectedIndex, handlers, submissionState =
           <div class="stat"><span class="micro-label">Level</span><strong>${result.levelNumber}</strong></div>`}
         </div>
         ${resultMetricHelp({ grade: true })}
+        ${result.persistenceWarning ? `<p class="campaign-save-warning" role="alert">${escapeHtml(result.persistenceWarning)}</p>` : ""}
         ${renderGlobalSubmissionMarkup(submissionState)}
         <div class="menu-list">
           ${actions.map(([label, action], index) => menuButton(

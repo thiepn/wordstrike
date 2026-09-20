@@ -17,6 +17,10 @@ import {
 } from "./levelGenerator.js";
 import { generateBossEncounter } from "./bossGenerator.js";
 import {
+  getCampaignBest60SecondWpm,
+  getCampaignResumeLevel,
+  hasExperiencedCampaignBoss,
+  isCampaignEstablished,
   isCampaignLevelAccessible,
   loadSave,
   resetProgress,
@@ -520,6 +524,10 @@ function openLeaderboardReturn(returnState) {
     openTitle();
     return;
   }
+  if (returnState?.screen === "campaign") {
+    openLevelSelect("auth-return");
+    return;
+  }
   const boardKey = returnState?.selectedCategory === LEADERBOARD_CATEGORIES.TYPING
     ? returnState.typingDuration === 15 ? LEADERBOARD_BOARDS.TYPING_15 : LEADERBOARD_BOARDS.TYPING_60
     : returnState?.selectedCategory === LEADERBOARD_CATEGORIES.ENDLESS
@@ -572,8 +580,25 @@ function openLevelSelect(reason = "level-select") {
   cleanupCampaignAttempt(reason);
   changeScreen(Screens.LEVEL_SELECT);
   const selectionLimit = appState.devMode ? 100 : appState.save.currentFurthestLevel;
-  appState.levelSelection = Math.min(appState.currentLevel || 1, selectionLimit, 100);
+  const resumeLevel = appState.devMode
+    ? Math.min(appState.currentLevel || 1, 100)
+    : getCampaignResumeLevel(appState.save);
+  const requestedLevel = ["mode-select", "auth-return", "placement-result"].includes(reason)
+    ? resumeLevel
+    : appState.currentLevel || resumeLevel;
+  appState.levelSelection = Math.max(1, Math.min(requestedLevel, selectionLimit, 100));
   renderCurrentScreen();
+}
+
+function startCampaignPlacement() {
+  cleanupCampaignAttempt("campaign-placement");
+  appState.speedTestConfigId = normalizeSpeedTestConfigId("time-60");
+  resetSpeedTestAttempt("campaign-placement");
+}
+
+function signInFromCampaign() {
+  saveLeaderboardReturnState({ screen: "campaign" });
+  void signInWithGoogle();
 }
 
 function openSettings() {
@@ -601,9 +626,14 @@ function startLevel(levelNumber, source = "level-select") {
   const safeLevel = Math.max(1, Math.min(100, levelNumber));
   const legitimatelyUnlocked = isCampaignLevelAccessible(appState.save, safeLevel);
   if (!appState.devMode && !legitimatelyUnlocked) return;
-  if (safeLevel % 10 === 0 && source !== "developer" && openAutomaticTutorial("boss", (choice) => {
-    if (choice === "primary") startLevel(safeLevel, source);
-  })) return;
+  if (
+    safeLevel % 10 === 0 &&
+    source !== "developer" &&
+    !hasExperiencedCampaignBoss(appState.save) &&
+    openAutomaticTutorial("boss", (choice) => {
+      if (choice === "primary") startLevel(safeLevel, source);
+    })
+  ) return;
   cleanupCampaignAttempt(source === "retry" ? "retry" : "new-session");
   appState.campaignResult = null;
   appState.currentLevel = safeLevel;
@@ -656,7 +686,9 @@ function startLevel(levelNumber, source = "level-select") {
   game.persistResult = shouldPersistLevelResult(appState.devMode, legitimatelyUnlocked);
   game.devMode = appState.devMode;
   syncCampaignSession(game);
-  if (!appState.devMode) beginContextualHints("campaign", "TYPE THE HIGHLIGHTED WORD", 3200);
+  if (!appState.devMode && !isCampaignEstablished(appState.save)) {
+    beginContextualHints("campaign", "TYPE THE HIGHLIGHTED WORD", 3200);
+  }
 }
 
 function finishSpeedTest(state, result) {
@@ -664,7 +696,7 @@ function finishSpeedTest(state, result) {
   unmountGameplayInput();
   appState.speedTestResult = result;
   appState.speedTestRecordFlags = { ...state.recordFlags };
-  appState.speedTestResultsIndex = 1;
+  appState.speedTestResultsIndex = result.sessionSource === "campaign-placement" ? 0 : 1;
   appState.speedTestResultsReadyAt = currentTimeMs() + 200;
   prepareAutomaticResultSubmission("typing", result);
   changeScreen(Screens.SPEED_TEST_RESULTS);
@@ -815,6 +847,7 @@ function startEndless(source = "mode-select") {
 function changeSpeedTestConfig(configId) {
   const state = getCurrentSpeedTest();
   if (state?.phase === "ACTIVE") return;
+  if (state?.sessionSource === "campaign-placement") return;
   const next = normalizeSpeedTestConfigId(configId);
   if (next === appState.speedTestConfigId) return;
   appState.speedTestConfigId = next;
@@ -912,7 +945,10 @@ function finishLevel(game, success) {
   };
   appState.campaignResult = finalizeCampaignSession(game, appState.results, success);
   if (success && game.persistResult) {
-    updateLevelResult(appState.save, game.levelNumber, appState.results);
+    const progressPersisted = updateLevelResult(appState.save, game.levelNumber, appState.results);
+    if (!progressPersisted) {
+      appState.results.persistenceWarning = "CAMPAIGN PROGRESS COULD NOT BE SAVED. Browser storage is unavailable.";
+    }
   }
   prepareAutomaticResultSubmission("campaign", appState.campaignResult);
   appState.resultsIndex = getDefaultResultsIndex(appState.results);
@@ -1071,9 +1107,14 @@ function activateSelectedMode(modeId = getAllModes()[appState.modeSelection]?.id
   const route = getAllModes().find((mode) => mode.id === modeId)?.route;
   if (route === "level-select") {
     openLevelSelect("mode-select");
-    openAutomaticTutorial("campaign", (choice) => {
-      if (choice === "primary" && appState.save.currentFurthestLevel === 1) startLevel(1, "level-select");
-    }, { primaryLabel: appState.save.currentFurthestLevel === 1 ? "START LEVEL 1" : "CONTINUE" });
+    // A missing onboarding flag must never make an established Campaign look
+    // reset. Progress or a prior placement is stronger evidence than tutorial
+    // storage, so automatic onboarding is only for genuinely new players.
+    if (!isCampaignEstablished(appState.save)) {
+      openAutomaticTutorial("campaign", (choice) => {
+        if (choice === "primary") startLevel(1, "level-select");
+      }, { primaryLabel: "START LEVEL 1" });
+    }
   }
   else if (route === "speed-test") {
     appState.speedTestConfigId = DEFAULT_SPEED_TEST_CONFIG_ID;
@@ -1190,10 +1231,14 @@ function renderCurrentScreen() {
       appState.speedTestRecordFlags,
       appState.speedTestResultsIndex,
       {
-        retry: () => resetSpeedTestAttempt("retry"),
+        retry: () => {
+          if (appState.speedTestResult?.sessionSource === "campaign-placement") startCampaignPlacement();
+          else resetSpeedTestAttempt("retry");
+        },
         change: () => resetSpeedTestAttempt("change-test"),
         modes: openModeSelect,
         title: openTitle,
+        campaign: () => openLevelSelect("placement-result"),
         select: (index) => {
           if (index === appState.speedTestResultsIndex) return;
           appState.speedTestResultsIndex = index;
@@ -1201,6 +1246,9 @@ function renderCurrentScreen() {
         },
       },
       getSubmissionState(),
+      {
+        campaignPlacement: appState.speedTestResult?.sessionSource === "campaign-placement",
+      },
     );
   } else if (appState.screen === Screens.LEVEL_SELECT) {
     renderLevelSelect(
@@ -1216,6 +1264,14 @@ function renderCurrentScreen() {
       devLaunch: (level) => startLevel(level, "developer"),
       helpCampaign: () => openTutorial("campaign"),
       helpBoss: () => openTutorial("boss"),
+      signIn: signInFromCampaign,
+      placement: startCampaignPlacement,
+      leaderboard: () => openLeaderboardBoard(LEADERBOARD_BOARDS.CAMPAIGN),
+      },
+      {
+        authState: getAuthState(),
+        profileState: getLeaderboardProfileState(),
+        bestPlacementWpm: getCampaignBest60SecondWpm(),
       },
     );
   } else if (appState.screen === Screens.RESULTS) {
@@ -1516,6 +1572,9 @@ async function bootstrap() {
       void handleAutomaticSubmissionStateChange(authState, getLeaderboardProfileState());
     }
     if (bootstrapReady) void pendingResultCoordinator.evaluate(authState, getLeaderboardProfileState());
+    if (authUiChanged && appState.screen === Screens.LEVEL_SELECT) {
+      renderCurrentScreen();
+    }
     if (authUiChanged && (
       appState.screen === Screens.SETTINGS ||
       (appState.screen === Screens.PROFILE_STATS && appState.statisticsTabIndex === 6)
@@ -1531,7 +1590,7 @@ async function bootstrap() {
       if (appState.screen === Screens.SETTINGS) renderCurrentScreen();
       else updateProfileAuthSection(getAuthState(), profileState);
     }
-    if (appState.screen === Screens.LEADERBOARDS) renderCurrentScreen();
+    if (appState.screen === Screens.LEADERBOARDS || appState.screen === Screens.LEVEL_SELECT) renderCurrentScreen();
     if ([Screens.ARCADE_RUSH_RESULTS, Screens.ENDLESS_RESULTS, Screens.SPEED_TEST_RESULTS, Screens.RESULTS].includes(appState.screen)) {
       void handleAutomaticSubmissionStateChange(getAuthState(), profileState);
     }

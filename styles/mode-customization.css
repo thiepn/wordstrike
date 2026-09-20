@@ -70,15 +70,24 @@
 .speed-test-screen[data-live-stats="false"] .speed-test-hud > span:has(:is(#speed-test-wpm, #speed-test-accuracy, #speed-test-raw, #speed-test-words, #speed-test-errors)) { display: none; }
 
 /* Keep the original fixed HUD row/arena size: hiding telemetry never changes trajectories. */
-.campaign-gameplay-screen[data-gameplay-hud="minimal"] .campaign-hud-metric,
+.campaign-gameplay-screen[data-gameplay-hud="minimal"] .campaign-hud-metric:not(.campaign-hud-score),
 .endless-gameplay-screen[data-gameplay-hud="minimal"] .endless-hud-metric { display: none; }
 .campaign-gameplay-screen[data-gameplay-hud="minimal"] .campaign-hud-primary,
-.endless-gameplay-screen[data-gameplay-hud="minimal"] .endless-hud-primary { grid-template-columns: auto minmax(0, 1fr) auto; grid-template-rows: minmax(44px, auto); }
-.campaign-gameplay-screen[data-gameplay-hud="minimal"] .campaign-hud-primary { grid-template-areas: "back level core"; }
+.endless-gameplay-screen[data-gameplay-hud="minimal"] .endless-hud-primary { grid-template-rows: minmax(44px, auto); }
+.campaign-gameplay-screen[data-gameplay-hud="minimal"] .campaign-hud-primary {
+  grid-template-columns: auto auto minmax(90px, 1fr) auto;
+  grid-template-areas: "back level score core";
+}
+.endless-gameplay-screen[data-gameplay-hud="minimal"] .endless-hud-primary { grid-template-columns: auto minmax(0, 1fr) auto; }
 .endless-gameplay-screen[data-gameplay-hud="minimal"] .endless-hud-primary { grid-template-areas: "back stage core"; }
 .campaign-gameplay-screen[data-gameplay-hud="minimal"] .campaign-hud-back,
 .endless-gameplay-screen[data-gameplay-hud="minimal"] .endless-hud-back { grid-area: back; }
 .campaign-gameplay-screen[data-gameplay-hud="minimal"] .campaign-hud-identity { grid-area: level; }
+.campaign-gameplay-screen[data-gameplay-hud="minimal"] .campaign-hud-score {
+  grid-area: score;
+  display: flex;
+  justify-content: center;
+}
 .endless-gameplay-screen[data-gameplay-hud="minimal"] .endless-hud-identity { grid-area: stage; }
 .campaign-gameplay-screen[data-gameplay-hud="minimal"] .campaign-hud-integrity,
 .endless-gameplay-screen[data-gameplay-hud="minimal"] .endless-hud-integrity { grid-area: core; }

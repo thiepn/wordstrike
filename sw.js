@@ -1,5 +1,5 @@
 const CACHE_PREFIX = "wordstrike-pwa-";
-const CACHE_NAME = CACHE_PREFIX + "v30-practice-stabilization";
+const CACHE_NAME = CACHE_PREFIX + "v31-campaign-recovery";
 const APP_SHELL = [
   "./js/practiceLab/practiceAssessmentInput.js",
   "./js/practiceLab/practiceDurableManifest.js",
@@ -52,7 +52,6 @@ const APP_SHELL = [
   "./js/flow/flowUiPhase7Polish.js",
   "./js/flow/flowUxPhase8.js",
   "./js/flow/flowVisualPhase6.js",
-  "./js/main.js?v=20260910f",
   "./js/nativeBackNavigation.js",
   "./js/speedTestPerformanceV1.js?v=20260910a",
   "./js/speedTestPerformanceV2.js?v=20260910b",
@@ -245,6 +244,7 @@ const APP_SHELL = [
   "./js/bossLoop.js",
   "./js/campaignDifficulty.js",
   "./js/campaignGameplayPresentation.js",
+  "./js/campaignGameplayPresentation.js?v=20260920a",
   "./js/campaignSession.js",
   "./js/contextualHints.js",
   "./js/customization.js",
@@ -271,6 +271,7 @@ const APP_SHELL = [
   "./js/levelGenerator.js",
   "./js/lifetimeStatistics.js",
   "./js/main.js",
+  "./js/main.js?v=20260910f",
   "./js/mobileInputAdapter.js",
   "./js/modeCustomization.js",
   "./js/modeCustomizationPresentation.js",
@@ -701,11 +702,14 @@ const APP_SHELL = [
   "./js/wordBank.js",
   "./styles/customization.css",
   "./styles/mode-customization.css",
+  "./styles/mode-customization.css?v=20260920a",
   "./styles/screens/arcade-rush-gameplay.css",
   "./styles/screens/boss-gameplay.css",
   "./styles/screens/campaign-gameplay-input.css",
   "./styles/screens/campaign-gameplay.css",
+  "./styles/screens/campaign-gameplay.css?v=20260920a",
   "./styles/screens/campaign-progression.css",
+  "./styles/screens/campaign-progression.css?v=20260920a",
   "./styles/screens/endless-gameplay.css",
   "./styles/screens/mode-select.css",
   "./styles/screens/profile-leaderboards-settings-ui11-contract.css",

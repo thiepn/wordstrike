@@ -1,0 +1,68 @@
+name: Campaign recovery certification
+on:
+  pull_request:
+    paths:
+      - 'js/storage.js'
+      - 'js/main.js'
+      - 'js/ui.js'
+      - 'js/campaignGameplayPresentation.js'
+      - 'js/leaderboardReturnState.js'
+      - 'styles/screens/campaign-progression.css'
+      - 'styles/screens/campaign-gameplay.css'
+      - 'styles/mode-customization.css'
+      - 'tests/campaign-*.test.js'
+      - 'tests/ui4-campaign-progression.test.js'
+      - 'tests/ui5-campaign-gameplay.test.js'
+      - 'tests/browser/campaign_recovery.py'
+      - 'tests/browser/ui4_campaign_progression.py'
+      - 'tests/browser/ui5_campaign_gameplay.py'
+      - 'index.html'
+      - 'sw.js'
+      - '.github/workflows/campaign-recovery.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  core:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Campaign storage, placement, auth-return and source contracts
+        run: |
+          node tests/campaign-recovery.test.js
+          node tests/campaign-speed-unlocks.test.js
+          node tests/campaign-session.test.js
+          node tests/campaignLeaderboard.test.js
+          node tests/ui4-campaign-progression.test.js
+          node tests/ui5-campaign-gameplay.test.js
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    container:
+      image: mcr.microsoft.com/playwright/python:v1.57.0-noble
+      options: --ipc=host
+    env:
+      HOME: /root
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install browser test dependencies
+        run: python3 -m pip install -r tests/browser/requirements.txt
+      - name: Certify Campaign recovery path
+        run: python3 tests/browser/campaign_recovery.py
+      - name: Certify Campaign progression
+        run: python3 tests/browser/ui4_campaign_progression.py
+      - name: Certify Campaign gameplay
+        run: python3 tests/browser/ui5_campaign_gameplay.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: campaign-recovery-evidence
+          path: |
+            browser-artifacts/campaign-recovery/
+            browser-artifacts/ui4-campaign-progression/
+            browser-artifacts/ui5-campaign-gameplay/
+          retention-days: 7

@@ -135,7 +135,8 @@ assert.doesNotMatch(controller,/subtree:\s*true|setInterval|requestAnimationFram
 assert.match(controller,/observer|Observer/);
 assert.match(controller,/could not be saved/);
 const css=readFileSync(new URL("../styles/mode-customization.css",import.meta.url),"utf8");
-assert.match(css,/grid-template-areas: "back level core"/);
+assert.match(css,/grid-template-areas: "back level score core"/);
+assert.match(css,/campaign-gameplay-screen\[data-gameplay-hud="minimal"\] \.campaign-hud-score[\s\S]*display:\s*flex/);
 assert.match(css,/grid-template-areas: "back stage core"/);
 assert.doesNotMatch(css,/--campaign-hud-height:|--endless-hud-height:/);
 for (const mode of ["typing","campaign","endless","boss","arcade-rush"]) for (const location of ["ready","pause"]) {
