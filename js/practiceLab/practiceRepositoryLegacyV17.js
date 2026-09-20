@@ -723,8 +723,17 @@ export function createPracticeRepository({ dataStore, manifestStore, now = Date.
     },
 
     async resetPracticeData() {
-      for (const storeName of PRACTICE_STORE_NAMES) await dataStore.clearStore(storeName);
-      await (manifestStore.clearDurable?.() ?? manifestStore.clear());
+      // A reset is destructive, so never delete canonical Practice records
+      // before we know the legacy compatibility mirror can be cleared.
+      if (manifestStore.clearLegacy) manifestStore.clearLegacy();
+      else await (manifestStore.clearDurable?.() ?? manifestStore.clear());
+
+      // Clear every IndexedDB store in one transaction. If any clear fails,
+      // IndexedDB rolls the entire reset back instead of leaving half a profile.
+      await dataStore.runTransaction(PRACTICE_STORE_NAMES, "readwrite", async (transaction) => {
+        for (const storeName of PRACTICE_STORE_NAMES) await transaction.clearStore(storeName);
+      });
+      manifestStore.invalidateDurable?.();
       manifest = null;
       return true;
     },

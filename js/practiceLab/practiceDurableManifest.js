@@ -106,13 +106,24 @@ export function withDurablePracticeManifest({legacy,storage,createDefault,defaul
     });
     return adopt(next,'durable',mirror(next));
   }
+  const clearLegacy = () => legacy.clear();
+  const invalidateDurable = () => { loaded = null; return true; };
   return Object.freeze({
     ...legacy,
     get isDurable(){return Boolean(loaded && store);},
     load(){return loaded?copy(loaded):legacy.load();},
     initialize,
     saveDurable,
-    async clearDurable(){if(store?.isOpen)await store.delete('meta',PRACTICE_DURABLE_MANIFEST_KEY);loaded=null;return legacy.clear();},
+    clearLegacy,
+    invalidateDurable,
+    async clearDurable(){
+      // Clear the compatibility mirror first. If it is inaccessible, leave
+      // canonical IndexedDB metadata untouched so reset cannot become partial.
+      clearLegacy();
+      if(store?.isOpen)await store.delete('meta',PRACTICE_DURABLE_MANIFEST_KEY);
+      loaded=null;
+      return true;
+    },
     clear(){loaded=null;return legacy.clear();},
   });
 }
