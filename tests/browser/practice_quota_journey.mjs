@@ -21,7 +21,11 @@ try{for(const mode of ['fresh-full','existing-full']){
   report.fillers=await page.evaluate(()=>{let i=0;localStorage.setItem('another-hub-app-test','preserve me');for(const size of [131072,32768,8192,2048,512,128,16,1]){for(let j=0;j<200;j++){try{localStorage.setItem('quota-fixture-'+i,'q'.repeat(size));i++;}catch(e){if(e.name!=='QuotaExceededError')throw e;break;}}}let full=false;try{localStorage.setItem('quota-probe','q'.repeat(1024));}catch(e){full=e.name==='QuotaExceededError';}if(!full)throw Error('Quota fixture did not fill localStorage');return i;});
   await openCoach(page);await page.locator('[data-coach-minutes="5"]').click();await page.locator('[data-practice-action="create-coach-plan"]:enabled').click();
   await page.locator('[data-practice-action="start-coach-next"]:enabled').waitFor({timeout:30000});
-  const plans=await rows(page,'coachPlans');assert.equal(plans.length,1);assert.ok(plans[0].blocks.length>0,'An empty plan is not usable practice');report.planId=plans[0].coachPlanId;report.profileId=plans[0].profileId;
+  const plans=await rows(page,'coachPlans');assert.equal(plans.length,1);assert.ok(plans[0].blocks.length>0,'An empty plan is not usable practice');
+  assert.equal(plans[0].requestedMinutes,5,'The explicit 5-minute choice must survive first-run async initialization');
+  assert.ok(plans[0].plannedMinutes<=5,`Daily Coach exceeded its 5-minute budget: ${plans[0].plannedMinutes}`);
+  for(const block of plans[0].blocks)if(block.kind==='real-text')assert.ok(block.realTextDurationMs<=300000,`5-minute Daily Coach launched ${block.realTextDurationMs/60000}-minute Real Text`);
+  report.planId=plans[0].coachPlanId;report.profileId=plans[0].profileId;report.requestedMinutes=plans[0].requestedMinutes;report.plannedMinutes=plans[0].plannedMinutes;report.blocks=plans[0].blocks.map(block=>({kind:block.kind,experimentId:block.experimentId,estimatedMinutes:block.estimatedMinutes,realTextDurationMs:block.realTextDurationMs??null}));
   await page.locator('[data-practice-action="start-coach-next"]').click();const input=page.locator('[data-real-text-input]');await input.waitFor({state:'visible'});
   const text=await page.locator('.is-current').first().evaluate(el=>{let s='';for(let n=el;n&&s.length<100;n=n.nextElementSibling)s+=n.textContent;return s.replaceAll('\u00a0',' ').slice(0,100);});
   await page.keyboard.type(text,{delay:35});await page.clock.fastForward(301000);
