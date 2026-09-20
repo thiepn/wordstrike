@@ -36,7 +36,7 @@ function renderActive(root, { contentPlan, snapshot, mode }) {
   if (!root.querySelector("[data-real-text-input]")) root.innerHTML = `<section class="screen practice-lab-screen practice-real-text-session" data-practice-view="real-text-${mode}-session">
     <main class="practice-lab-shell"><header class="practice-real-text-session-header"><div><div class="eyebrow">Real Text</div><h1>${label}</h1><p>${note}</p></div><button type="button" data-real-text-session-action="stop">STOP</button></header>
     <div class="practice-real-text-time" ><strong>${fmtSeconds(remaining)}</strong><span>remaining</span></div>
-    <section class="practice-real-text-typing" aria-label="Natural typing passage"></section>
+    <section class="practice-real-text-typing" role="region" aria-label="Natural typing passage" tabindex="0"></section>
     <textarea data-real-text-input aria-label="Real Text typing input" inputmode="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" style="display:block;width:100%;box-sizing:border-box;min-height:3em"></textarea>
     </main></section>`;
   root.querySelector('.practice-real-text-time strong').textContent=fmtSeconds(remaining);
