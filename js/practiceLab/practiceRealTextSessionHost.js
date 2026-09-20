@@ -96,7 +96,14 @@ export async function mountPracticeRealTextSession({ root, session, mode = "natu
     capture.value = "";
   };
   const keyDown = (event) => { if ((event.ctrlKey || event.metaKey) && ["v", "x"].includes(String(event.key).toLowerCase())) event.preventDefault(); };
-  const click = (event) => { const button = event.target?.closest?.("[data-real-text-session-action]"); if (!button || !root.contains?.(button)) return; if (button.dataset.realTextSessionAction === "finish") void finish(); else if (button.dataset.realTextSessionAction === "stop") void engine.abandon("manual-stop").then((result) => { finalResult = result; return finish(); }).catch(() => finish()); };
+  const click = (event) => {
+    const passage = event.target?.closest?.(".practice-real-text-typing");
+    if (passage && root.contains?.(passage) && !closed && !finalResult) { focus(); return; }
+    const button = event.target?.closest?.("[data-real-text-session-action]");
+    if (!button || !root.contains?.(button)) return;
+    if (button.dataset.realTextSessionAction === "finish") void finish();
+    else if (button.dataset.realTextSessionAction === "stop") void engine.abandon("manual-stop").then((result) => { finalResult = result; return finish(); }).catch(() => finish());
+  };
   const visibilityChange = () => { if (globalThis.document?.visibilityState !== "hidden" || closed || finalResult) return; if (mode === "cold") void engine.handleVisibilityState("hidden").then(() => engine.abandon("visibility-hidden")).then((result) => { finalResult = result; return finish(); }).catch(() => finish()); else void engine.abandon("visibility-hidden").then((result) => { finalResult = result; return finish(); }).catch(() => finish()); };
   root.addEventListener("beforeinput", beforeInput); root.addEventListener("keydown", keyDown); root.addEventListener("click", click); globalThis.document?.addEventListener?.("visibilitychange", visibilityChange);
   try {

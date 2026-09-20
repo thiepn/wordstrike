@@ -1,4 +1,5 @@
 import { createPracticeSegmenter } from "./practiceTextSegmentation.js";
+import { renderPracticeSessionMarkup } from "./practiceHostDom.js";
 
 const escapeHtml = (value = "") => String(value).replace(/[&<>'"]/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[character]);
 const finite = Number.isFinite;
@@ -99,7 +100,7 @@ export function renderPracticeWeaknessBossBattle(root, { session, snapshot, game
   const phase = getPracticeWeaknessBossPhase(session.contentPlan, snapshot?.cursorIndex ?? 0);
   const hp = Math.max(0, Math.min(100, Number(gameplay?.bossHp ?? 100)));
   const paused = snapshot?.lifecycleState === "paused";
-  root.innerHTML = `<section class="screen practice-lab-screen" data-practice-view="weakness-boss-session"><div class="practice-lab-shell">
+  const markup = `<section class="screen practice-lab-screen" data-practice-view="weakness-boss-session"><div class="practice-lab-shell">
     <header class="practice-weak-key-session-header"><div><div class="eyebrow">Weakness Boss</div><h1>${escapeHtml(session.weaknessBossPlan.bossTheme.name)}</h1><p>Target: <strong>${escapeHtml(titleTarget(session.weaknessBossPlan.target))}</strong></p></div>
       <div class="practice-weak-key-session-actions"><button type="button" data-weakness-boss-session-action="${paused ? "resume" : "pause"}">${paused ? "RESUME" : "PAUSE"}</button><button type="button" data-weakness-boss-session-action="abandon">EXIT SESSION</button></div></header>
     <section class="practice-lab-empty-state"><div class="eyebrow">Boss HP</div><div role="progressbar" aria-label="Boss HP remaining" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(hp)}" aria-valuetext="${Math.round(hp)}% remaining"><strong>${Math.round(hp)}% remaining</strong></div><div class="practice-weak-key-progress"><span style="width:${hp.toFixed(2)}%"></span></div></section>
@@ -108,6 +109,7 @@ export function renderPracticeWeaknessBossBattle(root, { session, snapshot, game
     ${paused ? '<div class="practice-lab-notice" role="status"><strong>Paused.</strong> Paused time is excluded from active typing time.</div>' : ""}
     <textarea data-weakness-boss-input aria-label="Weakness Boss typing input" inputmode="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" style="position:fixed;left:-10000px;top:0;width:1px;height:1px;opacity:0"></textarea>
   </div></section>`;
+  renderPracticeSessionMarkup(root, markup);
 }
 
 export function renderPracticeWeaknessBossResult(root, finalResult) {

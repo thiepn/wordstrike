@@ -2,6 +2,7 @@ import { createPracticeIndexedDbStore } from "./practiceIndexedDbStore.js";
 import { createPracticeManifestStore } from "./practiceManifestStore.js";
 import { createPracticeRepository } from "./practiceRepository.js";
 import { createPracticeSessionEngine } from "./practiceSessionEngine.js";
+import { renderPracticeSessionMarkup } from "./practiceHostDom.js";
 
 const INSERT_TYPES = new Set(["insertText", "insertCompositionText"]);
 const ACTION = "[data-research-probe-action]";
@@ -36,7 +37,7 @@ export function renderPracticeResearchProbeSnapshot(root, { contentPlan, snapsho
   const progress = expected > 0 ? Math.min(100, ((snapshot.cursorIndex ?? 0) / expected) * 100) : 0;
   const paused = snapshot.lifecycleState === "paused";
   const label = phase === "followup" ? "Follow-up measurement" : "Baseline measurement";
-  root.innerHTML = `<section class="screen practice-lab-screen practice-research-probe" data-practice-view="research-probe-session">
+  const markup = `<section class="screen practice-lab-screen practice-research-probe" data-practice-view="research-probe-session">
     <div class="practice-lab-shell">
       <header class="practice-research-probe-header">
         <div><div class="eyebrow">Practice Research</div><h1>${label}</h1></div>
@@ -48,11 +49,12 @@ export function renderPracticeResearchProbeSnapshot(root, { contentPlan, snapsho
       <div class="practice-lab-notice" role="note">Type naturally. No live WPM, aggregate accuracy, target highlighting, cadence cue, or treatment feedback is shown during this measurement.</div>
       <div class="practice-research-probe-progress" aria-label="Measurement progress"><span style="width:${progress.toFixed(2)}%"></span></div>
       <div class="practice-research-probe-progress-label">${Math.round(progress)}% complete</div>
-      <section class="practice-research-probe-typing" aria-label="Research typing passage" data-session-paused="${paused ? "true" : "false"}">${renderText(contentPlan, snapshot)}</section>
+      <section class="practice-real-text-typing practice-research-probe-typing" aria-label="Research typing passage" data-session-paused="${paused ? "true" : "false"}">${renderText(contentPlan, snapshot)}</section>
       ${paused ? '<div class="practice-lab-notice" role="status"><strong>Paused.</strong> Paused time is excluded from active typing time.</div>' : ""}
       <textarea data-research-probe-input aria-label="Research typing input" inputmode="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" style="position:fixed;left:-10000px;top:0;width:1px;height:1px;opacity:0"></textarea>
     </div>
   </section>`;
+  renderPracticeSessionMarkup(root, markup);
 }
 
 function renderFailure(root, error) {
@@ -91,7 +93,6 @@ export async function mountPracticeResearchProbeSession({
     root.removeEventListener("beforeinput", beforeInput);
     root.removeEventListener("keydown", keyDown);
     root.removeEventListener("click", click);
-    root.removeEventListener("pointerdown", pointerDown);
     globalThis.document?.removeEventListener?.("visibilitychange", visibilityChange);
     try { await engine.destroy(); } catch (error) { logger?.warn?.("Research probe engine destroy failed", error); }
     try { dataStore.close?.(); } catch {}
@@ -147,7 +148,6 @@ export async function mountPracticeResearchProbeSession({
       void engine.abandon("manual-stop").catch((error) => logger?.warn?.("Research probe abandonment failed", error)).finally(() => finish(onExit));
     }
   };
-  const pointerDown = () => { if (engine.getSnapshot().lifecycleState === "active") focusCapture(); };
   const visibilityChange = () => {
     const state = globalThis.document?.visibilityState;
     if (state === "hidden" || state === "visible") void engine.handleVisibilityState(state).catch((error) => logger?.warn?.("Research probe visibility transition failed", error));
@@ -156,7 +156,6 @@ export async function mountPracticeResearchProbeSession({
   root.addEventListener("beforeinput", beforeInput);
   root.addEventListener("keydown", keyDown);
   root.addEventListener("click", click);
-  root.addEventListener("pointerdown", pointerDown);
   globalThis.document?.addEventListener?.("visibilitychange", visibilityChange);
 
   try {
