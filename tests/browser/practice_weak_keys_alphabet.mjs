@@ -71,6 +71,12 @@ try{
   await page.keyboard.insertText(currentBefore==='x'?'z':'x');
   await page.keyboard.press('Backspace');
   assert.ok(await input.evaluate(el=>el===window.__weakCapture&&el===document.activeElement),'B typing input was replaced or lost focus');
+  const pause=page.locator('[data-weak-keys-session-action="pause"]');
+  await pause.click();
+  const resume=page.locator('[data-weak-keys-session-action="resume"]');await resume.waitFor();
+  assert.ok(await resume.evaluate(el=>el===document.activeElement),'Pause control lost focus to the typing capture');
+  await resume.click();
+  assert.ok(await input.evaluate(el=>el===document.activeElement),'Resume did not restore typing focus');
   await page.screenshot({path:path.join(out,'weak-keys-b-active.png'),fullPage:true});
   await page.locator('[data-weak-keys-session-action="abandon"]').click();
   await page.locator('[data-practice-action="start-weak-keys"]').waitFor();
