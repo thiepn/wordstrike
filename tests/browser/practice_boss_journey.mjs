@@ -28,6 +28,26 @@ async function saved(page){
     try{return await store.list('sessionSummaries');}finally{store.close();}
   });
 }
+async function bossCursor(page){
+  const current=page.locator('.practice-weak-key-typing .is-current').first();
+  if(!await current.count())return null;
+  return current.evaluate(el=>({
+    index:Number(el.getAttribute('data-char-index')),
+    phase:el.closest('[data-practice-view="weakness-boss-session"]')?.querySelector('.practice-weak-key-phase-card .practice-lab-card-meta span')?.textContent??null,
+  }));
+}
+async function remainingBossText(page,limit=220){
+  const current=page.locator('.practice-weak-key-typing .is-current').first();
+  if(!await current.count())return '';
+  return current.evaluate((el,limit)=>{
+    let text='';
+    for(let node=el;node&&Array.from(text).length<limit;node=node.nextElementSibling){
+      text+=node.querySelector?.('br')?'\n':node.textContent;
+    }
+    return Array.from(text.replaceAll('\u00a0',' ')).slice(0,limit).join('');
+  },limit);
+}
+
 async function typeNatural(page,text){
   let buffer='',virtualChars=0;
   const advance=async()=>{
@@ -178,14 +198,18 @@ try{
   assert.equal(await page.locator('.practice-weak-key-typing .is-error').count(),0,'Backspace must clear the Boss error');
   assert.ok(await input.evaluate(node=>node===document.activeElement),'Correction must preserve Boss typing focus');
 
-  for(let guard=0;guard<10;guard++){
+  let previousCursor=-1;
+  for(let guard=0;guard<240;guard++){
     if(await page.locator('[data-practice-view="weakness-boss-result"]').count())break;
     const passage=page.locator('.practice-weak-key-typing');
     await passage.waitFor({state:'visible'});
-    const phase=await page.locator('.practice-weak-key-phase-card .practice-lab-card-meta span').first().innerText();
-    const text=await passage.innerText();
-    assert.ok(text.length>0,`Boss phase has no text: ${phase}`);
-    report.phases.push({phase,characters:Array.from(text).length});
+    const cursor=await bossCursor(page);
+    assert.ok(cursor&&Number.isInteger(cursor.index),'Active Boss session must expose one current character');
+    assert.ok(cursor.index>previousCursor,`Boss cursor stalled at ${cursor.index} during ${cursor.phase}`);
+    previousCursor=cursor.index;
+    const text=await remainingBossText(page);
+    assert.ok(text.length>0,`Boss cursor ${cursor.index} has no remaining visible text`);
+    report.phases.push({phase:cursor.phase,cursor:cursor.index,characters:Array.from(text).length});
     await passage.click();
     assert.ok(await input.evaluate(node=>node===document.activeElement),'Boss passage click must restore typing focus');
     await typeNatural(page,text);

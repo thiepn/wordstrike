@@ -69,8 +69,20 @@ try{
     const raw=await current.textContent();
     const expected=raw.replaceAll('\u00a0',' ');
     if(expected===' '){
-      const box=await current.boundingBox();
-      assert.ok(box&&box.width>0&&box.height>0,'Active Weak Keys whitespace caret must remain visibly measurable');
+      const geometry=await current.evaluate(el=>{
+        const rect=el.getBoundingClientRect();
+        const passage=el.closest('.practice-weak-key-typing');
+        const clip=passage?.getBoundingClientRect();
+        const style=getComputedStyle(el);
+        return {
+          width:rect.width,height:rect.height,top:rect.top,bottom:rect.bottom,
+          clipTop:clip?.top??null,clipBottom:clip?.bottom??null,
+          display:style.display,minWidth:style.minWidth,minInlineSize:style.minInlineSize,
+          scrollTop:passage?.scrollTop??null,scrollHeight:passage?.scrollHeight??null,clientHeight:passage?.clientHeight??null,
+          visible:Boolean(clip)&&rect.width>0&&rect.height>0&&rect.bottom>clip.top&&rect.top<clip.bottom,
+        };
+      });
+      assert.ok(geometry.visible,`Active Weak Keys whitespace caret must remain visible: ${JSON.stringify(geometry)}`);
       sawVisibleWhitespaceCaret=true;
     }
     await page.keyboard.insertText(expected);

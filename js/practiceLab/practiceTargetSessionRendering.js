@@ -1,3 +1,4 @@
+import { scrollPracticeTypingCursor } from "./practiceHostDom.js";
 // Keep typing captures and live phase instructions mounted while typing.
 const plans = new WeakMap();
 const views = new WeakMap();
@@ -25,5 +26,8 @@ export function updatePracticeTargetSession(root, { contentPlan, phase, snapshot
   if (label) label.textContent = `${Math.round(progress)}% complete`;
   const feedback = root.querySelector('[data-repair-feedback]');
   if (feedback) { feedback.hidden = !repairFeedback; feedback.textContent = repairFeedback?.message ?? ''; }
+  // Stable fast-path updates bypass renderPracticeSessionMarkup(), so keep the
+  // newly advanced caret inside the clipped typing viewport explicitly.
+  scrollPracticeTypingCursor(root);
   return true;
 }
