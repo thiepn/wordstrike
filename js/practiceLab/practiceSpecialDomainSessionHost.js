@@ -136,7 +136,6 @@ export async function mountPracticeSpecialDomainSession({ root, session, runtime
     root.removeEventListener("beforeinput", beforeInput);
     root.removeEventListener("keydown", keyDown);
     root.removeEventListener("click", click);
-    root.removeEventListener("pointerdown", pointerDown);
     globalThis.document?.removeEventListener?.("visibilitychange", visibilityChange);
     try { await engine.destroy(); } catch {}
     try { dataStore.close?.(); } catch {}
@@ -170,7 +169,6 @@ export async function mountPracticeSpecialDomainSession({ root, session, runtime
     if (button.dataset.specialDomainSessionAction === "stop") void interrupt("manual-stop");
     else if (button.dataset.specialDomainSessionAction === "finish") void cleanup(true);
   };
-  const pointerDown = () => focus();
   const visibilityChange = () => {
     if (globalThis.document?.visibilityState === "hidden" && running()) void interrupt("visibility-hidden");
   };
@@ -207,7 +205,6 @@ export async function mountPracticeSpecialDomainSession({ root, session, runtime
     root.addEventListener("beforeinput", beforeInput);
     root.addEventListener("keydown", keyDown);
     root.addEventListener("click", click);
-    root.addEventListener("pointerdown", pointerDown);
     globalThis.document?.addEventListener?.("visibilitychange", visibilityChange);
     const start = await engine.start();
     renderActive(root, session, start);
