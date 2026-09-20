@@ -20,7 +20,8 @@ await new Promise(resolve=>server.once('listening',resolve));
 const browser=await chromium.launch();
 const report={status:'FAIL',letters:[],errors:[]};
 try{
-  const width=Number(process.env.PRACTICE_WIDTH??1280);\n  const context=await browser.newContext({viewport:{width,height:900},hasTouch:width<600,serviceWorkers:'block'});
+  const width=Number(process.env.PRACTICE_WIDTH??1280);
+  const context=await browser.newContext({viewport:{width,height:900},hasTouch:width<600,serviceWorkers:'block'});
   await context.addInitScript(()=>{
     localStorage.setItem('wordstrike.onboarding.general.v3','seen');
     let i=0;
