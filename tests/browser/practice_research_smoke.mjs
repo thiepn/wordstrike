@@ -46,11 +46,14 @@ try{
   const page=await context.newPage();page.setDefaultTimeout(30000);page.on('pageerror',error=>report.errors.push(error.message));
   await page.goto(`http://127.0.0.1:${server.address().port}/`,{waitUntil:'domcontentloaded'});
   await openLab(page);
-  const initialProfiles=await rows(page,'profiles');assert.equal(initialProfiles.length,1);
-  report.profileId=initialProfiles[0].profileId;
   report.fillers=await page.evaluate(()=>Object.keys(localStorage).filter(k=>k.startsWith('research-quota-')).length);
+  // Practice home is intentionally lazy and may not create a profile until a
+  // data-backed route opens. Research is the operation under test, so assert
+  // canonical profile creation after that route has initialized its repository.
   await openResearch(page);
   await page.locator('[data-research-action="enroll"]').waitFor();
+  const initialProfiles=await rows(page,'profiles');assert.equal(initialProfiles.length,1);
+  report.profileId=initialProfiles[0].profileId;
   assert.ok(!(await page.locator('.practice-lab-screen').innerText()).includes('PRACTICE_STORAGE_'));
   await page.locator('[data-research-action="enroll"]').click();
   await page.locator('[data-research-action="pause"]').waitFor();
