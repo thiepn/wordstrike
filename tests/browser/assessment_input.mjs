@@ -84,6 +84,13 @@ try{for(const [depth,count] of [['quick',3],['standard',6],['deep',10]]){
     await input.evaluate(e=>{e.value='Q';e.dispatchEvent(new InputEvent('input',{bubbles:true,inputType:'insertText',data:'Q'}));});
     assert.equal(await passage.getAttribute('data-cursor'),'37','Native input fallback must not depend on beforeinput');
     await page.keyboard.press('Backspace');
+    await input.evaluate(e=>{
+      e.value='R';
+      e.dispatchEvent(new InputEvent('beforeinput',{bubbles:true,cancelable:true,inputType:'insertCompositionText',data:'R',isComposing:false}));
+      e.dispatchEvent(new InputEvent('input',{bubbles:true,inputType:'insertCompositionText',data:'R',isComposing:false}));
+    });
+    assert.equal(await passage.getAttribute('data-cursor'),'37','Non-composing composition-text fallback must commit once');
+    await page.keyboard.press('Backspace');
     await page.screenshot({path:path.join(out,`${name}-${depth}-typing.png`),fullPage:true});
    }
    await page.clock.fastForward(130000);
