@@ -83,6 +83,10 @@ export function renderPracticeSessionMarkup(root, markup) {
   const template = doc.createElement('template');
   // The passage uses pre-wrap; real spaces allow word-boundary line wrapping.
   template.innerHTML = markup.replaceAll('>&nbsp;</span>', '> </span>');
+  for (const passage of template.content.querySelectorAll('.practice-real-text-typing, .practice-weak-key-typing, .practice-combination-typing, [data-protocol-text]')) {
+    if (!passage.hasAttribute('tabindex')) passage.setAttribute('tabindex', '0');
+    if (!passage.hasAttribute('role')) passage.setAttribute('role', 'region');
+  }
   for (const input of template.content.querySelectorAll('textarea')) {
     input.classList.add('practice-session-input');
     input.setAttribute('data-practice-session-capture', '');

@@ -35,15 +35,30 @@ try {
     for(const node of item.nodes) {
      if(node.checks.some(c=>c.data?.messageKey!=='elmPartiallyObscured'))continue;
      const measured=await page.locator(node.target.join(' ')).evaluate(el=>{
-      if(el.tagName!=='TEXTAREA')return null;
-      el.scrollIntoView({block:'center'});
+      const isTypingField=el.tagName==='TEXTAREA';
+      const isScrollableRoute=el.tagName==='BUTTON'&&Boolean(el.closest('.pl-navigation'));
+      if(!isTypingField&&!isScrollableRoute)return null;
+      el.scrollIntoView({block:'nearest',inline:'nearest'});
       for(let p=el;p;p=p.parentElement){const s=getComputedStyle(p);if(s.opacity!=='1'||s.filter!=='none')return null;}
-      const s=getComputedStyle(el),rgb=v=>v.match(/[\d.]+/g)?.map(Number),fg=rgb(s.color),bg=rgb(s.backgroundColor);
-      if(!fg||!bg||(fg.length===4&&fg[3]!==1)||(bg.length===4&&bg[3]!==1))return null;
+      const rgba=value=>{
+       const numbers=value.match(/[\d.]+/g)?.map(Number);
+       if(!numbers||numbers.length<3)return null;
+       return [numbers[0],numbers[1],numbers[2],numbers.length>3?numbers[3]:1];
+      };
+      const style=getComputedStyle(el),fg=rgba(style.color);
+      let background=null,backgroundSource=el;
+      for(let p=el;p&&!background;p=p.parentElement){
+       const candidate=rgba(getComputedStyle(p).backgroundColor);
+       if(candidate&&candidate[3]>=.999){background=candidate;backgroundSource=p;}
+      }
+      if(!fg||fg[3]<.999||!background)return null;
       const luminance=c=>c.slice(0,3).map(v=>v/255).map(v=>v<=.04045?v/12.92:((v+.055)/1.055)**2.4).reduce((sum,v,i)=>sum+v*[.2126,.7152,.0722][i],0);
-      const a=luminance(fg),b=luminance(bg),ratio=(Math.max(a,b)+.05)/(Math.min(a,b)+.05),r=el.getBoundingClientRect();
-      const clear=[[r.left+5,r.top+5],[r.right-5,r.top+5],[r.left+r.width/2,r.top+r.height/2]].every(([x,y])=>document.elementFromPoint(x,y)===el);
-      return {ratio,clear,foreground:s.color,background:s.backgroundColor};
+      const a=luminance(fg),b=luminance(background),ratio=(Math.max(a,b)+.05)/(Math.min(a,b)+.05),rect=el.getBoundingClientRect();
+      const points=isTypingField
+       ? [[rect.left+5,rect.top+5],[rect.right-5,rect.top+5],[rect.left+rect.width/2,rect.top+rect.height/2]]
+       : [[rect.left+rect.width/2,rect.top+rect.height/2]];
+      const clear=points.every(([x,y])=>document.elementFromPoint(x,y)===el||el.contains(document.elementFromPoint(x,y)));
+      return {ratio,clear,foreground:style.color,background:getComputedStyle(backgroundSource).backgroundColor,kind:isTypingField?'textarea':'scrollable-route'};
      });
      if(measured?.clear&&measured.ratio>=4.5){nativeContrast.push({target:node.target,...measured});node.resolved=true;}
     }
@@ -63,6 +78,12 @@ try {
    const input=id==='full-assessment'?'[data-assessment-input]':id==='real-text'?'[data-real-text-input]':'[data-protocol-input]';
    await page.locator(input).waitFor();await audit(id+'-active');
    if(!await page.locator(input).evaluate(el=>el===document.activeElement))throw Error(`${id} input did not receive focus`);
+   if(id==='full-assessment'||id==='real-text'){
+    const passage=page.locator('.practice-real-text-typing');
+    if(await passage.getAttribute('tabindex')!=='0')throw Error(`${id} scrollable passage is not keyboard focusable`);
+    await passage.click();
+    if(!await page.locator(input).evaluate(el=>el===document.activeElement))throw Error(`${id} passage click did not restore typing focus`);
+   }
    await page.locator(input).press('Tab');
    await page.getByRole('button',{name:id==='full-assessment'?'END ASSESSMENT':id==='real-text'?'STOP':'END SESSION',exact:true}).focus();await page.keyboard.press('Enter');
    await page.locator(selector).waitFor();

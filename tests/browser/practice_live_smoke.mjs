@@ -11,7 +11,7 @@ const report={url:base,commit:process.env.GITHUB_SHA??null,status:'FAIL',assets:
 const assetPaths=['index.html','sw.js','practiceLabPlayability.css','js/practiceLab/practiceHostDom.js','js/practiceLab/practiceEntityResolver.js','js/practiceLab/practiceTargetSessionRendering.js'];
 let browser;
 try{
- const deadline=Date.now()+900000;
+ const deadline=Date.now()+5400000;
  for(;;){
   const matches=await Promise.all(assetPaths.map(async file=>{
    try{

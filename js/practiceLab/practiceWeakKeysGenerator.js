@@ -481,15 +481,37 @@ async function composeWeakKeysPhases({ sessionId, context, target, targetIndex, 
   const generatedContext = generatedTargetPool(wordCandidates, PRACTICE_WEAK_KEYS_PHASE_QUOTAS.context, { compositionMode: "generated-word-sequence", salt: "context" });
   const contextPreferred = [...naturalCandidates.filter((unit) => !probeFamilies.has(unit.familyId) && !probeContents.has(unit.contentId)), ...generatedContext.filter((unit) => !(unit.sourceFamilyIds ?? []).some((id) => probeFamilies.has(id)) && !(unit.sourceContentIds ?? []).some((id) => probeContents.has(id)))];
   const fullContextPool = [...naturalCandidates, ...generatedContext];
-  const contextSelection = (contextPreferred.length ? selectPracticeWeakKeysExactQuota(contextPreferred, PRACTICE_WEAK_KEYS_PHASE_QUOTAS.context, {
-    sessionId, entityKey: target.entityKey, generatorVersion: PRACTICE_WEAK_KEYS_GENERATOR_VERSION, policyVersion: policy.version, salt: "context-preferred",
-  }) : null) ?? selectPracticeWeakKeysExactQuota(fullContextPool, PRACTICE_WEAK_KEYS_PHASE_QUOTAS.context, {
-    sessionId, entityKey: target.entityKey, generatorVersion: PRACTICE_WEAK_KEYS_GENERATOR_VERSION, policyVersion: policy.version, salt: "context-fallback",
-  });
-  if (!contextSelection) throw createPracticeWeakKeysError(PRACTICE_WEAK_KEYS_ERRORS.INSUFFICIENT_KEY_CONTENT, "Weak Keys Context phase cannot satisfy its exact target quota");
-  const supportPositionClasses = new Set([...naturalCandidates, ...generatedContext].flatMap((unit) => unit.positionClasses ?? [])).size;
-  if (supportPositionClasses >= policy.content.minimumContextPositionClassesWhenAvailable && contextSelection.metrics.positionClassCount < policy.content.minimumContextPositionClassesWhenAvailable) {
-    throw createPracticeWeakKeysError(PRACTICE_WEAK_KEYS_ERRORS.INSUFFICIENT_POSITION_VARIETY, "Weak Keys Context phase could not preserve available word-position diversity");
+  const supportPositionClasses = new Set(fullContextPool.flatMap((unit) => unit.positionClasses ?? [])).size;
+  const requiredContextPositionClasses = supportPositionClasses >= policy.content.minimumContextPositionClassesWhenAvailable
+    ? policy.content.minimumContextPositionClassesWhenAvailable
+    : 0;
+  const selectContext = (pool, saltBase) => {
+    if (!pool.length) return { selection: null, anySelection: null };
+    let anySelection = null;
+    for (let attempt = 0; attempt < 32; attempt += 1) {
+      const selection = selectPracticeWeakKeysExactQuota(pool, PRACTICE_WEAK_KEYS_PHASE_QUOTAS.context, {
+        sessionId,
+        entityKey: target.entityKey,
+        generatorVersion: PRACTICE_WEAK_KEYS_GENERATOR_VERSION,
+        policyVersion: policy.version,
+        salt: `${saltBase}:${attempt}`,
+      });
+      if (!selection) continue;
+      anySelection ??= selection;
+      if (!requiredContextPositionClasses || selection.metrics.positionClassCount >= requiredContextPositionClasses) {
+        return { selection, anySelection };
+      }
+    }
+    return { selection: null, anySelection };
+  };
+  const preferredContext = selectContext(contextPreferred, "context-preferred");
+  const fallbackContext = preferredContext.selection ? { selection: null, anySelection: null } : selectContext(fullContextPool, "context-fallback");
+  const contextSelection = preferredContext.selection ?? fallbackContext.selection;
+  if (!contextSelection) {
+    if (requiredContextPositionClasses && (preferredContext.anySelection || fallbackContext.anySelection)) {
+      throw createPracticeWeakKeysError(PRACTICE_WEAK_KEYS_ERRORS.INSUFFICIENT_POSITION_VARIETY, "Weak Keys Context phase could not preserve available word-position diversity");
+    }
+    throw createPracticeWeakKeysError(PRACTICE_WEAK_KEYS_ERRORS.INSUFFICIENT_KEY_CONTENT, "Weak Keys Context phase cannot satisfy its exact target quota");
   }
 
   const mixTargetPool = generatedTargetPool(wordCandidates, PRACTICE_WEAK_KEYS_PHASE_QUOTAS.interleave, { compositionMode: "generated-word-sequence", salt: "mix-target" });
