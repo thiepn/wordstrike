@@ -74,6 +74,9 @@ jobs:
       - name: Research probe stable typing capture
         if: ${{ !cancelled() && matrix.browser == 'chromium' }}
         run: node tests/browser/practice_research_probe_input.mjs
+      - name: Daily Coach review stable typing capture
+        if: ${{ !cancelled() && matrix.browser == 'chromium' }}
+        run: node tests/browser/practice_coach_review_input.mjs
       - name: Assessment and protected protocol regression
         if: ${{ !cancelled() }}
         run: node tests/browser/practice_completion.mjs
