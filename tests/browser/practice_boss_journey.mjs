@@ -203,8 +203,12 @@ try{
     if(await page.locator('[data-practice-view="weakness-boss-result"]').count())break;
     const passage=page.locator('.practice-weak-key-typing');
     await passage.waitFor({state:'visible'});
-    const cursor=await bossCursor(page);
-    assert.ok(cursor&&Number.isInteger(cursor.index),'Active Boss session must expose one current character');
+    let cursor=await bossCursor(page);
+    if(!cursor){
+      await page.locator('[data-practice-view="weakness-boss-result"]').waitFor({state:'visible',timeout:5000});
+      break;
+    }
+    assert.ok(Number.isInteger(cursor.index),'Active Boss session must expose one current character');
     assert.ok(cursor.index>previousCursor,`Boss cursor stalled at ${cursor.index} during ${cursor.phase}`);
     previousCursor=cursor.index;
     const text=await remainingBossText(page);
