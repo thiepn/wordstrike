@@ -16,6 +16,24 @@ function setup(storage=quotaStorage(),dataStore=createPracticeMemoryStore()){
  const manifestStore=createPracticeManifestStore({storage,defaultOptions:{now}});
  const repository=createPracticeRepository({dataStore,manifestStore,now});return {manifestStore,repository,dataStore,storage};
 }
+test('Practice initialization succeeds when accessing global localStorage itself throws',async()=>{
+ const descriptor=Object.getOwnPropertyDescriptor(globalThis,'localStorage');
+ Object.defineProperty(globalThis,'localStorage',{configurable:true,get(){throw new DOMException('blocked','SecurityError');}});
+ try{
+  const dataStore=createPracticeMemoryStore();
+  const manifestStore=createPracticeManifestStore({defaultOptions:{now}});
+  const repository=createPracticeRepository({dataStore,manifestStore,now});
+  const initialized=await repository.initializePracticeStorage();
+  assert.ok(initialized.profile.profileId);
+  assert.equal(manifestStore.load().backend,'indexeddb');
+  assert.equal(manifestStore.load().mirrorWarning,'localstorage-unavailable');
+  assert.equal((await dataStore.list('profiles')).length,1);
+ }finally{
+  if(descriptor)Object.defineProperty(globalThis,'localStorage',descriptor);
+  else delete globalThis.localStorage;
+ }
+});
+
 test('first-ever Practice initialization succeeds without any writable localStorage and persists its identity',async()=>{
  const a=setup();const initial=await a.repository.initializePracticeStorage();
  assert.ok(initial.profile.profileId);assert.equal(a.manifestStore.load().mirrorWarning,'localstorage-full');
