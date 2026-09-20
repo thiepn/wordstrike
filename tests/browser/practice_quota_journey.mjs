@@ -12,7 +12,8 @@ const browser=await ({chromium,firefox,webkit}[browserName]).launch();const repo
 async function rows(page,table){return page.evaluate(async({base,table})=>{const {createPracticeIndexedDbStore}=await import(new URL('js/practiceLab/practiceIndexedDbStore.js',base));const s=createPracticeIndexedDbStore();await s.open();try{return await s.list(table);}finally{s.close();}},{base,table});}
 async function openCoach(page){await page.locator('[data-action="modes"]').click();await page.locator('[data-mode-id="practice"]').click();await page.locator('.pl-navigation [data-route="daily-training"]').click();}
 try{for(const mode of ['fresh-full','existing-full']){
- const width=Number(process.env.PRACTICE_WIDTH??1280);\n const context=await browser.newContext({viewport:{width,height:900},hasTouch:width<600,serviceWorkers:'block'});
+ const width=Number(process.env.PRACTICE_WIDTH??1280);
+ const context=await browser.newContext({viewport:{width,height:900},hasTouch:width<600,serviceWorkers:'block'});
  await context.addInitScript(()=>{if(!localStorage.getItem('wordstrike.onboarding.general.v3'))localStorage.setItem('wordstrike.onboarding.general.v3','seen');});
  const page=await context.newPage();page.setDefaultTimeout(20000);const report={mode,browser:browserName,width,status:'FAIL',errors:[]};page.on('pageerror',e=>report.errors.push(e.message));
  try{
