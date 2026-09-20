@@ -33,7 +33,9 @@ try{
     ]=await Promise.all([
       import('/js/practiceLab/practiceLabControllerRuntimeV25.js'),
       import('/js/practiceLab/practiceFeatureGate.js'),
-      import('/js/practiceLab/practiceExperimentRegistry.js'),
+      // This harness constructs the controller directly, outside the production
+      // lazy-loader bootstrap, so use the concrete registry runtime here.
+      import('/js/practiceLab/practiceExperimentRegistryRuntime.js'),
       import('/js/practiceLab/practiceLabRoutes.js'),
     ]);
 
