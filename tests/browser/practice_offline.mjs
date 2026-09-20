@@ -37,7 +37,7 @@ try {
  check('fresh offline document boots production shell');
  await page.locator('[data-action="modes"]').click();
  await page.locator('button[data-mode-id="practice"]').click();
- await page.locator('[data-route="skill-map"]').waitFor();
+ await page.locator('.pl-navigation [data-route="skill-map"]').waitFor();
  assert.ok(!page.url().includes('dev='));
  check('public offline navigation opens Practice Lab without developer flags');
  await page.locator('[data-practice-action="open-experiment"][data-experiment-id="full-assessment"]').first().click();
@@ -68,7 +68,7 @@ try {
  await page.reload();
  await page.locator('[data-action="modes"]').click();
  await page.locator('button[data-mode-id="practice"]').click();
- await page.locator('[data-route="progress"]').click();
+ await page.locator('.pl-navigation [data-route="progress"]').click();
  const history=page.locator('[data-practice-history]');
  await history.getByText(/read-ahead/).first().waitFor({timeout:15000}).catch(async error=>{throw new Error(error.message+'\n'+await page.locator('body').innerText());});
  assert.match(await history.innerText(),/metronome-typing/);
