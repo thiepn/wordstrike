@@ -10,8 +10,8 @@ const CATEGORIES = new Set([...Object.values(LEADERBOARD_CATEGORIES), LEGACY_DAI
 export function validateLeaderboardReturnState(value) {
   if (!value || typeof value !== "object" || Array.isArray(value)) return null;
   if (Object.keys(value).some((key) => !["screen", "selectedCategory", "typingDuration"].includes(key))) return null;
-  if (value.screen === "title" && Object.keys(value).length === 1) {
-    return Object.freeze({ screen: "title" });
+  if (["title", "campaign"].includes(value.screen) && Object.keys(value).length === 1) {
+    return Object.freeze({ screen: value.screen });
   }
   if (value.screen !== "leaderboards" || !CATEGORIES.has(value.selectedCategory)) return null;
   // AR14 redirects any pre-cutover Daily OAuth return to the replacement board.

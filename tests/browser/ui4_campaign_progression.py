@@ -95,8 +95,13 @@ def inspect_desktop(browser, base, browser_name, evidence):
     assert page.locator('[data-level="20"].is-boss:disabled').count() == 1
     expect(page.locator('[data-level="1"] .campaign-node-state')).to_have_text("S")
     expect(page.locator(".campaign-progress-count strong")).to_have_text("17")
-    expect(page.locator(".campaign-mission-heading strong")).to_have_text("LEVEL 01")
-    expect(page.locator(".campaign-mission-metric").first.locator("strong")).to_have_text("S")
+    # Returning to Campaign resumes at the actual frontier instead of resetting
+    # the selected mission to Level 1.
+    expect(page.locator(".campaign-mission-heading strong")).to_have_text("LEVEL 17")
+    expect(page.locator(".campaign-mission-metric").first.locator("strong")).to_have_text("—")
+    expect(page.locator(".campaign-placement-strip")).to_be_visible()
+    expect(page.locator("[data-campaign-placement]")).to_be_visible()
+    expect(page.locator("[data-campaign-account-state]")).to_be_visible()
 
     geometry = page.evaluate("""() => ({
       docOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
@@ -112,18 +117,16 @@ def inspect_desktop(browser, base, browser_name, evidence):
     node_box = page.locator('[data-level="1"]').bounding_box()
     assert node_box and node_box["width"] >= 44 and node_box["height"] >= 44, node_box
 
-    assert selected_level(page) == "1"
-    page.keyboard.press("ArrowRight")
-    assert selected_level(page) == "2"
-    page.keyboard.press("ArrowDown")
-    assert selected_level(page) == "12", selected_level(page)
+    assert selected_level(page) == "17"
+    page.keyboard.press("ArrowLeft")
+    assert selected_level(page) == "16"
     page.keyboard.press("ArrowUp")
-    assert selected_level(page) == "2"
+    assert selected_level(page) == "6", selected_level(page)
+    page.keyboard.press("ArrowDown")
+    assert selected_level(page) == "16"
 
-    # Move to the furthest unlocked mission and ensure self-scroll keeps focus visible.
-    page.keyboard.press("ArrowDown")  # 12
-    for _ in range(5):
-        page.keyboard.press("ArrowRight")
+    # Return to the furthest unlocked mission and ensure self-scroll keeps focus visible.
+    page.keyboard.press("ArrowRight")
     assert selected_level(page) == "17"
     visibility = page.locator('[data-level="17"]').evaluate("""el => {
       const owner = document.querySelector('[data-campaign-route-scroll]');
@@ -160,15 +163,15 @@ def inspect_mobile(browser, base, browser_name, evidence):
 
     columns = page.locator(".campaign-sector-track").first.evaluate("el => getComputedStyle(el).gridTemplateColumns.split(' ').length")
     assert columns == 5, columns
-    assert selected_level(page) == "1"
-    page.keyboard.press("ArrowDown")
-    assert selected_level(page) == "6", selected_level(page)
-    page.keyboard.press("ArrowRight")
-    assert selected_level(page) == "7"
+    assert selected_level(page) == "17"
+    page.keyboard.press("ArrowLeft")
+    assert selected_level(page) == "16", selected_level(page)
     page.keyboard.press("ArrowUp")
-    assert selected_level(page) == "2"
+    assert selected_level(page) == "11"
+    page.keyboard.press("ArrowRight")
+    assert selected_level(page) == "12"
 
-    node_box = page.locator('[data-level="2"]').bounding_box()
+    node_box = page.locator('[data-level="12"]').bounding_box()
     assert node_box and node_box["width"] >= 52 and node_box["height"] >= 54, node_box
     overflow = page.evaluate("document.documentElement.scrollWidth - document.documentElement.clientWidth")
     assert overflow <= 1, overflow

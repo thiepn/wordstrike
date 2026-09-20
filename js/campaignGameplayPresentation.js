@@ -110,12 +110,23 @@ function enhanceHud(screen) {
   progressFill.className = "campaign-mission-progress-fill";
   progress.append(progressFill);
 
+  const readout = document.createElement("span");
+  readout.className = "campaign-typing-readout";
+  readout.dataset.campaignTypingReadout = "";
+  readout.setAttribute("aria-live", "polite");
+  readout.setAttribute("aria-label", "Current Campaign typing target");
+  const readoutTyped = document.createElement("strong");
+  readoutTyped.dataset.campaignTypingReadoutTyped = "";
+  const readoutRemaining = document.createElement("span");
+  readoutRemaining.dataset.campaignTypingReadoutRemaining = "";
+  readout.append(readoutTyped, readoutRemaining);
+
   const target = document.createElement("span");
   target.className = "campaign-target-state";
   target.dataset.campaignTargetState = "";
   target.textContent = "SCANNING";
 
-  secondary.append(threat, progress, target);
+  secondary.append(threat, progress, readout, target);
   hud.replaceChildren(primary, secondary);
 }
 
@@ -169,6 +180,36 @@ function targetingCopy(game) {
   return "SCANNING";
 }
 
+function syncTypingReadout(screen, game) {
+  const targeting = game?.targetingState ?? {};
+  const activeId = targeting.activeTargetId ?? game?.activeTargetId ?? null;
+  const candidateIds = Array.isArray(targeting.candidateIds) ? targeting.candidateIds : [];
+  const fallbackId = candidateIds.length === 1 ? candidateIds[0] : null;
+  const targetId = activeId ?? fallbackId;
+  const word = targetId == null
+    ? null
+    : game?.words?.find?.((entry) => String(entry.id) === String(targetId)) ?? null;
+  const prefix = String(targeting.prefix ?? "");
+
+  let typedText = "";
+  let remainingText = "TYPE ANY VISIBLE WORD";
+  if (word) {
+    const typedIndex = activeId != null
+      ? Math.max(0, Number(word.typedIndex) || 0)
+      : Math.min(prefix.length, word.text.length);
+    typedText = word.text.slice(0, typedIndex);
+    remainingText = word.text.slice(typedIndex) || "✓";
+  } else if (prefix) {
+    typedText = prefix;
+    remainingText = candidateIds.length > 1 ? ` · ${candidateIds.length} MATCHES` : "…";
+  }
+
+  setText(screen.querySelector("[data-campaign-typing-readout-typed]"), typedText);
+  setText(screen.querySelector("[data-campaign-typing-readout-remaining]"), remainingText);
+  const readout = screen.querySelector("[data-campaign-typing-readout]");
+  if (readout) readout.dataset.active = typedText ? "true" : "false";
+}
+
 function syncIntegrity(screen, lives) {
   const safeLives = Math.max(0, Math.min(MAX_INTEGRITY, Number.isFinite(lives) ? Math.round(lives) : MAX_INTEGRITY));
   screen.dataset.coreIntegrity = String(safeLives);
@@ -198,6 +239,7 @@ function syncPresentation(screen) {
   setText(screen.querySelector("[data-campaign-resolved]"), `${resolved} / ${total}`);
   setText(screen.querySelector("[data-campaign-combo-count]"), comboCount);
   setText(screen.querySelector("[data-campaign-target-state]"), targetingCopy(game));
+  syncTypingReadout(screen, game);
 
   const progress = screen.querySelector("[data-campaign-progress]");
   if (progress) {

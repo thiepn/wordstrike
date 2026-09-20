@@ -1,12 +1,13 @@
 import { calculateGrade } from "./scoring.js";
 import { normalizeSpeedTestFontSize } from "./speedTestPresentation.js";
-import { getSpeedTestRecord } from "./modeStorage.js";
+import { getRecentSessions, getSpeedTestRecord } from "./modeStorage.js";
 
 import { createDefaultCustomization, normalizeCustomization, normalizeCustomizationValue } from "./customization.js";
 
 import { normalizeModeCustomizationValue } from "./modeCustomization.js";
 
 const STORAGE_KEY = "wordstrike_save";
+export const CAMPAIGN_BACKUP_KEY = "wordstrike_campaign_progress_v1";
 const CAMPAIGN_TYPING_TEST_CONFIG_ID = "time-60";
 
 export const CAMPAIGN_SPEED_UNLOCKS = Object.freeze([
@@ -49,6 +50,49 @@ export function getCampaignBest60SecondWpm() {
 export function getCampaignSpeedUnlockLevel() {
   return getCampaignSpeedUnlockLevelFromWpm(getCampaignBest60SecondWpm());
 }
+
+export function getCampaignPlacementSummary(bestWpm = getCampaignBest60SecondWpm()) {
+  const safeWpm = Number.isFinite(Number(bestWpm)) ? Math.max(0, Number(bestWpm)) : 0;
+  const level = getCampaignSpeedUnlockLevelFromWpm(safeWpm);
+  const next = CAMPAIGN_SPEED_UNLOCKS.find((checkpoint) => checkpoint.wpm > safeWpm) ?? null;
+  return Object.freeze({
+    bestWpm: safeWpm,
+    level,
+    placed: level > 1,
+    nextWpm: next?.wpm ?? null,
+    nextLevel: next?.level ?? null,
+  });
+}
+
+export function getCampaignResumeLevel(
+  save,
+  speedUnlockLevel = getCampaignSpeedUnlockLevel(),
+) {
+  const progressLevel = normalizeCampaignLevel(
+    save?.campaignFurthestLevel ?? save?.currentFurthestLevel ?? 1,
+  );
+  const checkpointLevel = normalizeCampaignLevel(speedUnlockLevel);
+  if (checkpointLevel > progressLevel && isCampaignSpeedCheckpointUnlocked(checkpointLevel, checkpointLevel)) {
+    return checkpointLevel;
+  }
+  return progressLevel;
+}
+
+export function isCampaignEstablished(save, bestWpm = getCampaignBest60SecondWpm()) {
+  if ((Number(bestWpm) || 0) > 0) return true;
+  if (normalizeCampaignFurthestLevel(save?.campaignFurthestLevel ?? save?.currentFurthestLevel) > 1) return true;
+  return Object.values(save?.levels || {}).some((record) => (
+    record?.grade && record.grade !== "Fail"
+  ));
+}
+
+export function hasExperiencedCampaignBoss(save) {
+  if (normalizeCampaignFurthestLevel(save?.campaignFurthestLevel ?? save?.currentFurthestLevel) > 10) {
+    return true;
+  }
+  return Object.values(save?.levels || {}).some((record) => record?.bossCleared === true);
+}
+
 
 function normalizeCampaignLevel(value) {
   return Math.max(1, Math.min(100, Math.trunc(Number(value) || 1)));
@@ -172,17 +216,194 @@ function getStorage() {
   }
 }
 
+function campaignSnapshot(save) {
+  return {
+    version: 1,
+    campaignFurthestLevel: normalizeCampaignFurthestLevel(
+      save?.campaignFurthestLevel ?? save?.currentFurthestLevel,
+    ),
+    levels: save?.levels && typeof save.levels === "object"
+      ? JSON.parse(JSON.stringify(save.levels))
+      : {},
+    updatedAt: Date.now(),
+  };
+}
+
+function readCampaignBackup(storage) {
+  try {
+    const raw = storage?.getItem?.(CAMPAIGN_BACKUP_KEY);
+    if (!raw) return null;
+    const value = JSON.parse(raw);
+    if (!value || value.version !== 1 || typeof value.levels !== "object") return null;
+    return value;
+  } catch {
+    return null;
+  }
+}
+
+function persistCampaignBackup(save, storage = getStorage()) {
+  if (!storage?.setItem) return false;
+  try {
+    storage.setItem(CAMPAIGN_BACKUP_KEY, JSON.stringify(campaignSnapshot(save)));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function mergeCampaignRecords(primary, backup) {
+  if (!primary) return backup && typeof backup === "object" ? { ...backup } : backup;
+  if (!backup) return primary && typeof primary === "object" ? { ...primary } : primary;
+  if (typeof primary !== "object" || typeof backup !== "object") return primary ?? backup;
+
+  const merged = { ...backup, ...primary };
+  const hasOwn = (record, key) => Object.prototype.hasOwnProperty.call(record, key);
+  const mergeMaximum = (key) => {
+    const values = [primary, backup]
+      .filter((record) => hasOwn(record, key))
+      .map((record) => Number(record[key]))
+      .filter(Number.isFinite);
+    if (values.length > 0) merged[key] = Math.max(...values);
+    else if (!hasOwn(primary, key) && !hasOwn(backup, key)) delete merged[key];
+  };
+
+  for (const key of [
+    "bestWPM",
+    "bestAccuracy",
+    "bestScore",
+    "maxCombo",
+    "bestTimeRemaining",
+  ]) mergeMaximum(key);
+
+  if (hasOwn(primary, "bossCleared") || hasOwn(backup, "bossCleared")) {
+    merged.bossCleared = primary.bossCleared === true || backup.bossCleared === true;
+  } else {
+    delete merged.bossCleared;
+  }
+
+  if (hasOwn(merged, "bestAccuracy") && Number.isFinite(Number(merged.bestAccuracy))) {
+    merged.grade = calculateGrade({ accuracy: Number(merged.bestAccuracy) });
+  } else if (!hasOwn(primary, "grade") && !hasOwn(backup, "grade")) {
+    delete merged.grade;
+  }
+
+  return merged;
+}
+
+function recoverCampaignFromRecentSessions(save) {
+  let sessions = [];
+  try {
+    sessions = getRecentSessions();
+  } catch {
+    return save;
+  }
+
+  let highestRecoveredLevel = normalizeCampaignFurthestLevel(
+    save.campaignFurthestLevel ?? save.currentFurthestLevel,
+  );
+  let recoveredAny = false;
+
+  for (const session of sessions) {
+    if (
+      session?.modeId !== "campaign" ||
+      session.success !== true ||
+      !Number.isInteger(Number(session.modeData?.level))
+    ) continue;
+
+    const level = normalizeCampaignLevel(session.modeData.level);
+    const accuracy = Number(session.accuracy);
+    const recovered = {
+      grade: typeof session.grade === "string"
+        ? session.grade
+        : calculateGrade({ accuracy: Number.isFinite(accuracy) ? accuracy : 0 }),
+      bestWPM: Math.max(0, Number(session.wpm) || 0),
+      bestAccuracy: Math.max(0, Math.min(100, Number.isFinite(accuracy) ? accuracy : 0)),
+      bestScore: Math.max(0, Number(session.score) || 0),
+      maxCombo: Math.max(0, Number(session.modeData?.maxCombo) || 0),
+      bestTimeRemaining: Math.max(0, Number(session.modeData?.bossTimeRemainingMs) || 0) / 1000,
+      bossCleared: level % 10 === 0,
+    };
+    const key = String(level);
+    save.levels[key] = mergeCampaignRecords(save.levels[key], recovered);
+    highestRecoveredLevel = Math.max(highestRecoveredLevel, Math.min(100, level + 1));
+    recoveredAny = true;
+  }
+
+  if (recoveredAny) {
+    save.campaignFurthestLevel = highestRecoveredLevel;
+    save.currentFurthestLevel = highestRecoveredLevel;
+  }
+  return save;
+}
+
+function recoverCampaignProgress(save, backup) {
+  if (!backup) return save;
+  const backupFurthest = normalizeCampaignFurthestLevel(backup.campaignFurthestLevel);
+  const currentFurthest = normalizeCampaignFurthestLevel(
+    save.campaignFurthestLevel ?? save.currentFurthestLevel,
+  );
+  const allKeys = new Set([
+    ...Object.keys(backup.levels || {}),
+    ...Object.keys(save.levels || {}),
+  ]);
+  const levels = {};
+  for (const key of allKeys) {
+    levels[key] = mergeCampaignRecords(save.levels?.[key], backup.levels?.[key]);
+  }
+  save.levels = levels;
+  const recoveredFurthest = Math.max(currentFurthest, backupFurthest);
+  save.campaignFurthestLevel = recoveredFurthest;
+  save.currentFurthestLevel = recoveredFurthest;
+  return save;
+}
+
+
 export function loadSave() {
   const storage = getStorage();
   if (!storage) return createDefaultSave();
+
+  let save = createDefaultSave();
+  let validPrimary = false;
   try {
     const raw = storage.getItem(STORAGE_KEY);
-    const save = raw ? validateSave(JSON.parse(raw)) : createDefaultSave();
-    saveGame(save);
-    return save;
+    if (raw) {
+      save = validateSave(JSON.parse(raw));
+      validPrimary = true;
+    }
   } catch {
-    return createDefaultSave();
+    // Do not overwrite a malformed primary save with defaults. A compact,
+    // independently-written Campaign backup may still contain valid progress.
   }
+
+  const backup = readCampaignBackup(storage);
+  let recovered = recoverCampaignProgress(save, backup);
+  if (!validPrimary && !backup) {
+    // The mode-history store is independent of the Campaign route save. If the
+    // primary Campaign save was already lost before this repair shipped, use
+    // successful recent Campaign sessions as a best-effort high-water recovery.
+    recovered = recoverCampaignFromRecentSessions(recovered);
+    if (
+      normalizeCampaignFurthestLevel(recovered.campaignFurthestLevel) > 1 ||
+      Object.keys(recovered.levels || {}).length > 0
+    ) {
+      persistCampaignBackup(recovered, storage);
+      saveGame(recovered);
+    }
+  }
+  if (validPrimary) {
+    // Keep the historical migration contract: a valid primary save is normalized
+    // and written back on load. Malformed primary data is never overwritten.
+    saveGame(recovered);
+    if (
+      normalizeCampaignFurthestLevel(recovered.campaignFurthestLevel) > 1 ||
+      Object.keys(recovered.levels || {}).length > 0
+    ) {
+      // Existing players receive recovery protection immediately on first load
+      // after this migration, rather than only after completing another mission.
+      persistCampaignBackup(recovered, storage);
+    }
+  }
+  return recovered;
 }
 
 export function saveGame(save) {
@@ -197,7 +418,7 @@ export function saveGame(save) {
 }
 
 export function updateLevelResult(save, levelNumber, result) {
-  if (result.grade === "Fail") return;
+  if (result.grade === "Fail") return false;
   const key = String(levelNumber);
   const previous = save.levels[key];
   const bestAccuracy = Math.max(previous?.bestAccuracy || 0, result.accuracy);
@@ -214,10 +435,15 @@ export function updateLevelResult(save, levelNumber, result) {
   const campaignFurthestLevel = normalizeCampaignFurthestLevel(
     save.campaignFurthestLevel ?? save.currentFurthestLevel,
   );
-  const nextCampaignFurthestLevel = Math.max(campaignFurthestLevel, levelNumber + 1);
+  const nextCampaignFurthestLevel = Math.min(100, Math.max(campaignFurthestLevel, levelNumber + 1));
   save.campaignFurthestLevel = nextCampaignFurthestLevel;
   save.currentFurthestLevel = nextCampaignFurthestLevel;
-  saveGame(save);
+
+  // Write the compact Campaign backup first. It can still fit when the larger
+  // shared save is at quota and prevents a completed mission from disappearing.
+  const backupPersisted = persistCampaignBackup(save);
+  const primaryPersisted = saveGame(save);
+  return backupPersisted || primaryPersisted;
 }
 
 export function updateSetting(save, setting, value) {
@@ -242,7 +468,8 @@ export function resetProgress(save) {
   save.campaignFurthestLevel = 1;
   save.currentFurthestLevel = 1;
   save.levels = {};
-  saveGame(save);
+  persistCampaignBackup(save);
+  return saveGame(save);
 }
 
 /** Appearance-only writes use validated strings, not the legacy boolean setter. */

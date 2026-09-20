@@ -27,6 +27,11 @@ assert.match(ui, /aria-label="Campaign progression map"/);
 assert.match(ui, /aria-current="\$\{level === safeSelected \? "true" : "false"\}"/);
 assert.match(ui, /\.campaign-node:not\(:disabled\)/);
 assert.match(ui, /data-campaign-route-scroll/);
+assert.match(ui, /class="campaign-placement-strip"/);
+assert.match(ui, /data-campaign-placement/);
+assert.match(ui, /data-campaign-account-state/);
+assert.match(ui, /data-campaign-account="sign-in"/);
+assert.match(ui, /data-campaign-leaderboard/);
 assert.doesNotMatch(ui, /class="level-grid/);
 assert.doesNotMatch(ui, /class="level-tile/);
 
@@ -36,6 +41,9 @@ assert.match(css, /@media\(max-width:720px\)[\s\S]*\.campaign-sector-track\{[^}]
 assert.match(css, /\.campaign-node\{[^}]*min-width:44px[^}]*min-height:58px/);
 assert.match(css, /\.campaign-node\.is-boss/);
 assert.match(css, /prefers-reduced-motion:reduce/);
+assert.match(css, /\.campaign-placement-strip/);
+assert.match(css, /\.campaign-account-state/);
+assert.match(css, /grid-template-rows:auto auto auto minmax\(0,1fr\) auto/);
 assert.doesNotMatch(css, /practice-lab/i);
 
 assert.doesNotMatch(legacyCss, /\.level-grid(?:[\s,{.:])/);
@@ -46,6 +54,10 @@ assert.doesNotMatch(systemCss, /\.level-tile(?:[\s,{.:])/);
 assert.match(main, /function getCampaignProgressionColumns\(\)/);
 assert.match(main, /matchMedia\?\.\("\(max-width: 720px\)"\)/);
 assert.match(main, /getCampaignProgressionColumns\(\),/);
+assert.match(main, /getCampaignResumeLevel\(appState\.save\)/);
+assert.match(main, /!isCampaignEstablished\(appState\.save\)/);
+assert.match(main, /function startCampaignPlacement\(\)/);
+assert.match(main, /saveLeaderboardReturnState\(\{ screen: "campaign" \}\)/);
 assert.equal(moveLevelGridSelection(1, "ArrowDown", 100, 10), 11);
 assert.equal(moveLevelGridSelection(11, "ArrowUp", 100, 10), 1);
 assert.equal(moveLevelGridSelection(1, "ArrowDown", 100, 5), 6);
