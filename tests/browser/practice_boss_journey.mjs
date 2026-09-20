@@ -106,12 +106,12 @@ try{
     ]);
     const targetIndex=createPracticeTargetIndex({loader:indexLoader,corpusManifest,indexManifest});
     const candidate=Object.freeze({
-      statId:'skill:key:e',entityType:'key',entityKey:'e',
-      limiterStatus:'confirmed',phenotype:'slow',hierarchyStatus:'independent',
+      statId:'skill:word:the',entityType:'word',entityKey:'the',
+      limiterStatus:'confirmed',phenotype:'launch-limited',hierarchyStatus:'independent',
       priorityScore:90,impactScore:80,limiterConfidence:.95,weaknessScore:90,
       masteryStage:'learning',saturationStatus:'not-detected',marginalGainBand:'high',
       bossTargetUtility:90,contentReady:true,
-      bossTheme:Object.freeze({...PRACTICE_WEAKNESS_BOSS_ARCHETYPES.slow}),
+      bossTheme:Object.freeze({...PRACTICE_WEAKNESS_BOSS_ARCHETYPES['launch-limited']}),
       reasonCodes:Object.freeze(['confirmed-limiter','high-impact','learning-headroom','independent-limiter','slow-pattern']),
     });
     const corpusBinding=Object.freeze({
@@ -157,7 +157,17 @@ try{
   await start.click();
 
   const input=page.locator('[data-weakness-boss-input]');
-  await input.waitFor({state:'visible',timeout:30000});
+  try {
+    await input.waitFor({state:'visible',timeout:30000});
+  } catch (error) {
+    const diagnostics=await page.evaluate(()=>({
+      weaknessBoss:window.__bossLab?.getSnapshot?.().weaknessBoss??null,
+      view:document.querySelector('[data-practice-view]')?.getAttribute('data-practice-view')??null,
+      alert:document.querySelector('[role="alert"]')?.textContent??null,
+      body:document.body.innerText.slice(0,4000),
+    }));
+    throw new Error(`Weakness Boss did not mount its typing session: ${JSON.stringify(diagnostics)}\n${error.message}`);
+  }
   assert.ok(await input.evaluate(node=>node===document.activeElement),'Weakness Boss must focus its typing capture automatically');
 
   const current=page.locator('.practice-weak-key-typing .is-current').first();

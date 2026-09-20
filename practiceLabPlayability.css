@@ -4,6 +4,9 @@
 .practice-lab-screen .practice-real-text-char.is-typed {color:var(--text-primary,#edf4fa);}
 .practice-lab-screen .practice-real-text-char.is-error {color:#ff8d95;background:#602a324d;text-decoration:underline wavy;}
 .practice-lab-screen .practice-real-text-char.is-current {color:var(--text-primary,#fff);background:#00d4c51c;box-shadow:inset 3px 0 0 var(--primary,#00dfcd);text-decoration:underline;text-underline-offset:.22em;}
+/* Collapsing whitespace can otherwise give the active/error span a zero-width
+   client rect. Keep a small paint box without changing the canonical text. */
+.practice-lab-screen :is(.practice-real-text-char,.practice-weak-key-char,.practice-combination-char):is(.is-current,.is-error) {display:inline-block;min-inline-size:.62ch;}
 .practice-lab-screen .practice-session-input {display:block;box-sizing:border-box;width:100%;min-height:48px;margin:1rem 0;padding:12px 14px;border:1px solid var(--border-subtle,#3b4758);border-radius:6px;background:var(--bg-panel,#101820);color:var(--text-primary,#edf4fa);font:inherit;font-size:16px;resize:vertical;}
 .practice-lab-screen .practice-session-input:focus-visible,.practice-lab-screen button:focus-visible {outline:2px solid var(--primary,#00dfcd);outline-offset:3px;}
 .practice-lab-screen :is(.practice-real-text-typing,.practice-weak-key-typing,.practice-combination-typing,[data-protocol-text]):focus-visible {outline:2px solid var(--primary,#00dfcd);outline-offset:3px;}
