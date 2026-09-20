@@ -1,0 +1,43 @@
+name: Practice Post-Stabilization
+on:
+  push:
+    branches: [fix/practice-post-stabilization]
+permissions:
+  contents: read
+jobs:
+  focused:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    container:
+      image: mcr.microsoft.com/playwright:v1.57.0-noble
+      options: --ipc=host
+    env:
+      HOME: /root
+      PRACTICE_BROWSER: firefox
+      PRACTICE_BROWSERS: firefox
+      PRACTICE_WIDTHS: '1280'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --no-save playwright@1.57.0 axe-core@4.10.3
+      - name: Accessibility audit
+        run: node tests/browser/practice_accessibility.mjs
+      - name: Practice identity Firefox
+        run: node tests/browser/practice_identity.mjs
+      - name: Retained-heap performance
+        run: node tests/browser/practice_performance.mjs
+  ui3:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    container:
+      image: mcr.microsoft.com/playwright/python:v1.57.0-noble
+      options: --ipc=host
+    env:
+      HOME: /root
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install -r tests/browser/requirements.txt
+      - name: Mode Select and Practice route
+        run: python3 tests/browser/ui3_mode_select.py
