@@ -1,0 +1,27 @@
+name: Practice Focus Ownership Verify
+on:
+  push:
+    branches: [verify/practice-focus-ownership-current]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    container:
+      image: mcr.microsoft.com/playwright:v1.57.0-noble
+      options: --ipc=host
+    env:
+      HOME: /root
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: |
+          node --check js/practiceLab/practiceWeaknessBossSessionHost.js
+          node --check js/practiceLab/practiceResearchProbeSessionHost.js
+          node --check js/practiceLab/practiceCoachReviewSessionHost.js
+          node --check tests/browser/practice_focus_ownership.mjs
+      - run: npm install --no-save playwright@1.57.0
+      - run: node tests/browser/practice_focus_ownership.mjs
