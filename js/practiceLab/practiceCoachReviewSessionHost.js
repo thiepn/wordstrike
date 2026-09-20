@@ -2,7 +2,7 @@ import { createPracticeIndexedDbStore } from "./practiceIndexedDbStore.js";
 import { createPracticeManifestStore } from "./practiceManifestStore.js";
 import { createPracticeRepository } from "./practiceRepository.js";
 import { createPracticeSessionEngine } from "./practiceSessionEngine.js";
-import { renderPracticeSessionMarkup } from "./practiceHostDom.js";
+import { focusPracticeSessionInput, renderPracticeSessionMarkup } from "./practiceHostDom.js";
 
 const INSERT_TYPES = new Set(["insertText", "insertCompositionText"]);
 const escapeHtml = (value = "") => String(value).replace(/[&<>'"]/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[character]);
@@ -80,7 +80,7 @@ export async function mountPracticeCoachReviewSession({
   let finalResult = null;
   let closed = false;
   let unsubscribe = null;
-  const focusCapture = () => queueMicrotask(() => root.querySelector?.("[data-coach-review-input]")?.focus?.({ preventScroll: true }));
+  const focusCapture = (force = false) => queueMicrotask(() => focusPracticeSessionInput(root, "[data-coach-review-input]", { force }));
   const finish = async () => {
     if (closed) return;
     closed = true;
@@ -114,7 +114,7 @@ export async function mountPracticeCoachReviewSession({
     if (event.key === "Escape") {
       event.preventDefault();
       const state = engine.getSnapshot().lifecycleState;
-      void (state === "paused" ? engine.resume() : state === "active" ? engine.pause("manual") : Promise.resolve());
+      void (state === "paused" ? engine.resume().then(() => focusCapture(true)) : state === "active" ? engine.pause("manual") : Promise.resolve());
     }
   }
   function click(event) {
@@ -122,7 +122,7 @@ export async function mountPracticeCoachReviewSession({
     if (!button || !root.contains?.(button)) return;
     const action = button.dataset.coachReviewAction;
     if (action === "pause") void engine.pause("manual");
-    else if (action === "resume") void engine.resume();
+    else if (action === "resume") void engine.resume().then(() => focusCapture(true));
     else if (action === "abandon") void engine.abandon("manual-stop").then(finish).catch(() => finish());
     else if (action === "finish") void finish();
   }
