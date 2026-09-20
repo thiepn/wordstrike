@@ -36,7 +36,7 @@ function renderActive(root, { contentPlan, snapshot, mode }) {
   if (!root.querySelector("[data-real-text-input]")) root.innerHTML = `<section class="screen practice-lab-screen practice-real-text-session" data-practice-view="real-text-${mode}-session">
     <main class="practice-lab-shell"><header class="practice-real-text-session-header"><div><div class="eyebrow">Real Text</div><h1>${label}</h1><p>${note}</p></div><button type="button" data-real-text-session-action="stop">STOP</button></header>
     <div class="practice-real-text-time" ><strong>${fmtSeconds(remaining)}</strong><span>remaining</span></div>
-    <section class="practice-real-text-typing" aria-label="Natural typing passage"></section>
+    <section class="practice-real-text-typing" role="region" aria-label="Natural typing passage" tabindex="0"></section>
     <textarea data-real-text-input aria-label="Real Text typing input" inputmode="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" style="display:block;width:100%;box-sizing:border-box;min-height:3em"></textarea>
     </main></section>`;
   root.querySelector('.practice-real-text-time strong').textContent=fmtSeconds(remaining);
@@ -96,7 +96,15 @@ export async function mountPracticeRealTextSession({ root, session, mode = "natu
     capture.value = "";
   };
   const keyDown = (event) => { if ((event.ctrlKey || event.metaKey) && ["v", "x"].includes(String(event.key).toLowerCase())) event.preventDefault(); };
-  const click = (event) => { const button = event.target?.closest?.("[data-real-text-session-action]"); if (!button || !root.contains?.(button)) return; if (button.dataset.realTextSessionAction === "finish") void finish(); else if (button.dataset.realTextSessionAction === "stop") void engine.abandon("manual-stop").then((result) => { finalResult = result; return finish(); }).catch(() => finish()); };
+  const click = (event) => {
+    const button = event.target?.closest?.("[data-real-text-session-action]");
+    if (button && root.contains?.(button)) {
+      if (button.dataset.realTextSessionAction === "finish") void finish();
+      else if (button.dataset.realTextSessionAction === "stop") void engine.abandon("manual-stop").then((result) => { finalResult = result; return finish(); }).catch(() => finish());
+      return;
+    }
+    if (event.target?.closest?.(".practice-real-text-typing") && root.contains?.(event.target)) focus();
+  };
   const visibilityChange = () => { if (globalThis.document?.visibilityState !== "hidden" || closed || finalResult) return; if (mode === "cold") void engine.handleVisibilityState("hidden").then(() => engine.abandon("visibility-hidden")).then((result) => { finalResult = result; return finish(); }).catch(() => finish()); else void engine.abandon("visibility-hidden").then((result) => { finalResult = result; return finish(); }).catch(() => finish()); };
   root.addEventListener("beforeinput", beforeInput); root.addEventListener("keydown", keyDown); root.addEventListener("click", click); globalThis.document?.addEventListener?.("visibilitychange", visibilityChange);
   try {
