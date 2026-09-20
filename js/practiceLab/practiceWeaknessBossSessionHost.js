@@ -2,6 +2,7 @@ import { createPracticeIndexedDbStore } from "./practiceIndexedDbStore.js";
 import { createPracticeManifestStore } from "./practiceManifestStore.js";
 import { createPracticeRepository } from "./practiceRepository.js";
 import { createPracticeSessionEngine } from "./practiceSessionEngine.js";
+import { focusPracticeSessionInput } from "./practiceHostDom.js";
 import { assertPracticeWeaknessBossSessionContext } from "./practiceWeaknessBossTrust.js";
 import { createPracticeWeaknessBossGameplayState, advancePracticeWeaknessBossOpportunity } from "./practiceWeaknessBossGameplay.js";
 import { getPracticeWeaknessBossPhase, renderPracticeWeaknessBossBattle, renderPracticeWeaknessBossResult } from "./practiceWeaknessBossUi.js";
@@ -66,7 +67,9 @@ export async function mountPracticeWeaknessBossSession({
   let closed = false;
   let unsubscribe = null;
 
-  const focusCapture = () => queueMicrotask(() => root.querySelector?.("[data-weakness-boss-input]")?.focus?.({ preventScroll: true }));
+  const focusCapture = (force = false) => queueMicrotask(() => focusPracticeSessionInput(root, "[data-weakness-boss-input]", { force }));
+  const pauseTyping = () => engine.pause("manual").catch((error) => logger?.warn?.("Weakness Boss pause failed", error));
+  const resumeTyping = () => engine.resume().then(() => focusCapture(true)).catch((error) => logger?.warn?.("Weakness Boss resume failed", error));
   const renderSnapshot = (snapshot) => {
     if (closed || finalResult) return;
     renderPracticeWeaknessBossBattle(root, { session, snapshot, gameplay });
@@ -120,7 +123,7 @@ export async function mountPracticeWeaknessBossSession({
     if (event.key === "Escape") {
       event.preventDefault();
       const state = engine.getSnapshot().lifecycleState;
-      void (state === "paused" ? engine.resume() : state === "active" ? engine.pause("manual") : Promise.resolve());
+      void (state === "paused" ? resumeTyping() : state === "active" ? pauseTyping() : Promise.resolve());
     }
   };
 
@@ -128,8 +131,8 @@ export async function mountPracticeWeaknessBossSession({
     const target = event.target?.closest?.(ACTION_SELECTOR);
     if (!target || !root.contains?.(target)) return;
     const action = target.dataset.weaknessBossSessionAction;
-    if (action === "pause") void engine.pause("manual");
-    else if (action === "resume") void engine.resume();
+    if (action === "pause") void pauseTyping();
+    else if (action === "resume") void resumeTyping();
     else if (action === "abandon") void engine.abandon("manual-stop").then(() => finish(false)).catch((error) => { logger?.warn?.("Weakness Boss abandon failed", error); void finish(false); });
     else if (action === "repeat") void finish(true);
     else if (action === "finish") void finish(false);
