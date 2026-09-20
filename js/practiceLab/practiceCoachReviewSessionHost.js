@@ -2,6 +2,7 @@ import { createPracticeIndexedDbStore } from "./practiceIndexedDbStore.js";
 import { createPracticeManifestStore } from "./practiceManifestStore.js";
 import { createPracticeRepository } from "./practiceRepository.js";
 import { createPracticeSessionEngine } from "./practiceSessionEngine.js";
+import { renderPracticeSessionMarkup } from "./practiceHostDom.js";
 
 const INSERT_TYPES = new Set(["insertText", "insertCompositionText"]);
 const escapeHtml = (value = "") => String(value).replace(/[&<>'"]/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[character]);
@@ -30,12 +31,12 @@ function renderText(contentPlan, snapshot) {
   }).join("");
 }
 
-function renderSnapshot(root, session, snapshot) {
+export function renderPracticeCoachReviewSnapshot(root, session, snapshot) {
   const total = snapshot.content?.expectedLength ?? Array.from(session.contentPlan.text).length;
   const progress = total > 0 ? Math.min(100, ((snapshot.cursorIndex ?? 0) / total) * 100) : 0;
   const paused = snapshot.lifecycleState === "paused";
   const itemCount = session.reviewPlan?.bindings?.length ?? 0;
-  root.innerHTML = `<section class="screen practice-lab-screen practice-coach-review-session" data-practice-view="coach-review-session"><div class="practice-lab-shell">
+  const markup = `<section class="screen practice-lab-screen practice-coach-review-session" data-practice-view="coach-review-session"><div class="practice-lab-shell">
     <header class="practice-weak-key-session-header"><div><div class="eyebrow">Daily Training · Review</div><h1>Retention Review</h1><p>${itemCount} due item${itemCount === 1 ? "" : "s"} · cues off</p></div><div class="practice-weak-key-session-actions"><button type="button" data-coach-review-action="${paused ? "resume" : "pause"}">${paused ? "RESUME" : "PAUSE"}</button><button type="button" data-coach-review-action="abandon">EXIT SESSION</button></div></header>
     <div class="practice-lab-notice" role="note">Type naturally. This block is a delayed verification/maintenance probe; no acquisition repetitions are appended afterward.</div>
     <div class="practice-weak-key-progress" aria-label="Review progress"><span style="width:${progress.toFixed(2)}%"></span></div><div class="practice-weak-key-progress-label">${Math.round(progress)}% complete</div>
@@ -43,6 +44,7 @@ function renderSnapshot(root, session, snapshot) {
     ${paused ? '<div class="practice-lab-notice" role="status"><strong>Paused.</strong> Resume to continue.</div>' : ""}
     <textarea data-coach-review-input aria-label="Retention Review typing input" inputmode="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" style="position:fixed;left:-10000px;top:0;width:1px;height:1px;opacity:0"></textarea>
   </div></section>`;
+  renderPracticeSessionMarkup(root, markup);
 }
 
 function renderResult(root, result) {
@@ -86,7 +88,6 @@ export async function mountPracticeCoachReviewSession({
     root.removeEventListener("beforeinput", beforeInput);
     root.removeEventListener("keydown", keyDown);
     root.removeEventListener("click", click);
-    root.removeEventListener("pointerdown", pointerDown);
     globalThis.document?.removeEventListener?.("visibilitychange", visibilityChange);
     try { await engine.destroy(); } catch (error) { logger?.warn?.("Coach Review engine destroy failed", error); }
     try { if (!dependencies.dataStore) dataStore.close?.(); } catch {}
@@ -125,7 +126,6 @@ export async function mountPracticeCoachReviewSession({
     else if (action === "abandon") void engine.abandon("manual-stop").then(finish).catch(() => finish());
     else if (action === "finish") void finish();
   }
-  const pointerDown = () => { if (engine.getSnapshot().lifecycleState === "active") focusCapture(); };
   const visibilityChange = () => {
     const state = globalThis.document?.visibilityState;
     if (state === "hidden" || state === "visible") void engine.handleVisibilityState(state).catch((error) => logger?.warn?.("Coach Review visibility transition failed", error));
@@ -133,7 +133,6 @@ export async function mountPracticeCoachReviewSession({
   root.addEventListener("beforeinput", beforeInput);
   root.addEventListener("keydown", keyDown);
   root.addEventListener("click", click);
-  root.addEventListener("pointerdown", pointerDown);
   globalThis.document?.addEventListener?.("visibilitychange", visibilityChange);
   try {
     await engine.prepare({ experiment: session.experiment, configuration: session.configuration, contentPlan: session.contentPlan, reviewPlan: session.reviewPlan });
@@ -142,11 +141,11 @@ export async function mountPracticeCoachReviewSession({
         void engine.complete().then((result) => { finalResult = result; renderResult(root, result); }).catch((error) => { logger?.warn?.("Coach Review result retrieval failed", error); renderFailure(root, error); });
         return;
       }
-      renderSnapshot(root, session, snapshot);
+      renderPracticeCoachReviewSnapshot(root, session, snapshot);
       if (snapshot.lifecycleState === "active") focusCapture();
     });
     const snapshot = await engine.start();
-    renderSnapshot(root, session, snapshot);
+    renderPracticeCoachReviewSnapshot(root, session, snapshot);
     focusCapture();
   } catch (error) {
     logger?.warn?.("Coach Review session initialization failed", error);
