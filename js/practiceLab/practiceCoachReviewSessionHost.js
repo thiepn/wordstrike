@@ -81,6 +81,8 @@ export async function mountPracticeCoachReviewSession({
   let closed = false;
   let unsubscribe = null;
   const focusCapture = (force = false) => queueMicrotask(() => focusPracticeSessionInput(root, "[data-coach-review-input]", { force }));
+  const pauseTyping = () => engine.pause("manual").catch((error) => logger?.warn?.("Coach Review pause failed", error));
+  const resumeTyping = () => engine.resume().then(() => focusCapture(true)).catch((error) => logger?.warn?.("Coach Review resume failed", error));
   const finish = async () => {
     if (closed) return;
     closed = true;
@@ -114,15 +116,15 @@ export async function mountPracticeCoachReviewSession({
     if (event.key === "Escape") {
       event.preventDefault();
       const state = engine.getSnapshot().lifecycleState;
-      void (state === "paused" ? engine.resume().then(() => focusCapture(true)) : state === "active" ? engine.pause("manual") : Promise.resolve());
+      void (state === "paused" ? resumeTyping() : state === "active" ? pauseTyping() : Promise.resolve());
     }
   }
   function click(event) {
     const button = event.target?.closest?.("[data-coach-review-action]");
     if (!button || !root.contains?.(button)) return;
     const action = button.dataset.coachReviewAction;
-    if (action === "pause") void engine.pause("manual");
-    else if (action === "resume") void engine.resume().then(() => focusCapture(true));
+    if (action === "pause") void pauseTyping();
+    else if (action === "resume") void resumeTyping();
     else if (action === "abandon") void engine.abandon("manual-stop").then(finish).catch(() => finish());
     else if (action === "finish") void finish();
   }
