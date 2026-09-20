@@ -19,7 +19,8 @@ function coachErrorCopy(code) {
 }
 
 function renderDurationChoices(view) {
-  return `<div class="practice-coach-duration" role="group" aria-label="Daily Training duration">${view.durationChoices.map((item) => `<button type="button" data-practice-action="set-coach-duration" data-coach-minutes="${item.minutes}" aria-pressed="${item.selected}" ${view.plan ? "disabled" : ""}>${item.minutes} MIN</button>`).join("")}</div>`;
+  const locked = Boolean(view.plan) || view.status === "creating";
+  return `<div class="practice-coach-duration" role="group" aria-label="Daily Training duration">${view.durationChoices.map((item) => `<button type="button" data-practice-action="set-coach-duration" data-coach-minutes="${item.minutes}" aria-pressed="${item.selected}" ${locked ? "disabled" : ""}>${item.minutes} MIN</button>`).join("")}</div>`;
 }
 
 function renderSuggestion(suggestion, type) {
