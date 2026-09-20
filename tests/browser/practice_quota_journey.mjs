@@ -27,6 +27,8 @@ try{for(const mode of ['fresh-full','existing-full']){
   for(const block of plans[0].blocks)if(block.kind==='real-text')assert.ok(block.realTextDurationMs<=300000,`5-minute Daily Coach launched ${block.realTextDurationMs/60000}-minute Real Text`);
   report.planId=plans[0].coachPlanId;report.profileId=plans[0].profileId;report.requestedMinutes=plans[0].requestedMinutes;report.plannedMinutes=plans[0].plannedMinutes;report.blocks=plans[0].blocks.map(block=>({kind:block.kind,experimentId:block.experimentId,estimatedMinutes:block.estimatedMinutes,realTextDurationMs:block.realTextDurationMs??null}));
   await page.locator('[data-practice-action="start-coach-next"]').click();const input=page.locator('[data-real-text-input]');await input.waitFor({state:'visible'});
+  const remainingSeconds=Number.parseInt(await page.locator('.practice-real-text-time strong').innerText(),10);
+  assert.ok(Number.isFinite(remainingSeconds)&&remainingSeconds<=300,`5-minute Daily Coach started with ${remainingSeconds}s remaining`);
   const text=await page.locator('.is-current').first().evaluate(el=>{let s='';for(let n=el;n&&s.length<100;n=n.nextElementSibling)s+=n.textContent;return s.replaceAll('\u00a0',' ').slice(0,100);});
   await page.keyboard.type(text,{delay:35});await page.clock.fastForward(301000);
   await page.locator('[data-real-text-session-action="finish"]').waitFor({timeout:30000});await page.locator('[data-real-text-session-action="finish"]').click();
