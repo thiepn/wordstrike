@@ -40,6 +40,8 @@ jobs:
         include:
           - browser: chromium
             width: 1280
+          - browser: chromium
+            width: 390
           - browser: firefox
             width: 1280
           - browser: webkit
