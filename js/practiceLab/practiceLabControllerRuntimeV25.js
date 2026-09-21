@@ -44,7 +44,7 @@ export function createPracticeLabController(options = {}) {
     coachGetColdTransferAvailability = null,
     coachGetRecentColdTransferAt = null,
   } = options;
-  const coachPreview = options.featureGate?.getSnapshot?.().reason === "developer-preview";
+  const coachPreview = options.featureGate?.getSnapshot?.().reason === "developer";
   const externalRenderer = typeof options.renderer === "function" ? options.renderer : null;
   let base = null;
   let mounted = false;

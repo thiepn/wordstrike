@@ -68,3 +68,10 @@ test("Phase 2 experimental maturity never replaces availability", async () => {
   assert.equal(view.statusLabel, "Available");
   assert.equal(view.maturityLabel, "Experimental");
 });
+
+
+test("Phase 2 feature-gate reasons use release truth rather than roadmap language", () => {
+  assert.equal(createPracticeFeatureGate({ developerMode: true }).getSnapshot().reason, "developer");
+  assert.equal(createPracticeFeatureGate().getSnapshot().reason, "public");
+  assert.equal(createPracticeFeatureGate({ publicEnabled: false }).getSnapshot().reason, "disabled");
+});

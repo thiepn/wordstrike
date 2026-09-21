@@ -11,7 +11,7 @@ export function createPracticeFeatureGate({
     developerMode: developerMode === true,
     publicEnabled: publicEnabled === true,
     allowed: developerMode === true || publicEnabled === true,
-    reason: developerMode === true ? "developer-preview" : publicEnabled === true ? "public" : "coming-soon",
+    reason: developerMode === true ? "developer" : publicEnabled === true ? "public" : "disabled",
   });
   return Object.freeze({
     canAccess: () => snapshot.allowed,

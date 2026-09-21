@@ -88,7 +88,7 @@ export function buildPracticeHomeViewModel({ registry, featureGate, helpAvailabl
     .map(Object.freeze);
   return Object.freeze({
     kind: "home", title: "Practice Lab", subtitle: "Diagnose weaknesses, train specific skills, and measure typing evidence.",
-    preview: featureGate.getSnapshot().reason === "developer-preview",
+    preview: featureGate.getSnapshot().reason === "developer",
     helpAvailable: helpAvailable === true,
     dataManagementAvailable: dataManagementAvailable === true,
     dailyTraining: Object.freeze({ title: PRACTICE_DAILY_TRAINING.title, description: PRACTICE_DAILY_TRAINING.description, state: "available", stateLabel: "Available", duration: "12-minute recommended session" }),
