@@ -1,0 +1,370 @@
+name: Practice Certification Matrix
+
+on:
+  pull_request:
+    paths:
+      - 'js/practiceLab/**'
+      - 'js/main.js'
+      - 'js/modes.js'
+      - 'data/practice/**'
+      - 'practiceLab*.css'
+      - 'tests/practice-*.test.js'
+      - 'tests/*pl38*.test.js'
+      - 'tests/*pl39*.test.js'
+      - 'tests/browser/practice_*.mjs'
+      - 'tests/browser/practice_*.py'
+      - 'tests/browser/storage_native.mjs'
+      - 'scripts/*Practice*.mjs'
+      - 'package.json'
+      - 'sw.js'
+      - '.github/workflows/practice-certification.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'js/practiceLab/**'
+      - 'js/main.js'
+      - 'js/modes.js'
+      - 'data/practice/**'
+      - 'practiceLab*.css'
+      - 'tests/practice-*.test.js'
+      - 'tests/*pl38*.test.js'
+      - 'tests/*pl39*.test.js'
+      - 'tests/browser/practice_*.mjs'
+      - 'tests/browser/practice_*.py'
+      - 'tests/browser/storage_native.mjs'
+      - 'scripts/*Practice*.mjs'
+      - 'package.json'
+      - 'sw.js'
+      - '.github/workflows/practice-certification.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: practice-certification-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  focused-contracts:
+    name: focused / ${{ matrix.suite }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - suite: release-contracts
+            command: >-
+              node --test
+              tests/practice-experiment-catalog.test.js
+              tests/practice-feature-gate.test.js
+              tests/practice-final-release-pl40.test.js
+              tests/practice-user-visible-correctness-phase1.test.js
+              tests/practice-release-truth-phase2.test.js
+              tests/practice-ux-completion-phase3.test.js
+              tests/practice-lab-controller.test.js
+              tests/practice-lab-renderer.test.js
+              tests/practice-lab-identity.test.js
+          - suite: pl28-common-words
+            command: npm run test:pl28-common-words
+          - suite: pl29-sustained
+            command: npm run test:pl29-sustained
+          - suite: pl30-special-domains
+            command: npm run test:pl30-special-domains
+          - suite: pl31-custom-text
+            command: npm run test:pl31-custom-text
+          - suite: pl32-treatment-response
+            command: npm run test:pl32-treatment-response
+          - suite: pl33-coach-personalization
+            command: npm run test:pl33-coach-personalization
+          - suite: pl34-read-ahead
+            command: npm run test:pl34-read-ahead
+          - suite: pl35-metronome
+            command: npm run test:pl35-metronome
+          - suite: pl36-physical-telemetry
+            command: npm run test:pl36-physical-telemetry
+          - suite: pl37-weakness-boss
+            command: npm run test:pl37-weakness-boss
+          - suite: pl38-research
+            command: npm run test:pl38-research-ab
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Run focused certification
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p test-artifacts/practice-focused
+          ${{ matrix.command }} 2>&1 | tee "test-artifacts/practice-focused/${{ matrix.suite }}.log"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: practice-focused-${{ matrix.suite }}
+          path: test-artifacts/practice-focused/
+          retention-days: 7
+          if-no-files-found: warn
+
+  deterministic-content:
+    name: content / deterministic artifacts
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Validate governed Practice artifacts
+        shell: bash
+        run: |
+          set -o pipefail
+          npm run validate:practice-corpus
+          npm run validate:practice-indexes
+          npm run validate:practice-typability
+          npm run validate:practice-sustained
+          npm run validate:practice-special-domains
+          node scripts/validatePracticeReleaseContent.mjs
+          node scripts/buildPracticeCommonWords.mjs
+          node scripts/buildPracticeReadAheadForms.mjs
+          git diff --exit-code -- data/practice/
+
+  data-integrity:
+    name: integrity / privacy storage migrations
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Audit local-data boundaries and migrations
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p test-artifacts/practice-integrity
+          npm run audit:practice-privacy-security 2>&1 | tee test-artifacts/practice-integrity/privacy.log
+          npm run test:practice-migrations 2>&1 | tee test-artifacts/practice-integrity/migrations.log
+          npm run test:pl39-integrity 2>&1 | tee test-artifacts/practice-integrity/pl39.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: practice-integrity
+          path: test-artifacts/practice-integrity/
+          retention-days: 14
+          if-no-files-found: warn
+
+  browser-core:
+    name: browser / ${{ matrix.label }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - label: chromium-desktop
+            browser: chromium
+            width: 1280
+            widths: '1440,768,390,320'
+            extended: '1'
+          - label: chromium-mobile
+            browser: chromium
+            width: 390
+            widths: '390'
+            extended: '0'
+    container:
+      image: mcr.microsoft.com/playwright:v1.57.0-noble
+      options: --ipc=host
+    env:
+      HOME: /root
+      PRACTICE_BROWSER: ${{ matrix.browser }}
+      PRACTICE_BROWSERS: ${{ matrix.browser }}
+      PRACTICE_WIDTH: ${{ matrix.width }}
+      PRACTICE_WIDTHS: ${{ matrix.widths }}
+      PRACTICE_FULL_STORAGE: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --no-save playwright@1.57.0 axe-core@4.10.3
+      - name: Studio, Workshop and Custom Text
+        run: |
+          node tests/browser/practice_identity.mjs
+          node tests/browser/practice_workshop.mjs
+          node tests/browser/practice_editor_ui.mjs
+      - name: Public drill and protected-protocol journeys
+        run: |
+          node tests/browser/practice_end_to_end.mjs
+          node tests/browser/practice_completion.mjs
+          node tests/browser/assessment_input.mjs
+      - name: Storage and quota resilience
+        run: |
+          node tests/browser/practice_quota_journey.mjs
+          node tests/browser/storage_native.mjs
+          node tests/browser/practice_storage_repair.mjs
+      - name: Chromium desktop extended Practice coverage
+        if: matrix.extended == '1'
+        run: |
+          node tests/browser/practice_playability.mjs
+          node tests/browser/practice_weak_keys_alphabet.mjs
+          node tests/browser/practice_boss_input.mjs
+          node tests/browser/practice_research_smoke.mjs
+          node tests/browser/practice_research_probe_input.mjs
+          node tests/browser/practice_coach_review_input.mjs
+          node tests/browser/practice_evidence_populated.mjs
+          node tests/browser/practice_accessibility.mjs
+          node tests/browser/practice_offline.mjs
+      - name: Chromium mobile Weakness Boss journey
+        if: matrix.width == 390
+        run: node tests/browser/practice_boss_journey.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: practice-browser-${{ matrix.label }}
+          path: browser-artifacts/
+          retention-days: 7
+          if-no-files-found: warn
+
+  browser-compat:
+    name: compat / ${{ matrix.label }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - label: firefox-desktop
+            browser: firefox
+            width: 1280
+            widths: '1280'
+          - label: webkit-mobile
+            browser: webkit
+            width: 390
+            widths: '390,320'
+    container:
+      image: mcr.microsoft.com/playwright:v1.57.0-noble
+      options: --ipc=host
+    env:
+      HOME: /root
+      PRACTICE_BROWSER: ${{ matrix.browser }}
+      PRACTICE_BROWSERS: ${{ matrix.browser }}
+      PRACTICE_WIDTH: ${{ matrix.width }}
+      PRACTICE_WIDTHS: ${{ matrix.widths }}
+      PRACTICE_FULL_STORAGE: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --no-save playwright@1.57.0 axe-core@4.10.3
+      - name: Cross-browser UI and editor
+        run: |
+          node tests/browser/practice_identity.mjs
+          node tests/browser/practice_workshop.mjs
+          node tests/browser/practice_editor_ui.mjs
+      - name: Cross-browser public journeys
+        run: |
+          node tests/browser/practice_end_to_end.mjs
+          node tests/browser/practice_completion.mjs
+          node tests/browser/assessment_input.mjs
+      - name: Cross-browser storage resilience
+        run: |
+          node tests/browser/practice_quota_journey.mjs
+          node tests/browser/storage_native.mjs
+          node tests/browser/practice_storage_repair.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: practice-compat-${{ matrix.label }}
+          path: browser-artifacts/
+          retention-days: 7
+          if-no-files-found: warn
+
+  browser-privacy:
+    name: browser / privacy security
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    container:
+      image: mcr.microsoft.com/playwright/python:v1.57.0-noble
+      options: --ipc=host
+    env:
+      HOME: /root
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install -r tests/browser/requirements.txt
+      - run: python3 tests/browser/practice_pl39_privacy_security.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: practice-browser-privacy
+          path: browser-artifacts/pl39-privacy-security/
+          retention-days: 14
+          if-no-files-found: warn
+
+  performance:
+    name: browser / performance
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    container:
+      image: mcr.microsoft.com/playwright:v1.57.0-noble
+      options: --ipc=host
+    env:
+      HOME: /root
+      PRACTICE_BROWSER: chromium
+      PRACTICE_WIDTH: 1280
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --no-save playwright@1.57.0
+      - run: node tests/browser/practice_performance.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: practice-performance
+          path: browser-artifacts/practice-performance/
+          retention-days: 7
+          if-no-files-found: warn
+
+  release-gate:
+    name: release gate
+    if: always()
+    needs:
+      - focused-contracts
+      - deterministic-content
+      - data-integrity
+      - browser-core
+      - browser-compat
+      - browser-privacy
+      - performance
+    runs-on: ubuntu-latest
+    steps:
+      - name: Publish certification summary
+        shell: bash
+        run: |
+          cat >> "$GITHUB_STEP_SUMMARY" <<'EOF'
+          ## Practice Certification Matrix
+
+          | Area | Result |
+          | --- | --- |
+          | Focused contracts | ${{ needs.focused-contracts.result }} |
+          | Deterministic content | ${{ needs.deterministic-content.result }} |
+          | Privacy / data integrity | ${{ needs.data-integrity.result }} |
+          | Chromium journeys | ${{ needs.browser-core.result }} |
+          | Firefox / WebKit compatibility | ${{ needs.browser-compat.result }} |
+          | Browser privacy / security | ${{ needs.browser-privacy.result }} |
+          | Performance | ${{ needs.performance.result }} |
+          EOF
+      - name: Enforce complete Practice certification
+        shell: bash
+        run: |
+          test "${{ needs.focused-contracts.result }}" = "success"
+          test "${{ needs.deterministic-content.result }}" = "success"
+          test "${{ needs.data-integrity.result }}" = "success"
+          test "${{ needs.browser-core.result }}" = "success"
+          test "${{ needs.browser-compat.result }}" = "success"
+          test "${{ needs.browser-privacy.result }}" = "success"
+          test "${{ needs.performance.result }}" = "success"
