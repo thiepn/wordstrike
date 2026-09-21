@@ -87,3 +87,28 @@ test("Phase 6 Physical Keyboard remains opt-in local advanced diagnostics", () =
   assert.match(root.innerHTML,/Enable physical telemetry/);
   assert.match(root.innerHTML,/does not save raw physical keystroke sequences/i);
 });
+
+
+test("Phase 6 graduated fluency protocols have real registry implementations", async () => {
+  const [{ createPracticeExperimentRegistry }, { registerPracticeGraduatedFluencyExperiments }] = await Promise.all([
+    import("../js/practiceLab/practiceExperimentRegistryRuntime.js"),
+    import("../js/practiceLab/practiceGraduatedFluencyExperiments.js"),
+  ]);
+  const registry=createPracticeExperimentRegistry({featureGate:{canAccess:()=>true}});
+  registerPracticeGraduatedFluencyExperiments(registry);
+  for (const id of ["read-ahead","metronome-typing"]) {
+    const resolved=registry.getResolvedExperiment(id);
+    assert.equal(resolved.runnable,true,id);
+    assert.equal(resolved.availability,"available",id);
+    assert.equal(resolved.registration.descriptor.category,"fluency",id);
+    assert.deepEqual(resolved.registration.descriptor.supportedCompletionModes,["duration"],id);
+    assert.equal(resolved.registration.descriptor.resumable,false,id);
+  }
+});
+
+test("Phase 6 graduated public fluency copy no longer presents these drills as experiments", () => {
+  for (const id of ["read-ahead","metronome-typing"]) {
+    const entry=PRACTICE_EXPERIMENT_CATALOG.find(item=>item.id===id);
+    assert.doesNotMatch(`${entry.description} ${entry.longDescription}`,/\bexperiment\b/i,id);
+  }
+});
