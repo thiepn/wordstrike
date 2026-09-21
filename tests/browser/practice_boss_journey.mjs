@@ -95,7 +95,7 @@ try{
       {createPracticeRepository},
       {createPracticeIndexLoader},
       {createPracticeTargetIndex},
-      {buildPracticeWeaknessBossEncounter},
+      {buildPracticeWeaknessBossEncounter,inspectPracticeWeaknessBossContentReadiness},
       {createPracticeSessionId,createSkillStatId},
       {PRACTICE_WEAKNESS_BOSS_ARCHETYPES},
     ]=await Promise.all([
@@ -125,15 +125,15 @@ try{
       indexLoader.loadManifest({language:'en',corpusVersion:1}),
     ]);
     const targetIndex=createPracticeTargetIndex({loader:indexLoader,corpusManifest,indexManifest});
-    const candidate=Object.freeze({
-      statId:createSkillStatId(initialized.profile.profileId,initialized.context.contextId,'key','e'),entityType:'key',entityKey:'e',
+    const candidateBase={
+      statId:createSkillStatId(initialized.profile.profileId,initialized.context.contextId,'key','q'),entityType:'key',entityKey:'q',
       limiterStatus:'confirmed',phenotype:'slow',hierarchyStatus:'independent',
       priorityScore:90,impactScore:80,limiterConfidence:.95,weaknessScore:90,
       masteryStage:'learning',saturationStatus:'not-detected',marginalGainBand:'high',
-      bossTargetUtility:90,contentReady:true,
+      bossTargetUtility:90,
       bossTheme:Object.freeze({...PRACTICE_WEAKNESS_BOSS_ARCHETYPES.slow}),
       reasonCodes:Object.freeze(['confirmed-limiter','high-impact','learning-headroom','independent-limiter','slow-pattern']),
-    });
+    };
     const corpusBinding=Object.freeze({
       corpusId:corpusManifest.corpusId,
       corpusVersion:corpusManifest.corpusVersion,
@@ -141,6 +141,12 @@ try{
       manifestHash:corpusManifest.buildChecksum,
       language:'en',
     });
+    const readiness=await inspectPracticeWeaknessBossContentReadiness({
+      sessionId:'practice-session_boss-browser-preflight-12345678',context:initialized.context,targetIndex,contentItems:trainingCorpus.items,corpusBinding,
+      target:candidateBase,targetSource:'recommended',language:initialized.context.dataLocale,
+    });
+    if(readiness.ready!==true)throw new Error(`Deterministic Weakness Boss fixture failed production content preflight: ${readiness.errorCode??'unknown'}`);
+    const candidate=Object.freeze({...candidateBase,contentReady:true});
     const weaknessBossRuntime=Object.freeze({
       async loadCandidates(){
         return Object.freeze({status:'ready',available:true,candidateCount:1,candidates:Object.freeze([candidate]),recommendedCandidate:candidate,profileId:initialized.profile.profileId,contextId:initialized.context.contextId});
