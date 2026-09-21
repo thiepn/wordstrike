@@ -44,6 +44,7 @@ export function createPracticeLabController(options = {}) {
     coachGetColdTransferAvailability = null,
     coachGetRecentColdTransferAt = null,
   } = options;
+  const coachPreview = options.featureGate?.getSnapshot?.().reason === "developer-preview";
   const externalRenderer = typeof options.renderer === "function" ? options.renderer : null;
   let base = null;
   let mounted = false;
@@ -73,7 +74,7 @@ export function createPracticeLabController(options = {}) {
   const renderCoach = (focusSelector = null) => {
     if (!mounted || !isDailyRoute() || hasCoachSession()) return false;
     attachCoachListener();
-    const view = buildPracticeCoachViewModel({ state: coachState, preview: true });
+    const view = buildPracticeCoachViewModel({ state: coachState, preview: coachPreview });
     return externalRenderer
       ? externalRenderer(root, view, { focusSelector })
       : renderPracticeLabV25(root, view, { focusSelector });
@@ -97,7 +98,7 @@ export function createPracticeLabController(options = {}) {
   function renderer(renderRoot, view, rendererOptions = {}) {
     if (isDailyRoute()) {
       attachCoachListener();
-      const coachView = buildPracticeCoachViewModel({ state: coachState, preview: true });
+      const coachView = buildPracticeCoachViewModel({ state: coachState, preview: coachPreview });
       const rendered = externalRenderer
         ? externalRenderer(renderRoot, coachView, rendererOptions)
         : renderPracticeLabV25(renderRoot, coachView, rendererOptions);

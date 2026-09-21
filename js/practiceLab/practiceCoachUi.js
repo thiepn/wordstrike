@@ -164,7 +164,7 @@ export function normalizePracticeCoachUiState(value = {}) {
   });
 }
 
-export function buildPracticeCoachViewModel({ state, preview = true } = {}) {
+export function buildPracticeCoachViewModel({ state, preview = false } = {}) {
   const normalized = normalizePracticeCoachUiState(state);
   const plan = normalized.plan;
   if (!plan) return freezeDeep({
