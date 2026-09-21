@@ -238,9 +238,11 @@ jobs:
           PRACTICE_FULL_STORAGE: '1'
           PRACTICE_WIDTHS: '1280'
         run: node tests/browser/practice_editor_ui.mjs
-      - name: Chromium mobile Weakness Boss journey
+      - name: Chromium mobile device acceptance
         if: matrix.width == 390
-        run: node tests/browser/practice_boss_journey.mjs
+        run: |
+          node tests/browser/practice_device_acceptance.mjs
+          node tests/browser/practice_boss_journey.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -289,6 +291,9 @@ jobs:
         run: |
           node tests/browser/practice_end_to_end.mjs
           node tests/browser/practice_completion.mjs
+      - name: WebKit mobile device acceptance
+        if: matrix.browser == 'webkit'
+        run: node tests/browser/practice_device_acceptance.mjs
       - name: Cross-browser saturated-storage resilience
         env:
           PRACTICE_FULL_STORAGE: '1'
