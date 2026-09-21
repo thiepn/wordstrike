@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import { shouldIncludePracticeCoachReview, buildPracticeCoachDailyPlan } from "../js/practiceLab/practiceCoachPlanner.js";
 import { createPracticeCoachService as createPracticeCoachServiceBase } from "../js/practiceLab/practiceCoachServiceBaseV25.js";
 import { buildPracticeCoachViewModel } from "../js/practiceLab/practiceCoachUi.js";
@@ -208,6 +209,8 @@ test("Phase 5 stale frozen target becomes blocked without throwing a generic Coa
   });
   let saved = original;
   const repository = {
+    async getTodayCoachPlan() { return null; },
+    async createCoachPlan(plan) { return { created: true, plan }; },
     async getCoachPlan() { return saved; },
     async listCoachChildSessions() { return []; },
     async getActiveCheckpoint() { return null; },
