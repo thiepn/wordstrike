@@ -19,7 +19,7 @@ const server=http.createServer((req,res)=>{
     res.end("ok");
     return;
   }
-  if(revision===2&&url.pathname==="/js/flow/flowAdaptive.js"){
+  if(revision===2&&url.pathname==="/data/practice/research-holdout/en-v1.json"){
     res.writeHead(404);
     res.end();
     return;
