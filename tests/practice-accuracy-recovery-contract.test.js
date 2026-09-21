@@ -44,7 +44,7 @@ test("PL23 experiment remains a non-resumable training intervention with no meas
   assert.equal(descriptor.evaluationMeasurementKind, null);
   const catalog = getPracticeExperiment("accuracy-control");
   assert.equal(catalog.title, "Accuracy & Recovery");
-  assert.equal(catalog.status, "preview");
+  assert.equal(catalog.status, "available");
   assert.deepEqual(catalog.estimatedDurationMinutes, { minimum: 4, recommended: 5, maximum: 6 });
 });
 

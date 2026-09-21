@@ -34,7 +34,7 @@ test("PL35 experiment v1 remains frozen inside the current PL38 storage envelope
 
 test("PL35 catalog exposes the target-blind fixed-tempo experiment", () => {
   const experiment = getPracticeExperiment("metronome-typing");
-  assert.equal(experiment.status, "preview");
+  assert.equal(experiment.status, "available");
   assert.deepEqual(experiment.estimatedDurationMinutes, { minimum: 2, recommended: 5, maximum: 8 });
   for (const capability of ["self-calibrated-fixed-tempo", "audio-with-visual-fallback", "counterbalanced-pulse-silent", "target-blind"]) assert.ok(experiment.capabilities.includes(capability));
   assert.match(experiment.longDescription, /not a one-key-per-beat target/i);
