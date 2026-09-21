@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import http from "node:http";
+import os from "node:os";
 import { chromium } from "playwright";
 
 const root=path.resolve(import.meta.dirname,"../..");
@@ -46,12 +47,13 @@ const server=http.createServer((req,res)=>{
 }).listen(0,"127.0.0.1");
 await new Promise(resolve=>server.once("listening",resolve));
 
-const browser=await chromium.launch();
+const profileDir=fs.mkdtempSync(path.join(os.tmpdir(),"wordstrike-phase7-pwa-"));
 const report={status:"FAIL",checks:[]};
 const check=value=>{report.checks.push(value);console.log(value);};
+let context=null;
 
 try{
-  const context=await browser.newContext({serviceWorkers:"allow"});
+  context=await chromium.launchPersistentContext(profileDir,{headless:true,serviceWorkers:"allow"});
   await context.addInitScript(()=>localStorage.setItem("wordstrike.onboarding.general.v3","seen"));
   let page=await context.newPage();
   page.setDefaultTimeout(30000);
@@ -105,8 +107,9 @@ try{
   assert.equal(after?.profileId,saved.profileId);
   check("IndexedDB Practice data survived service-worker replacement");
 
+  await context.close();
+  context=await chromium.launchPersistentContext(profileDir,{headless:true,serviceWorkers:"allow"});
   await context.setOffline(true);
-  await page.close();
   page=await context.newPage();
   page.setDefaultTimeout(30000);
   await page.goto(base,{waitUntil:"domcontentloaded"});
@@ -123,17 +126,19 @@ try{
     return record;
   },saved.customTextId);
   assert.equal(offlineRecord?.sourceText,saved.sourceText);
-  check("upgraded app shell boots offline and reads pre-upgrade Practice data");
+  check("upgraded app shell survives browser restart, boots offline and reads pre-upgrade Practice data");
 
   report.status="PASS";
   await page.screenshot({path:path.join(out,"upgrade-offline.png"),fullPage:true});
   await context.close();
+  context=null;
 }catch(error){
   report.error=String(error);
   throw error;
 }finally{
   fs.writeFileSync(path.join(out,"report.json"),JSON.stringify(report,null,2));
   console.log(JSON.stringify(report));
-  await browser.close();
+  if(context) await context.close().catch(()=>{});
+  fs.rmSync(profileDir,{recursive:true,force:true});
   server.close();
 }
