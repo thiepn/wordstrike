@@ -1,10 +1,7 @@
 name: Practice Studio UI
 on:
-  push:
-    branches: [main, ui/practice-studio]
-    paths: ['js/practiceLab/**', 'practiceLab*.css', 'index.html', 'sw.js', 'tests/practice-lab-identity.test.js', 'tests/browser/practice_*.mjs', 'scripts/auditPracticePrivacySecurity.mjs', '.github/workflows/practice-identity.yml']
-  pull_request:
-    paths: ['js/practiceLab/**', 'practiceLab*.css', 'index.html', 'sw.js', 'tests/practice-lab-identity.test.js', 'tests/browser/practice_*.mjs', '.github/workflows/practice-identity.yml']
+  workflow_dispatch:
+
 permissions:
   contents: read
 concurrency:

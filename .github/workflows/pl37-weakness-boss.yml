@@ -1,16 +1,7 @@
 name: PL37 Weakness Boss
 
 on:
-  push:
-    branches: [pl37-weakness-boss]
-  pull_request:
-    paths:
-      - 'js/practiceLab/**'
-      - 'tests/practice-weakness-boss*-pl37.test.js'
-      - 'docs/practice-lab/PL37-WEAKNESS-BOSS.md'
-      - 'docs/PRACTICE_LAB_WEAKNESS_BOSS.md'
-      - 'package.json'
-      - '.github/workflows/pl37-weakness-boss.yml'
+  workflow_dispatch:
 
 permissions:
   contents: read

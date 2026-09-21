@@ -1,10 +1,7 @@
 name: Practice Playability Repair
 on:
-  push:
-    branches: [main, fix/practice-lab-playability]
-    paths: ['js/practiceLab/**', 'tests/browser/practice_*.mjs', 'tests/practice-*.test.js', 'scripts/auditPracticePrivacySecurity.mjs', 'practiceLab*.css', 'index.html', 'sw.js', '.github/workflows/practice-playability.yml']
-  pull_request:
-    paths: ['js/practiceLab/**', 'tests/browser/practice_*.mjs', 'tests/practice-*.test.js', 'scripts/auditPracticePrivacySecurity.mjs', 'practiceLab*.css', 'index.html', 'sw.js', '.github/workflows/practice-playability.yml']
+  workflow_dispatch:
+
 permissions:
   contents: read
 concurrency:

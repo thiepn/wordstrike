@@ -1,9 +1,7 @@
 name: Practice Completion
 on:
-  push:
-    branches: [main, practice-release-hardening]
-  pull_request:
-    paths: ['js/practiceLab/**', 'data/practice/**', 'tests/browser/practice_*.mjs', 'tests/practice-offline-shell.test.js', 'style.css', 'sw.js', '.github/workflows/practice-completion.yml']
+  workflow_dispatch:
+
 permissions:
   contents: read
 jobs:
