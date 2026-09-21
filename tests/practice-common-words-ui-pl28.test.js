@@ -93,7 +93,7 @@ test("PL28 Check result presents canonical PL13 estimate, 95% model interval, co
   assert.match(root.innerHTML, /<dt>Confidence<\/dt><dd>medium<\/dd>/);
   assert.match(root.innerHTML, /<dt>Accuracy<\/dt><dd>97%<\/dd>/);
   assert.match(root.innerHTML, /<h2>Frequency-band profile<\/h2>/);
-  assert.match(root.innerHTML, /<th>First-pass accuracy<\/th><th>Starting words<\/th><th>Inside words<\/th>/);
+  assert.match(root.innerHTML, /<th>First-pass accuracy<\/th><th>Launch residual \(ms\)<\/th><th>Internal residual \(ms\)<\/th>/);
   assert.match(root.innerHTML, /<th scope="row">Broad<\/th>/);
   assert.match(root.innerHTML, /<h2>Typing breadth coverage<\/h2>/);
   assert.doesNotMatch(root.innerHTML, /Vocabulary Breadth Score|vocabulary level|You know \d|Your vocabulary is limited|You don't know broad vocabulary/i);
