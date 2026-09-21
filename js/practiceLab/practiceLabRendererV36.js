@@ -13,7 +13,7 @@ export function renderPracticePhysicalKeyboardPage(root, view, { focusSelector =
   const body = loading
     ? `<section class="practice-lab-empty-state" aria-live="polite"><h2>Loading Physical Keyboard telemetry…</h2><p>Reading local aggregate telemetry from this browser.</p></section>`
     : unavailable
-      ? `<section class="practice-lab-empty-state" role="status"><h2>Physical Keyboard telemetry unavailable</h2><p>Local telemetry could not be read. Existing Practice evidence is unaffected.</p>${view?.errorCode ? `<p role="alert">${escapeHtml(view.errorCode)}</p>` : ""}</section>`
+      ? `<section class="practice-lab-empty-state" role="status"><h2>Physical Keyboard telemetry unavailable</h2><p>Local telemetry could not be read. Existing Practice evidence is unaffected.</p>${view?.errorCode ? `<p role="alert">${escapeHtml(view.errorCode)}</p>` : ""}<button type="button" data-practice-action="physical-retry">TRY AGAIN</button></section>`
       : `${renderPracticePhysicalTelemetryPanel({ availability: view.availability, snapshot: view.snapshot, hasStoredData: view.hasStoredData })}
         <section class="practice-lab-empty-state" aria-labelledby="practice-physical-settings-title"><div class="eyebrow">Advanced</div><h2 id="practice-physical-settings-title">Physical keyboard telemetry</h2>${renderPracticePhysicalTelemetrySetting({ enabled: view.availability?.enabled === true, hasStoredData: false })}</section>`;
   root.innerHTML = `<section class="screen practice-lab-screen" data-practice-view="physical-keyboard"><div class="practice-lab-shell">

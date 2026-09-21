@@ -87,7 +87,7 @@ export function createPracticeLabController(options = {}) {
 
   const scheduleDailyLoad = () => {
     if (loadScheduled || !mounted || !isDailyRoute() || hasCoachSession()) return;
-    if (!["idle", "error"].includes(coachState.status)) return;
+    if (coachState.status !== "idle") return;
     loadScheduled = true;
     queueMicrotask(() => {
       loadScheduled = false;
@@ -309,7 +309,7 @@ export function createPracticeLabController(options = {}) {
     const button = event.target?.closest?.("[data-practice-action]");
     if (!button || !root?.contains?.(button) || button.disabled || button.getAttribute?.("aria-disabled") === "true") return;
     const action = button.dataset.practiceAction;
-    if (!["set-coach-duration", "create-coach-plan", "start-coach-next", "skip-coach-block", "abandon-coach-plan", "open-coach-assessment", "open-coach-cold-transfer"].includes(action)) return;
+    if (!["set-coach-duration", "create-coach-plan", "reload-coach", "start-coach-next", "skip-coach-block", "abandon-coach-plan", "open-coach-assessment", "open-coach-cold-transfer"].includes(action)) return;
     event.preventDefault?.();
     event.stopPropagation?.();
     if (!isDailyRoute()) return;
@@ -318,6 +318,7 @@ export function createPracticeLabController(options = {}) {
       setCoachState({ requestedMinutes: Number(button.dataset.coachMinutes), errorCode: null }, `[data-coach-minutes="${button.dataset.coachMinutes}"]`);
     }
     else if (action === "create-coach-plan") void createTodayPlan();
+    else if (action === "reload-coach") void loadTodayPlan();
     else if (action === "start-coach-next") void startNextBlock();
     else if (action === "skip-coach-block") void skipBlock(button.dataset.coachBlockId);
     else if (action === "abandon-coach-plan") void endForToday();
@@ -328,7 +329,7 @@ export function createPracticeLabController(options = {}) {
   const routeAfterNavigation = () => {
     if (isDailyRoute()) {
       attachCoachListener();
-      if (coachState.status === "idle" || coachState.status === "error") scheduleDailyLoad();
+      if (coachState.status === "idle") scheduleDailyLoad();
     } else {
       detachCoachListener();
     }

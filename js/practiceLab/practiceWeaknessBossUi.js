@@ -44,7 +44,7 @@ export function renderPracticeWeaknessBossDetail(root, view, { focusSelector = n
   const body = loading
     ? `<section class="practice-lab-empty-state" aria-live="polite"><h2>Finding a Boss…</h2><p>Checking current local Practice evidence and training-content availability.</p></section>`
     : view?.status === "unavailable"
-      ? `<section class="practice-lab-empty-state"><h2>Weakness Boss unavailable</h2><p>Current Practice evidence or local training content could not be read.</p>${view.errorCode ? `<p role="alert">${escapeHtml(view.errorCode)}</p>` : ""}</section>`
+      ? `<section class="practice-lab-empty-state"><h2>Weakness Boss unavailable</h2><p>Current Practice evidence or local training content could not be read.</p>${view.errorCode ? `<p role="alert">${escapeHtml(view.errorCode)}</p>` : ""}<button type="button" data-practice-action="weakness-boss-refresh">TRY AGAIN</button></section>`
       : !recommended
         ? `<section class="practice-lab-empty-state"><h2>No Boss ready yet</h2><p>There is no current likely or confirmed limiter with enough learning headroom and valid training content. Keep practicing normally and check again later.</p></section>`
         : `<div class="practice-lab-category-grid">${candidateCard(recommended, { recommended: true })}${alternatives.map((candidate) => candidateCard(candidate)).join("")}</div>`;

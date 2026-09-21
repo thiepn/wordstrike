@@ -75,7 +75,7 @@ export function renderPracticeCoach(root, view, { focusSelector = null } = {}) {
   const technical = detail
     ? [view.errorCode, detail.stage && `stage=${detail.stage}`, detail.operation && `operation=${detail.operation}`, detail.name && `error=${detail.name}`, detail.causeName && `cause=${detail.causeName}`, detail.causeMessage && `message=${detail.causeMessage}`].filter(Boolean).join(" · ")
     : String(view.errorCode ?? "");
-  const error = view.errorCode ? `<div class="practice-lab-notice is-warning practice-coach-error" role="alert"><strong>Daily Training could not save or load its local plan.</strong> <span>${escapeHtml(coachErrorCopy(view.errorCode))}</span><details><summary>Technical details</summary><code>${escapeHtml(technical)}</code></details></div>` : "";
+  const error = view.errorCode ? `<div class="practice-lab-notice is-warning practice-coach-error" role="alert"><strong>Daily Training could not save or load its local plan.</strong> <span>${escapeHtml(coachErrorCopy(view.errorCode))}</span><div><button type="button" data-practice-action="reload-coach">TRY AGAIN</button></div><details><summary>Technical details</summary><code>${escapeHtml(technical)}</code></details></div>` : "";
   const beforePlan = !plan ? `<section class="practice-coach-create">
       <div class="practice-lab-section-heading"><div><div class="eyebrow">Choose today's budget</div><h2>${view.requestedMinutes} minutes</h2></div><p>This sets a planning budget, not a quota. The Coach may intentionally underfill it when no useful block fits.</p></div>
       ${renderDurationChoices(view)}

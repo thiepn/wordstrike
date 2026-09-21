@@ -120,10 +120,11 @@ export function createPracticeLabController(options = {}) {
 
   function click(event) {
     if (!isBossRoute() || host) return;
-    const control = event.target?.closest?.("[data-practice-action='weakness-boss-start']");
+    const control = event.target?.closest?.("[data-practice-action='weakness-boss-start'],[data-practice-action='weakness-boss-refresh']");
     if (!control || !root?.contains?.(control)) return;
     event.preventDefault();
     event.stopPropagation();
+    if (control.dataset.practiceAction === "weakness-boss-refresh") { void load(); return; }
     void start(control.dataset.bossStatId ?? null, null);
   }
 

@@ -124,10 +124,11 @@ export function createPracticeLabController(options = {}) {
 
   function click(event) {
     if (!isPhysicalRoute()) return;
-    const control = event.target?.closest?.("[data-practice-physical-enable],[data-practice-physical-clear]");
+    const control = event.target?.closest?.("[data-practice-physical-enable],[data-practice-physical-clear],[data-practice-action='physical-retry']");
     if (!control || !root?.contains?.(control)) return;
     event.preventDefault();
     event.stopPropagation();
+    if (control.matches("[data-practice-action='physical-retry']")) { void load({ focusSelector: "[data-practice-action='physical-retry']" }); return; }
     if (control.matches("[data-practice-physical-enable]")) void setEnabled(true, "[data-practice-physical-toggle]");
     else void clear();
   }
