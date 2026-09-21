@@ -182,7 +182,6 @@ jobs:
       PRACTICE_BROWSERS: ${{ matrix.browser }}
       PRACTICE_WIDTH: ${{ matrix.width }}
       PRACTICE_WIDTHS: ${{ matrix.widths }}
-      PRACTICE_FULL_STORAGE: '1'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -198,11 +197,15 @@ jobs:
         run: |
           node tests/browser/practice_end_to_end.mjs
           node tests/browser/practice_completion.mjs
-          node tests/browser/assessment_input.mjs
-      - name: Storage and quota resilience
+      - name: Saturated-storage persistence and Assessment
+        env:
+          PRACTICE_FULL_STORAGE: '1'
         run: |
+          node tests/browser/assessment_input.mjs
           node tests/browser/practice_quota_journey.mjs
           node tests/browser/storage_native.mjs
+          node tests/browser/practice_end_to_end.mjs
+          node tests/browser/practice_completion.mjs
           node tests/browser/practice_storage_repair.mjs
       - name: Chromium desktop extended Practice coverage
         if: matrix.extended == '1'
@@ -216,6 +219,12 @@ jobs:
           node tests/browser/practice_evidence_populated.mjs
           node tests/browser/practice_accessibility.mjs
           node tests/browser/practice_offline.mjs
+      - name: Chromium full-storage Custom Text
+        if: matrix.extended == '1'
+        env:
+          PRACTICE_FULL_STORAGE: '1'
+          PRACTICE_WIDTHS: '1280'
+        run: node tests/browser/practice_editor_ui.mjs
       - name: Chromium mobile Weakness Boss journey
         if: matrix.width == 390
         run: node tests/browser/practice_boss_journey.mjs
@@ -252,7 +261,6 @@ jobs:
       PRACTICE_BROWSERS: ${{ matrix.browser }}
       PRACTICE_WIDTH: ${{ matrix.width }}
       PRACTICE_WIDTHS: ${{ matrix.widths }}
-      PRACTICE_FULL_STORAGE: '1'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -268,11 +276,15 @@ jobs:
         run: |
           node tests/browser/practice_end_to_end.mjs
           node tests/browser/practice_completion.mjs
-          node tests/browser/assessment_input.mjs
-      - name: Cross-browser storage resilience
+      - name: Cross-browser saturated-storage resilience
+        env:
+          PRACTICE_FULL_STORAGE: '1'
         run: |
+          node tests/browser/assessment_input.mjs
           node tests/browser/practice_quota_journey.mjs
           node tests/browser/storage_native.mjs
+          node tests/browser/practice_end_to_end.mjs
+          node tests/browser/practice_completion.mjs
           node tests/browser/practice_storage_repair.mjs
       - uses: actions/upload-artifact@v4
         if: always()
