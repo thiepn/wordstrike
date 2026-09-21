@@ -138,6 +138,7 @@ export function createPracticeLabController(options = {}) {
         getAssessmentState: coachGetAssessmentState,
         getColdTransferAvailability: coachGetColdTransferAvailability,
         getRecentColdTransferAt: coachGetRecentColdTransferAt,
+        logger,
       });
       return Object.freeze({ service, repository, initialized, dataStore });
     })().catch((error) => {
@@ -184,6 +185,10 @@ export function createPracticeLabController(options = {}) {
         language: runtime.initialized.context.dataLocale,
       });
       if (!mounted || epoch !== actionEpoch || !isDailyRoute()) return false;
+      if (!created.plan) {
+        setCoachState({ status: "ready", plan: null, requestedMinutes, errorCode: "PRACTICE_COACH_NO_AVAILABLE_BLOCKS", errorDetail: null });
+        return false;
+      }
       setCoachState({ status: "ready", plan: created.plan, requestedMinutes: created.plan.requestedMinutes, errorCode: null, errorDetail: null });
       return true;
     } catch (error) {
@@ -254,7 +259,7 @@ export function createPracticeLabController(options = {}) {
       const started = await runtime.service.startPracticeCoachBlock({ coachPlanId: plan.coachPlanId, blockId: next.blockId });
       if (!mounted || epoch !== actionEpoch || !isDailyRoute()) return false;
       if (!started.started) {
-        setCoachState({ status: "ready", plan: started.plan, startingBlockId: null, errorCode: started.reason ?? null });
+        setCoachState({ status: "ready", plan: started.plan, startingBlockId: null, errorCode: null, errorDetail: null });
         return false;
       }
       coachState = normalizePracticeCoachUiState({ ...coachState, status: "ready", plan: started.plan, startingBlockId: null, errorCode: null });
@@ -264,8 +269,18 @@ export function createPracticeLabController(options = {}) {
     } catch (error) {
       if (!mounted || epoch !== actionEpoch) return false;
       logger?.warn?.("Daily Coach child start failed", error);
-      setCoachState({ status: "error", startingBlockId: null, errorCode: error?.code ?? "PRACTICE_COACH_BLOCK_START_FAILED" });
-      try { await loadTodayPlan({ reconcile: true }); } catch {}
+      const errorDetail = coachErrorDetail(error, "start-block");
+      try {
+        const runtime = await ensureCoachRuntime();
+        const recovered = await runtime.service.recoverInterruptedPracticeCoachBlock?.({ coachPlanId: plan.coachPlanId });
+        if (mounted && epoch === actionEpoch && recovered?.plan) {
+          setCoachState({ status: "ready", plan: recovered.plan, startingBlockId: null, errorCode: "PRACTICE_COACH_BLOCK_START_FAILED", errorDetail });
+          return false;
+        }
+      } catch (recoveryError) {
+        logger?.warn?.("Daily Coach automatic block recovery failed", recoveryError);
+      }
+      setCoachState({ status: "ready", startingBlockId: null, errorCode: error?.code ?? "PRACTICE_COACH_BLOCK_START_FAILED", errorDetail });
       return false;
     }
   }
@@ -273,6 +288,7 @@ export function createPracticeLabController(options = {}) {
   async function skipBlock(blockId) {
     const plan = coachState.plan;
     if (!plan || hasCoachSession()) return false;
+    if (globalThis.confirm?.("Skip this Daily Training block? The frozen plan will not replace it today.") === false) return false;
     const next = plan.blocks.find((block) => block.status === "pending");
     if (!next || next.blockId !== blockId) return false;
     const epoch = ++actionEpoch;
@@ -283,7 +299,24 @@ export function createPracticeLabController(options = {}) {
       setCoachState({ status: "ready", plan: result.plan, errorCode: result.updated ? null : result.reason });
       return Boolean(result.updated);
     } catch (error) {
-      if (epoch === actionEpoch) setCoachState({ status: "error", errorCode: error?.code ?? "PRACTICE_COACH_SKIP_FAILED" });
+      if (epoch === actionEpoch) setCoachState({ status: "ready", errorCode: error?.code ?? "PRACTICE_COACH_SKIP_FAILED", errorDetail: coachErrorDetail(error, "skip-block") });
+      return false;
+    }
+  }
+
+  async function recoverActiveBlock() {
+    const plan = coachState.plan;
+    if (!plan || hasCoachSession() || !plan.blocks?.some((block) => block.status === "active")) return false;
+    if (globalThis.confirm?.("Recover this interrupted Daily Training block? Only do this if the session is not still running in another tab. The interrupted block will be closed rather than resumed.") === false) return false;
+    const epoch = ++actionEpoch;
+    try {
+      const runtime = await ensureCoachRuntime();
+      const result = await runtime.service.recoverInterruptedPracticeCoachBlock({ coachPlanId: plan.coachPlanId });
+      if (!mounted || epoch !== actionEpoch) return false;
+      setCoachState({ status: "ready", plan: result.plan, errorCode: null, errorDetail: null, startingBlockId: null });
+      return Boolean(result.updated);
+    } catch (error) {
+      if (epoch === actionEpoch) setCoachState({ status: "ready", errorCode: "PRACTICE_COACH_RECOVERY_FAILED", errorDetail: coachErrorDetail(error, "recover-block") });
       return false;
     }
   }
@@ -300,7 +333,7 @@ export function createPracticeLabController(options = {}) {
       setCoachState({ status: "ready", plan: next, errorCode: null });
       return true;
     } catch (error) {
-      if (epoch === actionEpoch) setCoachState({ status: "error", errorCode: error?.code ?? "PRACTICE_COACH_END_FAILED" });
+      if (epoch === actionEpoch) setCoachState({ status: "ready", errorCode: error?.code ?? "PRACTICE_COACH_END_FAILED", errorDetail: coachErrorDetail(error, "end-plan") });
       return false;
     }
   }
@@ -310,7 +343,7 @@ export function createPracticeLabController(options = {}) {
     const button = event.target?.closest?.("[data-practice-action]");
     if (!button || !root?.contains?.(button) || button.disabled || button.getAttribute?.("aria-disabled") === "true") return;
     const action = button.dataset.practiceAction;
-    if (!["set-coach-duration", "create-coach-plan", "reload-coach", "start-coach-next", "skip-coach-block", "abandon-coach-plan", "open-coach-assessment", "open-coach-cold-transfer"].includes(action)) return;
+    if (!["set-coach-duration", "create-coach-plan", "reload-coach", "recover-coach-active", "start-coach-next", "skip-coach-block", "abandon-coach-plan", "open-coach-assessment", "open-coach-cold-transfer"].includes(action)) return;
     event.preventDefault?.();
     event.stopPropagation?.();
     if (!isDailyRoute()) return;
@@ -320,6 +353,7 @@ export function createPracticeLabController(options = {}) {
     }
     else if (action === "create-coach-plan") void createTodayPlan();
     else if (action === "reload-coach") void loadTodayPlan();
+    else if (action === "recover-coach-active") void recoverActiveBlock();
     else if (action === "start-coach-next") void startNextBlock();
     else if (action === "skip-coach-block") void skipBlock(button.dataset.coachBlockId);
     else if (action === "abandon-coach-plan") void endForToday();

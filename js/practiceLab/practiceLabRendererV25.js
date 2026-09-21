@@ -12,10 +12,23 @@ const COACH_ERROR_COPY = Object.freeze({
   PRACTICE_STORAGE_UNAVAILABLE: "Local browser storage is unavailable, so Daily Training cannot save its plan in this session.",
   PRACTICE_COACH_PLAN_FAILED: "Daily Training could not create today's plan. Try again.",
   PRACTICE_COACH_UNAVAILABLE: "Daily Training could not load its local Practice data. Try again.",
+  PRACTICE_COACH_NO_AVAILABLE_BLOCKS: "No verified training block fits right now. Nothing was frozen or saved; you can try again later or choose a drill manually.",
+  PRACTICE_COACH_BLOCK_START_FAILED: "The next block could not start. The frozen plan was recovered so you can continue with any remaining block.",
+  PRACTICE_COACH_SKIP_FAILED: "This block could not be skipped. The frozen plan is unchanged.",
+  PRACTICE_COACH_END_FAILED: "Daily Training could not end the frozen plan. Completed blocks remain saved.",
+  PRACTICE_COACH_RECOVERY_FAILED: "The interrupted block could not be recovered automatically. If it is not open in another tab, reload WordStrike and try again.",
 });
 
 function coachErrorCopy(code) {
   return COACH_ERROR_COPY[code] ?? "Daily Training could not complete this action. Try again; if the problem persists, reload WordStrike.";
+}
+function coachErrorTitle(code) {
+  if (code === "PRACTICE_COACH_NO_AVAILABLE_BLOCKS") return "No Daily Training block is available right now.";
+  if (code === "PRACTICE_COACH_BLOCK_START_FAILED") return "A Daily Training block could not start.";
+  if (code === "PRACTICE_COACH_SKIP_FAILED") return "The block could not be skipped.";
+  if (code === "PRACTICE_COACH_END_FAILED") return "Daily Training could not end.";
+  if (code === "PRACTICE_COACH_RECOVERY_FAILED") return "The interrupted block still needs recovery.";
+  return "Daily Training could not save or load its local plan.";
 }
 
 function renderDurationChoices(view) {
@@ -75,14 +88,15 @@ export function renderPracticeCoach(root, view, { focusSelector = null } = {}) {
   const technical = detail
     ? [view.errorCode, detail.stage && `stage=${detail.stage}`, detail.operation && `operation=${detail.operation}`, detail.name && `error=${detail.name}`, detail.causeName && `cause=${detail.causeName}`, detail.causeMessage && `message=${detail.causeMessage}`].filter(Boolean).join(" · ")
     : String(view.errorCode ?? "");
-  const error = view.errorCode ? `<div class="practice-lab-notice is-warning practice-coach-error" role="alert"><strong>Daily Training could not save or load its local plan.</strong> <span>${escapeHtml(coachErrorCopy(view.errorCode))}</span><div><button type="button" data-practice-action="reload-coach">TRY AGAIN</button></div><details><summary>Technical details</summary><code>${escapeHtml(technical)}</code></details></div>` : "";
+  const error = view.errorCode ? `<div class="practice-lab-notice is-warning practice-coach-error" role="alert"><strong>${escapeHtml(coachErrorTitle(view.errorCode))}</strong> <span>${escapeHtml(coachErrorCopy(view.errorCode))}</span><div><button type="button" data-practice-action="reload-coach">TRY AGAIN</button></div>${technical ? `<details><summary>Technical details</summary><code>${escapeHtml(technical)}</code></details>` : ""}</div>` : "";
   const beforePlan = !plan ? `<section class="practice-coach-create">
       <div class="practice-lab-section-heading"><div><div class="eyebrow">Choose today's budget</div><h2>${view.requestedMinutes} minutes</h2></div><p>This sets a planning budget, not a quota. The Coach may intentionally underfill it when no useful block fits.</p></div>
       ${renderDurationChoices(view)}
       <button type="button" class="practice-lab-primary-action" data-practice-action="create-coach-plan" ${view.canCreate ? "" : "disabled"}>${view.status === "creating" ? "CREATING PLAN…" : "CREATE TODAY'S PLAN"}</button>
     </section>` : "";
-  const planSection = plan ? `<section class="practice-coach-plan" aria-labelledby="practice-coach-plan-title">
-      <div class="practice-coach-plan-header"><div><div class="eyebrow">${escapeHtml(plan.statusLabel)}</div><h2 id="practice-coach-plan-title">~${plan.plannedMinutes} min · ${plan.blockCount} block${plan.blockCount === 1 ? "" : "s"}</h2><p>${escapeHtml(plan.progress.label)} · ${escapeHtml(plan.coverageLabel ?? "")}</p></div>
+  const recovery = plan?.recoveryAvailable ? `<div class="practice-lab-notice is-warning" role="status"><strong>An interrupted Daily Training block is still marked active.</strong><p>If that session is still open in another tab, continue it there. If this page was reloaded or the session crashed and no other tab is running it, recover the frozen plan.</p><button type="button" data-practice-action="recover-coach-active">RECOVER INTERRUPTED BLOCK</button></div>` : "";
+  const planSection = plan ? `${recovery}<section class="practice-coach-plan" aria-labelledby="practice-coach-plan-title">
+      <div class="practice-coach-plan-header"><div><div class="eyebrow">${escapeHtml(plan.statusLabel)}</div><h2 id="practice-coach-plan-title">~${plan.plannedMinutes} min · ${plan.blockCount} block${plan.blockCount === 1 ? "" : "s"}</h2><p>${escapeHtml(plan.budgetLabel)} · ${escapeHtml(plan.progress.label)} · ${escapeHtml(plan.coverageLabel ?? "")}</p></div>
         <div class="practice-coach-plan-actions">${plan.canStartNext ? `<button type="button" class="practice-lab-primary-action" data-practice-action="start-coach-next">START NEXT BLOCK</button>` : ""}${plan.canEndToday ? '<button type="button" data-practice-action="abandon-coach-plan">END FOR TODAY</button>' : ""}</div></div>
       <div class="practice-coach-blocks">${plan.blocks.map((block) => renderBlock(block, view)).join("")}</div>
     </section>

@@ -89,7 +89,11 @@ function blockView(block, { nextPendingId = null, startingBlockId = null } = {})
 function progress(plan) {
   const terminal = (plan?.blocks ?? []).filter((block) => ["completed", "skipped", "blocked", "invalid"].includes(block.status)).length;
   const completed = Number(plan?.completion?.completedCount || 0);
-  return freezeDeep({ terminal, completed, total: plan?.blocks?.length ?? 0, label: `${completed} of ${plan?.blocks?.length ?? 0} completed` });
+  const total = plan?.blocks?.length ?? 0;
+  const label = terminal === completed
+    ? `${completed} of ${total} completed`
+    : `${terminal} of ${total} resolved · ${completed} completed`;
+  return freezeDeep({ terminal, completed, total, label });
 }
 
 function rationales(plan) {
@@ -100,7 +104,10 @@ function rationales(plan) {
   if (target) output.push(blockReason(target));
   if (plan?.blocks?.some((block) => block.responseInformed === true)) output.push(RESPONSE_RATIONALE);
   if (plan?.blocks?.some((block) => block.kind === "real-text")) output.push("Broad natural-text practice keeps the plan from becoming weakness-only.");
-  return freezeDeep([...new Set(output)].slice(0, 4));
+  if (plan?.decisionContext?.unavailableTargetCount > 0 && !plan?.blocks?.some((block) => block.kind === "targeted-intervention")) output.push("Focused targets were omitted because no current target could be verified as runnable.");
+  if (plan?.decisionContext?.reviewRequested && !plan?.blocks?.some((block) => block.kind === "review") && plan?.decisionContext?.degradedInputs?.includes?.("review-content")) output.push("A due review was omitted because fresh review content could not be verified.");
+  if (plan?.decisionContext?.degradedInputs?.length) output.push("Some local evidence sources were unavailable, so this plan uses only blocks that could be verified.");
+  return freezeDeep([...new Set(output)].slice(0, 5));
 }
 
 function developerDiagnostics(plan) {
@@ -199,12 +206,16 @@ export function buildPracticeCoachViewModel({ state, preview = false } = {}) {
       statusLabel: plan.status === "abandoned" ? "Ended for today" : plan.status === "expired" ? "Expired" : plan.status === "finished" ? "Finished" : "Today's plan",
       requestedMinutes: plan.requestedMinutes,
       plannedMinutes: plan.plannedMinutes,
-      coverageLabel: plan.coverage?.label ?? null,
+      budgetLabel: plan.plannedMinutes === plan.requestedMinutes
+        ? `${plan.plannedMinutes} of ${plan.requestedMinutes} min planned`
+        : `${plan.plannedMinutes} of ${plan.requestedMinutes} min planned · intentionally underfilled`,
+      coverageLabel: plan.coverage?.label === "full" ? "well covered" : plan.coverage?.label === "partial" ? "partially filled" : "light plan",
       blockCount: plan.blocks.length,
       blocks,
       progress: progress(plan),
       nextBlockId: nextBlock?.blockId ?? null,
       activeBlockId: activeBlock?.blockId ?? null,
+      recoveryAvailable: Boolean(activeBlock),
       canStartNext: Boolean(nextBlock) && !activeBlock && normalized.status !== "starting" && normalized.startingBlockId == null && !["finished", "abandoned", "expired"].includes(plan.status),
       canEndToday: !activeBlock && normalized.status !== "starting" && normalized.startingBlockId == null && !["finished", "abandoned", "expired"].includes(plan.status),
       rationales: rationales(plan),
