@@ -88,8 +88,8 @@ test("PL30 v1 versions and durations are frozen",()=>{
 test("catalog activates exactly the two separate PL30 surfaces",()=>{
   const punct=getPracticeExperiment("punctuation-capitals");
   const nums=getPracticeExperiment("numbers-symbols");
-  assert.equal(punct.status,"preview");
-  assert.equal(nums.status,"preview");
+  assert.equal(punct.status,"available");
+  assert.equal(nums.status,"available");
   assert.equal(punct.requiresPracticeData,false);
   assert.equal(nums.requiresPracticeData,false);
   assert.equal(punct.supportsSoftwareKeyboard,true);

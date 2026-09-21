@@ -48,7 +48,7 @@ test("PL24 keeps one visible real-text card and the cold-transfer descriptor int
   assert.equal(PRACTICE_EXPERIMENT_CATALOG.filter((entry) => entry.id === "real-text").length, 1);
   assert.equal(PRACTICE_EXPERIMENT_CATALOG.some((entry) => entry.id === "real-text-cold-transfer"), false);
   const entry = getPracticeExperiment("real-text");
-  assert.equal(entry.status, "preview");
+  assert.equal(entry.status, "available");
   assert.equal(entry.category, "real-world");
   assert.deepEqual(entry.capabilities, ["duration-options", "broad-training", "cold-transfer-launch"]);
 });

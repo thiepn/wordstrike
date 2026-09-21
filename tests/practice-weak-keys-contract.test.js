@@ -139,7 +139,7 @@ test("the existing weak-keys catalog mode is implemented as preview instead of d
   const entry = getPracticeExperiment("weak-keys");
   assert.equal(entry.id, "weak-keys");
   assert.equal(entry.version, 1);
-  assert.equal(entry.status, "preview");
+  assert.equal(entry.status, "available");
   assert.equal(entry.estimatedDurationMinutes.minimum, 4);
   assert.equal(entry.estimatedDurationMinutes.maximum, 6);
   assert.match(entry.description, /one difficult letter/i);

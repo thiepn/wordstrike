@@ -100,7 +100,7 @@ test("Phase 1 Daily Coach developer diagnostics are opt-in and production-safe b
   assert.equal(developer.plan.developerDiagnostics.length, 1);
 
   const controller = await readFile(new URL("../js/practiceLab/practiceLabControllerRuntimeV25.js", import.meta.url), "utf8");
-  assert.match(controller, /coachPreview = options\.featureGate\?\.getSnapshot\?\.\(\)\.reason === "developer-preview"/);
+  assert.match(controller, /coachPreview = options\.featureGate\?\.getSnapshot\?\.\(\)\.reason === "developer"/);
   assert.doesNotMatch(controller, /buildPracticeCoachViewModel\(\{ state: coachState, preview: true \}\)/);
 });
 

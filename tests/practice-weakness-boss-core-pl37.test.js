@@ -186,7 +186,7 @@ test("PL37 result reports same-session delta without mastery claim", () => {
 test("PL37 is a distinct advanced catalog experiment and PL32 targeted family excludes cosmetic theme", () => {
   const catalog = getPracticeExperiment("weakness-boss");
   assert.equal(catalog?.category, "advanced");
-  assert.equal(catalog?.status, "preview");
+  assert.equal(catalog?.status, "available");
   const configuration = {
     weaknessBossVersion: PRACTICE_WEAKNESS_BOSS_VERSION,
     policyVersion: PRACTICE_WEAKNESS_BOSS_POLICY_VERSION,

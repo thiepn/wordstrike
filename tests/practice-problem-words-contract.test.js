@@ -93,7 +93,7 @@ test("existing problem-words catalog entry is preview, unique, and retains no pr
   const entry = getPracticeExperiment("problem-words");
   assert.equal(entry.id, "problem-words");
   assert.equal(entry.version, 1);
-  assert.equal(entry.status, "preview");
+  assert.equal(entry.status, "available");
   assert.deepEqual(entry.estimatedDurationMinutes, { minimum: 4, recommended: 5, maximum: 6 });
   assert.match(entry.description, /difficult words/i);
   assert.deepEqual(entry.capabilities, ["manual-target", "recommended-target", "fixed-dose", "same-session-check"]);
