@@ -46,7 +46,7 @@ export function renderPracticeWeaknessBossDetail(root, view, { focusSelector = n
     : view?.status === "unavailable"
       ? `<section class="practice-lab-empty-state"><h2>Weakness Boss unavailable</h2><p>Current Practice evidence or local training content could not be read.</p>${view.errorCode ? `<p role="alert">${escapeHtml(view.errorCode)}</p>` : ""}<button type="button" data-practice-action="weakness-boss-refresh">TRY AGAIN</button></section>`
       : !recommended
-        ? `<section class="practice-lab-empty-state"><h2>No Boss ready yet</h2><p>There is no current likely or confirmed limiter with enough learning headroom and valid training content. Keep practicing normally and check again later.</p></section>`
+        ? `<section class="practice-lab-empty-state"><h2>No Boss ready yet</h2><p>There is no current likely or confirmed limiter with enough learning headroom and valid training content. Keep practicing normally and check again later.</p><button type="button" data-practice-action="navigate" data-route="daily-training">OPEN DAILY TRAINING</button></section>`
         : `<div class="practice-lab-category-grid">${candidateCard(recommended, { recommended: true })}${alternatives.map((candidate) => candidateCard(candidate)).join("")}</div>`;
   root.innerHTML = `<section class="screen practice-lab-screen" data-practice-view="weakness-boss-detail"><div class="practice-lab-shell">
     <header class="practice-lab-header"><button type="button" class="practice-lab-back" data-practice-action="back">← Back to Practice Lab</button><span class="practice-lab-status is-preview">EXPERIMENTAL</span></header>

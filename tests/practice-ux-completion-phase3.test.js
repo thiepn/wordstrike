@@ -62,3 +62,19 @@ test("Phase 3 mobile Practice navigation remains reachable on long screens", asy
   const css = await readFile(new URL("../practiceLabIdentity.css", import.meta.url), "utf8");
   assert.match(css, /@media\(max-width:700px\).*\.pl-navigation\{position:sticky;top:0;z-index:6/s);
 });
+
+
+test("Phase 3 empty evidence and Boss states offer a concrete next step", async () => {
+  const evidence = await readFile(new URL("../js/practiceLab/practiceEvidenceViews.js", import.meta.url), "utf8");
+  assert.ok((evidence.match(/data-route="daily-training"/g) ?? []).length >= 3);
+
+  const boss = root();
+  renderPracticeWeaknessBossDetail(boss, { status:"ready", candidates:[], recommendedCandidate:null, errorCode:null });
+  assert.match(boss.innerHTML, /data-practice-action="navigate" data-route="daily-training"/);
+});
+
+test("Phase 3 Daily Training error copy matches in-place retry behavior", async () => {
+  const source = await readFile(new URL("../js/practiceLab/practiceLabRendererV25.js", import.meta.url), "utf8");
+  assert.match(source, /PRACTICE_COACH_UNAVAILABLE: "Daily Training could not load its local Practice data\. Try again\."/);
+  assert.doesNotMatch(source, /PRACTICE_COACH_UNAVAILABLE: .*Reload WordStrike and try again/);
+});

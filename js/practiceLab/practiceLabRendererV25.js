@@ -6,16 +6,16 @@ const number = (value, digits = 2) => Number.isFinite(value) ? Number(value).toF
 
 const COACH_ERROR_COPY = Object.freeze({
   PRACTICE_STORAGE_TRANSACTION_FAILED: "Practice could not complete a storage transaction. The plan has not been reported as saved. Your existing data has not been cleared; the technical details identify the failing operation.",
-  PRACTICE_STORAGE_OPEN_FAILED: "WordStrike could not open the local Practice database. Reload the page and try again.",
+  PRACTICE_STORAGE_OPEN_FAILED: "WordStrike could not open the local Practice database. Try again; if the problem persists, reload WordStrike.",
   PRACTICE_STORAGE_RECOVERY_REQUIRED: "Your local Practice database needs a schema repair. Reload WordStrike once to complete the upgrade; do not clear site data.",
   PRACTICE_STORAGE_QUOTA_EXCEEDED: "Your browser could not allocate enough local storage for Practice. Free some site storage and try again.",
   PRACTICE_STORAGE_UNAVAILABLE: "Local browser storage is unavailable, so Daily Training cannot save its plan in this session.",
-  PRACTICE_COACH_PLAN_FAILED: "Daily Training could not create today's plan. Try again after reloading WordStrike.",
-  PRACTICE_COACH_UNAVAILABLE: "Daily Training could not load its local Practice data. Reload WordStrike and try again.",
+  PRACTICE_COACH_PLAN_FAILED: "Daily Training could not create today's plan. Try again.",
+  PRACTICE_COACH_UNAVAILABLE: "Daily Training could not load its local Practice data. Try again.",
 });
 
 function coachErrorCopy(code) {
-  return COACH_ERROR_COPY[code] ?? "Daily Training could not complete this action. Reload WordStrike and try again.";
+  return COACH_ERROR_COPY[code] ?? "Daily Training could not complete this action. Try again; if the problem persists, reload WordStrike.";
 }
 
 function renderDurationChoices(view) {
