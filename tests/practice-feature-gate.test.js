@@ -15,7 +15,7 @@ test("Practice feature gate enables public access and preserves developer previe
   const devMode = devGate.resolveModeDefinitions(getAllModes()).find(({ id }) => id === MODE_IDS.PRACTICE);
   assert.equal(devGate.canAccess(), true);
   assert.equal(devMode.enabled, true);
-  assert.equal(devMode.status, "preview");
+  assert.equal(devMode.status, "available");
   assert.equal(devMode.route, "practice-lab");
 });
 
@@ -36,6 +36,6 @@ test("Explicit disable switch closes public access and menu without mutating can
   const mode = gate.resolveModeDefinitions(getAllModes()).find(mode => mode.id === MODE_IDS.PRACTICE);
   assert.equal(mode.enabled, false);
   assert.equal(mode.route, null);
-  assert.equal(mode.status, "coming-soon");
+  assert.equal(mode.status, "unavailable");
   assert.equal(getAllModes().find(mode => mode.id === MODE_IDS.PRACTICE).enabled, true);
 });

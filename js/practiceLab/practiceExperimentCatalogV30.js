@@ -102,7 +102,7 @@ export const getPracticeExperiment = (experimentId) => CATALOG_BY_ID.get(experim
 
 export const PRACTICE_DAILY_TRAINING = deepFreeze({
   id: "daily-training", version: 1, title: "Today's Training",
-  description: "Personalized sessions will combine weakness repair, accuracy, fluency, transfer, and speed practice.",
-  recommendedDurationMinutes: 12, supportedDurationsMinutes: [5, 8, 12, 15], status: "planned",
+  description: "Build a small evidence-informed session from due review, focused practice when justified, and broad natural-text work.",
+  recommendedDurationMinutes: 12, supportedDurationsMinutes: [5, 8, 12, 15], status: "available",
   requiresAssessment: false, requiresPracticeData: true, implementationPrompt: 15,
 });

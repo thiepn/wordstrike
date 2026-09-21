@@ -67,7 +67,7 @@ test("PL19 existing Practice feature gate remains the sole public gate", () => {
   assert.equal(view.kind, "unavailable");
   const root = fakeRoot();
   renderPracticeLab(root, view);
-  assert.match(root.innerHTML, /Practice Lab is coming soon/);
+  assert.match(root.innerHTML, /Practice Lab is unavailable in this build/);
   assert.equal(root.innerHTML.includes("Quick"), false);
 });
 

@@ -47,7 +47,7 @@ test("PL40 developer preview is explicit and cannot mutate the canonical mode", 
 
   assert.notEqual(previewMode, practiceMode);
   assert.equal(previewMode.enabled, true);
-  assert.equal(previewMode.status, "preview");
+  assert.equal(previewMode.status, "available");
   assert.equal(previewMode.route, PRACTICE_LAB_ROUTE);
 
   assert.equal(practiceMode.enabled, true);

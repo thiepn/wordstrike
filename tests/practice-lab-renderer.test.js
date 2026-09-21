@@ -30,11 +30,11 @@ test("home renderer exposes semantic sections, honest empty states, native contr
   assert.doesNotMatch(target.innerHTML, /implementationPrompt|Prompt 6/);
 });
 
-test("generic detail and analysis renderers show controlled planned and empty states", () => {
+test("generic detail and analysis renderers show controlled unavailable and current empty states", () => {
   const registry = createPracticeExperimentRegistry({ featureGate: gate });
   const detail = root();
   renderPracticeLab(detail, buildExperimentDetailViewModel({ route: createPracticeLabRoute(PRACTICE_LAB_ROUTES.EXPERIMENT_DETAIL, { experimentId: "weak-keys" }), registry }));
-  assert.match(detail.innerHTML, /This experiment is not available/);
+  assert.match(detail.innerHTML, /This drill is unavailable/);
   assert.match(detail.innerHTML, /BEGIN UNAVAILABLE/);
   for (const view of [buildSkillMapEmptyViewModel(), buildReviewQueueEmptyViewModel(), buildProgressEmptyViewModel()]) {
     const target = root();

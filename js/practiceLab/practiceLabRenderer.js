@@ -9,7 +9,7 @@ function experimentCard(card) {
   return `<article class="practice-lab-experiment-card practice-lab-accent-${slug(card.category)}">
     <div class="practice-lab-card-meta"><span>${escapeHtml(card.categoryLabel)}</span><span>${escapeHtml(card.duration)}</span></div>
     <h3>${escapeHtml(card.title)}</h3><p>${escapeHtml(card.description)}</p>
-    <div class="practice-lab-card-footer"><span class="practice-lab-status" data-status="${slug(card.status)}">${escapeHtml(card.status)}</span>
+    <div class="practice-lab-card-footer"><span class="practice-lab-status" data-status="${slug(card.status)}">${escapeHtml(card.statusLabel ?? card.status)}</span>
       <button type="button" class="practice-lab-text-button" data-practice-action="open-experiment" data-experiment-id="${slug(card.id)}" aria-label="View ${escapeHtml(card.title)} details">VIEW DETAILS</button></div>
   </article>`;
 }
@@ -22,7 +22,7 @@ function shell(content, { home = false } = {}) {
 function renderHome(view) {
   return shell(`${backButton("Exit Practice Lab", "exit")}
     <header class="practice-lab-header"><div><div class="eyebrow">Focused training</div><h1 tabindex="-1" data-practice-heading>${escapeHtml(view.title)}</h1><p>${escapeHtml(view.subtitle)}</p></div>
-      <div class="practice-lab-header-actions">${view.preview ? '<span class="practice-lab-preview">DEVELOPER PREVIEW</span>' : ""}${view.dataManagementAvailable ? '<button type="button" data-practice-action="manage-data" aria-label="Manage Practice Lab data">DATA</button>' : ""}<button type="button" class="practice-lab-help" data-practice-action="help" aria-label="Practice Lab help"${view.helpAvailable ? "" : ' disabled aria-disabled="true" title="Practice Lab help is not available yet"'}>HELP</button></div></header>
+      <div class="practice-lab-header-actions">${view.preview ? '<span class="practice-lab-preview">DEVELOPER MODE</span>' : ""}${view.dataManagementAvailable ? '<button type="button" data-practice-action="manage-data" aria-label="Manage Practice Lab data">DATA</button>' : ""}<button type="button" class="practice-lab-help" data-practice-action="help" aria-label="Practice Lab help"${view.helpAvailable ? "" : ' disabled aria-disabled="true" title="Practice Lab help is not available yet"'}>HELP</button></div></header>
     <main>
       <section class="practice-lab-feature-grid" aria-label="Practice overview">
         <article class="practice-lab-feature-card practice-lab-daily"><div class="eyebrow">Guided program</div><h2>${escapeHtml(view.dailyTraining.title)}</h2><p>${escapeHtml(view.dailyTraining.description)}</p><ul><li>${escapeHtml(view.dailyTraining.stateLabel)}</li><li>${escapeHtml(view.dailyTraining.duration)}</li></ul><button type="button" data-practice-action="navigate" data-route="daily-training">OPEN DAILY TRAINING</button></article>
@@ -38,7 +38,7 @@ function renderHome(view) {
 function renderDetail(view) {
   if (view.kind === "not-found") return shell(`${backButton()}<main class="practice-lab-detail"><div class="eyebrow">Practice Lab</div><h1 tabindex="-1" data-practice-heading>${escapeHtml(view.title)}</h1><p>${escapeHtml(view.description)}</p></main>`);
   return shell(`${backButton(view.backLabel)}<main class="practice-lab-detail"><div class="eyebrow">${escapeHtml(view.category)}</div><h1 tabindex="-1" data-practice-heading>${escapeHtml(view.title)}</h1><p class="practice-lab-lead">${escapeHtml(view.description)}</p><p>${escapeHtml(view.longDescription)}</p>
-    <dl><div><dt>Primary skill</dt><dd>${escapeHtml(view.primarySkill)}</dd></div><div><dt>Estimated duration</dt><dd>${escapeHtml(view.duration)}</dd></div><div><dt>Difficulty</dt><dd>${escapeHtml(view.difficulty)}</dd></div><div><dt>Prerequisites</dt><dd>${escapeHtml(view.prerequisites.length ? view.prerequisites.join(", ") : "None")}</dd></div><div><dt>Device support</dt><dd>${escapeHtml(view.deviceSupport.join(", "))}</dd></div><div><dt>Availability</dt><dd>${escapeHtml(view.status)}</dd></div></dl>
+    <dl><div><dt>Primary skill</dt><dd>${escapeHtml(view.primarySkill)}</dd></div><div><dt>Estimated duration</dt><dd>${escapeHtml(view.duration)}</dd></div><div><dt>Difficulty</dt><dd>${escapeHtml(view.difficulty)}</dd></div><div><dt>Prerequisites</dt><dd>${escapeHtml(view.prerequisites.length ? view.prerequisites.join(", ") : "None")}</dd></div><div><dt>Device support</dt><dd>${escapeHtml(view.deviceSupport.join(", "))}</dd></div><div><dt>Availability</dt><dd>${escapeHtml(view.statusLabel ?? view.status)}</dd></div></dl>
     <div class="practice-lab-notice" role="status">${escapeHtml(view.unavailableMessage)}</div><button type="button" disabled aria-disabled="true">BEGIN UNAVAILABLE</button></main>`);
 }
 

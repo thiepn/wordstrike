@@ -19,7 +19,7 @@ export function createPracticeFeatureGate({
     resolveModeDefinitions(modes = []) {
       return modes.map((mode) => mode.id === MODE_IDS.PRACTICE
         ? Object.freeze({ ...mode, enabled: snapshot.allowed,
-          status: snapshot.allowed ? (snapshot.developerMode ? "preview" : "available") : "coming-soon",
+          status: snapshot.allowed ? "available" : "unavailable",
           route: snapshot.allowed ? PRACTICE_LAB_ROUTE : null })
         : mode);
     },

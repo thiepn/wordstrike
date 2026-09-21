@@ -56,7 +56,7 @@ function cardMarkup(card, index) {
     <div class="pl-drill-top"><span>${numbered(index)} / ${escape(card.categoryLabel)}</span><span>${escape(card.duration)}</span></div>
     <div class="pl-drill-art">${practiceDrillArtwork(card.id)}</div>
     <h3>${escape(card.title)}</h3><p>${escape(short)}</p>
-    <div class="practice-lab-card-footer"><span class="pl-drill-status" data-status="${safeId(card.status)}">${escape(card.status === 'available' ? 'Ready to train' : card.status)}</span><button type="button" class="practice-lab-text-button" data-practice-action="open-experiment" data-experiment-id="${safeId(card.id)}" aria-label="Open ${escape(card.title)}"><span>OPEN</span><span aria-hidden="true">↗</span></button></div>
+    <div class="practice-lab-card-footer"><span class="pl-drill-status" data-status="${safeId(card.status)}">${escape(card.statusLabel ?? (card.status === 'available' ? 'Ready to train' : 'Unavailable'))}</span><button type="button" class="practice-lab-text-button" data-practice-action="open-experiment" data-experiment-id="${safeId(card.id)}" aria-label="Open ${escape(card.title)}"><span>OPEN</span><span aria-hidden="true">↗</span></button></div>
   </article>`;
 }
 function homeMarkup(view) {
