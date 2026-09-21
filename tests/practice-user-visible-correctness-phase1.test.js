@@ -158,3 +158,40 @@ test("Phase 1 target-result surfaces distinguish rates, residuals, and quality-p
   assert.match(physicalHtml, /<th scope="col">Median residual<\/th>/);
   assert.doesNotMatch(physicalHtml, /<th scope="col">Normalized timing<\/th>/);
 });
+
+
+test("Phase 1 Pace Ladder distinguishes the reference stage from ratio rungs", async () => {
+  const source = await readFile(new URL("../js/practiceLab/practicePaceLadderSessionHost.js", import.meta.url), "utf8");
+  assert.match(source, /s\.kind === "reference" \? "Reference"/);
+  assert.doesNotMatch(source, /Math\.round\(\(s\.ratio \?\? 0\) \* 100\).*<\/th>/);
+});
+
+test("Phase 1 Weakness Boss renders the explicit runtime recommendation, not list position", async () => {
+  const { renderPracticeWeaknessBossDetail } = await import("../js/practiceLab/practiceWeaknessBossUi.js");
+  const target = root();
+  const candidate = (statId, entityKey) => ({
+    statId, entityType: "key", entityKey,
+    bossTheme: { name: `Boss ${entityKey}`, description: `Target ${entityKey}` },
+    reasonCodes: ["confirmed-limiter"],
+  });
+  const first = candidate("stat-a", "a");
+  const recommended = candidate("stat-b", "b");
+  renderPracticeWeaknessBossDetail(target, {
+    status: "ready",
+    candidates: [first, recommended],
+    recommendedCandidate: recommended,
+    errorCode: null,
+  });
+  const recommendedIndex = target.innerHTML.indexOf('data-boss-candidate="stat-b"');
+  const alternativeIndex = target.innerHTML.indexOf('data-boss-candidate="stat-a"');
+  assert.ok(recommendedIndex >= 0 && alternativeIndex > recommendedIndex);
+  assert.match(target.innerHTML.slice(recommendedIndex, alternativeIndex), /Recommended Boss/);
+});
+
+test("Phase 1 missing Common Words breadth percentages render unavailable, not a fake percent token", () => {
+  const target = root();
+  renderPracticeCommonWordsResult(target, { flow: "practice", contentPlan: { completion: { value: 80 } } }, {
+    summary: { afterMetrics: { wordsCompleted: 80, wpm: 60, firstPassWordAccuracy: 0.95 } },
+  }, { bands: {} }, null, { focusResult: false });
+  assert.doesNotMatch(target.innerHTML, /—%/);
+});

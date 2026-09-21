@@ -39,8 +39,8 @@ export function renderPracticeWeaknessBossDetail(root, view, { focusSelector = n
   if (!root || typeof root.innerHTML !== "string") throw new TypeError("Weakness Boss renderer requires a root element");
   const loading = view?.status === "loading" || view?.status === "idle";
   const candidates = view?.candidates ?? [];
-  const recommended = candidates[0] ?? null;
-  const alternatives = candidates.slice(1, 5);
+  const recommended = view?.recommendedCandidate ?? candidates[0] ?? null;
+  const alternatives = candidates.filter((candidate) => candidate.statId !== recommended?.statId).slice(0, 4);
   const body = loading
     ? `<section class="practice-lab-empty-state" aria-live="polite"><h2>Finding a Boss…</h2><p>Checking current local Practice evidence and training-content availability.</p></section>`
     : view?.status === "unavailable"
