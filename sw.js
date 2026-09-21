@@ -1,5 +1,5 @@
 const CACHE_PREFIX = "wordstrike-pwa-";
-const CACHE_NAME = CACHE_PREFIX + "v56-practice-experimental-closure";
+const CACHE_NAME = CACHE_PREFIX + "v57-practice-graduated-fluency";
 const APP_SHELL = [
   "./js/practiceLab/practiceAssessmentInput.js",
   "./js/practiceLab/practiceDurableManifest.js",
@@ -152,6 +152,7 @@ const APP_SHELL = [
   "./js/practiceLab/practicePhysicalTelemetryUi.js",
   "./js/practiceLab/practicePhysicalTelemetryViewRuntime.js",
   "./js/practiceLab/practicePl30ModelBoundaryRepair.js",
+  "./js/practiceLab/practiceGraduatedFluencyExperiments.js",
   "./js/practiceLab/practicePreviewProtocolRuntime.js",
   "./js/practiceLab/practicePreviewProtocolSessionHost.js",
   "./js/practiceLab/practicePreviewProtocolSetup.js",
