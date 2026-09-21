@@ -80,14 +80,19 @@ try{
       };
     });
 
-    const certify=async(name,action,checks)=>{
+    const certify=async(name,action,checks,{openDetails=false}={})=>{
       await page.evaluate(action=>window.__phase1[action](),action);
+      if(openDetails){
+        const details=page.locator('details').first();
+        await details.waitFor({state:'visible'});
+        await details.evaluate(node=>{node.open=true;});
+      }
       for(const check of checks)await page.getByText(check,{exact:false}).first().waitFor();
       assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+2),false,`${name} overflows horizontally at ${width}px`);
       await page.screenshot({path:path.join(out,`${width}-${name}.png`),fullPage:true});
     };
-    await certify('skill-map','renderSkill',['90%','145.2 ms','high confidence','learning']);
-    await certify('review-queue','renderReview',['overdue','verified','retained']);
+    await certify('skill-map','renderSkill',['90%','145.2 ms','high confidence','learning'],{openDetails:true});
+    await certify('review-queue','renderReview',['overdue','verified','retained'],{openDetails:true});
     await certify('history','renderHistory',['72.4 WPM','96.5% accuracy']);
     assert.equal(await page.getByText(/999 WPM|0\.8% accuracy/).count(),0,'History must not expose probe metrics as session metrics');
     await certify('treatment-response','renderTreatment',['Positive observed signal','+6.5 quality pts','Medium']);
