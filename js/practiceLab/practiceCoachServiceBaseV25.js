@@ -277,13 +277,27 @@ export function createPracticeCoachService({
 
     let reviewPlan = null;
     const reviewRequested = shouldIncludePracticeCoachReview(reviewQueue, budget.minutes, policy);
+    let reviewReservedBindings = reviewRequested
+      ? (reviewQueue?.candidates ?? [])
+        .filter((candidate) => ["due", "overdue"].includes(candidate?.dueStatus))
+        .slice(0, policy.review.maxItems)
+        .map((candidate) => candidate.reviewBinding ?? candidate)
+        .filter((binding) => binding?.entityType && binding?.entityKey)
+      : [];
     if (reviewRequested) {
-      const tentative = await resolvedReviewService.buildPracticeReviewPlan({ queue: reviewQueue, maxItems: 4, maxCostUnits: 4, includeNearDue: false });
-      if (tentative.bindings?.length) {
-        const targetIndex = await loadReviewTargetIndex().catch(() => null);
+      let tentative = null;
+      try {
+        tentative = await resolvedReviewService.buildPracticeReviewPlan({ queue: reviewQueue, maxItems: policy.review.maxItems, maxCostUnits: policy.review.maxCostUnits, includeNearDue: false });
+      } catch (error) {
+        degrade("review-plan", null, error);
+      }
+      if (tentative?.bindings?.length) {
+        reviewReservedBindings = tentative.bindings;
+        const targetIndex = await loadReviewTargetIndex().catch((error) => degrade("review-index", null, error));
         if (targetIndex) {
           const reviewSessionId = coachPlannedSessionId(profileId, contextId, localDayKey, "review");
-          const preflight = await buildPracticeCoachReviewPreflight({ sessionId: reviewSessionId, reviewPlan: tentative, targetIndex }).catch(() => null);
+          const preflight = await buildPracticeCoachReviewPreflight({ sessionId: reviewSessionId, reviewPlan: tentative, targetIndex })
+            .catch((error) => degrade("review-preflight", null, error));
           if (preflight?.status === "ready" && preflight.reviewPlan?.bindings?.length) {
             const reviewReason = reasonFromReviewQueue(reviewQueue, preflight.reviewPlan.bindings);
             reviewPlan = freezeDeep({ ...preflight.reviewPlan, ...reviewReason });
@@ -293,8 +307,9 @@ export function createPracticeCoachService({
       if (!reviewPlan) degradedInputs.add("review-content");
     }
 
-    const reviewedEntities = new Set((reviewPlan?.bindings ?? []).map(entityIdentity));
-    const reviewedStatIds = new Set((reviewPlan?.bindings ?? []).map((binding) => skillStats.find((stat) => stat.entityType === binding.entityType && stat.entityKey === binding.entityKey)?.statId).filter(Boolean));
+    const reviewSuppressionBindings = reviewPlan?.bindings ?? reviewReservedBindings;
+    const reviewedEntities = new Set(reviewSuppressionBindings.map(entityIdentity));
+    const reviewedStatIds = new Set(reviewSuppressionBindings.map((binding) => skillStats.find((stat) => stat.entityType === binding.entityType && stat.entityKey === binding.entityKey)?.statId).filter(Boolean));
     let targetCandidates = buildPracticeCoachTargetCandidates({
       limiterCandidates: limiterSnapshot?.candidates ?? [],
       masteryByStat,

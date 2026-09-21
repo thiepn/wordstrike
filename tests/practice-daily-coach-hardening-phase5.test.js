@@ -151,3 +151,97 @@ test("Phase 5 explicit interrupted-block recovery closes a non-resumable orphan 
   assert.equal(result.plan.status, "finished");
   assert.equal(result.plan.blocks[0].plannedSessionId, original.blocks[0].plannedSessionId);
 });
+
+
+test("Phase 5 failed review preflight never substitutes same-entity acquisition", async () => {
+  const binding = {
+    reviewItemId: "practice-review_phase5-r-12345678",
+    cycleId: 1,
+    referenceAtUtc: "2026-09-07T10:00:00.000Z",
+    entityType: "key",
+    entityKey: "r",
+  };
+  const repository = baseRepository();
+  const service = createPracticeCoachServiceBase({
+    repository,
+    experimentRegistry: {
+      getRegistration(id) {
+        if (id === "real-text") return { runtime: { async getAvailability() { return { supportedDurationsMs: [300_000] }; } } };
+        if (id === "weak-keys") return { runtime: { async inspectTarget() { return { status: "ready" }; } } };
+        return null;
+      },
+    },
+    limiterService: {
+      async buildContextLimiterSnapshot() {
+        return { candidates: [{
+          statId: "stat-r", entityType: "key", entityKey: "r", status: "confirmed",
+          priorityScore: 90, weaknessScore: 85, hierarchy: { status: "independent", explainedBy: [] },
+          evidenceMetadata: { primaryDimensionConfidenceScore: 90 },
+          dimensions: { slow: { weightedSeverity: 70 }, inaccurate: { weightedSeverity: 10 }, recoveryHeavy: { weightedSeverity: 5 } },
+        }] };
+      },
+    },
+    masteryService: {
+      async buildContextMasterySnapshot() { return { entities: [{ statId: "stat-r", stage: "learning" }], counts: {} }; },
+    },
+    reviewService: {
+      async reconcile() {},
+      async buildPracticeReviewQueue() { return { candidates: [{ dueStatus: "overdue", reviewValue: 90, reviewBinding: binding }] }; },
+      async buildPracticeReviewPlan() { throw new Error("review content unavailable"); },
+    },
+    now,
+  });
+  const created = await service.createTodayPracticeCoachPlan({ profileId, contextId, requestedMinutes: 12, language: "en" });
+  assert.equal(created.created, true);
+  assert.equal(created.plan.blocks.some((block) => block.kind === "targeted-intervention" && block.target?.entityKey === "r"), false);
+  assert.equal(created.plan.blocks.some((block) => block.kind === "review"), false);
+  assert.equal(created.plan.blocks.some((block) => block.kind === "real-text"), true);
+  assert.ok(created.plan.decisionContext.degradedInputs.includes("review-content"));
+  const view = buildPracticeCoachViewModel({ state: { status: "ready", requestedMinutes: 12, plan: created.plan } });
+  assert.match(view.plan.rationales.join(" "), /due review was omitted/i);
+});
+
+test("Phase 5 stale frozen target becomes blocked without throwing a generic Coach failure", async () => {
+  const original = buildPracticeCoachDailyPlan({
+    profileId, contextId, localDayKey: "2026-09-08", requestedMinutes: 5, inputFingerprint: "stale-target",
+    targetCandidates: [target()], realTextSupportedMinutes: [], now,
+  });
+  let saved = original;
+  const repository = {
+    async getCoachPlan() { return saved; },
+    async listCoachChildSessions() { return []; },
+    async getActiveCheckpoint() { return null; },
+    async getSkillStat() { return { lastPractisedAt: "2026-09-08T10:30:00.000Z" }; },
+    async saveCoachPlan(plan) { saved = plan; return plan; },
+  };
+  const service = createPracticeCoachServiceBase({
+    repository,
+    experimentRegistry: { getRegistration() { return null; } },
+    limiterService: {}, masteryService: {}, reviewService: {}, now,
+  });
+  const result = await service.startPracticeCoachBlock({ coachPlanId: original.coachPlanId, blockId: original.blocks[0].blockId });
+  assert.equal(result.started, false);
+  assert.equal(result.blocked, true);
+  assert.equal(result.reason, "target-practised-after-plan");
+  assert.equal(result.plan.blocks[0].status, "blocked");
+  assert.equal(result.plan.status, "finished");
+});
+
+test("Phase 5 no-block recovery action re-runs plan creation directly", async () => {
+  const { renderPracticeCoach } = await import("../js/practiceLab/practiceLabRendererV25.js");
+  const targetRoot = { innerHTML: "", querySelector() { return null; } };
+  renderPracticeCoach(targetRoot, {
+    title: "Daily Training", subtitle: "", preview: false, status: "ready",
+    errorCode: "PRACTICE_COACH_NO_AVAILABLE_BLOCKS", errorDetail: null,
+    requestedMinutes: 12, durationChoices: [5,8,12,15].map((minutes) => ({ minutes, selected: minutes === 12 })),
+    plan: null, canCreate: true,
+  });
+  assert.match(targetRoot.innerHTML, /data-practice-action="create-coach-plan">CHECK AGAIN/);
+  assert.doesNotMatch(targetRoot.innerHTML, /data-practice-action="reload-coach">CHECK AGAIN/);
+});
+
+test("Phase 5 frozen-block skip remains explicit and irreversible for the day", async () => {
+  const source = await readFile(new URL("../js/practiceLab/practiceLabControllerRuntimeV25.js", import.meta.url), "utf8");
+  assert.match(source, /Skip this Daily Training block\?/);
+  assert.match(source, /frozen plan will not replace it today/);
+});

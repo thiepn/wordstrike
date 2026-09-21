@@ -88,7 +88,11 @@ export function renderPracticeCoach(root, view, { focusSelector = null } = {}) {
   const technical = detail
     ? [view.errorCode, detail.stage && `stage=${detail.stage}`, detail.operation && `operation=${detail.operation}`, detail.name && `error=${detail.name}`, detail.causeName && `cause=${detail.causeName}`, detail.causeMessage && `message=${detail.causeMessage}`].filter(Boolean).join(" · ")
     : String(view.errorCode ?? "");
-  const error = view.errorCode ? `<div class="practice-lab-notice is-warning practice-coach-error" role="alert"><strong>${escapeHtml(coachErrorTitle(view.errorCode))}</strong> <span>${escapeHtml(coachErrorCopy(view.errorCode))}</span><div><button type="button" data-practice-action="reload-coach">TRY AGAIN</button></div>${technical ? `<details><summary>Technical details</summary><code>${escapeHtml(technical)}</code></details>` : ""}</div>` : "";
+  const retryAction = !plan && ["PRACTICE_COACH_PLAN_FAILED", "PRACTICE_COACH_NO_AVAILABLE_BLOCKS"].includes(view.errorCode)
+    ? "create-coach-plan"
+    : "reload-coach";
+  const retryLabel = view.errorCode === "PRACTICE_COACH_NO_AVAILABLE_BLOCKS" ? "CHECK AGAIN" : "TRY AGAIN";
+  const error = view.errorCode ? `<div class="practice-lab-notice is-warning practice-coach-error" role="alert"><strong>${escapeHtml(coachErrorTitle(view.errorCode))}</strong> <span>${escapeHtml(coachErrorCopy(view.errorCode))}</span><div><button type="button" data-practice-action="${retryAction}">${retryLabel}</button></div>${technical ? `<details><summary>Technical details</summary><code>${escapeHtml(technical)}</code></details>` : ""}</div>` : "";
   const beforePlan = !plan ? `<section class="practice-coach-create">
       <div class="practice-lab-section-heading"><div><div class="eyebrow">Choose today's budget</div><h2>${view.requestedMinutes} minutes</h2></div><p>This sets a planning budget, not a quota. The Coach may intentionally underfill it when no useful block fits.</p></div>
       ${renderDurationChoices(view)}
