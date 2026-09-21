@@ -170,6 +170,7 @@ export function createPracticeCoachService({
   limiterService = null,
   masteryService = null,
   reviewService = null,
+  logger = null,
   now = () => new Date(),
   policy = PRACTICE_COACH_POLICY_V1,
   fetchImpl = globalThis.fetch,
@@ -234,19 +235,28 @@ export function createPracticeCoachService({
     const context = await repository.getPracticeContext(contextId);
     if (!context || context.profileId !== profileId) throw serviceError("PRACTICE_COACH_CONTEXT_MISMATCH", "Daily Coach context is missing or belongs to another profile");
     const budget = normalizePracticeCoachRequestedMinutes(requestedMinutes ?? repository.getPracticeSettings?.()?.dailySessionLengthMinutes, policy);
+    const degradedInputs = new Set();
+    const degrade = (code, fallback, error = null) => {
+      degradedInputs.add(code);
+      logger?.warn?.("Daily Coach optional evidence unavailable", { code, name: error?.name ?? "Error" });
+      return fallback;
+    };
 
-    await resolvedReviewService.reconcile({ profileId, contextId });
+    try { await resolvedReviewService.reconcile({ profileId, contextId }); }
+    catch (error) { degrade("review-reconcile", null, error); }
+
     const [limiterSnapshot, masterySnapshot, learningStates, performanceState, reviewQueue, assessmentRuns, skillStats] = await Promise.all([
-      resolvedLimiterService.buildContextLimiterSnapshot({ profileId, contextId, maxCandidates: 32 }),
-      resolvedMasteryService.buildContextMasterySnapshot({ profileId, contextId, maxEntities: 256, entityTypes: ["key", "bigram", "trigram", "word"] }),
-      repository.listLearningStates(profileId, contextId),
-      repository.getPerformanceState(profileId, contextId),
-      resolvedReviewService.buildPracticeReviewQueue({ profileId, contextId, maxCandidates: 128, includeNearDue: false, reconcile: false }),
-      repository.listAssessmentRuns?.(profileId, { contextId }) ?? Promise.resolve([]),
-      repository.listSkillStats(profileId, contextId),
+      resolvedLimiterService.buildContextLimiterSnapshot({ profileId, contextId, maxCandidates: 32 }).catch((error) => degrade("limiter-snapshot", { candidates: [] }, error)),
+      resolvedMasteryService.buildContextMasterySnapshot({ profileId, contextId, maxEntities: 256, entityTypes: ["key", "bigram", "trigram", "word"] }).catch((error) => degrade("mastery-snapshot", { entities: [], counts: {} }, error)),
+      repository.listLearningStates(profileId, contextId).catch((error) => degrade("learning-states", [], error)),
+      repository.getPerformanceState(profileId, contextId).catch((error) => degrade("performance-state", null, error)),
+      resolvedReviewService.buildPracticeReviewQueue({ profileId, contextId, maxCandidates: 128, includeNearDue: false, reconcile: false }).catch((error) => degrade("review-queue", { candidates: [] }, error)),
+      (repository.listAssessmentRuns?.(profileId, { contextId }) ?? Promise.resolve([])).catch((error) => degrade("assessment-history", [], error)),
+      repository.listSkillStats(profileId, contextId).catch((error) => degrade("skill-stats", [], error)),
     ]);
 
-    const currentPerformance = await repository.getCurrentPerformanceState(profileId, contextId, COACH_READINESS_CHANNEL, now);
+    const currentPerformance = await repository.getCurrentPerformanceState(profileId, contextId, COACH_READINESS_CHANNEL, now)
+      .catch((error) => degrade("current-performance", null, error));
     const readinessBand = currentPerformance?.readinessBand ?? "unknown";
     const readinessStale = currentPerformance?.status === "stale";
     const warmupStatus = performanceState?.warmupModels?.[COACH_READINESS_CHANNEL]?.status ?? "insufficient-data";
@@ -266,7 +276,8 @@ export function createPracticeCoachService({
     }
 
     let reviewPlan = null;
-    if (shouldIncludePracticeCoachReview(reviewQueue, budget.minutes, policy)) {
+    const reviewRequested = shouldIncludePracticeCoachReview(reviewQueue, budget.minutes, policy);
+    if (reviewRequested) {
       const tentative = await resolvedReviewService.buildPracticeReviewPlan({ queue: reviewQueue, maxItems: 4, maxCostUnits: 4, includeNearDue: false });
       if (tentative.bindings?.length) {
         const targetIndex = await loadReviewTargetIndex().catch(() => null);
@@ -279,6 +290,7 @@ export function createPracticeCoachService({
           }
         }
       }
+      if (!reviewPlan) degradedInputs.add("review-content");
     }
 
     const reviewedEntities = new Set((reviewPlan?.bindings ?? []).map(entityIdentity));
@@ -297,9 +309,13 @@ export function createPracticeCoachService({
     const bounded = targetCandidates.slice(0, Math.min(PRACTICE_COACH_MAX_FEASIBILITY_CHECKS, policy.candidateLimits.feasibility));
     const availability = await Promise.all(bounded.map((candidate) => inspectTargetAvailability(candidate)));
     targetCandidates = freezeDeep(bounded.map((candidate, index) => ({ ...candidate, availabilityStatus: availability[index] })).filter((candidate) => candidate.availabilityStatus === "ready"));
+    const unavailableTargetCount = Math.max(0, bounded.length - targetCandidates.length);
 
     const realTextRegistration = experimentRegistry.getRegistration("real-text");
-    const realTextAvailability = await realTextRegistration?.runtime?.getAvailability?.().catch(() => null) ?? null;
+    let realTextAvailability = null;
+    try { realTextAvailability = await realTextRegistration?.runtime?.getAvailability?.() ?? null; }
+    catch (error) { degrade("real-text-availability", null, error); }
+    if (!realTextRegistration?.runtime) degradedInputs.add("real-text-availability");
     const realTextSupportedMinutes = (realTextAvailability?.supportedDurationsMs ?? []).map((durationMs) => durationMs / 60_000).filter((minutes) => [3, 5, 10].includes(minutes));
 
     const assessmentState = typeof getAssessmentState === "function"
@@ -316,12 +332,18 @@ export function createPracticeCoachService({
       : null;
     const suggestions = deriveSuggestions({ assessmentState, assessmentAvailability, actionableTargetCount: targetCandidates.length, masterySnapshot, coldTransferAvailability, recentColdTransferAt, now });
 
+    const reviewItemsForFingerprint = await repository.listReviewItems(profileId, contextId)
+      .catch((error) => degrade("review-items", [], error));
     const decisionContext = freezeDeep({
       readinessBand,
       warmupStatus,
       assessmentState,
       reviewCandidateCount: (reviewQueue?.candidates ?? []).filter((candidate) => ["due", "overdue"].includes(candidate.dueStatus)).length,
+      reviewRequested,
       limiterCandidateCount: (limiterSnapshot?.candidates ?? []).filter((candidate) => ["likely", "confirmed"].includes(candidate.status)).length,
+      verifiedTargetCount: targetCandidates.length,
+      unavailableTargetCount,
+      degradedInputs: Object.freeze([...degradedInputs].sort()),
       modelVersions: modelVersions(),
       budgetDiagnostic: budget.diagnostic,
     });
@@ -335,8 +357,9 @@ export function createPracticeCoachService({
       performanceUpdatedAt: performanceState?.updatedAt ?? null,
       skillUpdatedAt: maximumUpdatedAt(skillStats),
       learningUpdatedAt: maximumUpdatedAt(learningStates),
-      reviewUpdatedAt: maximumUpdatedAt((await repository.listReviewItems(profileId, contextId)) ?? []),
+      reviewUpdatedAt: maximumUpdatedAt(reviewItemsForFingerprint ?? []),
       assessmentState,
+      degradedInputs: decisionContext.degradedInputs,
       review: (reviewQueue?.candidates ?? []).filter((candidate) => ["due", "overdue"].includes(candidate.dueStatus)).slice(0, 8).map((candidate) => [candidate.reviewItemId ?? candidate.reviewBinding?.reviewItemId, candidate.dueStatus, candidate.reviewValue]),
       targets: targetCandidates.map((candidate) => [candidate.statId, candidate.experimentId, candidate.utilityScore, candidate.availabilityStatus]),
       realTextSupportedMinutes,
@@ -359,8 +382,11 @@ export function createPracticeCoachService({
       now,
       policy,
     });
+    if (!plan.blocks.length) {
+      return freezeDeep({ created: false, raced: false, plan: null, reason: "no-available-blocks", decisionContext: plan.decisionContext });
+    }
     const persisted = await repository.createCoachPlan(plan);
-    return freezeDeep({ created: persisted.created, raced: Boolean(persisted.raced), plan: persisted.plan });
+    return freezeDeep({ created: persisted.created, raced: Boolean(persisted.raced), plan: persisted.plan, reason: null });
   };
 
   const reconcilePracticeCoachPlan = async ({ coachPlanId } = {}) => {
@@ -372,6 +398,22 @@ export function createPracticeCoachService({
     const next = reconcilePracticeCoachPlanRecord(plan, { childSessions: sessions, activeSessionIds, now });
     if (next !== plan) await repository.saveCoachPlan(next);
     return next;
+  };
+
+  const recoverInterruptedPracticeCoachBlock = async ({ coachPlanId } = {}) => {
+    const plan = await repository.getCoachPlan(coachPlanId);
+    if (!plan) throw serviceError("PRACTICE_COACH_PLAN_MISSING", "Daily Coach plan does not exist");
+    const activeBlock = plan.blocks.find((block) => block.status === "active") ?? null;
+    if (!activeBlock) return freezeDeep({ updated: false, reason: "no-active-block", plan });
+    const checkpoint = await repository.getActiveCheckpoint?.(plan.profileId).catch(() => null);
+    if (checkpoint?.sessionId === activeBlock.childSessionId) {
+      if (checkpoint.resumable === true) throw serviceError("PRACTICE_COACH_RECOVERY_RESUMABLE", "Daily Coach will not clear a resumable session checkpoint");
+      await repository.clearActiveCheckpoint?.(plan.profileId);
+    }
+    const sessions = await repository.listCoachChildSessions(coachPlanId);
+    const next = reconcilePracticeCoachPlanRecord(plan, { childSessions: sessions, activeSessionIds: [], now });
+    if (next !== plan) await repository.saveCoachPlan(next);
+    return freezeDeep({ updated: next !== plan, reason: next === plan ? "active-block-still-current" : null, plan: next });
   };
 
   const startPracticeCoachBlock = async ({ coachPlanId, blockId = null } = {}) => {
@@ -490,6 +532,7 @@ export function createPracticeCoachService({
     skipPracticeCoachBlock,
     abandonPracticeCoachPlan,
     reconcilePracticeCoachPlan,
+    recoverInterruptedPracticeCoachBlock,
     clearCaches() { reviewIndexPromise = null; },
   });
 }
