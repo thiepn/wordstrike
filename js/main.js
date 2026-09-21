@@ -635,7 +635,7 @@ function openPracticeDataSettings() {
     if (!section) return;
     section.open = true;
     section.scrollIntoView?.({ block: "start", behavior: "smooth" });
-    section.querySelector?.("[data-practice-data-action]")?.focus?.({ preventScroll: true });
+    section.querySelector?.("[data-practice-data-heading]")?.focus?.({ preventScroll: true });
   });
 }
 

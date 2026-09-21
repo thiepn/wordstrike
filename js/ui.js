@@ -1667,7 +1667,7 @@ export function renderSettings(save, selectedIndex, handlers, accountMarkup = ""
           </div>
         </details>
         <details class="settings-tutorials settings-practice-data">
-          <summary>PRACTICE LAB DATA</summary>
+          <summary data-practice-data-heading>PRACTICE LAB DATA</summary>
           <p class="micro-label">Practice data stays in this browser. Reset clears the active Practice profile's evidence and progress but keeps saved Custom Text. Delete all also removes Custom Text and every other Practice record in this browser.</p>
           <div class="settings-tutorial-grid">
             <button type="button" class="text-action danger" data-practice-data-action="reset">RESET PRACTICE EVIDENCE</button>

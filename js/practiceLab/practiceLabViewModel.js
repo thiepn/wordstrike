@@ -89,7 +89,7 @@ export function buildPracticeHomeViewModel({ registry, featureGate, helpAvailabl
     preview: featureGate.getSnapshot().reason === "developer-preview",
     helpAvailable: helpAvailable === true,
     dataManagementAvailable: dataManagementAvailable === true,
-    dailyTraining: Object.freeze({ title: PRACTICE_DAILY_TRAINING.title, description: PRACTICE_DAILY_TRAINING.description, state: "planned", stateLabel: "Planned", duration: "12-minute recommended session" }),
+    dailyTraining: Object.freeze({ title: PRACTICE_DAILY_TRAINING.title, description: PRACTICE_DAILY_TRAINING.description, state: "available", stateLabel: "Available", duration: "12-minute recommended session" }),
     assessment: cardFromResolved(registry.getResolvedExperiment("full-assessment")),
     profile: Object.freeze({ state: "not-loaded", title: "No skill profile yet", description: "Full Assessment is recommended when its required artifacts are ready, but it is optional. Practice modes and future Skill Map use are not gated on completing it." }),
     recommendations: Object.freeze({ state: "needs-data", title: "Recommendations need data", description: "After valid assessment or practice evidence exists, this section can summarize what is measured without forcing a training path." }),

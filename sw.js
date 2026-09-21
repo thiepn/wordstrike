@@ -1,5 +1,5 @@
 const CACHE_PREFIX = "wordstrike-pwa-";
-const CACHE_NAME = CACHE_PREFIX + "v39-practice-data-entry";
+const CACHE_NAME = CACHE_PREFIX + "v40-practice-fallback-status";
 const APP_SHELL = [
   "./js/practiceLab/practiceAssessmentInput.js",
   "./js/practiceLab/practiceDurableManifest.js",
