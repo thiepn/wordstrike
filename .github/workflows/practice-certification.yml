@@ -231,6 +231,7 @@ jobs:
           node tests/browser/practice_evidence_populated.mjs
           node tests/browser/practice_accessibility.mjs
           node tests/browser/practice_offline.mjs
+          node tests/browser/practice_pwa_upgrade.mjs
       - name: Chromium full-storage Custom Text
         if: matrix.extended == '1'
         env:
