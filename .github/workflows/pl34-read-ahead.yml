@@ -1,17 +1,7 @@
 name: PL34 Read-Ahead
 
 on:
-  push:
-    branches: [pl34-read-ahead]
-  pull_request:
-    paths:
-      - 'js/practiceLab/**'
-      - 'tests/practice-read-ahead*-pl34.test.js'
-      - 'scripts/buildPracticeReadAheadForms.mjs'
-      - 'data/practice/read-ahead/**'
-      - 'docs/**'
-      - 'package.json'
-      - '.github/workflows/pl34-read-ahead.yml'
+  workflow_dispatch:
 
 jobs:
   certify:

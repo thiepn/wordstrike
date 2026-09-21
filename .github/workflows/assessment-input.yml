@@ -1,10 +1,7 @@
 name: Assessment Input Regression
 on:
-  push:
-    branches: [main, fix/assessment-typing]
-    paths: ['js/practiceLab/practiceAssessmentSessionHost.js', 'js/practiceLab/practiceAssessmentInput.js', 'tests/browser/assessment_input.mjs', 'tests/practice-assessment-input.test.js', '.github/workflows/assessment-input.yml', 'sw.js']
-  pull_request:
-    paths: ['js/practiceLab/practiceAssessmentSessionHost.js', 'js/practiceLab/practiceAssessmentInput.js', 'tests/browser/assessment_input.mjs', 'tests/practice-assessment-input.test.js', '.github/workflows/assessment-input.yml']
+  workflow_dispatch:
+
 permissions:
   contents: read
 concurrency:

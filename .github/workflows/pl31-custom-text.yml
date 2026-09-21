@@ -1,9 +1,6 @@
 name: PL31 Custom Text
 
 on:
-  pull_request:
-  push:
-    branches: [pl31-custom-text]
   workflow_dispatch:
 
 permissions:

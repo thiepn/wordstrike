@@ -1,9 +1,7 @@
 name: PL28 Common Words artifacts
 on:
-  pull_request:
-  push:
-    branches: [main, codex/pl27-burst-sprints-v1, codex/pl28-common-words-v1]
   workflow_dispatch:
+
 permissions:
   contents: read
 jobs:

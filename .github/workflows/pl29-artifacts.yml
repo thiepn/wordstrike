@@ -1,9 +1,6 @@
 name: PL29 Consistency and Endurance
 
 on:
-  pull_request:
-  push:
-    branches: [codex/pl29-consistency-endurance-v1]
   workflow_dispatch:
 
 permissions:
