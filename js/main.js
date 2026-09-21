@@ -248,6 +248,7 @@ function ensurePracticeLabController() {
     root: document.querySelector("#app"), featureGate, experimentRegistry: practiceLabRegistry,
     appNavigation: {
       exit: openModeSelect,
+      help: () => openTutorial("practice", { source: "help" }),
     },
   });
   return practiceLabController;

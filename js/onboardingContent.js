@@ -2,6 +2,7 @@ export const ONBOARDING_VERSIONS = Object.freeze({
   general: 3,
   campaign: 2,
   typing: 1,
+  practice: 1,
   endless: 1,
   boss: 1,
   leaderboards: 1,
@@ -53,6 +54,21 @@ export const ONBOARDING_TUTORIALS = Object.freeze({
         ]),
       }),
       step("CHOOSE YOUR TEST", "Timed tests end when time runs out. Word tests end after the selected number of words. 15s and 60s tests can join global rankings.", "typing-options", "CHOOSE A TEST"),
+    ]),
+  }),
+  practice: Object.freeze({
+    id: "practice", version: 1, title: "PRACTICE LAB GUIDE",
+    steps: Object.freeze([
+      step("CHOOSE YOUR TRAINING", "Daily Training can build a plan for today, or you can open any available drill directly. Full Assessment is optional.", "typing-options"),
+      step("TYPE IN THE PRACTICE LANE", "Click or tap the typing area if focus is lost. Type the shown text and use Backspace to correct mistakes. On phones and tablets, tap the practice input to reopen the keyboard.", "word-stream", "NEXT", {
+        controls: Object.freeze([
+          Object.freeze({ key: "TYPE", label: "Enter the displayed Practice text." }),
+          Object.freeze({ key: "BACKSPACE", label: "Correct the current input." }),
+          Object.freeze({ key: "TAP / CLICK", label: "Return focus to the Practice input." }),
+        ]),
+      }),
+      step("READ EVIDENCE CAREFULLY", "Skill Map, Review Queue, and Progress use local Practice evidence. A single result is not a universal typing score, and missing evidence is shown as not measured.", "local-first"),
+      step("TRAIN, REVIEW, REPEAT", "Use targeted drills for specific limiters, then return to Daily Training or the Review Queue when you want the next session.", "difficulty-growth", "RETURN TO PRACTICE"),
     ]),
   }),
   endless: Object.freeze({
