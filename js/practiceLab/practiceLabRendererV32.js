@@ -34,9 +34,9 @@ export function renderPracticeTreatmentResponseProgress(root, view, { focusSelec
   const loading = view.status === "loading";
   const unavailable = view.status === "unavailable";
   const body = loading
-    ? `<section class="practice-lab-empty-state"><h2>Loading Treatment Response…</h2><p>Reading local longitudinal Practice evidence.</p></section>`
+    ? `<section class="practice-lab-empty-state"><h2>Loading observed response…</h2><p>Reading local longitudinal Practice evidence.</p></section>`
     : unavailable
-      ? `<section class="practice-lab-empty-state"><h2>Treatment Response unavailable</h2><p>Local response tracking could not be read. Existing Practice evidence is unaffected.</p>${view.errorCode ? `<p role="alert">${escapeHtml(view.errorCode)}</p>` : ""}</section>`
+      ? `<section class="practice-lab-empty-state"><h2>Observed response unavailable</h2><p>Local response tracking could not be read. Existing Practice evidence is unaffected.</p>${view.errorCode ? `<p role="alert">${escapeHtml(view.errorCode)}</p>` : ""}</section>`
       : view.hasEvidence
         ? `<div class="practice-lab-category-grid">${view.cards.map(responseCard).join("")}</div>`
         : `<section class="practice-lab-empty-state"><h2>${escapeHtml(view.emptyTitle)}</h2><p>${escapeHtml(view.emptyDescription)}</p></section>`;
@@ -46,8 +46,9 @@ export function renderPracticeTreatmentResponseProgress(root, view, { focusSelec
   root.innerHTML = `<section class="screen practice-lab-screen" data-practice-view="treatment-response-progress"><div class="practice-lab-shell">
     <header class="practice-lab-header"><button type="button" class="practice-lab-back" data-practice-action="back">← ${escapeHtml(view.backLabel ?? "Back to Practice Lab")}</button><span class="practice-lab-status is-preview">PRACTICE LAB</span></header>
     <main class="practice-lab-detail">
-      <div class="eyebrow">Progress · longitudinal observation</div><h1>${escapeHtml(view.sectionTitle ?? "Treatment Response")}</h1>
-      <p class="practice-lab-lead">See how later compatible measurements have differed after specific Practice treatments.</p>
+      <div class="eyebrow">Progress · longitudinal observation</div><h1>Progress</h1>
+      <p class="practice-lab-lead">See your Practice history together with cautious observations from compatible later measurements.</p>
+      <h2>${escapeHtml(view.sectionTitle ?? "Observed Response")}</h2>
       <div class="practice-lab-notice">${escapeHtml(view.doctrine ?? "Observed response patterns do not establish causation.")}</div>
       <div class="practice-lab-actions"><button type="button" data-practice-action="treatment-response-refresh" ${loading ? "disabled" : ""}>${loading ? "REFRESHING…" : "REFRESH LOCAL EVIDENCE"}</button>${view.trackingCount ? `<span>${view.trackingCount} treatment${view.trackingCount === 1 ? "" : "s"} awaiting later outcomes</span>` : ""}</div>
       ${body}${recent}

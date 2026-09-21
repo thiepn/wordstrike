@@ -14,6 +14,7 @@ const initialState = () => Object.freeze({
 
 export function createPracticeLabController(options = {}) {
   const { root, experimentRegistry, logger = null } = options;
+  const researchDeveloperEnabled = options.featureGate?.getSnapshot?.().reason === "developer";
   const externalRenderer = typeof options.renderer === "function" ? options.renderer : null;
   const ownsRuntime = !options.researchRuntime;
   let runtime = options.researchRuntime ?? null;
@@ -70,7 +71,7 @@ export function createPracticeLabController(options = {}) {
   }
 
   function homeWithResearchNavigation(view) {
-    if (view?.kind !== "home") return view;
+    if (view?.kind !== "home" || !researchDeveloperEnabled) return view;
     if (view.analysis?.some?.((item) => item.route === RESEARCH_ROUTE)) return view;
     return Object.freeze({
       ...view,

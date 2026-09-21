@@ -49,7 +49,7 @@ export function renderPracticeWeaknessBossDetail(root, view, { focusSelector = n
         ? `<section class="practice-lab-empty-state"><h2>No Boss ready yet</h2><p>There is no current likely or confirmed limiter with enough learning headroom and valid training content. Keep practicing normally and check again later.</p><button type="button" data-practice-action="navigate" data-route="daily-training">OPEN DAILY TRAINING</button></section>`
         : `<div class="practice-lab-category-grid">${candidateCard(recommended, { recommended: true })}${alternatives.map((candidate) => candidateCard(candidate)).join("")}</div>`;
   root.innerHTML = `<section class="screen practice-lab-screen" data-practice-view="weakness-boss-detail"><div class="practice-lab-shell">
-    <header class="practice-lab-header"><button type="button" class="practice-lab-back" data-practice-action="back">← Back to Practice Lab</button><span class="practice-lab-status is-preview">EXPERIMENTAL</span></header>
+    <header class="practice-lab-header"><button type="button" class="practice-lab-back" data-practice-action="back">← Back to Practice Lab</button><span class="practice-lab-status">ADVANCED CHALLENGE</span></header>
     <main class="practice-lab-detail">
       <div class="eyebrow">Advanced · Adaptive Practice</div><h1>Weakness Boss</h1>
       <p class="practice-lab-lead">Face one current Practice limiter in a focused fixed-dose encounter.</p>

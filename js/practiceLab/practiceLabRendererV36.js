@@ -17,7 +17,7 @@ export function renderPracticePhysicalKeyboardPage(root, view, { focusSelector =
       : `${renderPracticePhysicalTelemetryPanel({ availability: view.availability, snapshot: view.snapshot, hasStoredData: view.hasStoredData })}
         <section class="practice-lab-empty-state" aria-labelledby="practice-physical-settings-title"><div class="eyebrow">Advanced</div><h2 id="practice-physical-settings-title">Physical keyboard telemetry</h2>${renderPracticePhysicalTelemetrySetting({ enabled: view.availability?.enabled === true, hasStoredData: false })}</section>`;
   root.innerHTML = `<section class="screen practice-lab-screen" data-practice-view="physical-keyboard"><div class="practice-lab-shell">
-    <header class="practice-lab-header"><button type="button" class="practice-lab-back" data-practice-action="back">← Back to Practice Lab</button><span class="practice-lab-status is-preview">PRACTICE LAB</span></header>
+    <header class="practice-lab-header"><button type="button" class="practice-lab-back" data-practice-action="back">← Back to Practice Lab</button><span class="practice-lab-status">ADVANCED · LOCAL</span></header>
     <main class="practice-lab-detail"><div class="eyebrow">Progress · Advanced</div>${body}</main>
   </div></section>`;
   const target = (focusSelector && root.querySelector?.(focusSelector))
