@@ -22,9 +22,11 @@ test("Phase 7 service worker has resilient core and optional precache layers", a
   assert.doesNotMatch(source,/cache\.addAll\(APP_SHELL\)/);
 });
 
-test("Phase 7 service worker waits for cache writes and handles query-version drift", async () => {
+test("Phase 7 service worker awaits cache writes and handles query-version drift", async () => {
   const source=await readFile(new URL("../sw.js",import.meta.url),"utf8");
-  assert.match(source,/event\.waitUntil\(caches\.open\(CACHE_NAME\).*cache\.put/s);
+  assert.match(source,/const cache = await caches\.open\(CACHE_NAME\);/);
+  assert.match(source,/await cache\.put\("\.\/index\.html", copy\)/);
+  assert.match(source,/await cache\.put\(request, copy\)/);
   assert.match(source,/caches\.match\(request, \{ ignoreSearch: true \}\)/);
   assert.match(source,/caches\.match\("\.\/index\.html", \{ ignoreSearch: true \}\)/);
 });

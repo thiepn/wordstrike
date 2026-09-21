@@ -1,5 +1,5 @@
 const CACHE_PREFIX = "wordstrike-pwa-";
-const CACHE_NAME = CACHE_PREFIX + "v61-practice-phase7-acceptance";
+const CACHE_NAME = CACHE_PREFIX + "v62-practice-pwa-cache-write";
 const APP_SHELL = [
   "./js/practiceLab/practiceAssessmentInput.js",
   "./js/practiceLab/practiceDurableManifest.js",
@@ -889,10 +889,11 @@ self.addEventListener("fetch", event => {
   if (url.origin !== self.location.origin) return;
 
   if (request.mode === "navigate") {
-    event.respondWith(fetch(request).then(response => {
+    event.respondWith(fetch(request).then(async response => {
       if (response && response.ok) {
         const copy = response.clone();
-        event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.put("./index.html", copy)));
+        const cache = await caches.open(CACHE_NAME);
+        await cache.put("./index.html", copy);
       }
       return response;
     }).catch(async () => (
@@ -906,10 +907,11 @@ self.addEventListener("fetch", event => {
     return;
   }
 
-  event.respondWith(fetch(request).then(response => {
+  event.respondWith(fetch(request).then(async response => {
     if (response && response.ok) {
       const copy = response.clone();
-      event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.put(request, copy)));
+      const cache = await caches.open(CACHE_NAME);
+      await cache.put(request, copy);
     }
     return response;
   }).catch(async () => (
