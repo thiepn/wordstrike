@@ -103,3 +103,58 @@ test("Phase 1 Daily Coach developer diagnostics are opt-in and production-safe b
   assert.match(controller, /coachPreview = options\.featureGate\?\.getSnapshot\?\.\(\)\.reason === "developer-preview"/);
   assert.doesNotMatch(controller, /buildPracticeCoachViewModel\(\{ state: coachState, preview: true \}\)/);
 });
+
+
+test("Phase 1 remaining metric surfaces state their actual units and semantics", async () => {
+  const [realText, paceLadder, burstSprints] = await Promise.all([
+    readFile(new URL("../js/practiceLab/practiceRealTextSessionHost.js", import.meta.url), "utf8"),
+    readFile(new URL("../js/practiceLab/practicePaceLadderSessionHost.js", import.meta.url), "utf8"),
+    readFile(new URL("../js/practiceLab/practiceBurstSprintsSessionHost.js", import.meta.url), "utf8"),
+  ]);
+  assert.match(realText, /<dt>Disfluency rate<\/dt>/);
+  assert.match(realText, /<dt>Log-scale uncertainty \(σ\)<\/dt>/);
+  assert.doesNotMatch(realText, /<dt>Fluency · disfluency<\/dt>/);
+  assert.match(paceLadder, /<th>Pace ratio<\/th><th>Target pace \(WPM\)<\/th><th>Observed gross pace \(WPM\)<\/th>/);
+  assert.match(paceLadder, /<th>Correction overhead<\/th>/);
+  assert.match(burstSprints, /<th>Gross \(WPM\)<\/th><th>Burst effective \(WPM\)<\/th>/);
+});
+
+test("Phase 1 target-result surfaces distinguish rates, residuals, and quality-point deltas", async () => {
+  const [{ renderPracticeAccuracyRecoveryResult }, { renderPracticeCombinationRepairResult }, { renderPracticeWeaknessBossResult }, { renderPracticePhysicalTelemetryPanel }] = await Promise.all([
+    import("../js/practiceLab/practiceAccuracyRecoverySessionHost.js"),
+    import("../js/practiceLab/practiceCombinationRepairSessionHost.js"),
+    import("../js/practiceLab/practiceWeaknessBossUi.js"),
+    import("../js/practiceLab/practicePhysicalTelemetryUi.js"),
+  ]);
+  const accuracyRoot = root();
+  renderPracticeAccuracyRecoveryResult(accuracyRoot, { summary: {
+    configuration: { target: { entityType: "key", entityKey: "e" } },
+    beforeMetrics: { firstPassAccuracy: 0.9, timing: { fluentResidualMedianMs: 12, disfluencyRate: 0.1 }, quality: 70 },
+    afterMetrics: { firstPassAccuracy: 0.95, timing: { fluentResidualMedianMs: -4, disfluencyRate: 0.05 }, quality: 78 },
+    trainingQuality: { accuracyDeltaPp: 5, residualDeltaMs: -16, recoveryProfile: { coverage: "none" }, targetOpportunityCount: 20 },
+  } });
+  assert.match(accuracyRoot.innerHTML, /<dt>Hesitation rate<\/dt>/);
+  assert.match(accuracyRoot.innerHTML, /12 ms → -4 ms/);
+
+  const combinationRoot = root();
+  renderPracticeCombinationRepairResult(combinationRoot, { summary: { wpm: 70, accuracy: 96, trainingQuality: {
+    sameSessionCheck: { immediateQualityChange: 6.5, entryQuality: 70, exitQuality: 76.5, immediateDirection: "Higher", interpretation: { wording: "Same-session descriptive change." } },
+    phases: [],
+  } } });
+  assert.match(combinationRoot.innerHTML, /Immediate quality change<\/dt><dd>\+6.5 quality pts/);
+
+  const bossRoot = root();
+  renderPracticeWeaknessBossResult(bossRoot, { summary: { trainingQuality: {
+    clearStatus: "defeated", boss: { archetype: "Tempo Warden" }, target: { entityType: "key", entityKey: "e" },
+    openingProbe: { quality: 65 }, finalProbe: { quality: 72 }, immediateQualityDelta: 7,
+    battle: { battleFirstPassAccuracy: 0.95, maxCleanTargetStreak: 8 },
+  } } });
+  assert.match(bossRoot.innerHTML, /Immediate quality delta<\/dt><dd>\+7 quality pts/);
+
+  const physicalHtml = renderPracticePhysicalTelemetryPanel({
+    availability: { enabled: true, contextEligible: true }, hasStoredData: true,
+    snapshot: { coverage: { eligibleSessions: 1 }, keys: [], transitions: [], modifierRoutes: [] },
+  });
+  assert.match(physicalHtml, /<th scope="col">Median residual<\/th>/);
+  assert.doesNotMatch(physicalHtml, /<th scope="col">Normalized timing<\/th>/);
+});
