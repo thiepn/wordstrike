@@ -136,10 +136,10 @@ function renderFullAssessment(view) {
     <h1 tabindex="-1" data-practice-heading>${escapeHtml(view.title)}</h1>
     <p class="practice-lab-lead">${escapeHtml(view.description)}</p>
     <p>${escapeHtml(view.longDescription)}</p>
-    <div class="practice-lab-notice" role="note"><strong>Assessment is optional.</strong> Deep is recommended only when fully available. Practice modes, Skill Map, Custom Text, and future training are not gated on completing it.</div>
+    <div class="practice-lab-notice" role="note"><strong>Assessment is optional.</strong> Deep is recommended only when fully available. Practice modes, Skill Map, Custom Text, and Daily Training are not gated on completing it.</div>
     ${renderAssessmentProgress(view.progress)}
     ${results ? `${renderIntegrity(results.integrity)}<section aria-labelledby="assessment-results-title"><div class="practice-lab-section-heading"><div><div class="eyebrow">Evidence</div><h2 id="assessment-results-title">Assessment results</h2></div></div>${results.sections.map(renderAssessmentSection).join("")}</section>` : `<section aria-labelledby="assessment-depth-title"><div class="practice-lab-section-heading"><div><div class="eyebrow">Choose depth</div><h2 id="assessment-depth-title">Quick, Standard, or Deep</h2></div><p>Each longer depth contains the complete shorter protocol as its prefix. Your explicit choice will not be escalated.</p></div><div class="practice-lab-experiment-grid">${view.depths.map(depthCard).join("")}</div></section>`}
-    <section class="practice-lab-empty-state"><h2>What this assessment does not claim</h2><p>PL19 does not provide a universal typing score, grade, rank, controlled-speed ability, burst ability, common-word ability, or endurance ability. Those remain unmeasured until their dedicated protocols exist.</p></section>
+    <section class="practice-lab-empty-state"><h2>What this assessment does not claim</h2><p>Full Assessment does not provide one universal typing score, grade, or rank. Controlled-speed, burst, common-word, and endurance abilities belong to their dedicated measurements and are not inferred from this battery.</p></section>
   </main>`);
 }
 

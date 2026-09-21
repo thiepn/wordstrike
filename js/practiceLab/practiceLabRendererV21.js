@@ -15,7 +15,7 @@ function recommendationRows(view) {
   if (view.recommendationStatus === "no-evidence") return '<p class="practice-lab-muted">No weak key is currently well-established. Manual practice remains possible.</p>';
   if (view.recommendationStatus === "unsupported") return '<p class="practice-lab-muted">Weak Keys recommendations are currently available for English v1 only. Manual unsupported-language training is not enabled.</p>';
   if (view.recommendationStatus === "unavailable") return `<div class="practice-lab-notice" role="status"><strong>Recommendations unavailable.</strong><p>Manual practice remains available.${view.recommendationErrorCode ? ` Diagnostic: ${escapeHtml(view.recommendationErrorCode)}.` : ""}</p></div>`;
-  if (!view.recommendations.length) return '<p class="practice-lab-muted">Recommendations use existing PL12/PL15/PL16 evidence when available. They do not preload every key’s training content.</p>';
+  if (!view.recommendations.length) return '<p class="practice-lab-muted">Recommendations use existing limiter, learning, and performance evidence when available. They do not preload every key’s training content.</p>';
   return `<div class="practice-weak-key-recommendations">${view.recommendations.map((item) => {
     const downstream = Number(item.downstreamExplainedCount || 0);
     const countLabel = downstream > 9 ? "9+" : String(downstream);
@@ -48,7 +48,7 @@ function renderWeakKeys(root, view, { focusSelector = null } = {}) {
         <button type="button" class="practice-lab-primary-action" data-practice-action="start-weak-keys" ${view.canStart && !view.preparing ? "" : "disabled"}>${view.preparing ? "BUILDING…" : "START WEAK KEYS"}</button>
         ${targetStatus(view)}
       </section>
-      <section class="practice-lab-empty-state"><h2>What this mode does</h2><p>Weak Keys trains one PL11 expected-character key across multiple words, word positions, and surrounding transitions. It does not prescribe a finger or enforce a touch-typing technique.</p><p>Where the active keyboard layout is known, PL10 geometry is used only to diversify observed transition contexts. Unknown layouts remain valid and are never treated as QWERTY.</p></section>
+      <section class="practice-lab-empty-state"><h2>What this mode does</h2><p>Weak Keys trains one measured letter across multiple words, word positions, and surrounding transitions. It does not prescribe a finger or enforce a touch-typing technique.</p><p>Where the active keyboard layout is known, keyboard geometry is used only to diversify observed transition contexts. Unknown layouts remain valid and are never treated as QWERTY.</p></section>
       <section class="practice-lab-empty-state"><h2>Session structure</h2><p>The fixed dose is never increased after errors and never shortened after a strong Baseline.</p>${phasePlan(view)}</section>
       <section class="practice-lab-empty-state"><h2>Evidence boundary</h2><p>Baseline and Check are both approved <code>training</code> material. The final Check is not transfer and one strong session does not mean “mastered,” “retained,” or “fixed forever.”</p><p>Transfer, benchmark, diagnostic, and research-holdout text are never used by this intervention.</p></section>
     </main></div>

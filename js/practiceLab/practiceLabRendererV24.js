@@ -27,7 +27,7 @@ export function renderPracticeRealTextDetail(root, view, { focusSelector = null 
           <button type="button" data-practice-action="start-real-text-cold" ${view.coldCanStart ? "" : "disabled"}>${view.starting === "cold" ? "RESERVING…" : "START COLD TRANSFER CHECK"}</button>
         </section>
       </div>
-      <section class="practice-lab-empty-state"><h2>Why these are separate</h2><p><strong>Natural Practice</strong> contributes ordinary training evidence. <strong>Cold Transfer</strong> uses PL18 protected material and may contribute transfer and cold-natural ability evidence only when its integrity rules pass.</p><p>Neither flow contains target entities or resamples text to include a recently trained weakness.</p></section>
+      <section class="practice-lab-empty-state"><h2>Why these are separate</h2><p><strong>Natural Practice</strong> contributes ordinary training evidence. <strong>Cold Transfer</strong> uses protected material and may contribute transfer and cold-natural ability evidence only when its integrity rules pass.</p><p>Neither flow contains target entities or resamples text to include a recently trained weakness.</p></section>
     </main></div></section>`;
   (root.querySelector?.(focusSelector) ?? root.querySelector?.("[data-practice-action='start-real-text-natural']") ?? root.querySelector?.("button"))?.focus?.({ preventScroll: true });
   return true;
