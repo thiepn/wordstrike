@@ -52,7 +52,7 @@ export function createPracticeLabController({
   const isWeakKeysRoute = () => route.name === PRACTICE_LAB_ROUTES.EXPERIMENT_DETAIL && route.params?.experimentId === WEAK_KEYS_ID;
   const hasSessionHost = () => Boolean(combinationSessionHost || weakKeysSessionHost);
   const snapshot = () => Object.freeze({
-    mounted, route, historyDepth: history.length, listenerCount: mounted ? 2 : 0,
+    mounted, route, historyDepth: history.length, listenerCount: mounted ? 3 : 0,
     renderCount, lastRenderReason, featureGate: featureGate.getSnapshot(), registry: experimentRegistry.getDiagnostics(),
     combinationRepair: Object.freeze({
       status: combinationRepairState.status,
@@ -352,6 +352,15 @@ export function createPracticeLabController({
     void inspectWeakKey({ entityKey: normalized.target.entityKey, targetSource: "manual" });
   };
 
+  const keydown = (event) => {
+    if (event.key !== "Escape" || event.defaultPrevented) return;
+    const target = event.target;
+    if (target?.closest?.("input,textarea,select,[contenteditable='true'],[contenteditable='']")) return;
+    if (root.querySelector?.("[data-practice-session-capture],[data-assessment-input],[data-protocol-input]")) return;
+    event.preventDefault?.();
+    (navigationController?.back ?? back)();
+  };
+
   const click = (event) => {
     if (event.button != null && event.button !== 0) return;
     const target = event.target?.closest?.("[data-practice-action]");
@@ -402,6 +411,7 @@ export function createPracticeLabController({
       mounted = true;
       root.addEventListener("click", click);
       root.addEventListener("input", input);
+      root.addEventListener("keydown", keydown);
       unsubscribeRegistry = experimentRegistry.subscribe(() => render("registry-change"));
       render("mount");
       if (isCombinationRepairRoute()) void loadCombinationRepairRecommendations();
@@ -430,6 +440,7 @@ export function createPracticeLabController({
       weakKeysSessionHost = null;
       root.removeEventListener("click", click);
       root.removeEventListener("input", input);
+      root.removeEventListener("keydown", keydown);
       unsubscribeRegistry?.();
       unsubscribeRegistry = null;
       history = [];

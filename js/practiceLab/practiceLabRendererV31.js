@@ -21,7 +21,7 @@ const messages = Object.freeze({
   CUSTOM_TEXT_REVISION_MISMATCH: "The saved text changed in another tab. Reopen it before starting.",
   CUSTOM_TEXT_CONFLICT: "This text changed in another tab. Export your draft before reopening the saved version.",
   CUSTOM_TEXT_HASH_MISMATCH: "The saved text could not be verified. Reopen it or paste a new copy.",
-  CUSTOM_TEXT_UNAVAILABLE: "The local text workspace could not load. Return to Practice Lab and try again.",
+  CUSTOM_TEXT_UNAVAILABLE: "The local text workspace could not load. Your draft has not been cleared. Try loading the workspace again.",
   CUSTOM_TEXT_SAVE_FAILED: "The text could not be saved. Your draft is still here; export a copy or try saving again.",
   CUSTOM_TEXT_LOAD_FAILED: "The saved text could not be opened. Try again or import a copy.",
   CUSTOM_TEXT_DELETE_FAILED: "The text could not be deleted. Try again.",
@@ -76,6 +76,7 @@ export function renderPracticeCustomTextDetail(root, view, { focusSelector = nul
     <main class="practice-lab-detail practice-custom-text-detail"><div class="eyebrow">Custom · user-selected material</div><h1>Custom Text</h1>
     <p class="practice-lab-lead">Bring a passage worth practicing. Set your session, then make it flow.</p>
     <div class="practice-lab-notice pl-custom-privacy"><strong>Local practice. No leaderboard.</strong><span>Pasting and importing never save automatically. Only an explicit Save writes source text to this device. Custom Text is excluded from PBs, standardized ability, transfer, benchmark, mastery, retention, and corpus statistics.</span></div>
+    ${view.status === "unavailable" ? '<div class="practice-lab-notice is-warning" role="alert"><strong>Custom Text could not load.</strong><div><button type="button" data-practice-action="custom-retry">TRY AGAIN</button></div></div>' : ""}
     <div class="practice-custom-workspace">
       <section class="practice-custom-editor" aria-labelledby="pl-custom-editor-title">
         <header class="pl-custom-section-heading"><div><div class="eyebrow">01 / Your material</div><h2 id="pl-custom-editor-title">The passage</h2></div><button type="button" data-practice-action="custom-import">IMPORT .TXT</button><input type="file" accept=".txt,text/plain" data-custom-text-file hidden></header>

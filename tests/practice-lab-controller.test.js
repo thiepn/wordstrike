@@ -37,9 +37,10 @@ test("controller mounts deterministically, navigates with bounded history, and u
   let exits = 0;
   const controller = createPracticeLabController({ root, featureGate: gate, experimentRegistry: registry, appNavigation: { exit: () => { exits += 1; } }, renderer: (_root, view) => rendered.push(view.kind) });
   controller.mount();
-  assert.deepEqual([...root.listeners.keys()].sort(), ["click", "input"]);
+  assert.deepEqual([...root.listeners.keys()].sort(), ["click", "input", "keydown"]);
   assert.equal(root.listenerCount("click"), 1);
   assert.equal(root.listenerCount("input"), 1);
+  assert.equal(root.listenerCount("keydown"), 1);
   assert.equal(controller.getSnapshot().route.name, "home");
   controller.navigate(createPracticeLabRoute(PRACTICE_LAB_ROUTES.SKILL_MAP));
   assert.equal(controller.getSnapshot().route.name, "skill-map");

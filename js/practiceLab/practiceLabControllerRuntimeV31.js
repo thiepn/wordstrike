@@ -221,9 +221,10 @@ export function createPracticeLabController(options = {}) {
   function click(event) {
     const button = event.target?.closest?.("[data-practice-action]"); if (!button || !root?.contains?.(button) || routeId(base) !== CUSTOM || host) return;
     const action = button.dataset.practiceAction;
-    if (!["back", "custom-new", "custom-open", "custom-save", "custom-delete", "custom-import", "custom-export", "custom-rebind", "custom-mode", "custom-duration", "custom-start"].includes(action)) return;
+    if (!["back", "custom-retry", "custom-new", "custom-open", "custom-save", "custom-delete", "custom-import", "custom-export", "custom-rebind", "custom-mode", "custom-duration", "custom-start"].includes(action)) return;
     event.stopPropagation();
     if (action === "back") { if (confirmDiscard()) { if (dirty()) discardEditor(); const value = base.back(); queueMicrotask(afterRoute); return value; } return; }
+    if (action === "custom-retry") { void load(); return; }
     if (action === "custom-new") { newText(); return; }
     if (action === "custom-open") { void openSaved(button.dataset.customTextId); return; }
     if (action === "custom-save") { void save(); return; }

@@ -291,6 +291,7 @@ export function createPracticeLabController(options = {}) {
   async function endForToday() {
     const plan = coachState.plan;
     if (!plan || hasCoachSession()) return false;
+    if (globalThis.confirm?.("End today’s Daily Training plan? Completed blocks stay saved; remaining blocks will be left unfinished.") === false) return false;
     const epoch = ++actionEpoch;
     try {
       const runtime = await ensureCoachRuntime();
