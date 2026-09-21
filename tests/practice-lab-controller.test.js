@@ -55,6 +55,28 @@ test("controller mounts deterministically, navigates with bounded history, and u
   assert.equal(rendered.length, 3);
 });
 
+test("Escape navigates back on route screens but not while editing", () => {
+  const root = fakeRoot();
+  const gate = createPracticeFeatureGate({ developerMode: true });
+  const registry = createPracticeExperimentRegistry({ featureGate: gate });
+  const controller = createPracticeLabController({ root, featureGate: gate, experimentRegistry: registry, renderer: () => {} });
+  controller.mount();
+  controller.navigate(createPracticeLabRoute(PRACTICE_LAB_ROUTES.SKILL_MAP));
+
+  let prevented = 0;
+  const routeTarget = { closest: () => null };
+  root.dispatch("keydown", { key: "Escape", defaultPrevented: false, target: routeTarget, preventDefault() { prevented += 1; } });
+  assert.equal(controller.getSnapshot().route.name, "home");
+  assert.equal(prevented, 1);
+
+  controller.navigate(createPracticeLabRoute(PRACTICE_LAB_ROUTES.REVIEW_QUEUE));
+  const inputTarget = { closest: (selector) => selector.includes("input") ? inputTarget : null };
+  root.dispatch("keydown", { key: "Escape", defaultPrevented: false, target: inputTarget, preventDefault() { prevented += 1; } });
+  assert.equal(controller.getSnapshot().route.name, "review-queue");
+  assert.equal(prevented, 1);
+  controller.unmount();
+});
+
 test("controller delegates native button clicks and registry emits one controlled rerender", () => {
   const root = fakeRoot();
   const gate = createPracticeFeatureGate({ developerMode: true });
