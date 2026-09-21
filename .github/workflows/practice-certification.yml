@@ -66,6 +66,15 @@ jobs:
               tests/practice-lab-controller.test.js
               tests/practice-lab-renderer.test.js
               tests/practice-lab-identity.test.js
+          - suite: daily-coach-hardening
+            command: >-
+              node --test
+              tests/practice-daily-coach-core.test.js
+              tests/practice-daily-coach-storage-lifecycle.test.js
+              tests/practice-daily-coach-review-retention.test.js
+              tests/practice-daily-coach-binding-integration.test.js
+              tests/practice-daily-coach-ui.test.js
+              tests/practice-daily-coach-hardening-phase5.test.js
           - suite: pl28-common-words
             command: npm run test:pl28-common-words
           - suite: pl29-sustained
