@@ -216,6 +216,7 @@ jobs:
           node tests/browser/practice_research_smoke.mjs
           node tests/browser/practice_research_probe_input.mjs
           node tests/browser/practice_coach_review_input.mjs
+          node tests/browser/practice_coach_recovery.mjs
           node tests/browser/practice_evidence_populated.mjs
           node tests/browser/practice_accessibility.mjs
           node tests/browser/practice_offline.mjs
