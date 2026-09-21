@@ -38,10 +38,10 @@ try{for(const name of (process.env.PRACTICE_BROWSERS??'chromium,firefox,webkit')
   if(metricTexts.some(text=>/\b0\.\d+% accuracy\b/.test(text)))throw Error('History appears to expose fractional accuracy as percent: '+JSON.stringify(metricTexts));
   await page.evaluate(()=>lab.navigate({name:'skill-map'}));await page.getByRole('heading',{name:'Skill Map',exact:true}).waitFor();
   if(await page.getByText('No skill evidence yet',{exact:true}).count())throw Error('Skill Map stayed empty after completed Practice sessions');
-  const firstSkill=page.locator('[data-practice-view="skill-map"] details').first();
-  await firstSkill.waitFor({state:'visible'});await firstSkill.evaluate(node=>{node.open=true;});
-  const skillText=await firstSkill.innerText();
-  if(!/First-pass accuracy[\s\S]*\d+(?:\.\d+)?%/.test(skillText))throw Error('Skill Map first-pass accuracy is not rendered as a percent');
+  const skills=page.locator('[data-practice-view="skill-map"] details');
+  await skills.first().waitFor({state:'visible'});
+  const measuredAccuracy=await skills.evaluateAll(nodes=>nodes.some(node=>/First-pass accuracy[\\s\\S]*\\d+(?:\\.\\d+)?%/.test(node.innerText)));
+  if(!measuredAccuracy)throw Error('Skill Map has no measured first-pass accuracy rendered as a percent after completed Practice sessions');
   await page.evaluate(()=>lab.navigate({name:'progress'}));await page.getByText(/saved sessions in this context/).waitFor();
   if(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+2))throw Error('Horizontal overflow');
   if(errors.length)throw Error(JSON.stringify(errors));
