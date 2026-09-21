@@ -73,6 +73,7 @@ export function analyzePracticeWeaknessBossResult({
   openingProbe = null,
   finalProbe = null,
   completed = false,
+  acquisitionDoseCommitted = completed,
 } = {}) {
   if (!plan?.target) throw new TypeError("Weakness Boss analysis requires an immutable plan target");
   const opening = compactProbe(openingProbe);
@@ -103,7 +104,7 @@ export function analyzePracticeWeaknessBossResult({
     finalProbe: final,
     immediateQualityDelta,
     immediateQualityDeltaLabel: "Final probe vs opening probe in this encounter.",
-    acquisitionDoseStatus: defeated ? "committed" : "not-committed",
+    acquisitionDoseStatus: acquisitionDoseCommitted === true ? "committed" : "not-committed",
     masteryClaim: false,
   });
 }
@@ -125,9 +126,19 @@ export function analyzePracticeWeaknessBossFoundationResult({ plan, contentPlan,
   const battleRecords = allTargetRecords.filter((record) => battleRanges.some((range) => Number.isInteger(record?.textPosition) && record.textPosition >= range.startIndex && record.textPosition < range.endIndex));
   const clean = battleRecords.filter((record) => record.correct === true).length;
   const total = battleRecords.length;
-  const completed = acquisition?.observation?.doseUnits === 1 && total === Number(plan.acquisitionDose?.opportunities || 0);
+  const expectedLength = Number(sessionSnapshot?.content?.expectedLength);
+  const cursorIndex = Number(sessionSnapshot?.cursorIndex);
+  // Boss HP is protocol progress only. Completing the immutable content plan
+  // clears the challenge even when the separate learning-evidence pipeline
+  // cannot admit a normalized acquisition observation.
+  const protocolCompleted = Number.isInteger(expectedLength) && expectedLength > 0
+    && Number.isInteger(cursorIndex) && cursorIndex >= expectedLength;
+  // PL16 remains conservative: exactly one acquisition dose is committed only
+  // when the special Boss learning adapter verified the full battle dose.
+  const acquisitionDoseCommitted = acquisition?.observation?.doseUnits === 1
+    && total === Number(plan.acquisitionDose?.opportunities || 0);
   const gameplay = {
-    defeated: completed,
+    defeated: protocolCompleted,
     battle: {
       targetOpportunityCount: total,
       cleanHitCount: clean,
@@ -142,7 +153,8 @@ export function analyzePracticeWeaknessBossFoundationResult({ plan, contentPlan,
     gameplay,
     openingProbe: probeFromObservation(observation, "opening"),
     finalProbe: probeFromObservation(observation, "final"),
-    completed,
+    completed: protocolCompleted,
+    acquisitionDoseCommitted,
   });
   return freezeDeep({
     beforeMetrics: result.openingProbe,
