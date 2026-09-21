@@ -333,9 +333,11 @@ export function createPracticeCoachService({
     if (!realTextRegistration?.runtime) degradedInputs.add("real-text-availability");
     const realTextSupportedMinutes = (realTextAvailability?.supportedDurationsMs ?? []).map((durationMs) => durationMs / 60_000).filter((minutes) => [3, 5, 10].includes(minutes));
 
-    const assessmentState = typeof getAssessmentState === "function"
-      ? await getAssessmentState({ profileId, contextId, runs: assessmentRuns, now })
-      : assessmentStateFromRuns(assessmentRuns);
+    let assessmentState = assessmentStateFromRuns(assessmentRuns);
+    if (typeof getAssessmentState === "function") {
+      try { assessmentState = await getAssessmentState({ profileId, contextId, runs: assessmentRuns, now }); }
+      catch (error) { assessmentState = "unknown"; logger?.warn?.("Daily Coach optional assessment state unavailable", { code: "assessment-state", name: error?.name ?? "Error" }); }
+    }
     const assessmentAvailability = typeof getAssessmentAvailability === "function"
       ? await getAssessmentAvailability({ profileId, contextId, language: requestedLanguage ?? context.dataLocale ?? language }).catch(() => null)
       : null;
