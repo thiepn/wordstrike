@@ -90,8 +90,10 @@ test("Treatment Response renderer keeps the non-causal doctrine visible", () => 
     querySelector() { return null; },
   };
   assert.equal(renderPracticeTreatmentResponseProgress(root, view), true);
-  assert.match(root.innerHTML, /Treatment Response/);
-  assert.match(root.innerHTML, /does not prove that a treatment caused/i);
+  assert.match(root.innerHTML, /<h1>Progress<\/h1>/);
+  assert.match(root.innerHTML, /Observed Response/);
+  assert.match(root.innerHTML, /does not prove that a practice method caused/i);
+  assert.doesNotMatch(root.innerHTML, /<h1>Treatment Response<\/h1>/);
   assert.match(root.innerHTML, /Positive observed signal/);
   assert.doesNotMatch(root.innerHTML, /proven effective|non-responder|responder classification/i);
 });

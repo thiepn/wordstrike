@@ -17,3 +17,10 @@ test("unknown and reserved routes fall back home while a public gate cannot be b
   assert.equal(normalizePracticeLabRoute(createPracticeLabRoute(PRACTICE_LAB_ROUTES.ACTIVE_SESSION), { featureGate: devGate }).name, "home");
   assert.equal(normalizePracticeLabRoute(createPracticeLabRoute(PRACTICE_LAB_ROUTES.SKILL_MAP), { featureGate: createPracticeFeatureGate({ publicEnabled: false }) }).name, "unavailable");
 });
+
+
+test("Research is developer-only after Phase 6 closure", () => {
+  const publicGate = createPracticeFeatureGate();
+  assert.equal(normalizePracticeLabRoute(createPracticeLabRoute(PRACTICE_LAB_ROUTES.RESEARCH), { featureGate: publicGate }).name, "home");
+  assert.equal(normalizePracticeLabRoute(createPracticeLabRoute(PRACTICE_LAB_ROUTES.RESEARCH), { featureGate: devGate }).name, "research");
+});

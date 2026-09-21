@@ -11,14 +11,15 @@ import {
 } from "../js/practiceLab/practiceLabViewModel.js";
 import { renderPracticeWeaknessBossDetail } from "../js/practiceLab/practiceWeaknessBossUi.js";
 
-test("Phase 2 canonical release catalog separates launchability from experimental maturity", () => {
+test("Phase 2 release truth remains intact after Phase 6 maturity closure", () => {
   assert.equal(PRACTICE_EXPERIMENT_CATALOG.length, 17);
   assert.ok(PRACTICE_EXPERIMENT_CATALOG.every((entry) => entry.status === "available"));
   assert.equal(PRACTICE_DAILY_TRAINING.status, "available");
   for (const id of ["read-ahead", "metronome-typing", "weakness-boss"]) {
     const entry = PRACTICE_EXPERIMENT_CATALOG.find((item) => item.id === id);
     assert.ok(entry);
-    assert.ok(entry.tags.includes("experimental") || entry.capabilities.includes("experimental"), id);
+    assert.equal(entry.tags.includes("experimental"), false, id);
+    assert.equal(entry.capabilities.includes("experimental"), false, id);
   }
   const publicCopy = PRACTICE_EXPERIMENT_CATALOG.map((entry) => `${entry.description} ${entry.longDescription}`).join("\n");
   assert.doesNotMatch(publicCopy, /\bPL\d+\b|coming soon|future local-only editor|will support|will let you/i);
@@ -51,22 +52,23 @@ test("Phase 2 public Practice UI contains no implementation-phase labels", async
   assert.doesNotMatch(combined, /\bPL(?:10|11|12|13|14|15|16|18|19)\b|DEVELOPER PREVIEW|future training|current development build|coming soon/i);
 });
 
-test("Phase 2 Weakness Boss is available but honestly marked experimental", () => {
+test("Phase 6 graduates Weakness Boss without weakening its evidence boundary", () => {
   const root = { innerHTML: "", querySelector() { return null; } };
   renderPracticeWeaknessBossDetail(root, { status: "ready", candidates: [], recommendedCandidate: null, errorCode: null });
-  assert.match(root.innerHTML, />EXPERIMENTAL</);
-  assert.doesNotMatch(root.innerHTML, /DEVELOPER PREVIEW/);
+  assert.match(root.innerHTML, />ADVANCED CHALLENGE</);
+  assert.doesNotMatch(root.innerHTML, />EXPERIMENTAL</);
+  assert.match(root.innerHTML, /Challenge progress, not a skill score/);
 });
 
 
-test("Phase 2 experimental maturity never replaces availability", async () => {
+test("Phase 6 graduated drill maturity never alters availability", async () => {
   const { buildExperimentDetailViewModel } = await import("../js/practiceLab/practiceLabViewModel.js");
   const entry = PRACTICE_EXPERIMENT_CATALOG.find((item) => item.id === "read-ahead");
   const registry = { getResolvedExperiment() { return { catalogEntry: entry, runnable: true, availability: "available" }; } };
   const view = buildExperimentDetailViewModel({ route: { params: { experimentId: "read-ahead" } }, registry });
   assert.equal(view.status, "available");
   assert.equal(view.statusLabel, "Available");
-  assert.equal(view.maturityLabel, "Experimental");
+  assert.equal(view.maturityLabel, null);
 });
 
 

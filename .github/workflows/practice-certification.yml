@@ -63,6 +63,7 @@ jobs:
               tests/practice-user-visible-correctness-phase1.test.js
               tests/practice-release-truth-phase2.test.js
               tests/practice-ux-completion-phase3.test.js
+              tests/practice-experimental-closure-phase6.test.js
               tests/practice-lab-controller.test.js
               tests/practice-lab-renderer.test.js
               tests/practice-lab-identity.test.js
