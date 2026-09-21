@@ -248,3 +248,25 @@ test("Phase 5 frozen-block skip remains explicit and irreversible for the day", 
   assert.match(source, /Skip this Daily Training block\?/);
   assert.match(source, /frozen plan will not replace it today/);
 });
+
+
+test("Phase 5 planner never exceeds any supported budget and reports intentional underfill", () => {
+  for (const requestedMinutes of [5, 8, 12, 15]) {
+    const plan = buildPracticeCoachDailyPlan({
+      profileId, contextId, localDayKey: "2026-09-08", requestedMinutes,
+      inputFingerprint: `budget-${requestedMinutes}`, targetCandidates: [target()],
+      realTextSupportedMinutes: [10, 5, 3], now,
+    });
+    assert.ok(plan.plannedMinutes <= requestedMinutes, `${requestedMinutes}: ${plan.plannedMinutes}`);
+    const view = buildPracticeCoachViewModel({ state: { status: "ready", requestedMinutes, plan } });
+    assert.match(view.plan.budgetLabel, new RegExp(`^${plan.plannedMinutes} of ${requestedMinutes} min planned`));
+    if (plan.plannedMinutes < requestedMinutes) assert.match(view.plan.budgetLabel, /intentionally underfilled/);
+  }
+});
+
+test("Phase 5 Coach result repeat controls cannot silently add another frozen dose", async () => {
+  const source = await readFile(new URL("../js/practiceLab/practiceLabControllerRuntimeV25.js", import.meta.url), "utf8");
+  assert.ok((source.match(/onRepeat: onCoachChildExit/g) ?? []).length >= 3);
+  assert.match(source, /const common = \{ root, session, logger, onExit: onCoachChildExit \}/);
+  assert.doesNotMatch(source, /onRepeat:\s*\(.*startNextBlock/);
+});
