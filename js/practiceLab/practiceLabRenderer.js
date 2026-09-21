@@ -2,7 +2,8 @@ const escapeHtml = (value = "") => String(value).replace(/[&<>'"]/g, (character)
 const slug = (value = "") => String(value).replace(/[^a-z0-9-]/gi, "");
 const backButton = (label = "Back to Practice Lab", action = "back") => `<button type="button" class="screen-back-button" data-practice-action="${action}" aria-label="${escapeHtml(label)}">BACK</button>`;
 const number = (value, digits = 1) => Number.isFinite(value) ? Number(value).toFixed(digits).replace(/\.0$/, "") : "Not measured";
-const percent = (value) => Number.isFinite(value) ? `${number(value <= 1 ? value * 100 : value, 1)}%` : "Not measured";
+const percentPoints = (value) => Number.isFinite(value) ? `${number(value, 1)}%` : "Not measured";
+const ratioPercent = (value) => Number.isFinite(value) ? `${number(value * 100, 1)}%` : "Not measured";
 
 function experimentCard(card) {
   return `<article class="practice-lab-experiment-card practice-lab-accent-${slug(card.category)}">
@@ -66,7 +67,7 @@ function renderNaturalText(data) {
   return `<dl>
     <div><dt>Benchmark WPM</dt><dd>${number(benchmark?.wpm)}</dd></div>
     <div><dt>Adjusted WPM</dt><dd>${number(benchmark?.adjustedWpm)}</dd></div>
-    <div><dt>Accuracy</dt><dd>${percent(benchmark?.accuracy)}</dd></div>
+    <div><dt>Accuracy</dt><dd>${percentPoints(benchmark?.accuracy)}</dd></div>
     <div><dt>Benchmark freshness</dt><dd>${escapeHtml(benchmark?.freshness ?? "Unknown")}</dd></div>
     <div><dt>Cold-natural ability estimate</dt><dd>${number(ability?.estimateWpm)}</dd></div>
     <div><dt>Ability confidence</dt><dd>${escapeHtml(ability?.confidenceLevel ?? "Not measured")}</dd></div>
@@ -76,8 +77,8 @@ function renderNaturalText(data) {
 function renderControl(data) {
   if (!data) return "<p>Not measured in this assessment.</p>";
   return `<dl>
-    <div><dt>First-pass accuracy</dt><dd>${percent(data.firstPassAccuracy)}</dd></div>
-    <div><dt>Disfluency rate</dt><dd>${percent(data.disfluencyRate)}</dd></div>
+    <div><dt>First-pass accuracy</dt><dd>${ratioPercent(data.firstPassAccuracy)}</dd></div>
+    <div><dt>Disfluency rate</dt><dd>${ratioPercent(data.disfluencyRate)}</dd></div>
     <div><dt>Correction inputs / 1000 chars</dt><dd>${number(data.correctionInputsPer1000)}</dd></div>
     <div><dt>Correction cost / 1000 chars</dt><dd>${number(data.correctionCostMsPer1000)}${Number.isFinite(data.correctionCostMsPer1000) ? " ms" : ""}</dd></div>
     <div><dt>Error episodes / 1000 chars</dt><dd>${number(data.errorEpisodesPer1000)}</dd></div>
@@ -88,7 +89,7 @@ function renderCoverage(data) {
   if (!data) return "<p>Not measured in this assessment.</p>";
   const blocks = Array.isArray(data.blocks) ? data.blocks : [];
   if (!blocks.length) return "<p>Coverage was not available for this assessment.</p>";
-  return `<ul>${blocks.map((entry) => `<li>Blueprint coverage: ${percent(entry?.coverageRatio)}</li>`).join("")}</ul>`;
+  return `<ul>${blocks.map((entry) => `<li>Blueprint coverage: ${ratioPercent(entry?.coverageRatio)}</li>`).join("")}</ul>`;
 }
 
 function renderLimiters(data) {
@@ -101,7 +102,7 @@ function renderTransfer(data) {
   return `<dl>
     <div><dt>Cold-transfer WPM</dt><dd>${number(data.wpm)}</dd></div>
     <div><dt>Adjusted WPM</dt><dd>${number(data.adjustedWpm)}</dd></div>
-    <div><dt>Accuracy</dt><dd>${percent(data.accuracy)}</dd></div>
+    <div><dt>Accuracy</dt><dd>${percentPoints(data.accuracy)}</dd></div>
     <div><dt>Freshness</dt><dd>${escapeHtml(data.freshness ?? "Unknown")}</dd></div>
     <div><dt>Valid entity transfer evidence</dt><dd>${number(data.validTransferEvidenceEntityCount, 0)}</dd></div>
   </dl>`;
