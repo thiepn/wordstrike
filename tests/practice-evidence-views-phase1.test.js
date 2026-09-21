@@ -45,7 +45,7 @@ test("Phase 1 Skill Map never presents an empty latency aggregate as zero millis
       },
     }],
   });
-  assert.match(root.innerHTML,/Fluent key latency<\/dt><dd>Not measured/);
+  assert.match(root.innerHTML,/Fluent timing<\/dt><dd>Not measured/);
   assert.doesNotMatch(root.innerHTML,/0 ms/);
 });
 
