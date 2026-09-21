@@ -283,3 +283,28 @@ test("Phase 5 load failures expose only reload recovery while planning failures 
   } });
   assert.equal(planFailureView.canCreate, true);
 });
+
+
+test("Phase 5 Assessment-state failure cannot block an otherwise valid training plan", async () => {
+  const repository = baseRepository();
+  const service = createPracticeCoachServiceBase({
+    repository,
+    experimentRegistry: {
+      getRegistration(id) {
+        if (id === "real-text") return { runtime: { async getAvailability() { return { supportedDurationsMs: [300_000] }; } } };
+        return null;
+      },
+    },
+    limiterService: { async buildContextLimiterSnapshot() { return { candidates: [] }; } },
+    masteryService: emptyMastery,
+    reviewService: emptyReview,
+    getAssessmentState: async () => { throw new Error("assessment unavailable"); },
+    now,
+  });
+  const created = await service.createTodayPracticeCoachPlan({ profileId, contextId, requestedMinutes: 5, language: "en" });
+  assert.equal(created.created, true);
+  assert.equal(created.plan.blocks.length, 1);
+  assert.equal(created.plan.blocks[0].kind, "real-text");
+  assert.equal(created.plan.decisionContext.assessmentState, "unknown");
+  assert.equal(created.plan.suggestions.assessmentSuggestion, null);
+});
