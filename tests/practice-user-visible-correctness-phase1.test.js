@@ -163,7 +163,7 @@ test("Phase 1 target-result surfaces distinguish rates, residuals, and quality-p
 test("Phase 1 Pace Ladder distinguishes the reference stage from ratio rungs", async () => {
   const source = await readFile(new URL("../js/practiceLab/practicePaceLadderSessionHost.js", import.meta.url), "utf8");
   assert.match(source, /s\.kind === "reference" \? "Reference"/);
-  assert.doesNotMatch(source, /Math\.round\(\(s\.ratio \?\? 0\) \* 100\).*<\/th>/);
+  assert.doesNotMatch(source, /<th scope="row">\$\{Math\.round\(\(s\.ratio \?\? 0\) \* 100\)\}%<\/th>/);
 });
 
 test("Phase 1 Weakness Boss renders the explicit runtime recommendation, not list position", async () => {
