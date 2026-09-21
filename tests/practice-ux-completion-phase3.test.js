@@ -38,7 +38,7 @@ test("Phase 3 advanced read failures have in-place recovery actions", () => {
 
 test("Phase 3 Full Assessment read failure exposes an in-place retry action", async () => {
   const source = await readFile(new URL("../js/practiceLab/practiceLabControllerRuntimeV40.js", import.meta.url), "utf8");
-  assert.match(source, /data-practice-action="assessment-refresh"/);
+  assert.match(source, /retry\.dataset\.practiceAction='assessment-refresh'/);
   assert.match(source, /action==='assessment-refresh'/);
   assert.doesNotMatch(source, /Assessment could not load\. Return to Practice Lab and try again\./);
 });

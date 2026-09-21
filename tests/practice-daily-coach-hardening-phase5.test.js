@@ -239,7 +239,7 @@ test("Phase 5 no-block recovery action re-runs plan creation directly", async ()
     requestedMinutes: 12, durationChoices: [5,8,12,15].map((minutes) => ({ minutes, selected: minutes === 12 })),
     plan: null, canCreate: true,
   });
-  assert.match(targetRoot.innerHTML, /data-practice-action="create-coach-plan">CHECK AGAIN/);
+  assert.match(targetRoot.innerHTML, /data-practice-action="create-coach-plan"\s*>CHECK AGAIN/);
   assert.doesNotMatch(targetRoot.innerHTML, /data-practice-action="reload-coach">CHECK AGAIN/);
 });
 
