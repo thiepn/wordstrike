@@ -31,7 +31,7 @@
 .practice-lab-screen .pl-topbar{min-height:50px;display:flex;align-items:center;justify-content:space-between;gap:16px;padding-bottom:18px;border-bottom:1px solid var(--pl-rule)}
 .pl-wordmark{display:flex;align-items:center;gap:12px;font:11px var(--font-game,monospace);letter-spacing:.07em}.pl-wordmark strong{font:750 13px var(--font-ui,sans-serif);letter-spacing:.1em}.pl-wordmark>span:last-child{color:var(--pl-quiet)}
 .pl-mark{display:inline-flex;align-items:center;font:900 25px/1 var(--pl-display);letter-spacing:-.15em}.pl-mark span{color:var(--pl-accent);padding-left:4px}.pl-topbar-divider{color:var(--pl-quiet)}.pl-topbar-actions{display:flex;align-items:center;gap:8px}
-.practice-lab-screen .pl-topbar-actions button{background:transparent;border-color:transparent;color:var(--pl-muted);font-size:11px}
+.practice-lab-screen .pl-topbar-actions button{min-width:44px;min-height:44px;background:transparent;border-color:transparent;color:var(--pl-muted);font-size:11px}
 .practice-lab-screen .pl-navigation{display:flex;gap:5px;border-bottom:1px solid var(--pl-rule);padding-top:8px;overflow-x:auto;scrollbar-width:thin;scrollbar-color:var(--pl-rule) transparent}
 .practice-lab-screen .pl-navigation button{flex:none;border:0;border-bottom:2px solid transparent;border-radius:0;background:transparent;color:var(--pl-quiet);padding:14px 18px;min-height:50px;font-size:13px;letter-spacing:0}
 .practice-lab-screen .pl-navigation button[aria-current='page']{border-bottom-color:var(--pl-accent);color:var(--pl-ink)}.practice-lab-screen .pl-navigation button:focus-visible{outline-offset:-5px}
