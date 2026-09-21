@@ -22,7 +22,7 @@ function shell(content, { home = false } = {}) {
 function renderHome(view) {
   return shell(`${backButton("Exit Practice Lab", "exit")}
     <header class="practice-lab-header"><div><div class="eyebrow">Focused training</div><h1 tabindex="-1" data-practice-heading>${escapeHtml(view.title)}</h1><p>${escapeHtml(view.subtitle)}</p></div>
-      <div class="practice-lab-header-actions">${view.preview ? '<span class="practice-lab-preview">DEVELOPER PREVIEW</span>' : ""}<button type="button" class="practice-lab-help" data-practice-action="help" aria-label="Practice Lab help"${view.helpAvailable ? "" : ' disabled aria-disabled="true" title="Practice Lab help is not available yet"'}>HELP</button></div></header>
+      <div class="practice-lab-header-actions">${view.preview ? '<span class="practice-lab-preview">DEVELOPER PREVIEW</span>' : ""}${view.dataManagementAvailable ? '<button type="button" data-practice-action="manage-data" aria-label="Manage Practice Lab data">DATA</button>' : ""}<button type="button" class="practice-lab-help" data-practice-action="help" aria-label="Practice Lab help"${view.helpAvailable ? "" : ' disabled aria-disabled="true" title="Practice Lab help is not available yet"'}>HELP</button></div></header>
     <main>
       <section class="practice-lab-feature-grid" aria-label="Practice overview">
         <article class="practice-lab-feature-card practice-lab-daily"><div class="eyebrow">Guided program</div><h2>${escapeHtml(view.dailyTraining.title)}</h2><p>${escapeHtml(view.dailyTraining.description)}</p><ul><li>${escapeHtml(view.dailyTraining.stateLabel)}</li><li>${escapeHtml(view.dailyTraining.duration)}</li></ul><button type="button" disabled aria-disabled="true">NOT AVAILABLE YET</button></article>

@@ -250,6 +250,7 @@ function ensurePracticeLabController() {
     appNavigation: {
       exit: openModeSelect,
       help: () => openTutorial("practice", { source: "help" }),
+      manageData: openPracticeDataSettings,
     },
   });
   return practiceLabController;
@@ -623,6 +624,19 @@ async function managePracticeData(action) {
   const result = await runPracticeDataAction(action);
   if (result.status === "success") unmountPracticeLab();
   return result;
+}
+
+function openPracticeDataSettings() {
+  unmountPracticeLab();
+  cleanupCampaignAttempt("practice-data-settings");
+  openSettings();
+  globalThis.requestAnimationFrame?.(() => {
+    const section = document.querySelector(".settings-practice-data");
+    if (!section) return;
+    section.open = true;
+    section.scrollIntoView?.({ block: "start", behavior: "smooth" });
+    section.querySelector?.("[data-practice-data-action]")?.focus?.({ preventScroll: true });
+  });
 }
 
 function backFromSettings() {

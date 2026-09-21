@@ -70,5 +70,7 @@ test("Settings exposes Practice help replay and the two bounded data actions", a
   assert.match(ui, /handlers\.practiceData/);
   assert.match(main, /practiceData:\s*managePracticeData/);
   assert.match(main, /runPracticeDataAction/);
+  assert.match(main, /manageData:\s*openPracticeDataSettings/);
+  assert.match(main, /\.settings-practice-data/);
   assert.match(sw, /practiceDataManagement\.js/);
 });

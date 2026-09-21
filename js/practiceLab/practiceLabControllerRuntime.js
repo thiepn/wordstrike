@@ -80,6 +80,7 @@ export function createPracticeLabController({
       registry: experimentRegistry,
       featureGate,
       helpAvailable: typeof appNavigation.help === "function",
+      dataManagementAvailable: typeof appNavigation.manageData === "function",
       combinationRepairState,
       weakKeysState,
     }), { focusSelector });
@@ -359,6 +360,7 @@ export function createPracticeLabController({
     if (action === "exit") appNavigation.exit?.();
     else if (action === "back") (navigationController?.back ?? back)();
     else if (action === "help") appNavigation.help?.({ onboardingVersion: PRACTICE_LAB_ONBOARDING_VERSION });
+    else if (action === "manage-data") appNavigation.manageData?.();
     else if (action === "open-experiment") (navigationController?.navigate ?? navigate)(
       createPracticeLabRoute(PRACTICE_LAB_ROUTES.EXPERIMENT_DETAIL, { experimentId: target.dataset.experimentId }),
       { returnFocusSelector: `[data-experiment-id="${String(target.dataset.experimentId || "").replace(/[^a-z0-9-]/gi, "")}"]` },
