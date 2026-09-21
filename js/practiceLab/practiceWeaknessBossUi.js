@@ -54,6 +54,7 @@ export function renderPracticeWeaknessBossDetail(root, view, { focusSelector = n
       <div class="eyebrow">Advanced · Adaptive Practice</div><h1>Weakness Boss</h1>
       <p class="practice-lab-lead">Face one current Practice limiter in a focused fixed-dose encounter.</p>
       <div class="practice-lab-notice" role="note"><strong>Challenge progress, not a skill score.</strong><br>The Boss challenge uses one fixed Practice dose. Boss HP represents challenge progress, not your skill score. Defeating a Boss does not mean the target is mastered, retained, transferred, or permanently fixed.</div>
+      ${view.errorCode && view.status === "ready" ? `<div class="practice-lab-notice" role="alert"><strong>Boss could not start.</strong><br>${escapeHtml(view.errorCode)} · Try again or choose another available target.</div>` : ""}
       ${body}
     </main></div></section>`;
   (root.querySelector?.(focusSelector) ?? root.querySelector?.("[data-practice-action='weakness-boss-start']") ?? root.querySelector?.("button"))?.focus?.({ preventScroll: true });

@@ -162,6 +162,7 @@ export function createPracticeLabController(options = {}) {
           recommendedStatId: state.recommendedCandidate?.statId ?? null,
           starting: state.starting,
           sessionActive: Boolean(host),
+          errorCode: state.errorCode ?? null,
         }),
       });
     },

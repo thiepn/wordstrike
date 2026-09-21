@@ -126,13 +126,13 @@ try{
     ]);
     const targetIndex=createPracticeTargetIndex({loader:indexLoader,corpusManifest,indexManifest});
     const candidate=Object.freeze({
-      statId:createSkillStatId(initialized.profile.profileId,initialized.context.contextId,'word','the'),entityType:'word',entityKey:'the',
-      limiterStatus:'confirmed',phenotype:'launch-limited',hierarchyStatus:'independent',
+      statId:createSkillStatId(initialized.profile.profileId,initialized.context.contextId,'key','e'),entityType:'key',entityKey:'e',
+      limiterStatus:'confirmed',phenotype:'slow',hierarchyStatus:'independent',
       priorityScore:90,impactScore:80,limiterConfidence:.95,weaknessScore:90,
       masteryStage:'learning',saturationStatus:'not-detected',marginalGainBand:'high',
       bossTargetUtility:90,contentReady:true,
-      bossTheme:Object.freeze({...PRACTICE_WEAKNESS_BOSS_ARCHETYPES['launch-limited']}),
-      reasonCodes:Object.freeze(['confirmed-limiter','high-impact','learning-headroom','independent-limiter','launch-pattern']),
+      bossTheme:Object.freeze({...PRACTICE_WEAKNESS_BOSS_ARCHETYPES.slow}),
+      reasonCodes:Object.freeze(['confirmed-limiter','high-impact','learning-headroom','independent-limiter','slow-pattern']),
     });
     const corpusBinding=Object.freeze({
       corpusId:corpusManifest.corpusId,
