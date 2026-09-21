@@ -11,7 +11,7 @@ const isExperimental = (entry) => entry?.capabilities?.includes?.("experimental"
 const cardFromResolved = ({ catalogEntry: entry, runnable }) => Object.freeze({
   id: entry.id, title: entry.title, description: entry.description, category: entry.category,
   categoryLabel: PRACTICE_CATEGORY_LABELS[entry.category], duration: durationLabel(entry.estimatedDurationMinutes),
-  status: runnable ? "available" : "unavailable", statusLabel: runnable ? (isExperimental(entry) ? "Experimental" : "Ready to train") : "Unavailable",
+  status: runnable ? "available" : "unavailable", statusLabel: runnable ? (isExperimental(entry) ? "Experimental · ready" : "Ready to train") : "Unavailable",
   experimental: isExperimental(entry), runnable,
 });
 
@@ -116,7 +116,8 @@ export function buildExperimentDetailViewModel({ route, registry, assessmentAvai
     prerequisites: [entry.requiresAssessment && "Full Assessment", entry.requiresPracticeData && "Practice data"].filter(Boolean),
     deviceSupport: [entry.supportsPhysicalKeyboard && "Physical keyboard", entry.supportsSoftwareKeyboard && "Software keyboard", entry.supportsMobile && "Mobile layouts"].filter(Boolean),
     status: resolved.runnable ? "available" : "unavailable",
-    statusLabel: resolved.runnable ? (isExperimental(entry) ? "Experimental" : "Available") : "Unavailable",
+    statusLabel: resolved.runnable ? "Available" : "Unavailable",
+    maturityLabel: isExperimental(entry) ? "Experimental" : null,
     experimental: isExperimental(entry),
     runnable: resolved.runnable,
     unavailableMessage: resolved.runnable ? "" : resolved.availability === "implementation-missing"

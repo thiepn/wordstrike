@@ -57,3 +57,14 @@ test("Phase 2 Weakness Boss is available but honestly marked experimental", () =
   assert.match(root.innerHTML, />EXPERIMENTAL</);
   assert.doesNotMatch(root.innerHTML, /DEVELOPER PREVIEW/);
 });
+
+
+test("Phase 2 experimental maturity never replaces availability", async () => {
+  const { buildExperimentDetailViewModel } = await import("../js/practiceLab/practiceLabViewModel.js");
+  const entry = PRACTICE_EXPERIMENT_CATALOG.find((item) => item.id === "read-ahead");
+  const registry = { getResolvedExperiment() { return { catalogEntry: entry, runnable: true, availability: "available" }; } };
+  const view = buildExperimentDetailViewModel({ route: { params: { experimentId: "read-ahead" } }, registry });
+  assert.equal(view.status, "available");
+  assert.equal(view.statusLabel, "Available");
+  assert.equal(view.maturityLabel, "Experimental");
+});
