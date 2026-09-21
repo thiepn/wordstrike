@@ -185,7 +185,9 @@ export function buildPracticeCoachViewModel({ state, preview = false } = {}) {
     requestedMinutes: normalized.requestedMinutes,
     durationChoices: PRACTICE_COACH_ALLOWED_MINUTES.map((minutes) => ({ minutes, selected: minutes === normalized.requestedMinutes })),
     plan: null,
-    canCreate: normalized.status !== "loading" && normalized.status !== "creating",
+    canCreate: normalized.status !== "loading"
+      && normalized.status !== "creating"
+      && !["PRACTICE_STORAGE_OPEN_FAILED", "PRACTICE_STORAGE_RECOVERY_REQUIRED", "PRACTICE_STORAGE_UNAVAILABLE", "PRACTICE_COACH_UNAVAILABLE"].includes(normalized.errorCode),
   });
   const nextBlock = plan.blocks.find((block) => block.status === "pending") ?? null;
   const activeBlock = plan.blocks.find((block) => block.status === "active") ?? null;

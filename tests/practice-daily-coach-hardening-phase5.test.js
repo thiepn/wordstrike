@@ -270,3 +270,16 @@ test("Phase 5 Coach result repeat controls cannot silently add another frozen do
   assert.match(source, /const common = \{ root, session, logger, onExit: onCoachChildExit \}/);
   assert.doesNotMatch(source, /onRepeat:\s*\(.*startNextBlock/);
 });
+
+
+test("Phase 5 load failures expose only reload recovery while planning failures can retry creation", async () => {
+  const storageView = buildPracticeCoachViewModel({ state: {
+    status: "error", requestedMinutes: 12, plan: null, errorCode: "PRACTICE_STORAGE_OPEN_FAILED",
+  } });
+  assert.equal(storageView.canCreate, false);
+
+  const planFailureView = buildPracticeCoachViewModel({ state: {
+    status: "error", requestedMinutes: 12, plan: null, errorCode: "PRACTICE_COACH_PLAN_FAILED",
+  } });
+  assert.equal(planFailureView.canCreate, true);
+});
