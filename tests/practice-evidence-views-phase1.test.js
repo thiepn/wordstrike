@@ -32,6 +32,23 @@ test("Phase 1 Skill Map renders canonical first-pass and latency units", () => {
   assert.match(root.innerHTML,/learning/);
 });
 
+test("Phase 1 Skill Map never presents an empty latency aggregate as zero milliseconds", () => {
+  const root=makeRoot();
+  renderPracticeEvidenceView(root,"skill-map",{
+    status:"ready",page:0,reviews:[],sessions:[],
+    skills:[{
+      statId:"practice-stat_empty-latency",entityType:"key",entityKey:"q",
+      priority:0,confidenceLevel:"low",confidenceScore:10,masteryState:"unmeasured",
+      evidence:{
+        opportunities:{count:1,correctCount:1,errorCount:0,directTargetedCount:1,incidentalCount:0},
+        timing:{fluentLatency:{count:0,meanMs:0,m2:0,minMs:null,maxMs:null,recentSamples:[]}},
+      },
+    }],
+  });
+  assert.match(root.innerHTML,/Fluent key latency<\/dt><dd>Not measured/);
+  assert.doesNotMatch(root.innerHTML,/0 ms/);
+});
+
 test("Phase 1 Practice history uses canonical session WPM and accuracy", () => {
   const root=makeRoot();
   renderPracticeEvidenceView(root,"history",{
