@@ -1657,14 +1657,23 @@ export function renderSettings(save, selectedIndex, handlers, accountMarkup = ""
           <div class="settings-tutorial-grid">
             ${[
     ["general", "GENERAL INTRODUCTION"], ["campaign", "CAMPAIGN GUIDE"],
-    ["typing", "TYPING TEST GUIDE"], ["endless", "ENDLESS GUIDE"],
-    ["boss", "BOSS GUIDE"], ["leaderboards", "LEADERBOARD GUIDE"],
+    ["typing", "TYPING TEST GUIDE"], ["practice", "PRACTICE LAB GUIDE"],
+    ["endless", "ENDLESS GUIDE"], ["boss", "BOSS GUIDE"], ["leaderboards", "LEADERBOARD GUIDE"],
   ].map(([id, label]) => `<button type="button" class="text-action" data-tutorial-id="${id}">REPLAY ${label}</button>`).join("")}
           </div>
           <div class="settings-tutorial-resets">
             <button type="button" class="text-action" data-tutorial-reset="hints">RESET CONTEXTUAL HINTS</button>
             <button type="button" class="text-action danger" data-tutorial-reset="all">RESET ALL TUTORIAL PROGRESS</button>
           </div>
+        </details>
+        <details class="settings-tutorials settings-practice-data">
+          <summary>PRACTICE LAB DATA</summary>
+          <p class="micro-label">Practice data stays in this browser. Reset clears the active Practice profile's evidence and progress but keeps saved Custom Text. Delete all also removes Custom Text and every other Practice record in this browser.</p>
+          <div class="settings-tutorial-grid">
+            <button type="button" class="text-action danger" data-practice-data-action="reset">RESET PRACTICE EVIDENCE</button>
+            <button type="button" class="text-action danger" data-practice-data-action="wipe">DELETE ALL PRACTICE DATA</button>
+          </div>
+          <p class="micro-label" data-practice-data-status role="status" aria-live="polite"></p>
         </details>
         <div class="settings-list">
           ${rows.map(([label, key, description], index) => `
@@ -1692,6 +1701,20 @@ export function renderSettings(save, selectedIndex, handlers, accountMarkup = ""
   const resetTutorials = app().querySelector('[data-tutorial-reset="all"]');
   if (resetHints) resetHints.onclick = handlers.resetHints;
   if (resetTutorials) resetTutorials.onclick = handlers.resetTutorials;
+  const practiceDataStatus = app().querySelector("[data-practice-data-status]");
+  const practiceDataButtons = [...app().querySelectorAll("[data-practice-data-action]")];
+  practiceDataButtons.forEach((button) => {
+    button.onclick = async () => {
+      if (button.disabled) return;
+      practiceDataButtons.forEach((control) => { control.disabled = true; });
+      try {
+        const result = await handlers.practiceData?.(button.dataset.practiceDataAction);
+        if (practiceDataStatus && result?.message) practiceDataStatus.textContent = result.message;
+      } finally {
+        practiceDataButtons.forEach((control) => { control.disabled = false; });
+      }
+    };
+  });
   const displayNameInput = app().querySelector("#profile-name-input");
   if (displayNameInput) {
     displayNameInput.onkeydown = (event) => {

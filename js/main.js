@@ -208,6 +208,7 @@ import { createPendingResultCoordinator } from "./pendingResultCoordinator.js";
 import { createPracticeFeatureGate } from "./practiceLab/practiceFeatureGate.js";
 import { createPracticeExperimentRegistry } from "./practiceLab/practiceExperimentRegistry.js";
 import { createPracticeLabController } from "./practiceLab/practiceLabController.js";
+import { runPracticeDataAction } from "./practiceLab/practiceDataManagement.js";
 import {
   armPreparedResult,
   clearAutomaticSubmission,
@@ -616,6 +617,12 @@ function openAccountSettings() {
     account?.scrollIntoView?.({ block: "start", behavior: "smooth" });
     account?.focus?.({ preventScroll: true });
   });
+}
+
+async function managePracticeData(action) {
+  const result = await runPracticeDataAction(action);
+  if (result.status === "success") unmountPracticeLab();
+  return result;
 }
 
 function backFromSettings() {
@@ -1299,6 +1306,7 @@ function renderCurrentScreen() {
       resetTutorials: () => {
         if (window.confirm("Reset every tutorial and contextual hint?")) resetAllOnboarding();
       },
+      practiceData: managePracticeData,
     }, renderSettingsAccountManagement({
       localProfile,
       editing: appState.profileEditing,
