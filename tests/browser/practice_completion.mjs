@@ -40,7 +40,7 @@ try{for(const name of (process.env.PRACTICE_BROWSERS??'chromium,firefox,webkit')
   if(await page.getByText('No skill evidence yet',{exact:true}).count())throw Error('Skill Map stayed empty after completed Practice sessions');
   const skills=page.locator('[data-practice-view="skill-map"] details');
   await skills.first().waitFor({state:'visible'});
-  const measuredAccuracy=await skills.evaluateAll(nodes=>nodes.some(node=>/First-pass accuracy[\\s\\S]*\\d+(?:\\.\\d+)?%/.test(node.innerText)));
+  const measuredAccuracy=await skills.evaluateAll(nodes=>nodes.some(node=>/First-pass accuracy[\\s\\S]*\\d+(?:\\.\\d+)?%/.test(node.textContent??'')));
   if(!measuredAccuracy)throw Error('Skill Map has no measured first-pass accuracy rendered as a percent after completed Practice sessions');
   await page.evaluate(()=>lab.navigate({name:'progress'}));await page.getByText(/saved sessions in this context/).waitFor();
   if(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+2))throw Error('Horizontal overflow');
