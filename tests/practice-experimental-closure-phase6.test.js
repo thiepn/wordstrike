@@ -112,3 +112,30 @@ test("Phase 6 graduated public fluency copy no longer presents these drills as e
     assert.doesNotMatch(`${entry.description} ${entry.longDescription}`,/\bexperiment\b/i,id);
   }
 });
+
+
+test("Phase 6 Review scheduling remains core while learning/saturation stays internal", async () => {
+  const [{ buildReviewQueueEmptyViewModel }, { PRACTICE_LAB_ROUTES, PRACTICE_LAB_PUBLIC_ROUTES }] = await Promise.all([
+    import("../js/practiceLab/practiceLabViewModel.js"),
+    import("../js/practiceLab/practiceLabRoutes.js"),
+  ]);
+  assert.equal(PRACTICE_LAB_PUBLIC_ROUTES.includes(PRACTICE_LAB_ROUTES.REVIEW_QUEUE), true);
+  const review = buildReviewQueueEmptyViewModel();
+  assert.match(review.description, /Retention reviews appear/);
+  assert.doesNotMatch(JSON.stringify(review), /experimental/i);
+
+  const ui = await readFile(new URL("../js/practiceLab/practiceCoachUi.js", import.meta.url), "utf8");
+  assert.match(ui, /learning headroom is limited/i);
+  assert.doesNotMatch(ui, /learning score|permanent mastery|permanently fixed/i);
+});
+
+test("Phase 6 adaptive recommendation policy stays bounded and auditable", async () => {
+  const [planSource, policySource] = await Promise.all([
+    readFile(new URL("../js/practiceLab/practiceCoachPlan.js", import.meta.url), "utf8"),
+    readFile(new URL("../js/practiceLab/practiceCoachPolicy.js", import.meta.url), "utf8"),
+  ]);
+  assert.match(planSource, /responseModifier < 0\.80 \|\| decision\.responseModifier > 1\.20/);
+  assert.match(policySource, /actionableUtility/);
+  assert.match(policySource, /saturationModifier/);
+  assert.match(policySource, /readinessModifier/);
+});

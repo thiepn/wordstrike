@@ -12,6 +12,9 @@ Phase 6 closes the public experimental-mode question before final hardening.
 | Treatment Response | Keep / simplify | Retained as cautious **Observed Response** inside Progress, not presented as a separate effectiveness product. |
 | Physical Keyboard | Keep / advanced opt-in | Local-only aggregate diagnostics, default off, no raw physical keystroke sequence persistence, not an experiment card. |
 | Research A/B | Hide from normal release | Runtime/storage/tests remain for developer work, but the route and navigation are developer-only. |
+| Retention / Review scheduling | Keep / core | Review Queue and Daily Coach review scheduling remain normal product behavior with strict delayed-verification eligibility. |
+| Learning curves / saturation | Keep internal / simplify | Used to de-emphasize low-headroom targets; not promoted into a standalone score, badge, or claim that a skill is permanently fixed. |
+| Adaptive recommendations | Keep bounded | Daily Coach remains deterministic/auditable: current need gates inclusion; treatment-response history may only make bounded adjustments among compatible methods. |
 
 ## Public maturity rule
 
@@ -36,3 +39,12 @@ Physical Keyboard telemetry remains discoverable only in eligible physical-keybo
 ## Freeze rule
 
 Phase 6 does not add new experimental modes. Any future experimental system must remain developer-only until a later release decision explicitly graduates it.
+
+
+## Internal adaptive-system closure
+
+Retention scheduling is no longer treated as experimental infrastructure. It is a normal evidence workflow, but eligibility remains conservative: direct practice is not a retention verification, due reviews can become stale, and stale review content is blocked rather than silently weakened.
+
+Learning-curve and saturation state remain internal decision inputs. They may lower the priority of repeated acquisition when observed headroom is small. They are not surfaced as a standalone “learning score,” and saturation does not mean permanent mastery.
+
+Adaptive recommendation behavior remains deliberately narrow. Daily Coach does not invent protocols or optimize an opaque reward function. Need, hierarchy, mastery/headroom, readiness and protocol compatibility determine whether a target is actionable. Longitudinal response evidence can only adjust compatible treatment selection within the bounded personalization policy; it cannot make an otherwise non-actionable target enter the plan.
