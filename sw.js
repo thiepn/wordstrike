@@ -1,5 +1,5 @@
 const CACHE_PREFIX = "wordstrike-pwa-";
-const CACHE_NAME = CACHE_PREFIX + "v58-practice-phase6-graduation";
+const CACHE_NAME = CACHE_PREFIX + "v59-practice-device-acceptance";
 const APP_SHELL = [
   "./js/practiceLab/practiceAssessmentInput.js",
   "./js/practiceLab/practiceDurableManifest.js",
@@ -855,8 +855,26 @@ const APP_SHELL = [
   "./style.css"
 ];
 
+const CORE_SHELL = Object.freeze([
+  "./",
+  "./index.html",
+  "./manifest.webmanifest",
+  "./style.css",
+  "./styles/ui-system.css",
+  "./js/main.js",
+  "./js/main.js?v=20260910f",
+]);
+
+async function precacheAppShell() {
+  const cache = await caches.open(CACHE_NAME);
+  await cache.addAll(CORE_SHELL);
+  const required = new Set(CORE_SHELL);
+  const optional = APP_SHELL.filter(asset => !required.has(asset));
+  await Promise.allSettled(optional.map(asset => cache.add(asset)));
+}
+
 self.addEventListener("install", event => {
-  event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL)));
+  event.waitUntil(precacheAppShell());
   self.skipWaiting();
 });
 
@@ -869,21 +887,37 @@ self.addEventListener("fetch", event => {
   if (request.method !== "GET") return;
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
+
   if (request.mode === "navigate") {
     event.respondWith(fetch(request).then(response => {
       if (response && response.ok) {
         const copy = response.clone();
-        caches.open(CACHE_NAME).then(cache => cache.put("./index.html", copy));
+        event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.put("./index.html", copy)));
       }
       return response;
-    }).catch(() => caches.match("./index.html").then(hit => hit || caches.match("./"))));
+    }).catch(async () => (
+      await caches.match("./index.html", { ignoreSearch: true })
+      || await caches.match("./", { ignoreSearch: true })
+      || new Response("WORDSTRIKE is unavailable offline until the app shell has been cached.", {
+        status: 503,
+        headers: { "Content-Type": "text/plain; charset=utf-8" },
+      })
+    )));
     return;
   }
+
   event.respondWith(fetch(request).then(response => {
-  if (response && response.ok) {
-    const copy = response.clone();
-    caches.open(CACHE_NAME).then(cache => cache.put(request, copy));
-  }
-  return response;
-}).catch(() => caches.match(request)));
+    if (response && response.ok) {
+      const copy = response.clone();
+      event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.put(request, copy)));
+    }
+    return response;
+  }).catch(async () => (
+    await caches.match(request)
+    || await caches.match(request, { ignoreSearch: true })
+    || new Response("Offline asset unavailable", {
+      status: 503,
+      headers: { "Content-Type": "text/plain; charset=utf-8" },
+    })
+  )));
 });
