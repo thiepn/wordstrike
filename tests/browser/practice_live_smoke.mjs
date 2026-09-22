@@ -49,10 +49,27 @@ try{
   throw new Error(`Production app did not reach title or mode select: ${JSON.stringify(report.startup)}\n${error.message}`);
  }
  report.entryState=entryState;
- if(entryState==='title')await titleModes.click();
+ if(entryState==='title'){
+  await page.waitForFunction(()=>typeof document.querySelector('[data-action="modes"]')?.onclick==='function',null,{timeout:30000});
+  await titleModes.click();
+ }
  await practiceMode.waitFor({state:'visible',timeout:30000});
+ await page.waitForFunction(()=>typeof document.querySelector('button[data-mode-id="practice"]')?.onclick==='function',null,{timeout:30000});
  await practiceMode.click();
- await page.locator('[data-practice-action="open-experiment"][data-experiment-id="custom-text"]').first().click();
+ try{
+  await page.locator('.pl-studio-home').waitFor({state:'visible',timeout:90000});
+ }catch(error){
+  report.practiceStartup=await page.evaluate(()=>({
+   readyState:document.readyState,
+   appText:(document.querySelector('#app')?.innerText??'').slice(0,3000),
+   appHtml:(document.querySelector('#app')?.innerHTML??'').slice(0,5000),
+   practiceModeHandler:typeof document.querySelector('button[data-mode-id="practice"]')?.onclick,
+  }));
+  throw new Error(`Production Practice home did not become ready: ${JSON.stringify(report.practiceStartup)}\n${error.message}`);
+ }
+ const customText=page.locator('[data-practice-action="open-experiment"][data-experiment-id="custom-text"]').first();
+ await customText.waitFor({state:'visible',timeout:60000});
+ await customText.click();
  const passage='Practice is ready. Correct a mistake, then continue.\nThe second line saves with the completed session.';
  await page.locator('[data-custom-text-source]').fill(passage);
  await page.locator('[data-practice-action="custom-start"]:enabled').click();
