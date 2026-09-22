@@ -132,7 +132,7 @@ try{
       manifestHash:corpusManifest.buildChecksum,
       language:'en',
     });
-    const fixtureWords=Object.freeze(['because','there','people','about','other','which','their','after','before','where']);
+    const fixtureWords=Object.freeze(['when','but','on','not','by','than','without','were','while','next','before']);
     const readinessChecks=[];
     let candidate=null;
     for(const entityKey of fixtureWords){
