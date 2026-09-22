@@ -205,7 +205,7 @@ try{
   assert.ok(await input.evaluate(node=>node===document.activeElement),'Correction must preserve Boss typing focus');
 
   let previousCursor=-1;
-  for(let guard=0;guard<240;guard++){
+  for(let guard=0;guard<80;guard++){
     if(await page.locator('[data-practice-view="weakness-boss-result"]').count())break;
     const passage=page.locator('.practice-weak-key-typing');
     await passage.waitFor({state:'visible'});
