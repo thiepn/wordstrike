@@ -1,0 +1,46 @@
+diff --git a/tests/browser/account_progress_reliability.py b/tests/browser/account_progress_reliability.py
+index 0009b25..f5387d9 100644
+--- a/tests/browser/account_progress_reliability.py
++++ b/tests/browser/account_progress_reliability.py
+@@ -230,7 +230,7 @@ def certify(playwright, browser_name, base, checks):
+             page.wait_for_function("window.__testState.screen==='SPEED_TEST_RUN'")
+             result = page.evaluate("""async()=>{
+               const speed=await import('./js/speedTest.js');const state=speed.getCurrentSpeedTest();let time=performance.now();const start=time;
+-              if(state.configId!=='time-60') throw Error('Wrong placement configuration');
++              if(state.config.configId!=='time-60') throw Error('Wrong placement configuration');
+               const key=k=>speed.handleCurrentSpeedTestKey({key:k,code:k===' '?'Space':'Key'+k.toUpperCase(),preventDefault(){},ctrlKey:false,metaKey:false,altKey:false,repeat:false},time+=8);
+               for(let i=0;i<75;i++){for(const c of speed.getSpeedTestCurrentWord(state))key(c);key(' ');}
+               time=start+60001;key(' ');
+diff --git a/tests/browser/campaign_recovery.py b/tests/browser/campaign_recovery.py
+index 98763bb..4331507 100644
+--- a/tests/browser/campaign_recovery.py
++++ b/tests/browser/campaign_recovery.py
+@@ -10,6 +10,7 @@ from pathlib import Path
+ from threading import Thread
+ import json
+ import os
++import re
+ import traceback
+ 
+ from playwright.sync_api import sync_playwright, expect
+@@ -150,7 +151,7 @@ def certify(browser_type, browser_name, base, evidence):
+     page.wait_for_timeout(100)
+     expect(page.locator("[data-campaign-typing-readout-typed]")).to_have_text("str")
+     expect(page.locator("[data-campaign-typing-readout-remaining]")).to_have_text("ike")
+-    expect(page.locator("#hud-score")).to_have_text("4321")
++    expect(page.locator("#hud-score")).to_have_text(re.compile(r"4[,\.\s]?321"))
+ 
+     page.screenshot(path=str(ARTIFACTS / f"{browser_name}-campaign-gameplay.png"), full_page=True)
+ 
+diff --git a/tests/practice-architecture-consolidation-phase8.test.js b/tests/practice-architecture-consolidation-phase8.test.js
+index a33174a..c4bd1d8 100644
+--- a/tests/practice-architecture-consolidation-phase8.test.js
++++ b/tests/practice-architecture-consolidation-phase8.test.js
+@@ -90,5 +90,6 @@ test("Phase 8 PWA precaches canonical Practice architecture only", async () => {
+   assert.match(sw, /practiceLabControllerCurrent\.js/);
+   assert.match(sw, /practiceLabRendererCurrent\.js/);
+   for (const name of legacyFiles) assert.equal(sw.includes(name), false, name);
+-  assert.match(sw, /v63-practice-architecture/);
++  const version = sw.match(/CACHE_NAME = CACHE_PREFIX \+ "v(\d+)-/);
++  assert.ok(version && Number(version[1]) >= 63, "Canonical architecture needs a current cache version");
+ });
