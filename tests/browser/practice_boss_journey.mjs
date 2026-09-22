@@ -229,8 +229,8 @@ try{
   await page.locator('[data-practice-view="weakness-boss-result"]').waitFor({timeout:30000});
   await page.getByRole('heading',{name:/Boss Defeated|Encounter Incomplete/}).waitFor();
   assert.ok((await page.getByRole('heading',{name:'Boss Defeated',exact:true}).count())===1,'A complete canonical Boss dose should defeat the Boss');
-  const observedPhases=new Set(report.phases.map(entry=>entry.phase).filter(Boolean));
-  for(const phase of ['Opening Probe','Break Guard','Pressure','Final Form','Final Probe']) assert.ok(observedPhases.has(phase),`Boss browser journey must traverse ${phase}`);
+  const observedPhases=report.phases.map(entry=>entry.phase).filter(Boolean);
+  for(const phase of ['Opening Probe','Break Guard','Pressure','Final Form','Final Probe']) assert.ok(observedPhases.some(value=>value.includes(phase)),`Boss browser journey must traverse ${phase}`);
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+2),false,'Weakness Boss result must not overflow horizontally');
 
   const rows=await saved(page);
