@@ -49,32 +49,17 @@ async function remainingBossText(page,limit=220){
 }
 
 async function typeNatural(page,text){
-  let buffer='',virtualChars=0;
-  const advance=async()=>{
-    if(virtualChars<60)return;
-    await page.clock.fastForward(Math.ceil(virtualChars/50*1000));
-    virtualChars=0;
-  };
-  const flush=async()=>{
-    if(!buffer)return;
-    await page.keyboard.type(buffer);
-    virtualChars+=Array.from(buffer).length;
-    buffer='';
-    await advance();
-  };
-  for(const char of Array.from(text.replaceAll('\u00a0',' '))){
-    if(char==='\n'){
-      await flush();
-      await page.keyboard.press('Enter');
-      virtualChars+=1;
-      await advance();
-    }else{
-      buffer+=char;
-      if(Array.from(buffer).length>=60)await flush();
-    }
+  const chars=Array.from(text.replaceAll('\u00a0',' '));
+  for(let offset=0;offset<chars.length;offset+=24){
+    const chunk=chars.slice(offset,offset+24).join('');
+    const capture=page.locator('[data-weakness-boss-input]');
+    await capture.evaluate((node,data)=>{
+      node.focus({preventScroll:true});
+      const InputEventClass=node.ownerDocument.defaultView.InputEvent;
+      node.dispatchEvent(new InputEventClass('beforeinput',{bubbles:true,cancelable:true,inputType:'insertText',data}));
+    },chunk);
+    await page.clock.fastForward(Math.max(1,Math.ceil(Array.from(chunk).length/50*1000)));
   }
-  await flush();
-  if(virtualChars)await page.clock.fastForward(Math.ceil(virtualChars/50*1000));
 }
 
 try{
