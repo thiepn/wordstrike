@@ -2992,5 +2992,21 @@ const __controller_v40 = (() => {
 })();
 
 export const PRACTICE_LAB_ONBOARDING_VERSION = __controller_base.PRACTICE_LAB_ONBOARDING_VERSION;
-export const createPracticeLabControllerCurrent = __controller_v40.createPracticeLabController;
+export const createPracticeLabControllerV21 = __controller_base.createPracticeLabController;
+export const createPracticeLabControllerV22 = __controller_v22.createPracticeLabController;
+export const createPracticeLabControllerV23 = __controller_v23.createPracticeLabController;
+export const createPracticeLabControllerV24 = __controller_v24.createPracticeLabController;
+export const createPracticeLabControllerV25 = __controller_v25.createPracticeLabController;
+export const createPracticeLabControllerV26 = __controller_v26.createPracticeLabController;
+export const createPracticeLabControllerV27 = __controller_v27.createPracticeLabController;
+export const createPracticeLabControllerV28 = __controller_v28.createPracticeLabController;
+export const createPracticeLabControllerV29 = __controller_v29.createPracticeLabController;
+export const createPracticeLabControllerV30 = __controller_v30.createPracticeLabController;
+export const createPracticeLabControllerV31 = __controller_v31.createPracticeLabController;
+export const createPracticeLabControllerV32 = __controller_v32.createPracticeLabController;
+export const createPracticeLabControllerV36 = __controller_v36.createPracticeLabController;
+export const createPracticeLabControllerV37 = __controller_v37.createPracticeLabController;
+export const createPracticeLabControllerV38 = __controller_v38.createPracticeLabController;
+export const createPracticeLabControllerV40 = __controller_v40.createPracticeLabController;
+export const createPracticeLabControllerCurrent = createPracticeLabControllerV40;
 export const createPracticeLabController = createPracticeLabControllerCurrent;

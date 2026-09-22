@@ -1,10 +1,10 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import { renderPracticeCoach } from "../js/practiceLab/practiceLabRendererV25.js";
-import { renderPracticePhysicalKeyboardPage } from "../js/practiceLab/practiceLabRendererV36.js";
+import { renderPracticeCoach } from "../js/practiceLab/practiceLabRendererCurrent.js";
+import { renderPracticePhysicalKeyboardPage } from "../js/practiceLab/practiceLabRendererCurrent.js";
 import { renderPracticeWeaknessBossDetail } from "../js/practiceLab/practiceWeaknessBossUi.js";
-import { renderPracticeCustomTextDetail } from "../js/practiceLab/practiceLabRendererV31.js";
+import { renderPracticeCustomTextDetail } from "../js/practiceLab/practiceLabRendererCurrent.js";
 
 const root = () => ({ innerHTML: "", querySelector() { return null; } });
 
@@ -12,7 +12,7 @@ test("Phase 3 Daily Training errors offer explicit retry and do not auto-loop fr
   const target = root();
   renderPracticeCoach(target, { title:"Daily Training", subtitle:"", status:"error", requestedMinutes:12, durationChoices:[], plan:null, canCreate:true, errorCode:"PRACTICE_COACH_UNAVAILABLE", errorDetail:null, preview:false });
   assert.match(target.innerHTML, /data-practice-action="reload-coach"/);
-  const source = await readFile(new URL("../js/practiceLab/practiceLabControllerRuntimeV25.js", import.meta.url), "utf8");
+  const source = await readFile(new URL("../js/practiceLab/practiceLabControllerCurrent.js", import.meta.url), "utf8");
   assert.match(source, /coachState\.status !== "idle"/);
   assert.doesNotMatch(source, /\["idle", "error"\]\.includes\(coachState\.status\)/);
 });
@@ -37,7 +37,7 @@ test("Phase 3 advanced read failures have in-place recovery actions", () => {
 });
 
 test("Phase 3 Full Assessment read failure exposes an in-place retry action", async () => {
-  const source = await readFile(new URL("../js/practiceLab/practiceLabControllerRuntimeV40.js", import.meta.url), "utf8");
+  const source = await readFile(new URL("../js/practiceLab/practiceLabControllerCurrent.js", import.meta.url), "utf8");
   assert.match(source, /retry\.dataset\.practiceAction='assessment-refresh'/);
   assert.match(source, /action==='assessment-refresh'/);
   assert.doesNotMatch(source, /Assessment could not load\. Return to Practice Lab and try again\./);
@@ -53,7 +53,7 @@ test("Phase 3 Escape navigation ignores editing and active typing captures", asy
 });
 
 test("Phase 3 destructive Daily Training abandonment requires confirmation", async () => {
-  const source = await readFile(new URL("../js/practiceLab/practiceLabControllerRuntimeV25.js", import.meta.url), "utf8");
+  const source = await readFile(new URL("../js/practiceLab/practiceLabControllerCurrent.js", import.meta.url), "utf8");
   assert.match(source, /End today’s Daily Training plan\?/);
   assert.match(source, /Completed blocks stay saved/);
 });
@@ -74,7 +74,7 @@ test("Phase 3 empty evidence and Boss states offer a concrete next step", async 
 });
 
 test("Phase 3 Daily Training error copy matches in-place retry behavior", async () => {
-  const source = await readFile(new URL("../js/practiceLab/practiceLabRendererV25.js", import.meta.url), "utf8");
+  const source = await readFile(new URL("../js/practiceLab/practiceLabRendererCurrent.js", import.meta.url), "utf8");
   assert.match(source, /PRACTICE_COACH_UNAVAILABLE: "Daily Training could not load its local Practice data\. Try again\."/);
   assert.doesNotMatch(source, /PRACTICE_COACH_UNAVAILABLE: .*Reload WordStrike and try again/);
 });

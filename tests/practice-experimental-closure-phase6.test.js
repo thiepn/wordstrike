@@ -7,9 +7,9 @@ import { createPracticeLabRoute, normalizePracticeLabRoute, PRACTICE_LAB_PUBLIC_
 import { buildExperimentDetailViewModel, buildPracticeHomeViewModel } from "../js/practiceLab/practiceLabViewModel.js";
 import { renderPracticeWeaknessBossDetail } from "../js/practiceLab/practiceWeaknessBossUi.js";
 import { renderPracticePreviewProtocolSetup } from "../js/practiceLab/practicePreviewProtocolSetup.js";
-import { renderPracticePhysicalKeyboardPage } from "../js/practiceLab/practiceLabRendererV36.js";
+import { renderPracticePhysicalKeyboardPage } from "../js/practiceLab/practiceLabRendererCurrent.js";
 import { buildPracticeTreatmentResponseViewModel } from "../js/practiceLab/practiceTreatmentResponseViewModel.js";
-import { renderPracticeTreatmentResponseProgress } from "../js/practiceLab/practiceLabRendererV32.js";
+import { renderPracticeTreatmentResponseProgress } from "../js/practiceLab/practiceLabRendererCurrent.js";
 
 const fakeRoot = () => ({ innerHTML:"", querySelector(){return null;} });
 
@@ -63,7 +63,7 @@ test("Phase 6 Research is absent from public routes and remains developer-only",
   const developerGate=createPracticeFeatureGate({developerMode:true});
   assert.equal(normalizePracticeLabRoute(createPracticeLabRoute(PRACTICE_LAB_ROUTES.RESEARCH),{featureGate:publicGate}).name,"home");
   assert.equal(normalizePracticeLabRoute(createPracticeLabRoute(PRACTICE_LAB_ROUTES.RESEARCH),{featureGate:developerGate}).name,"research");
-  const source=await readFile(new URL("../js/practiceLab/practiceLabControllerRuntimeV38.js",import.meta.url),"utf8");
+  const source=await readFile(new URL("../js/practiceLab/practiceLabControllerCurrent.js",import.meta.url),"utf8");
   assert.match(source,/researchDeveloperEnabled/);
   assert.match(source,/view\?\.kind !== "home" \|\| !researchDeveloperEnabled/);
 });

@@ -119,7 +119,7 @@ test("PL31 renderer window remains bounded with one global expected index", () =
 });
 
 test("PL31 controller discards confirmed dirty drafts and runtime can reopen after close", () => {
-  const controller = fs.readFileSync(new URL("../js/practiceLab/practiceLabControllerRuntimeV31.js", import.meta.url), "utf8");
+  const controller = fs.readFileSync(new URL("../js/practiceLab/practiceLabControllerCurrent.js", import.meta.url), "utf8");
   const runtime = fs.readFileSync(new URL("../js/practiceLab/practiceCustomTextRuntime.js", import.meta.url), "utf8");
   assert.match(controller, /const discardEditor/);
   assert.match(controller, /if \(dirty\(\)\) discardEditor\(\)/);

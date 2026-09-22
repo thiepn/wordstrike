@@ -3,7 +3,7 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 import { buildPracticeTreatmentResponseViewModel } from "../js/practiceLab/practiceTreatmentResponseViewModel.js";
-import { renderPracticeTreatmentResponseProgress } from "../js/practiceLab/practiceLabRendererV32.js";
+import { renderPracticeTreatmentResponseProgress } from "../js/practiceLab/practiceLabRendererCurrent.js";
 
 const state = Object.freeze({
   treatmentResponseStateId: "response-1",
@@ -99,7 +99,7 @@ test("Treatment Response renderer keeps the non-causal doctrine visible", () => 
 });
 
 test("V32 controller route-lazy-loads Treatment Response persistence", async () => {
-  const source = await readFile(new URL("../js/practiceLab/practiceLabControllerRuntimeV32.js", import.meta.url), "utf8");
+  const source = await readFile(new URL("../js/practiceLab/practiceLabControllerCurrent.js", import.meta.url), "utf8");
   assert.match(source, /import\("\.\/practiceTreatmentResponseRuntime\.js"\)/);
   assert.doesNotMatch(source, /^import .*practiceTreatmentResponseRuntime\.js/m);
   assert.match(source, /PRACTICE_LAB_ROUTES\.PROGRESS/);

@@ -22,7 +22,7 @@ try{
   await page.goto(`http://127.0.0.1:${server.address().port}/harness`);
   await page.evaluate(async()=>{
     const [{createPracticeLabController},{createPracticeFeatureGate},{createPracticeExperimentRegistry},{createPracticeLabRoute,PRACTICE_LAB_ROUTES}]=await Promise.all([
-      import("/js/practiceLab/practiceLabControllerRuntimeV25.js"),
+      import("/js/practiceLab/practiceLabControllerCurrent.js"),
       import("/js/practiceLab/practiceFeatureGate.js"),
       import("/js/practiceLab/practiceExperimentRegistryRuntime.js"),
       import("/js/practiceLab/practiceLabRoutes.js"),
@@ -70,7 +70,7 @@ try{
   // That must reconcile automatically instead of stranding the Coach in "active".
   await page.evaluate(async()=>{
     const [{createPracticeLabController},{createPracticeFeatureGate},{createPracticeExperimentRegistry},{createPracticeLabRoute,PRACTICE_LAB_ROUTES}]=await Promise.all([
-      import("/js/practiceLab/practiceLabControllerRuntimeV25.js"),
+      import("/js/practiceLab/practiceLabControllerCurrent.js"),
       import("/js/practiceLab/practiceFeatureGate.js"),
       import("/js/practiceLab/practiceExperimentRegistryRuntime.js"),
       import("/js/practiceLab/practiceLabRoutes.js"),

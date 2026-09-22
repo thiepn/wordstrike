@@ -748,5 +748,6 @@ const __coach_current = (() => {
   return Object.freeze({ getTodayPracticeCoachPlan, createPracticeCoachService });
 })();
 
+export const createPracticeCoachServiceBase = __coach_base.createPracticeCoachService;
 export const getTodayPracticeCoachPlan = __coach_current.getTodayPracticeCoachPlan;
 export const createPracticeCoachService = __coach_current.createPracticeCoachService;

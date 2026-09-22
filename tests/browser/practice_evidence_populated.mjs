@@ -35,7 +35,7 @@ try{
       const [{renderPracticeEvidenceView},{buildPracticeTreatmentResponseViewModel},{renderPracticeTreatmentResponseProgress}]=await Promise.all([
         import('/js/practiceLab/practiceEvidenceViews.js'),
         import('/js/practiceLab/practiceTreatmentResponseViewModel.js'),
-        import('/js/practiceLab/practiceLabRendererV32.js'),
+        import('/js/practiceLab/practiceLabRendererCurrent.js'),
       ]);
       const app=document.querySelector('#app');
       const skill={

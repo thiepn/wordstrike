@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { renderPracticeCommonWordsDetail } from "../js/practiceLab/practiceLabRendererV28.js";
+import { renderPracticeCommonWordsDetail } from "../js/practiceLab/practiceLabRendererCurrent.js";
 import { renderPracticeCommonWordsResult } from "../js/practiceLab/practiceCommonWordsSessionHost.js";
 
 function fakeRoot() {

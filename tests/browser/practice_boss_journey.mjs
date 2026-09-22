@@ -99,7 +99,7 @@ try{
       {createPracticeSessionId,createSkillStatId},
       {PRACTICE_WEAKNESS_BOSS_ARCHETYPES},
     ]=await Promise.all([
-      import('/js/practiceLab/practiceLabControllerRuntimeV40.js'),
+      import('/js/practiceLab/practiceLabControllerCurrent.js'),
       import('/js/practiceLab/practiceFeatureGate.js'),
       import('/js/practiceLab/practiceExperimentRegistryRuntime.js'),
       import('/js/practiceLab/practiceLabRoutes.js'),

@@ -85,7 +85,7 @@ test("PL33 developer diagnostics are preview-only and neutral plans do not gain 
 
 test("PL33 renderer keeps response diagnostics bounded, developer-only and non-causal", async () => {
   const ui = await readFile(new URL("../js/practiceLab/practiceCoachUi.js", import.meta.url), "utf8");
-  const renderer = await readFile(new URL("../js/practiceLab/practiceLabRendererV25.js", import.meta.url), "utf8");
+  const renderer = await readFile(new URL("../js/practiceLab/practiceLabRendererCurrent.js", import.meta.url), "utf8");
   const combined = `${ui}\n${renderer}`;
   assert.match(renderer, /Response-informed/);
   assert.match(renderer, /Coach v2 diagnostics/);

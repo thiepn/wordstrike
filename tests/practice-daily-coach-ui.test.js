@@ -64,8 +64,8 @@ test("PL25 starting state disables duplicate Daily Training start/skip actions",
 });
 
 test("PL25 renderer/controller expose Daily Training without auto-running optional assessment or Cold Transfer measurements", async () => {
-  const renderer = await readFile(new URL("../js/practiceLab/practiceLabRendererV25.js", import.meta.url), "utf8");
-  const controller = await readFile(new URL("../js/practiceLab/practiceLabControllerRuntimeV25.js", import.meta.url), "utf8");
+  const renderer = await readFile(new URL("../js/practiceLab/practiceLabRendererCurrent.js", import.meta.url), "utf8");
+  const controller = await readFile(new URL("../js/practiceLab/practiceLabControllerCurrent.js", import.meta.url), "utf8");
   assert.match(renderer, /OPEN DAILY TRAINING/);
   assert.match(renderer, /Optional suggestions/);
   assert.match(renderer, /outside today's training block count and never start automatically/i);
@@ -84,7 +84,7 @@ test("PL25 Daily Coach styling retains mobile and reduced-motion handling", asyn
 
 test("PL25 Coach UI copy avoids mastery, retention-success, transfer-success and causal-improvement claims", async () => {
   const ui = await readFile(new URL("../js/practiceLab/practiceCoachUi.js", import.meta.url), "utf8");
-  const renderer = await readFile(new URL("../js/practiceLab/practiceLabRendererV25.js", import.meta.url), "utf8");
+  const renderer = await readFile(new URL("../js/practiceLab/practiceLabRendererCurrent.js", import.meta.url), "utf8");
   const combined = `${ui}\n${renderer}`.toLowerCase();
   for (const forbidden of ["you mastered", "you retained", "you transferred", "this caused improvement", "proves improvement", "learning gain caused"]) {
     assert.equal(combined.includes(forbidden), false, forbidden);

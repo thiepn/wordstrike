@@ -1,23 +1,35 @@
 # Practice Lab — Phase 8 Architecture Consolidation
 
-## Goal
+## Result
 
-Replace the accumulated V20→V40 production wrapper graph with one canonical controller module and one canonical renderer module while preserving the already-certified Practice behavior.
+The historical V20→V40 Practice wrapper graph is no longer part of the repository architecture.
 
-## Canonical production owners
+Production now has these canonical owners:
 
-- `practiceLabController.js` — lazy public entry and lifecycle boundary.
-- `practiceLabControllerCurrent.js` — complete Practice controller runtime. The former V21→V40 layers are embedded as internal feature sections; production no longer imports versioned controller files.
-- `practiceLabRendererCurrent.js` — complete Practice renderer. Production no longer imports versioned renderer files.
-- `practiceExperimentCatalog.js` — complete current catalog plus validation/constants; no V30 catalog dependency.
-- `practiceCoachService.js` — complete current Daily Coach service plus its former base implementation; no V25 service dependency.
+- `practiceLabController.js` — lazy public entry and mount lifecycle.
+- `practiceLabControllerCurrent.js` — the complete Practice orchestration runtime.
+- `practiceLabRendererCurrent.js` — the complete Practice rendering surface.
+- `practiceExperimentCatalog.js` — the complete current catalog, constants, and validation.
+- `practiceCoachService.js` — the complete Daily Coach service.
 
-## Preserved contracts
+The old controller-runtime files, renderer files, V30 catalog compatibility file, and V25 Coach base file are deleted. Test-only named controller seams remain exports of the canonical controller so historical feature contracts can still be isolated without recreating file-level wrappers.
 
-This phase does not change training protocols, scoring, evidence semantics, recommendation policy, IndexedDB schema, session-summary schema, feature gates, Research privacy boundaries, or the Phase 7 offline/device lifecycle rules.
+## Preserved behavior
 
-The service worker cache is bumped so installed clients receive the canonical modules. Historical V-files may remain temporarily for migration-only test coverage, but they are outside the production dependency graph and outside PWA precache ownership.
+Phase 8 is structural. It does not change:
 
-## Architecture gate
+- training protocols or fixed doses
+- scoring, evidence, mastery, retention, or recommendation semantics
+- IndexedDB or session-summary schemas
+- Research consent/privacy boundaries
+- Physical Keyboard local-only telemetry boundaries
+- feature-gate behavior
+- Phase 7 offline/background/resume rules
 
-`tests/practice-architecture-consolidation-phase8.test.js` blocks reintroduction of versioned controller/renderer imports, the V30 catalog dependency, the V25 Coach base dependency, or legacy PWA precache entries.
+## Offline architecture
+
+The service-worker cache is `v63-practice-architecture`. It precaches the canonical controller and renderer and no longer downloads the deleted compatibility stack.
+
+## Regression guard
+
+`tests/practice-architecture-consolidation-phase8.test.js` verifies that production loads the canonical controller, obsolete files are physically absent, source/tests cannot depend on them, catalog and Coach each have one production owner, and the PWA caches only canonical architecture.

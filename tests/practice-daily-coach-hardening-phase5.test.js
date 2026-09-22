@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { shouldIncludePracticeCoachReview, buildPracticeCoachDailyPlan } from "../js/practiceLab/practiceCoachPlanner.js";
-import { createPracticeCoachService as createPracticeCoachServiceBase } from "../js/practiceLab/practiceCoachServiceBaseV25.js";
+import { createPracticeCoachServiceBase } from "../js/practiceLab/practiceCoachService.js";
 import { buildPracticeCoachViewModel } from "../js/practiceLab/practiceCoachUi.js";
 import { calculatePracticeCoachPlanHash } from "../js/practiceLab/practiceCoachPlan.js";
 import { createPracticeId } from "../js/practiceLab/practiceIds.js";
@@ -231,7 +231,7 @@ test("Phase 5 stale frozen target becomes blocked without throwing a generic Coa
 });
 
 test("Phase 5 no-block recovery action re-runs plan creation directly", async () => {
-  const { renderPracticeCoach } = await import("../js/practiceLab/practiceLabRendererV25.js");
+  const { renderPracticeCoach } = await import("../js/practiceLab/practiceLabRendererCurrent.js");
   const targetRoot = { innerHTML: "", querySelector() { return null; } };
   renderPracticeCoach(targetRoot, {
     title: "Daily Training", subtitle: "", preview: false, status: "ready",
@@ -244,7 +244,7 @@ test("Phase 5 no-block recovery action re-runs plan creation directly", async ()
 });
 
 test("Phase 5 frozen-block skip remains explicit and irreversible for the day", async () => {
-  const source = await readFile(new URL("../js/practiceLab/practiceLabControllerRuntimeV25.js", import.meta.url), "utf8");
+  const source = await readFile(new URL("../js/practiceLab/practiceLabControllerCurrent.js", import.meta.url), "utf8");
   assert.match(source, /Skip this Daily Training block\?/);
   assert.match(source, /frozen plan will not replace it today/);
 });
@@ -265,7 +265,7 @@ test("Phase 5 planner never exceeds any supported budget and reports intentional
 });
 
 test("Phase 5 Coach result repeat controls cannot silently add another frozen dose", async () => {
-  const source = await readFile(new URL("../js/practiceLab/practiceLabControllerRuntimeV25.js", import.meta.url), "utf8");
+  const source = await readFile(new URL("../js/practiceLab/practiceLabControllerCurrent.js", import.meta.url), "utf8");
   assert.ok((source.match(/onRepeat: onCoachChildExit/g) ?? []).length >= 3);
   assert.match(source, /const common = \{ root, session, logger, onExit: onCoachChildExit \}/);
   assert.doesNotMatch(source, /onRepeat:\s*\(.*startNextBlock/);

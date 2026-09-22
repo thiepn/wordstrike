@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { buildPracticeResearchViewModel, renderPracticeResearchPage } from "../js/practiceLab/practiceResearchUi.js";
-import { renderPracticeLabV38 } from "../js/practiceLab/practiceLabRendererV38.js";
+import { renderPracticeLabV38 } from "../js/practiceLab/practiceLabRendererCurrent.js";
 
 const root = () => ({ innerHTML: "", querySelector: () => null });
 const enrollment = Object.freeze({ status: "active", researchEnrollmentId: "research-enrollment:test" });

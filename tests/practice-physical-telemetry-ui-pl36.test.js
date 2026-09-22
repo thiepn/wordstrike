@@ -3,7 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { PRACTICE_LAB_ROUTES, PRACTICE_LAB_PUBLIC_ROUTES, createPracticeLabRoute, normalizePracticeLabRoute } from "../js/practiceLab/practiceLabRoutes.js";
-import { renderPracticePhysicalKeyboardPage } from "../js/practiceLab/practiceLabRendererV36.js";
+import { renderPracticePhysicalKeyboardPage } from "../js/practiceLab/practiceLabRendererCurrent.js";
 
 assert.equal(PRACTICE_LAB_ROUTES.PHYSICAL_KEYBOARD, "physical-keyboard");
 assert.ok(PRACTICE_LAB_PUBLIC_ROUTES.includes(PRACTICE_LAB_ROUTES.PHYSICAL_KEYBOARD));
@@ -37,7 +37,7 @@ assert.match(root.innerHTML, /does not save raw physical keystroke sequences/i);
 assert.doesNotMatch(root.innerHTML, />Physical accuracy</i);
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-const controller = fs.readFileSync(path.join(here, "../js/practiceLab/practiceLabControllerRuntimeV36.js"), "utf8");
+const controller = fs.readFileSync(path.join(here, "../js/practiceLab/practiceLabControllerCurrent.js"), "utf8");
 const loader = fs.readFileSync(path.join(here, "../js/practiceLab/practiceLabController.js"), "utf8");
 assert.match(controller, /contextEligible !== true/);
 assert.match(controller, /title: "Physical Keyboard"/);
