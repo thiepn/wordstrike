@@ -153,8 +153,8 @@ try{
       let text='';
       const phaseRanges=[];
       encounter.plan.phases.forEach((phase,index)=>{
-        if(index>0)text+='\n';
         const startIndex=Array.from(text).length;
+        if(index>0)text+=' ';
         const targetPositions=[];
         for(let opportunity=0;opportunity<phase.opportunityQuota;opportunity++){
           if(opportunity>0)text+=' ';
