@@ -44,7 +44,7 @@ test("Phase 3 Full Assessment read failure exposes an in-place retry action", as
 });
 
 test("Phase 3 Escape navigation ignores editing and active typing captures", async () => {
-  const source = await readFile(new URL("../js/practiceLab/practiceLabControllerRuntime.js", import.meta.url), "utf8");
+  const source = await readFile(new URL("../js/practiceLab/practiceLabControllerCurrent.js", import.meta.url), "utf8");
   assert.match(source, /event\.key !== "Escape"/);
   assert.match(source, /input,textarea,select/);
   assert.match(source, /data-practice-session-capture/);

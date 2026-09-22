@@ -929,7 +929,7 @@ const __controller_v25 = (() => {
   }
   
   /** Use the same durable metadata initialization as every other Practice mode. */
-  export async function initializePracticeCoachRuntimeData({repository,initialized=null}={}) {
+  async function initializePracticeCoachRuntimeData({repository,initialized=null}={}) {
     if(initialized?.profile && initialized?.context)return initialized;
     if(!repository?.initializePracticeStorage)throw new TypeError('Daily Coach storage runtime is incomplete');
     return repository.initializePracticeStorage();
@@ -1331,7 +1331,7 @@ const __controller_v25 = (() => {
       },
     });
   }
-  return Object.freeze({ createPracticeLabController });
+  return Object.freeze({ createPracticeLabController, initializePracticeCoachRuntimeData });
 })();
 
 // practiceLabControllerRuntimeV26 — consolidated controller layer
@@ -2992,6 +2992,7 @@ const __controller_v40 = (() => {
 })();
 
 export const PRACTICE_LAB_ONBOARDING_VERSION = __controller_base.PRACTICE_LAB_ONBOARDING_VERSION;
+export const initializePracticeCoachRuntimeData = __controller_v25.initializePracticeCoachRuntimeData;
 export const createPracticeLabControllerV21 = __controller_base.createPracticeLabController;
 export const createPracticeLabControllerV22 = __controller_v22.createPracticeLabController;
 export const createPracticeLabControllerV23 = __controller_v23.createPracticeLabController;

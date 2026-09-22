@@ -104,7 +104,7 @@ test("controller cannot navigate through a closed feature gate", () => {
 });
 
 test('late combination recommendations preserve the manually typed target', async () => {
-  const { createPracticeLabController: createRuntime } = await import('../js/practiceLab/practiceLabControllerRuntime.js');
+  const { createPracticeLabControllerV21: createRuntime } = await import('../js/practiceLab/practiceLabControllerCurrent.js');
   const { registerPracticeCombinationRepairExperiment } = await import('../js/practiceLab/practiceCombinationRepairExperiment.js');
   const root = fakeRoot();
   const gate = createPracticeFeatureGate({ developerMode: true });

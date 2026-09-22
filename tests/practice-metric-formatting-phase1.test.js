@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { renderPracticeLab } from "../js/practiceLab/practiceLabRenderer.js";
+import { renderPracticeLab } from "../js/practiceLab/practiceLabRendererCurrent.js";
 import { renderPracticeCommonWordsResult } from "../js/practiceLab/practiceCommonWordsSessionHost.js";
 import { renderPracticeCustomTextResult } from "../js/practiceLab/practiceCustomTextSessionHost.js";
 

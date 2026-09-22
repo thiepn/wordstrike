@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { buildExperimentDetailViewModel, buildPracticeLabViewModel } from "../js/practiceLab/practiceLabViewModel.js";
-import { renderPracticeLab } from "../js/practiceLab/practiceLabRenderer.js";
+import { renderPracticeLab } from "../js/practiceLab/practiceLabRendererCurrent.js";
 
 const fullAssessment = Object.freeze({
   id: "full-assessment",

@@ -5,7 +5,7 @@ import { readFile } from "node:fs/promises";
 test("Practice shell owns no document/window keyboard listener, hidden input, storage, or session runtime", async () => {
   const files = [
     "practiceFeatureGate.js", "practiceExperimentCatalog.js", "practiceExperimentRegistry.js",
-    "practiceLabRoutes.js", "practiceLabViewModel.js", "practiceLabRenderer.js", "practiceLabController.js",
+    "practiceLabRoutes.js", "practiceLabViewModel.js", "practiceLabRendererCurrent.js", "practiceLabController.js",
   ];
   const source = (await Promise.all(files.map((file) => readFile(new URL(`../js/practiceLab/${file}`, import.meta.url), "utf8")))).join("\n");
   assert.doesNotMatch(source, /document\.addEventListener|window\.addEventListener/);
@@ -28,7 +28,7 @@ test("app keyboard controller recognizes Practice as a non-gameplay screen and p
 });
 
 test("Practice renderer uses native buttons, labels disabled controls, and provides landmark structure", async () => {
-  const source = await readFile(new URL("../js/practiceLab/practiceLabRenderer.js", import.meta.url), "utf8");
+  const source = await readFile(new URL("../js/practiceLab/practiceLabRendererCurrent.js", import.meta.url), "utf8");
   assert.match(source, /<header/);
   assert.match(source, /<main>/);
   assert.match(source, /<section/);

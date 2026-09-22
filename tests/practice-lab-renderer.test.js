@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { createPracticeFeatureGate } from "../js/practiceLab/practiceFeatureGate.js";
 import { createPracticeExperimentRegistry } from "../js/practiceLab/practiceExperimentRegistry.js";
 import { buildPracticeHomeViewModel, buildExperimentDetailViewModel, buildSkillMapEmptyViewModel, buildReviewQueueEmptyViewModel, buildProgressEmptyViewModel } from "../js/practiceLab/practiceLabViewModel.js";
-import { renderPracticeLab } from "../js/practiceLab/practiceLabRenderer.js";
+import { renderPracticeLab } from "../js/practiceLab/practiceLabRendererCurrent.js";
 import { createPracticeLabRoute, PRACTICE_LAB_ROUTES } from "../js/practiceLab/practiceLabRoutes.js";
 
 const root = () => ({ innerHTML: "", querySelector: () => null });

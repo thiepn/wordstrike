@@ -116,7 +116,6 @@ const __catalog_base = (() => {
 
 const __catalog_current = (() => {
   const { PRACTICE_EXPERIMENT_CATALOG: CATALOG_V30, validatePracticeExperimentCatalog } = __catalog_base;
-  export { validatePracticeExperimentCatalog };
   
   const CUSTOM_CAPABILITIES = Object.freeze(["plain-text-editor", "local-save", "txt-import", "txt-export", "full-text", "selection", "timed-practice", "local-only"]);
   const customDescription = "Paste or save your own plain text and practice it locally without sending the text to rankings, cloud services, standardized ability models, or protected evaluation systems.";

@@ -16,7 +16,7 @@ import { createPracticeCoachPlanRecord } from "../js/practiceLab/practiceCoachPl
 import { createPracticeMemoryStore } from "../js/practiceLab/practiceMemoryStore.js";
 import { createPracticeManifestStore } from "../js/practiceLab/practiceManifestStore.js";
 import { createPracticeRepository } from "../js/practiceLab/practiceRepository.js";
-import { initializePracticeCoachRuntimeData } from "../js/practiceLab/practiceLabControllerRuntimeV25.js";
+import { initializePracticeCoachRuntimeData } from "../js/practiceLab/practiceLabControllerCurrent.js";
 import { PRACTICE_STORAGE_ERROR_CODES, practiceStorageError } from "../js/practiceLab/practiceStorageContract.js";
 import {
   applyPracticeCoachBlockDelta,

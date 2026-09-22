@@ -35,6 +35,6 @@ test("Practice dependency direction excludes ranked, auth, Supabase, and UI-to-s
   assert.doesNotMatch(all, /from\s+["'][^"']*(supabase|leaderboard|authService|modeStorage|speedTest)/i);
   assert.doesNotMatch(all, /localStorage\.clear\s*\(|setInterval\s*\(/);
   for (const name of ["practiceRepository.js", "practiceIndexedDbStore.js", "practiceManifestStore.js", "practiceSessionEngine.js"]) assert.doesNotMatch(sources[name], /practiceLab(?:Controller|Renderer|ViewModel|Routes)/);
-  for (const name of ["practiceLabRenderer.js", "practiceLabViewModel.js", "practiceLabController.js"]) assert.doesNotMatch(sources[name], /practice(?:Repository|IndexedDbStore|ManifestStore|SessionEngine)/);
+  for (const name of ["practiceLabRendererCurrent.js", "practiceLabViewModel.js", "practiceLabController.js"]) assert.doesNotMatch(sources[name], /practice(?:Repository|IndexedDbStore|ManifestStore|SessionEngine)/);
   assert.doesNotMatch(all, /\.register\(\{\s*experimentId:\s*["'](?:full-assessment|weak-keys)/);
 });
