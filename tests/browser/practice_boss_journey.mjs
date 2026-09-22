@@ -82,6 +82,8 @@ try{
       {createPracticeTargetIndex},
       {buildPracticeWeaknessBossEncounter,inspectPracticeWeaknessBossContentReadiness},
       {createPracticeSessionId,createSkillStatId},
+      {createPracticeContentPlan},
+      {trustPracticeWeaknessBossContentPlan},
       {PRACTICE_WEAKNESS_BOSS_ARCHETYPES},
     ]=await Promise.all([
       import('/js/practiceLab/practiceLabControllerCurrent.js'),
@@ -95,6 +97,8 @@ try{
       import('/js/practiceLab/practiceTargetIndex.js'),
       import('/js/practiceLab/practiceWeaknessBossGenerator.js'),
       import('/js/practiceLab/practiceIds.js'),
+      import('/js/practiceLab/practiceSessionContract.js'),
+      import('/js/practiceLab/practiceWeaknessBossTrust.js'),
       import('/js/practiceLab/practiceWeaknessBossConstants.js'),
     ]);
 
@@ -143,6 +147,42 @@ try{
     }
     if(!candidate)throw new Error(`No bounded Weakness Boss word fixture passed production preflight: ${JSON.stringify(readinessChecks)}`);
     window.__bossFixture=Object.freeze({entityType:candidate.entityType,entityKey:candidate.entityKey,readinessChecks:Object.freeze(readinessChecks)});
+
+    const compactBossContentPlan=(encounter)=>{
+      const canonicalRanges=encounter.contentPlan.metadata.weaknessBoss.phaseRanges;
+      let text='';
+      const phaseRanges=[];
+      encounter.plan.phases.forEach((phase,index)=>{
+        if(index>0)text+='\n';
+        const startIndex=Array.from(text).length;
+        const targetPositions=[];
+        for(let opportunity=0;opportunity<phase.opportunityQuota;opportunity++){
+          if(opportunity>0)text+=' ';
+          text+=candidate.entityKey;
+          targetPositions.push(Array.from(text).length-1);
+        }
+        const endIndex=Array.from(text).length;
+        const canonical=canonicalRanges.find(range=>range.id===phase.id)??{};
+        phaseRanges.push(Object.freeze({...canonical,startIndex,endIndex,targetPositions:Object.freeze(targetPositions)}));
+      });
+      const metadata=structuredClone(encounter.contentPlan.metadata);
+      metadata.weaknessBoss={...metadata.weaknessBoss,phaseRanges};
+      const compact=createPracticeContentPlan({
+        contentId:'practice-content_boss-browser-compact',
+        contentGeneratorVersion:encounter.contentPlan.contentGeneratorVersion,
+        text,
+        targetEntities:encounter.contentPlan.targetEntities,
+        completion:encounter.contentPlan.completion,
+        metadata,
+      });
+      trustPracticeWeaknessBossContentPlan(compact,encounter.plan);
+      const expected=encounter.plan.phases.reduce((sum,phase)=>sum+phase.opportunityQuota,0);
+      const actual=phaseRanges.reduce((sum,phase)=>sum+phase.targetPositions.length,0);
+      if(actual!==expected)throw new Error(`Compact Boss fixture opportunity mismatch: ${actual} !== ${expected}`);
+      window.__bossExecutionFixture=Object.freeze({canonicalCharacters:Array.from(encounter.contentPlan.text).length,compactCharacters:Array.from(compact.text).length,targetOpportunities:actual});
+      return compact;
+    };
+
     const weaknessBossRuntime=Object.freeze({
       async loadCandidates(){
         return Object.freeze({status:'ready',available:true,candidateCount:1,candidates:Object.freeze([candidate]),recommendedCandidate:candidate,profileId:initialized.profile.profileId,contextId:initialized.context.contextId});
@@ -153,9 +193,10 @@ try{
           sessionId,context:initialized.context,targetIndex,contentItems:trainingCorpus.items,corpusBinding,
           target:candidate,targetSource:targetSource??'recommended',language:initialized.context.dataLocale,
         });
+        const contentPlan=compactBossContentPlan(encounter);
         return Object.freeze({
           experimentTarget:candidate,targetSource:targetSource??'recommended',sessionId,
-          plan:encounter.plan,contentPlan:encounter.contentPlan,
+          plan:encounter.plan,contentPlan,
           context:Object.freeze({contextId:initialized.context.contextId,dataLocale:initialized.context.dataLocale,keyboardLayout:initialized.context.keyboardLayout,inputMethod:initialized.context.inputMethod}),
         });
       },
@@ -192,6 +233,9 @@ try{
     throw new Error(`Weakness Boss did not mount its typing session: ${JSON.stringify(diagnostics)}\n${error.message}`);
   }
   assert.ok(await input.evaluate(node=>node===document.activeElement),'Weakness Boss must focus its typing capture automatically');
+  report.executionFixture=await page.evaluate(()=>window.__bossExecutionFixture??null);
+  assert.ok(report.executionFixture?.canonicalCharacters>report.executionFixture?.compactCharacters,'Browser Boss fixture must compact filler while preserving the frozen protocol');
+  assert.equal(report.executionFixture?.targetOpportunities,21,'Word-target Boss browser fixture must preserve the exact 21-opportunity protocol');
 
   const current=page.locator('.practice-weak-key-typing .is-current').first();
   const expected=await current.textContent();
