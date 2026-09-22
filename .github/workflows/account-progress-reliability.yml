@@ -31,8 +31,8 @@ jobs:
           const meta=JSON.parse(readFileSync('vendor/supabase-2.116.0.integrity.json','utf8'));
           if(meta.version!=='2.116.0'||createHash('sha256').update(readFileSync('vendor/supabase-2.116.0.js')).digest('hex')!==meta.bundleSHA256)throw Error('Vendored SDK mismatch');
           JS
-      - name: Account and merge invariants
-        run: node --test tests/account-lifecycle-reliability.test.js tests/player-profile-reliability.test.js tests/auth-service.test.js tests/campaign-recovery.test.js tests/supabase-client.test.js
+      - name: Account, merge and scroll invariants
+        run: node --test tests/account-lifecycle-reliability.test.js tests/player-profile-reliability.test.js tests/screen-view-state.test.js tests/auth-service.test.js tests/campaign-recovery.test.js tests/supabase-client.test.js
       - name: Install browser test tools
         run: |
           pip install -r tests/browser/requirements.txt
