@@ -61,14 +61,14 @@ function wireMenuActions(root, selector, handlers = {}) {
       event?.preventDefault?.();
       handlers[action]?.();
     };
-    button.onmouseenter = () => handlers.select?.(index);
+    button.onmousemove = () => handlers.select?.(index);
     button.onfocus = () => handlers.select?.(index);
   });
 }
 
 function wireMenuSelection(root, selector, select) {
   root?.querySelectorAll?.(selector).forEach((button, index) => {
-    button.onmouseenter = () => select?.(index);
+    button.onmousemove = () => select?.(index);
     button.onfocus = () => select?.(index);
   });
 }
@@ -1468,7 +1468,7 @@ export function showSpeedTestPauseOverlay(selectedIndex, handlers) {
     overlay.querySelector(`[data-action="${action}"]`).onclick = handlers[action];
   }
   overlay.querySelectorAll(".arcade-button").forEach((button, index) => {
-    button.onmouseenter = () => handlers.select?.(index);
+    button.onmousemove = () => handlers.select?.(index);
   });
 }
 

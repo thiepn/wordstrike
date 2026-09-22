@@ -1,0 +1,60 @@
+/* Stable, non-layout-shifting feedback shared by Campaign and Endless. */
+:is(.campaign-gameplay-screen, .endless-gameplay-screen) .word-visual .word-text {
+  color: #f8fafc;
+  background: #0b1322;
+}
+:is(.campaign-gameplay-screen, .endless-gameplay-screen) .word-visual.active .word-text {
+  outline: 2px solid var(--ui-accent, #7dd3fc);
+  outline-offset: 4px;
+  border-radius: 3px;
+}
+:is(.campaign-gameplay-screen, .endless-gameplay-screen) .word-visual.candidate .word-text {
+  outline: 1px dashed var(--ui-accent, #7dd3fc);
+  outline-offset: 3px;
+}
+:is(.campaign-gameplay-screen, .endless-gameplay-screen) .word-visual:is(.active, .candidate) .typed-letter {
+  color: #8af7d3;
+  background: #173c3d;
+  border-bottom: 2px solid currentColor;
+  font-weight: 800;
+  opacity: 1;
+}
+:is(.campaign-gameplay-screen, .endless-gameplay-screen) .current-letter:not(:empty) {
+  position: relative;
+  color: #111827;
+  background: #fde68a;
+  box-shadow: 0 0 0 2px #fde68a;
+  font-weight: 800;
+  opacity: 1;
+  text-shadow: none;
+}
+:is(.campaign-gameplay-screen, .endless-gameplay-screen) .current-letter:not(:empty)::before {
+  content: '';
+  position: absolute;
+  left: -2px;
+  top: -0.12em;
+  bottom: -0.12em;
+  border-left: 2px solid #fff;
+}
+:is(.campaign-gameplay-screen, .endless-gameplay-screen) .remaining-letter {
+  color: #f8fafc;
+  opacity: 0.85;
+}
+#player-save-status {
+  position: fixed;
+  z-index: 25;
+  right: max(10px, env(safe-area-inset-right));
+  bottom: max(5px, env(safe-area-inset-bottom));
+  max-width: min(540px, 90vw);
+  padding: 4px 8px;
+  border-radius: 5px;
+  background: #101827ee;
+  color: #cbd5e1;
+  font: 11px/1.35 system-ui, sans-serif;
+  pointer-events: none;
+}
+#player-save-status[data-state='error'] { color: #fff; background: #8b1e26; }
+body.gameplay-active #player-save-status:not([data-state='error']) { visibility: hidden; }
+@media (forced-colors: active) {
+  .current-letter:not(:empty) { forced-color-adjust: none; }
+}

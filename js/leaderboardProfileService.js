@@ -61,11 +61,12 @@ export function createLeaderboardProfileService({ getClient = getSupabaseClient 
   let state = makeState();
   let activeUserId = null;
   let initializationPromise = null;
+  let lifecycle = 0;
   const listeners = new Set();
 
   const publish = (next) => {
     state = makeState(next);
-    for (const listener of listeners) listener(state);
+    for (const listener of listeners) { try { listener(state); } catch { /* A view must not break account services. */ } }
     return state;
   };
 
@@ -89,6 +90,7 @@ export function createLeaderboardProfileService({ getClient = getSupabaseClient 
   const initialize = (user, { force = false } = {}) => {
     const userId = typeof user?.id === "string" ? user.id : null;
     if (!userId) {
+      lifecycle++;
       activeUserId = null;
       initializationPromise = null;
       return Promise.resolve(publish(makeState()));
@@ -97,16 +99,18 @@ export function createLeaderboardProfileService({ getClient = getSupabaseClient 
     if (
       !force &&
       userId === activeUserId &&
-      ["ready", "needs-username"].includes(state.status)
+      ["ready", "needs-username", "checking", "claiming", "changing"].includes(state.status)
     ) return Promise.resolve(state);
 
+    const previousProfile = activeUserId === userId ? state.profile : null;
+    const requestLifecycle = ++lifecycle;
     activeUserId = userId;
-    publish({ status: "loading" });
+    publish({ status: previousProfile ? "ready" : "loading", profile: previousProfile });
     const request = (async () => {
       const result = await invoke("get");
-      if (activeUserId !== userId) return state;
-      if (result.unavailable) return publish({ status: "unavailable" });
-      if (!result.ok) return publish({ status: "error", error: result.error });
+      if (activeUserId !== userId || requestLifecycle !== lifecycle) return state;
+      if (result.unavailable) return publish({ status: previousProfile ? "ready" : "unavailable", profile: previousProfile });
+      if (!result.ok) return publish({ status: previousProfile ? "ready" : "error", profile: previousProfile, error: result.error });
       const profile = result.data?.profile ?? null;
       return publish({
         status: profile ? "ready" : "needs-username",
@@ -145,7 +149,9 @@ export function createLeaderboardProfileService({ getClient = getSupabaseClient 
     const validation = validateOperation(username);
     if (!validation) return state;
     publish(baseState({ status: "checking", draft: validation.username }));
+    const requestLifecycle = lifecycle;
     const result = await invoke("check", validation.username);
+    if (requestLifecycle !== lifecycle) return state;
     if (!result.ok) return publish(baseState({ draft: validation.username, error: result.error }));
     return publish(baseState({
       draft: validation.username,
@@ -157,7 +163,9 @@ export function createLeaderboardProfileService({ getClient = getSupabaseClient 
     const validation = validateOperation(username);
     if (!validation) return state;
     publish(baseState({ status: "claiming", draft: validation.username }));
+    const requestLifecycle = lifecycle;
     const result = await invoke("claim", validation.username);
+    if (requestLifecycle !== lifecycle) return state;
     if (!result.ok) return publish(baseState({ draft: validation.username, error: result.error }));
     return publish({
       status: "ready",
@@ -170,7 +178,9 @@ export function createLeaderboardProfileService({ getClient = getSupabaseClient 
     const validation = validateOperation(username);
     if (!validation) return state;
     publish(baseState({ status: "changing", draft: validation.username, editing: true }));
+    const requestLifecycle = lifecycle;
     const result = await invoke("change", validation.username);
+    if (requestLifecycle !== lifecycle) return state;
     if (!result.ok) {
       const profile = result.error?.canChangeAt
         ? { ...state.profile, canChangeAt: result.error.canChangeAt }
@@ -195,7 +205,7 @@ export function createLeaderboardProfileService({ getClient = getSupabaseClient 
     subscribeToLeaderboardProfile(listener) {
       if (typeof listener !== "function") return () => {};
       listeners.add(listener);
-      listener(state);
+      try { listener(state); } catch { /* View isolation. */ }
       return () => listeners.delete(listener);
     },
     checkUsernameAvailability: check,
@@ -206,14 +216,17 @@ export function createLeaderboardProfileService({ getClient = getSupabaseClient 
       return publish(baseState({ editing: true, draft: state.profile.username }));
     },
     cancelUsernameChange() {
+      lifecycle++;
       if (!state.profile) return state;
       return publish(baseState({ editing: false, draft: "" }));
     },
     setUsernameDraft(value) {
-      state = makeState({ ...state, draft: String(value || ""), availability: null, error: null });
+      lifecycle++;
+      state = makeState({ ...state, status: ["checking", "claiming", "changing"].includes(state.status) ? (state.profile ? "ready" : "needs-username") : state.status, draft: String(value || ""), availability: null, error: null });
       return state;
     },
     resetLeaderboardProfile() {
+      lifecycle++;
       activeUserId = null;
       initializationPromise = null;
       return publish(makeState());

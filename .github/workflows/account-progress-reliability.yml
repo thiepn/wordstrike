@@ -1,0 +1,52 @@
+name: Account and progress reliability
+on:
+  pull_request:
+    paths: ['js/**', 'styles/**', 'index.html', 'sw.js', 'vendor/**', 'tests/**', 'supabase/**', '.github/workflows/account-progress-reliability.yml']
+  push:
+    branches: [main]
+    paths: ['js/**', 'styles/**', 'index.html', 'sw.js', 'vendor/**', 'tests/**', 'supabase/**', '.github/workflows/account-progress-reliability.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: account-reliability-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  browser-regressions:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify committed SDK integrity
+        run: |
+          node --input-type=module - <<'JS'
+          import {readFileSync} from 'node:fs';
+          import {createHash} from 'node:crypto';
+          const meta=JSON.parse(readFileSync('vendor/supabase-2.116.0.integrity.json','utf8'));
+          if(meta.version!=='2.116.0'||createHash('sha256').update(readFileSync('vendor/supabase-2.116.0.js')).digest('hex')!==meta.bundleSHA256)throw Error('Vendored SDK mismatch');
+          JS
+      - name: Account, merge and scroll invariants
+        run: node --test tests/account-lifecycle-reliability.test.js tests/player-profile-reliability.test.js tests/screen-view-state.test.js tests/auth-service.test.js tests/campaign-recovery.test.js tests/supabase-client.test.js
+      - name: Install browser test tools
+        run: |
+          pip install -r tests/browser/requirements.txt
+          python -m playwright install --with-deps chromium firefox
+      - name: Real-browser account and progress regressions
+        run: python tests/browser/account_progress_reliability.py
+      - name: Existing Campaign regressions
+        run: python tests/browser/campaign_recovery.py
+      - name: Existing cross-mode regressions
+        run: python tests/browser/non_practice_regressions.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: account-progress-browser-evidence
+          path: browser-artifacts/
+          retention-days: 7
+          if-no-files-found: warn

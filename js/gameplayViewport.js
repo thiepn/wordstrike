@@ -45,7 +45,7 @@ export function focusGameplayInput(input, windowObject = globalThis.window) {
     }
   };
   restoreScroll();
-  windowObject?.setTimeout?.(restoreScroll, 0);
+  // Do not schedule a delayed restoration that can undo the player's scroll.
   return true;
 }
 
@@ -57,19 +57,22 @@ export function createGameplayViewportController({
   const root = documentObject?.documentElement;
   const body = documentObject?.body;
   let revealFrame = null;
-  const update = () => {
+  let previousHeight = null;
+  const update = (event) => {
     const metrics = getGameplayViewportMetrics({
       visualViewport,
       innerHeight: windowObject?.innerHeight,
       innerWidth: windowObject?.innerWidth,
     });
+    const keyboardOpened = event?.type !== "scroll" && previousHeight != null && previousHeight - metrics.height > 80;
+    previousHeight = metrics.height;
     const compactDevice = metrics.width <= 760
       || windowObject?.matchMedia?.("(pointer: coarse)")?.matches === true;
     body?.classList?.toggle?.("gameplay-viewport-short", metrics.height < 520 && compactDevice);
     const applied = applyGameplayViewportMetrics(root?.style, metrics);
     // When the software keyboard shrinks the viewport, reveal both typing rows.
     // Configuration remains reachable by scrolling; never hide its controls.
-    if (compactDevice && windowObject?.requestAnimationFrame) {
+    if (keyboardOpened && compactDevice && windowObject?.requestAnimationFrame) {
       if (revealFrame != null) windowObject.cancelAnimationFrame?.(revealFrame);
       revealFrame = windowObject.requestAnimationFrame(() => {
         revealFrame = null;
