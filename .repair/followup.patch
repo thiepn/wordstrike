@@ -58,10 +58,32 @@ index a9147f5..2ebbaf5 100644
 +  else restore();
  }
 diff --git a/tests/browser/account_progress_reliability.py b/tests/browser/account_progress_reliability.py
-index 0009b25..f5387d9 100644
+index 0009b25..633324e 100644
 --- a/tests/browser/account_progress_reliability.py
 +++ b/tests/browser/account_progress_reliability.py
-@@ -230,7 +230,7 @@ def certify(playwright, browser_name, base, checks):
+@@ -25,6 +25,9 @@ API = 'https://hycegznamzjhwinegaai.supabase.co'
+ A = '10000000-0000-4000-8000-000000000001'
+ B = '10000000-0000-4000-8000-000000000002'
+ SEED = """(() => {
++  // Playwright also runs init scripts in opaque about:blank documents.
++  // Seed onboarding only for the actual HTTP app, never that empty document.
++  if (!/^https?:$/.test(location.protocol)) return;
+   for (const [id, v] of Object.entries({general:3,campaign:2,typing:1,endless:1,boss:1,leaderboards:1}))
+     localStorage.setItem(`wordstrike.onboarding.${id}.v${v}`, 'seen');
+ })();"""
+@@ -129,9 +132,9 @@ class Backend:
+ def setup(context, backend, errors):
+     context.add_init_script(SEED)
+     context.route('**/*', backend.route)
+-    context.on('page', lambda page: page.on('pageerror', lambda e: errors.append(str(e))))
++    context.on('page', lambda page: page.on('pageerror', lambda e: errors.append({'message': str(e), 'url': page.url, 'stack': e.stack})))
+     page = context.pages[0] if context.pages else context.new_page()
+-    page.on('pageerror', lambda e: errors.append(str(e)))
++    page.on('pageerror', lambda e: errors.append({'message': str(e), 'url': page.url, 'stack': e.stack}))
+     return page
+ 
+ 
+@@ -230,7 +233,7 @@ def certify(playwright, browser_name, base, checks):
              page.wait_for_function("window.__testState.screen==='SPEED_TEST_RUN'")
              result = page.evaluate("""async()=>{
                const speed=await import('./js/speedTest.js');const state=speed.getCurrentSpeedTest();let time=performance.now();const start=time;
