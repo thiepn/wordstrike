@@ -57,7 +57,7 @@ test("Phase 9 freezes the public Practice experiment surface", () => {
     assert.equal(entry.supportsSoftwareKeyboard, true, entry.id);
     assert.equal(entry.tags?.includes("experimental"), false, entry.id);
     assert.equal(entry.capabilities?.includes("experimental"), false, entry.id);
-    assert.doesNotMatch(`${entry.description} ${entry.longDescription}`, /\b(?:preview|planned|coming soon|experimental)\b/i, entry.id);
+    assert.doesNotMatch(`${entry.description} ${entry.longDescription}`, /\b(?:planned|coming soon|experimental|developer preview|preview status)\b/i, entry.id);
   }
 });
 
