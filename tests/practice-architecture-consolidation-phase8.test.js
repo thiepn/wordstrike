@@ -90,5 +90,6 @@ test("Phase 8 PWA precaches canonical Practice architecture only", async () => {
   assert.match(sw, /practiceLabControllerCurrent\.js/);
   assert.match(sw, /practiceLabRendererCurrent\.js/);
   for (const name of legacyFiles) assert.equal(sw.includes(name), false, name);
-  assert.match(sw, /v63-practice-architecture/);
+  const version = sw.match(/CACHE_NAME = CACHE_PREFIX \+ "v(\d+)-/);
+  assert.ok(version && Number(version[1]) >= 63, "Canonical architecture needs a current cache version");
 });

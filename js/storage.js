@@ -1,3 +1,4 @@
+import { getGameStorage, getPersistedPlacementWpm, resetPersistentCampaign } from './playerPersistence.js';
 import { calculateGrade } from "./scoring.js";
 import { normalizeSpeedTestFontSize } from "./speedTestPresentation.js";
 import { getRecentSessions, getSpeedTestRecord } from "./modeStorage.js";
@@ -38,10 +39,12 @@ export function getCampaignSpeedUnlockLevelFromWpm(wpm) {
 }
 
 export function getCampaignBest60SecondWpm() {
+  const persisted = getPersistedPlacementWpm();
+  if (persisted != null) return persisted;
   try {
     const record = getSpeedTestRecord(CAMPAIGN_TYPING_TEST_CONFIG_ID);
     const bestWpm = Number(record?.bestWpm);
-    return Number.isFinite(bestWpm) && bestWpm > 0 ? bestWpm : 0;
+    return Math.max(getPersistedPlacementWpm(), Number.isFinite(bestWpm) && bestWpm > 0 ? bestWpm : 0);
   } catch {
     return 0;
   }
@@ -210,7 +213,7 @@ function validateSave(value) {
 
 function getStorage() {
   try {
-    return globalThis.localStorage ?? null;
+    return getGameStorage();
   } catch {
     return null;
   }
@@ -468,6 +471,7 @@ export function resetProgress(save) {
   save.campaignFurthestLevel = 1;
   save.currentFurthestLevel = 1;
   save.levels = {};
+  resetPersistentCampaign(save);
   persistCampaignBackup(save);
   return saveGame(save);
 }

@@ -1,3 +1,7 @@
+import { initializePlayerPersistence } from "./playerPersistence.js";
+import { createPlayerCloudSync } from "./playerCloudSync.js";
+import { createPlayerSaveStatus } from "./playerSaveStatus.js";
+import { captureScreenView, restoreScreenView } from "./screenViewState.js";
 import { startModeCustomizationPresentation } from "./modeCustomizationPresentation.js";
 import { startCustomizationPresentation } from "./customizationPresentation.js";
 import {
@@ -1163,7 +1167,30 @@ function confirmReset() {
   }
 }
 
+let lastScreenRenderKey = null;
+function screenRenderKey() {
+  return JSON.stringify([
+    appState.screen, getAuthState().user?.id ?? null,
+    appState.statisticsTabIndex, appState.statisticsRecentFilter,
+    appState.modeSelection, appState.levelSelection, appState.settingsIndex,
+    appState.resultsIndex, appState.speedTestResultsIndex, appState.endlessResultsIndex,
+    appState.campaignResult?.sessionId, appState.speedTestResult?.sessionId, appState.endlessResult?.sessionId,
+  ]);
+}
+function updateRenderedSelection(selector, index) {
+  document.querySelectorAll(selector).forEach((button, position) => {
+    button.classList.toggle("selected", position === index);
+  });
+  lastScreenRenderKey = screenRenderKey();
+}
 function renderCurrentScreen() {
+  const key = screenRenderKey();
+  const view = key === lastScreenRenderKey ? captureScreenView(document.querySelector("#app")) : null;
+  lastScreenRenderKey = key;
+  renderCurrentScreenContent();
+  restoreScreenView(document.querySelector("#app"), view);
+}
+function renderCurrentScreenContent() {
   if (appState.screen === Screens.TITLE) {
     renderTitle(appState.menuIndex, {
       modes: openModeSelect,
@@ -1182,7 +1209,13 @@ function renderCurrentScreen() {
       select: (index) => {
         if (appState.modeSelection === index) return;
         appState.modeSelection = index;
-        renderCurrentScreen();
+        document.querySelectorAll('[data-mode-index], [data-mode-home-index]').forEach(card => {
+          const selected = Number(card.dataset.modeIndex ?? card.dataset.modeHomeIndex) === index;
+          card.classList.toggle('selected', selected);
+          if (selected) card.setAttribute('aria-current', 'true');
+          else card.removeAttribute('aria-current');
+        });
+        lastScreenRenderKey = screenRenderKey();
       },
       activate: activateSelectedMode,
       back: openTitle,
@@ -1206,7 +1239,7 @@ function renderCurrentScreen() {
         select: (index) => {
           if (appState.endlessResultsIndex === index) return;
           appState.endlessResultsIndex = index;
-          renderCurrentScreen();
+          updateRenderedSelection('.endless-results-panel > .menu-list .arcade-button', index);
         },
       },
       getSubmissionState(),
@@ -1264,7 +1297,7 @@ function renderCurrentScreen() {
         select: (index) => {
           if (index === appState.speedTestResultsIndex) return;
           appState.speedTestResultsIndex = index;
-          renderCurrentScreen();
+          updateRenderedSelection('.speed-results-panel > .menu-list .arcade-button', index);
         },
       },
       getSubmissionState(),
@@ -1302,7 +1335,10 @@ function renderCurrentScreen() {
       next: () => startLevel(appState.results.levelNumber + 1, "next-level"),
       levels: openLevelSelect,
       title: openTitle,
-      select: (index) => { appState.resultsIndex = index; },
+      select: (index) => {
+        appState.resultsIndex = index;
+        updateRenderedSelection('.results-panel .menu-list .arcade-button', index);
+      },
     }, getSubmissionState());
   } else if (appState.screen === Screens.SETTINGS) {
     const localProfile = ensureStoredPlayerProfile();
@@ -1589,7 +1625,37 @@ const handleGlobalKeydown = createGlobalKeyboardController({
 
 async function bootstrap() {
   clearSession();
+  // Hydrate the independent durable mirror BEFORE routes or sessions can read
+  // defaults. Import the old unscoped saves once; never overwrite them on failure.
+  const playerStore = await initializePlayerPersistence({ legacySave: loadSave(), legacyModes: loadModeData() });
+  const updateSaveStatus = createPlayerSaveStatus(playerStore);
+  const playerCloud = createPlayerCloudSync({
+    store: playerStore,
+    onStatus: updateSaveStatus,
+    onOwnerChange: () => {
+      appState.save = loadSave();
+      if (bootstrapReady) openTitle(); // Never finish an old account's run into a new account.
+    },
+  });
+  let profileRenderQueued = false;
+  playerStore.subscribe(({ reason }) => {
+    if (!['cloud', 'other-tab', 'recovered', 'owner-change'].includes(reason)) return;
+    appState.save = loadSave();
+    if (reason === 'owner-change' || !bootstrapReady || profileRenderQueued) return;
+    if (![Screens.LEVEL_SELECT, Screens.PROFILE_STATS, Screens.SETTINGS].includes(appState.screen)) return;
+    profileRenderQueued = true;
+    queueMicrotask(() => {
+      profileRenderQueued = false;
+      if ([Screens.LEVEL_SELECT, Screens.PROFILE_STATS, Screens.SETTINGS].includes(appState.screen)) renderCurrentScreen();
+    });
+  });
+  window.addEventListener('online', playerCloud.wake);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') playerCloud.wake();
+    else void playerStore.flush();
+  });
   subscribeToAuth((authState) => {
+    void playerCloud.setAuthState(authState);
     const authUiKey = `${authState.status}:${authState.user?.id ?? ""}`;
     const authUiChanged = authUiKey !== lastAuthUiKey;
     lastAuthUiKey = authUiKey;

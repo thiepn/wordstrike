@@ -1,3 +1,4 @@
+import { getGameStorage, resetPersistentModes } from './playerPersistence.js';
 import {
   getModeDefinition,
   getRegisteredModes,
@@ -53,7 +54,7 @@ function clone(value) {
 
 function readJsonStorage(key) {
   try {
-    const raw = globalThis.localStorage?.getItem(key);
+    const raw = getGameStorage()?.getItem(key);
     if (!raw) return null;
     const parsed = JSON.parse(raw);
     return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : null;
@@ -64,7 +65,9 @@ function readJsonStorage(key) {
 
 function writeJsonStorage(key, value) {
   try {
-    globalThis.localStorage?.setItem(key, JSON.stringify(value));
+    const storage = getGameStorage();
+    if (!storage?.setItem) return false;
+    storage.setItem(key, JSON.stringify(value));
     return true;
   } catch {
     return false;
@@ -829,6 +832,7 @@ export function getRecentSessions() {
 
 export function resetModeData() {
   const defaults = createDefaultModeData();
+  resetPersistentModes(defaults);
   saveModeData(defaults);
   clearRetiredDailyStorage();
   return defaults;

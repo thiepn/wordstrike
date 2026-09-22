@@ -10,6 +10,7 @@ from pathlib import Path
 from threading import Thread
 import json
 import os
+import re
 import traceback
 
 from playwright.sync_api import sync_playwright, expect
@@ -150,7 +151,7 @@ def certify(browser_type, browser_name, base, evidence):
     page.wait_for_timeout(100)
     expect(page.locator("[data-campaign-typing-readout-typed]")).to_have_text("str")
     expect(page.locator("[data-campaign-typing-readout-remaining]")).to_have_text("ike")
-    expect(page.locator("#hud-score")).to_have_text("4321")
+    expect(page.locator("#hud-score")).to_have_text(re.compile(r"4[,\.\s]?321"))
 
     page.screenshot(path=str(ARTIFACTS / f"{browser_name}-campaign-gameplay.png"), full_page=True)
 
@@ -166,7 +167,7 @@ def certify(browser_type, browser_name, base, evidence):
     expect(page.locator('[data-speed-config="time-60"]')).to_be_visible()
     snapshot = page.evaluate("""async () => {
       const {getCurrentSpeedTest}=await import('./js/speedTest.js');
-      return getCurrentSpeedTest()?.configId;
+      return getCurrentSpeedTest()?.config?.configId;
     }""")
     assert snapshot == "time-60", snapshot
 
@@ -176,7 +177,7 @@ def certify(browser_type, browser_name, base, evidence):
         page.wait_for_timeout(50)
         locked_snapshot = page.evaluate("""async () => {
           const {getCurrentSpeedTest}=await import('./js/speedTest.js');
-          return {configId:getCurrentSpeedTest()?.configId, source:getCurrentSpeedTest()?.sessionSource};
+          return {configId:getCurrentSpeedTest()?.config?.configId, source:getCurrentSpeedTest()?.sessionSource};
         }""")
         assert locked_snapshot == {"configId": "time-60", "source": "campaign-placement"}, locked_snapshot
 

@@ -33,9 +33,11 @@ assert.deepEqual(calls[0], [
       autoRefreshToken: true,
       detectSessionInUrl: true,
       storageKey: "sb-hycegznamzjhwinegaai-auth-token",
+      storage: calls[0][2].auth.storage,
     },
   },
 ]);
+for (const method of ["getItem", "setItem", "removeItem"]) assert.equal(typeof calls[0][2].auth.storage[method], "function");
 assert.equal(SUPABASE_AUTH_STORAGE_KEY, "sb-hycegznamzjhwinegaai-auth-token");
 
 console.log("Supabase browser client singleton and shared THIEPN Account OAuth options passed.");

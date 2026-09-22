@@ -1,6 +1,15 @@
 const CACHE_PREFIX = "wordstrike-pwa-";
-const CACHE_NAME = CACHE_PREFIX + "v63-practice-architecture";
+const CACHE_NAME = CACHE_PREFIX + "v64-account-progress-reliability";
 const APP_SHELL = [
+  "./js/playerProfileDocument.js",
+  "./js/playerPersistence.js",
+  "./js/playerCloudSync.js",
+  "./js/playerSaveStatus.js",
+  "./js/screenViewState.js",
+  "./styles/player-reliability.css",
+  "./styles/player-reliability.css?v=20260922a",
+  "./vendor/supabase-2.116.0.js",
+
   "./js/practiceLab/practiceAssessmentInput.js",
   "./js/practiceLab/practiceDurableManifest.js",
   "./js/practiceLab/practiceLabWorkshop.js",
@@ -823,6 +832,15 @@ const APP_SHELL = [
 ];
 
 const CORE_SHELL = Object.freeze([
+  "./js/playerProfileDocument.js",
+  "./js/playerPersistence.js",
+  "./js/playerCloudSync.js",
+  "./js/playerSaveStatus.js",
+  "./js/screenViewState.js",
+  "./styles/player-reliability.css",
+  "./styles/player-reliability.css?v=20260922a",
+  "./vendor/supabase-2.116.0.js",
+
   "./",
   "./index.html",
   "./manifest.webmanifest",
