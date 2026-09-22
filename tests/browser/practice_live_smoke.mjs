@@ -30,8 +30,28 @@ try{
  await context.addInitScript(()=>localStorage.setItem('wordstrike.onboarding.general.v3','seen'));
  const page=await context.newPage();page.setDefaultTimeout(30000);page.on('pageerror',error=>report.errors.push(error.message));
  await page.goto(base,{waitUntil:'domcontentloaded'});
- await page.locator('[data-action="modes"]').click();
- await page.locator('button[data-mode-id="practice"]').click();
+ const titleModes=page.locator('[data-action="modes"]').first();
+ const practiceMode=page.locator('button[data-mode-id="practice"]').first();
+ let entryState=null;
+ try{
+  entryState=await Promise.any([
+   titleModes.waitFor({state:'visible',timeout:90000}).then(()=> 'title'),
+   practiceMode.waitFor({state:'visible',timeout:90000}).then(()=> 'mode-select'),
+  ]);
+ }catch(error){
+  report.startup=await page.evaluate(()=>({
+   readyState:document.readyState,
+   title:document.title,
+   href:location.href,
+   appText:(document.querySelector('#app')?.innerText??'').slice(0,2000),
+   appHtml:(document.querySelector('#app')?.innerHTML??'').slice(0,4000),
+  }));
+  throw new Error(`Production app did not reach title or mode select: ${JSON.stringify(report.startup)}\n${error.message}`);
+ }
+ report.entryState=entryState;
+ if(entryState==='title')await titleModes.click();
+ await practiceMode.waitFor({state:'visible',timeout:30000});
+ await practiceMode.click();
  await page.locator('[data-practice-action="open-experiment"][data-experiment-id="custom-text"]').first().click();
  const passage='Practice is ready. Correct a mistake, then continue.\nThe second line saves with the completed session.';
  await page.locator('[data-custom-text-source]').fill(passage);
