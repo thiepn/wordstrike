@@ -186,6 +186,7 @@ try{
     });
     window.__bossLab.mount(createPracticeLabRoute(PRACTICE_LAB_ROUTES.EXPERIMENT_DETAIL,{experimentId:'weakness-boss'}));
   });
+  report.fixture=await page.evaluate(()=>window.__bossFixture??null);
 
   await page.locator('[data-practice-view="weakness-boss-detail"]').waitFor();
   const start=page.locator('[data-practice-action="weakness-boss-start"]').first();
