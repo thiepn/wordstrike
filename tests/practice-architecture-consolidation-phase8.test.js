@@ -29,7 +29,7 @@ async function walk(directory) {
   for (const entry of entries) {
     const absolute = path.join(directory, entry.name);
     if (entry.isDirectory()) files.push(...await walk(absolute));
-    else if (/\.(?:js|mjs)$/.test(entry.name)) files.push(absolute);
+    else if (/\.(?:js|mjs|py)$/.test(entry.name)) files.push(absolute);
   }
   return files;
 }
