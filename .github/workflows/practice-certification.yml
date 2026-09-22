@@ -67,6 +67,8 @@ jobs:
               tests/practice-pwa-offline-phase7.test.js
               tests/practice-device-lifecycle-phase7.test.js
               tests/practice-device-acceptance-contract-phase7.test.js
+              tests/practice-architecture-consolidation-phase8.test.js
+              tests/practice-release-freeze-phase9.test.js
               tests/practice-lab-controller.test.js
               tests/practice-lab-renderer.test.js
               tests/practice-lab-identity.test.js
