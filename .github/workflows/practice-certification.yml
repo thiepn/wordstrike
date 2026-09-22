@@ -245,14 +245,41 @@ jobs:
         run: node tests/browser/practice_editor_ui.mjs
       - name: Chromium mobile device acceptance
         if: matrix.width == 390
-        run: |
-          node tests/browser/practice_device_acceptance.mjs
-          node tests/browser/practice_boss_journey.mjs
+        run: node tests/browser/practice_device_acceptance.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: practice-browser-${{ matrix.label }}
           path: browser-artifacts/
+          retention-days: 7
+          if-no-files-found: warn
+
+  mobile-boss:
+    name: browser / chromium-mobile-boss
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    container:
+      image: mcr.microsoft.com/playwright:v1.57.0-noble
+      options: --ipc=host
+    env:
+      HOME: /root
+      PRACTICE_BROWSER: chromium
+      PRACTICE_BROWSERS: chromium
+      PRACTICE_WIDTH: 390
+      PRACTICE_WIDTHS: '390'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --no-save playwright@1.57.0
+      - name: Weakness Boss mobile journey
+        run: node tests/browser/practice_boss_journey.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: practice-browser-chromium-mobile-boss
+          path: browser-artifacts/practice-boss-journey/
           retention-days: 7
           if-no-files-found: warn
 
@@ -372,6 +399,7 @@ jobs:
       - deterministic-content
       - data-integrity
       - browser-core
+      - mobile-boss
       - browser-compat
       - browser-privacy
       - performance
@@ -389,6 +417,7 @@ jobs:
           | Deterministic content | ${{ needs.deterministic-content.result }} |
           | Privacy / data integrity | ${{ needs.data-integrity.result }} |
           | Chromium journeys | ${{ needs.browser-core.result }} |
+          | Chromium mobile Boss | ${{ needs.mobile-boss.result }} |
           | Firefox / WebKit compatibility | ${{ needs.browser-compat.result }} |
           | Browser privacy / security | ${{ needs.browser-privacy.result }} |
           | Performance | ${{ needs.performance.result }} |
@@ -400,6 +429,7 @@ jobs:
           test "${{ needs.deterministic-content.result }}" = "success"
           test "${{ needs.data-integrity.result }}" = "success"
           test "${{ needs.browser-core.result }}" = "success"
+          test "${{ needs.mobile-boss.result }}" = "success"
           test "${{ needs.browser-compat.result }}" = "success"
           test "${{ needs.browser-privacy.result }}" = "success"
           test "${{ needs.performance.result }}" = "success"

@@ -106,4 +106,6 @@ test("Phase 9 release-contract CI permanently includes Phases 8 and 9", async ()
   const workflow = await readFile(new URL("../.github/workflows/practice-certification.yml", import.meta.url), "utf8");
   assert.match(workflow, /tests\/practice-architecture-consolidation-phase8\.test\.js/);
   assert.match(workflow, /tests\/practice-release-freeze-phase9\.test\.js/);
+  assert.match(workflow, /^  mobile-boss:/m);
+  assert.match(workflow, /- mobile-boss/);
 });

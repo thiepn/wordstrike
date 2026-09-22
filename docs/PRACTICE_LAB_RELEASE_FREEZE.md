@@ -62,11 +62,12 @@ The release candidate must keep all of the following green:
 - storage and migration integrity
 - Chromium desktop
 - Chromium mobile
+- Chromium mobile Weakness Boss journey
 - Firefox desktop
 - WebKit mobile
 - browser performance
 
-The consolidated Practice release gate must depend on every matrix area. A failed Practice gate blocks release certification.
+The consolidated Practice release gate must depend on every matrix area, including the dedicated Chromium-mobile Weakness Boss journey. A failed Practice gate blocks release certification.
 
 ## Release invariants
 
