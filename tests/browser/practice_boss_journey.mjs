@@ -126,7 +126,7 @@ try{
     ]);
     const targetIndex=createPracticeTargetIndex({loader:indexLoader,corpusManifest,indexManifest});
     const candidateBase={
-      statId:createSkillStatId(initialized.profile.profileId,initialized.context.contextId,'key','q'),entityType:'key',entityKey:'q',
+      statId:createSkillStatId(initialized.profile.profileId,initialized.context.contextId,'word','the'),entityType:'word',entityKey:'the',
       limiterStatus:'confirmed',phenotype:'slow',hierarchyStatus:'independent',
       priorityScore:90,impactScore:80,limiterConfidence:.95,weaknessScore:90,
       masteryStage:'learning',saturationStatus:'not-detected',marginalGainBand:'high',
@@ -229,6 +229,8 @@ try{
   await page.locator('[data-practice-view="weakness-boss-result"]').waitFor({timeout:30000});
   await page.getByRole('heading',{name:/Boss Defeated|Encounter Incomplete/}).waitFor();
   assert.ok((await page.getByRole('heading',{name:'Boss Defeated',exact:true}).count())===1,'A complete canonical Boss dose should defeat the Boss');
+  const observedPhases=new Set(report.phases.map(entry=>entry.phase).filter(Boolean));
+  for(const phase of ['Opening Probe','Break Guard','Pressure','Final Form','Final Probe']) assert.ok(observedPhases.has(phase),`Boss browser journey must traverse ${phase}`);
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+2),false,'Weakness Boss result must not overflow horizontally');
 
   const rows=await saved(page);
