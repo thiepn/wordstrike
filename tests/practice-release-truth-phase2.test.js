@@ -43,9 +43,9 @@ test("Phase 2 fallback analysis and unavailable views use current product langua
 
 test("Phase 2 public Practice UI contains no implementation-phase labels", async () => {
   const files = [
-    "practiceLabRendererCurrent.js", "practiceLabRendererCurrent.js", "practiceLabRendererCurrent.js", "practiceLabRendererCurrent.js",
-    "practiceLabRendererCurrent.js", "practiceLabRendererCurrent.js", "practiceLabRendererCurrent.js",
-    "practiceBurstSprintsSessionHost.js", "practicePaceLadderSessionHost.js",
+    "practiceLabRendererCurrent.js",
+    "practiceBurstSprintsSessionHost.js",
+    "practicePaceLadderSessionHost.js",
   ];
   const sources = await Promise.all(files.map((name) => readFile(new URL(`../js/practiceLab/${name}`, import.meta.url), "utf8")));
   const combined = sources.join("\n");
