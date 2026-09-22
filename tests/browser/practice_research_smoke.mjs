@@ -45,7 +45,7 @@ try{
     }
   });
   const page=await context.newPage();page.setDefaultTimeout(30000);page.on('pageerror',error=>report.errors.push(error.message));
-  await page.goto(`http://127.0.0.1:${server.address().port}/`,{waitUntil:'domcontentloaded'});
+  await page.goto(`http://127.0.0.1:${server.address().port}/?dev=1`,{waitUntil:'domcontentloaded'});
   await openLab(page);
   report.fillers=await page.evaluate(()=>Object.keys(localStorage).filter(k=>k.startsWith('research-quota-')).length);
   // Practice home is intentionally lazy and may not create a profile until a
