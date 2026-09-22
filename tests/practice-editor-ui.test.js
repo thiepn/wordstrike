@@ -38,7 +38,9 @@ test('source text stays out of HTML and form controls keep labeled descriptions'
 });
 test('the highlighted range is read before the busy render',()=>{
  const controller=fs.readFileSync(new URL('../js/practiceLab/practiceLabControllerCurrent.js',import.meta.url),'utf8');
- const start=controller.slice(controller.indexOf('  async function startCustom()'),controller.indexOf('  function input(event)'));
+ const startAt=controller.indexOf('async function startCustom()');
+ const endAt=controller.indexOf('function input(event)',startAt);
+ const start=controller.slice(startAt,endAt);
  assert.ok(start.indexOf('const selectionRange') < start.indexOf('rerender()'));
 });
 

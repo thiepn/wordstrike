@@ -19,7 +19,7 @@ test("isolated Practice imports do not touch storage, DOM listeners, timers, aut
     fetch: { configurable: true, value: async (...args) => { calls.fetches += 1; return original.fetch?.(...args); } },
   });
   try {
-    const modules = ["practiceExperimentCatalog", "practiceExperimentRegistry", "practiceFeatureGate", "practiceLabRoutes", "practiceLabViewModel", "practiceLabRenderer", "practiceLabController", "practiceSessionEngine"];
+    const modules = ["practiceExperimentCatalog", "practiceExperimentRegistry", "practiceFeatureGate", "practiceLabRoutes", "practiceLabViewModel", "practiceLabRendererCurrent", "practiceLabController", "practiceSessionEngine"];
     for (const name of modules) await import(new URL(`../js/practiceLab/${name}.js?audit=${name}`, import.meta.url));
     assert.deepEqual(calls, { storage: 0, indexedDb: 0, listeners: 0, timers: 0, fetches: 0 });
   } finally {

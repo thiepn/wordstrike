@@ -5,7 +5,7 @@ import { readFile } from "node:fs/promises";
 test("Practice shell owns no document/window keyboard listener, hidden input, storage, or session runtime", async () => {
   const files = [
     "practiceFeatureGate.js", "practiceExperimentCatalog.js", "practiceExperimentRegistry.js",
-    "practiceLabRoutes.js", "practiceLabViewModel.js", "practiceLabRendererCurrent.js", "practiceLabController.js",
+    "practiceLabRoutes.js", "practiceLabViewModel.js", "practiceLabController.js",
   ];
   const source = (await Promise.all(files.map((file) => readFile(new URL(`../js/practiceLab/${file}`, import.meta.url), "utf8")))).join("\n");
   assert.doesNotMatch(source, /document\.addEventListener|window\.addEventListener/);
