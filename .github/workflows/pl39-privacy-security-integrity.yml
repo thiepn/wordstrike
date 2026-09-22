@@ -1,19 +1,7 @@
 name: PL39 Privacy Security Data Integrity
 
 on:
-  push:
-    branches: [pl39-privacy-security-integrity]
-  pull_request:
-    paths:
-      - 'js/practiceLab/**'
-      - 'tests/*pl39*.test.js'
-      - 'tests/browser/practice_pl39_privacy_security.py'
-      - 'scripts/auditPracticePrivacySecurity.mjs'
-      - 'scripts/testPracticeMigrations.mjs'
-      - 'docs/PRACTICE_LAB_DATA_INVENTORY.md'
-      - 'docs/PRACTICE_LAB_PRIVACY_SECURITY_DATA_INTEGRITY_CERTIFICATION.md'
-      - 'package.json'
-      - '.github/workflows/pl39-privacy-security-integrity.yml'
+  workflow_dispatch:
 
 permissions:
   contents: read

@@ -11,7 +11,7 @@ export function createPracticeFeatureGate({
     developerMode: developerMode === true,
     publicEnabled: publicEnabled === true,
     allowed: developerMode === true || publicEnabled === true,
-    reason: developerMode === true ? "developer-preview" : publicEnabled === true ? "public" : "coming-soon",
+    reason: developerMode === true ? "developer" : publicEnabled === true ? "public" : "disabled",
   });
   return Object.freeze({
     canAccess: () => snapshot.allowed,
@@ -19,7 +19,7 @@ export function createPracticeFeatureGate({
     resolveModeDefinitions(modes = []) {
       return modes.map((mode) => mode.id === MODE_IDS.PRACTICE
         ? Object.freeze({ ...mode, enabled: snapshot.allowed,
-          status: snapshot.allowed ? (snapshot.developerMode ? "preview" : "available") : "coming-soon",
+          status: snapshot.allowed ? "available" : "unavailable",
           route: snapshot.allowed ? PRACTICE_LAB_ROUTE : null })
         : mode);
     },

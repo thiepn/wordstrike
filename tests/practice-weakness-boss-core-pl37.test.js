@@ -18,7 +18,7 @@ import {
   createPracticeWeaknessBossGameplayState,
   advancePracticeWeaknessBossOpportunity,
 } from "../js/practiceLab/practiceWeaknessBossGameplay.js";
-import { analyzePracticeWeaknessBossResult } from "../js/practiceLab/practiceWeaknessBossAnalyzer.js";
+import { analyzePracticeWeaknessBossFoundationResult, analyzePracticeWeaknessBossResult } from "../js/practiceLab/practiceWeaknessBossAnalyzer.js";
 import { getPracticeExperiment } from "../js/practiceLab/practiceExperimentCatalog.js";
 import { resolvePracticeTreatmentIdentity } from "../js/practiceLab/practiceTreatmentRegistry.js";
 import { PRACTICE_DATABASE_VERSION, PRACTICE_RECORD_VERSIONS } from "../js/practiceLab/practiceConstants.js";
@@ -122,6 +122,47 @@ test("PL37 HP is protocol progress only and hit outcome cannot change damage", (
   assert.equal(mixed.defeated, true);
 });
 
+test("PL37 challenge clear follows fixed-protocol completion, not learning-evidence admission", () => {
+  const plan = {
+    target: { entityType: "word", statId: "practice-stat_demo", entityKey: "the" },
+    bossTheme: { id: "anchor", name: "The Anchor" },
+    acquisitionDose: { opportunities: 15 },
+  };
+  const contentPlan = {
+    text: "the",
+    targetEntities: [{ entityType: "word", entityKey: "the", directTarget: true }],
+    metadata: {
+      language: "en",
+      weaknessBoss: {
+        phaseRanges: [
+          { id: "opening-probe", startIndex: 0, endIndex: 1, acquisitionDoseEligible: false },
+          { id: "break-guard", startIndex: 1, endIndex: 1, acquisitionDoseEligible: true },
+          { id: "pressure", startIndex: 1, endIndex: 1, acquisitionDoseEligible: true },
+          { id: "final-form", startIndex: 1, endIndex: 1, acquisitionDoseEligible: true },
+          { id: "final-probe", startIndex: 1, endIndex: 3, acquisitionDoseEligible: false },
+        ],
+      },
+    },
+  };
+  const result = analyzePracticeWeaknessBossFoundationResult({
+    plan,
+    contentPlan,
+    foundationAnalysis: {
+      learning: { observationDeltas: [] },
+      normalization: { normalizedTransitions: [] },
+    },
+    sessionSnapshot: {
+      profileId: "practice-profile_demo",
+      contextId: "practice-context_demo",
+      cursorIndex: 3,
+      content: { expectedLength: 3 },
+    },
+  });
+  assert.equal(result.trainingQuality.clearStatus, "defeated");
+  assert.equal(result.trainingQuality.acquisitionDoseStatus, "not-committed");
+  assert.equal(result.trainingQuality.masteryClaim, false);
+});
+
 test("PL37 result reports same-session delta without mastery claim", () => {
   const plan = {
     target: { entityType: "key", statId: "skill:key:e", entityKey: "e" },
@@ -145,7 +186,7 @@ test("PL37 result reports same-session delta without mastery claim", () => {
 test("PL37 is a distinct advanced catalog experiment and PL32 targeted family excludes cosmetic theme", () => {
   const catalog = getPracticeExperiment("weakness-boss");
   assert.equal(catalog?.category, "advanced");
-  assert.equal(catalog?.status, "preview");
+  assert.equal(catalog?.status, "available");
   const configuration = {
     weaknessBossVersion: PRACTICE_WEAKNESS_BOSS_VERSION,
     policyVersion: PRACTICE_WEAKNESS_BOSS_POLICY_VERSION,

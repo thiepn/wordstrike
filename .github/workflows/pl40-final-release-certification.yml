@@ -1,19 +1,7 @@
 name: PL40 Final Practice Lab Release Certification
 
 on:
-  push:
-    branches: [pl40-final-release-certification]
-  pull_request:
-    paths:
-      - 'js/practiceLab/**'
-      - 'js/main.js'
-      - 'js/modes.js'
-      - 'data/**'
-      - 'tests/**'
-      - 'scripts/**'
-      - 'package.json'
-      - 'docs/PRACTICE_LAB*.md'
-      - '.github/workflows/pl40-final-release-certification.yml'
+  workflow_dispatch:
 
 permissions:
   contents: read

@@ -118,8 +118,8 @@ function resultInterpretation(analysis) {
   const check = analysis?.sameSessionCheck;
   if (!check) return `<div class="practice-lab-notice" role="status"><strong>No comparable Baseline/Check result.</strong> ${escapeHtml(analysis?.interpretation?.wording ?? "The session did not retain enough complete phase evidence.")}</div>`;
   const delta = check.immediateQualityChange;
-  const signed = finite(delta) ? `${delta >= 0 ? "+" : ""}${formatNumber(delta)}` : "—";
-  return `<section class="practice-lab-empty-state"><div class="eyebrow">Same-session check</div><h2>${escapeHtml(check.immediateDirection)}</h2><dl><div><dt>Baseline quality</dt><dd>${formatNumber(check.entryQuality)}</dd></div><div><dt>Check quality</dt><dd>${formatNumber(check.exitQuality)}</dd></div><div><dt>Immediate change</dt><dd>${signed}</dd></div></dl><p>${escapeHtml(check.interpretation.wording)}</p><p><strong>Not established:</strong> mastery, retention, transfer, or causal improvement.</p></section>`;
+  const signed = finite(delta) ? `${delta >= 0 ? "+" : ""}${formatNumber(delta)} quality pts` : "—";
+  return `<section class="practice-lab-empty-state"><div class="eyebrow">Same-session check</div><h2>${escapeHtml(check.immediateDirection)}</h2><dl><div><dt>Baseline quality</dt><dd>${formatNumber(check.entryQuality)}</dd></div><div><dt>Check quality</dt><dd>${formatNumber(check.exitQuality)}</dd></div><div><dt>Immediate quality change</dt><dd>${signed}</dd></div></dl><p>${escapeHtml(check.interpretation.wording)}</p><p><strong>Not established:</strong> mastery, retention, transfer, or causal improvement.</p></section>`;
 }
 
 export function renderPracticeCombinationRepairResult(root, finalResult) {

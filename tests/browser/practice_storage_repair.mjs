@@ -92,7 +92,7 @@ async function exerciseCoachTransactionFailure(page, databaseName) {
     const { createDefaultPracticeManifest, createDefaultPracticeProfile } = await import("/js/practiceLab/practiceDefaults.js");
     const { createDefaultPracticeContext } = await import("/js/practiceLab/practiceContext.js");
     const { createPracticeCoachPlanRecord } = await import("/js/practiceLab/practiceCoachPlan.js");
-    const { initializePracticeCoachRuntimeData } = await import("/js/practiceLab/practiceLabControllerRuntimeV25.js");
+    const { initializePracticeCoachRuntimeData } = await import("/js/practiceLab/practiceLabControllerCurrent.js");
 
     const now = () => new Date("2026-09-19T18:00:00.000Z");
     const profileId = "practice-profile_browser-coach-recovery-12345678";

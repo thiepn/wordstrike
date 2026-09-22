@@ -1,9 +1,7 @@
 name: Practice Completion
 on:
-  push:
-    branches: [main, practice-release-hardening]
-  pull_request:
-    paths: ['js/practiceLab/**', 'data/practice/**', 'tests/browser/practice_*.mjs', 'tests/practice-offline-shell.test.js', 'style.css', 'sw.js', '.github/workflows/practice-completion.yml']
+  workflow_dispatch:
+
 permissions:
   contents: read
 jobs:
@@ -37,6 +35,7 @@ jobs:
       - run: npm install --no-save playwright@1.57.0 axe-core@4.10.3
       - run: node tests/browser/practice_targeted.mjs
       - run: node tests/browser/practice_completion.mjs
+      - run: node tests/browser/practice_evidence_populated.mjs
       - run: node tests/browser/practice_accessibility.mjs
       - run: node tests/browser/practice_offline.mjs
       - uses: actions/upload-artifact@v4
@@ -45,6 +44,7 @@ jobs:
           name: practice-completion-browser
           path: |
             browser-artifacts/practice-completion/
+            browser-artifacts/practice-evidence-populated/
             browser-artifacts/practice-accessibility/
             browser-artifacts/practice-offline/
             browser-artifacts/practice-targeted/

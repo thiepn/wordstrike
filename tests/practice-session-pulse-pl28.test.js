@@ -87,18 +87,30 @@ test("inactive or stopped sessions do not schedule pulses", () => {
 function hostFixture(t, kind, overrides = {}) {
   const clock = timers();
   const rootListeners = new Map(); const documentListeners = new Map();
+  const addListener = (registry, name, handler) => {
+    const bucket = registry.get(name) ?? new Set();
+    bucket.add(handler);
+    registry.set(name, bucket);
+  };
+  const removeListener = (registry, name, handler) => {
+    const bucket = registry.get(name);
+    if (!bucket) return;
+    bucket.delete(handler);
+    if (!bucket.size) registry.delete(name);
+  };
+  const listenerCount = (registry) => [...registry.values()].reduce((sum, bucket) => sum + bucket.size, 0);
   const root = {
     innerHTML: "", focusCount: 0,
-    addEventListener(name, handler) { rootListeners.set(name, handler); },
-    removeEventListener(name) { rootListeners.delete(name); },
+    addEventListener(name, handler) { addListener(rootListeners, name, handler); },
+    removeEventListener(name, handler) { removeListener(rootListeners, name, handler); },
     querySelector() { return { focus() { root.focusCount++; } }; },
     contains() { return true; },
   };
   const originalDocument = Object.getOwnPropertyDescriptor(globalThis, "document");
   const document = {
     visibilityState: "visible",
-    addEventListener(name, handler) { documentListeners.set(name, handler); },
-    removeEventListener(name) { documentListeners.delete(name); },
+    addEventListener(name, handler) { addListener(documentListeners, name, handler); },
+    removeEventListener(name, handler) { removeListener(documentListeners, name, handler); },
   };
   Object.defineProperty(globalThis, "document", { configurable: true, value: document });
   t.after(() => {
@@ -136,7 +148,7 @@ function hostFixture(t, kind, overrides = {}) {
   });
   return { clock, root, snapshot, session, engine, mount, document,
     emit(event) { listener?.(snapshot, event); },
-    counts: () => ({ destroyed, closed, exited, ticks, completes, interrupts, listeners: rootListeners.size + documentListeners.size }),
+    counts: () => ({ destroyed, closed, exited, ticks, completes, interrupts, rootListeners: listenerCount(rootListeners), documentListeners: listenerCount(documentListeners) }),
   };
 }
 
@@ -145,10 +157,15 @@ for (const kind of ["pace", "burst"]) {
     const f = hostFixture(t, kind); const host = await f.mount();
     assert.equal(f.clock.pending.size, 1);
     assert.equal([...f.clock.pending.values()][0].delay, kind === "pace" ? 200 : 50);
-    assert.equal(f.counts().listeners, 4);
+    const mountedListeners = f.counts();
+    assert.equal(mountedListeners.documentListeners, 1, "the session owns one visibility listener");
+    assert.ok(mountedListeners.rootListeners >= 3, "the session and shared Practice input layer are both wired");
     await host.exit(); await host.exit();
     assert.equal(f.clock.pending.size, 0);
-    assert.equal(f.counts().listeners, 0);
+    const cleanedListeners = f.counts();
+    assert.equal(mountedListeners.rootListeners - cleanedListeners.rootListeners, 3, "the session releases exactly its beforeinput, keydown and click listeners");
+    assert.equal(cleanedListeners.documentListeners, 0, "the session releases its visibility listener");
+    assert.ok(cleanedListeners.rootListeners > 0, "the root-scoped shared Practice input compatibility layer remains installed");
     assert.equal(f.counts().destroyed, 1);
     assert.equal(f.counts().closed, 1);
     assert.equal(f.counts().exited, 1);
@@ -159,7 +176,8 @@ for (const kind of ["pace", "burst"]) {
       const failure = new Error("initialization failed");
       const f = hostFixture(t, kind, { async [step]() { throw failure; } });
       await assert.rejects(f.mount(), failure);
-      assert.equal(f.counts().listeners, 0);
+      assert.equal(f.counts().documentListeners, 0);
+      assert.equal(f.counts().rootListeners, 0);
       assert.equal(f.clock.pending.size, 0);
       assert.equal(f.counts().destroyed, 1);
       assert.equal(f.counts().closed, 1);

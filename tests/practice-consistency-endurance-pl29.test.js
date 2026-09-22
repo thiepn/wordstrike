@@ -65,8 +65,8 @@ test("PL29 generic record and foundation versions remain stable inside the curre
 
 test("PL29 activates only the existing Consistency and Endurance catalog cards", () => {
   const consistency = getPracticeExperiment("consistency-trainer"); const endurance = getPracticeExperiment("endurance");
-  assert.equal(consistency.status, "preview"); assert.equal(consistency.requiresPracticeData, false); assert.deepEqual(consistency.estimatedDurationMinutes, { minimum: 3, recommended: 6, maximum: 10 });
-  assert.equal(endurance.status, "preview"); assert.deepEqual(endurance.estimatedDurationMinutes, { minimum: 5, recommended: 10, maximum: 20 });
+  assert.equal(consistency.status, "available"); assert.equal(consistency.requiresPracticeData, false); assert.deepEqual(consistency.estimatedDurationMinutes, { minimum: 3, recommended: 6, maximum: 10 });
+  assert.equal(endurance.status, "available"); assert.deepEqual(endurance.estimatedDurationMinutes, { minimum: 5, recommended: 10, maximum: 20 });
   assert.equal(getPracticeExperiment("endurance-check"), null); assert.equal(getPracticeExperiment("stamina"), null); assert.equal(getPracticeExperiment("consistency-endurance"), null);
 });
 

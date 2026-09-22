@@ -19,7 +19,7 @@ test("isolated Practice imports do not touch storage, DOM listeners, timers, aut
     fetch: { configurable: true, value: async (...args) => { calls.fetches += 1; return original.fetch?.(...args); } },
   });
   try {
-    const modules = ["practiceExperimentCatalog", "practiceExperimentRegistry", "practiceFeatureGate", "practiceLabRoutes", "practiceLabViewModel", "practiceLabRenderer", "practiceLabController", "practiceSessionEngine"];
+    const modules = ["practiceExperimentCatalog", "practiceExperimentRegistry", "practiceFeatureGate", "practiceLabRoutes", "practiceLabViewModel", "practiceLabRendererCurrent", "practiceLabController", "practiceSessionEngine"];
     for (const name of modules) await import(new URL(`../js/practiceLab/${name}.js?audit=${name}`, import.meta.url));
     assert.deepEqual(calls, { storage: 0, indexedDb: 0, listeners: 0, timers: 0, fetches: 0 });
   } finally {
@@ -35,6 +35,6 @@ test("Practice dependency direction excludes ranked, auth, Supabase, and UI-to-s
   assert.doesNotMatch(all, /from\s+["'][^"']*(supabase|leaderboard|authService|modeStorage|speedTest)/i);
   assert.doesNotMatch(all, /localStorage\.clear\s*\(|setInterval\s*\(/);
   for (const name of ["practiceRepository.js", "practiceIndexedDbStore.js", "practiceManifestStore.js", "practiceSessionEngine.js"]) assert.doesNotMatch(sources[name], /practiceLab(?:Controller|Renderer|ViewModel|Routes)/);
-  for (const name of ["practiceLabRenderer.js", "practiceLabViewModel.js", "practiceLabController.js"]) assert.doesNotMatch(sources[name], /practice(?:Repository|IndexedDbStore|ManifestStore|SessionEngine)/);
+  for (const name of ["practiceLabRendererCurrent.js", "practiceLabViewModel.js", "practiceLabController.js"]) assert.doesNotMatch(sources[name], /practice(?:Repository|IndexedDbStore|ManifestStore|SessionEngine)/);
   assert.doesNotMatch(all, /\.register\(\{\s*experimentId:\s*["'](?:full-assessment|weak-keys)/);
 });

@@ -39,21 +39,22 @@ export function renderPracticeWeaknessBossDetail(root, view, { focusSelector = n
   if (!root || typeof root.innerHTML !== "string") throw new TypeError("Weakness Boss renderer requires a root element");
   const loading = view?.status === "loading" || view?.status === "idle";
   const candidates = view?.candidates ?? [];
-  const recommended = candidates[0] ?? null;
-  const alternatives = candidates.slice(1, 5);
+  const recommended = view?.recommendedCandidate ?? candidates[0] ?? null;
+  const alternatives = candidates.filter((candidate) => candidate.statId !== recommended?.statId).slice(0, 4);
   const body = loading
     ? `<section class="practice-lab-empty-state" aria-live="polite"><h2>Finding a Boss…</h2><p>Checking current local Practice evidence and training-content availability.</p></section>`
     : view?.status === "unavailable"
-      ? `<section class="practice-lab-empty-state"><h2>Weakness Boss unavailable</h2><p>Current Practice evidence or local training content could not be read.</p>${view.errorCode ? `<p role="alert">${escapeHtml(view.errorCode)}</p>` : ""}</section>`
+      ? `<section class="practice-lab-empty-state"><h2>Weakness Boss unavailable</h2><p>Current Practice evidence or local training content could not be read.</p>${view.errorCode ? `<p role="alert">${escapeHtml(view.errorCode)}</p>` : ""}<button type="button" data-practice-action="weakness-boss-refresh">TRY AGAIN</button></section>`
       : !recommended
-        ? `<section class="practice-lab-empty-state"><h2>No Boss ready yet</h2><p>There is no current likely or confirmed limiter with enough learning headroom and valid training content. Keep practicing normally and check again later.</p></section>`
+        ? `<section class="practice-lab-empty-state"><h2>No Boss ready yet</h2><p>There is no current likely or confirmed limiter with enough learning headroom and valid training content. Keep practicing normally and check again later.</p><button type="button" data-practice-action="navigate" data-route="daily-training">OPEN DAILY TRAINING</button></section>`
         : `<div class="practice-lab-category-grid">${candidateCard(recommended, { recommended: true })}${alternatives.map((candidate) => candidateCard(candidate)).join("")}</div>`;
   root.innerHTML = `<section class="screen practice-lab-screen" data-practice-view="weakness-boss-detail"><div class="practice-lab-shell">
-    <header class="practice-lab-header"><button type="button" class="practice-lab-back" data-practice-action="back">← Back to Practice Lab</button><span class="practice-lab-status is-preview">DEVELOPER PREVIEW</span></header>
+    <header class="practice-lab-header"><button type="button" class="practice-lab-back" data-practice-action="back">← Back to Practice Lab</button><span class="practice-lab-status">ADVANCED CHALLENGE</span></header>
     <main class="practice-lab-detail">
       <div class="eyebrow">Advanced · Adaptive Practice</div><h1>Weakness Boss</h1>
       <p class="practice-lab-lead">Face one current Practice limiter in a focused fixed-dose encounter.</p>
       <div class="practice-lab-notice" role="note"><strong>Challenge progress, not a skill score.</strong><br>The Boss challenge uses one fixed Practice dose. Boss HP represents challenge progress, not your skill score. Defeating a Boss does not mean the target is mastered, retained, transferred, or permanently fixed.</div>
+      ${view.errorCode && view.status === "ready" ? `<div class="practice-lab-notice" role="alert"><strong>Boss could not start.</strong><br>${escapeHtml(view.errorCode)} · Try again or choose another available target.</div>` : ""}
       ${body}
     </main></div></section>`;
   (root.querySelector?.(focusSelector) ?? root.querySelector?.("[data-practice-action='weakness-boss-start']") ?? root.querySelector?.("button"))?.focus?.({ preventScroll: true });
@@ -121,7 +122,7 @@ export function renderPracticeWeaknessBossResult(root, finalResult) {
   root.innerHTML = `<section class="screen practice-lab-screen" data-practice-view="weakness-boss-result"><div class="practice-lab-shell"><main class="practice-lab-detail">
     <div class="eyebrow">Weakness Boss complete</div><h1>${defeated ? "Boss Defeated" : "Encounter Incomplete"}</h1>
     <p class="practice-lab-lead">${escapeHtml(result?.boss?.archetype ?? "Weakness Boss")} · ${escapeHtml(titleTarget(result?.target))}</p>
-    <dl class="practice-weak-key-result-grid"><div><dt>Opening → Final quality</dt><dd>${number(opening?.quality)} → ${number(final?.quality)}</dd></div><div><dt>Immediate quality delta</dt><dd>${signed(result?.immediateQualityDelta)}</dd></div><div><dt>Battle first-pass accuracy</dt><dd>${percent(result?.battle?.battleFirstPassAccuracy)}</dd></div><div><dt>Max clean target streak</dt><dd>${number(result?.battle?.maxCleanTargetStreak, 0)}</dd></div></dl>
+    <dl class="practice-weak-key-result-grid"><div><dt>Opening → Final quality</dt><dd>${number(opening?.quality)} → ${number(final?.quality)}</dd></div><div><dt>Immediate quality delta</dt><dd>${finite(result?.immediateQualityDelta) ? `${signed(result.immediateQualityDelta)} quality pts` : "—"}</dd></div><div><dt>Battle first-pass accuracy</dt><dd>${percent(result?.battle?.battleFirstPassAccuracy)}</dd></div><div><dt>Max clean target streak</dt><dd>${number(result?.battle?.maxCleanTargetStreak, 0)}</dd></div></dl>
     <div class="practice-lab-notice" role="note"><strong>This clear is challenge completion, not mastery.</strong><br>The Final Probe is only a same-session comparison. Boss defeat does not establish durable learning, retention, transfer, or a permanent fix. Later independent Practice evidence is required.</div>
     <div class="practice-weak-key-result-actions"><button type="button" data-weakness-boss-session-action="repeat">FIGHT AGAIN</button><button type="button" data-weakness-boss-session-action="finish">BACK TO WEAKNESS BOSS</button></div>
   </main></div></section>`;

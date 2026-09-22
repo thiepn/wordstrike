@@ -2,17 +2,16 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
-const controllerUrl = new URL("../js/practiceLab/practiceLabControllerRuntimeV38.js", import.meta.url);
+const controllerUrl = new URL("../js/practiceLab/practiceLabControllerCurrent.js", import.meta.url);
 const shellUrl = new URL("../js/practiceLab/practiceLabController.js", import.meta.url);
 
-test("PL38 shell loads V38 while Research orchestration remains lazy", async () => {
+test("Phase 8 canonical controller keeps Research orchestration lazy", async () => {
   const [controllerSource, shellSource] = await Promise.all([
     readFile(controllerUrl, "utf8"),
     readFile(shellUrl, "utf8"),
   ]);
-  assert.match(shellSource, /practiceLabControllerRuntimeV40\.js/);
-  assert.match(await readFile(new URL("../js/practiceLab/practiceLabControllerRuntimeV40.js", import.meta.url), "utf8"), /practiceLabControllerRuntimeV38\.js/);
-  assert.match(controllerSource, /createPracticeLabControllerV37/);
+  assert.match(shellSource, /practiceLabControllerCurrent\.js/);
+  assert.doesNotMatch(shellSource, /practiceLabControllerRuntimeV\d+/);
   assert.match(controllerSource, /PRACTICE_LAB_ROUTES\.RESEARCH/);
   assert.match(controllerSource, /import\("\.\/practiceResearchRuntime\.js"\)/);
   assert.match(controllerSource, /import\("\.\/practiceResearchProbeSessionHost\.js"\)/);
@@ -21,6 +20,7 @@ test("PL38 shell loads V38 while Research orchestration remains lazy", async () 
   assert.match(controllerSource, /import\("\.\/practiceProblemWordsSessionHost\.js"\)/);
   assert.match(controllerSource, /import\("\.\/practiceWeaknessBossSessionHost\.js"\)/);
   assert.match(controllerSource, /title: "Research"/);
+  assert.doesNotMatch(controllerSource, /from\s+["']\.\/practiceResearchRuntime\.js["']/);
   assert.doesNotMatch(shellSource, /practiceResearchRuntime\.js/);
 });
 

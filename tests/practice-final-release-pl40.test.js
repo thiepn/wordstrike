@@ -32,7 +32,7 @@ test("PL40 enables the authorized public Practice Lab release", () => {
   );
 });
 
-test("PL40 developer preview is explicit and cannot mutate the canonical mode", () => {
+test("PL40 developer mode is explicit and cannot mutate the canonical mode", () => {
   const practiceMode = getModeDefinition(MODE_IDS.PRACTICE);
   const gate = createPracticeFeatureGate({ developerMode: true });
   const [previewMode] = gate.resolveModeDefinitions([practiceMode]);
@@ -42,12 +42,12 @@ test("PL40 developer preview is explicit and cannot mutate the canonical mode", 
     developerMode: true,
     publicEnabled: true,
     allowed: true,
-    reason: "developer-preview",
+    reason: "developer",
   });
 
   assert.notEqual(previewMode, practiceMode);
   assert.equal(previewMode.enabled, true);
-  assert.equal(previewMode.status, "preview");
+  assert.equal(previewMode.status, "available");
   assert.equal(previewMode.route, PRACTICE_LAB_ROUTE);
 
   assert.equal(practiceMode.enabled, true);

@@ -1,5 +1,5 @@
 const CACHE_PREFIX = "wordstrike-pwa-";
-const CACHE_NAME = CACHE_PREFIX + "v34-practice-reset";
+const CACHE_NAME = CACHE_PREFIX + "v63-practice-architecture";
 const APP_SHELL = [
   "./js/practiceLab/practiceAssessmentInput.js",
   "./js/practiceLab/practiceDurableManifest.js",
@@ -7,6 +7,7 @@ const APP_SHELL = [
   "./practiceLabWorkshop.css",
   "./practiceLabWorkshop.css?v=20260919b",
   "./js/practiceLab/practiceLabIdentity.js",
+  "./js/practiceLab/practiceDataManagement.js",
   "./practiceLabIdentity.css",
   "./practiceLabIdentity.css?v=20260919a",
   "./js/practiceLab/practiceHostDom.js",
@@ -92,7 +93,6 @@ const APP_SHELL = [
   "./js/practiceLab/practiceCoachPersonalization.js",
   "./js/practiceLab/practiceCoachPersonalizationConstants.js",
   "./js/practiceLab/practiceCoachPersonalizationEvidence.js",
-  "./js/practiceLab/practiceCoachServiceBaseV25.js",
   "./js/practiceLab/practiceCoachTreatmentOptions.js",
   "./js/practiceLab/practiceConstantsV30.js",
   "./js/practiceLab/practiceConstantsV31.js",
@@ -110,19 +110,7 @@ const APP_SHELL = [
   "./js/practiceLab/practiceCustomTextValidation.js",
   "./js/practiceLab/practiceDataInventory.js",
   "./js/practiceLab/practiceEvidenceViews.js",
-  "./js/practiceLab/practiceExperimentCatalogV30.js",
   "./js/practiceLab/practiceIntegrityAudit.js",
-  "./js/practiceLab/practiceLabControllerRuntimeV31.js",
-  "./js/practiceLab/practiceLabControllerRuntimeV32.js",
-  "./js/practiceLab/practiceLabControllerRuntimeV36.js",
-  "./js/practiceLab/practiceLabControllerRuntimeV37.js",
-  "./js/practiceLab/practiceLabControllerRuntimeV38.js",
-  "./js/practiceLab/practiceLabControllerRuntimeV40.js",
-  "./js/practiceLab/practiceLabRendererV31.js",
-  "./js/practiceLab/practiceLabRendererV32.js",
-  "./js/practiceLab/practiceLabRendererV36.js",
-  "./js/practiceLab/practiceLabRendererV37.js",
-  "./js/practiceLab/practiceLabRendererV38.js",
   "./js/practiceLab/practiceMetronomeAnalysis.js",
   "./js/practiceLab/practiceMetronomeAvailability.js",
   "./js/practiceLab/practiceMetronomeBlockAccumulator.js",
@@ -151,6 +139,7 @@ const APP_SHELL = [
   "./js/practiceLab/practicePhysicalTelemetryUi.js",
   "./js/practiceLab/practicePhysicalTelemetryViewRuntime.js",
   "./js/practiceLab/practicePl30ModelBoundaryRepair.js",
+  "./js/practiceLab/practiceGraduatedFluencyExperiments.js",
   "./js/practiceLab/practicePreviewProtocolRuntime.js",
   "./js/practiceLab/practicePreviewProtocolSessionHost.js",
   "./js/practiceLab/practicePreviewProtocolSetup.js",
@@ -449,28 +438,8 @@ const APP_SHELL = [
   "./js/practiceLab/practiceInputEngine.js",
   "./js/practiceLab/practiceKeyboardGeometry.js",
   "./js/practiceLab/practiceLabController.js",
-  "./js/practiceLab/practiceLabControllerRuntime.js",
-  "./js/practiceLab/practiceLabControllerRuntimeV22.js",
-  "./js/practiceLab/practiceLabControllerRuntimeV23.js",
-  "./js/practiceLab/practiceLabControllerRuntimeV24.js",
-  "./js/practiceLab/practiceLabControllerRuntimeV25.js",
-  "./js/practiceLab/practiceLabControllerRuntimeV26.js",
-  "./js/practiceLab/practiceLabControllerRuntimeV27.js",
-  "./js/practiceLab/practiceLabControllerRuntimeV28.js",
-  "./js/practiceLab/practiceLabControllerRuntimeV29.js",
-  "./js/practiceLab/practiceLabControllerRuntimeV30.js",
-  "./js/practiceLab/practiceLabRenderer.js",
-  "./js/practiceLab/practiceLabRendererV20.js",
-  "./js/practiceLab/practiceLabRendererV21.js",
-  "./js/practiceLab/practiceLabRendererV22.js",
-  "./js/practiceLab/practiceLabRendererV23.js",
-  "./js/practiceLab/practiceLabRendererV24.js",
-  "./js/practiceLab/practiceLabRendererV25.js",
-  "./js/practiceLab/practiceLabRendererV26.js",
-  "./js/practiceLab/practiceLabRendererV27.js",
-  "./js/practiceLab/practiceLabRendererV28.js",
-  "./js/practiceLab/practiceLabRendererV29.js",
-  "./js/practiceLab/practiceLabRendererV30.js",
+  "./js/practiceLab/practiceLabControllerCurrent.js",
+  "./js/practiceLab/practiceLabRendererCurrent.js",
   "./js/practiceLab/practiceLabRoutes.js",
   "./js/practiceLab/practiceLabViewModel.js",
   "./js/practiceLab/practiceLabViewModelV21.js",
@@ -853,8 +822,26 @@ const APP_SHELL = [
   "./style.css"
 ];
 
+const CORE_SHELL = Object.freeze([
+  "./",
+  "./index.html",
+  "./manifest.webmanifest",
+  "./style.css",
+  "./styles/ui-system.css",
+  "./js/main.js",
+  "./js/main.js?v=20260910f",
+]);
+
+async function precacheAppShell() {
+  const cache = await caches.open(CACHE_NAME);
+  await cache.addAll(CORE_SHELL);
+  const required = new Set(CORE_SHELL);
+  const optional = APP_SHELL.filter(asset => !required.has(asset));
+  await Promise.allSettled(optional.map(asset => cache.add(asset)));
+}
+
 self.addEventListener("install", event => {
-  event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL)));
+  event.waitUntil(precacheAppShell());
   self.skipWaiting();
 });
 
@@ -867,21 +854,39 @@ self.addEventListener("fetch", event => {
   if (request.method !== "GET") return;
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
+
   if (request.mode === "navigate") {
-    event.respondWith(fetch(request).then(response => {
+    event.respondWith(fetch(request).then(async response => {
       if (response && response.ok) {
         const copy = response.clone();
-        caches.open(CACHE_NAME).then(cache => cache.put("./index.html", copy));
+        const cache = await caches.open(CACHE_NAME);
+        await cache.put("./index.html", copy);
       }
       return response;
-    }).catch(() => caches.match("./index.html").then(hit => hit || caches.match("./"))));
+    }).catch(async () => (
+      await caches.match("./index.html", { ignoreSearch: true })
+      || await caches.match("./", { ignoreSearch: true })
+      || new Response("WORDSTRIKE is unavailable offline until the app shell has been cached.", {
+        status: 503,
+        headers: { "Content-Type": "text/plain; charset=utf-8" },
+      })
+    )));
     return;
   }
-  event.respondWith(fetch(request).then(response => {
-  if (response && response.ok) {
-    const copy = response.clone();
-    caches.open(CACHE_NAME).then(cache => cache.put(request, copy));
-  }
-  return response;
-}).catch(() => caches.match(request)));
+
+  event.respondWith(fetch(request).then(async response => {
+    if (response && response.ok) {
+      const copy = response.clone();
+      const cache = await caches.open(CACHE_NAME);
+      await cache.put(request, copy);
+    }
+    return response;
+  }).catch(async () => (
+    await caches.match(request)
+    || await caches.match(request, { ignoreSearch: true })
+    || new Response("Offline asset unavailable", {
+      status: 503,
+      headers: { "Content-Type": "text/plain; charset=utf-8" },
+    })
+  )));
 });

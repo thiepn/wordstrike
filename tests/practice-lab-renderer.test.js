@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { createPracticeFeatureGate } from "../js/practiceLab/practiceFeatureGate.js";
 import { createPracticeExperimentRegistry } from "../js/practiceLab/practiceExperimentRegistry.js";
 import { buildPracticeHomeViewModel, buildExperimentDetailViewModel, buildSkillMapEmptyViewModel, buildReviewQueueEmptyViewModel, buildProgressEmptyViewModel } from "../js/practiceLab/practiceLabViewModel.js";
-import { renderPracticeLab } from "../js/practiceLab/practiceLabRenderer.js";
+import { renderPracticeLab } from "../js/practiceLab/practiceLabRendererCurrent.js";
 import { createPracticeLabRoute, PRACTICE_LAB_ROUTES } from "../js/practiceLab/practiceLabRoutes.js";
 
 const root = () => ({ innerHTML: "", querySelector: () => null });
@@ -20,6 +20,9 @@ test("home renderer exposes semantic sections, honest empty states, native contr
   assert.match(target.innerHTML, /NO SKILL PROFILE YET/i);
   assert.match(target.innerHTML, /RECOMMENDATIONS NEED DATA/i);
   assert.match(target.innerHTML, /disabled aria-disabled="true"/);
+  assert.match(target.innerHTML, /data-practice-action="navigate" data-route="daily-training"/);
+  assert.doesNotMatch(target.innerHTML, /NOT AVAILABLE YET/);
+  assert.equal(viewModel.dailyTraining.state, "available");
   assert.match(target.innerHTML, /data-practice-action="open-experiment" data-experiment-id="full-assessment"/);
   const visibleCatalogCardCount = viewModel.categories.reduce((count, category) => count + category.experiments.length, 0);
   const renderedCatalogCardCount = (target.innerHTML.match(/class="practice-lab-text-button" data-practice-action="open-experiment" data-experiment-id=/g) || []).length;
@@ -27,11 +30,11 @@ test("home renderer exposes semantic sections, honest empty states, native contr
   assert.doesNotMatch(target.innerHTML, /implementationPrompt|Prompt 6/);
 });
 
-test("generic detail and analysis renderers show controlled planned and empty states", () => {
+test("generic detail and analysis renderers show controlled unavailable and current empty states", () => {
   const registry = createPracticeExperimentRegistry({ featureGate: gate });
   const detail = root();
   renderPracticeLab(detail, buildExperimentDetailViewModel({ route: createPracticeLabRoute(PRACTICE_LAB_ROUTES.EXPERIMENT_DETAIL, { experimentId: "weak-keys" }), registry }));
-  assert.match(detail.innerHTML, /This experiment is not available/);
+  assert.match(detail.innerHTML, /This drill is unavailable/);
   assert.match(detail.innerHTML, /BEGIN UNAVAILABLE/);
   for (const view of [buildSkillMapEmptyViewModel(), buildReviewQueueEmptyViewModel(), buildProgressEmptyViewModel()]) {
     const target = root();

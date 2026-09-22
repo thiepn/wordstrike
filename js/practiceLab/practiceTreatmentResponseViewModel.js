@@ -120,14 +120,14 @@ export function buildPracticeTreatmentResponseViewModel({ states = [], episodes 
   return freezeDeep({
     kind: "treatment-response-progress",
     title: "Progress",
-    sectionTitle: "Treatment Response",
+    sectionTitle: "Observed Response",
     status,
     errorCode,
     cards,
     recentEpisodes,
     trackingCount,
     hasEvidence: cards.some((card) => card.sampleCount > 0),
-    doctrine: "Treatment Response summarizes associations in your recorded Practice history. It does not prove that a treatment caused a later change, and practice outside WordStrike is not observed.",
+    doctrine: "Observed Response summarizes associations in your recorded Practice history. It does not prove that a practice method caused a later change, and practice outside WordStrike is not observed.",
     emptyTitle: "No delayed response evidence yet",
     emptyDescription: trackingCount > 0
       ? "One or more completed treatments are waiting for a compatible later observation. Same-session Check results are intentionally not counted here."

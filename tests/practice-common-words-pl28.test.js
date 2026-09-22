@@ -91,7 +91,7 @@ test("band metrics keep first-pass word correctness separate from launch and int
 
 test("visible Practice and hidden Check preserve distinct PL13 roles", () => {
   const practice = createPracticeCommonWordsDescriptor(); const check = createPracticeCommonWordCheckDescriptor();
-  assert.equal(practice.id, "common-words"); assert.equal(practice.abilityChannel, null); assert.equal(check.id, "common-words-check"); assert.equal(check.abilityChannel, "common-words"); assert.equal(practice.resumable, false); assert.equal(check.resumable, false); assert.equal(getPracticeExperiment("common-words").status, "preview");
+  assert.equal(practice.id, "common-words"); assert.equal(practice.abilityChannel, null); assert.equal(check.id, "common-words-check"); assert.equal(check.abilityChannel, "common-words"); assert.equal(practice.resumable, false); assert.equal(check.resumable, false); assert.equal(getPracticeExperiment("common-words").status, "available");
   const registry = createPracticeExperimentRegistry(); registerPracticeCommonWordsExperiment(registry, { runtime: { prepare() {}, getAvailability() {}, getBreadthSnapshot() {} } }); assert.equal(registry.getResolvedExperiment("common-words").runnable, true);
 });
 

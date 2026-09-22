@@ -9,7 +9,10 @@ export const PRACTICE_LAB_ROUTES = Object.freeze({
 export const PRACTICE_LAB_PUBLIC_ROUTES = Object.freeze([
   PRACTICE_LAB_ROUTES.HOME, PRACTICE_LAB_ROUTES.DAILY_TRAINING, PRACTICE_LAB_ROUTES.EXPERIMENT_DETAIL,
   PRACTICE_LAB_ROUTES.SKILL_MAP, PRACTICE_LAB_ROUTES.REVIEW_QUEUE, PRACTICE_LAB_ROUTES.PROGRESS,
-  PRACTICE_LAB_ROUTES.PHYSICAL_KEYBOARD, PRACTICE_LAB_ROUTES.RESEARCH,
+  PRACTICE_LAB_ROUTES.PHYSICAL_KEYBOARD,
+]);
+export const PRACTICE_LAB_DEVELOPER_ROUTES = Object.freeze([
+  PRACTICE_LAB_ROUTES.RESEARCH,
 ]);
 export const PRACTICE_LAB_RESERVED_ROUTES = Object.freeze([
   PRACTICE_LAB_ROUTES.EXPERIMENT_SETUP, PRACTICE_LAB_ROUTES.ACTIVE_SESSION,
@@ -22,7 +25,11 @@ export function createPracticeLabRoute(name = PRACTICE_LAB_ROUTES.HOME, params =
 
 export function normalizePracticeLabRoute(route, { featureGate, getExperiment = getPracticeExperiment } = {}) {
   if (featureGate?.canAccess?.() !== true) return createPracticeLabRoute("unavailable");
-  if (!route || typeof route !== "object" || !PRACTICE_LAB_PUBLIC_ROUTES.includes(route.name)) return createPracticeLabRoute();
+  if (!route || typeof route !== "object") return createPracticeLabRoute();
+  const developer = featureGate?.getSnapshot?.().reason === "developer";
+  const allowedRoute = PRACTICE_LAB_PUBLIC_ROUTES.includes(route.name)
+    || developer && PRACTICE_LAB_DEVELOPER_ROUTES.includes(route.name);
+  if (!allowedRoute) return createPracticeLabRoute();
   if (route.name === PRACTICE_LAB_ROUTES.EXPERIMENT_DETAIL) {
     const experimentId = typeof route.params?.experimentId === "string" ? route.params.experimentId : "";
     return createPracticeLabRoute(route.name, { experimentId, notFound: !getExperiment(experimentId) });

@@ -4,7 +4,7 @@ import { createPracticeFeatureGate } from "../js/practiceLab/practiceFeatureGate
 import { createPracticeExperimentRegistry } from "../js/practiceLab/practiceExperimentRegistry.js";
 import { registerPracticeAccuracyRecoveryExperiment } from "../js/practiceLab/practiceAccuracyRecoveryExperiment.js";
 import { buildPracticeAccuracyRecoveryDetailViewModel } from "../js/practiceLab/practiceAccuracyRecoveryUi.js";
-import { renderPracticeAccuracyRecoveryDetail } from "../js/practiceLab/practiceLabRendererV23.js";
+import { renderPracticeAccuracyRecoveryDetail } from "../js/practiceLab/practiceLabRendererCurrent.js";
 import { renderPracticeAccuracyRecoverySessionSnapshot } from "../js/practiceLab/practiceAccuracyRecoverySessionHost.js";
 
 const root = () => ({ innerHTML: "", querySelector: () => null });

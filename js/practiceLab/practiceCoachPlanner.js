@@ -22,9 +22,9 @@ export function shouldIncludePracticeCoachReview(queue, requestedMinutes, policy
   if (!candidates.length) return false;
   const overdue = candidates.some((candidate) => candidate.dueStatus === "overdue");
   const maximumValue = Math.max(...candidates.map((candidate) => Number(candidate.reviewValue || 0)), 0);
-  if (requestedMinutes === 5) return overdue || maximumValue >= policy.review.urgentValue;
-  if (requestedMinutes === 8) return overdue || maximumValue >= 50;
-  return maximumValue >= policy.review.moderateValue;
+  if (overdue) return true;
+  const threshold = Number(policy.review.inclusionThresholdByMinutes?.[requestedMinutes] ?? policy.review.moderateValue);
+  return maximumValue >= threshold;
 }
 
 function selectSecondTarget(targets, first, policy) {

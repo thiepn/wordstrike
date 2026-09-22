@@ -63,7 +63,7 @@ test("Full Assessment fixture integrates catalog through registry without activa
   const gate = createPracticeFeatureGate({ developerMode: true });
   const registry = createPracticeExperimentRegistry({ featureGate: gate });
   let descriptorCalls = 0;
-  assert.equal(catalogEntry.status, "preview");
+  assert.equal(catalogEntry.status, "available");
   assert.equal(registry.getResolvedExperiment("full-assessment").runnable, false);
   registry.register({ experimentId: "full-assessment", implementationVersion: 1, descriptorFactory: () => { descriptorCalls += 1; return descriptor; }, setupFactory() {} });
   const resolved = registry.getResolvedExperiment("full-assessment");
@@ -71,7 +71,7 @@ test("Full Assessment fixture integrates catalog through registry without activa
   assert.equal(validatePracticeExperimentDescriptor(resolved.registration.descriptor).valid, true);
   assert.equal(resolved.availability, "available");
   assert.equal(resolved.runnable, true);
-  assert.equal(catalogEntry.status, "preview");
+  assert.equal(catalogEntry.status, "available");
   assert.equal(normalizePracticeLabRoute(createPracticeLabRoute(PRACTICE_LAB_ROUTES.EXPERIMENT_SETUP, { experimentId: "full-assessment" }), { featureGate: gate }).name, "home");
   registry.unregister("full-assessment");
   assert.equal(registry.getResolvedExperiment("full-assessment").runnable, false);
@@ -104,7 +104,7 @@ test("controller mount/unmount stress leaves no listeners, subscribers, or stale
   for (let cycle = 0; cycle < 50; cycle += 1) {
     controller.mount();
     for (let index = 0; index < 10; index += 1) controller.navigate(createPracticeLabRoute(index % 2 ? PRACTICE_LAB_ROUTES.SKILL_MAP : PRACTICE_LAB_ROUTES.PROGRESS));
-    assert.equal(listeners.size, 3);
+    assert.equal(listeners.size, 4, "base click/input/Escape listeners plus the active evidence-route handler");
     assert.equal(registry.getDiagnostics().subscriberCount, 1);
     controller.unmount();
     assert.equal(listeners.size, 0);

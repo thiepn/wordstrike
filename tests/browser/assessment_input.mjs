@@ -30,7 +30,7 @@ async function type(page,text){
 const browser=await ({chromium,firefox,webkit}[name]).launch();
 try{for(const [depth,count] of [['quick',3],['standard',6],['deep',10]]){
  const report={browser:name,url:base,depth,expectedBlocks:count,status:'FAIL',blocks:[],errors:[],fullLocalStorage:process.env.PRACTICE_FULL_STORAGE==='1'};
- const width=name==='webkit'?390:1280;
+ const width=Number(process.env.PRACTICE_WIDTH??(name==='webkit'?390:1280));
  const context=await browser.newContext({viewport:{width,height:900},hasTouch:width<600,serviceWorkers:process.env.PRACTICE_URL?'allow':'block'});
  await context.addInitScript(()=>localStorage.setItem('wordstrike.onboarding.general.v3','seen'));
  const page=await context.newPage();page.setDefaultTimeout(30000);page.on('pageerror',e=>report.errors.push(e.message));
@@ -83,6 +83,13 @@ try{for(const [depth,count] of [['quick',3],['standard',6],['deep',10]]){
     await page.keyboard.press('Backspace');assert.equal(await passage.getAttribute('data-cursor'),'36');
     await input.evaluate(e=>{e.value='Q';e.dispatchEvent(new InputEvent('input',{bubbles:true,inputType:'insertText',data:'Q'}));});
     assert.equal(await passage.getAttribute('data-cursor'),'37','Native input fallback must not depend on beforeinput');
+    await page.keyboard.press('Backspace');
+    await input.evaluate(e=>{
+      e.value='R';
+      e.dispatchEvent(new InputEvent('beforeinput',{bubbles:true,cancelable:true,inputType:'insertCompositionText',data:'R',isComposing:false}));
+      e.dispatchEvent(new InputEvent('input',{bubbles:true,inputType:'insertCompositionText',data:'R',isComposing:false}));
+    });
+    assert.equal(await passage.getAttribute('data-cursor'),'37','Non-composing composition-text fallback must commit once');
     await page.keyboard.press('Backspace');
     await page.screenshot({path:path.join(out,`${name}-${depth}-typing.png`),fullPage:true});
    }

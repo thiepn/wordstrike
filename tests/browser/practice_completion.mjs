@@ -30,9 +30,22 @@ try{for(const name of (process.env.PRACTICE_BROWSERS??'chromium,firefox,webkit')
    await page.clock.fastForward(610000);await page.getByRole('heading',{name:'Session complete',exact:true}).waitFor();await page.screenshot({path:path.join(out,`${name}-${width}-${id}.png`)});await page.getByRole('button',{name:'BACK TO SETUP',exact:true}).click();await page.locator('[data-practice-action="start-preview-protocol"]').waitFor();
   }
   await page.evaluate(()=>lab.navigate({name:'progress'}));await page.getByText(/saved sessions in this context/).waitFor();
+  const historyRoot=page.locator('[data-practice-history]');
+  const history=await historyRoot.innerText();if(!history.includes('read-ahead')||!history.includes('metronome-typing'))throw Error('Protocol persistence missing');
+  const metricRows=historyRoot.locator('[data-practice-history-metrics]');if(await metricRows.count()<4)throw Error('Populated history metric rows missing');
+  const metricTexts=await metricRows.allInnerTexts();
+  if(metricTexts.some(text=>/— WPM|— accuracy/.test(text)))throw Error('Completed session history lost canonical WPM/accuracy: '+JSON.stringify(metricTexts));
+  if(metricTexts.some(text=>/\b0\.\d+% accuracy\b/.test(text)))throw Error('History appears to expose fractional accuracy as percent: '+JSON.stringify(metricTexts));
+  await page.evaluate(()=>lab.navigate({name:'skill-map'}));await page.getByRole('heading',{name:'Skill Map',exact:true}).waitFor();
+  if(await page.getByText('No skill evidence yet',{exact:true}).count())throw Error('Skill Map stayed empty after completed Practice sessions');
+  const skills=page.locator('[data-practice-view="skill-map"] details');
+  await skills.first().waitFor({state:'visible'});
+  // This journey certifies that completed sessions populate Skill Map. Metric
+  // formatting and mixed measured/unmeasured cards are covered by the dedicated
+  // populated-evidence browser regression, where the evidence shape is explicit.
+  await page.evaluate(()=>lab.navigate({name:'progress'}));await page.getByText(/saved sessions in this context/).waitFor();
   if(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+2))throw Error('Horizontal overflow');
   if(errors.length)throw Error(JSON.stringify(errors));
-  const history=await page.locator('[data-practice-history]').innerText();if(!history.includes('read-ahead')||!history.includes('metronome-typing'))throw Error('Protocol persistence missing');
   await page.evaluate(()=>lab.unmount());report.push({browser:name,width,status:'PASS',journeys:['assessment quick complete','real text complete','read-ahead masked complete','metronome calibrated complete','persistent history'],errors});console.log(JSON.stringify(report.at(-1)));await context.close();
  }}finally{await browser.close();}
 }}finally{server.close();fs.writeFileSync(path.join(out,'report.json'),JSON.stringify(report,null,2));}

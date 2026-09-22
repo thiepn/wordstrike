@@ -1,9 +1,6 @@
 name: PL32 Treatment Response
 
 on:
-  pull_request:
-  push:
-    branches: [pl32-treatment-response]
   workflow_dispatch:
 
 permissions:

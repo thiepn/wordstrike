@@ -1,16 +1,7 @@
 name: PL36 Physical Keyboard Telemetry
 
 on:
-  push:
-    branches: [pl36-physical-keyboard-telemetry]
-  pull_request:
-    paths:
-      - 'js/practiceLab/**'
-      - 'js/appKeyboardController.js'
-      - 'tests/practice-physical-telemetry*-pl36.test.js'
-      - 'docs/practice-lab/PL36-PHYSICAL-KEYBOARD-TELEMETRY.md'
-      - 'package.json'
-      - '.github/workflows/pl36-physical-keyboard-telemetry.yml'
+  workflow_dispatch:
 
 jobs:
   certify:

@@ -27,8 +27,9 @@ const reports=[];
 try{for(const name of (process.env.PRACTICE_BROWSERS??'chromium').split(',')){
  const browser=await ({chromium,firefox}[name]).launch();
  try{for(const [id,action,attribute,target,value] of cases){
-  const context=await browser.newContext({viewport:{width:1280,height:900}});await context.addInitScript(()=>localStorage.setItem('wordstrike.onboarding.general.v3','seen'));
-  const page=await context.newPage();page.setDefaultTimeout(15000);const errors=[],record={browser:name,id,status:'FAIL'};page.on('pageerror',e=>errors.push(e.message));
+  const width=Number(process.env.PRACTICE_WIDTH??1280);
+  const context=await browser.newContext({viewport:{width,height:900},hasTouch:width<600});await context.addInitScript(()=>localStorage.setItem('wordstrike.onboarding.general.v3','seen'));
+  const page=await context.newPage();page.setDefaultTimeout(15000);const errors=[],record={browser:name,width,id,status:'FAIL'};page.on('pageerror',e=>errors.push(e.message));
   try{
    await page.goto(`http://127.0.0.1:${server.address().port}/`);await page.locator('[data-action="modes"]').click();await page.locator('button[data-mode-id="practice"]').click();await page.locator(`[data-practice-action="open-experiment"][data-experiment-id="${id}"]`).first().click();
    if(target){await page.locator(target).fill(value);}
@@ -36,6 +37,41 @@ try{for(const name of (process.env.PRACTICE_BROWSERS??'chromium').split(',')){
    const input=page.locator(`[${attribute}]`);await input.waitFor({state:'attached',timeout:30000});record.startMs=Date.now()-started;
    await page.evaluate(attr=>{window.__practiceCapture=document.querySelector(`[${attr}]`);window.__acceptedInputs=0;document.addEventListener('beforeinput',()=>window.__acceptedInputs++,true);},attribute);
    record.focusBefore=await input.evaluate(e=>e===document.activeElement);
+   const cursorPosition=()=>page.locator('.is-current,[aria-current="true"]').first().evaluate(e=>Array.from(e.parentElement?.children??[]).indexOf(e));
+   const compatibilityExpected=await page.locator('.is-current,[aria-current="true"]').first().textContent();
+   const cursorBefore=await cursorPosition();
+   await input.evaluate((el,value)=>el.dispatchEvent(new InputEvent('beforeinput',{bubbles:true,cancelable:true,inputType:'insertReplacementText',data:value})),compatibilityExpected);
+   await page.waitForTimeout(0);
+   assert.equal(await cursorPosition(),cursorBefore+1,'Replacement-text input must advance exactly once');
+   await page.keyboard.press('Backspace');await page.waitForTimeout(0);
+   assert.equal(await cursorPosition(),cursorBefore,'Replacement-text correction must restore the cursor');
+
+   const compositionExpected=await page.locator('.is-current,[aria-current="true"]').first().textContent();
+   await input.evaluate((el,value)=>{
+    el.dispatchEvent(new CompositionEvent('compositionstart',{bubbles:true,data:''}));
+    el.value=value;
+    el.dispatchEvent(new InputEvent('beforeinput',{bubbles:true,cancelable:true,inputType:'insertCompositionText',data:value,isComposing:true}));
+    el.dispatchEvent(new InputEvent('input',{bubbles:true,inputType:'insertCompositionText',data:value,isComposing:true}));
+    el.dispatchEvent(new CompositionEvent('compositionend',{bubbles:true,data:value}));
+    el.dispatchEvent(new InputEvent('beforeinput',{bubbles:true,cancelable:true,inputType:'insertFromComposition',data:value}));
+   },compositionExpected);
+   await page.waitForTimeout(0);
+   assert.equal(await cursorPosition(),cursorBefore+1,'IME composition must commit exactly once');
+   await page.keyboard.press('Backspace');await page.waitForTimeout(0);
+   assert.equal(await cursorPosition(),cursorBefore,'IME correction must restore the cursor');
+
+   const nativeExpected=await page.locator('.is-current,[aria-current="true"]').first().textContent();
+   await input.evaluate((el,value)=>{
+    el.value=value;
+    el.dispatchEvent(new InputEvent('beforeinput',{bubbles:true,cancelable:false,inputType:'insertText',data:value}));
+    el.dispatchEvent(new InputEvent('input',{bubbles:true,inputType:'insertText',data:value}));
+   },nativeExpected);
+   await page.waitForTimeout(0);
+   assert.equal(await cursorPosition(),cursorBefore+1,'Non-cancelable native input must advance exactly once');
+   await page.keyboard.press('Backspace');await page.waitForTimeout(0);
+   assert.equal(await cursorPosition(),cursorBefore,'Native-input correction must restore the cursor');
+   record.mobileInputCompatibility=true;
+
    const current=page.locator('.is-current,[aria-current="true"]').first();await current.waitFor();
    const text=await current.evaluate(e=>{let result='';for(let n=e;n&&result.length<100;n=n.nextElementSibling)result+=n.textContent;return result.replaceAll('\u00a0',' ');});
    record.initialText=text;await page.keyboard.type(text.slice(0,80),{delay:25});await page.waitForTimeout(300);

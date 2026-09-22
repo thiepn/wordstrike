@@ -1,10 +1,7 @@
 name: Practice Studio UI
 on:
-  push:
-    branches: [main, ui/practice-studio]
-    paths: ['js/practiceLab/**', 'practiceLab*.css', 'index.html', 'sw.js', 'tests/practice-lab-identity.test.js', 'tests/browser/practice_*.mjs', 'scripts/auditPracticePrivacySecurity.mjs', '.github/workflows/practice-identity.yml']
-  pull_request:
-    paths: ['js/practiceLab/**', 'practiceLab*.css', 'index.html', 'sw.js', 'tests/practice-lab-identity.test.js', 'tests/browser/practice_*.mjs', '.github/workflows/practice-identity.yml']
+  workflow_dispatch:
+
 permissions:
   contents: read
 concurrency:
@@ -39,10 +36,13 @@ jobs:
       matrix:
         include:
           - browser: chromium
+            width: 390
             widths: '1440,768,390,320'
           - browser: firefox
+            width: 1280
             widths: '1280'
           - browser: webkit
+            width: 390
             widths: '390'
     container:
       image: mcr.microsoft.com/playwright:v1.57.0-noble
@@ -51,6 +51,7 @@ jobs:
       HOME: /root
       PRACTICE_BROWSER: ${{ matrix.browser }}
       PRACTICE_BROWSERS: ${{ matrix.browser }}
+      PRACTICE_WIDTH: ${{ matrix.width }}
       PRACTICE_WIDTHS: ${{ matrix.widths }}
     steps:
       - uses: actions/checkout@v4

@@ -95,3 +95,10 @@ test("warm and concurrent shard reads reuse verified objects; changed manifests 
   assert.equal(loader.getCacheSize(), 1);
   assert.notEqual(await loader.loadTargetShard(query), results[0], "evicted shards must be verified again");
 });
+
+
+test("Practice lazy loader registers graduated Read-Ahead and Metronome protocols", async () => {
+  const source = await readFile(new URL("../js/practiceLab/practiceLabController.js", import.meta.url), "utf8");
+  assert.match(source, /practiceGraduatedFluencyExperiments\.js/);
+  assert.match(source, /registerPracticeGraduatedFluencyExperiments/);
+});

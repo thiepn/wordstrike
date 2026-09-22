@@ -40,7 +40,7 @@ export function bindPracticeAssessmentInput({ input, passage, send, isActive = (
     if (composing || event.isComposing) return;
     if (!active()) { empty(); return; }
     if (compositionTail !== null && input.value === compositionTail) { empty(); return; }
-    if (['insertText', 'insertReplacementText', 'insertFromComposition'].includes(event.inputType)) insert(input.value);
+    if (['insertText', 'insertReplacementText', 'insertFromComposition', 'insertCompositionText'].includes(event.inputType)) insert(input.value);
     else if (['insertLineBreak', 'insertParagraph'].includes(event.inputType)) insert('\n');
     empty();
   };

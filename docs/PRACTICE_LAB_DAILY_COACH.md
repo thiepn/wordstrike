@@ -1,5 +1,7 @@
 # Practice Lab — PL25 Daily Coach v1
 
+> **Current release note (Phase 5 hardening):** Daily Training is publicly available in the current Practice Lab release. The PL25/version-envelope material below records the feature's original architecture and should be read historically. The current implementation uses the later Coach v2 personalization envelope and now additionally hardens optional-evidence degradation, empty-plan avoidance, frozen-block skip/end confirmation, interrupted non-resumable child recovery, and explicit distinction between resolved blocks and completed blocks. A failed due-review preflight never substitutes same-entity acquisition practice.
+
 PL25 adds **Daily Coach v1**, a local-first orchestration layer over the canonical Practice Lab evidence and training systems delivered in PL11–PL24. It does not introduce a new typing model, a new skill-state owner, or a new measurement channel. Its job is to choose and freeze a small same-day sequence from existing protocols, then preserve the ownership and interpretation rules of each child session.
 
 ## Version envelope

@@ -7,10 +7,12 @@ import { buildPracticeCombinationRepairDetailViewModel } from "./practiceCombina
 const durationLabel = (duration) => duration.minimum === duration.maximum
   ? `${duration.recommended} min`
   : `${duration.minimum}-${duration.maximum} min`;
-const cardFromResolved = ({ catalogEntry: entry, availability, runnable }) => Object.freeze({
+const isExperimental = (entry) => entry?.capabilities?.includes?.("experimental") || entry?.tags?.includes?.("experimental");
+const cardFromResolved = ({ catalogEntry: entry, runnable }) => Object.freeze({
   id: entry.id, title: entry.title, description: entry.description, category: entry.category,
   categoryLabel: PRACTICE_CATEGORY_LABELS[entry.category], duration: durationLabel(entry.estimatedDurationMinutes),
-  status: runnable ? "available" : availability === "preview" ? "preview" : "planned", runnable,
+  status: runnable ? "available" : "unavailable", statusLabel: runnable ? (isExperimental(entry) ? "Experimental · ready" : "Ready to train") : "Unavailable",
+  experimental: isExperimental(entry), runnable,
 });
 
 const CURRENT_ASSESSMENT_UNAVAILABLE = Object.freeze({
@@ -78,7 +80,7 @@ function assessmentResults(report) {
   });
 }
 
-export function buildPracticeHomeViewModel({ registry, featureGate, helpAvailable = false }) {
+export function buildPracticeHomeViewModel({ registry, featureGate, helpAvailable = false, dataManagementAvailable = false }) {
   const visible = registry.listResolvedExperiments().filter(({ catalogEntry }) => catalogEntry.status !== "hidden");
   const categories = PRACTICE_EXPERIMENT_CATEGORIES
     .map((id) => ({ id, title: PRACTICE_CATEGORY_LABELS[id], experiments: visible.filter(({ catalogEntry }) => catalogEntry.category === id).sort((a, b) => a.catalogEntry.displayOrder - b.catalogEntry.displayOrder).map(cardFromResolved) }))
@@ -86,11 +88,12 @@ export function buildPracticeHomeViewModel({ registry, featureGate, helpAvailabl
     .map(Object.freeze);
   return Object.freeze({
     kind: "home", title: "Practice Lab", subtitle: "Diagnose weaknesses, train specific skills, and measure typing evidence.",
-    preview: featureGate.getSnapshot().reason === "developer-preview",
+    preview: featureGate.getSnapshot().reason === "developer",
     helpAvailable: helpAvailable === true,
-    dailyTraining: Object.freeze({ title: PRACTICE_DAILY_TRAINING.title, description: PRACTICE_DAILY_TRAINING.description, state: "planned", stateLabel: "Planned", duration: "12-minute recommended session" }),
+    dataManagementAvailable: dataManagementAvailable === true,
+    dailyTraining: Object.freeze({ title: PRACTICE_DAILY_TRAINING.title, description: PRACTICE_DAILY_TRAINING.description, state: "available", stateLabel: "Available", duration: "12-minute recommended session" }),
     assessment: cardFromResolved(registry.getResolvedExperiment("full-assessment")),
-    profile: Object.freeze({ state: "not-loaded", title: "No skill profile yet", description: "Full Assessment is recommended when its required artifacts are ready, but it is optional. Practice modes and future Skill Map use are not gated on completing it." }),
+    profile: Object.freeze({ state: "not-loaded", title: "No skill profile yet", description: "Full Assessment is optional. Practice sessions can build Skill Map evidence without requiring an assessment first." }),
     recommendations: Object.freeze({ state: "needs-data", title: "Recommendations need data", description: "After valid assessment or practice evidence exists, this section can summarize what is measured without forcing a training path." }),
     categories: Object.freeze(categories),
     analysis: Object.freeze([
@@ -112,9 +115,14 @@ export function buildExperimentDetailViewModel({ route, registry, assessmentAvai
     duration: durationLabel(entry.estimatedDurationMinutes), difficulty: entry.difficulty,
     prerequisites: [entry.requiresAssessment && "Full Assessment", entry.requiresPracticeData && "Practice data"].filter(Boolean),
     deviceSupport: [entry.supportsPhysicalKeyboard && "Physical keyboard", entry.supportsSoftwareKeyboard && "Software keyboard", entry.supportsMobile && "Mobile layouts"].filter(Boolean),
-    status: resolved.runnable ? "available" : entry.status === "preview" ? "preview" : "planned",
+    status: resolved.runnable ? "available" : "unavailable",
+    statusLabel: resolved.runnable ? "Available" : "Unavailable",
+    maturityLabel: isExperimental(entry) ? "Experimental" : null,
+    experimental: isExperimental(entry),
     runnable: resolved.runnable,
-    unavailableMessage: resolved.runnable ? "" : "This experiment is not available in the current development build.",
+    unavailableMessage: resolved.runnable ? "" : resolved.availability === "implementation-missing"
+      ? "This drill is unavailable because its runtime did not load."
+      : "This drill is unavailable right now.",
     backLabel: "Back to Practice Lab",
   };
   if (entry.id === "combination-repair") return Object.freeze({
@@ -137,16 +145,16 @@ export function buildExperimentDetailViewModel({ route, registry, assessmentAvai
 }
 
 const emptyView = (kind, title, description, emptyTitle, emptyDescription, futureItems) => Object.freeze({ kind, title, description, emptyTitle, emptyDescription, futureItems: Object.freeze(futureItems), backLabel: "Back to Practice Lab" });
-export const buildSkillMapEmptyViewModel = () => emptyView("skill-map", "Skill Map", "A future evidence view for key speed, accuracy, combinations, word fluency, punctuation, numbers, consistency, and endurance.", "No skill data", "Assessment is optional. Valid assessment and Practice sessions can both contribute evidence to the Skill Map.", ["Key speed and accuracy", "Bigrams and trigrams", "Words and punctuation", "Consistency and endurance"]);
-export const buildReviewQueueEmptyViewModel = () => emptyView("review-queue", "Review Queue", "Future review scheduling will revisit weak keys, slow combinations, problem words, punctuation transitions, and number patterns.", "No reviews scheduled", "Completed Practice sessions will eventually add evidence-based review items here.", ["Weak keys", "Slow combinations", "Problem words", "Punctuation and number patterns"]);
-export const buildProgressEmptyViewModel = () => emptyView("progress", "Progress", "A future home for training time, sustainable and burst speed, accuracy, consistency, mastered weaknesses, and experiment history.", "No training history", "Complete future Practice sessions to begin a local training history.", ["Training activity", "Speed and accuracy", "Consistency", "Mastered weaknesses"]);
-export const buildPracticeUnavailableViewModel = () => Object.freeze({ kind: "unavailable", title: "Practice Lab", description: "Practice Lab is coming soon.", backLabel: "Back" });
+export const buildSkillMapEmptyViewModel = () => emptyView("skill-map", "Skill Map", "Local evidence for keys, combinations, words, timing, accuracy, and supported typing domains.", "No skill data", "Assessment is optional. Valid assessment and Practice sessions can both contribute evidence to the Skill Map.", ["Keys and accuracy", "Bigrams and trigrams", "Words and timing", "Supported domain evidence"]);
+export const buildReviewQueueEmptyViewModel = () => emptyView("review-queue", "Review Queue", "Retention reviews appear when local evidence meets the scheduler’s eligibility requirements.", "No reviews scheduled", "Keep practicing normally. Eligible review items will appear here when a later verification is useful.", ["Weak keys", "Combinations", "Problem words", "Eligible retention checks"]);
+export const buildProgressEmptyViewModel = () => emptyView("progress", "Progress", "Local Practice history and cautious delayed response observations.", "No training history", "Complete a Practice session to begin local history.", ["Training history", "Observed response evidence", "Pending later outcomes", "Local-only records"]);
+export const buildPracticeUnavailableViewModel = () => Object.freeze({ kind: "unavailable", title: "Practice Lab", description: "Practice Lab is unavailable in this build.", backLabel: "Back" });
 
-export function buildPracticeLabViewModel({ route, registry, featureGate, helpAvailable = false, assessmentAvailability = null, assessmentRun = null, assessmentReport = null, combinationRepairState = null }) {
+export function buildPracticeLabViewModel({ route, registry, featureGate, helpAvailable = false, dataManagementAvailable = false, assessmentAvailability = null, assessmentRun = null, assessmentReport = null, combinationRepairState = null }) {
   if (!featureGate.canAccess() || route.name === "unavailable") return buildPracticeUnavailableViewModel();
   if (route.name === PRACTICE_LAB_ROUTES.EXPERIMENT_DETAIL) return buildExperimentDetailViewModel({ route, registry, assessmentAvailability, assessmentRun, assessmentReport, combinationRepairState });
   if (route.name === PRACTICE_LAB_ROUTES.SKILL_MAP) return buildSkillMapEmptyViewModel();
   if (route.name === PRACTICE_LAB_ROUTES.REVIEW_QUEUE) return buildReviewQueueEmptyViewModel();
   if (route.name === PRACTICE_LAB_ROUTES.PROGRESS) return buildProgressEmptyViewModel();
-  return buildPracticeHomeViewModel({ registry, featureGate, helpAvailable });
+  return buildPracticeHomeViewModel({ registry, featureGate, helpAvailable, dataManagementAvailable });
 }

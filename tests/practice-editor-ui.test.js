@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {practiceCustomEditorFeedback,updatePracticeCustomEditorUi,renderPracticeCustomTextDetail} from '../js/practiceLab/practiceLabRendererV31.js';
+import {practiceCustomEditorFeedback,updatePracticeCustomEditorUi,renderPracticeCustomTextDetail} from '../js/practiceLab/practiceLabRendererCurrent.js';
 const view=overrides=>({status:'ready',editor:{title:'',sourceText:''},sessionMode:'full-text',timedDurationMs:300000,sourceGraphemeCount:80,validationErrorCode:null,errorCode:null,texts:[],...overrides});
 test('initial and validation messages explain how to proceed without raw error codes',()=>{
  for(const code of ['CUSTOM_TEXT_EMPTY','CUSTOM_TEXT_TOO_SHORT','CUSTOM_TEXT_TOO_LARGE']) {
@@ -37,8 +37,10 @@ test('source text stays out of HTML and form controls keep labeled descriptions'
  assert.ok(root.innerHTML.includes('aria-pressed="true"'));
 });
 test('the highlighted range is read before the busy render',()=>{
- const controller=fs.readFileSync(new URL('../js/practiceLab/practiceLabControllerRuntimeV31.js',import.meta.url),'utf8');
- const start=controller.slice(controller.indexOf('  async function startCustom()'),controller.indexOf('  function input(event)'));
+ const controller=fs.readFileSync(new URL('../js/practiceLab/practiceLabControllerCurrent.js',import.meta.url),'utf8');
+ const startAt=controller.indexOf('async function startCustom()');
+ const endAt=controller.indexOf('function input(event)',startAt);
+ const start=controller.slice(startAt,endAt);
  assert.ok(start.indexOf('const selectionRange') < start.indexOf('rerender()'));
 });
 

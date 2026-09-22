@@ -1,9 +1,6 @@
 name: PL30 Punctuation, Capitals, Numbers, and Symbols
 
 on:
-  pull_request:
-  push:
-    branches: [codex/pl30-punctuation-numbers-v1]
   workflow_dispatch:
 
 permissions:

@@ -9,7 +9,7 @@ import { getPracticeCustomTextRenderWindow } from "./practiceCustomTextPlan.js";
 const INSERT_TYPES = new Set(["insertText", "insertCompositionText"]);
 const finite = Number.isFinite;
 const number = (value, digits = 1) => finite(value) ? Number(value).toFixed(digits).replace(/\.0$/, "") : "—";
-const percent = (value) => finite(value) ? `${number(value * (value <= 1 ? 100 : 1), 1)}%` : "—";
+const percentPoints = (value) => finite(value) ? `${number(value, 1)}%` : "—";
 
 function normalizedInput(type, value) {
   return { type, value, source: "browser-input", monotonicTimestampMs: Math.max(0, globalThis.performance?.now?.() ?? Date.now()), wallTimestampUtc: new Date().toISOString(), modifiers: { ctrl: false, meta: false, alt: false, shift: false } };
@@ -39,10 +39,10 @@ function renderActive(root, session, snapshot) {
   }
 }
 
-function renderResult(root, session, finalResult) {
+export function renderPracticeCustomTextResult(root, session, finalResult) {
   const summary = finalResult?.summary ?? {};
   const after = summary.afterMetrics ?? {};
-  renderPracticeSessionMarkup(root, `<section class="screen practice-lab-screen" data-practice-view="custom-text-result"><div class="practice-lab-shell"><main class="practice-lab-detail"><div class="eyebrow">Custom Text · local result</div><h1>Practice complete</h1><dl class="practice-real-text-result-grid"><div><dt>WPM</dt><dd>${number(after.wpm ?? summary.wpm)}</dd></div><div><dt>Raw WPM</dt><dd>${number(after.rawWpm ?? summary.rawWpm)}</dd></div><div><dt>Accuracy</dt><dd>${percent(after.acceptedInsertionAccuracy ?? summary.accuracy)}</dd></div><div><dt>First-pass accuracy</dt><dd>${percent(after.firstPassAccuracy)}</dd></div><div><dt>Characters</dt><dd>${after.charactersTyped ?? summary.typedCharacterCount ?? 0}</dd></div><div><dt>Words encountered</dt><dd>${after.wordsEncountered ?? summary.completedWordCount ?? 0}</dd></div><div><dt>Corrections</dt><dd>${after.correctionInputs ?? "—"}</dd></div><div><dt>Error episodes</dt><dd>${after.errorEpisodeCount ?? "—"}</dd></div></dl><div class="practice-lab-notice">These are session-local descriptive metrics. Custom Text does not update standardized ability, transfer, benchmark, retention, mastery, PBs, or rankings.</div><div class="practice-custom-actions"><button type="button" data-custom-text-session-action="again">PRACTICE AGAIN</button><button type="button" data-custom-text-session-action="finish">BACK TO CUSTOM TEXT</button></div></main></div></section>`);
+  renderPracticeSessionMarkup(root, `<section class="screen practice-lab-screen" data-practice-view="custom-text-result"><div class="practice-lab-shell"><main class="practice-lab-detail"><div class="eyebrow">Custom Text · local result</div><h1>Practice complete</h1><dl class="practice-real-text-result-grid"><div><dt>WPM</dt><dd>${number(after.wpm ?? summary.wpm)}</dd></div><div><dt>Raw WPM</dt><dd>${number(after.rawWpm ?? summary.rawWpm)}</dd></div><div><dt>Accuracy</dt><dd>${percentPoints(after.acceptedInsertionAccuracy ?? summary.accuracy)}</dd></div><div><dt>First-pass accuracy</dt><dd>${percentPoints(after.firstPassAccuracy)}</dd></div><div><dt>Characters</dt><dd>${after.charactersTyped ?? summary.typedCharacterCount ?? 0}</dd></div><div><dt>Words encountered</dt><dd>${after.wordsEncountered ?? summary.completedWordCount ?? 0}</dd></div><div><dt>Corrections</dt><dd>${after.correctionInputs ?? "—"}</dd></div><div><dt>Error episodes</dt><dd>${after.errorEpisodeCount ?? "—"}</dd></div></dl><div class="practice-lab-notice">These are session-local descriptive metrics. Custom Text does not update standardized ability, transfer, benchmark, retention, mastery, PBs, or rankings.</div><div class="practice-custom-actions"><button type="button" data-custom-text-session-action="again">PRACTICE AGAIN</button><button type="button" data-custom-text-session-action="finish">BACK TO CUSTOM TEXT</button></div></main></div></section>`);
   root.querySelector?.("[data-custom-text-session-action='again']")?.focus?.({ preventScroll: true });
 }
 
@@ -81,7 +81,7 @@ export async function mountPracticeCustomTextSession({ root, session, runtime = 
     try {
       finalResult = await engine.complete();
       if (finalResult?.summary?.status === "completed") await runtime?.markPractised?.(session, finalResult.summary.completedAtUtc).catch(() => false);
-      renderResult(root, session, finalResult);
+      renderPracticeCustomTextResult(root, session, finalResult);
     } catch (error) { logger?.warn?.("Custom Text completion failed", error); finishing = false; }
   };
   const scheduleTimedTick = () => {

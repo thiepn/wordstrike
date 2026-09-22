@@ -33,7 +33,8 @@ async function openResearch(page){
   await page.waitForFunction(()=>!document.querySelector('[data-practice-view="research"] [role="status"]')?.textContent.includes('Loading local research state'));
 }
 try{
-  const context=await browser.newContext({viewport:{width:1280,height:900},serviceWorkers:'block'});
+  const width=Number(process.env.PRACTICE_WIDTH??1280);
+  const context=await browser.newContext({viewport:{width,height:900},hasTouch:width<600,serviceWorkers:'block'});
   await context.addInitScript(()=>{
     localStorage.setItem('wordstrike.onboarding.general.v3','seen');
     localStorage.setItem('practice-research-preserve','keep');
@@ -44,7 +45,7 @@ try{
     }
   });
   const page=await context.newPage();page.setDefaultTimeout(30000);page.on('pageerror',error=>report.errors.push(error.message));
-  await page.goto(`http://127.0.0.1:${server.address().port}/`,{waitUntil:'domcontentloaded'});
+  await page.goto(`http://127.0.0.1:${server.address().port}/?dev=1`,{waitUntil:'domcontentloaded'});
   await openLab(page);
   report.fillers=await page.evaluate(()=>Object.keys(localStorage).filter(k=>k.startsWith('research-quota-')).length);
   // Practice home is intentionally lazy and may not create a profile until a

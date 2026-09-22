@@ -1,10 +1,7 @@
 name: Assessment Input Regression
 on:
-  push:
-    branches: [main, fix/assessment-typing]
-    paths: ['js/practiceLab/practiceAssessmentSessionHost.js', 'js/practiceLab/practiceAssessmentInput.js', 'tests/browser/assessment_input.mjs', 'tests/practice-assessment-input.test.js', '.github/workflows/assessment-input.yml', 'sw.js']
-  pull_request:
-    paths: ['js/practiceLab/practiceAssessmentSessionHost.js', 'js/practiceLab/practiceAssessmentInput.js', 'tests/browser/assessment_input.mjs', 'tests/practice-assessment-input.test.js', '.github/workflows/assessment-input.yml']
+  workflow_dispatch:
+
 permissions:
   contents: read
 concurrency:
@@ -36,13 +33,22 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        browser: [chromium, firefox, webkit]
+        include:
+          - browser: chromium
+            width: 1280
+          - browser: chromium
+            width: 390
+          - browser: firefox
+            width: 1280
+          - browser: webkit
+            width: 390
     container:
       image: mcr.microsoft.com/playwright:v1.57.0-noble
       options: --ipc=host
     env:
       HOME: /root
       PRACTICE_BROWSER: ${{ matrix.browser }}
+      PRACTICE_WIDTH: ${{ matrix.width }}
       PRACTICE_FULL_STORAGE: '1'
     steps:
       - uses: actions/checkout@v4
@@ -54,7 +60,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: assessment-input-${{ matrix.browser }}
+          name: assessment-input-${{ matrix.browser }}-${{ matrix.width }}
           path: browser-artifacts/assessment-input/
           retention-days: 7
   live:
@@ -64,13 +70,22 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        browser: [chromium, firefox, webkit]
+        include:
+          - browser: chromium
+            width: 1280
+          - browser: chromium
+            width: 390
+          - browser: firefox
+            width: 1280
+          - browser: webkit
+            width: 390
     container:
       image: mcr.microsoft.com/playwright:v1.57.0-noble
       options: --ipc=host
     env:
       HOME: /root
       PRACTICE_BROWSER: ${{ matrix.browser }}
+      PRACTICE_WIDTH: ${{ matrix.width }}
       PRACTICE_FULL_STORAGE: '1'
       PRACTICE_URL: https://thiepn.dev/wordstrike/
     steps:
@@ -100,6 +115,6 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: assessment-live-${{ matrix.browser }}
+          name: assessment-live-${{ matrix.browser }}-${{ matrix.width }}
           path: browser-artifacts/assessment-input/
           retention-days: 7

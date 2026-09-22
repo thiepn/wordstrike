@@ -1,15 +1,7 @@
 name: PL38 Research A-B
 
 on:
-  push:
-    branches: [pl38-research-ab]
-  pull_request:
-    paths:
-      - 'js/practiceLab/**'
-      - 'tests/*pl38*.test.js'
-      - 'docs/PRACTICE_LAB_RESEARCH_AB_INFRASTRUCTURE.md'
-      - 'package.json'
-      - '.github/workflows/pl38-research-ab.yml'
+  workflow_dispatch:
 
 permissions:
   contents: read

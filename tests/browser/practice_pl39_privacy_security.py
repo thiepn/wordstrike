@@ -116,7 +116,7 @@ def run():
                 import('/js/practiceLab/practiceMemoryStore.js'),
                 import('/js/practiceLab/practiceCustomTextRepository.js'),
                 import('/js/practiceLab/practiceIntegrityAudit.js'),
-                import('/js/practiceLab/practiceLabRendererV31.js'),
+                import('/js/practiceLab/practiceLabRendererCurrent.js'),
                 import('/js/practiceLab/practiceResearchUi.js'),
               ]);
               const profileId = 'practice-profile_pl39-browser-profile-12345678';

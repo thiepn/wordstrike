@@ -4,7 +4,7 @@ import { createPracticeFeatureGate } from "../js/practiceLab/practiceFeatureGate
 import { createPracticeExperimentRegistry } from "../js/practiceLab/practiceExperimentRegistry.js";
 import { registerPracticeWeakKeysExperiment } from "../js/practiceLab/practiceWeakKeysExperiment.js";
 import { buildPracticeLabViewModelV21 } from "../js/practiceLab/practiceLabViewModelV21.js";
-import { renderPracticeLabV21 } from "../js/practiceLab/practiceLabRendererV21.js";
+import { renderPracticeLabV21 } from "../js/practiceLab/practiceLabRendererCurrent.js";
 import {
   renderPracticeWeakKeysResult,
   renderPracticeWeakKeysSessionSnapshot,

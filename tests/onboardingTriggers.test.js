@@ -13,12 +13,13 @@ assert.match(main, /openAutomaticTutorial\("endless"/);
 assert.doesNotMatch(main, /openAutomaticTutorial\("daily"/);
 assert.match(main, /openAutomaticTutorial\("boss"/);
 assert.match(main, /openAutomaticTutorial\("leaderboards"/);
+assert.match(main, /help:\s*\(\)\s*=>\s*openTutorial\("practice",\s*\{\s*source:\s*"help"\s*\}\)/);
 assert.match(main, /safeLevel % 10 === 0[\s\S]*openAutomaticTutorial\("boss"[\s\S]*return;/);
 assert.match(main, /typedBuffer === getSpeedTestCurrentWord\(speedState\)/);
 assert.match(main, /window\.wordstrikeOnboarding = Object\.freeze/);
 assert.match(main, /openAutomaticTutorial\("general", \(choice\) =>/);
 assert.doesNotMatch(main, /openAutomaticTutorial\("general"[\s\S]{0,300}openLevelSelect/);
 assert.doesNotMatch(onboardingModules.join("\n"), /beginSession|startSpeedTest|prepareResultSubmission|submitCurrentResult|recordCompletedSession/);
-assert.doesNotMatch(onboardingModules.join("\n"), /Daily Strike|\bdaily\b/i);
+assert.doesNotMatch(onboardingModules[1], /^\s*daily:\s*Object\.freeze/m);
 
 console.log("Current first-title, mode, boss, and leaderboard tutorial triggers are one-shot and retired Daily has no onboarding trigger.");

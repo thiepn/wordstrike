@@ -22,7 +22,8 @@ await new Promise(resolve=>server.once('listening',resolve));
 const browser=await chromium.launch();
 const report={status:'FAIL'};
 try{
-  const context=await browser.newContext({viewport:{width:900,height:700}});
+  const width=Number(process.env.PRACTICE_WIDTH??900);
+  const context=await browser.newContext({viewport:{width,height:700},hasTouch:width<600});
   const page=await context.newPage();await page.goto(`http://127.0.0.1:${server.address().port}/harness`);
   const result=await page.evaluate(async()=>{
     const {renderPracticeCoachReviewSnapshot}=await import('/js/practiceLab/practiceCoachReviewSessionHost.js');

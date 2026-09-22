@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { renderPracticeCommonWordsDetail } from "../js/practiceLab/practiceLabRendererV28.js";
+import { renderPracticeCommonWordsDetail } from "../js/practiceLab/practiceLabRendererCurrent.js";
 import { renderPracticeCommonWordsResult } from "../js/practiceLab/practiceCommonWordsSessionHost.js";
 
 function fakeRoot() {
@@ -68,7 +68,7 @@ test("PL28 Check result presents canonical PL13 estimate, 95% model interval, co
     summary: {
       afterMetrics: {
         wpm: 83.4,
-        accuracy: 0.97,
+        accuracy: 97,
         bandMetrics: {
           core: { wholeWordFirstPassAccuracy: 0.98, launchResidualMedianMs: 10, internalResidualMedianMs: 5, launchDisfluencyRate: 0.02, internalDisfluencyRate: 0.01 },
           frequent: { wholeWordFirstPassAccuracy: 0.97, launchResidualMedianMs: 11, internalResidualMedianMs: 6, launchDisfluencyRate: 0.03, internalDisfluencyRate: 0.02 },
@@ -91,8 +91,9 @@ test("PL28 Check result presents canonical PL13 estimate, 95% model interval, co
   assert.match(root.innerHTML, /<dt>Common-word typing ability<\/dt><dd>81\.2 WPM<\/dd>/);
   assert.match(root.innerHTML, /<dt>95% model interval<\/dt><dd>72\.5–90\.9 WPM<\/dd>/);
   assert.match(root.innerHTML, /<dt>Confidence<\/dt><dd>medium<\/dd>/);
+  assert.match(root.innerHTML, /<dt>Accuracy<\/dt><dd>97%<\/dd>/);
   assert.match(root.innerHTML, /<h2>Frequency-band profile<\/h2>/);
-  assert.match(root.innerHTML, /<th>First-pass accuracy<\/th><th>Starting words<\/th><th>Inside words<\/th>/);
+  assert.match(root.innerHTML, /<th>First-pass accuracy<\/th><th>Launch residual \(ms\)<\/th><th>Internal residual \(ms\)<\/th>/);
   assert.match(root.innerHTML, /<th scope="row">Broad<\/th>/);
   assert.match(root.innerHTML, /<h2>Typing breadth coverage<\/h2>/);
   assert.doesNotMatch(root.innerHTML, /Vocabulary Breadth Score|vocabulary level|You know \d|Your vocabulary is limited|You don't know broad vocabulary/i);

@@ -20,7 +20,8 @@ await new Promise(resolve=>server.once('listening',resolve));
 const browser=await chromium.launch();
 const report={status:'FAIL',letters:[],errors:[]};
 try{
-  const context=await browser.newContext({viewport:{width:1280,height:900},serviceWorkers:'block'});
+  const width=Number(process.env.PRACTICE_WIDTH??1280);
+  const context=await browser.newContext({viewport:{width,height:900},hasTouch:width<600,serviceWorkers:'block'});
   await context.addInitScript(()=>{
     localStorage.setItem('wordstrike.onboarding.general.v3','seen');
     let i=0;
@@ -61,12 +62,32 @@ try{
   const input=page.locator('[data-weak-keys-input]');await input.waitFor({state:'visible'});
   assert.ok(await input.evaluate(el=>el===document.activeElement),'B session did not receive typing focus');
   await input.evaluate(el=>window.__weakCapture=el);
+  let sawVisibleWhitespaceCaret=false;
   for(let i=0;i<40;i++){
     const current=page.locator('.is-current').first();
-    await current.waitFor();
-    const expected=(await current.textContent()).replaceAll('\u00a0',' ');
+    await current.waitFor({state:'attached'});
+    const raw=await current.textContent();
+    const expected=raw.replaceAll('\u00a0',' ');
+    if(expected===' '){
+      const geometry=await current.evaluate(el=>{
+        const rect=el.getBoundingClientRect();
+        const passage=el.closest('.practice-weak-key-typing');
+        const clip=passage?.getBoundingClientRect();
+        const style=getComputedStyle(el);
+        return {
+          width:rect.width,height:rect.height,top:rect.top,bottom:rect.bottom,
+          clipTop:clip?.top??null,clipBottom:clip?.bottom??null,
+          display:style.display,minWidth:style.minWidth,minInlineSize:style.minInlineSize,
+          scrollTop:passage?.scrollTop??null,scrollHeight:passage?.scrollHeight??null,clientHeight:passage?.clientHeight??null,
+          visible:Boolean(clip)&&rect.width>0&&rect.height>0&&rect.bottom>clip.top&&rect.top<clip.bottom,
+        };
+      });
+      assert.ok(geometry.visible,`Active Weak Keys whitespace caret must remain visible: ${JSON.stringify(geometry)}`);
+      sawVisibleWhitespaceCaret=true;
+    }
     await page.keyboard.insertText(expected);
   }
+  assert.equal(sawVisibleWhitespaceCaret,true,'B regression passage must certify at least one active whitespace caret');
   const currentBefore=await page.locator('.is-current').first().textContent();
   await page.keyboard.insertText(currentBefore==='x'?'z':'x');
   await page.keyboard.press('Backspace');
