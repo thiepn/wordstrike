@@ -125,15 +125,6 @@ try{
       indexLoader.loadManifest({language:'en',corpusVersion:1}),
     ]);
     const targetIndex=createPracticeTargetIndex({loader:indexLoader,corpusManifest,indexManifest});
-    const candidateBase={
-      statId:createSkillStatId(initialized.profile.profileId,initialized.context.contextId,'word','the'),entityType:'word',entityKey:'the',
-      limiterStatus:'confirmed',phenotype:'slow',hierarchyStatus:'independent',
-      priorityScore:90,impactScore:80,limiterConfidence:.95,weaknessScore:90,
-      masteryStage:'learning',saturationStatus:'not-detected',marginalGainBand:'high',
-      bossTargetUtility:90,
-      bossTheme:Object.freeze({...PRACTICE_WEAKNESS_BOSS_ARCHETYPES.slow}),
-      reasonCodes:Object.freeze(['confirmed-limiter','high-impact','learning-headroom','independent-limiter','slow-pattern']),
-    };
     const corpusBinding=Object.freeze({
       corpusId:corpusManifest.corpusId,
       corpusVersion:corpusManifest.corpusVersion,
@@ -141,12 +132,32 @@ try{
       manifestHash:corpusManifest.buildChecksum,
       language:'en',
     });
-    const readiness=await inspectPracticeWeaknessBossContentReadiness({
-      sessionId:'practice-session_boss-browser-preflight-12345678',context:initialized.context,targetIndex,contentItems:trainingCorpus.items,corpusBinding,
-      target:candidateBase,targetSource:'recommended',language:initialized.context.dataLocale,
-    });
-    if(readiness.ready!==true)throw new Error(`Deterministic Weakness Boss fixture failed production content preflight: ${readiness.errorCode??'unknown'}`);
-    const candidate=Object.freeze({...candidateBase,contentReady:true});
+    const fixtureWords=Object.freeze(['because','there','people','about','other','which','their','after','before','where']);
+    const readinessChecks=[];
+    let candidate=null;
+    for(const entityKey of fixtureWords){
+      const candidateBase={
+        statId:createSkillStatId(initialized.profile.profileId,initialized.context.contextId,'word',entityKey),entityType:'word',entityKey,
+        limiterStatus:'confirmed',phenotype:'slow',hierarchyStatus:'independent',
+        priorityScore:90,impactScore:80,limiterConfidence:.95,weaknessScore:90,
+        masteryStage:'learning',saturationStatus:'not-detected',marginalGainBand:'high',
+        bossTargetUtility:90,
+        bossTheme:Object.freeze({...PRACTICE_WEAKNESS_BOSS_ARCHETYPES.slow}),
+        reasonCodes:Object.freeze(['confirmed-limiter','high-impact','learning-headroom','independent-limiter','slow-pattern']),
+      };
+      try{
+        const readiness=await inspectPracticeWeaknessBossContentReadiness({
+          sessionId:`practice-session_boss-browser-preflight-${entityKey}-12345678`,context:initialized.context,targetIndex,contentItems:trainingCorpus.items,corpusBinding,
+          target:candidateBase,targetSource:'recommended',language:initialized.context.dataLocale,
+        });
+        readinessChecks.push({entityKey,ready:readiness.ready===true,errorCode:readiness.errorCode??null});
+        if(readiness.ready===true){candidate=Object.freeze({...candidateBase,contentReady:true});break;}
+      }catch(error){
+        readinessChecks.push({entityKey,ready:false,errorCode:error?.code??error?.message??'preflight-error'});
+      }
+    }
+    if(!candidate)throw new Error(`No bounded Weakness Boss word fixture passed production preflight: ${JSON.stringify(readinessChecks)}`);
+    window.__bossFixture=Object.freeze({entityType:candidate.entityType,entityKey:candidate.entityKey,readinessChecks:Object.freeze(readinessChecks)});
     const weaknessBossRuntime=Object.freeze({
       async loadCandidates(){
         return Object.freeze({status:'ready',available:true,candidateCount:1,candidates:Object.freeze([candidate]),recommendedCandidate:candidate,profileId:initialized.profile.profileId,contextId:initialized.context.contextId});
