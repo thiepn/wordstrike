@@ -89,7 +89,7 @@ test("Phase 9 keeps canonical architecture and route-lazy heavy runtimes", async
     "practiceCustomTextSessionHost.js",
     "practiceAssessmentSessionHost.js",
   ]) {
-    assert.ok(controller.includes(`import("./${runtime}")`), runtime);
+    assert.ok(controller.includes(`import("./${runtime}")`) || controller.includes(`import(\'./${runtime}\')`), runtime);
   }
 });
 
