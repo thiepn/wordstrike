@@ -12,12 +12,18 @@ import {
 import { dailySubmission } from "./leaderboardSubmissionFixtures.js";
 import { getModeDefinition, MODE_IDS } from "../js/modes.js";
 
-const ACTIVE_BOARDS = [
+const PRE_FLOW_ACTIVE_BOARDS = [
   "campaign-highest-level-v1",
   "typing-60s-english200-v1",
   "typing-15s-english200-v1",
   "endless-v1",
   "arcade-rush-v1",
+];
+const ACTIVE_BOARDS = [
+  ...PRE_FLOW_ACTIVE_BOARDS,
+  "flow-quick-v1",
+  "flow-standard-v1",
+  "flow-long-v1",
 ];
 
 assert.deepEqual(PUBLIC_BOARD_KEYS, ACTIVE_BOARDS);
@@ -65,7 +71,7 @@ const submitRpc = migration.slice(
 const readRpc = migration.slice(migration.indexOf("create or replace function public.get_public_leaderboard"));
 assert.doesNotMatch(submitRpc, /'daily-strike-v1'/);
 assert.doesNotMatch(readRpc, /'daily-strike-v1'/);
-for (const boardKey of ACTIVE_BOARDS) {
+for (const boardKey of PRE_FLOW_ACTIVE_BOARDS) {
   assert.match(submitRpc, new RegExp(`'${boardKey}'`));
   assert.match(readRpc, new RegExp(`'${boardKey}'`));
 }
@@ -95,4 +101,4 @@ assert.equal(getModeDefinition(MODE_IDS.FLOW).enabled, true);
 assert.equal(getModeDefinition(MODE_IDS.FLOW).status, "available");
 assert.equal(getModeDefinition(MODE_IDS.FLOW).route, "flow-release");
 
-console.log("AR15 backend retirement remains intact while Phase 13 exposes Flow publicly and preserves archived Rush/Daily data.");
+console.log("AR15 Daily retirement remains immutable while current backend contracts add Flow boards and preserve archived Rush/Daily data.");
