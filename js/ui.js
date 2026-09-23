@@ -1559,9 +1559,13 @@ export function renderGlobalSubmissionMarkup(state = {}, { localResultStored: st
         ? "Global submission is unavailable while offline.<span>Queued for automatic retry. Your result is saved locally.</span>"
         : "Global submission is unavailable while offline.<span>Submission queued for retry, but this result was not saved to local history.</span>";
     } else {
-      message = stored
-        ? "Global submission is unavailable while offline.<span>Your result is saved locally. Keep this page open to retry the global submission.</span>"
-        : "Global submission is unavailable while offline.<span>This result was not saved locally or queued. Keep this page open and retry.</span>";
+      message = state.retryPersistenceError
+        ? stored
+          ? "Global submission is unavailable while offline.<span>Your result is saved locally, but automatic retry could not be queued. Keep this page open and retry.</span>"
+          : "Global submission is unavailable while offline.<span>This result was not saved locally, and automatic retry could not be queued. Keep this page open and retry.</span>"
+        : stored
+          ? "Global submission is unavailable while offline.<span>Your result is saved locally. Keep this page open to retry the global submission.</span>"
+          : "Global submission is unavailable while offline.<span>This result was not saved locally or queued. Keep this page open and retry.</span>";
     }
     buttons = submissionButton("RETRY SUBMISSION", "retry-global-score") + submissionButton(viewLabel, viewAction);
   } else if (state.status === "error") {
@@ -1570,9 +1574,13 @@ export function renderGlobalSubmissionMarkup(state = {}, { localResultStored: st
         ? "Global submission failed.<span>Queued for automatic retry. Your result is saved locally.</span>"
         : "Global submission failed.<span>Submission queued for retry, but this result was not saved to local history.</span>";
     } else {
-      message = stored
-        ? "Global submission failed.<span>Your result is saved locally. Keep this page open to retry the global submission.</span>"
-        : "Global submission failed.<span>This result was not saved locally or queued. Keep this page open and retry.</span>";
+      message = state.retryPersistenceError
+        ? stored
+          ? "Global submission failed.<span>Your result is saved locally, but automatic retry could not be queued. Keep this page open and retry.</span>"
+          : "Global submission failed.<span>This result was not saved locally, and automatic retry could not be queued. Keep this page open and retry.</span>"
+        : stored
+          ? "Global submission failed.<span>Your result is saved locally. Keep this page open to retry the global submission.</span>"
+          : "Global submission failed.<span>This result was not saved locally or queued. Keep this page open and retry.</span>";
     }
     buttons = submissionButton("RETRY SUBMISSION", "retry-global-score") + submissionButton(viewLabel, viewAction);
   }
