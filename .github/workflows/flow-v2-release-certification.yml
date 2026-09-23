@@ -3,6 +3,12 @@ name: Flow V2 production certification
 on:
   pull_request:
     paths:
+      - 'sw.js'
+      - 'tests/arcade-rush-*.test.js'
+      - 'tests/keyboardNavigation.test.js'
+      - 'tests/practice-offline-shell.test.js'
+      - 'tests/ui3-mode-select.test.js'
+      - '.github/workflows/test.yml'
       - 'js/flow/**'
       - 'js/leaderboard*.js'
       - 'js/pendingResult*.js'
@@ -22,6 +28,12 @@ on:
   push:
     branches: [main]
     paths:
+      - 'sw.js'
+      - 'tests/arcade-rush-*.test.js'
+      - 'tests/keyboardNavigation.test.js'
+      - 'tests/practice-offline-shell.test.js'
+      - 'tests/ui3-mode-select.test.js'
+      - '.github/workflows/test.yml'
       - 'js/flow/**'
       - 'js/leaderboard*.js'
       - 'js/pendingResult*.js'
@@ -72,6 +84,12 @@ jobs:
           node tests/submissionOutbox.test.js
           node tests/submissionOutboxCoordinator.test.js
           node tests/pendingResultSubmission.test.js
+          node tests/arcade-rush-final-certification.test.js
+          node tests/arcade-rush-production-cutover.test.js
+          node tests/arcade-rush-retire-daily-backend.test.js
+          node tests/keyboardNavigation.test.js
+          node tests/practice-offline-shell.test.js
+          node tests/ui3-mode-select.test.js
 
   browser:
     runs-on: ubuntu-latest
