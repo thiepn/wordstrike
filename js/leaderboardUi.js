@@ -20,6 +20,7 @@ function boardKind(boardKey) {
   if (boardKey === LEADERBOARD_BOARDS.CAMPAIGN) return "campaign";
   if ([LEADERBOARD_BOARDS.TYPING_60, LEADERBOARD_BOARDS.TYPING_15].includes(boardKey)) return "typing";
   if (boardKey === LEADERBOARD_BOARDS.ARCADE_RUSH) return "arcade-rush";
+  if ([LEADERBOARD_BOARDS.FLOW_QUICK, LEADERBOARD_BOARDS.FLOW_STANDARD, LEADERBOARD_BOARDS.FLOW_LONG].includes(boardKey)) return "flow";
   return "endless";
 }
 
@@ -27,6 +28,7 @@ function metricText(entry, kind) {
   if (kind === "campaign") return `Level ${entry.level} · Grade ${entry.grade} · ${entry.accuracy.toFixed(1)}%`;
   if (kind === "typing") return `${entry.wpm.toFixed(1)} WPM · ${entry.accuracy.toFixed(1)}% · ${entry.rawWpm.toFixed(1)} raw`;
   if (kind === "arcade-rush") return `${entry.score.toLocaleString()} pts · ${entry.accuracy.toFixed(1)}% · ${duration(entry.durationMs)}`;
+  if (kind === "flow") return `${entry.score.toLocaleString()} pts · ${entry.wpm.toFixed(1)} WPM · ${entry.accuracy.toFixed(1)}% · ${entry.consistency?.toFixed?.(0) ?? 0} consistency`;
   return `Stage ${entry.stage} · ${entry.score.toLocaleString()} pts · ${entry.accuracy.toFixed(1)}%`;
 }
 
@@ -34,6 +36,7 @@ function columns(kind) {
   if (kind === "campaign") return ["LEVEL", "GRADE", "ACCURACY"];
   if (kind === "typing") return ["WPM", "ACCURACY", "RAW WPM"];
   if (kind === "arcade-rush") return ["SCORE", "ACCURACY", "TIME"];
+  if (kind === "flow") return ["SCORE", "WPM", "ACCURACY"];
   return ["STAGE", "SCORE", "ACCURACY"];
 }
 
@@ -41,6 +44,7 @@ function values(entry, kind) {
   if (kind === "campaign") return [entry.level, entry.grade, `${entry.accuracy.toFixed(1)}%`];
   if (kind === "typing") return [entry.wpm.toFixed(1), `${entry.accuracy.toFixed(1)}%`, entry.rawWpm.toFixed(1)];
   if (kind === "arcade-rush") return [entry.score.toLocaleString(), `${entry.accuracy.toFixed(1)}%`, duration(entry.durationMs)];
+  if (kind === "flow") return [entry.score.toLocaleString(), entry.wpm.toFixed(1), `${entry.accuracy.toFixed(1)}%`];
   return [entry.stage, entry.score.toLocaleString(), `${entry.accuracy.toFixed(1)}%`];
 }
 
@@ -88,6 +92,7 @@ function emptyModeLabel(kind) {
   if (kind === "typing") return "Typing Test";
   if (kind === "campaign") return "Campaign";
   if (kind === "arcade-rush") return "Arcade Rush";
+  if (kind === "flow") return "Flow";
   return "Endless";
 }
 
@@ -114,7 +119,9 @@ export function renderLeaderboards(
   const inferredSelection = getLeaderboardSelection(boardKey);
   const category = state.selectedCategory || inferredSelection.selectedCategory;
   const typingDuration = state.selectedTypingDuration || inferredSelection.selectedTypingDuration;
+  const flowLength = state.selectedFlowLength || inferredSelection.selectedFlowLength || "standard";
   const typing = category === LEADERBOARD_CATEGORIES.TYPING;
+  const flow = category === LEADERBOARD_CATEGORIES.FLOW;
   const rush = boardKey === LEADERBOARD_BOARDS.ARCADE_RUSH;
   const meta = rush
     ? "LEGACY BOARD // RETIRED MODE // ALL-TIME"
@@ -122,11 +129,14 @@ export function renderLeaderboards(
         ? "HIGHEST SUCCESSFULLY COMPLETED LEVEL"
         : typing
           ? `ENGLISH 200 // ${typingDuration} SECONDS`
-          : "STANDARD ENDLESS";
+          : flow
+            ? `LONGFORM FLOW // ${flowLength.toUpperCase()} // SCORE · ACCURACY · WPM`
+            : "STANDARD ENDLESS";
   const tabs = [
     [LEADERBOARD_CATEGORIES.CAMPAIGN, "CAMPAIGN", "leaderboard-select-campaign"],
     [LEADERBOARD_CATEGORIES.TYPING, "TYPING TEST", "leaderboard-select-typing"],
     [LEADERBOARD_CATEGORIES.ENDLESS, "ENDLESS", "leaderboard-select-endless"],
+    [LEADERBOARD_CATEGORIES.FLOW, "FLOW", "leaderboard-select-flow"],
   ];
   app().innerHTML = `<section class="screen leaderboards-screen"><main class="leaderboards-panel">
     <button type="button" class="screen-back-button" data-action="leaderboard-main-menu" aria-label="Go back">BACK</button>
@@ -139,6 +149,11 @@ export function renderLeaderboards(
     ${typing ? `<nav class="leaderboard-duration-tabs" aria-label="Typing Test duration" role="tablist">
       <button role="tab" class="${typingDuration === 60 ? "selected" : ""}" data-action="leaderboard-typing-select-60" aria-selected="${typingDuration === 60}" tabindex="${typingDuration === 60 ? "0" : "-1"}">60 SECONDS</button>
       <button role="tab" class="${typingDuration === 15 ? "selected" : ""}" data-action="leaderboard-typing-select-15" aria-selected="${typingDuration === 15}" tabindex="${typingDuration === 15 ? "0" : "-1"}">15 SECONDS</button>
+    </nav>` : ""}
+    ${flow ? `<nav class="leaderboard-duration-tabs" aria-label="Flow run length" role="tablist">
+      <button role="tab" class="${flowLength === "quick" ? "selected" : ""}" data-action="leaderboard-flow-select-quick" aria-selected="${flowLength === "quick"}" tabindex="${flowLength === "quick" ? "0" : "-1"}">QUICK</button>
+      <button role="tab" class="${flowLength === "standard" ? "selected" : ""}" data-action="leaderboard-flow-select-standard" aria-selected="${flowLength === "standard"}" tabindex="${flowLength === "standard" ? "0" : "-1"}">STANDARD</button>
+      <button role="tab" class="${flowLength === "long" ? "selected" : ""}" data-action="leaderboard-flow-select-long" aria-selected="${flowLength === "long"}" tabindex="${flowLength === "long" ? "0" : "-1"}">LONG</button>
     </nav>` : ""}
     <div class="leaderboard-board-meta">${meta}</div>
     ${authenticationPanel(authState, profileState)}
