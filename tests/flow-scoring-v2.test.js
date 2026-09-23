@@ -9,6 +9,8 @@ import {
 
 const perfect100 = calculateFlowScoreV2({ wpm: 100, accuracy: 100, consistency: 100 });
 assert.equal(perfect100.score, 100000);
+assert.equal(perfect100.wpm, 100);
+assert.equal(perfect100.scoredWpm, 100);
 assert.equal(perfect100.accuracyMultiplier, 1);
 assert.equal(perfect100.consistencyMultiplier, 1);
 
@@ -25,6 +27,10 @@ assert.ok(sloppy95.score > 75000 && sloppy95.score < 78000, sloppy95);
 
 const inconsistent = calculateFlowScoreV2({ wpm: 100, accuracy: 100, consistency: 0 });
 assert.equal(inconsistent.score, 85000, "consistency can modify only the final 15% of score");
+const superhumanInput = calculateFlowScoreV2({ wpm: 999, accuracy: 100, consistency: 100 });
+assert.equal(superhumanInput.wpm, 999);
+assert.equal(superhumanInput.scoredWpm, 300);
+assert.equal(superhumanInput.score, 300000);
 assert.equal(FLOW_SCORE_V2_RULES.accuracyExponent, 5);
 assert.equal(FLOW_SCORE_V2_RULES.consistencyFloor, 0.85);
 assert.equal(FLOW_SCORE_V2_RULES.consistencyWeight, 0.15);
