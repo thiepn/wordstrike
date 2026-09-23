@@ -234,7 +234,7 @@ function decorate() {
 
 if (enabled) {
   const app = document.querySelector("#app");
-  if (app) new MutationObserver(() => queueMicrotask(decorate)).observe(app, { childList: true, subtree: true });
+  if (app) new MutationObserver(() => queueMicrotask(decorate)).observe(app, { childList: true });
   queueMicrotask(decorate);
 }
 

@@ -170,8 +170,9 @@ function finalEntry(run, index) {
   return entry && entry.index === index ? entry : null;
 }
 
-function latency(run, fromIndex, toIndex) {
-  if (cadenceBoundarySet(run).has(fromIndex)) return null;
+function latency(run, fromIndex, toIndex, excludedAfterIndexes = null) {
+  const boundaries = excludedAfterIndexes || cadenceBoundarySet(run);
+  if (boundaries.has(fromIndex)) return null;
   const from = finalEntry(run, fromIndex);
   const to = finalEntry(run, toIndex);
   if (!from || !to) return null;
@@ -193,6 +194,7 @@ function previousWordIndex(text, index) {
 
 function collectFeatureLatencies(run) {
   const text = run?.passage || "";
+  const excludedAfterIndexes = cadenceBoundarySet(run);
   const groups = new Map([
     ["word-transition", { label: "Word transitions", values: [] }],
     ["after-comma", { label: "After commas", values: [] }],
@@ -212,25 +214,25 @@ function collectFeatureLatencies(run) {
     if (/[A-Za-z0-9]/.test(character) && (index === 0 || !/[A-Za-z0-9'’]/.test(text[index - 1]))) {
       const previous = previousWordIndex(text, index);
       if (previous >= 0) {
-        const value = latency(run, previous, index);
+        const value = latency(run, previous, index, excludedAfterIndexes);
         if (value != null) groups.get("word-transition").values.push(value);
       }
     }
 
     if (/[A-Z]/.test(character) && index > 0) {
-      const value = latency(run, index - 1, index);
+      const value = latency(run, index - 1, index, excludedAfterIndexes);
       if (value != null) groups.get("capitals").values.push(value);
     }
     if (/[0-9]/.test(character) && index > 0) {
-      const value = latency(run, index - 1, index);
+      const value = latency(run, index - 1, index, excludedAfterIndexes);
       if (value != null) groups.get("numbers").values.push(value);
     }
     if (["'", "’"].includes(character) && index > 0) {
-      const value = latency(run, index - 1, index);
+      const value = latency(run, index - 1, index, excludedAfterIndexes);
       if (value != null) groups.get("apostrophes").values.push(value);
     }
     if (["\"", "“", "”"].includes(character) && index > 0) {
-      const value = latency(run, index - 1, index);
+      const value = latency(run, index - 1, index, excludedAfterIndexes);
       if (value != null) groups.get("quotes").values.push(value);
     }
 
@@ -244,7 +246,7 @@ function collectFeatureLatencies(run) {
     if (punctuationKey) {
       const next = nextNonSpaceIndex(text, index);
       if (next >= 0) {
-        const value = latency(run, index, next);
+        const value = latency(run, index, next, excludedAfterIndexes);
         if (value != null) groups.get(punctuationKey).values.push(value);
       }
     }

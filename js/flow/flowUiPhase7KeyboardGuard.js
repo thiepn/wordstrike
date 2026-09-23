@@ -165,9 +165,19 @@ if (enabled) {
 
   const app = document.querySelector("#app");
   if (app) {
-    new MutationObserver(() => queueMicrotask(decorateStructure)).observe(app, { childList: true, subtree: true });
+    new MutationObserver(() => queueMicrotask(decorateStructure)).observe(app, { childList: true });
   }
+  const setupControl = (target) => target?.closest?.("[data-flow-choice-group]");
+  document.addEventListener("wordstrike:flow-ui7-decorated", () => queueMicrotask(decorateStructure));
+  document.addEventListener("click", (event) => {
+    if (setupControl(event.target)) queueMicrotask(decorateStructure);
+  });
+  document.addEventListener("keydown", (event) => {
+    if (setupControl(event.target) && ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Enter", " "].includes(event.key)) {
+      queueMicrotask(decorateStructure);
+    }
+  });
   queueMicrotask(decorateStructure);
 }
 
-export { previousWordDeleteCount };
+export { previousWordDeleteCount, decorateStructure as refreshFlowUiGuard };

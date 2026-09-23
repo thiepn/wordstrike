@@ -1,21 +1,10 @@
 const app = document.querySelector("#app");
 
-function flowBand(value) {
-  if (value >= 85) return "high";
-  if (value <= 35) return "low";
-  return "mid";
-}
-
 function decorateFlowSurface() {
   if (!app) return;
 
   for (const screen of app.querySelectorAll(".flow-phase1-screen")) {
     screen.dataset.flowVisual = "quiet-signal";
-  }
-
-  for (const meter of app.querySelectorAll("[data-flow-meter]")) {
-    const value = Number(meter.getAttribute("aria-valuenow"));
-    if (Number.isFinite(value)) meter.dataset.flowBand = flowBand(value);
   }
 
   for (const transition of app.querySelectorAll(".flow-chapter-transition")) {
@@ -32,12 +21,7 @@ function decorateFlowSurface() {
 }
 
 if (app) {
-  const observer = new MutationObserver(decorateFlowSurface);
-  observer.observe(app, {
-    childList: true,
-    subtree: true,
-    attributes: true,
-    attributeFilter: ["aria-valuenow"],
-  });
+  const observer = new MutationObserver(() => queueMicrotask(decorateFlowSurface));
+  observer.observe(app, { childList: true });
   queueMicrotask(decorateFlowSurface);
 }

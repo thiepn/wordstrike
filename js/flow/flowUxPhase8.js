@@ -8,7 +8,6 @@ const enabled = params.get("dev") === "1"
 let scheduledCaretCheck = false;
 let decoratedScreen = null;
 let setupObserver = null;
-let passageObserver = null;
 
 function controller() {
   return globalThis.window?.wordstrikeFlowPhase1 || null;
@@ -222,16 +221,8 @@ function decorateRun(screen) {
   input?.addEventListener("blur", () => queueMicrotask(() => setTypingFocusState(screen)));
   setTypingFocusState(screen);
 
-  passageObserver?.disconnect();
-  const passage = screen.querySelector("[data-flow-passage]");
-  if (passage) {
-    passageObserver = new MutationObserver(scheduleCaretVisibility);
-    passageObserver.observe(passage, {
-      subtree: true,
-      attributes: true,
-      attributeFilter: ["class", "data-status"],
-    });
-  }
+  // Character progress calls scheduleCaretVisibility() directly from Phase 1.
+  // No live subtree observer is needed on the passage hot path.
   scheduleCaretVisibility();
 }
 
@@ -313,7 +304,6 @@ function decorate() {
   if (screen !== decoratedScreen) {
     decoratedScreen = screen;
     setupObserver?.disconnect();
-    passageObserver?.disconnect();
   }
   if (screen.dataset.flowUxPhase8 === "true") return;
   const view = screen.dataset.flowView;
@@ -325,7 +315,7 @@ function decorate() {
 
 if (enabled) {
   const app = document.querySelector("#app");
-  if (app) new MutationObserver(() => queueMicrotask(decorate)).observe(app, { childList: true, subtree: true });
+  if (app) new MutationObserver(() => queueMicrotask(decorate)).observe(app, { childList: true });
   document.addEventListener("keydown", (event) => {
     if (currentScreen()?.matches?.('[data-flow-view="run"]') && event.key.length === 1) scheduleCaretVisibility();
   }, true);
@@ -337,6 +327,7 @@ if (globalThis.window) {
   window.wordstrikeFlowUxPhase8 = Object.freeze({
     enabled,
     ensureCaretVisible,
+    scheduleCaretVisibility,
     syncRovingTabindex: () => syncRovingTabindex(currentScreen()),
   });
 }

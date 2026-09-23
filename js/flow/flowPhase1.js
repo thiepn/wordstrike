@@ -11,11 +11,20 @@ import { FLOW_PHASES } from "./flowState.js";
 
 const root = () => document.querySelector("#app");
 const now = () => globalThis.performance?.now?.() ?? Date.now();
-const search = new URLSearchParams(globalThis.location?.search || "");
-const developerFlowRequested = search.get("dev") === "1" && search.get("mode") === "flow";
-const resolvedRunPlan = resolveFlowRunPlan(search);
-const resolvedSelection = resolvedRunPlan ? null : resolveFlowSelection(search);
+let developerFlowRequested = false;
+let resolvedRunPlan = null;
+let resolvedSelection = null;
 const LIVE_CADENCE_INTERVAL_MS = 180;
+
+function resolveFlowRouteState(locationLike = globalThis.location) {
+  const params = new URLSearchParams(locationLike?.search || "");
+  developerFlowRequested = params.get("dev") === "1" && params.get("mode") === "flow";
+  resolvedRunPlan = resolveFlowRunPlan(params);
+  resolvedSelection = resolvedRunPlan ? null : resolveFlowSelection(params);
+  return developerFlowRequested;
+}
+
+resolveFlowRouteState();
 
 let active = false;
 let dismissed = false;
@@ -25,6 +34,7 @@ let run = null;
 let activeSegmentIndex = 0;
 let chapterPauseStartedAt = null;
 let mountedCharacterNodes = new Map();
+let mountedRunHud = null;
 let cadenceRefreshTimer = null;
 let lastCadenceRefreshAt = -Infinity;
 let performanceStats = createPerformanceStats();
@@ -62,6 +72,7 @@ function clearCadenceRefresh() {
 
 function resetMountedCharacterNodes() {
   mountedCharacterNodes = new Map();
+  mountedRunHud = null;
 }
 
 function restoreReturnSurface() {
@@ -264,38 +275,59 @@ function liveGameplaySnapshot() {
   };
 }
 
-function updateGameplayHud(app, gameplay, cadence) {
+function flowBand(value) {
+  if (value >= 85) return "high";
+  if (value <= 35) return "low";
+  return "mid";
+}
+
+function mountRunHud(app) {
+  mountedRunHud = Object.freeze({
+    progress: app.querySelector("[data-flow-progress]"),
+    corrected: app.querySelector("[data-flow-corrected]"),
+    unresolved: app.querySelector("[data-flow-unresolved]"),
+    score: app.querySelector("[data-flow-score]"),
+    flowValue: app.querySelector("[data-flow-value]"),
+    meter: app.querySelector("[data-flow-meter]"),
+    meterFill: app.querySelector("[data-flow-meter-fill]"),
+    momentum: app.querySelector("[data-flow-momentum]"),
+    accuracy: app.querySelector("[data-flow-accuracy]"),
+    cadence: app.querySelector("[data-flow-cadence]"),
+    cadenceLabel: app.querySelector("[data-flow-cadence-label]"),
+    finalWpm: app.querySelector("[data-flow-final-wpm]"),
+    pauses: app.querySelector("[data-flow-pauses]"),
+  });
+  return mountedRunHud;
+}
+
+function updateGameplayHud(hud, gameplay, cadence) {
+  if (!hud) return;
   if (gameplay) {
-    setTextIfChanged(app.querySelector("[data-flow-score]"), gameplay.score.toLocaleString("en-US"));
+    setTextIfChanged(hud.score, gameplay.score.toLocaleString("en-US"));
     const roundedFlow = String(Math.round(gameplay.flowValue));
-    setTextIfChanged(app.querySelector("[data-flow-value]"), roundedFlow);
-    const meter = app.querySelector("[data-flow-meter]");
-    if (meter?.getAttribute("aria-valuenow") !== roundedFlow) meter?.setAttribute("aria-valuenow", roundedFlow);
-    const fill = app.querySelector("[data-flow-meter-fill]");
+    setTextIfChanged(hud.flowValue, roundedFlow);
+    if (hud.meter?.getAttribute("aria-valuenow") !== roundedFlow) hud.meter?.setAttribute("aria-valuenow", roundedFlow);
+    if (hud.meter?.dataset.flowBand !== flowBand(gameplay.flowValue)) hud.meter.dataset.flowBand = flowBand(gameplay.flowValue);
     const width = `${gameplay.flowValue}%`;
-    if (fill && fill.style.width !== width) fill.style.width = width;
-    setTextIfChanged(app.querySelector("[data-flow-momentum]"), `×${gameplay.momentum.toFixed(1)}`);
-    setTextIfChanged(app.querySelector("[data-flow-accuracy]"), `${gameplay.accuracyPercent.toFixed(1)}%`);
+    if (hud.meterFill && hud.meterFill.style.width !== width) hud.meterFill.style.width = width;
+    setTextIfChanged(hud.momentum, `×${gameplay.momentum.toFixed(1)}`);
+    setTextIfChanged(hud.accuracy, `${gameplay.accuracyPercent.toFixed(1)}%`);
   }
   if (cadence) {
-    setTextIfChanged(
-      app.querySelector("[data-flow-cadence]"),
-      cadence.cadenceScore == null ? "—" : String(cadence.cadenceScore),
-    );
-    setTextIfChanged(app.querySelector("[data-flow-cadence-label]"), cadence.cadenceLabel);
-    setTextIfChanged(app.querySelector("[data-flow-final-wpm]"), cadence.finalWpm.toFixed(1));
-    setTextIfChanged(app.querySelector("[data-flow-pauses]"), String(cadence.pauseCount));
+    setTextIfChanged(hud.cadence, cadence.cadenceScore == null ? "—" : String(cadence.cadenceScore));
+    setTextIfChanged(hud.cadenceLabel, cadence.cadenceLabel);
+    setTextIfChanged(hud.finalWpm, cadence.finalWpm.toFixed(1));
+    setTextIfChanged(hud.pauses, String(cadence.pauseCount));
   }
 }
 
 function refreshCadenceHud() {
   cadenceRefreshTimer = null;
   if (!run || view !== "run") return;
-  const app = root();
-  if (!app) return;
+  if (!mountedRunHud) return;
   lastCadenceRefreshAt = now();
   performanceStats.cadenceRefreshes += 1;
-  updateGameplayHud(app, null, analyzeFlowCadence(run));
+  updateGameplayHud(mountedRunHud, null, analyzeFlowCadence(run));
 }
 
 function scheduleCadenceHud(immediate = false) {
@@ -311,11 +343,13 @@ function scheduleCadenceHud(immediate = false) {
   cadenceRefreshTimer = globalThis.setTimeout?.(refreshCadenceHud, delay) ?? null;
 }
 
-function syncRunHud(app) {
-  setTextIfChanged(app.querySelector("[data-flow-progress]"), `${run.currentIndex} / ${run.passage.length}`);
-  setTextIfChanged(app.querySelector("[data-flow-corrected]"), String(run.correctedErrors));
-  setTextIfChanged(app.querySelector("[data-flow-unresolved]"), String(run.uncorrectedErrors));
-  updateGameplayHud(app, liveGameplaySnapshot(), null);
+function syncRunHud() {
+  const hud = mountedRunHud;
+  if (!hud) return;
+  setTextIfChanged(hud.progress, `${run.currentIndex} / ${run.passage.length}`);
+  setTextIfChanged(hud.corrected, String(run.correctedErrors));
+  setTextIfChanged(hud.unresolved, String(run.uncorrectedErrors));
+  updateGameplayHud(hud, liveGameplaySnapshot(), null);
 }
 
 function renderRun() {
@@ -360,13 +394,14 @@ function renderRun() {
       </main>
     </section>`;
   rebuildMountedCharacterNodes(app);
+  mountRunHud(app);
   app.querySelector('[data-flow-action="back"]')?.addEventListener("click", restoreReturnSurface);
   const input = app.querySelector("[data-flow-input]");
   input?.addEventListener("beforeinput", handleBeforeInput);
   input?.addEventListener("input", () => { input.value = ""; });
   app.querySelector("[data-flow-passage]")?.addEventListener("pointerdown", () => input?.focus?.({ preventScroll: true }));
   input?.focus?.({ preventScroll: true });
-  syncRunHud(app);
+  syncRunHud();
   scheduleCadenceHud(true);
 }
 
@@ -467,10 +502,12 @@ function updateRunView(startIndex = run?.currentIndex ?? 0, endIndex = startInde
   }
   if (maybeAdvanceRunPlan()) return;
 
-  const app = root();
-  if (!app) return;
+  if (!root()) return;
   updateCharacterRange(startIndex, endIndex);
-  syncRunHud(app);
+  // Phase 8 exposes an optional compositor-aligned caret scheduler. Calling it
+  // directly avoids observing the passage subtree on every typed character.
+  globalThis.window?.wordstrikeFlowUxPhase8?.scheduleCaretVisibility?.();
+  syncRunHud();
   scheduleCadenceHud();
 }
 
@@ -608,13 +645,21 @@ function handleDocumentKeydown(event) {
 }
 
 function tryLaunchDeveloperFlow() {
-  if (!developerFlowRequested || active || dismissed) return;
+  if (!developerFlowRequested || active || dismissed) return false;
   const app = root();
-  if (!app || app.childNodes.length === 0) return;
+  if (!app || app.childNodes.length === 0) return false;
   preserveReturnSurface();
   active = true;
   view = "ready";
   renderReady();
+  return true;
+}
+
+function activateFlowFromLocation() {
+  if (!resolveFlowRouteState()) return false;
+  if (active) return true;
+  dismissed = false;
+  return tryLaunchDeveloperFlow();
 }
 
 document.addEventListener("keydown", handleDocumentKeydown, true);
@@ -632,6 +677,7 @@ if (globalThis.window) {
     getActiveSegmentIndex: () => activeSegmentIndex,
     getPerformanceStats: () => ({ ...performanceStats }),
     isActive: () => active,
+    activateFromLocation: activateFlowFromLocation,
     developerRouteEnabled: developerFlowRequested,
   });
 }

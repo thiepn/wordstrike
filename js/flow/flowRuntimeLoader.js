@@ -1,6 +1,6 @@
 const RELEASE_FLAG = "flowRelease";
 const FLOW_RELEASE_VERSION = 1;
-const FLOW_RELEASE_CACHE_NAME = "wordstrike-flow-release-v1";
+const FLOW_RELEASE_CACHE_NAME = "wordstrike-flow-release-v2";
 const FLOW_RELEASE_QUERY_KEYS = Object.freeze([
   "mode",
   RELEASE_FLAG,
@@ -23,10 +23,10 @@ const FLOW_RELEASE_QUERY_KEYS = Object.freeze([
 ]);
 
 const FLOW_RELEASE_ASSETS = Object.freeze([
-  "./js/flow/flowRuntimeLoader.js?v=20260918a",
-  "./js/flow/flowMigrationPresentation.js?v=20260915a",
+  "./js/flow/flowRuntimeLoader.js?v=20260923a",
+  "./js/flow/flowMigrationPresentation.js?v=20260923a",
   "./js/flow/flowAdaptive.js",
-  "./js/flow/flowAdaptivePhase10.js?v=20260916a",
+  "./js/flow/flowAdaptivePhase10.js?v=20260923a",
   "./js/flow/flowCadence.js",
   "./js/flow/flowCatalog.js",
   "./js/flow/flowConfig.js",
@@ -35,29 +35,29 @@ const FLOW_RELEASE_ASSETS = Object.freeze([
   "./js/flow/flowEngine.js",
   "./js/flow/flowGameplay.js",
   "./js/flow/flowIntegrationBootstrap.js?v=20260916a",
-  "./js/flow/flowIntegrationPhase11.js?v=20260916a",
+  "./js/flow/flowIntegrationPhase11.js?v=20260923a",
   "./js/flow/flowLongformContent.js",
   "./js/flow/flowModifiers.js",
-  "./js/flow/flowModifiersPhase9.js?v=20260916a",
+  "./js/flow/flowModifiersPhase9.js?v=20260923a",
   "./js/flow/flowPassages.js",
-  "./js/flow/flowPhase1.js?v=20260917b",
+  "./js/flow/flowPhase1.js?v=20260923a",
   "./js/flow/flowProgression.js",
   "./js/flow/flowRunPlan.js",
   "./js/flow/flowSelection.js",
   "./js/flow/flowShell.js",
   "./js/flow/flowState.js",
-  "./js/flow/flowUiPhase7.js?v=20260916a",
-  "./js/flow/flowUiPhase7KeyboardGuard.js?v=20260917a",
-  "./js/flow/flowUiPhase7Polish.js?v=20260918a",
-  "./js/flow/flowUxPhase8.js?v=20260916a",
-  "./js/flow/flowVisualPhase6.js?v=20260916a",
+  "./js/flow/flowUiPhase7.js?v=20260923a",
+  "./js/flow/flowUiPhase7KeyboardGuard.js?v=20260923a",
+  "./js/flow/flowUiPhase7Polish.js?v=20260923a",
+  "./js/flow/flowUxPhase8.js?v=20260923a",
+  "./js/flow/flowVisualPhase6.js?v=20260923a",
   "./styles/screens/flow-phase1.css?v=20260916d",
   "./styles/screens/flow-phase5.css?v=20260916a",
-  "./styles/screens/flow-visual-phase6.css?v=20260916b",
+  "./styles/screens/flow-visual-phase6.css?v=20260923a",
   "./styles/screens/flow-visual-phase6-polish.css?v=20260916a",
   "./styles/screens/flow-ui-phase7.css?v=20260916a",
   "./styles/screens/flow-ui-phase7-polish.css?v=20260916b",
-  "./styles/screens/flow-ux-phase8.css?v=20260916a",
+  "./styles/screens/flow-ux-phase8.css?v=20260923a",
   "./styles/screens/flow-modifiers-phase9.css?v=20260916a",
   "./styles/screens/flow-adaptive-phase10.css?v=20260916a",
   "./styles/screens/flow-integration-phase11.css?v=20260916a",
@@ -123,9 +123,31 @@ function replaceUrl(url) {
   globalThis.history?.replaceState?.(null, "", url.href || String(url));
 }
 
+let runtimeReady = Promise.resolve(false);
+let publicLaunchPromise = null;
+
+function runFlowRuntime() {
+  const request = importFlowRuntime().catch((error) => {
+    console.error("Flow runtime failed to initialize", error);
+    return false;
+  });
+  runtimeReady = request;
+  return request;
+}
+
 function launchPublicFlow() {
+  if (publicLaunchPromise) return publicLaunchPromise;
   const next = releaseUrl();
-  globalThis.location.assign(next.href);
+  // Flow used to force a full document navigation here. That made the main app
+  // bootstrap twice and then serially loaded Flow on top. Keep the same release
+  // URL contract, but activate Flow inside the already-running document.
+  replaceUrl(next);
+  const request = runFlowRuntime();
+  const launch = request.finally(() => {
+    if (publicLaunchPromise === launch) publicLaunchPromise = null;
+  });
+  publicLaunchPromise = launch;
+  return publicLaunchPromise;
 }
 
 function bindPublicModeEntry() {
@@ -143,7 +165,7 @@ function installModeEntryRouting() {
     if (!target) return;
     event.preventDefault();
     event.stopImmediatePropagation();
-    launchPublicFlow();
+    void launchPublicFlow();
   }, true);
 
   // The listener above is intentionally installed on release pages too so it
@@ -152,7 +174,7 @@ function installModeEntryRouting() {
   // during active Flow typing to avoid waking on gameplay DOM mutations.
   if (isFlowReleaseRoute()) return;
   const app = document.querySelector("#app");
-  if (app) new MutationObserver(bindPublicModeEntry).observe(app, { childList: true, subtree: true });
+  if (app) new MutationObserver(bindPublicModeEntry).observe(app, { childList: true });
   bindPublicModeEntry();
 }
 
@@ -181,7 +203,7 @@ function waitForModeSelect(timeoutMs = 5000) {
     };
     const app = document.querySelector("#app");
     const observer = app ? new MutationObserver(inspect) : null;
-    observer?.observe(app, { childList: true, subtree: true });
+    observer?.observe(app, { childList: true });
     const timer = globalThis.setTimeout?.(() => finish(false), timeoutMs);
     inspect();
   });
@@ -219,6 +241,7 @@ function installReleaseExitCleanup() {
   if (!app) return;
   let seenActive = false;
   let cleaned = false;
+  let observer = null;
   const inspect = () => {
     const controller = globalThis.window?.wordstrikeFlowPhase1;
     if (controller?.isActive?.()) {
@@ -229,22 +252,23 @@ function installReleaseExitCleanup() {
     cleaned = true;
     replaceUrl(stripFlowReleaseUrl());
     bindPublicModeEntry();
+    observer?.disconnect();
   };
-  new MutationObserver(() => queueMicrotask(inspect)).observe(app, { childList: true });
+  observer = new MutationObserver(() => queueMicrotask(inspect));
+  observer.observe(app, { childList: true });
   queueMicrotask(inspect);
 }
 
 export async function warmFlowOfflineCache() {
   if (!globalThis.caches?.open || !globalThis.fetch) return { supported: false, cached: 0 };
   try {
-    // Flow owns a small cache outside the rotating `wordstrike-pwa-*` namespace.
-    // PWA activation intentionally deletes older app-shell caches, so coupling
-    // Flow warm-up to a guessed shell version could erase freshly cached assets
-    // during a first install or service-worker upgrade. The service worker's
-    // fetch fallback uses caches.match(request), which searches this cache too.
     const cache = await globalThis.caches.open(FLOW_RELEASE_CACHE_NAME);
     const urls = FLOW_RELEASE_ASSETS.map((asset) => new URL(asset, globalThis.location.href).href);
-    await cache.addAll(urls);
+    const missing = [];
+    for (const url of urls) {
+      if (!(await cache.match(url))) missing.push(url);
+    }
+    if (missing.length) await cache.addAll(missing);
     return { supported: true, cached: urls.length, cacheName: FLOW_RELEASE_CACHE_NAME };
   } catch (error) {
     return {
@@ -254,6 +278,26 @@ export async function warmFlowOfflineCache() {
       error: String(error?.message || error),
     };
   }
+}
+
+function scheduleFlowOfflineCacheWarmup() {
+  if (typeof document === "undefined") return warmFlowOfflineCache();
+  return new Promise((resolve) => {
+    const run = () => {
+      // Never compete with the critical Flow activation path. If Flow is being
+      // entered right now, give module loading and first paint priority.
+      if (isFlowReleaseRoute()) {
+        globalThis.setTimeout?.(() => void warmFlowOfflineCache().then(resolve), 1200);
+        return;
+      }
+      void warmFlowOfflineCache().then(resolve);
+    };
+    if (typeof globalThis.requestIdleCallback === "function") {
+      globalThis.requestIdleCallback(run, { timeout: 1800 });
+    } else {
+      globalThis.setTimeout?.(run, 900);
+    }
+  });
 }
 
 async function importFlowRuntime() {
@@ -273,28 +317,43 @@ async function importFlowRuntime() {
   }
 
   try {
-    await import("./flowIntegrationBootstrap.js?v=20260916a");
-    await import("./flowPhase1.js?v=20260917b");
-    await import("./flowVisualPhase6.js?v=20260916a");
+    // Integration defaults must run before Phase 1 resolves its immutable run
+    // plan. Everything after that is presentation/integration and can load in
+    // dependency-safe waves instead of eleven serial network/parse waits.
+    const integrationBootstrap = await import("./flowIntegrationBootstrap.js?v=20260916a");
+    integrationBootstrap.applyFlowIntegrationDefaults?.();
+    await Promise.all([
+      import("./flowPhase1.js?v=20260923a"),
+      import("./flowVisualPhase6.js?v=20260923a"),
+    ]);
 
     const params = new URLSearchParams(globalThis.location.search);
     if (params.get("flowUi") === "1") {
-      await import("./flowUiPhase7KeyboardGuard.js?v=20260917a");
-      await import("./flowUiPhase7.js?v=20260916a");
-      await import("./flowUiPhase7Polish.js?v=20260918a");
+      const [keyboardGuard] = await Promise.all([
+        import("./flowUiPhase7KeyboardGuard.js?v=20260923a"),
+        import("./flowUiPhase7.js?v=20260923a"),
+      ]);
+      // UI7 inserts its setup inside the already-mounted READY screen. The
+      // root-only observer intentionally ignores that subtree mutation, so
+      // explicitly refresh the keyboard/presentation guard once after UI7's
+      // initial decorator microtask instead of observing every typed character.
+      await Promise.resolve();
+      keyboardGuard.refreshFlowUiGuard?.();
+      await import("./flowUiPhase7Polish.js?v=20260923a");
       if (params.get("flowUx") === "1") {
-        await import("./flowUxPhase8.js?v=20260916a");
-        if (params.get("flowModifiers") === "1") {
-          await import("./flowModifiersPhase9.js?v=20260916a");
-        }
-        if (params.get("flowAdaptive") === "1") {
-          await import("./flowAdaptivePhase10.js?v=20260916a");
-        }
-        if (params.get("flowIntegration") === "1") {
-          await import("./flowIntegrationPhase11.js?v=20260916a");
-        }
+        await import("./flowUxPhase8.js?v=20260923a");
+        await Promise.resolve();
+        const extensions = [];
+        if (params.get("flowModifiers") === "1") extensions.push(import("./flowModifiersPhase9.js?v=20260923a"));
+        if (params.get("flowAdaptive") === "1") extensions.push(import("./flowAdaptivePhase10.js?v=20260923a"));
+        if (params.get("flowIntegration") === "1") extensions.push(import("./flowIntegrationPhase11.js?v=20260923a"));
+        await Promise.all(extensions);
       }
     }
+    // Dynamic imports are cached after the first visit. Explicit activation lets
+    // the same document re-enter Flow with a freshly resolved release seed/setup
+    // instead of requiring a reload just to rerun module side effects.
+    globalThis.window?.wordstrikeFlowPhase1?.activateFromLocation?.();
   } finally {
     if (release) {
       removeTemporaryDeveloperFlag();
@@ -306,12 +365,9 @@ async function importFlowRuntime() {
   return true;
 }
 
-const offlineReady = warmFlowOfflineCache();
+const offlineReady = scheduleFlowOfflineCacheWarmup();
 installModeEntryRouting();
-const runtimeReady = importFlowRuntime().catch((error) => {
-  console.error("Flow runtime failed to initialize", error);
-  return false;
-});
+runtimeReady = runFlowRuntime();
 
 if (globalThis.window) {
   window.wordstrikeFlowReleasePhase13 = Object.freeze({
