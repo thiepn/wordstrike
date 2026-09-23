@@ -119,6 +119,13 @@ assert.equal(ineligible.completed, true);
 assert.equal(ineligible.recordEligible, false);
 assert.ok(ineligible.score > 0, "ineligible runs still receive a result score");
 
+const missingIdentity = createFlowScoreV2Result({
+  sessionId: "",
+  snapshot,
+  plan,
+});
+assert.equal(missingIdentity.recordEligible, false, "ranked eligibility requires a canonical session id");
+
 const noConsistency = createFlowScoreV2Result({
   sessionId: "flow-v2-session-too-short",
   snapshot: {
