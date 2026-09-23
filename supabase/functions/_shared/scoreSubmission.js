@@ -44,14 +44,12 @@ export {
 export const FLOW_QUICK_BOARD_KEY = "flow-quick-v1";
 export const FLOW_STANDARD_BOARD_KEY = "flow-standard-v1";
 export const FLOW_LONG_BOARD_KEY = "flow-long-v1";
-export const FLOW_RULES_VERSION = 2;
-export const FLOW_METRIC_VERSION = 1;
-export const FLOW_CONTRACT_VERSION = 1;
+export const FLOW_RULES_VERSION = 3;
+export const FLOW_METRIC_VERSION = 2;
+export const FLOW_CONTRACT_VERSION = 2;
 
 export const FLOW_BOARD_KEYS = Object.freeze([
-  FLOW_QUICK_BOARD_KEY,
   FLOW_STANDARD_BOARD_KEY,
-  FLOW_LONG_BOARD_KEY,
 ]);
 
 export const SUPPORTED_BOARD_KEYS = Object.freeze([
@@ -71,6 +69,7 @@ const FLOW_FIELDS = new Set([
   "metricVersion",
   "variantId",
   "sessionLength",
+  "endedReason",
   "score",
   "wpm",
   "rawWpm",
@@ -80,29 +79,19 @@ const FLOW_FIELDS = new Set([
   "durationMs",
   "wordsCompleted",
   "charactersCompleted",
+  "correctCharacters",
   "correctKeystrokes",
   "incorrectKeystrokes",
   "correctedErrors",
   "unresolvedErrors",
   "textId",
   "seed",
+  "theme",
   "completed",
   "recordEligible",
   "developerMode",
   "sessionSource",
 ]);
-
-const FLOW_LENGTH_BY_BOARD = Object.freeze({
-  [FLOW_QUICK_BOARD_KEY]: "quick",
-  [FLOW_STANDARD_BOARD_KEY]: "standard",
-  [FLOW_LONG_BOARD_KEY]: "long",
-});
-
-const FLOW_WORD_FLOORS = Object.freeze({
-  quick: 150,
-  standard: 300,
-  long: 600,
-});
 
 const failure = (code) => Object.freeze({ valid: false, code });
 const success = (value) => Object.freeze({ valid: true, value: Object.freeze(value) });
@@ -125,11 +114,20 @@ const closeEnough = (actual, expected, tolerance) => (
 );
 const clamp = (value, minimum, maximum) => Math.max(minimum, Math.min(maximum, value));
 
-function calculateFlowScore({ wpm, accuracy, consistency }) {
-  const scoredWpm = clamp(wpm, 0, 300);
-  const accuracyMultiplier = Math.pow(clamp(accuracy, 0, 100) / 100, 5);
-  const consistencyMultiplier = 0.85 + (0.15 * (clamp(consistency, 0, 100) / 100));
-  return Math.round(1000 * scoredWpm * accuracyMultiplier * consistencyMultiplier);
+function calculateFlowScore({ correctCharacters, wpm, accuracy, consistency }) {
+  const scoredCharacters = Math.max(0, Math.round(correctCharacters));
+  const volumePoints = scoredCharacters * 10;
+  const speedMultiplier = clamp(wpm / 60, 0.75, 2.25);
+  const accuracyMultiplier = Math.pow(clamp(accuracy, 0, 100) / 100, 3);
+  const consistencyMultiplier = 0.9 + (0.1 * (clamp(consistency, 0, 100) / 100));
+  const enduranceMultiplier = 1 + (0.6 * clamp(scoredCharacters / 10_000, 0, 1));
+  return Math.round(
+    volumePoints
+      * speedMultiplier
+      * accuracyMultiplier
+      * consistencyMultiplier
+      * enduranceMultiplier,
+  );
 }
 
 export function validateFlowScoreSubmission(body) {
@@ -141,7 +139,7 @@ export function validateFlowScoreSubmission(body) {
     Object.keys(body).length !== ROOT_FIELDS.size
   ) return failure("INVALID_REQUEST");
 
-  if (!FLOW_BOARD_KEYS.includes(body.boardKey)) return failure("INVALID_BOARD");
+  if (body.boardKey !== FLOW_STANDARD_BOARD_KEY) return failure("INVALID_BOARD");
   if (!isValidSubmissionSessionId(body.sessionId)) return failure("INVALID_SESSION_ID");
   if (body.clientVersion !== CURRENT_GAME_VERSION) return failure("UNSUPPORTED_CLIENT_VERSION");
 
@@ -150,47 +148,52 @@ export function validateFlowScoreSubmission(body) {
     return failure("INVALID_RESULT");
   }
 
-  const expectedLength = FLOW_LENGTH_BY_BOARD[body.boardKey];
   if (
     result.contractVersion !== FLOW_CONTRACT_VERSION ||
     result.rulesVersion !== FLOW_RULES_VERSION ||
     result.metricVersion !== FLOW_METRIC_VERSION ||
-    result.sessionLength !== expectedLength ||
-    result.variantId !== `flow-${expectedLength}-v2`
+    result.sessionLength !== "flow" ||
+    result.variantId !== "flow-v3"
   ) return failure("INVALID_RESULT");
 
   if (result.completed !== true) return failure("TEST_NOT_COMPLETED");
   if (result.recordEligible !== true) return failure("RECORD_NOT_ELIGIBLE");
   if (result.developerMode !== false) return failure("DEVELOPER_RESULT");
   if (result.sessionSource !== "flow-release") return failure("INVALID_SESSION_SOURCE");
+  if (!["reset", "complete", "exit", "theme-change"].includes(result.endedReason)) {
+    return failure("INVALID_RESULT");
+  }
 
   if (
-    !integer(result.score, 0, 1_000_000_000) ||
+    !integer(result.score, 0, 2_000_000_000) ||
     !finite(result.wpm, 0.1, 1000) ||
     !finite(result.rawWpm, result.wpm, 2000) ||
     !finite(result.accuracy, 90, 100) ||
     !integer(result.consistency, 0, 100) ||
-    !integer(result.consistencySamples, 5, 200_000) ||
-    !integer(result.durationMs, 20_000, 7_200_000) ||
-    !integer(result.wordsCompleted, FLOW_WORD_FLOORS[expectedLength], 10_000) ||
-    !integer(result.charactersCompleted, result.wordsCompleted, 500_000) ||
-    !integer(result.correctKeystrokes, 1, 1_000_000) ||
-    !integer(result.incorrectKeystrokes, 0, 1_000_000) ||
+    !integer(result.consistencySamples, 20, 500_000) ||
+    !integer(result.durationMs, 20_000, 14_400_000) ||
+    !integer(result.wordsCompleted, 50, 100_000) ||
+    !integer(result.charactersCompleted, 250, 1_000_000) ||
+    !integer(result.correctCharacters, 250, result.charactersCompleted) ||
+    !integer(result.correctKeystrokes, 1, 2_000_000) ||
+    !integer(result.incorrectKeystrokes, 0, 2_000_000) ||
     !integer(result.correctedErrors, 0, result.incorrectKeystrokes) ||
     !integer(result.unresolvedErrors, 0, result.incorrectKeystrokes) ||
     result.correctedErrors + result.unresolvedErrors > result.incorrectKeystrokes ||
-    result.unresolvedErrors > result.charactersCompleted ||
+    result.correctCharacters !== result.charactersCompleted - result.unresolvedErrors ||
+    result.wordsCompleted !== Math.floor(result.correctCharacters / 5) ||
     result.consistencySamples > result.correctKeystrokes + result.incorrectKeystrokes ||
     typeof result.textId !== "string" ||
-    !new RegExp(`^flow-v2-${expectedLength}-[0-9a-f]+$`).test(result.textId) ||
+    !/^flow-v3-stream-[0-9a-f]+$/.test(result.textId) ||
     typeof result.seed !== "string" ||
     result.seed.length < 1 ||
-    result.seed.length > 160
+    result.seed.length > 160 ||
+    typeof result.theme !== "string" ||
+    !/^(mixed|[a-z0-9-]{2,40})$/.test(result.theme)
   ) return failure("INVALID_RESULT");
 
   const minutes = result.durationMs / 60000;
-  const finalCorrectCharacters = result.charactersCompleted - result.unresolvedErrors;
-  const expectedWpm = (finalCorrectCharacters / 5) / minutes;
+  const expectedWpm = (result.correctCharacters / 5) / minutes;
   const expectedRawWpm = ((result.correctKeystrokes + result.incorrectKeystrokes) / 5) / minutes;
   const expectedAccuracy = result.correctKeystrokes /
     (result.correctKeystrokes + result.incorrectKeystrokes) * 100;
@@ -202,6 +205,7 @@ export function validateFlowScoreSubmission(body) {
   ) return failure("METRIC_MISMATCH");
 
   const expectedScore = calculateFlowScore({
+    correctCharacters: result.correctCharacters,
     wpm: result.wpm,
     accuracy: result.accuracy,
     consistency: result.consistency,
@@ -231,15 +235,18 @@ export function validateFlowScoreSubmission(body) {
       metricVersion: result.metricVersion,
       variantId: result.variantId,
       sessionLength: result.sessionLength,
+      endedReason: result.endedReason,
       consistency: result.consistency,
       consistencySamples: result.consistencySamples,
       charactersCompleted: result.charactersCompleted,
+      correctCharacters: result.correctCharacters,
       correctKeystrokes: result.correctKeystrokes,
       incorrectKeystrokes: result.incorrectKeystrokes,
       correctedErrors: result.correctedErrors,
       unresolvedErrors: result.unresolvedErrors,
       textId: result.textId,
       seed: result.seed,
+      theme: result.theme,
     }),
   });
 }
