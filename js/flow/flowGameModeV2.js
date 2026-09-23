@@ -1,3 +1,7 @@
+import {
+  getFlowPersonalBestV2,
+  getFlowRecentRunsV2,
+} from "./flowRecordsV2.js?v=20260923a";
 import { FLOW_SESSION_LENGTHS } from "./flowConfig.js";
 
 const params = new URLSearchParams(globalThis.location?.search || "");
@@ -73,6 +77,31 @@ function publicRunUrl({ length = selectedLength, newSeed = false } = {}) {
   return url;
 }
 
+function syncRecords(home) {
+  const best = getFlowPersonalBestV2(selectedLength);
+  const bestNode = home.querySelector("[data-flow-game-best]");
+  if (bestNode) bestNode.textContent = best ? best.score.toLocaleString("en-US") : "—";
+  const bestMeta = home.querySelector("[data-flow-game-best-meta]");
+  if (bestMeta) {
+    bestMeta.textContent = best
+      ? `${best.wpm.toFixed(1)} WPM · ${best.accuracy.toFixed(1)}%`
+      : "Complete an eligible run to set a record";
+  }
+
+  const recent = getFlowRecentRunsV2(3);
+  const recentNode = home.querySelector("[data-flow-game-recent]");
+  if (recentNode) {
+    recentNode.innerHTML = recent.length
+      ? recent.map((item) => `
+          <div class="flow-game-v2-recent-row">
+            <span>${item.sessionLength.toUpperCase()}</span>
+            <strong>${item.score.toLocaleString("en-US")}</strong>
+            <small>${item.wpm.toFixed(1)} WPM · ${item.accuracy.toFixed(1)}%</small>
+          </div>`).join("")
+      : '<p class="flow-game-v2-recent-empty">No Flow V2 runs yet.</p>';
+  }
+}
+
 function syncLengthButtons(home) {
   for (const button of home.querySelectorAll("[data-flow-game-length]")) {
     const selected = button.dataset.flowGameLength === selectedLength;
@@ -80,6 +109,7 @@ function syncLengthButtons(home) {
     button.setAttribute("aria-pressed", selected ? "true" : "false");
     button.tabIndex = selected ? 0 : -1;
   }
+  syncRecords(home);
 }
 
 function startSelectedRun({ newSeed = false } = {}) {
@@ -138,8 +168,17 @@ function decorateReady(screen) {
     <div class="flow-game-v2-lengths" role="group" aria-label="Run length">
       ${lengthButtonsMarkup()}
     </div>
+    <div class="flow-game-v2-record-summary" aria-label="Flow personal best">
+      <span>Personal best</span>
+      <strong data-flow-game-best>—</strong>
+      <small data-flow-game-best-meta>Complete an eligible run to set a record</small>
+    </div>
     <p class="flow-game-v2-auto">Text, topic, difficulty, and seed are chosen automatically.</p>
-    <div class="flow-game-v2-play"></div>`;
+    <div class="flow-game-v2-play"></div>
+    <section class="flow-game-v2-recent-panel" aria-label="Recent Flow runs">
+      <span class="flow-game-v2-recent-label">Recent</span>
+      <div data-flow-game-recent></div>
+    </section>`;
 
   const playSlot = home.querySelector(".flow-game-v2-play");
   if (start && playSlot) {
@@ -196,11 +235,15 @@ function decorateComplete(screen) {
   screen.querySelector("[data-flow-ui-action='setup']")?.remove();
   screen.querySelector(".flow-natural-analysis")?.remove();
   screen.querySelector(".flow-score-breakdown")?.remove();
+  screen.querySelector("[data-flow-ux='primary-results']")?.remove();
+  screen.querySelector("[data-flow-ux='details']")?.remove();
 
-  const kicker = screen.querySelector(".flow-phase1-kicker");
-  if (kicker) kicker.textContent = "LONGFORM RUN COMPLETE";
-  const lead = screen.querySelector(".flow-phase1-lead");
-  if (lead) lead.textContent = "Run complete. Keep the speed, accuracy, and rhythm together, then beat the score.";
+  if (screen.dataset.flowScoreV2 !== "true") {
+    const kicker = screen.querySelector(".flow-phase1-kicker");
+    if (kicker) kicker.textContent = "LONGFORM RUN COMPLETE";
+    const lead = screen.querySelector(".flow-phase1-lead");
+    if (lead) lead.textContent = "Run complete. Keep the speed, accuracy, and rhythm together, then beat the score.";
+  }
 
   const restart = screen.querySelector('[data-flow-action="restart"]');
   if (restart) {
