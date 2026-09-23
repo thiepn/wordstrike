@@ -1,15 +1,29 @@
+export const FLOW_BOARD_KEYS = Object.freeze([
+  "flow-quick-v1",
+  "flow-standard-v1",
+  "flow-long-v1",
+]);
+
 export const PUBLIC_BOARD_KEYS = Object.freeze([
   "campaign-highest-level-v1",
   "typing-60s-english200-v1",
   "typing-15s-english200-v1",
   "endless-v1",
   "arcade-rush-v1",
+  ...FLOW_BOARD_KEYS,
 ]);
 export const LEADERBOARD_LIMIT = 100;
 export const LEADERBOARD_RULES_VERSION = 1;
+export const FLOW_LEADERBOARD_RULES_VERSION = 2;
 export const ARCADE_RUSH_BOARD_KEY = "arcade-rush-v1";
 
 const RETIRED_DAILY_BOARD_KEY = "daily-strike-v1";
+
+function expectedRulesVersion(boardKey) {
+  return FLOW_BOARD_KEYS.includes(boardKey)
+    ? FLOW_LEADERBOARD_RULES_VERSION
+    : LEADERBOARD_RULES_VERSION;
+}
 
 export function validateLeaderboardRequest(body) {
   if (!body || typeof body !== "object" || Array.isArray(body)) {
@@ -59,6 +73,14 @@ export function compareArcadeRushLeaderboardRows(a, b) {
   ].find(Boolean) || finalTie(a, b);
 }
 
+export function compareFlowLeaderboardRows(a, b) {
+  return [
+    higher(a.score, b.score),
+    higher(a.accuracy, b.accuracy),
+    higher(a.wpm, b.wpm),
+  ].find(Boolean) || finalTie(a, b);
+}
+
 const GRADE_RANK = Object.freeze({ D: 1, C: 2, B: 3, A: 4, S: 5 });
 
 export function compareCampaignLeaderboardRows(a, b) {
@@ -94,6 +116,19 @@ function publicEntry(row, rank, boardKey) {
       rawWpm: number(row.rawWpm ?? row.raw_wpm),
     });
   }
+  if (FLOW_BOARD_KEYS.includes(boardKey)) {
+    return Object.freeze({
+      ...common,
+      score: number(row.score),
+      wpm: number(row.wpm),
+      rawWpm: number(row.rawWpm ?? row.raw_wpm),
+      consistency: number(row.consistency ?? row.metrics?.consistency),
+      durationMs: row.durationMs == null && row.duration_ms == null
+        ? null
+        : number(row.durationMs ?? row.duration_ms),
+      completed: row.completed === true,
+    });
+  }
   return Object.freeze({
     ...common,
     stage: row.stage == null ? null : number(row.stage),
@@ -112,21 +147,26 @@ export function rankLeaderboardRows(rows, {
   if (!PUBLIC_BOARD_KEYS.includes(boardKey)) {
     return Object.freeze({ entries: Object.freeze([]), viewer: null });
   }
-  const comparator = boardKey === ARCADE_RUSH_BOARD_KEY
-    ? compareArcadeRushLeaderboardRows
-    : boardKey === "endless-v1"
-      ? compareEndlessLeaderboardRows
-      : boardKey === "campaign-highest-level-v1"
-        ? compareCampaignLeaderboardRows
-        : compareTypingLeaderboardRows;
+  const isFlow = FLOW_BOARD_KEYS.includes(boardKey);
+  const comparator = isFlow
+    ? compareFlowLeaderboardRows
+    : boardKey === ARCADE_RUSH_BOARD_KEY
+      ? compareArcadeRushLeaderboardRows
+      : boardKey === "endless-v1"
+        ? compareEndlessLeaderboardRows
+        : boardKey === "campaign-highest-level-v1"
+          ? compareCampaignLeaderboardRows
+          : compareTypingLeaderboardRows;
+  const rulesVersion = expectedRulesVersion(boardKey);
   const eligible = (Array.isArray(rows) ? rows : []).filter((row) => (
     row.boardKey === boardKey &&
-    number(row.rulesVersion) === LEADERBOARD_RULES_VERSION &&
+    number(row.rulesVersion) === rulesVersion &&
     row.moderationStatus === "accepted" &&
     typeof row.username === "string" && row.username.length > 0 &&
     (boardKey !== "campaign-highest-level-v1" || row.completed === true) &&
     (!boardKey.startsWith("typing-") || row.completed === true) &&
-    (boardKey !== ARCADE_RUSH_BOARD_KEY || row.completed === true)
+    (boardKey !== ARCADE_RUSH_BOARD_KEY || row.completed === true) &&
+    (!isFlow || row.completed === true)
   ));
   const best = new Map();
   for (const row of eligible) {
