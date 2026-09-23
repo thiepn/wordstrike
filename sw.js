@@ -272,6 +272,8 @@ const APP_SHELL = [
   "./js/endlessScoring.js",
   "./js/endlessWords.js",
   "./js/gameLoop.js",
+  "./js/gameplayVisibilityLifecycle.js",
+  "./js/runtimeTiming.js",
   "./js/gameVersion.js",
   "./js/gameplayViewport.js",
   "./js/gameplayWorld.js",

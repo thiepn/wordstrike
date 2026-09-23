@@ -67,6 +67,8 @@ assert.equal(game.remainingMs, remainingBeforePause);
 assert.equal(game.elapsedMs, 0);
 appState.screen = Screens.PLAYING;
 frame(100);
+assert.equal(game.remainingMs, 1000);
+frame(100);
 assert.equal(game.remainingMs, 900);
 
 game.remainingMs = 0.1;
