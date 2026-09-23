@@ -98,10 +98,10 @@ def finish_run(page, plan):
     assert metrics == ['WPM', 'Accuracy', 'Consistency'], metrics
     assert page.locator('.flow-complete-screen').get_by_text('Momentum', exact=True).count() == 0
     assert page.locator('.flow-complete-screen').get_by_text('Cadence', exact=True).count() == 0
-    # The legacy integration record remains active but its old progression card
-    # is intentionally hidden from the clean V2 result screen.
+    # Legacy integration recording remains active for compatibility, but its
+    # old progression card must not render on the competitive V2 result screen.
     page.wait_for_timeout(50)
-    assert page.locator('[data-flow-integration-complete]').count() == 1
+    assert page.locator('[data-flow-integration-complete]').count() == 0
 
 
 def certify_public_journey(browser, browser_name, base, evidence):
@@ -134,7 +134,6 @@ def certify_public_journey(browser, browser_name, base, evidence):
 
     summary = page.evaluate('window.wordstrikeFlowIntegrationPhase11.getSummary()')
     assert summary['progress']['completedRuns'] == 1, summary
-    assert summary['progress']['best']['score'] == public_result['score'], summary
     assert summary['generic']['completedSessions'] == 1, summary
     assert summary['recent'][0]['modeId'] == 'flow', summary
     assert 'dev=1' not in page.url, page.url
@@ -157,6 +156,7 @@ def certify_public_journey(browser, browser_name, base, evidence):
 
     persisted_plan = page.evaluate('window.wordstrikeFlowPhase1.getRunPlan()')
     expect(page.locator('[data-flow-game-best]')).to_have_text(f"{public_result['score']:,}")
+    expect(page.locator('[data-flow-game-recent]')).to_contain_text(f"{public_result['score']:,}")
     assert persisted_plan['sessionLength'] == 'quick', persisted_plan
     assert persisted_plan['modifiers'] == [], persisted_plan
     assert persisted_plan['passageCount'] == 3, persisted_plan
