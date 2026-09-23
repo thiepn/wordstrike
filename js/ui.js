@@ -53,23 +53,39 @@ function menuButton(label, action, selected = false, extraClass = "") {
   return `<button class="arcade-button ${selected ? "selected" : ""} ${extraClass}" data-action="${action}">${label}</button>`;
 }
 
+function applyMenuSelection(buttons, index) {
+  buttons.forEach((button, buttonIndex) => {
+    button.classList.toggle("selected", buttonIndex === index);
+  });
+}
+
 function wireMenuActions(root, selector, handlers = {}) {
-  root?.querySelectorAll?.(selector).forEach((button, index) => {
+  const buttons = [...(root?.querySelectorAll?.(selector) || [])];
+  buttons.forEach((button, index) => {
     const action = button.dataset?.action;
     if (typeof handlers[action] !== "function") return;
     button.onclick = (event) => {
       event?.preventDefault?.();
       handlers[action]?.();
     };
-    button.onmouseenter = () => handlers.select?.(index);
-    button.onfocus = () => handlers.select?.(index);
+    const select = () => {
+      applyMenuSelection(buttons, index);
+      handlers.select?.(index);
+    };
+    button.onmouseenter = select;
+    button.onfocus = select;
   });
 }
 
 function wireMenuSelection(root, selector, select) {
-  root?.querySelectorAll?.(selector).forEach((button, index) => {
-    button.onmouseenter = () => select?.(index);
-    button.onfocus = () => select?.(index);
+  const buttons = [...(root?.querySelectorAll?.(selector) || [])];
+  buttons.forEach((button, index) => {
+    const update = () => {
+      applyMenuSelection(buttons, index);
+      select?.(index);
+    };
+    button.onmouseenter = update;
+    button.onfocus = update;
   });
 }
 
@@ -783,7 +799,7 @@ export function renderSpeedTestResults(result, recordFlags, selectedIndex, handl
         </div>
       </div>
     </section>`;
-  wireMenuActions(app(), ".speed-results-panel .arcade-button", handlers);
+  wireMenuActions(app(), ".speed-results-panel > .menu-list .arcade-button", handlers);
   const speedBack = app().querySelector?.('[data-screen-back="modes"]');
   if (speedBack) speedBack.onclick = campaignPlacement ? handlers.campaign : handlers.modes;
 }
@@ -1633,7 +1649,7 @@ export function renderResults(result, selectedIndex, handlers, submissionState =
         <p class="footer-hint">ESC LEVEL SELECT</p>
       </div>
     </section>`;
-  wireMenuActions(app(), ".results-panel .arcade-button", handlers);
+  wireMenuActions(app(), ".results-panel > .menu-list .arcade-button", handlers);
   const campaignBack = app().querySelector?.('[data-screen-back="levels"]');
   if (campaignBack) campaignBack.onclick = handlers.levels;
 }
