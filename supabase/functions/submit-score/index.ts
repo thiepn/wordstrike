@@ -90,7 +90,18 @@ Deno.serve(async (request) => {
     return failure("INVALID_REQUEST", 400, cors, requestId);
   }
   const validation = validateScoreSubmission(body);
-  if (!validation.valid) return failure(validation.code, 400, cors, requestId);
+  if (!validation.valid) {
+    logOperationalEvent("wordstrike.score.validation_failure", {
+      request_id: requestId,
+      service: "submit-score",
+      category: "client",
+      http_status: 400,
+      board_key: typeof body.boardKey === "string" ? body.boardKey : null,
+      error_code: validation.code,
+      duration_ms: Date.now() - started,
+    });
+    return failure(validation.code, 400, cors, requestId);
+  }
   const value = validation.value;
 
   try {
