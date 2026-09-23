@@ -1,6 +1,6 @@
 const RELEASE_FLAG = "flowRelease";
-const FLOW_RELEASE_VERSION = 5;
-const FLOW_RELEASE_CACHE_NAME = "wordstrike-flow-release-v7";
+const FLOW_RELEASE_VERSION = 6;
+const FLOW_RELEASE_CACHE_NAME = "wordstrike-flow-release-v8";
 const FLOW_RELEASE_QUERY_KEYS = Object.freeze([
   "mode",
   RELEASE_FLAG,
@@ -30,6 +30,20 @@ const FLOW_RELEASE_ASSETS = Object.freeze([
   "./js/leaderboardSubmissionService.js",
   "./js/leaderboardProfileService.js",
   "./js/authService.js",
+  "./js/supabaseConfig.js",
+  "./js/supabaseClient.js",
+  "./js/gameVersion.js",
+  "./js/leaderboardUsername.js",
+  "./js/leaderboardService.js",
+  "./js/arcadeRushLeaderboard.js",
+  "./js/sessionResult.js",
+  "./js/random.js",
+  "./js/arcadeRush/arcadeRushContract.js",
+  "./js/arcadeRush/arcadeRushConfig.js",
+  "./js/arcadeRush/arcadeRushBoss.js",
+  "./js/arcadeRush/arcadeRushGenerator.js",
+  "./js/arcadeRush/arcadeRushScoring.js",
+  "./js/arcadeRush/arcadeRushResult.js",
   "./js/flow/flowMigrationPresentation.js?v=20260923a",
   "./js/flow/flowAdaptive.js",
   "./js/flow/flowAdaptivePhase10.js?v=20260923a",
