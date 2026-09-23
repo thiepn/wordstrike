@@ -20,6 +20,7 @@ const source = Object.fromEntries(entries);
 assert.match(source.loader, /replaceUrl\(next\)/);
 assert.doesNotMatch(source.loader, /location\.assign\(next\.href\)/);
 assert.match(source.loader, /requestIdleCallback/);
+assert.match(source.loader, /cache\.match\(url\)/, "Flow cache warmup must test its dedicated cache, not another cache namespace");
 assert.match(source.loader, /cache\.addAll\(missing\)/);
 assert.match(source.loader, /await Promise\.all\(\[/);
 assert.match(source.loader, /activateFromLocation/);

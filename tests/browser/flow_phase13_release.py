@@ -235,10 +235,10 @@ def certify_offline(browser, browser_name, base, evidence):
 
     cached = page.evaluate("""async () => {
       const targets = [
-        './js/flow/flowRuntimeLoader.js?v=20260918a',
+        './js/flow/flowRuntimeLoader.js?v=20260923a',
         './js/flow/flowLongformContent.js',
-        './js/flow/flowUiPhase7KeyboardGuard.js?v=20260917a',
-        './js/flow/flowIntegrationPhase11.js?v=20260916a',
+        './js/flow/flowUiPhase7KeyboardGuard.js?v=20260923a',
+        './js/flow/flowIntegrationPhase11.js?v=20260923a',
         './styles/screens/flow-integration-phase11.css?v=20260916a',
       ];
       const results = [];

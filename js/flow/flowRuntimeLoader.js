@@ -266,7 +266,7 @@ export async function warmFlowOfflineCache() {
     const urls = FLOW_RELEASE_ASSETS.map((asset) => new URL(asset, globalThis.location.href).href);
     const missing = [];
     for (const url of urls) {
-      if (!(await globalThis.caches.match(url))) missing.push(url);
+      if (!(await cache.match(url))) missing.push(url);
     }
     if (missing.length) await cache.addAll(missing);
     return { supported: true, cached: urls.length, cacheName: FLOW_RELEASE_CACHE_NAME };
