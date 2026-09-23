@@ -7,9 +7,9 @@ const enabled = params.get("dev") === "1"
 
 const LENGTH_ORDER = Object.freeze(["quick", "standard", "long"]);
 const LENGTH_COPY = Object.freeze({
-  quick: Object.freeze({ label: "Quick", detail: "~2 min" }),
-  standard: Object.freeze({ label: "Standard", detail: "~5 min" }),
-  long: Object.freeze({ label: "Long", detail: "~8 min" }),
+  quick: Object.freeze({ label: "Quick", detail: "~3 min" }),
+  standard: Object.freeze({ label: "Standard", detail: "~6 min" }),
+  long: Object.freeze({ label: "Long", detail: "~10 min" }),
 });
 
 let selectedLength = null;
