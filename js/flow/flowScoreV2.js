@@ -82,6 +82,7 @@ export function createFlowScoreV2Result({
   const completed = snapshot.phase === "complete"
     && finite(snapshot.currentIndex) >= finite(snapshot.passageLength);
   const recordEligible = completed
+    && String(sessionId || "").length > 0
     && consistencyAvailable
     && breakdown.wpm > 0
     && breakdown.accuracy >= FLOW_SCORE_V2_RULES.minimumRecordAccuracy;
