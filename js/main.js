@@ -208,6 +208,7 @@ import {
 } from "./pendingResultSubmission.js";
 import { createPendingResultCoordinator } from "./pendingResultCoordinator.js";
 import { createSubmissionOutboxCoordinator } from "./submissionOutboxCoordinator.js";
+import { removeSubmissionOutbox } from "./submissionOutbox.js";
 import { createPracticeFeatureGate } from "./practiceLab/practiceFeatureGate.js";
 import { createPracticeExperimentRegistry } from "./practiceLab/practiceExperimentRegistry.js";
 import { createPracticeLabController } from "./practiceLab/practiceLabController.js";
@@ -326,7 +327,9 @@ async function resumeDurableSubmissions(authState = getAuthState(), profileState
     Screens.SPEED_TEST_RESULTS,
     Screens.RESULTS,
   ].includes(appState.screen);
-  const skipSessionId = resultScreen ? getSubmissionState().sessionId : null;
+  const foregroundSessionId = resultScreen ? getSubmissionState().sessionId : null;
+  const pendingSessionId = pendingResultCoordinator.getState().sessionId;
+  const skipSessionId = foregroundSessionId || pendingSessionId || null;
   return submissionOutboxCoordinator.drain(authState, profileState, { skipSessionId });
 }
 
@@ -1468,7 +1471,10 @@ function handleAppClick(event) {
       void pendingResultCoordinator.resume(getAuthState(), getLeaderboardProfileState());
     }
     else if (action === "discard-pending-result") {
+      const pendingSessionId = pendingResultCoordinator.getState().sessionId;
+      const userId = getAuthState().user?.id ?? null;
       pendingResultCoordinator.discard();
+      if (pendingSessionId) removeSubmissionOutbox(pendingSessionId, userId);
       renderCurrentScreen();
     }
     else if (action === "settings-edit-name") beginProfileNameEdit();
