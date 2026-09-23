@@ -613,7 +613,10 @@ function renderRun() {
     </section>`;
   rebuildMountedCharacterNodes(app);
   mountRunHud(app);
-  app.querySelector('[data-flow-action="back"]')?.addEventListener("click", restoreReturnSurface);
+  app.querySelector('[data-flow-action="back"]')?.addEventListener("click", () => {
+    if (isPublicStreamRun()) finalizePublicStreamRun("exit");
+    restoreReturnSurface();
+  });
   const input = app.querySelector("[data-flow-input]");
   input?.addEventListener("beforeinput", handleBeforeInput);
   input?.addEventListener("input", () => { input.value = ""; });
