@@ -1,4 +1,4 @@
-"""Flow Phase 13 public release-candidate certification."""
+"""Flow V3 instant-play public release certification."""
 from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -36,204 +36,165 @@ def context_for(browser, base, width=1440, height=900):
 
 def open_modes(page, base):
     page.goto(base, wait_until="domcontentloaded")
-    expect(page.locator('.title-screen')).to_be_visible(timeout=10000)
+    expect(page.locator(".title-screen")).to_be_visible(timeout=10000)
     page.locator('[data-action="modes"]').click()
-    expect(page.locator('.mode-select-screen')).to_be_visible(timeout=10000)
+    expect(page.locator(".mode-select-screen")).to_be_visible(timeout=10000)
 
 
 def launch_public_flow(page):
     flow = page.locator('button[data-mode-id="flow"]')
     expect(flow).to_be_visible(timeout=10000)
-    expect(flow).to_contain_text('Flow')
     flow.click()
-    expect(page.locator('[data-flow-view="ready"]')).to_be_visible(timeout=15000)
-    assert 'flowRelease=1' in page.url, page.url
-    assert page.evaluate('window.wordstrikeFlowReleasePhase13.runtimeReady()') is True
-    assert 'dev=1' not in page.url, page.url
-    assert page.evaluate('window.wordstrikeFlowReleasePhase13.isReleaseRoute()') is True
-    expect(page.locator('.flow-phase1-screen[data-flow-ui-phase7="true"][data-flow-game-mode-v2="true"]')).to_be_visible()
-    expect(page.locator('[data-flow-game-home]')).to_be_visible(timeout=10000)
-    assert page.locator('[data-flow-choice-group="category"]').count() == 0
-    assert page.locator('[data-flow-choice-group="difficulty"]').count() == 0
-    assert page.locator('[data-flow-modifier-id]').count() == 0
 
-
-def make_quick_run(page, seed):
-    page.evaluate("""seed => {
-      const url = new URL(location.href);
-      url.searchParams.set('flowSeed', seed);
-      history.replaceState(null, '', url.href);
-    }""", seed)
-    expect(page.locator('[data-flow-game-length="quick"]')).to_be_visible(timeout=10000)
-    page.locator('[data-flow-game-length="quick"]').click()
-    expect(page.locator('[data-flow-game-length="quick"]')).to_have_attribute('aria-pressed', 'true')
-    page.locator('[data-flow-action="start"]').click()
+    # V3 has no public setup/Ready gate: clicking the mode is the start action.
     expect(page.locator('[data-flow-view="run"]')).to_be_visible(timeout=15000)
-    plan = page.evaluate('window.wordstrikeFlowPhase1.getRunPlan()')
-    assert plan['sessionLength'] == 'quick', plan
-    assert plan['modifiers'] == [], plan
-    assert plan['category'] == 'mixed', plan
-    assert plan['difficulty'] == 'smooth', plan
-    assert plan['passageCount'] == 3, plan
-    assert plan['paragraphCount'] == 3, plan
-    assert plan['documentCount'] == 1, plan
-    assert plan['targetMinutes'] == 3, plan
+    assert page.locator('[data-flow-view="ready"]').count() == 0
+    assert page.locator('[data-flow-ui="setup"]').count() == 0
+    assert page.locator('[data-flow-game-length]').count() == 0
+    assert page.locator('[data-flow-choice-group]').count() == 0
+
+    assert "flowRelease=1" in page.url, page.url
+    assert "dev=1" not in page.url, page.url
+    assert page.evaluate("window.wordstrikeFlowReleasePhase13.runtimeReady()") is True
+    assert page.evaluate("window.wordstrikeFlowReleasePhase13.isReleaseRoute()") is True
+
+    plan = page.evaluate("window.wordstrikeFlowPhase1.getRunPlan()")
+    assert plan["gameplayVersion"] == 3, plan
+    assert plan["structure"] == "continuous-stream", plan
+    assert plan["sessionLength"] == "flow", plan
+    assert plan["theme"] == "mixed", plan
+    assert plan["documentCount"] == 10, plan
+    assert plan["paragraphCount"] >= 50, plan
+    assert plan["wordCount"] >= 4500, plan
+    assert plan["stream"] is True, plan
+
+    labels = page.locator(".flow-game-v2-hud > div > span").all_text_contents()
+    assert labels == ["Score", "WPM", "Accuracy", "Words"], labels
+    expect(page.locator('[data-flow-theme-select]')).to_be_visible()
+    expect(page.locator(".flow-v3-tab-hint")).to_contain_text("TAB")
     return plan
 
 
-def finish_run(page, plan):
-    if page.locator('[data-flow-view="ready"]').is_visible():
-        page.locator('[data-flow-action="start"]').click()
-    expect(page.locator('[data-flow-view="run"][data-flow-longform-v2="true"]')).to_be_visible(timeout=10000)
-    expect(page.locator('[data-flow-longform="true"]')).to_be_visible(timeout=10000)
-    assert page.locator('[data-flow-paragraph]').count() == plan['paragraphCount']
-    assert page.locator('[data-flow-view="chapter"]').count() == 0
-    hud_labels = page.locator('.flow-game-v2-hud > div > span').all_text_contents()
-    assert hud_labels == ['Score', 'WPM', 'Accuracy', 'Progress'], hud_labels
-    page.keyboard.type(plan['fullText'])
-    assert page.locator('[data-flow-view="chapter"]').count() == 0
-    expect(page.locator('[data-flow-view="complete"][data-flow-score-v2="true"]')).to_be_visible(timeout=10000)
-    expect(page.locator('.flow-v2-final-score')).to_be_visible(timeout=10000)
-    metrics = page.locator('.flow-v2-result-metrics > div > span').all_text_contents()
-    assert metrics == ['WPM', 'Accuracy', 'Consistency'], metrics
-    assert page.locator('.flow-complete-screen').get_by_text('Momentum', exact=True).count() == 0
-    assert page.locator('.flow-complete-screen').get_by_text('Cadence', exact=True).count() == 0
-    # The legacy integration record remains active but its old progression card
-    # is intentionally hidden from the clean V2 result screen.
-    page.wait_for_timeout(50)
-    assert page.locator('[data-flow-integration-complete]').count() == 1
+def type_prefix(page, plan, characters=320):
+    text = plan["fullText"][:characters]
+    page.keyboard.type(text)
+    snapshot = page.evaluate("window.wordstrikeFlowPhase1.getSnapshot()")
+    assert snapshot["currentIndex"] == len(text), snapshot
+    assert snapshot["gameplay"]["accuracyPercent"] == 100, snapshot
+    return text
 
 
 def certify_public_journey(browser, browser_name, base, evidence):
     context = context_for(browser, base)
     page = context.new_page()
     errors = []
-    page.on('pageerror', lambda error: errors.append(str(error)))
+    page.on("pageerror", lambda error: errors.append(str(error)))
 
     open_modes(page, base)
-    active = page.locator('button.mode-option.available').evaluate_all('els => els.map(el => el.dataset.modeId)')
-    assert active == ['campaign', 'speed-test', 'endless', 'flow', 'practice'], active
-    assert page.locator('button[data-mode-id="practice"]:enabled').count() == 1
+    active = page.locator("button.mode-option.available").evaluate_all(
+        "els => els.map(el => el.dataset.modeId)"
+    )
+    assert active == ["campaign", "speed-test", "endless", "flow", "practice"], active
     assert page.locator('[data-mode-id="arcade-rush"]').count() == 0
 
-    launch_public_flow(page)
-    plan = make_quick_run(page, f'phase13-public-{browser_name}')
-    finish_run(page, plan)
+    first_plan = launch_public_flow(page)
+    first_session = page.evaluate("window.wordstrikeFlowPhase1.getPublicSessionId()")
+    first_seed = first_plan["seed"]
+    typed = type_prefix(page, first_plan)
 
-    public_result = page.evaluate('window.wordstrikeFlowPhase1.getPublicResult()')
-    record_state = page.evaluate('window.wordstrikeFlowPhase1.getPublicRecordState()')
-    assert public_result['rulesVersion'] == 2, public_result
-    assert public_result['metricVersion'] == 1, public_result
-    assert public_result['boardKey'] == 'flow-quick-v1', public_result
-    assert public_result['score'] > 0, public_result
-    assert public_result['accuracy'] == 100, public_result
-    assert public_result['recordEligible'] is True, public_result
-    assert record_state['recorded'] is True, record_state
-    assert record_state['isPersonalBest'] is True, record_state
-    assert record_state['personalBest']['score'] == public_result['score'], record_state
+    # Tab is the central Flow loop: record the attempt, reroll, continue immediately.
+    page.keyboard.press("Tab")
+    expect(page.locator('[data-flow-view="run"]')).to_be_visible(timeout=10000)
+    second_plan = page.evaluate("window.wordstrikeFlowPhase1.getRunPlan()")
+    second_session = page.evaluate("window.wordstrikeFlowPhase1.getPublicSessionId()")
+    previous_result = page.evaluate("window.wordstrikeFlowPhase1.getPublicResult()")
+    assert second_session != first_session, (first_session, second_session)
+    assert second_plan["seed"] != first_seed, (first_seed, second_plan["seed"])
+    assert second_plan["id"] != first_plan["id"], (first_plan["id"], second_plan["id"])
+    assert previous_result["variantId"] == "flow-v3", previous_result
+    assert previous_result["rulesVersion"] == 3, previous_result
+    assert previous_result["endedReason"] == "reset", previous_result
+    assert previous_result["correctCharacters"] == len(typed), previous_result
+    assert previous_result["wordsCompleted"] == len(typed) // 5, previous_result
+    assert previous_result["score"] > 0, previous_result
+    assert page.locator('[data-flow-view="complete"]').count() == 0
 
-    summary = page.evaluate('window.wordstrikeFlowIntegrationPhase11.getSummary()')
-    assert summary['progress']['completedRuns'] == 1, summary
-    assert summary['progress']['best']['score'] == public_result['score'], summary
-    assert summary['generic']['completedSessions'] == 1, summary
-    assert summary['recent'][0]['modeId'] == 'flow', summary
-    assert 'dev=1' not in page.url, page.url
+    # Optional text-kind filtering is secondary and never returns to a setup screen.
+    page.locator('[data-flow-theme-select]').select_option("science")
+    expect(page.locator('[data-flow-view="run"]')).to_be_visible(timeout=10000)
+    themed_plan = page.evaluate("window.wordstrikeFlowPhase1.getRunPlan()")
+    assert themed_plan["theme"] == "science", themed_plan
+    assert all(doc["theme"] == "science" for doc in themed_plan["documents"]), themed_plan
+    assert "flowTheme=science" in page.url, page.url
+    assert page.locator('[data-flow-view="ready"]').count() == 0
 
-    if browser_name == 'chromium':
-        page.screenshot(path=str(ARTIFACTS / 'chromium-public-results.png'), full_page=True)
+    if browser_name == "chromium":
+        page.screenshot(path=str(ARTIFACTS / "chromium-instant-flow.png"), full_page=True)
 
-    page.keyboard.press('Escape')
-    expect(page.locator('.mode-select-screen')).to_be_visible(timeout=10000)
-    assert 'flowRelease=1' not in page.url, page.url
-    assert 'flowRun=1' not in page.url, page.url
-    flow = page.locator('button[data-mode-id="flow"]')
-    expect(flow).to_be_visible()
-
-    flow.focus()
-    page.keyboard.press('Enter')
-    expect(page.locator('[data-flow-view="ready"]')).to_be_visible(timeout=15000)
-    assert page.evaluate('window.wordstrikeFlowReleasePhase13.runtimeReady()') is True
-    assert 'flowRelease=1' in page.url and 'dev=1' not in page.url, page.url
-
-    persisted_plan = page.evaluate('window.wordstrikeFlowPhase1.getRunPlan()')
-    expect(page.locator('[data-flow-game-best]')).to_have_text(f"{public_result['score']:,}")
-    assert persisted_plan['sessionLength'] == 'quick', persisted_plan
-    assert persisted_plan['modifiers'] == [], persisted_plan
-    assert persisted_plan['passageCount'] == 3, persisted_plan
-    assert persisted_plan['paragraphCount'] == 3, persisted_plan
+    page.keyboard.press("Escape")
+    expect(page.locator(".mode-select-screen")).to_be_visible(timeout=10000)
+    assert "flowRelease=1" not in page.url, page.url
+    assert "flowTheme=" not in page.url, page.url
     assert not errors, errors
-    context.close()
-
-    fresh_context = context_for(browser, base)
-    fresh_page = fresh_context.new_page()
-    fresh_errors = []
-    fresh_page.on('pageerror', lambda error: fresh_errors.append(str(error)))
-    open_modes(fresh_page, base)
-    launch_public_flow(fresh_page)
-
-    default_plan = fresh_page.evaluate('window.wordstrikeFlowPhase1.getRunPlan()')
-    assert default_plan['sessionLength'] == 'standard', default_plan
-    assert default_plan['modifiers'] == [], default_plan
-    assert default_plan['coherent'] is True, default_plan
-    assert default_plan['continuous'] is True, default_plan
-    assert default_plan['passageCount'] == 5, default_plan
-    assert default_plan['paragraphCount'] == 5, default_plan
-    assert default_plan['documentCount'] == 2, default_plan
-    assert default_plan['targetMinutes'] == 6, default_plan
-    assert default_plan['chapterCount'] == 1, default_plan
-    assert default_plan['seriesTitle'], default_plan
-    assert all('"' not in segment['text'] for segment in default_plan['segments']), default_plan
-    assert all(32 <= ord(char) <= 126 for segment in default_plan['segments'] for char in segment['text']), default_plan
-    assert not fresh_errors, fresh_errors
 
     evidence.append({
-        'browser': browser_name,
-        'case': 'public Flow remembers only run length while a fresh profile starts coherent Standard',
-        'completedRuns': summary['progress']['completedRuns'],
-        'canonicalSessions': summary['generic']['completedSessions'],
-        'persistedLength': persisted_plan['sessionLength'],
-        'persistedModifiers': persisted_plan['modifiers'],
-        'defaultStory': default_plan['seriesTitle'],
-        'defaultSections': default_plan['passageCount'],
+        "browser": browser_name,
+        "case": "instant Flow launch, Tab reroll, optional theme filter, clean exit",
+        "firstSeed": first_seed,
+        "secondSeed": second_plan["seed"],
+        "typedCharacters": len(typed),
+        "score": previous_result["score"],
+        "theme": themed_plan["theme"],
     })
-    fresh_context.close()
+    context.close()
+
+
+def certify_fresh_default(browser, browser_name, base, evidence):
+    context = context_for(browser, base)
+    page = context.new_page()
+    open_modes(page, base)
+    plan = launch_public_flow(page)
+    assert plan["theme"] == "mixed", plan
+    assert page.locator('[data-flow-theme-select]').input_value() == "mixed"
+    assert page.locator('[data-flow-view="ready"]').count() == 0
+    assert page.locator('[data-flow-action="start"]').count() == 0
+    evidence.append({
+        "browser": browser_name,
+        "case": "fresh Flow click enters mixed stream immediately",
+        "documents": plan["documentCount"],
+        "paragraphs": plan["paragraphCount"],
+        "wordsAvailable": plan["wordCount"],
+    })
+    context.close()
 
 
 def certify_mobile(browser, browser_name, base, evidence):
-    if browser_name != 'chromium':
+    if browser_name != "chromium":
         return
     context = context_for(browser, base, width=390, height=844)
     page = context.new_page()
     open_modes(page, base)
-    page.locator('button[data-mode-id="flow"]').click()
-    expect(page.locator('[data-flow-view="ready"]')).to_be_visible(timeout=15000)
-    assert page.evaluate('window.wordstrikeFlowReleasePhase13.runtimeReady()') is True
+    plan = launch_public_flow(page)
+
     geometry = page.evaluate("""() => ({
       overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
       viewport: document.documentElement.clientWidth,
       screen: document.querySelector('.flow-phase1-screen').getBoundingClientRect().width,
-      setup: document.querySelector('[data-flow-game-home]')?.getBoundingClientRect().width || 0,
-    })""")
-    assert geometry['overflow'] <= 1, geometry
-    assert geometry['screen'] <= geometry['viewport'] + 1, geometry
-    assert geometry['setup'] <= geometry['viewport'] + 1, geometry
-
-    page.locator('[data-flow-game-length="quick"]').click()
-    page.locator('[data-flow-action="start"]').click()
-    expect(page.locator('[data-flow-view="run"][data-flow-longform-v2="true"]')).to_be_visible(timeout=10000)
-    gameplay_geometry = page.evaluate("""() => ({
-      overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
       hud: document.querySelector('.flow-game-v2-hud').getBoundingClientRect().width,
       passage: document.querySelector('[data-flow-longform="true"]').getBoundingClientRect().width,
-      viewport: document.documentElement.clientWidth,
-      paragraphs: document.querySelectorAll('[data-flow-paragraph]').length,
+      theme: document.querySelector('[data-flow-theme-select]').getBoundingClientRect().width,
     })""")
-    assert gameplay_geometry['overflow'] <= 1, gameplay_geometry
-    assert gameplay_geometry['hud'] <= gameplay_geometry['viewport'] + 1, gameplay_geometry
-    assert gameplay_geometry['passage'] <= gameplay_geometry['viewport'] + 1, gameplay_geometry
-    assert gameplay_geometry['paragraphs'] == 3, gameplay_geometry
-    page.screenshot(path=str(ARTIFACTS / 'chromium-public-mobile.png'), full_page=True)
-    evidence.append({'browser': browser_name, 'case': '390px public Flow entry/setup', **geometry})
+    assert geometry["overflow"] <= 1, geometry
+    assert geometry["screen"] <= geometry["viewport"] + 1, geometry
+    assert geometry["hud"] <= geometry["viewport"] + 1, geometry
+    assert geometry["passage"] <= geometry["viewport"] + 1, geometry
+    assert geometry["theme"] <= geometry["viewport"], geometry
+
+    page.keyboard.type(plan["fullText"][:80])
+    page.keyboard.press("Tab")
+    expect(page.locator('[data-flow-view="run"]')).to_be_visible(timeout=10000)
+    page.screenshot(path=str(ARTIFACTS / "chromium-instant-flow-mobile.png"), full_page=True)
+    evidence.append({"browser": browser_name, "case": "390px instant Flow and Tab reroll", **geometry})
     context.close()
 
 
@@ -258,44 +219,35 @@ def bounded_offline_ready(page, timeout_ms=30000):
 
 
 def certify_offline(browser, browser_name, base, evidence):
-    if browser_name != 'chromium':
+    if browser_name != "chromium":
         return
     context = context_for(browser, base)
     page = context.new_page()
-    print('Phase 13 offline: loading PWA origin', flush=True)
-    page.goto(base, wait_until='load')
-    expect(page.locator('.title-screen')).to_be_visible(timeout=10000)
+    page.goto(base, wait_until="load")
+    expect(page.locator(".title-screen")).to_be_visible(timeout=10000)
 
-    print('Phase 13 offline: awaiting service worker registration', flush=True)
     sw_ready = bounded_service_worker_ready(page)
-    assert sw_ready['ready'] is True, sw_ready
-
-    print('Phase 13 offline: awaiting Flow cache warm-up', flush=True)
+    assert sw_ready["ready"] is True, sw_ready
     cache_result = bounded_offline_ready(page)
-    assert cache_result.get('timeout') is not True, cache_result
-    assert cache_result['supported'] is True, cache_result
-    assert cache_result['cached'] == page.evaluate('window.wordstrikeFlowReleasePhase13.offlineAssetCount'), cache_result
-    assert cache_result['cached'] >= 50, cache_result
-    assert cache_result['cacheName'] == page.evaluate('window.wordstrikeFlowReleasePhase13.offlineCacheName'), cache_result
+    assert cache_result.get("timeout") is not True, cache_result
+    assert cache_result["supported"] is True, cache_result
+    assert cache_result["cached"] == page.evaluate(
+        "window.wordstrikeFlowReleasePhase13.offlineAssetCount"
+    ), cache_result
+    assert cache_result["cached"] >= 70, cache_result
 
     cached = page.evaluate("""async () => {
       const targets = [
-        './js/flow/flowRuntimeLoader.js?v=20260923h',
-        './js/flow/flowLongformContent.js',
-        './js/flow/flowGameModeV2.js?v=20260923c',
-        './js/flow/flowScoreV2.js?v=20260923a',
-        './js/flow/flowRecordsV2.js?v=20260923a',
+        './js/flow/flowRuntimeLoader.js?v=20260923i',
+        './js/flow/flowPhase1.js?v=20260923i',
+        './js/flow/flowStreamPlanV3.js?v=20260923a',
+        './js/flow/flowScoreV3.js?v=20260923a',
+        './js/flow/flowRecordsV3.js?v=20260923a',
         './js/leaderboardService.js',
         './js/leaderboardSubmissionService.js',
         './js/submissionOutbox.js',
-        './js/pendingResultSubmission.js',
         './js/supabaseClient.js',
-        './js/arcadeRushLeaderboard.js',
-        './js/arcadeRush/arcadeRushResult.js',
-        './js/flow/flowScoreV2.js',
-        './js/flow/flowUiPhase7KeyboardGuard.js?v=20260923a',
-        './js/flow/flowIntegrationPhase11.js?v=20260923b',
-        './styles/screens/flow-integration-phase11.css?v=20260916a',
+        './styles/screens/flow-game-mode-v2.css?v=20260923d',
       ];
       const results = [];
       for (const target of targets) {
@@ -305,58 +257,54 @@ def certify_offline(browser, browser_name, base, evidence):
     }""")
     assert all(cached), cached
 
-    if not page.evaluate('Boolean(navigator.serviceWorker.controller)'):
-        print('Phase 13 offline: reloading once for service-worker control', flush=True)
-        page.reload(wait_until='load')
-        expect(page.locator('.title-screen')).to_be_visible(timeout=10000)
-    assert page.evaluate('Boolean(navigator.serviceWorker.controller)') is True
+    if not page.evaluate("Boolean(navigator.serviceWorker.controller)"):
+        page.reload(wait_until="load")
+        expect(page.locator(".title-screen")).to_be_visible(timeout=10000)
+    assert page.evaluate("Boolean(navigator.serviceWorker.controller)") is True
 
-    print('Phase 13 offline: exercising true offline reload', flush=True)
     context.set_offline(True)
-    page.reload(wait_until='domcontentloaded')
-    expect(page.locator('.title-screen')).to_be_visible(timeout=10000)
+    page.reload(wait_until="domcontentloaded")
+    expect(page.locator(".title-screen")).to_be_visible(timeout=10000)
     page.locator('[data-action="modes"]').click()
-    expect(page.locator('.mode-select-screen')).to_be_visible()
+    expect(page.locator(".mode-select-screen")).to_be_visible()
     page.locator('button[data-mode-id="flow"]').click()
-    expect(page.locator('[data-flow-view="ready"]')).to_be_visible(timeout=15000)
-    assert page.evaluate('window.wordstrikeFlowReleasePhase13.runtimeReady()') is True
-    assert 'dev=1' not in page.url, page.url
-    offline_plan = page.evaluate('window.wordstrikeFlowPhase1.getRunPlan()')
-    assert offline_plan['coherent'] is True, offline_plan
-    assert offline_plan['passageCount'] == 5, offline_plan
-    assert offline_plan['paragraphCount'] == 5, offline_plan
-    context.set_offline(False)
+    expect(page.locator('[data-flow-view="run"]')).to_be_visible(timeout=15000)
+    offline_plan = page.evaluate("window.wordstrikeFlowPhase1.getRunPlan()")
+    assert offline_plan["gameplayVersion"] == 3, offline_plan
+    assert offline_plan["structure"] == "continuous-stream", offline_plan
 
     evidence.append({
-        'browser': browser_name,
-        'case': 'PWA cache warm-up and offline coherent Flow relaunch',
-        'cachedAssets': cache_result['cached'],
-        'cacheName': cache_result['cacheName'],
+        "browser": browser_name,
+        "case": "offline instant Flow relaunch",
+        "cachedAssets": cache_result["cached"],
+        "cacheName": cache_result["cacheName"],
     })
-    print('Phase 13 offline: certification passed', flush=True)
     context.close()
 
 
 def main():
     ARTIFACTS.mkdir(parents=True, exist_ok=True)
     os.chdir(ROOT)
-    server = ThreadingHTTPServer(('127.0.0.1', 0), partial(QuietHandler, directory=str(ROOT)))
+    server = ThreadingHTTPServer(("127.0.0.1", 0), partial(QuietHandler, directory=str(ROOT)))
     thread = Thread(target=server.serve_forever, daemon=True)
     thread.start()
-    base = f'http://localhost:{server.server_port}/'
+    base = f"http://localhost:{server.server_port}/"
     evidence = []
     try:
         with sync_playwright() as p:
             for browser_type in (p.chromium, p.firefox):
                 browser = browser_type.launch()
                 name = browser_type.name
-                print(f'Phase 13 browser: {name} public journey', flush=True)
                 certify_public_journey(browser, name, base, evidence)
+                certify_fresh_default(browser, name, base, evidence)
                 certify_mobile(browser, name, base, evidence)
                 certify_offline(browser, name, base, evidence)
                 browser.close()
-        (ARTIFACTS / 'evidence.json').write_text(json.dumps(evidence, indent=2), encoding='utf-8')
-        print(f'PASS: {len(evidence)} Flow Phase 13 public release scenarios', flush=True)
+        (ARTIFACTS / "evidence.json").write_text(
+            json.dumps(evidence, indent=2),
+            encoding="utf-8",
+        )
+        print(f"PASS: {len(evidence)} Flow V3 instant-play release scenarios", flush=True)
     except Exception:
         traceback.print_exc()
         raise
@@ -365,5 +313,5 @@ def main():
         server.server_close()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
