@@ -104,6 +104,7 @@ export function createFlowScoreV2Result({
     rawWpm: round(cadence.rawWpm, 1),
     accuracy: breakdown.accuracy,
     consistency: breakdown.consistency,
+    consistencySamples: Math.max(0, Math.round(finite(cadence.sampleCount))),
     activeDurationMs: Math.max(0, round(cadence.typingDurationMs, 1)),
     wordsCompleted: Math.max(0, Math.round(finite(plan.wordCount, snapshot.wordTimings?.length || 0))),
     charactersCompleted: Math.max(0, Math.round(finite(snapshot.currentIndex))),
