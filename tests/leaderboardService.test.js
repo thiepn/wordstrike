@@ -70,7 +70,7 @@ assert.deepEqual(EXPECTED_LEADERBOARD_RULES_VERSIONS, {
   "endless-v1": 1,
   "arcade-rush-v1": 1,
   "flow-quick-v1": 2,
-  "flow-standard-v1": 2,
+  "flow-standard-v1": 3,
   "flow-long-v1": 2,
 });
 
