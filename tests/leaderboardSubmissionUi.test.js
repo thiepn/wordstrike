@@ -28,6 +28,14 @@ assert.match(
   /Submission queued for retry.*not saved to local history/s,
 );
 assert.match(
+  renderGlobalSubmissionMarkup({
+    ...endless,
+    status: "error",
+    retryPersistenceError: "STORAGE_ERROR",
+  }),
+  /automatic retry could not be queued.*Keep this page open and retry/s,
+);
+assert.match(
   renderGlobalSubmissionMarkup({ ...endless, status: "error" }, { localResultStored: false }),
   /not saved locally or queued.*Keep this page open and retry/s,
 );
