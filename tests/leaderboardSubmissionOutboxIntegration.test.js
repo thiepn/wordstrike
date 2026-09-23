@@ -48,7 +48,10 @@ const result = {
       return true;
     },
   });
-  service.prepareResultSubmission("endless", result, auth, profile);
+  const prepared = service.prepareResultSubmission("endless", result, auth, { status: "loading", profile: null });
+  assert.equal(prepared.status, "checking");
+  assert.equal(prepared.retryPersisted, true, "signed-in results must be durable before profile lookup/network");
+  service.refreshSubmissionEligibility(auth, profile);
   const offline = await service.submitCurrentResult();
   assert.equal(offline.status, "offline");
   assert.equal(offline.retryPersisted, true);
