@@ -1,7 +1,7 @@
 import {
   getFlowPersonalBestV2,
   getFlowRecentRunsV2,
-} from "./flowRecordsV2.js?v=20260923a";
+} from "./flowRecordsV2.js?v=20260923b";
 import { FLOW_SESSION_LENGTHS } from "./flowConfig.js";
 
 const params = new URLSearchParams(globalThis.location?.search || "");
