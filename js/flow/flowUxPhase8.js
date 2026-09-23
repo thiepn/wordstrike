@@ -250,6 +250,10 @@ function metric(label, value) {
 }
 
 function decorateResults(screen) {
+  if (screen.dataset.flowScoreV2 === "true") {
+    screen.dataset.flowUxPhase8 = "true";
+    return;
+  }
   if (screen.querySelector("[data-flow-ux='primary-results']")) {
     screen.dataset.flowUxPhase8 = "true";
     return;
