@@ -5,13 +5,14 @@ import {
   insertFlowText,
 } from "./flowEngine.js";
 import { analyzeFlowCadence } from "./flowCadence.js";
-import { resolveFlowRunPlan } from "./flowRunPlan.js?v=20260923a";
+import { resolveFlowRunPlan } from "./flowRunPlan.js?v=20260923e";
 import { resolveFlowSelection } from "./flowSelection.js";
 import {
   calculateFlowScoreV2,
   createFlowScoreV2Result,
 } from "./flowScoreV2.js?v=20260923a";
 import { recordFlowResultV2 } from "./flowRecordsV2.js?v=20260923a";
+import { recordFlowCorpusRun } from "./flowCorpusHistory.js?v=20260923a";
 import { FLOW_PHASES } from "./flowState.js";
 
 const root = () => document.querySelector("#app");
@@ -655,6 +656,9 @@ function ensurePublicResult(snapshot) {
   });
   if (!result) return null;
   lastPublicRecordState = recordFlowResultV2(result);
+  if (result.completed && resolvedRunPlan?.corpusVersion === 2) {
+    recordFlowCorpusRun(resolvedRunPlan, { completedAt: result.endedAt });
+  }
   lastPublicResult = result;
   return result;
 }
