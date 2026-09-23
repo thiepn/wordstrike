@@ -35,7 +35,10 @@ const signed = (value, suffix = "") => {
 let practiceOverlay = null;
 let practiceController = null;
 let practiceRegistry = null;
-let practiceObserver = null;
+let practiceStructureObserver = null;
+let practiceAttributeObserver = null;
+let resultsObserver = null;
+let installed = false;
 let practiceAutoStartIssued = false;
 let practiceTargetFilled = false;
 let accuracyTypeIssued = false;
@@ -53,8 +56,10 @@ function ensureStyles() {
 }
 
 function closePracticeOverlay() {
-  practiceObserver?.disconnect?.();
-  practiceObserver = null;
+  practiceStructureObserver?.disconnect?.();
+  practiceStructureObserver = null;
+  practiceAttributeObserver?.disconnect?.();
+  practiceAttributeObserver = null;
   practiceController?.unmount?.();
   practiceRegistry?.destroy?.();
   practiceController = null;
@@ -207,8 +212,14 @@ async function openCoachPractice(plan, drillType, trigger = null) {
     practiceAutoStartIssued = false;
     practiceTargetFilled = false;
     accuracyTypeIssued = false;
-    practiceObserver = new MutationObserver(driveCoachPractice);
-    practiceObserver.observe(root, { childList: true, subtree: true, attributes: true, attributeFilter: ["disabled", "aria-disabled"] });
+    practiceStructureObserver = new MutationObserver(driveCoachPractice);
+    practiceStructureObserver.observe(root, { childList: true });
+    practiceAttributeObserver = new MutationObserver(driveCoachPractice);
+    practiceAttributeObserver.observe(root, {
+      attributes: true,
+      subtree: true,
+      attributeFilter: ["disabled", "aria-disabled", "data-practice-view"],
+    });
     practiceController.mount(createPracticeLabRoute(PRACTICE_LAB_ROUTES.EXPERIMENT_DETAIL, { experimentId: cycle.drill.experimentId }));
     driveCoachPractice();
     return true;
@@ -344,16 +355,28 @@ function enhanceResultsV6() {
   restoreResultsScroll(scrollPosition);
 }
 
+function teardown() {
+  resultsObserver?.disconnect?.();
+  resultsObserver = null;
+  closePracticeOverlay();
+  installed = false;
+}
+
 function install() {
+  if (installed) return;
   const root = document.querySelector("#app");
   if (!root) return;
+  installed = true;
   enhanceResultsV6();
-  const observer = new MutationObserver(enhanceResultsV6);
-  observer.observe(root, { childList: true, subtree: true });
-  window.addEventListener("pagehide", closePracticeOverlay, { once: true });
+  resultsObserver = new MutationObserver(enhanceResultsV6);
+  resultsObserver.observe(root, { childList: true });
 }
 
 if (typeof document !== "undefined") {
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", install, { once: true });
   else install();
+}
+if (typeof window !== "undefined") {
+  window.addEventListener("pagehide", teardown);
+  window.addEventListener("pageshow", install);
 }

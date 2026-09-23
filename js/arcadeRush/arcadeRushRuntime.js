@@ -1,4 +1,5 @@
 import { calculateSessionAccuracy, calculateSessionWpm } from "../sessionMetrics.js";
+import { GAMEPLAY_MAX_FRAME_DELTA_MS, clampGameplayFrameDelta } from "../runtimeTiming.js";
 import {
   ARCADE_RUSH_CONTRACT_VERSION,
   ARCADE_RUSH_MODE_ID,
@@ -20,7 +21,7 @@ import { buildArcadeRushSessionResult } from "./arcadeRushResult.js";
 export const ARCADE_RUSH_RUNTIME_VERSION = 2;
 export const ARCADE_RUSH_WAVE_TRANSITION_MS = 2_500;
 export const ARCADE_RUSH_BOSS_INTRO_MS = 2_500;
-export const ARCADE_RUSH_MAX_FRAME_DELTA_MS = 100;
+export const ARCADE_RUSH_MAX_FRAME_DELTA_MS = GAMEPLAY_MAX_FRAME_DELTA_MS;
 
 export const ARCADE_RUSH_RUNTIME_PORTS = Object.freeze({
   clock: Object.freeze(["now"]),
@@ -822,9 +823,10 @@ export function createArcadeRushRuntime({
     const now = Number.isFinite(timestamp) ? timestamp : runtimePorts.clock.now();
     let deltaMs = 0;
     if (game.lastTimestamp != null) {
-      deltaMs = Math.min(
+      deltaMs = clampGameplayFrameDelta(
+        now,
+        game.lastTimestamp,
         ARCADE_RUSH_MAX_FRAME_DELTA_MS,
-        Math.max(0, now - game.lastTimestamp),
       );
     }
     game.lastTimestamp = now;

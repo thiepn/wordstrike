@@ -24,6 +24,7 @@ import {
   updateWordElement,
 } from "./renderer.js";
 import { updateWordSeparation } from "./gameLoop.js";
+import { clampGameplayFrameDelta } from "./runtimeTiming.js";
 import { createSeededRandom, mixSeed } from "./random.js";
 import {
   beginSession,
@@ -406,12 +407,11 @@ function tick(timestamp) {
   const game = currentEndless;
   if (!game || game.ended) return;
   if (appState.screen !== Screens.PLAYING) {
-    game.lastTimestamp = timestamp;
+    game.lastTimestamp = null;
     animationFrameId = requestAnimationFrame(tick);
     return;
   }
-  if (game.lastTimestamp == null) game.lastTimestamp = timestamp;
-  const deltaMs = Math.min(100, Math.max(0, timestamp - game.lastTimestamp));
+  const deltaMs = clampGameplayFrameDelta(timestamp, game.lastTimestamp);
   game.lastTimestamp = timestamp;
   game.elapsedMs += deltaMs;
   if (game.stageWordsCompleted >= getEndlessWordsPerStage(game.stage)) {

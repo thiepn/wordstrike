@@ -9,6 +9,7 @@ import {
 } from "./renderer.js";
 import { createSeededRandom, mixSeed } from "./random.js";
 import { reconcileTargetingState } from "./input.js";
+import { clampGameplayFrameDelta } from "./runtimeTiming.js";
 import {
   advanceWordTrajectory,
   createWordTrajectory,
@@ -208,26 +209,29 @@ function targetingVisualState(game, word) {
 function finish(game, success) {
   if (game.ended) return;
   game.ended = true;
+  const onEnd = callbacks.onEnd;
   stopGameLoop();
-  callbacks.onEnd?.(game, success);
+  onEnd?.(game, success);
 }
 
 function tick(timestamp) {
   const game = appState.game;
   if (!game || game.ended) return;
   if (appState.screen !== Screens.PLAYING) {
-    game.lastTimestamp = timestamp;
+    game.lastTimestamp = null;
     animationFrameId = requestAnimationFrame(tick);
     return;
   }
 
-  if (game.lastTimestamp === null) game.lastTimestamp = timestamp;
-  const deltaMs = Math.min(timestamp - game.lastTimestamp, 100);
+  const deltaMs = clampGameplayFrameDelta(timestamp, game.lastTimestamp);
   game.lastTimestamp = timestamp;
 
   game.elapsedMs += deltaMs;
   const dimensions = getDimensions(game);
-  if (!dimensions) return;
+  if (!dimensions) {
+    animationFrameId = requestAnimationFrame(tick);
+    return;
+  }
 
   if (
     game.spawnedCount < game.config.wordCount &&
@@ -285,6 +289,7 @@ export function stopGameLoop() {
   if (animationFrameId !== null) cancelAnimationFrame(animationFrameId);
   animationFrameId = null;
   clearWordElements();
+  callbacks = {};
   if (appState.game?.mode === "normal") appState.game.lastTimestamp = null;
 }
 

@@ -1,5 +1,6 @@
 import { appState, Screens } from "./state.js";
 import { clearBossPhrase, clearWordElements, renderBossPhrase } from "./renderer.js";
+import { clampGameplayFrameDelta } from "./runtimeTiming.js";
 
 const INTRO_DURATION_MS = 2800;
 export const BOSS_TRANSITION_DURATION_MS = 350;
@@ -61,9 +62,11 @@ function finishBoss(game, success) {
   if (game.ended) return;
   game.ended = true;
   if (!success) addBossTimeoutMisses(game);
+  const onUpdate = callbacks.onUpdate;
+  const onEnd = callbacks.onEnd;
   stopBossLoop();
-  callbacks.onUpdate?.(game);
-  callbacks.onEnd?.(game, success);
+  onUpdate?.(game);
+  onEnd?.(game, success);
 }
 
 export function completeBossPhrase(game) {
@@ -98,13 +101,12 @@ function tick(timestamp) {
   if (!game || game.mode !== "boss" || game.ended) return;
 
   if (appState.screen !== Screens.PLAYING) {
-    game.lastTimestamp = timestamp;
+    game.lastTimestamp = null;
     animationFrameId = requestAnimationFrame(tick);
     return;
   }
 
-  if (game.lastTimestamp === null) game.lastTimestamp = timestamp;
-  const deltaMs = Math.max(timestamp - game.lastTimestamp, 0);
+  const deltaMs = clampGameplayFrameDelta(timestamp, game.lastTimestamp);
   game.lastTimestamp = timestamp;
 
   if (game.phase === "INTRO") {
@@ -155,6 +157,7 @@ export function stopBossLoop() {
   if (animationFrameId !== null) cancelAnimationFrame(animationFrameId);
   animationFrameId = null;
   clearBossPhrase();
+  callbacks = {};
   if (appState.game?.mode === "boss") appState.game.lastTimestamp = null;
 }
 

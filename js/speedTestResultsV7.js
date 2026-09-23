@@ -36,8 +36,12 @@ const signed = (value, suffix = "") => {
   return `${number > 0 ? "+" : ""}${number.toFixed(suffix === " / word" ? 2 : 1)}${suffix}`;
 };
 
-let observer = null;
+let rootObserver = null;
+let bodyObserver = null;
+let practiceViewObserver = null;
+let observedPracticeOverlay = null;
 let scheduled = false;
+let installed = false;
 
 function ensureStyles() {
   if (typeof document === "undefined") return null;
@@ -308,11 +312,11 @@ function enhanceResultsV7() {
 }
 
 function scheduleEnhance() {
-  if (scheduled) return;
+  if (scheduled || !installed) return;
   scheduled = true;
   queueMicrotask(() => {
     scheduled = false;
-    enhanceResultsV7();
+    if (installed) enhanceResultsV7();
   });
 }
 
@@ -325,20 +329,59 @@ function onDocumentClickCapture(event) {
   scheduleEnhance();
 }
 
+function disconnectPracticeViewObserver() {
+  practiceViewObserver?.disconnect?.();
+  practiceViewObserver = null;
+  observedPracticeOverlay = null;
+}
+
+function syncPracticeViewObserver() {
+  const overlay = document.querySelector("[data-typing-coach-practice-overlay]");
+  if (overlay === observedPracticeOverlay) return;
+  disconnectPracticeViewObserver();
+  observedPracticeOverlay = overlay || null;
+  if (!overlay) return;
+  practiceViewObserver = new MutationObserver(() => {
+    if (syncPracticeCompletion()) scheduleEnhance();
+  });
+  practiceViewObserver.observe(overlay, {
+    attributes: true,
+    subtree: true,
+    attributeFilter: ["data-practice-view"],
+  });
+  syncPracticeCompletion();
+}
+
+function teardown() {
+  rootObserver?.disconnect?.();
+  rootObserver = null;
+  bodyObserver?.disconnect?.();
+  bodyObserver = null;
+  disconnectPracticeViewObserver();
+  document.removeEventListener("click", onDocumentClickCapture, true);
+  scheduled = false;
+  installed = false;
+}
+
 function install() {
+  if (installed) return;
   const root = document.querySelector("#app");
   if (!root) return;
+  installed = true;
   enhanceResultsV7();
-  observer = new MutationObserver(() => {
-    syncPracticeCompletion();
-    scheduleEnhance();
-  });
-  observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["data-practice-view"] });
+  rootObserver = new MutationObserver(scheduleEnhance);
+  rootObserver.observe(root, { childList: true });
+  bodyObserver = new MutationObserver(syncPracticeViewObserver);
+  bodyObserver.observe(document.body, { childList: true });
+  syncPracticeViewObserver();
   document.addEventListener("click", onDocumentClickCapture, true);
-  window.addEventListener("pagehide", () => observer?.disconnect?.(), { once: true });
 }
 
 if (typeof document !== "undefined") {
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", install, { once: true });
   else install();
+}
+if (typeof window !== "undefined") {
+  window.addEventListener("pagehide", teardown);
+  window.addEventListener("pageshow", install);
 }

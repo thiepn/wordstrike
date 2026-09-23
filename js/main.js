@@ -111,6 +111,7 @@ import {
   startSpeedTest,
   stopSpeedTestLoop,
 } from "./speedTest.js";
+import { createGameplayVisibilityLifecycle } from "./gameplayVisibilityLifecycle.js";
 import { createEndlessVocabulary } from "./endlessWords.js";
 import {
   clearEndlessRuntime,
@@ -237,6 +238,7 @@ const titleActions = ["modes", "leaderboards", "profile", "settings"];
 const currentTimeMs = () => globalThis.performance?.now?.() ?? Date.now();
 let lastAuthUiKey = "";
 let bootstrapReady = false;
+let gameplayVisibilityLifecycle = null;
 let pendingLeaderboardReturn = null;
 let leaderboardNotice = "";
 let deactivateGameplayInput = () => {};
@@ -1020,6 +1022,9 @@ function pauseGame() {
   deactivateGameplayInput.blur?.();
   dismissContextualHint();
   tutorialHintMode = null;
+  if (["normal", "boss"].includes(appState.game?.mode)) {
+    appState.game.lastTimestamp = null;
+  }
   if (appState.game?.mode === ARCADE_RUSH_MODE_ID) {
     if (!ensureArcadeRushAppController()?.pause()) return;
     changeScreen(Screens.PAUSED);
@@ -1803,6 +1808,17 @@ async function bootstrap() {
     loadCommonWordBank(),
   ]);
   document.addEventListener("keydown", handleGlobalKeydown);
+  gameplayVisibilityLifecycle ??= createGameplayVisibilityLifecycle({
+    documentRef: document,
+    getScreen: () => appState.screen,
+    getSpeedTest: getCurrentSpeedTest,
+    screens: Screens,
+    pauseTypingTest,
+    pauseGameplay: pauseGame,
+  });
+  gameplayVisibilityLifecycle.mount();
+  window.addEventListener("pagehide", () => gameplayVisibilityLifecycle?.unmount?.());
+  window.addEventListener("pageshow", () => gameplayVisibilityLifecycle?.mount?.());
   window.addEventListener("online", () => {
     void resumeDurableSubmissions(getAuthState(), getLeaderboardProfileState());
   });

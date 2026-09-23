@@ -136,8 +136,25 @@ const missedOnce = game.missedCharacters;
 completeBossPhrase(game);
 assert.equal(game.missedCharacters, missedOnce);
 
-startBossLoop(10, { timeLimitSec: 1 }, ["a"], {});
-startBossLoop(10, { timeLimitSec: 1 }, ["a"], {});
+outcome = null;
+now = 0;
+game = startBossLoop(
+  10,
+  { timeLimitSec: 5 },
+  ["ab"],
+  { onEnd: (_game, success) => { outcome = success; } },
+);
+for (let index = 0; index < 30 && game.phase === "INTRO"; index += 1) frame();
+const remainingBeforeFrameJump = game.remainingMs;
+frame(5_000);
+assert.equal(game.remainingMs, remainingBeforeFrameJump - 100);
+assert.equal(outcome, null);
+stopBossLoop();
+
+for (let index = 0; index < 50; index += 1) {
+  startBossLoop(10, { timeLimitSec: 1 }, ["a"], {});
+  assert.equal(frames.size, 1);
+}
 assert.equal(frames.size, 1);
 updateBossHud(appState.game);
 assert.equal(sequenceCount.textContent, "SEQUENCE 1 / 1");
