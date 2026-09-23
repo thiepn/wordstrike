@@ -15,13 +15,16 @@ export function applyFlowIntegrationDefaults(locationLike = globalThis.location)
   if (!eligible(url.searchParams)) return false;
   const progress = loadFlowProgress();
   const setup = progress.lastSetup || {};
+  const publicGameMode = url.searchParams.get("flowRelease") === "1";
   let changed = false;
 
-  const defaults = [
-    ["flowLength", setup.sessionLength],
-    ["flowCategory", setup.category],
-    ["flowDifficulty", setup.difficulty],
-  ];
+  const defaults = publicGameMode
+    ? [["flowLength", setup.sessionLength]]
+    : [
+        ["flowLength", setup.sessionLength],
+        ["flowCategory", setup.category],
+        ["flowDifficulty", setup.difficulty],
+      ];
   for (const [key, value] of defaults) {
     if (!url.searchParams.has(key) && value) {
       url.searchParams.set(key, value);
@@ -30,6 +33,7 @@ export function applyFlowIntegrationDefaults(locationLike = globalThis.location)
   }
 
   if (
+    !publicGameMode &&
     url.searchParams.get("flowModifiers") === "1"
     && !url.searchParams.has("flowModifierIds")
     && Array.isArray(setup.modifiers)
@@ -40,6 +44,7 @@ export function applyFlowIntegrationDefaults(locationLike = globalThis.location)
   }
 
   if (
+    !publicGameMode &&
     url.searchParams.get("flowAdaptive") === "1"
     && url.searchParams.get("flowResumeAdaptive") === "1"
     && !url.searchParams.has("flowWeaknesses")
