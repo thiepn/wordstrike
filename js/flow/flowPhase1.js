@@ -5,13 +5,14 @@ import {
   insertFlowText,
 } from "./flowEngine.js";
 import { analyzeFlowCadence } from "./flowCadence.js";
-import { resolveFlowRunPlan } from "./flowRunPlan.js";
+import { resolveFlowRunPlan } from "./flowRunPlan.js?v=20260923a";
 import { resolveFlowSelection } from "./flowSelection.js";
 import { FLOW_PHASES } from "./flowState.js";
 
 const root = () => document.querySelector("#app");
 const now = () => globalThis.performance?.now?.() ?? Date.now();
 let developerFlowRequested = false;
+let publicFlowRequested = false;
 let resolvedRunPlan = null;
 let resolvedSelection = null;
 const LIVE_CADENCE_INTERVAL_MS = 180;
@@ -26,6 +27,7 @@ function refreshFlowPlanFromLocation(locationLike = globalThis.location) {
 function resolveFlowRouteState(locationLike = globalThis.location) {
   const params = new URLSearchParams(locationLike?.search || "");
   developerFlowRequested = params.get("dev") === "1" && params.get("mode") === "flow";
+  publicFlowRequested = params.get("flowRelease") === "1" && params.get("mode") === "flow";
   refreshFlowPlanFromLocation(locationLike);
   return developerFlowRequested;
 }
@@ -103,6 +105,48 @@ function currentSegment() {
 function currentChapter() {
   const segment = currentSegment();
   return segment ? resolvedRunPlan.chapters[segment.chapterIndex] : null;
+}
+
+function isPublicLongformRun() {
+  return publicFlowRequested
+    && resolvedRunPlan?.gameplayVersion === 2
+    && resolvedRunPlan?.structure === "continuous-longform";
+}
+
+function publicLongformMarkup() {
+  if (!run || !isPublicLongformRun()) return "";
+  const documents = resolvedRunPlan.documents || [];
+  return documents.map((document, documentIndex) => {
+    const segments = resolvedRunPlan.segments.filter((segment) => segment.documentIndex === documentIndex);
+    const paragraphs = segments.map((segment) => {
+      const characters = [];
+      for (let index = segment.startIndex; index <= segment.endIndex; index += 1) {
+        const character = flowCharacterAt(index);
+        if (character) characters.push(charMarkup(character));
+      }
+      if (segment.separatorIndex != null) {
+        const separator = flowCharacterAt(segment.separatorIndex);
+        if (separator) characters.push(charMarkup(separator, { paragraphBreak: true }));
+      }
+      return `<p class="flow-longform-paragraph" data-flow-paragraph="${segment.index}">${characters.join("")}</p>`;
+    }).join("");
+    const label = documents.length > 1
+      ? `<div class="flow-longform-document-label"><span>TEXT ${documentIndex + 1} / ${documents.length}</span><strong>${escapeHtml(document.title)}</strong></div>`
+      : "";
+    return `<section class="flow-longform-document" data-flow-document="${documentIndex}">${label}${paragraphs}</section>`;
+  }).join("");
+}
+
+function syncPublicSegmentIndex() {
+  if (!run || !isPublicLongformRun()) return;
+  while (
+    activeSegmentIndex < resolvedRunPlan.segments.length - 1
+    && run.currentIndex > (resolvedRunPlan.segments[activeSegmentIndex]?.separatorIndex
+      ?? resolvedRunPlan.segments[activeSegmentIndex]?.endIndex
+      ?? Infinity)
+  ) {
+    activeSegmentIndex += 1;
+  }
 }
 
 function renderMissingSelection() {
@@ -196,11 +240,12 @@ function flowCharacterAt(index) {
   };
 }
 
-function charMarkup(character) {
+function charMarkup(character, { paragraphBreak = false } = {}) {
   const shown = character.actual ?? character.expected;
   const classes = ["flow-char", `flow-char--${character.status}`];
   if (character.current) classes.push("flow-char--current");
-  return `<span class="${classes.join(" ")}" data-flow-char="${character.index}" data-status="${character.status}" aria-hidden="true">${escapeHtml(shown)}</span>`;
+  const paragraphBreakAttribute = paragraphBreak ? ' data-flow-paragraph-break="true"' : "";
+  return `<span class="${classes.join(" ")}" data-flow-char="${character.index}" data-status="${character.status}"${paragraphBreakAttribute} aria-hidden="true">${escapeHtml(shown)}</span>`;
 }
 
 function visibleCharacterView() {
@@ -255,6 +300,9 @@ function updateCharacterRange(startIndex, endIndex) {
 
 function runHeaderLabel() {
   if (!resolvedRunPlan) return `FLOW · ${resolvedSelection?.passage?.id || "passage"}`;
+  if (isPublicLongformRun()) {
+    return `FLOW · ${resolvedRunPlan.sessionLength.toUpperCase()} · ${resolvedRunPlan.wordCount} WORDS`;
+  }
   const segment = currentSegment();
   const chapter = currentChapter();
   return `CHAPTER ${segment.chapterIndex + 1}/${resolvedRunPlan.chapterCount} · ${chapter.title.toUpperCase()} · ${segment.passageIndex + 1}/${chapter.passages.length}`;
@@ -352,7 +400,12 @@ function scheduleCadenceHud(immediate = false) {
 function syncRunHud() {
   const hud = mountedRunHud;
   if (!hud) return;
-  setTextIfChanged(hud.progress, `${run.currentIndex} / ${run.passage.length}`);
+  setTextIfChanged(
+    hud.progress,
+    isPublicLongformRun()
+      ? `${Math.min(100, Math.round((run.currentIndex / Math.max(1, run.passage.length)) * 100))}%`
+      : `${run.currentIndex} / ${run.passage.length}`,
+  );
   setTextIfChanged(hud.corrected, String(run.correctedErrors));
   setTextIfChanged(hud.unresolved, String(run.uncorrectedErrors));
   updateGameplayHud(hud, liveGameplaySnapshot(), null);
@@ -364,38 +417,47 @@ function renderRun() {
   clearCadenceRefresh();
   view = "run";
   const chapter = currentChapter();
+  const publicLongform = isPublicLongformRun();
+  const hud = publicLongform
+    ? `<section class="flow-gameplay-hud flow-game-v2-hud" aria-label="Flow run status">
+        <div><span>Score</span><strong data-flow-score>0</strong></div>
+        <div><span>WPM</span><strong data-flow-final-wpm>0.0</strong></div>
+        <div><span>Accuracy</span><strong data-flow-accuracy>100.0%</strong></div>
+        <div><span>Progress</span><strong data-flow-progress>0%</strong></div>
+      </section>`
+    : `<section class="flow-gameplay-hud flow-cadence-hud" aria-label="Flow gameplay and cadence status">
+        <div class="flow-score-block"><span>Score</span><strong data-flow-score>0</strong></div>
+        <div class="flow-meter-block">
+          <div class="flow-meter-label"><span>Flow</span><strong data-flow-value>60</strong></div>
+          <div class="flow-meter" role="progressbar" aria-label="Flow meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="60" data-flow-meter>
+            <span data-flow-meter-fill style="width:60%"></span>
+          </div>
+        </div>
+        <div class="flow-momentum-block"><span>Momentum</span><strong data-flow-momentum>×1.0</strong></div>
+        <div class="flow-cadence-block"><span>Cadence</span><strong data-flow-cadence>—</strong><small data-flow-cadence-label>Warming up</small></div>
+      </section>`;
+  const passage = publicLongform
+    ? `<div class="flow-passage flow-longform-passage" data-flow-passage data-flow-longform="true" aria-label="Longform typing text">${publicLongformMarkup()}</div>`
+    : `<div class="flow-passage" data-flow-passage aria-label="${escapeHtml(visiblePassageText())}">${visibleCharacterView().map(charMarkup).join("")}</div>`;
   app.innerHTML = `
-    <section class="screen flow-phase1-screen flow-run-screen" data-flow-view="run">
+    <section class="screen flow-phase1-screen flow-run-screen" data-flow-view="run"${publicLongform ? ' data-flow-longform-v2="true"' : ""}>
       <main class="flow-run-shell">
         <header class="flow-run-header">
           <button type="button" class="screen-back-button" data-flow-action="back">BACK</button>
-          <div><span>${escapeHtml(runHeaderLabel())}</span><strong data-flow-progress>0 / ${run.passage.length}</strong></div>
+          <div><span>${escapeHtml(runHeaderLabel())}</span>${publicLongform ? "" : `<strong data-flow-progress>0 / ${run.passage.length}</strong>`}</div>
         </header>
-        ${chapter ? `<div class="flow-chapter-strip" data-flow-chapter><span>${escapeHtml(chapter.title)}</span><strong>${escapeHtml(chapter.difficulty)}</strong></div>` : ""}
-        <section class="flow-gameplay-hud flow-cadence-hud" aria-label="Flow gameplay and cadence status">
-          <div class="flow-score-block"><span>Score</span><strong data-flow-score>0</strong></div>
-          <div class="flow-meter-block">
-            <div class="flow-meter-label"><span>Flow</span><strong data-flow-value>60</strong></div>
-            <div class="flow-meter" role="progressbar" aria-label="Flow meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="60" data-flow-meter>
-              <span data-flow-meter-fill style="width:60%"></span>
-            </div>
-          </div>
-          <div class="flow-momentum-block"><span>Momentum</span><strong data-flow-momentum>×1.0</strong></div>
-          <div class="flow-cadence-block"><span>Cadence</span><strong data-flow-cadence>—</strong><small data-flow-cadence-label>Warming up</small></div>
-        </section>
+        ${!publicLongform && chapter ? `<div class="flow-chapter-strip" data-flow-chapter><span>${escapeHtml(chapter.title)}</span><strong>${escapeHtml(chapter.difficulty)}</strong></div>` : ""}
+        ${hud}
         <div class="flow-run-copy">
-          <p>${chapter ? escapeHtml(chapter.description) : "Type naturally. Flow tracks quality; Cadence tracks rhythm relative to your baseline."}</p>
-          <div class="flow-passages" aria-label="Typing passage">
-            <div class="flow-passage" data-flow-passage aria-label="${escapeHtml(visiblePassageText())}">${visibleCharacterView().map(charMarkup).join("")}</div>
-          </div>
+          <div class="flow-passages" aria-label="Typing passage">${passage}</div>
         </div>
-        <div class="flow-run-diagnostics" aria-live="polite">
+        ${publicLongform ? "" : `<div class="flow-run-diagnostics" aria-live="polite">
           <span>WPM <strong data-flow-final-wpm>0.0</strong></span>
           <span>Accuracy <strong data-flow-accuracy>100.0%</strong></span>
           <span>Pauses <strong data-flow-pauses>0</strong></span>
           <span>Corrected <strong data-flow-corrected>0</strong></span>
           <span>Unresolved <strong data-flow-unresolved>0</strong></span>
-        </div>
+        </div>`}
         <textarea class="flow-input-capture" data-flow-input aria-label="Flow typing input" autocapitalize="off" autocomplete="off" autocorrect="off" spellcheck="false"></textarea>
       </main>
     </section>`;
@@ -506,7 +568,8 @@ function updateRunView(startIndex = run?.currentIndex ?? 0, endIndex = startInde
     renderComplete();
     return;
   }
-  if (maybeAdvanceRunPlan()) return;
+  if (isPublicLongformRun()) syncPublicSegmentIndex();
+  else if (maybeAdvanceRunPlan()) return;
 
   if (!root()) return;
   updateCharacterRange(startIndex, endIndex);
@@ -543,7 +606,9 @@ function renderComplete() {
   const seconds = (cadence.typingDurationMs / 1000).toFixed(1);
   const cadenceScore = cadence.cadenceScore == null ? "—" : cadence.cadenceScore;
   const runMetrics = resolvedRunPlan
-    ? `<span><strong>${resolvedRunPlan.chapterCount}</strong> chapters</span><span><strong>${resolvedRunPlan.passageCount}</strong> passages</span>`
+    ? isPublicLongformRun()
+      ? `<span><strong>${resolvedRunPlan.wordCount}</strong> words</span><span><strong>${resolvedRunPlan.documentCount}</strong> text${resolvedRunPlan.documentCount === 1 ? "" : "s"}</span>`
+      : `<span><strong>${resolvedRunPlan.chapterCount}</strong> chapters</span><span><strong>${resolvedRunPlan.passageCount}</strong> passages</span>`
     : "";
   app.innerHTML = `
     <section class="screen flow-phase1-screen flow-complete-screen" data-flow-view="complete">
