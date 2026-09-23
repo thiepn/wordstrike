@@ -1,7 +1,5 @@
 export const FLOW_BOARD_KEYS = Object.freeze([
-  "flow-quick-v1",
   "flow-standard-v1",
-  "flow-long-v1",
 ]);
 
 export const PUBLIC_BOARD_KEYS = Object.freeze([
@@ -14,7 +12,7 @@ export const PUBLIC_BOARD_KEYS = Object.freeze([
 ]);
 export const LEADERBOARD_LIMIT = 100;
 export const LEADERBOARD_RULES_VERSION = 1;
-export const FLOW_LEADERBOARD_RULES_VERSION = 2;
+export const FLOW_LEADERBOARD_RULES_VERSION = 3;
 export const ARCADE_RUSH_BOARD_KEY = "arcade-rush-v1";
 
 const RETIRED_DAILY_BOARD_KEY = "daily-strike-v1";
@@ -123,6 +121,7 @@ function publicEntry(row, rank, boardKey) {
       wpm: number(row.wpm),
       rawWpm: number(row.rawWpm ?? row.raw_wpm),
       consistency: number(row.consistency ?? row.metrics?.consistency),
+      wordsCompleted: number(row.wordsCompleted ?? row.words_completed),
       durationMs: row.durationMs == null && row.duration_ms == null
         ? null
         : number(row.durationMs ?? row.duration_ms),
