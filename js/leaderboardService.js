@@ -137,6 +137,7 @@ const safeEntry = (entry) => Object.freeze({
     : Math.max(0, Number(entry.durationMs ?? entry.activeDurationMs) || 0),
   completed: entry?.completed === true,
   consistency: entry?.consistency == null ? null : Math.max(0, Math.min(100, Number(entry.consistency) || 0)),
+  wordsCompleted: entry?.wordsCompleted == null ? null : Math.max(0, Number(entry.wordsCompleted) || 0),
   submittedAt: String(entry?.submittedAt || ""),
 });
 
