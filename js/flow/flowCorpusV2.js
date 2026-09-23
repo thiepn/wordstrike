@@ -349,10 +349,23 @@ const LONGFORM_EXTENSIONS = Object.freeze([
   (theme, topic) => "Looking back, the strongest part of the process was its repeatability. The outcome did not depend on perfect timing or one unusually clever move; it came from clear priorities, observable feedback, and controlled adjustments. The same approach could be used again in a different setting without copying every detail of this situation."
 ]);
 
+const LONGFORM_CLOSERS = Object.freeze([
+  "That made the next checkpoint easy to verify.",
+  "The next step therefore began with clear context.",
+  "That kept progress visible without adding extra complexity.",
+  "The decision could then be checked against a concrete result.",
+  "The remaining work stayed orderly and easy to review.",
+  "That left a clear result and a reusable process."
+]);
+
 function buildDocument(theme, topic, topicIndex) {
   const style = PARAGRAPH_STYLES[topicIndex % PARAGRAPH_STYLES.length];
   const paragraphs = Object.freeze(style.map((builder, paragraphIndex) => (
-    builder(theme, topic) + " " + LONGFORM_EXTENSIONS[paragraphIndex](theme, topic)
+    builder(theme, topic)
+      + " "
+      + LONGFORM_EXTENSIONS[paragraphIndex](theme, topic)
+      + " "
+      + LONGFORM_CLOSERS[paragraphIndex]
   ).replace(/\s+/g, " ").trim()));
   const text = paragraphs.join(" ");
   const metrics = analyzeFlowCorpusText(text);
