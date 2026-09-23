@@ -1,6 +1,6 @@
 const RELEASE_FLAG = "flowRelease";
-const FLOW_RELEASE_VERSION = 1;
-const FLOW_RELEASE_CACHE_NAME = "wordstrike-flow-release-v2";
+const FLOW_RELEASE_VERSION = 2;
+const FLOW_RELEASE_CACHE_NAME = "wordstrike-flow-release-v3";
 const FLOW_RELEASE_QUERY_KEYS = Object.freeze([
   "mode",
   RELEASE_FLAG,
@@ -23,7 +23,7 @@ const FLOW_RELEASE_QUERY_KEYS = Object.freeze([
 ]);
 
 const FLOW_RELEASE_ASSETS = Object.freeze([
-  "./js/flow/flowRuntimeLoader.js?v=20260923a",
+  "./js/flow/flowRuntimeLoader.js?v=20260923b",
   "./js/flow/flowMigrationPresentation.js?v=20260923a",
   "./js/flow/flowAdaptive.js",
   "./js/flow/flowAdaptivePhase10.js?v=20260923a",
@@ -34,13 +34,14 @@ const FLOW_RELEASE_ASSETS = Object.freeze([
   "./js/flow/flowContentExpansion.js",
   "./js/flow/flowEngine.js",
   "./js/flow/flowGameplay.js",
-  "./js/flow/flowIntegrationBootstrap.js?v=20260916a",
+  "./js/flow/flowGameModeV2.js?v=20260923a",
+  "./js/flow/flowIntegrationBootstrap.js?v=20260923b",
   "./js/flow/flowIntegrationPhase11.js?v=20260923a",
   "./js/flow/flowLongformContent.js",
   "./js/flow/flowModifiers.js",
   "./js/flow/flowModifiersPhase9.js?v=20260923a",
   "./js/flow/flowPassages.js",
-  "./js/flow/flowPhase1.js?v=20260923a",
+  "./js/flow/flowPhase1.js?v=20260923b",
   "./js/flow/flowProgression.js",
   "./js/flow/flowRunPlan.js",
   "./js/flow/flowSelection.js",
@@ -53,6 +54,7 @@ const FLOW_RELEASE_ASSETS = Object.freeze([
   "./js/flow/flowVisualPhase6.js?v=20260923a",
   "./styles/screens/flow-phase1.css?v=20260916d",
   "./styles/screens/flow-phase5.css?v=20260916a",
+  "./styles/screens/flow-game-mode-v2.css?v=20260923a",
   "./styles/screens/flow-visual-phase6.css?v=20260923a",
   "./styles/screens/flow-visual-phase6-polish.css?v=20260916a",
   "./styles/screens/flow-ui-phase7.css?v=20260916a",
@@ -98,9 +100,21 @@ function releaseUrl(locationLike = globalThis.location) {
   url.searchParams.set("flowRun", "1");
   url.searchParams.set("flowUi", "1");
   url.searchParams.set("flowUx", "1");
-  url.searchParams.set("flowModifiers", "1");
-  url.searchParams.set("flowAdaptive", "1");
+  url.searchParams.set("flowModifiers", "0");
+  url.searchParams.set("flowAdaptive", "0");
   url.searchParams.set("flowIntegration", "1");
+  for (const key of [
+    "flowCategory",
+    "flowDifficulty",
+    "flowModifierIds",
+    "flowWeaknesses",
+    "flowResumeAdaptive",
+    "flowUiStart",
+    "flowCatalog",
+    "flowPassage",
+  ]) {
+    url.searchParams.delete(key);
+  }
   if (!url.searchParams.has("flowSeed")) url.searchParams.set("flowSeed", createReleaseSeed());
   return url;
 }
@@ -320,10 +334,10 @@ async function importFlowRuntime() {
     // Integration defaults must run before Phase 1 resolves its immutable run
     // plan. Everything after that is presentation/integration and can load in
     // dependency-safe waves instead of eleven serial network/parse waits.
-    const integrationBootstrap = await import("./flowIntegrationBootstrap.js?v=20260916a");
+    const integrationBootstrap = await import("./flowIntegrationBootstrap.js?v=20260923b");
     integrationBootstrap.applyFlowIntegrationDefaults?.();
     await Promise.all([
-      import("./flowPhase1.js?v=20260923a"),
+      import("./flowPhase1.js?v=20260923b"),
       import("./flowVisualPhase6.js?v=20260923a"),
     ]);
 
@@ -349,6 +363,9 @@ async function importFlowRuntime() {
         if (params.get("flowIntegration") === "1") extensions.push(import("./flowIntegrationPhase11.js?v=20260923a"));
         await Promise.all(extensions);
       }
+    }
+    if (release) {
+      await import("./flowGameModeV2.js?v=20260923a");
     }
     // Dynamic imports are cached after the first visit. Explicit activation lets
     // the same document re-enter Flow with a freshly resolved release seed/setup
