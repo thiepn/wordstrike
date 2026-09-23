@@ -89,6 +89,7 @@ jobs:
           node tests/arcade-rush-retire-daily-backend.test.js
           node tests/keyboardNavigation.test.js
           node tests/practice-offline-shell.test.js
+          node tests/practice-architecture-consolidation-phase8.test.js
           node tests/ui3-mode-select.test.js
 
   browser:
