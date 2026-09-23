@@ -157,7 +157,7 @@ def inspect_leaderboards(browser, base, browser_name, evidence):
     assert values["overflow"] <= 1, values
     assert values["panelBorder"] == "0px", values
     assert values["selectedTabs"] == 1, values
-    assert values["tabCount"] == 3, values
+    assert values["tabCount"] == 4, values
     assert values["rushTabs"] == 0, values
     assert values["backHeight"] >= 44, values
     assert values["live"] == "polite", values
@@ -168,12 +168,20 @@ def inspect_leaderboards(browser, base, browser_name, evidence):
     expect(page.locator(".leaderboard-duration-tabs")).to_be_visible()
     page.locator('[data-action="leaderboard-select-endless"]').click()
     expect(page.locator('[data-action="leaderboard-select-endless"]')).to_have_attribute("aria-selected", "true")
+    page.locator('[data-action="leaderboard-select-flow"]').click()
+    expect(page.locator('[data-action="leaderboard-select-flow"]')).to_have_attribute("aria-selected", "true")
+    expect(page.locator('[aria-label="Flow run length"]')).to_be_visible()
+    expect(page.locator('[data-action="leaderboard-flow-select-standard"]')).to_have_attribute("aria-selected", "true")
+    page.locator('[data-action="leaderboard-flow-select-quick"]').click()
+    expect(page.locator('[data-action="leaderboard-flow-select-quick"]')).to_have_attribute("aria-selected", "true")
+    page.locator('[data-action="leaderboard-flow-select-long"]').click()
+    expect(page.locator('[data-action="leaderboard-flow-select-long"]')).to_have_attribute("aria-selected", "true")
     assert page.locator('[data-action="leaderboard-select-arcade-rush"]').count() == 0
 
     if browser_name == "chromium":
         page.screenshot(path=str(ARTIFACTS / "chromium-ui11-leaderboards.png"), full_page=True)
 
-    evidence.append({"browser": browser_name, "case": "public leaderboards with retired Rush category suppressed", **values})
+    evidence.append({"browser": browser_name, "case": "public Campaign/Typing/Endless/Flow leaderboards with retired Rush suppressed", **values})
     assert_no_errors(errors, f"{browser_name} leaderboards")
     context.close()
 
