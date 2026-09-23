@@ -1,6 +1,6 @@
 const RELEASE_FLAG = "flowRelease";
 const FLOW_RELEASE_VERSION = 6;
-const FLOW_RELEASE_CACHE_NAME = "wordstrike-flow-release-v8";
+const FLOW_RELEASE_CACHE_NAME = "wordstrike-flow-release-v9";
 const FLOW_RELEASE_QUERY_KEYS = Object.freeze([
   "mode",
   RELEASE_FLAG,
@@ -23,7 +23,7 @@ const FLOW_RELEASE_QUERY_KEYS = Object.freeze([
 ]);
 
 const FLOW_RELEASE_ASSETS = Object.freeze([
-  "./js/flow/flowRuntimeLoader.js?v=20260923g",
+  "./js/flow/flowRuntimeLoader.js?v=20260923h",
   "./js/leaderboardReturnState.js",
   "./js/pendingResultSubmission.js",
   "./js/submissionOutbox.js",
@@ -69,6 +69,9 @@ const FLOW_RELEASE_ASSETS = Object.freeze([
   "./js/flow/flowRunPlan.js",
   "./js/flow/flowRunPlan.js?v=20260923e",
   "./js/flow/flowScoreV2.js?v=20260923f",
+  "./js/flow/flowScoreV2.js",
+  "./js/flow/flowScoreV2.js?v=20260923a",
+  "./js/flow/flowRecordsV2.js?v=20260923a",
   "./js/flow/flowRecordsV2.js?v=20260923f",
   "./js/flow/flowSelection.js",
   "./js/flow/flowShell.js",
