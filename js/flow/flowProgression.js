@@ -6,7 +6,7 @@ import {
 } from "../modeStorageV2.js";
 import { buildFlowWeaknessProfile } from "./flowAdaptive.js";
 import { normalizeFlowModifierIds } from "./flowModifiers.js";
-import { createFlowScoreV2Result } from "./flowScoreV2.js?v=20260923a";
+import { createFlowScoreV2Result } from "./flowScoreV2.js?v=20260923b";
 
 export const FLOW_PROGRESS_STORAGE_KEY = "wordstrike_flow_progress_v1";
 export const FLOW_ONBOARDING_STORAGE_KEY = "wordstrike_flow_onboarding_v1";
