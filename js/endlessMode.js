@@ -36,6 +36,10 @@ import {
 } from "./sessionManager.js";
 import { buildSessionResult } from "./sessionResult.js";
 import {
+  annotateLocalResultPersistence,
+  LOCAL_RESULT_PERSISTENCE,
+} from "./localResultPersistence.js";
+import {
   calculateSessionAccuracy,
   calculateSessionWpm,
 } from "./sessionMetrics.js";
@@ -376,11 +380,26 @@ export function completeEndlessRun(game = currentEndless) {
   if (!result) return null;
   setSessionState(SESSION_STATES.RESULTS);
   if (!completeSession(result)) return null;
-  if (game.recordEligible && recordCompletedSession(result)) {
+  const recordPersisted = game.recordEligible ? recordCompletedSession(result) : false;
+  if (recordPersisted) {
     markSessionResultPersisted(result.sessionId);
   }
-  game.result = result;
-  return result;
+
+  const visibleResult = !game.recordEligible
+    ? annotateLocalResultPersistence(result, {
+      status: LOCAL_RESULT_PERSISTENCE.EXCLUDED,
+    })
+    : recordPersisted
+      ? annotateLocalResultPersistence(result, {
+        status: LOCAL_RESULT_PERSISTENCE.SAVED,
+      })
+      : annotateLocalResultPersistence(result, {
+        status: LOCAL_RESULT_PERSISTENCE.FAILED,
+        warning: "THIS ENDLESS RESULT COULD NOT BE SAVED LOCALLY. Keep this page open until you have retried any global submission.",
+      });
+
+  game.result = visibleResult;
+  return visibleResult;
 }
 
 function tick(timestamp) {
