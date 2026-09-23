@@ -122,6 +122,18 @@ function resultMetricHelp({ grade = false } = {}) {
   </details>`;
 }
 
+function resultPersistenceWarning(result) {
+  const warning = result?.localPersistence?.warning || result?.persistenceWarning;
+  return warning
+    ? `<p class="result-save-warning" role="alert">${escapeHtml(warning)}</p>`
+    : "";
+}
+
+function localResultStored(result) {
+  if (result?.persistenceWarning) return false;
+  return result?.localPersistence?.status !== "failed";
+}
+
 export function renderTitle(menuIndex, handlers) {
   const icon = (name) => {
     const paths = {
@@ -789,7 +801,8 @@ export function renderSpeedTestResults(result, recordFlags, selectedIndex, handl
           <div><span>Duration</span><strong>${(result.activeDurationMs / 1000).toFixed(1)}s</strong></div>
         </div>
         ${resultMetricHelp()}
-        ${renderGlobalSubmissionMarkup(submissionState)}
+        ${resultPersistenceWarning(result)}
+        ${renderGlobalSubmissionMarkup(submissionState, { localResultStored: localResultStored(result) })}
         <div class="menu-list">
           ${actions.map(([label, action], index) => menuButton(
     label,
@@ -1492,7 +1505,7 @@ function submissionButton(label, action, disabled = false) {
   return `<button class="arcade-button" data-action="${action}"${disabled ? " disabled aria-disabled=\"true\"" : ""}>${label}</button>`;
 }
 
-export function renderGlobalSubmissionMarkup(state = {}) {
+export function renderGlobalSubmissionMarkup(state = {}, { localResultStored: stored = true } = {}) {
   const boardDetails = ({
     "campaign-highest-level-v1": ["CAMPAIGN", "view-campaign-leaderboard"],
     "typing-60s-english200-v1": ["60S", "view-typing-60-leaderboard"],
@@ -1521,10 +1534,14 @@ export function renderGlobalSubmissionMarkup(state = {}) {
     buttons = "";
   } else if (state.status === "ready") {
     if (state.automatic) {
-      message = "Submitting global score…";
+      message = stored
+        ? "Submitting global score…"
+        : "Submitting global score…<span>This result was not saved to local history.</span>";
       buttons = "";
     } else {
-      message = "This result is saved locally.";
+      message = stored
+        ? "This result is saved locally."
+        : "This result could not be saved locally.<span>Submit now before leaving this page.</span>";
       buttons = submissionButton("SUBMIT GLOBAL SCORE", "submit-global-score") + submissionButton(viewLabel, viewAction);
     }
   } else if (state.status === "submitting") {
@@ -1537,10 +1554,26 @@ export function renderGlobalSubmissionMarkup(state = {}) {
     message = `This result was already submitted.${state.rank ? `<strong>Rank #${state.rank}</strong>` : ""}`;
     buttons = submissionButton(viewLabel, viewAction);
   } else if (state.status === "offline") {
-    message = "Global submission is unavailable while offline.<span>Your local result is safe.</span>";
+    if (state.retryPersisted) {
+      message = stored
+        ? "Global submission is unavailable while offline.<span>Queued for automatic retry. Your result is saved locally.</span>"
+        : "Global submission is unavailable while offline.<span>Submission queued for retry, but this result was not saved to local history.</span>";
+    } else {
+      message = stored
+        ? "Global submission is unavailable while offline.<span>Your result is saved locally. Keep this page open to retry the global submission.</span>"
+        : "Global submission is unavailable while offline.<span>This result was not saved locally or queued. Keep this page open and retry.</span>";
+    }
     buttons = submissionButton("RETRY SUBMISSION", "retry-global-score") + submissionButton(viewLabel, viewAction);
   } else if (state.status === "error") {
-    message = "Global submission failed.<span>Your local result is safe.</span>";
+    if (state.retryPersisted) {
+      message = stored
+        ? "Global submission failed.<span>Queued for automatic retry. Your result is saved locally.</span>"
+        : "Global submission failed.<span>Submission queued for retry, but this result was not saved to local history.</span>";
+    } else {
+      message = stored
+        ? "Global submission failed.<span>Your result is saved locally. Keep this page open to retry the global submission.</span>"
+        : "Global submission failed.<span>This result was not saved locally or queued. Keep this page open and retry.</span>";
+    }
     buttons = submissionButton("RETRY SUBMISSION", "retry-global-score") + submissionButton(viewLabel, viewAction);
   }
   const busy = ["checking", "submitting"].includes(state.status) || (state.status === "ready" && state.automatic);
@@ -1592,7 +1625,8 @@ export function renderEndlessResults(result, selectedIndex, handlers, submission
           <div class="total"><span>TOTAL</span><strong>${result.score.toLocaleString()}</strong></div>
         </section>
         ${resultMetricHelp()}
-        ${renderGlobalSubmissionMarkup(submissionState)}
+        ${resultPersistenceWarning(result)}
+        ${renderGlobalSubmissionMarkup(submissionState, { localResultStored: localResultStored(result) })}
         <div class="menu-list">${actions.map(([label, action], index) => (
     menuButton(label, action, index === selectedIndex)
   )).join("")}</div>
@@ -1637,8 +1671,8 @@ export function renderResults(result, selectedIndex, handlers, submissionState =
           <div class="stat"><span class="micro-label">Level</span><strong>${result.levelNumber}</strong></div>`}
         </div>
         ${resultMetricHelp({ grade: true })}
-        ${result.persistenceWarning ? `<p class="campaign-save-warning" role="alert">${escapeHtml(result.persistenceWarning)}</p>` : ""}
-        ${renderGlobalSubmissionMarkup(submissionState)}
+        ${resultPersistenceWarning(result)}
+        ${renderGlobalSubmissionMarkup(submissionState, { localResultStored: localResultStored(result) })}
         <div class="menu-list">
           ${actions.map(([label, action], index) => menuButton(
     label,
