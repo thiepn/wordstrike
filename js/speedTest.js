@@ -17,6 +17,10 @@ import {
 } from "./sessionManager.js";
 import { buildSessionResult } from "./sessionResult.js";
 import {
+  annotateLocalResultPersistence,
+  LOCAL_RESULT_PERSISTENCE,
+} from "./localResultPersistence.js";
+import {
   getSpeedTestConfig,
   SPEED_TEST_TYPES,
 } from "./speedTestConfig.js";
@@ -346,22 +350,43 @@ export function completeSpeedTest(state, completedAtMs = monotonicNow()) {
   })) {
     return null;
   }
-  if (recordCompletedSession(result)) {
+  const recordPersisted = recordCompletedSession(result);
+  if (recordPersisted) {
     markSessionResultPersisted(result.sessionId);
-  } else if (state.developerMode) {
+  } else {
+    // Never announce a record that could not actually be written.
     state.recordFlags = {
       newWpmRecord: false,
       newRawWpmRecord: false,
       newAccuracyRecord: false,
     };
   }
-  persistSpeedTestTimeline(
+  const timelinePersisted = persistSpeedTestTimeline(
     result.sessionId,
     result.modeData?.performanceTimeline,
     result.endedAt,
   );
-  state.result = result;
-  return result;
+
+  const visibleResult = state.developerMode
+    ? annotateLocalResultPersistence(result, {
+      status: LOCAL_RESULT_PERSISTENCE.EXCLUDED,
+    })
+    : !recordPersisted
+      ? annotateLocalResultPersistence(result, {
+        status: LOCAL_RESULT_PERSISTENCE.FAILED,
+        warning: "THIS TYPING RESULT COULD NOT BE SAVED LOCALLY. Keep this page open until you have retried any global submission.",
+      })
+      : !timelinePersisted
+        ? annotateLocalResultPersistence(result, {
+          status: LOCAL_RESULT_PERSISTENCE.PARTIAL,
+          warning: "RESULT SAVED, BUT THE DETAILED PERFORMANCE TIMELINE COULD NOT BE STORED.",
+        })
+        : annotateLocalResultPersistence(result, {
+          status: LOCAL_RESULT_PERSISTENCE.SAVED,
+        });
+
+  state.result = visibleResult;
+  return visibleResult;
 }
 
 function processCharacter(state, character, nowMs) {
