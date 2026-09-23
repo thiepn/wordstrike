@@ -132,6 +132,9 @@ def certify_public_journey(browser, browser_name, base, evidence):
     assert record_state['isPersonalBest'] is True, record_state
     assert record_state['personalBest']['score'] == public_result['score'], record_state
 
+    integration_session_id = page.evaluate('window.wordstrikeFlowIntegrationPhase11.getSessionId()')
+    assert integration_session_id == public_result['sessionId'], (integration_session_id, public_result)
+
     summary = page.evaluate('window.wordstrikeFlowIntegrationPhase11.getSummary()')
     assert summary['progress']['completedRuns'] == 1, summary
     assert summary['generic']['completedSessions'] == 1, summary
