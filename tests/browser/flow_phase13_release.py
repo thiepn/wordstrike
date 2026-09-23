@@ -275,16 +275,24 @@ def certify_offline(browser, browser_name, base, evidence):
     assert cache_result.get('timeout') is not True, cache_result
     assert cache_result['supported'] is True, cache_result
     assert cache_result['cached'] == page.evaluate('window.wordstrikeFlowReleasePhase13.offlineAssetCount'), cache_result
-    assert cache_result['cached'] >= 30, cache_result
+    assert cache_result['cached'] >= 50, cache_result
     assert cache_result['cacheName'] == page.evaluate('window.wordstrikeFlowReleasePhase13.offlineCacheName'), cache_result
 
     cached = page.evaluate("""async () => {
       const targets = [
-        './js/flow/flowRuntimeLoader.js?v=20260923d',
+        './js/flow/flowRuntimeLoader.js?v=20260923h',
         './js/flow/flowLongformContent.js',
         './js/flow/flowGameModeV2.js?v=20260923c',
         './js/flow/flowScoreV2.js?v=20260923a',
         './js/flow/flowRecordsV2.js?v=20260923a',
+        './js/leaderboardService.js',
+        './js/leaderboardSubmissionService.js',
+        './js/submissionOutbox.js',
+        './js/pendingResultSubmission.js',
+        './js/supabaseClient.js',
+        './js/arcadeRushLeaderboard.js',
+        './js/arcadeRush/arcadeRushResult.js',
+        './js/flow/flowScoreV2.js',
         './js/flow/flowUiPhase7KeyboardGuard.js?v=20260923a',
         './js/flow/flowIntegrationPhase11.js?v=20260923b',
         './styles/screens/flow-integration-phase11.css?v=20260916a',
