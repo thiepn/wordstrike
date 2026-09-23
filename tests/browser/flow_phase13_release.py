@@ -158,12 +158,29 @@ def certify_fresh_default(browser, browser_name, base, evidence):
     assert page.locator('[data-flow-theme-select]').input_value() == "mixed"
     assert page.locator('[data-flow-view="ready"]').count() == 0
     assert page.locator('[data-flow-action="start"]').count() == 0
+
+    first_document = plan["documents"][0]["documentId"]
+    first_session = page.evaluate("window.wordstrikeFlowPhase1.getPublicSessionId()")
+    page.keyboard.press("Tab")
+    expect(page.locator('[data-flow-view="run"]')).to_be_visible(timeout=10000)
+    rerolled = page.evaluate("window.wordstrikeFlowPhase1.getRunPlan()")
+    rerolled_session = page.evaluate("window.wordstrikeFlowPhase1.getPublicSessionId()")
+    assert rerolled_session != first_session, (first_session, rerolled_session)
+    assert rerolled["documents"][0]["documentId"] != first_document, (
+        first_document,
+        rerolled["documents"][0]["documentId"],
+    )
+    assert page.locator('[data-flow-view="ready"]').count() == 0
+    assert page.locator('[data-flow-view="complete"]').count() == 0
+
     evidence.append({
         "browser": browser_name,
-        "case": "fresh Flow click enters mixed stream immediately",
+        "case": "fresh Flow click enters immediately and empty Tab rerolls source",
         "documents": plan["documentCount"],
         "paragraphs": plan["paragraphCount"],
         "wordsAvailable": plan["wordCount"],
+        "firstDocument": first_document,
+        "nextDocument": rerolled["documents"][0]["documentId"],
     })
     context.close()
 
@@ -238,8 +255,8 @@ def certify_offline(browser, browser_name, base, evidence):
 
     cached = page.evaluate("""async () => {
       const targets = [
-        './js/flow/flowRuntimeLoader.js?v=20260923j',
-        './js/flow/flowPhase1.js?v=20260923j',
+        './js/flow/flowRuntimeLoader.js?v=20260923k',
+        './js/flow/flowPhase1.js?v=20260923k',
         './js/flow/flowStreamPlanV3.js?v=20260923b',
         './js/flow/flowScoreV3.js?v=20260923a',
         './js/flow/flowRecordsV3.js?v=20260923a',

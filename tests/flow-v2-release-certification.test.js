@@ -37,8 +37,8 @@ assert.equal(validateLeaderboardRequest({ boardKey: LEADERBOARD_BOARDS.FLOW_QUIC
 assert.equal(EXPECTED_LEADERBOARD_RULES_VERSIONS[LEADERBOARD_BOARDS.FLOW_STANDARD], 3);
 assert.equal(getLeaderboardSelection(LEADERBOARD_BOARDS.FLOW_STANDARD).selectedCategory, LEADERBOARD_CATEGORIES.FLOW);
 
-assert.match(loader, /const FLOW_RELEASE_VERSION = 8/);
-assert.match(loader, /wordstrike-flow-release-v11/);
+assert.match(loader, /const FLOW_RELEASE_VERSION = 9/);
+assert.match(loader, /wordstrike-flow-release-v12/);
 assert.match(index, /js\/flow\/flowRuntimeLoader\.js\?v=20260923i/);
 for (const asset of [
   "./js/authService.js",
@@ -52,7 +52,7 @@ for (const asset of [
   "./js/flow/flowScoreV3.js?v=20260923a",
   "./js/flow/flowRecordsV3.js",
   "./js/flow/flowRecordsV3.js?v=20260923a",
-  "./js/flow/flowPhase1.js?v=20260923j",
+  "./js/flow/flowPhase1.js?v=20260923k",
 ]) {
   assert.equal(loader.includes(JSON.stringify(asset)), true, "offline pack missing " + asset);
 }
