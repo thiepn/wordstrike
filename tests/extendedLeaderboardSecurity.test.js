@@ -7,7 +7,7 @@ import { dailySubmission } from "./leaderboardSubmissionFixtures.js";
 const activeBoards = [
   "campaign-highest-level-v1", "typing-60s-english200-v1",
   "typing-15s-english200-v1", "endless-v1", "arcade-rush-v1",
-  "flow-quick-v1", "flow-standard-v1", "flow-long-v1",
+  "flow-standard-v1",
 ];
 assert.deepEqual(PUBLIC_BOARD_KEYS, activeBoards);
 assert.deepEqual(SUPPORTED_BOARD_KEYS, activeBoards);
@@ -41,4 +41,4 @@ assert.doesNotMatch(submitEdge, /CHALLENGE_MISMATCH|Daily Strike/);
 assert.doesNotMatch(readEdge, /INVALID_CHALLENGE_DATE|Daily Strike/);
 assert.doesNotMatch(submitEdge, /body\.userId|body\.username|error\.message|error\.stack/);
 
-console.log("Eight active boards retain verified identity, service-only SQL, accepted moderation, rate limiting, and strict requests; Daily backend access is retired.");
+console.log("Six active boards retain verified identity, service-only SQL, accepted moderation, rate limiting, and strict requests; legacy Flow length boards and Daily are retired.");
