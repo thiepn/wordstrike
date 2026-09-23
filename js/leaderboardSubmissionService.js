@@ -32,6 +32,11 @@ function canonicalTypingSubmissionSource(source) {
 
 function boardForMode(mode, result) {
   if (mode === "flow") {
+    if (
+      result?.variantId === "flow-v3" &&
+      result?.rulesVersion === 3 &&
+      result?.boardKey === LEADERBOARD_BOARDS.FLOW_STANDARD
+    ) return LEADERBOARD_BOARDS.FLOW_STANDARD;
     const length = ["quick", "standard", "long"].includes(result?.sessionLength)
       ? result.sessionLength
       : null;
@@ -179,17 +184,14 @@ export function buildSubmissionPayload(mode, result) {
 }
 
 export function buildFlowSubmissionResult(result) {
-  const length = ["quick", "standard", "long"].includes(result?.sessionLength)
-    ? result.sessionLength
-    : null;
   if (
-    !length ||
     result?.modeId !== "flow" ||
-    result?.boardKey !== FLOW_BOARDS[length] ||
-    result?.variantId !== `flow-${length}-v2` ||
-    result?.contractVersion !== 1 ||
-    result?.rulesVersion !== 2 ||
-    result?.metricVersion !== 1 ||
+    result?.boardKey !== LEADERBOARD_BOARDS.FLOW_STANDARD ||
+    result?.variantId !== "flow-v3" ||
+    result?.contractVersion !== 2 ||
+    result?.rulesVersion !== 3 ||
+    result?.metricVersion !== 2 ||
+    result?.sessionLength !== "flow" ||
     result?.completed !== true
   ) return null;
   const normalized = {
@@ -197,7 +199,8 @@ export function buildFlowSubmissionResult(result) {
     rulesVersion: result.rulesVersion,
     metricVersion: result.metricVersion,
     variantId: result.variantId,
-    sessionLength: length,
+    sessionLength: "flow",
+    endedReason: result.endedReason,
     score: result.score,
     wpm: result.wpm,
     rawWpm: result.rawWpm,
@@ -207,12 +210,14 @@ export function buildFlowSubmissionResult(result) {
     durationMs: Math.round(result.activeDurationMs),
     wordsCompleted: result.wordsCompleted,
     charactersCompleted: result.charactersCompleted,
+    correctCharacters: result.correctCharacters,
     correctKeystrokes: result.correctKeystrokes,
     incorrectKeystrokes: result.incorrectKeystrokes,
     correctedErrors: result.correctedErrors,
     unresolvedErrors: result.unresolvedErrors,
     textId: result.textId,
     seed: result.seed,
+    theme: result.theme,
     completed: true,
     recordEligible: result.recordEligible === true,
     developerMode: false,
@@ -328,10 +333,12 @@ export function createLeaderboardSubmissionService({
     )) return { status: "ineligible", reason: "invalid-result" };
     if (activeMode === "flow" && (
       payload.result.completed !== true ||
-      payload.result.rulesVersion !== 2 ||
-      payload.result.metricVersion !== 1 ||
-      !["quick", "standard", "long"].includes(payload.result.sessionLength) ||
-      payload.boardKey !== FLOW_BOARDS[payload.result.sessionLength]
+      payload.result.contractVersion !== 2 ||
+      payload.result.rulesVersion !== 3 ||
+      payload.result.metricVersion !== 2 ||
+      payload.result.variantId !== "flow-v3" ||
+      payload.result.sessionLength !== "flow" ||
+      payload.boardKey !== LEADERBOARD_BOARDS.FLOW_STANDARD
     )) return { status: "ineligible", reason: "invalid-result" };
     if (payload.result.developerMode || !payload.result.recordEligible) {
       return { status: "ineligible", reason: "local-only" };
