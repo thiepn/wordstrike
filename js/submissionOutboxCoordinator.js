@@ -32,13 +32,13 @@ export function createSubmissionOutboxCoordinator({
     return lastResult;
   };
 
-  const drain = (authState, profileState) => {
+  const drain = (authState, profileState, { skipSessionId = null } = {}) => {
     if (activePromise) return activePromise;
     if (!readyAccount(authState, profileState)) {
       return Promise.resolve(publish({ status: "waiting", attempted: 0, submitted: 0, remaining: 0 }));
     }
     const userId = authState.user.id;
-    const entries = list({ userId });
+    const entries = list({ userId }).filter((entry) => entry.sessionId !== skipSessionId);
     if (!entries.length) {
       return Promise.resolve(publish({ status: "empty", attempted: 0, submitted: 0, remaining: 0 }));
     }
