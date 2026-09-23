@@ -225,6 +225,9 @@ export function createLeaderboardSubmissionService({
     if (!payload || !activeMode || !activeUserId) {
       return Object.freeze({ ok: false, error: "AUTH_REQUIRED", entry: null });
     }
+    if (payload.result?.developerMode === true || payload.result?.recordEligible !== true) {
+      return Object.freeze({ ok: false, error: "NOT_ELIGIBLE", entry: null });
+    }
     return enqueueOutbox(activeMode, payload, activeUserId);
   };
 
@@ -277,11 +280,18 @@ export function createLeaderboardSubmissionService({
       return state;
     }
     const nextEligibility = eligibility(authState, profileState);
+    const retryIntent = !state.retryPersisted && activeUserId
+      ? persistRetryIntent()
+      : null;
     return publish({
       ...state,
       ...nextEligibility,
       automatic: state.automatic && ["checking", "ready"].includes(nextEligibility.status),
       error: null,
+      retryPersisted: state.retryPersisted || retryIntent?.ok === true,
+      retryPersistenceError: retryIntent && retryIntent.ok !== true && retryIntent.error !== "NOT_ELIGIBLE"
+        ? retryIntent.error
+        : state.retryPersistenceError,
     });
   };
 
@@ -431,7 +441,18 @@ export function createLeaderboardSubmissionService({
       payload = freezePayload(buildSubmissionPayload(mode, result));
       const boardKey = boardForMode(mode, result);
       const sessionId = payload?.sessionId || result?.sessionId || null;
-      return publish({ mode, boardKey, sessionId, ...eligibility(authState, profileState) });
+      const nextEligibility = eligibility(authState, profileState);
+      const retryIntent = activeUserId ? persistRetryIntent() : null;
+      return publish({
+        mode,
+        boardKey,
+        sessionId,
+        ...nextEligibility,
+        retryPersisted: retryIntent?.ok === true,
+        retryPersistenceError: retryIntent && retryIntent.ok !== true && retryIntent.error !== "NOT_ELIGIBLE"
+          ? retryIntent.error
+          : null,
+      });
     },
     restorePreparedSubmission: restorePayload,
     markAutomaticSubmissionPending(sessionId) {
