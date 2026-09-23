@@ -992,6 +992,19 @@ button {
 .result-metric-help p { margin: 9px 0; font-size: 11px; }
 .result-metric-help strong { color: var(--text); }
 
+.result-save-warning {
+  width: min(100%, 640px);
+  margin: 14px auto;
+  padding: 12px 14px;
+  border: 1px solid rgb(255 71 87 / 55%);
+  background: rgb(255 71 87 / 8%);
+  color: var(--text);
+  font-size: 11px;
+  line-height: 1.5;
+  letter-spacing: 0.06em;
+  text-align: left;
+}
+
 .onboarding-root {
   position: fixed;
   z-index: 1000;
