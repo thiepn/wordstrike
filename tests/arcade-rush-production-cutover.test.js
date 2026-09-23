@@ -40,7 +40,7 @@ const endTarget = getLeaderboardKeyboardTarget({
   selectedBoardKey: LEADERBOARD_BOARDS.CAMPAIGN,
   selectedTypingDuration: 60,
 }, "End");
-assert.equal(endTarget, LEADERBOARD_BOARDS.ENDLESS);
+assert.equal(endTarget, LEADERBOARD_BOARDS.FLOW_STANDARD);
 
 // Historical Arcade Rush boards remain directly addressable even though public
 // leaderboard keyboard/tab navigation no longer exposes the retired category.
