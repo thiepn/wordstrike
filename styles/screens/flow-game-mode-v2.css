@@ -564,3 +564,216 @@
     font-size: clamp(1.35rem, 7vw, 2rem);
   }
 }
+
+
+/* ---------- PHASE 3: Score V2, personal bests, and records ---------- */
+
+.flow-game-v2-length small {
+  grid-column: 1 / -1;
+  color: var(--flow-ink-muted);
+  font-family: var(--flow-data-face);
+  font-size: 0.56rem;
+  font-weight: 650;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.flow-game-v2-length.is-selected small {
+  color: var(--flow-ink-soft);
+}
+
+.flow-v2-recent {
+  width: 100%;
+  border-top: 1px solid var(--flow-line);
+  border-bottom: 1px solid var(--flow-line);
+}
+
+.flow-v2-recent > summary {
+  padding: 12px 0;
+  color: var(--flow-ink-muted);
+  cursor: pointer;
+  font-family: var(--flow-data-face);
+  font-size: 0.62rem;
+  font-weight: 650;
+  letter-spacing: 0.12em;
+  list-style-position: inside;
+  text-transform: uppercase;
+}
+
+.flow-v2-recent > summary:hover,
+.flow-v2-recent > summary:focus-visible {
+  color: var(--flow-signal);
+  outline: none;
+}
+
+.flow-v2-recent-list {
+  display: grid;
+  padding: 0 0 12px;
+}
+
+.flow-v2-recent-row {
+  display: grid;
+  grid-template-columns: 84px minmax(90px, auto) 1fr;
+  gap: 12px;
+  align-items: baseline;
+  padding: 8px 0;
+  border-top: 1px solid var(--flow-line);
+}
+
+.flow-v2-recent-row span,
+.flow-v2-recent-row small {
+  color: var(--flow-ink-muted);
+  font-family: var(--flow-data-face);
+  font-size: 0.6rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.flow-v2-recent-row strong {
+  color: var(--flow-ink);
+  font-family: var(--flow-reading-face);
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+}
+
+.flow-v2-recent-row small {
+  text-align: right;
+}
+
+.flow-complete-screen[data-flow-score-v2="true"] .flow-v2-results {
+  width: min(calc(100% - 40px), 760px);
+  gap: clamp(18px, 3vw, 30px);
+  padding-top: clamp(30px, 7vw, 72px);
+  padding-bottom: clamp(54px, 9vw, 96px);
+}
+
+.flow-v2-pb-badge,
+.flow-v2-pb-reference {
+  width: fit-content;
+  color: var(--flow-signal);
+  font-family: var(--flow-data-face);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.flow-v2-pb-reference {
+  color: var(--flow-ink-muted);
+}
+
+.flow-v2-pb-reference strong {
+  color: var(--flow-ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+
+.flow-v2-final-score {
+  padding: clamp(20px, 4vw, 32px) 0;
+}
+
+.flow-v2-final-score strong {
+  font-size: clamp(4rem, 13vw, 8rem);
+  letter-spacing: -0.055em;
+}
+
+.flow-v2-result-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border-top: 1px solid var(--flow-line-strong);
+  border-bottom: 1px solid var(--flow-line-strong);
+}
+
+.flow-v2-result-metrics > div {
+  display: grid;
+  gap: 7px;
+  padding: 17px 18px;
+  border-right: 1px solid var(--flow-line);
+}
+
+.flow-v2-result-metrics > div:first-child {
+  padding-left: 0;
+}
+
+.flow-v2-result-metrics > div:last-child {
+  padding-right: 0;
+  border-right: 0;
+  text-align: right;
+}
+
+.flow-v2-result-metrics > div:nth-child(2) {
+  text-align: center;
+}
+
+.flow-v2-result-metrics span,
+.flow-v2-result-meta,
+.flow-v2-record-note {
+  color: var(--flow-ink-muted);
+  font-family: var(--flow-data-face);
+  font-size: 0.62rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.flow-v2-result-metrics strong {
+  color: var(--flow-ink);
+  font-family: var(--flow-reading-face);
+  font-size: clamp(1.7rem, 4vw, 2.7rem);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.flow-v2-result-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+}
+
+.flow-v2-result-meta span:not(:last-child)::after {
+  content: " ·";
+}
+
+.flow-v2-record-note {
+  margin: -8px 0 0;
+  color: var(--flow-ink-soft);
+  line-height: 1.5;
+}
+
+@media (max-width: 640px) {
+  .flow-game-v2-length small {
+    grid-column: 1 / -1;
+  }
+
+  .flow-v2-recent-row {
+    grid-template-columns: 66px auto 1fr;
+    gap: 8px;
+  }
+
+  .flow-v2-recent-row small {
+    font-size: 0.54rem;
+  }
+
+  .flow-complete-screen[data-flow-score-v2="true"] .flow-v2-results {
+    width: min(calc(100% - 28px), 760px);
+  }
+
+  .flow-v2-result-metrics > div {
+    padding: 14px 8px;
+  }
+
+  .flow-v2-result-metrics > div:first-child {
+    padding-left: 0;
+  }
+
+  .flow-v2-result-metrics > div:last-child {
+    padding-right: 0;
+  }
+
+  .flow-v2-result-metrics span {
+    font-size: 0.54rem;
+    letter-spacing: 0.06em;
+  }
+
+  .flow-v2-result-metrics strong {
+    font-size: clamp(1.3rem, 7vw, 1.9rem);
+  }
+}
