@@ -331,9 +331,13 @@ function slug(value) {
 }
 
 function inferDifficulty(metrics, variantIndex) {
-  if (variantIndex % 5 === 0) return "smooth";
-  if (metrics.difficultyScore >= 62 || variantIndex % 5 === 4) return "advanced";
-  return "natural";
+  // The generated prose intentionally stays highly typeable, so the raw metric
+  // occupies a fairly narrow band. Use the authored topic variant as the primary
+  // calibration tier and retain the measured score as independent metadata.
+  const tier = variantIndex % 5;
+  if (tier === 0) return "smooth";
+  if (tier === 1 || tier === 2) return "natural";
+  return "advanced";
 }
 
 const LONGFORM_EXTENSIONS = Object.freeze([
@@ -403,6 +407,15 @@ export function validateFlowCorpusV2(documents = FLOW_CORPUS_V2_DOCUMENTS) {
   }
   if (documents.length < 100) throw new TypeError("Flow Corpus V2 requires at least 100 source documents");
   if (themes.size < 8) throw new TypeError("Flow Corpus V2 requires at least eight themes");
+  const difficultyCoverage = documents.reduce((coverage, document) => {
+    coverage[document.difficulty] = (coverage[document.difficulty] || 0) + 1;
+    return coverage;
+  }, {});
+  for (const difficulty of ["smooth", "natural", "advanced"]) {
+    if ((difficultyCoverage[difficulty] || 0) < 10) {
+      throw new TypeError("Flow Corpus V2 has insufficient " + difficulty + " difficulty coverage");
+    }
+  }
 
   const totalWords = documents.reduce((sum, document) => sum + document.wordCount, 0);
   const averageTypability = documents.length
@@ -415,6 +428,7 @@ export function validateFlowCorpusV2(documents = FLOW_CORPUS_V2_DOCUMENTS) {
     totalWords,
     averageWords: Math.round(totalWords / documents.length),
     averageTypability: Number(averageTypability.toFixed(1)),
+    difficultyCoverage: Object.freeze({ ...difficultyCoverage }),
   });
 }
 
