@@ -163,6 +163,30 @@ def main():
                     selected_after = words_panel.locator('[data-v4-word].is-selected').first.get_attribute('data-v4-word')
                     assert selected_after == selected_before, (selected_before, selected_after, scroll_positions)
 
+                    # Regression: scrolling down over the results action menu must
+                    # not rebuild the whole screen. A rebuild briefly shortens the
+                    # document before the V1-V6 enhancers remount and used to clamp
+                    # window.scrollY back toward the top.
+                    shell.evaluate("element => { element.dataset.scrollGuard = 'stable'; }")
+                    result_menu = page.locator('.speed-results-panel > .menu-list')
+                    result_menu.scroll_into_view_if_needed()
+                    before_menu_hover = page.evaluate('window.scrollY')
+                    result_menu.locator('.arcade-button').last.hover()
+                    page.wait_for_timeout(120)
+                    expect(shell).to_have_attribute('data-scroll-guard', 'stable')
+                    after_menu_hover = page.evaluate('window.scrollY')
+                    assert after_menu_hover >= before_menu_hover - 2, (before_menu_hover, after_menu_hover)
+
+                    page.mouse.wheel(0, 10000)
+                    page.wait_for_timeout(120)
+                    bottom = page.evaluate("""() => ({
+                      y: window.scrollY,
+                      max: Math.max(0, document.documentElement.scrollHeight - window.innerHeight),
+                      screenOverflowY: getComputedStyle(document.querySelector('.speed-results-screen')).overflowY,
+                    })""")
+                    assert bottom['screenOverflowY'] == 'visible', bottom
+                    assert bottom['max'] - bottom['y'] <= 4, bottom
+
                 words_tab.focus()
                 page.keyboard.press('ArrowRight')
                 expect(shell.locator('[data-v6-tab="progress"]')).to_have_attribute('aria-selected', 'true')
