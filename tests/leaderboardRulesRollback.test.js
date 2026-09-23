@@ -48,7 +48,13 @@ assert.equal(LEADERBOARD_RULES_VERSION, 1);
 assert.equal(ARCHIVED_DAILY_CHALLENGE_VERSION, 1);
 assert.equal(PUBLIC_BOARD_KEYS.includes("daily-strike-v1"), false);
 assert.equal(SUPPORTED_BOARD_KEYS.includes("daily-strike-v1"), false);
-assert.ok(Object.values(EXPECTED_LEADERBOARD_RULES_VERSIONS).every((version) => version === 1));
+for (const [boardKey, version] of Object.entries(EXPECTED_LEADERBOARD_RULES_VERSIONS)) {
+  assert.equal(
+    version,
+    boardKey.startsWith("flow-") ? 2 : 1,
+    `${boardKey} must keep its active rules version`,
+  );
+}
 assert.equal(validateScoreSubmission(dailySubmission()).code, "INVALID_BOARD");
 
 console.log("Historical rules migrations remain immutable, while retired Daily has no current frontend or server contract.");
