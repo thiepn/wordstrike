@@ -1214,7 +1214,6 @@ function renderCurrentScreen() {
         select: (index) => {
           if (appState.endlessResultsIndex === index) return;
           appState.endlessResultsIndex = index;
-          renderCurrentScreen();
         },
       },
       getSubmissionState(),
@@ -1272,7 +1271,6 @@ function renderCurrentScreen() {
         select: (index) => {
           if (index === appState.speedTestResultsIndex) return;
           appState.speedTestResultsIndex = index;
-          renderCurrentScreen();
         },
       },
       getSubmissionState(),
