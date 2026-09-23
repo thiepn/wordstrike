@@ -1119,17 +1119,25 @@ export function renderLevelSelect(
   const selectedNode = app().querySelector(".campaign-node.selected");
   selectedNode?.focus?.({ preventScroll: true });
   const scrollOwner = app().querySelector("[data-campaign-route-scroll]");
-  if (selectedNode && scrollOwner) {
+  const ensureSelectedLevelVisible = () => {
+    if (!selectedNode?.isConnected || !scrollOwner?.isConnected) return;
     const ownerRect = scrollOwner.getBoundingClientRect?.();
     const nodeRect = selectedNode.getBoundingClientRect?.();
-    if (ownerRect && nodeRect) {
-      const inset = 18;
-      if (nodeRect.bottom > ownerRect.bottom - inset) {
-        scrollOwner.scrollTop += nodeRect.bottom - ownerRect.bottom + inset;
-      } else if (nodeRect.top < ownerRect.top + inset) {
-        scrollOwner.scrollTop += nodeRect.top - ownerRect.top - inset;
-      }
+    if (!ownerRect || !nodeRect) return;
+    // Keep an inset when the viewport can afford it, but never reserve so much
+    // space that a short software-keyboard viewport cannot fit the selected node.
+    const inset = Math.max(0, Math.min(18, (scrollOwner.clientHeight - nodeRect.height) / 2));
+    if (nodeRect.bottom > ownerRect.bottom - inset) {
+      scrollOwner.scrollTop += nodeRect.bottom - ownerRect.bottom + inset;
+    } else if (nodeRect.top < ownerRect.top + inset) {
+      scrollOwner.scrollTop += nodeRect.top - ownerRect.top - inset;
     }
+  };
+  if (selectedNode && scrollOwner) {
+    ensureSelectedLevelVisible();
+    // Short mobile viewports can change usable route height after layout/focus.
+    // Re-check after the browser has committed the new geometry.
+    globalThis.requestAnimationFrame?.(ensureSelectedLevelVisible);
   }
 
   if (devMode) {

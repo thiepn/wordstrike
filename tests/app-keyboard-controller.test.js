@@ -57,6 +57,7 @@ function createHarness(overrides = {}) {
     openModeSelect: record("modes"),
     startEndless: record("endless"),
     startArcadeRush: record("rush"),
+    openArcadeRushLeaderboard: record("rush-leaderboard"),
     retryCurrentLevel: record("campaign-retry"),
     backPracticeLab: record("practice-back"),
     activateTitleAction: record("title-action"),
@@ -112,7 +113,7 @@ test("native controls and already-handled events are never hijacked by global sh
   assert.deepEqual(results.calls, []);
 });
 
-test("Home and End remain native outside components that explicitly own them", () => {
+test("Home, End, and unowned arrows remain native outside components that explicitly own them", () => {
   const modes = createHarness({ screen: Screens.MODE_SELECT });
   const home = eventFor("Home");
   modes.handle(home);
@@ -124,6 +125,24 @@ test("Home and End remain native outside components that explicitly own them", (
   settings.handle(end);
   assert.equal(end.prevented, false);
   assert.deepEqual(settings.calls, []);
+
+  const practice = createHarness({ screen: Screens.PRACTICE_LAB });
+  const practiceDown = eventFor("ArrowDown");
+  practice.handle(practiceDown);
+  assert.equal(practiceDown.prevented, false);
+  assert.deepEqual(practice.calls, []);
+
+  const ready = createHarness({ screen: Screens.ENDLESS_READY });
+  const readyDown = eventFor("ArrowDown");
+  ready.handle(readyDown);
+  assert.equal(readyDown.prevented, false);
+  assert.deepEqual(ready.calls, []);
+
+  const title = createHarness({ screen: Screens.TITLE });
+  const titleLeft = eventFor("ArrowLeft");
+  title.handle(titleLeft);
+  assert.equal(titleLeft.prevented, false);
+  assert.deepEqual(title.calls, []);
 });
 
 test("Practice and Settings keyboard routes remain independent of gameplay execution", () => {
@@ -245,7 +264,7 @@ test("Arcade Rush ready and results routes use injected high-level actions only"
   });
   modes.handle(eventFor("ArrowDown"));
   modes.handle(eventFor("Enter"));
-  assert.deepEqual(modes.calls, [["render"], ["modes"]]);
+  assert.deepEqual(modes.calls, [["sync-result", Screens.ARCADE_RUSH_RESULTS, 1], ["modes"]]);
 
   const title = createHarness({
     screen: Screens.ARCADE_RUSH_RESULTS,
@@ -254,6 +273,31 @@ test("Arcade Rush ready and results routes use injected high-level actions only"
   });
   title.handle(eventFor("Enter"));
   assert.deepEqual(title.calls, [["title"]]);
+
+  const leaderboard = createHarness({
+    screen: Screens.ARCADE_RUSH_RESULTS,
+    arcadeRushResultsReadyAt: 0,
+    arcadeRushResultsIndex: 3,
+  });
+  leaderboard.handle(eventFor("Enter"));
+  assert.deepEqual(leaderboard.calls, [["rush-leaderboard"]]);
+
+  const tabThenArrow = createHarness({
+    screen: Screens.ARCADE_RUSH_RESULTS,
+    arcadeRushResultsReadyAt: 0,
+    arcadeRushResultsIndex: 0,
+  });
+  tabThenArrow.handle(eventFor("ArrowDown", {
+    target: {
+      tagName: "BUTTON",
+      matches: () => false,
+      closest: (selector) => selector === "[data-rush-action]"
+        ? { dataset: { rushAction: "main-menu" } }
+        : null,
+    },
+  }));
+  assert.equal(tabThenArrow.state.arcadeRushResultsIndex, 3);
+  assert.deepEqual(tabThenArrow.calls, [["sync-result", Screens.ARCADE_RUSH_RESULTS, 3]]);
 });
 
 test("Arcade Rush pause routing owns selection without owning runtime execution", () => {
