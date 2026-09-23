@@ -11,12 +11,16 @@ import { STATISTICS_TABS } from "./statisticsUi.js";
 import { getResultsActions, isResultsInputBlocked, Screens } from "./state.js";
 import { observePracticePhysicalTelemetryKeyDown } from "./practiceLab/practicePhysicalTelemetryRuntime.js";
 
-const PREVENTED_NAVIGATION_KEYS = new Set([
-  "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Enter", "Escape",
-]);
 const LEADERBOARD_NAVIGATION_KEYS = new Set([
   "ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End",
 ]);
+
+const ARCADE_RUSH_RESULT_ACTION_INDEX = Object.freeze({
+  "play-again": 0,
+  "mode-select": 1,
+  "main-menu": 2,
+  leaderboard: 3,
+});
 
 function cycleIndex(index, direction, length) {
   return (index + direction + length) % length;
@@ -37,6 +41,7 @@ export function createGlobalKeyboardController({
   openModeSelect,
   startEndless,
   startArcadeRush,
+  openArcadeRushLeaderboard,
   retryCurrentLevel,
   backPracticeLab,
   activateTitleAction,
@@ -124,14 +129,13 @@ export function createGlobalKeyboardController({
       return;
     }
 
-    if (PREVENTED_NAVIGATION_KEYS.has(event.key)) event.preventDefault();
-
     if (state.screen === Screens.PAUSED) {
       if (state.game?.mode === "arcade-rush") {
         const actions = ["resume", "restart", "modes"];
         if (event.key === "Escape") {
           resumeGame();
         } else if (event.key === "ArrowUp" || event.key === "ArrowDown") {
+          event.preventDefault?.();
           const direction = event.key === "ArrowUp" ? -1 : 1;
           state.pauseIndex = cycleIndex(state.pauseIndex, direction, actions.length);
           renderPauseOverlay();
@@ -146,6 +150,7 @@ export function createGlobalKeyboardController({
       if (event.key === "Escape") {
         resumeGame();
       } else if (event.key === "ArrowUp" || event.key === "ArrowDown") {
+        event.preventDefault?.();
         const direction = event.key === "ArrowUp" ? -1 : 1;
         state.pauseIndex = cycleIndex(state.pauseIndex, direction, 4);
         renderPauseOverlay();
@@ -173,6 +178,7 @@ export function createGlobalKeyboardController({
 
     if (state.screen === Screens.TITLE) {
       if (event.key === "ArrowUp" || event.key === "ArrowDown") {
+        event.preventDefault?.();
         const direction = event.key === "ArrowUp" ? -1 : 1;
         state.menuIndex = cycleIndex(state.menuIndex, direction, titleActionCount);
         renderCurrentScreen();
@@ -197,9 +203,11 @@ export function createGlobalKeyboardController({
     if (state.screen === Screens.MODE_SELECT) {
       const itemCount = getAllModes().length + 1;
       if (event.key === "ArrowUp" || event.key === "ArrowLeft") {
+        event.preventDefault?.();
         state.modeSelection = cycleIndex(state.modeSelection, -1, itemCount);
         renderModeSelection();
       } else if (event.key === "ArrowDown" || event.key === "ArrowRight") {
+        event.preventDefault?.();
         state.modeSelection = cycleIndex(state.modeSelection, 1, itemCount);
         renderModeSelection();
       } else if (event.key === "Enter") {
@@ -223,6 +231,7 @@ export function createGlobalKeyboardController({
       if (event.key === "Escape") {
         openModeSelect();
       } else if (event.key === "ArrowUp" || event.key === "ArrowDown") {
+        event.preventDefault?.();
         const direction = event.key === "ArrowUp" ? -1 : 1;
         state.endlessResultsIndex = cycleIndex(state.endlessResultsIndex, direction, actions.length);
         renderResultsSelection(Screens.ENDLESS_RESULTS, state.endlessResultsIndex);
@@ -242,19 +251,24 @@ export function createGlobalKeyboardController({
     }
 
     if (state.screen === Screens.ARCADE_RUSH_RESULTS) {
-      const actions = ["retry", "modes", "title"];
+      const actions = ["retry", "modes", "title", "leaderboard"];
       if (isResultsInputBlocked(event, currentTimeMs(), state.arcadeRushResultsReadyAt)) return;
       if (event.key === "Escape") {
         openModeSelect();
       } else if (event.key === "ArrowUp" || event.key === "ArrowDown") {
+        event.preventDefault?.();
+        const focusedAction = event.target?.closest?.("[data-rush-action]")?.dataset?.rushAction;
+        const focusedIndex = ARCADE_RUSH_RESULT_ACTION_INDEX[focusedAction];
+        if (Number.isInteger(focusedIndex)) state.arcadeRushResultsIndex = focusedIndex;
         const direction = event.key === "ArrowUp" ? -1 : 1;
         state.arcadeRushResultsIndex = cycleIndex(state.arcadeRushResultsIndex, direction, actions.length);
-        renderCurrentScreen();
+        renderResultsSelection(Screens.ARCADE_RUSH_RESULTS, state.arcadeRushResultsIndex);
       } else if (event.key === "Enter") {
         const action = actions[state.arcadeRushResultsIndex];
         if (action === "retry") startArcadeRush?.("retry");
         else if (action === "modes") openModeSelect();
-        else openTitle();
+        else if (action === "title") openTitle();
+        else openArcadeRushLeaderboard?.();
       }
       return;
     }
@@ -290,7 +304,10 @@ export function createGlobalKeyboardController({
     }
 
     if (state.screen === Screens.LEVEL_SELECT) {
-      if (event.key.startsWith("Arrow")) moveLevelSelection(event.key);
+      if (event.key.startsWith("Arrow")) {
+        event.preventDefault?.();
+        moveLevelSelection(event.key);
+      }
       if (event.key === "Enter") startLevel(state.levelSelection);
       if (event.key === "Escape") openModeSelect();
       return;
@@ -302,6 +319,7 @@ export function createGlobalKeyboardController({
       if (event.key === "Escape") {
         openLevelSelect();
       } else if (event.key === "ArrowUp" || event.key === "ArrowDown") {
+        event.preventDefault?.();
         const direction = event.key === "ArrowUp" ? -1 : 1;
         state.resultsIndex = cycleIndex(state.resultsIndex, direction, actions.length);
         renderResultsSelection(Screens.RESULTS, state.resultsIndex);
@@ -319,6 +337,7 @@ export function createGlobalKeyboardController({
       if (event.key === "Escape") {
         backFromSettings();
       } else if (event.key === "ArrowUp" || event.key === "ArrowDown") {
+        event.preventDefault?.();
         const direction = event.key === "ArrowUp" ? -1 : 1;
         state.settingsIndex = cycleIndex(state.settingsIndex, direction, 5);
         renderCurrentScreen();

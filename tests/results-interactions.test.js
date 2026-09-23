@@ -103,7 +103,7 @@ const [main, keyboard] = await Promise.all([
   readFile(new URL("../js/main.js", import.meta.url), "utf8"),
   readFile(new URL("../js/appKeyboardController.js", import.meta.url), "utf8"),
 ]);
-assert.match(keyboard, /Screens\.ARCADE_RUSH_RESULTS[\s\S]*const actions = \["retry", "modes", "title"\][\s\S]*startArcadeRush\?\.\("retry"\)/);
+assert.match(keyboard, /Screens\.ARCADE_RUSH_RESULTS[\s\S]*const actions = \["retry", "modes", "title", "leaderboard"\][\s\S]*renderResultsSelection\(Screens\.ARCADE_RUSH_RESULTS[\s\S]*openArcadeRushLeaderboard\?\.\(\)/);
 assert.doesNotMatch(keyboard, /startDaily|DAILY_RESULTS/);
 assert.match(main, /createGlobalKeyboardController\(\{/);
 assert.doesNotMatch(main, /renderDailyResults|Screens\.DAILY_RESULTS/);

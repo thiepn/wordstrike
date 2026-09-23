@@ -150,7 +150,7 @@ def certify(browser_type, browser_name, base, evidence):
     page.wait_for_timeout(100)
     expect(page.locator("[data-campaign-typing-readout-typed]")).to_have_text("str")
     expect(page.locator("[data-campaign-typing-readout-remaining]")).to_have_text("ike")
-    expect(page.locator("#hud-score")).to_have_text("4321")
+    expect(page.locator("#hud-score")).to_have_text("4,321")
 
     page.screenshot(path=str(ARTIFACTS / f"{browser_name}-campaign-gameplay.png"), full_page=True)
 

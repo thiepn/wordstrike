@@ -1625,7 +1625,9 @@ function syncKeyboardResultsSelection(screen, index) {
       ? ".endless-results-panel > .menu-list .arcade-button"
       : screen === Screens.RESULTS
         ? ".results-panel > .menu-list .arcade-button"
-        : null;
+        : screen === Screens.ARCADE_RUSH_RESULTS
+          ? ".arcade-rush-results .arcade-rush-actions .arcade-rush-action"
+          : null;
   if (!selector) return false;
   const focus = Boolean(document.activeElement?.closest?.(selector));
   return updateRenderedMenuSelection(selector, index, { focus });
@@ -1646,6 +1648,7 @@ const handleGlobalKeydown = createGlobalKeyboardController({
   openModeSelect,
   startEndless,
   startArcadeRush,
+  openArcadeRushLeaderboard: () => openLeaderboardBoard(LEADERBOARD_BOARDS.ARCADE_RUSH),
   retryCurrentLevel,
   backPracticeLab: () => practiceLabController?.back(),
   activateTitleAction,
