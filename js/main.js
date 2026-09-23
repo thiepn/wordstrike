@@ -143,6 +143,8 @@ import {
 } from "./appClickRouting.js";
 import { createGlobalKeyboardController } from "./appKeyboardController.js";
 import { createNativeBackNavigation, createWordStrikeBackHandler } from "./nativeBackNavigation.js";
+import { captureScreenScroll, restoreScreenScroll } from "./screenScroll.js";
+import { startAccountDataSync, stopAccountDataSync } from "./accountDataSync.js";
 import {
   getAuthState,
   initializeAuth,
@@ -1163,7 +1165,13 @@ function confirmReset() {
   }
 }
 
+let lastRenderedScreen = null;
+
 function renderCurrentScreen() {
+  const appRoot = document.querySelector("#app");
+  const preserveScroll = lastRenderedScreen === appState.screen;
+  const scrollSnapshot = preserveScroll ? captureScreenScroll(appRoot, window) : null;
+
   if (appState.screen === Screens.TITLE) {
     renderTitle(appState.menuIndex, {
       modes: openModeSelect,
@@ -1366,6 +1374,8 @@ function renderCurrentScreen() {
     renderDevModeIndicator();
     renderDevSessionDiagnostics();
   }
+  lastRenderedScreen = appState.screen;
+  if (scrollSnapshot) restoreScreenScroll(appRoot, scrollSnapshot, window);
 }
 
 function handleAppClick(event) {
@@ -1601,6 +1611,16 @@ async function bootstrap() {
     if (authState.status === "signed-in") {
       void initializeLeaderboardProfile(authState.user);
       if (authUiChanged) {
+        void startAccountDataSync(authState.user, {
+          onApplied: () => {
+            // Rehydrate through storage.js so Campaign's computed availability
+            // accessors remain authoritative after a cloud restore/merge.
+            appState.save = loadSave();
+            if (bootstrapReady && [Screens.LEVEL_SELECT, Screens.SETTINGS, Screens.PROFILE_STATS].includes(appState.screen)) {
+              renderCurrentScreen();
+            }
+          },
+        });
         const returnState = consumeLeaderboardReturnState();
         if (returnState) {
           pendingLeaderboardReturn = returnState;
@@ -1611,7 +1631,10 @@ async function bootstrap() {
         }
       }
     }
-    else resetLeaderboardProfile();
+    else {
+      stopAccountDataSync();
+      resetLeaderboardProfile();
+    }
     if ([Screens.ARCADE_RUSH_RESULTS, Screens.ENDLESS_RESULTS, Screens.SPEED_TEST_RESULTS, Screens.RESULTS].includes(appState.screen)) {
       void handleAutomaticSubmissionStateChange(authState, getLeaderboardProfileState());
     }

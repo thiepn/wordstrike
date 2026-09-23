@@ -512,6 +512,30 @@
   text-shadow: 0 0 7px rgb(255 60 172 / 56%);
 }
 
+.endless-gameplay-screen .word-visual.active .current-letter {
+  display: inline-block;
+  min-width: .58em;
+  margin-inline: 1px;
+  padding: 1px 2px 2px;
+  border-radius: 3px;
+  background: var(--ui-accent);
+  color: rgb(3 12 14);
+  box-shadow: 0 0 0 1px rgb(255 255 255 / 32%), 0 0 12px rgb(var(--custom-accent-rgb, 0 255 242) / 76%);
+  text-shadow: none;
+}
+
+.endless-gameplay-screen .word-visual.candidate .current-letter {
+  display: inline-block;
+  min-width: .58em;
+  margin-inline: 1px;
+  padding: 1px 2px 2px;
+  border-radius: 3px;
+  background: var(--ui-accent-special);
+  color: rgb(20 6 16);
+  box-shadow: 0 0 10px rgb(255 60 172 / 68%);
+  text-shadow: none;
+}
+
 .endless-gameplay-screen .word-visual.wrong {
   border: 0;
   background: transparent;

@@ -806,6 +806,30 @@
   color: #fff;
 }
 
+.campaign-gameplay-screen .word-visual.active .current-letter {
+  display: inline-block;
+  min-width: .58em;
+  margin-inline: 1px;
+  padding: 1px 2px 2px;
+  border-radius: 3px;
+  background: var(--color-accent);
+  color: rgb(3 12 14);
+  box-shadow: 0 0 0 1px rgb(255 255 255 / 35%), 0 0 12px rgb(var(--custom-accent-rgb, 0 255 242) / 78%);
+  text-shadow: none;
+}
+
+.campaign-gameplay-screen .word-visual.candidate .current-letter {
+  display: inline-block;
+  min-width: .58em;
+  margin-inline: 1px;
+  padding: 1px 2px 2px;
+  border-radius: 3px;
+  background: var(--color-special);
+  color: rgb(20 6 16);
+  box-shadow: 0 0 10px rgb(255 60 172 / 68%);
+  text-shadow: none;
+}
+
 .campaign-gameplay-screen .word-visual.candidate .typed-letter {
   font-weight: 820;
 }

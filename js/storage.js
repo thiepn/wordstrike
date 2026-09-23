@@ -1,6 +1,7 @@
 import { calculateGrade } from "./scoring.js";
 import { normalizeSpeedTestFontSize } from "./speedTestPresentation.js";
 import { getRecentSessions, getSpeedTestRecord } from "./modeStorage.js";
+import { notifyLocalDataChanged } from "./localDataEvents.js";
 
 import { createDefaultCustomization, normalizeCustomization, normalizeCustomizationValue } from "./customization.js";
 
@@ -411,6 +412,7 @@ export function saveGame(save) {
   if (!storage) return false;
   try {
     storage.setItem(STORAGE_KEY, JSON.stringify(save));
+    notifyLocalDataChanged("campaign");
     return true;
   } catch {
     return false;
@@ -443,6 +445,7 @@ export function updateLevelResult(save, levelNumber, result) {
   // shared save is at quota and prevents a completed mission from disappearing.
   const backupPersisted = persistCampaignBackup(save);
   const primaryPersisted = saveGame(save);
+  if (backupPersisted && !primaryPersisted) notifyLocalDataChanged("campaign");
   return backupPersisted || primaryPersisted;
 }
 

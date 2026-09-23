@@ -15,6 +15,7 @@ import {
   updateDisplayName,
   validateDisplayName,
 } from "./playerProfile.js";
+import { notifyLocalDataChanged } from "./localDataEvents.js";
 import {
   applyResultToLifetimeStatistics,
   createDefaultLifetimeStatistics,
@@ -23,6 +24,7 @@ import {
 
 export const MODE_DATA_STORAGE_KEY = "wordstrike_mode_data_v2";
 export const LEGACY_MODE_DATA_STORAGE_KEY = "wordstrike_mode_data_v1";
+export const CAMPAIGN_PLACEMENT_BACKUP_KEY = "wordstrike_campaign_placement_v1";
 const RETIRED_DAILY_STORAGE_KEY = "wordstrike_daily_legacy_v1";
 export const MODE_DATA_SCHEMA_VERSION = 2;
 export const MAX_RECENT_SESSIONS = 30;
@@ -417,21 +419,67 @@ function clearRetiredDailyStorage() {
   try { globalThis.localStorage?.removeItem(RETIRED_DAILY_STORAGE_KEY); } catch { /* Ignore cleanup failure. */ }
 }
 
+function readCampaignPlacementBackup() {
+  const value = readJsonStorage(CAMPAIGN_PLACEMENT_BACKUP_KEY);
+  if (value?.version !== 1) return null;
+  return sanitizeSpeedTestRecord(value.record);
+}
+
+function persistCampaignPlacementBackup(data) {
+  const record = data?.modes?.[MODE_IDS.SPEED_TEST]
+    ?.wordSetRecords?.[SPEED_TEST_WORD_SET.id]?.["time-60"];
+  if (!record || nullableFinite(record.bestWpm) == null) return false;
+  return writeJsonStorage(CAMPAIGN_PLACEMENT_BACKUP_KEY, {
+    version: 1,
+    record: sanitizeSpeedTestRecord(record),
+    updatedAt: Date.now(),
+  });
+}
+
+function mergePlacementBackup(data) {
+  const backup = readCampaignPlacementBackup();
+  if (!backup || backup.bestWpm == null) return data;
+  const record = data.modes[MODE_IDS.SPEED_TEST]
+    .wordSetRecords[SPEED_TEST_WORD_SET.id]["time-60"];
+  const backupWins = record.bestWpm == null || backup.bestWpm > record.bestWpm || (
+    backup.bestWpm === record.bestWpm &&
+    (backup.tieAccuracy ?? 0) > (record.tieAccuracy ?? 0)
+  );
+  if (backupWins) {
+    record.bestWpm = backup.bestWpm;
+    record.bestResultAt = backup.bestResultAt;
+    record.sessionId = backup.sessionId;
+    record.tieAccuracy = backup.tieAccuracy;
+    record.tieRawWpm = backup.tieRawWpm;
+  }
+  record.bestRawWpm = better(record.bestRawWpm, backup.bestRawWpm);
+  record.bestAccuracy = better(record.bestAccuracy, backup.bestAccuracy);
+  record.bestExactWords = better(record.bestExactWords, backup.bestExactWords);
+  return data;
+}
+
 export function loadModeData() {
   clearRetiredDailyStorage();
   const v2 = readJsonStorage(MODE_DATA_STORAGE_KEY);
-  if (v2) return migrateModeDataToV2(v2);
+  if (v2) return mergePlacementBackup(migrateModeDataToV2(v2));
   const legacy = readJsonStorage(LEGACY_MODE_DATA_STORAGE_KEY);
   if (legacy) {
-    const migrated = migrateModeDataToV2(legacy);
+    const migrated = mergePlacementBackup(migrateModeDataToV2(legacy));
     writeJsonStorage(MODE_DATA_STORAGE_KEY, migrated);
     return migrated;
   }
-  return createDefaultModeData();
+  return mergePlacementBackup(createDefaultModeData());
 }
 
 export function saveModeData(data) {
-  return writeJsonStorage(MODE_DATA_STORAGE_KEY, migrateModeDataToV2(data));
+  const migrated = migrateModeDataToV2(data);
+  // Keep the Campaign placement record in a tiny independent key first. If the
+  // larger mode-history store ever hits quota or is corrupted, placement still
+  // survives and is merged back on the next load.
+  const placementPersisted = persistCampaignPlacementBackup(migrated);
+  const persisted = writeJsonStorage(MODE_DATA_STORAGE_KEY, migrated);
+  if (persisted || placementPersisted) notifyLocalDataChanged("mode");
+  return persisted;
 }
 
 function better(previous, next) {
@@ -830,6 +878,7 @@ export function getRecentSessions() {
 export function resetModeData() {
   const defaults = createDefaultModeData();
   saveModeData(defaults);
+  try { globalThis.localStorage?.removeItem(CAMPAIGN_PLACEMENT_BACKUP_KEY); } catch { /* Ignore reset cleanup failure. */ }
   clearRetiredDailyStorage();
   return defaults;
 }

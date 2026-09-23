@@ -30,27 +30,53 @@ export function createAuthService({
     session?.user ? session : null,
   );
 
+  const publishSessionEvent = (event, session) => {
+    if (session?.user) return publish(stateFromSession(session));
+    if (event === "SIGNED_OUT") return publish(freezeState("signed-out"));
+    // INITIAL_SESSION can arrive before getSession() resolves and transient auth
+    // events may omit a session. Never turn a healthy restored session into a
+    // visible logout unless Supabase explicitly emitted SIGNED_OUT.
+    if (state.session?.user) return state;
+    if (event === "INITIAL_SESSION") return state;
+    return publish(freezeState("signed-out"));
+  };
+
   const initialize = () => {
     if (initializationPromise) return initializationPromise;
-    publish(freezeState("loading"));
-    initializationPromise = (async () => {
+    const preservedSession = state.session?.user ? state.session : null;
+    if (!preservedSession) publish(freezeState("loading"));
+    const request = (async () => {
       const client = getClient();
       if (!client?.auth) return publish(freezeState("unavailable"));
       try {
         if (!authSubscription) {
-          const response = client.auth.onAuthStateChange?.((_event, session) => {
-            publish(stateFromSession(session));
+          const response = client.auth.onAuthStateChange?.((event, session) => {
+            publishSessionEvent(event, session);
           });
           authSubscription = response?.data?.subscription ?? response?.subscription ?? null;
         }
         const { data, error } = await client.auth.getSession();
-        if (error) return publish(freezeState("error", null, safeError()));
+        if (error) {
+          // A network/service failure is not proof that the browser session was
+          // revoked. Keep a restored session usable and retry on the next init.
+          if (state.session?.user || preservedSession?.user) {
+            return publish(stateFromSession(state.session?.user ? state.session : preservedSession));
+          }
+          return publish(freezeState("error", null, safeError()));
+        }
         return publish(stateFromSession(data?.session ?? null));
       } catch {
+        if (state.session?.user || preservedSession?.user) {
+          return publish(stateFromSession(state.session?.user ? state.session : preservedSession));
+        }
         return publish(freezeState("error", null, safeError()));
       }
     })();
-    return initializationPromise;
+    initializationPromise = request;
+    void request.finally(() => {
+      if (initializationPromise === request) initializationPromise = null;
+    });
+    return request;
   };
 
   const signIn = async () => {

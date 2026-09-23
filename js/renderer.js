@@ -37,12 +37,14 @@ export function createWordElement(word) {
   const visual = document.createElement("div");
   const text = document.createElement("span");
   const typed = document.createElement("span");
+  const current = document.createElement("span");
   const remaining = document.createElement("span");
   position.className = "word-position";
   separation.className = "word-separation";
   visual.className = "word-visual";
   text.className = "word-text";
   typed.className = "typed-letter";
+  current.className = "current-letter";
   remaining.className = "remaining-letter";
   position.dataset.wordId = word.id;
   position.setAttribute("aria-label", word.text);
@@ -51,7 +53,7 @@ export function createWordElement(word) {
       visual.classList.remove("wrong");
     }
   });
-  text.append(typed, remaining);
+  text.append(typed, current, remaining);
   visual.append(text);
   separation.append(visual);
   position.append(separation);
@@ -61,6 +63,7 @@ export function createWordElement(word) {
     separation,
     visual,
     typed,
+    current,
     remaining,
     renderedText: null,
     renderedTypedIndex: null,
@@ -71,7 +74,7 @@ export function createWordElement(word) {
 export function updateWordElement(word, isActive, candidateState = null) {
   const elements = wordElements.get(word.id);
   if (!elements) return;
-  const { position, separation, visual, typed, remaining } = elements;
+  const { position, separation, visual, typed, current, remaining } = elements;
   const isCandidate = candidateState?.candidate === true;
   const candidatePrefixLength = isCandidate
     ? Math.max(0, candidateState.prefixLength || 0)
@@ -86,7 +89,8 @@ export function updateWordElement(word, isActive, candidateState = null) {
     elements.renderedTypedIndex !== displayTypedIndex
   ) {
     typed.textContent = word.text.slice(0, displayTypedIndex);
-    remaining.textContent = word.text.slice(displayTypedIndex);
+    current.textContent = word.text.slice(displayTypedIndex, displayTypedIndex + 1);
+    remaining.textContent = word.text.slice(displayTypedIndex + 1);
     position.setAttribute("aria-label", word.text);
     elements.renderedText = word.text;
     elements.renderedTypedIndex = displayTypedIndex;

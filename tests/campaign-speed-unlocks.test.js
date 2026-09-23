@@ -101,3 +101,19 @@ test("best 60-second Typing Test score unlocks access without completing skipped
     else globalThis.localStorage = previousStorage;
   }
 });
+
+test("Campaign placement survives corruption of the large mode-data store", () => {
+  const previousStorage = globalThis.localStorage;
+  globalThis.localStorage = new MemoryStorage();
+  try {
+    installBest60SecondWpm(87);
+    assert.equal(getCampaignBest60SecondWpm(), 87);
+    globalThis.localStorage.setItem("wordstrike_mode_data_v2", "{broken-json");
+    assert.equal(getCampaignBest60SecondWpm(), 87);
+    const save = createDefaultSave();
+    assert.equal(save.currentFurthestLevel, 51);
+  } finally {
+    if (previousStorage === undefined) delete globalThis.localStorage;
+    else globalThis.localStorage = previousStorage;
+  }
+});

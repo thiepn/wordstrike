@@ -80,3 +80,21 @@ assert.equal((await failing.initializeAuth()).status, "error");
 assert.equal(failing.getAuthState().error.message, "Online account request failed.");
 
 console.log("Auth initialization, restoration, Google OAuth, local sign-out, and failure handling passed.");
+
+// Transient auth events/errors must never manufacture a logout for a valid session.
+const resilient = createClient(restoredSession);
+let failNextGetSession = false;
+resilient.client.auth.getSession = async () => {
+  resilient.calls.getSession += 1;
+  if (failNextGetSession) throw new Error("temporary network failure");
+  return { data: { session: restoredSession }, error: null };
+};
+const resilientService = createAuthService({ getClient: () => resilient.client });
+assert.equal((await resilientService.initializeAuth()).status, "signed-in");
+resilient.emit("TOKEN_REFRESHED", restoredSession);
+assert.equal(resilientService.getAuthState().status, "signed-in");
+resilient.emit("INITIAL_SESSION", null);
+assert.equal(resilientService.getAuthState().status, "signed-in");
+failNextGetSession = true;
+assert.equal((await resilientService.initializeAuth()).status, "signed-in");
+assert.equal(resilientService.getAuthState().user.id, "user-1");

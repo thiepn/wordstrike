@@ -1,5 +1,5 @@
 const CACHE_PREFIX = "wordstrike-pwa-";
-const CACHE_NAME = CACHE_PREFIX + "v63-practice-architecture";
+const CACHE_NAME = CACHE_PREFIX + "v63-practice-architecture-account-fix-1";
 const APP_SHELL = [
   "./js/practiceLab/practiceAssessmentInput.js",
   "./js/practiceLab/practiceDurableManifest.js",
@@ -227,6 +227,10 @@ const APP_SHELL = [
   "./js/arcadeRushShadowCoordinator.js",
   "./js/auditedFallbackWords.js",
   "./js/authService.js",
+  "./js/accountDataMerge.js",
+  "./js/accountDataSync.js",
+  "./js/localDataEvents.js",
+  "./js/screenScroll.js",
   "./js/automaticSubmissionController.js",
   "./js/bossGameplayPresentation.js",
   "./js/bossGenerator.js",
