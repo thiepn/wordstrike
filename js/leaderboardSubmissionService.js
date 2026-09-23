@@ -14,6 +14,12 @@ const MODE_BOARDS = Object.freeze({
   "arcade-rush": LEADERBOARD_BOARDS.ARCADE_RUSH,
 });
 
+const FLOW_BOARDS = Object.freeze({
+  quick: LEADERBOARD_BOARDS.FLOW_QUICK,
+  standard: LEADERBOARD_BOARDS.FLOW_STANDARD,
+  long: LEADERBOARD_BOARDS.FLOW_LONG,
+});
+
 const TYPING_SUBMISSION_SOURCE_ALIASES = Object.freeze({
   "topbar-restart": "retry",
   "pause-restart": "retry",
@@ -25,6 +31,13 @@ function canonicalTypingSubmissionSource(source) {
 }
 
 function boardForMode(mode, result) {
+  if (mode === "flow") {
+    const length = ["quick", "standard", "long"].includes(result?.sessionLength)
+      ? result.sessionLength
+      : null;
+    const boardKey = length ? FLOW_BOARDS[length] : null;
+    return boardKey && (!result?.boardKey || result.boardKey === boardKey) ? boardKey : null;
+  }
   if (mode === "typing") {
     if (result?.modeData?.durationSeconds === 60) return LEADERBOARD_BOARDS.TYPING_60;
     if (result?.modeData?.durationSeconds === 15) return LEADERBOARD_BOARDS.TYPING_15;
@@ -72,8 +85,20 @@ function freezePayload(value) {
 
 export function buildSubmissionPayload(mode, result) {
   const boardKey = boardForMode(mode, result);
+  if (!boardKey || !result || !validSessionId(result.sessionId)) return null;
+  if (mode === "flow") {
+    const normalizedResult = buildFlowSubmissionResult(result);
+    if (!normalizedResult) return null;
+    const payload = {
+      boardKey,
+      sessionId: result.sessionId,
+      clientVersion: CURRENT_GAME_VERSION,
+      result: normalizedResult,
+    };
+    return hasCompleteMetrics(payload) ? payload : null;
+  }
   const data = result?.modeData;
-  if (!boardKey || !result || !data || !validSessionId(result.sessionId)) return null;
+  if (!data) return null;
   if (mode === "arcade-rush") {
     const normalizedResult = buildArcadeRushLeaderboardSubmissionResult(result);
     if (!normalizedResult) return null;
@@ -151,6 +176,49 @@ export function buildSubmissionPayload(mode, result) {
     },
   };
   return hasCompleteMetrics(payload) ? payload : null;
+}
+
+export function buildFlowSubmissionResult(result) {
+  const length = ["quick", "standard", "long"].includes(result?.sessionLength)
+    ? result.sessionLength
+    : null;
+  if (
+    !length ||
+    result?.modeId !== "flow" ||
+    result?.boardKey !== FLOW_BOARDS[length] ||
+    result?.variantId !== `flow-${length}-v2` ||
+    result?.contractVersion !== 1 ||
+    result?.rulesVersion !== 2 ||
+    result?.metricVersion !== 1 ||
+    result?.completed !== true
+  ) return null;
+  const normalized = {
+    contractVersion: result.contractVersion,
+    rulesVersion: result.rulesVersion,
+    metricVersion: result.metricVersion,
+    variantId: result.variantId,
+    sessionLength: length,
+    score: result.score,
+    wpm: result.wpm,
+    rawWpm: result.rawWpm,
+    accuracy: result.accuracy,
+    consistency: result.consistency,
+    consistencySamples: result.consistencySamples,
+    durationMs: Math.round(result.activeDurationMs),
+    wordsCompleted: result.wordsCompleted,
+    charactersCompleted: result.charactersCompleted,
+    correctKeystrokes: result.correctKeystrokes,
+    incorrectKeystrokes: result.incorrectKeystrokes,
+    correctedErrors: result.correctedErrors,
+    unresolvedErrors: result.unresolvedErrors,
+    textId: result.textId,
+    seed: result.seed,
+    completed: true,
+    recordEligible: result.recordEligible === true,
+    developerMode: false,
+    sessionSource: "flow-release",
+  };
+  return hasCompleteMetrics(normalized) ? normalized : null;
 }
 
 export function buildTypingSubmissionResult(result, durationSeconds) {
@@ -258,6 +326,13 @@ export function createLeaderboardSubmissionService({
       payload.result.bossDefeated !== true ||
       payload.result.rulesVersion !== 1
     )) return { status: "ineligible", reason: "invalid-result" };
+    if (activeMode === "flow" && (
+      payload.result.completed !== true ||
+      payload.result.rulesVersion !== 2 ||
+      payload.result.metricVersion !== 1 ||
+      !["quick", "standard", "long"].includes(payload.result.sessionLength) ||
+      payload.boardKey !== FLOW_BOARDS[payload.result.sessionLength]
+    )) return { status: "ineligible", reason: "invalid-result" };
     if (payload.result.developerMode || !payload.result.recordEligible) {
       return { status: "ineligible", reason: "local-only" };
     }
@@ -300,10 +375,12 @@ export function createLeaderboardSubmissionService({
   const restorePayload = (mode, restoredPayload, authState, profileState) => {
     requestSequence += 1;
     captureUser(authState);
-    activeMode = (MODE_BOARDS[mode] || mode === "typing") ? mode : null;
+    activeMode = (MODE_BOARDS[mode] || mode === "typing" || mode === "flow") ? mode : null;
     const expectedBoards = mode === "typing"
       ? [LEADERBOARD_BOARDS.TYPING_15, LEADERBOARD_BOARDS.TYPING_60]
-      : [MODE_BOARDS[mode]];
+      : mode === "flow"
+        ? Object.values(FLOW_BOARDS)
+        : [MODE_BOARDS[mode]];
     const valid = Boolean(
       activeMode &&
       restoredPayload &&
