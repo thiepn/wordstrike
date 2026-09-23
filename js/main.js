@@ -320,7 +320,14 @@ const pendingResultCoordinator = createPendingResultCoordinator({
 
 async function resumeDurableSubmissions(authState = getAuthState(), profileState = getLeaderboardProfileState()) {
   await pendingResultCoordinator.evaluate(authState, profileState);
-  return submissionOutboxCoordinator.drain(authState, profileState);
+  const resultScreen = [
+    Screens.ARCADE_RUSH_RESULTS,
+    Screens.ENDLESS_RESULTS,
+    Screens.SPEED_TEST_RESULTS,
+    Screens.RESULTS,
+  ].includes(appState.screen);
+  const skipSessionId = resultScreen ? getSubmissionState().sessionId : null;
+  return submissionOutboxCoordinator.drain(authState, profileState, { skipSessionId });
 }
 
 function ensureOnboardingView() {
