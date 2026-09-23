@@ -69,6 +69,9 @@ assert.deepEqual(EXPECTED_LEADERBOARD_RULES_VERSIONS, {
   "typing-15s-english200-v1": 1,
   "endless-v1": 1,
   "arcade-rush-v1": 1,
+  "flow-quick-v1": 2,
+  "flow-standard-v1": 2,
+  "flow-long-v1": 2,
 });
 
 for (const requestedBoardKey of [
@@ -134,14 +137,14 @@ assert.deepEqual(rushCalls, [{ boardKey: LEADERBOARD_BOARDS.ARCADE_RUSH }]);
 assert.equal(rushService.getLeaderboardState().selectedBoardKey, LEADERBOARD_BOARDS.ARCADE_RUSH);
 assert.equal(rushService.getLeaderboardState().selectedCategory, "arcade-rush");
 assert.equal(rushService.getLeaderboardState().entries[0].durationMs, 250000);
-// Keyboard navigation is public-only: Endless wraps to Campaign and End lands on Endless.
+// Keyboard navigation is public-only: Endless advances to Flow and End lands on Flow.
 assert.equal(
   getLeaderboardKeyboardTarget({ selectedBoardKey: LEADERBOARD_BOARDS.ENDLESS }, "ArrowRight"),
-  LEADERBOARD_BOARDS.CAMPAIGN,
+  LEADERBOARD_BOARDS.FLOW_STANDARD,
 );
 assert.equal(
   getLeaderboardKeyboardTarget({ selectedBoardKey: LEADERBOARD_BOARDS.CAMPAIGN }, "End"),
-  LEADERBOARD_BOARDS.ENDLESS,
+  LEADERBOARD_BOARDS.FLOW_STANDARD,
 );
 
 console.log("Leaderboard service stays lazy and rules-versioned; legacy Daily can resolve to hidden Rush while public keyboard navigation excludes the retired board.");
