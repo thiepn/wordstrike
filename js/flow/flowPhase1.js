@@ -1020,7 +1020,16 @@ function finalizePublicStreamRun(endedReason = "reset") {
   return result;
 }
 
+function rememberDisplayedPublicStreamText() {
+  if (!isPublicStreamRun() || run?.currentIndex > 0 || !resolvedRunPlan?.documents?.length) return;
+  recordFlowCorpusRun({
+    ...resolvedRunPlan,
+    documents: resolvedRunPlan.documents.slice(0, 1),
+  }, { completedAt: Date.now() });
+}
+
 function rerollPublicStream() {
+  rememberDisplayedPublicStreamText();
   finalizePublicStreamRun("reset");
   updatePublicFlowUrl({ newSeed: true });
   startRun();
