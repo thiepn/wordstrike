@@ -125,4 +125,13 @@ assert.equal(listSubmissionOutbox({ storage, now: 2500, userId: "user-1" }).leng
 assert.equal((await coordinator.drain({ status: "signed-out" }, profile)).status, "waiting");
 assert.equal(listSubmissionOutbox({ storage, now: 2500, userId: "user-1" }).length, 1);
 
-console.log("Submission outbox drains after reload, stays user-bound, retries later, and never drops offline failures.");
+online = true;
+const requestsBeforeSkip = requests.length;
+const skipped = await coordinator.drain(auth, profile, {
+  skipSessionId: "session-offline-outbox-0005",
+});
+assert.equal(skipped.status, "empty");
+assert.equal(requests.length, requestsBeforeSkip);
+assert.equal(listSubmissionOutbox({ storage, now: 2500, userId: "user-1" }).length, 1);
+
+console.log("Submission outbox drains after reload, stays user-bound, skips foreground-owned results, retries later, and never drops offline failures.");
