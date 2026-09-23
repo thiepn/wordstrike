@@ -68,6 +68,22 @@ for (const [duration, source] of [[60, "tab-reset"], [15, "quit-test"]]) {
   assert.equal(validateScoreSubmission({ ...request, result: { ...normalized, wpm: normalized.wpm + 1 } }).code, "METRIC_MISMATCH");
 }
 
+for (const [source, canonical] of [
+  ["topbar-restart", "retry"],
+  ["pause-restart", "retry"],
+  ["campaign-placement", "mode-select"],
+]) {
+  const local = typingResult(60, `123e4567-e89b-42d3-a456-4266141743${source.length}`, source);
+  const normalized = buildTypingSubmissionResult(local, 60);
+  assert.equal(normalized.sessionSource, canonical);
+  assert.equal(validateScoreSubmission({
+    boardKey: "typing-60s-english200-v1",
+    sessionId: local.sessionId,
+    clientVersion: "1.0.0",
+    result: { ...normalized, sessionSource: source },
+  }).valid, true, `${source} must remain a server-recognized legitimate typing source`);
+}
+
 const campaignResult = {
   sessionId: "123e4567-e89b-42d3-a456-426614174200",
   sessionSource: "level-select", developerMode: false, success: true,
