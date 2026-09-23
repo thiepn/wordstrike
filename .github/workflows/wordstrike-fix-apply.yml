@@ -32,7 +32,7 @@ jobs:
             gh api "repos/${GITHUB_REPOSITORY}/git/blobs/${sha}" --jq .content | tr -d '\n' | base64 --decode > "$path"
           }
 
-          fetch_blob /tmp/wordstrike-fix.patch 58fb80389856d62692b775a6cb69ebf5bf1aee16
+          fetch_blob /tmp/wordstrike-fix.patch 170816b539878cfbb549d73f47c12f417c1338e6
           git apply --check /tmp/wordstrike-fix.patch
           git apply /tmp/wordstrike-fix.patch
 
