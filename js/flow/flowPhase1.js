@@ -361,7 +361,9 @@ function updateGameplayHud(hud, gameplay, cadence) {
     const roundedFlow = String(Math.round(gameplay.flowValue));
     setTextIfChanged(hud.flowValue, roundedFlow);
     if (hud.meter?.getAttribute("aria-valuenow") !== roundedFlow) hud.meter?.setAttribute("aria-valuenow", roundedFlow);
-    if (hud.meter?.dataset.flowBand !== flowBand(gameplay.flowValue)) hud.meter.dataset.flowBand = flowBand(gameplay.flowValue);
+    if (hud.meter && hud.meter.dataset.flowBand !== flowBand(gameplay.flowValue)) {
+      hud.meter.dataset.flowBand = flowBand(gameplay.flowValue);
+    }
     const width = `${gameplay.flowValue}%`;
     if (hud.meterFill && hud.meterFill.style.width !== width) hud.meterFill.style.width = width;
     setTextIfChanged(hud.momentum, `×${gameplay.momentum.toFixed(1)}`);
