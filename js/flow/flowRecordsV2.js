@@ -1,4 +1,4 @@
-import { compareFlowScoreV2Results } from "./flowScoreV2.js";
+import { compareFlowScoreV2Results } from "./flowScoreV2.js?v=20260923a";
 
 export const FLOW_RECORDS_V2_STORAGE_KEY = "wordstrike_flow_records_v2";
 export const FLOW_RECORDS_V2_VERSION = 1;
