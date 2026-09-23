@@ -37,7 +37,7 @@ assert.match(css, /@media \(max-width:\s*720px\)/);
 
 assert.match(index, /typing-performance-v1\.css\?v=20260910a/);
 assert.match(index, /speedTestPerformanceV1\.js\?v=20260910a/);
-assert.match(index, /js\/main\.js\?v=20260923b/);
+assert.match(index, /js\/main\.js\?v=20260923d/);
 
 assert.doesNotMatch(leaderboard, /performanceTimeline/,
   "rich per-second analytics must remain local and outside leaderboard submissions");

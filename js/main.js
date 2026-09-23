@@ -207,6 +207,8 @@ import {
   savePendingResultSubmission,
 } from "./pendingResultSubmission.js";
 import { createPendingResultCoordinator } from "./pendingResultCoordinator.js";
+import { createSubmissionOutboxCoordinator } from "./submissionOutboxCoordinator.js";
+import { removeSubmissionOutbox } from "./submissionOutbox.js";
 import { createPracticeFeatureGate } from "./practiceLab/practiceFeatureGate.js";
 import { createPracticeExperimentRegistry } from "./practiceLab/practiceExperimentRegistry.js";
 import { createPracticeLabController } from "./practiceLab/practiceLabController.js";
@@ -303,6 +305,8 @@ function ensureArcadeRushAppController() {
   return arcadeRushAppController;
 }
 
+const submissionOutboxCoordinator = createSubmissionOutboxCoordinator();
+
 const pendingResultCoordinator = createPendingResultCoordinator({
   onUsernameRequired: () => {
     if (bootstrapReady && appState.screen !== Screens.SETTINGS) openAccountSettings();
@@ -314,6 +318,20 @@ const pendingResultCoordinator = createPendingResultCoordinator({
     if (bootstrapReady) openLeaderboardBoard(intent.boardKey, { notice: "LAST RESULT SUBMITTED" });
   },
 });
+
+async function resumeDurableSubmissions(authState = getAuthState(), profileState = getLeaderboardProfileState()) {
+  await pendingResultCoordinator.evaluate(authState, profileState);
+  const resultScreen = [
+    Screens.ARCADE_RUSH_RESULTS,
+    Screens.ENDLESS_RESULTS,
+    Screens.SPEED_TEST_RESULTS,
+    Screens.RESULTS,
+  ].includes(appState.screen);
+  const foregroundSessionId = resultScreen ? getSubmissionState().sessionId : null;
+  const pendingSessionId = pendingResultCoordinator.getState().sessionId;
+  const skipSessionId = foregroundSessionId || pendingSessionId || null;
+  return submissionOutboxCoordinator.drain(authState, profileState, { skipSessionId });
+}
 
 function ensureOnboardingView() {
   onboardingView ||= createOnboardingView(onboardingController);
@@ -1453,7 +1471,10 @@ function handleAppClick(event) {
       void pendingResultCoordinator.resume(getAuthState(), getLeaderboardProfileState());
     }
     else if (action === "discard-pending-result") {
+      const pendingSessionId = pendingResultCoordinator.getState().sessionId;
+      const userId = getAuthState().user?.id ?? null;
       pendingResultCoordinator.discard();
+      if (pendingSessionId) removeSubmissionOutbox(pendingSessionId, userId);
       renderCurrentScreen();
     }
     else if (action === "settings-edit-name") beginProfileNameEdit();
@@ -1636,7 +1657,7 @@ async function bootstrap() {
     if ([Screens.ARCADE_RUSH_RESULTS, Screens.ENDLESS_RESULTS, Screens.SPEED_TEST_RESULTS, Screens.RESULTS].includes(appState.screen)) {
       void handleAutomaticSubmissionStateChange(authState, getLeaderboardProfileState());
     }
-    if (bootstrapReady) void pendingResultCoordinator.evaluate(authState, getLeaderboardProfileState());
+    if (bootstrapReady) void resumeDurableSubmissions(authState, getLeaderboardProfileState());
     if (authUiChanged && appState.screen === Screens.LEVEL_SELECT) {
       renderCurrentScreen();
     }
@@ -1659,7 +1680,7 @@ async function bootstrap() {
     if ([Screens.ARCADE_RUSH_RESULTS, Screens.ENDLESS_RESULTS, Screens.SPEED_TEST_RESULTS, Screens.RESULTS].includes(appState.screen)) {
       void handleAutomaticSubmissionStateChange(getAuthState(), profileState);
     }
-    if (bootstrapReady) void pendingResultCoordinator.evaluate(getAuthState(), profileState);
+    if (bootstrapReady) void resumeDurableSubmissions(getAuthState(), profileState);
   });
   subscribeToSubmissions((submissionState) => {
     if ([Screens.ARCADE_RUSH_RESULTS, Screens.ENDLESS_RESULTS, Screens.SPEED_TEST_RESULTS, Screens.RESULTS].includes(appState.screen)) {
@@ -1719,6 +1740,9 @@ async function bootstrap() {
     loadCommonWordBank(),
   ]);
   document.addEventListener("keydown", handleGlobalKeydown);
+  window.addEventListener("online", () => {
+    void resumeDurableSubmissions(getAuthState(), getLeaderboardProfileState());
+  });
   nativeBackNavigation.mount();
   const appRoot = document.querySelector("#app");
   attachAppClickListener(appRoot, handleAppClick);
@@ -1750,7 +1774,7 @@ async function bootstrap() {
       }
     });
   }
-  void pendingResultCoordinator.evaluate(getAuthState(), getLeaderboardProfileState());
+  void resumeDurableSubmissions(getAuthState(), getLeaderboardProfileState());
 }
 
 bootstrap();
