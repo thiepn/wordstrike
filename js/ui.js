@@ -50,13 +50,25 @@ export function clearSpeedTestLayout() {
 }
 
 function menuButton(label, action, selected = false, extraClass = "") {
-  return `<button class="arcade-button ${selected ? "selected" : ""} ${extraClass}" data-action="${action}">${label}</button>`;
+  return `<button class="arcade-button ${selected ? "selected" : ""} ${extraClass}" data-action="${action}"${selected ? ' aria-current="true"' : ""}>${label}</button>`;
 }
 
 function applyMenuSelection(buttons, index) {
   buttons.forEach((button, buttonIndex) => {
-    button.classList.toggle("selected", buttonIndex === index);
+    const selected = buttonIndex === index;
+    button.classList.toggle("selected", selected);
+    if (selected) button.setAttribute?.("aria-current", "true");
+    else button.removeAttribute?.("aria-current");
   });
+}
+
+export function updateRenderedMenuSelection(selector, index, { focus = false } = {}) {
+  const buttons = [...(app()?.querySelectorAll?.(selector) || [])];
+  if (!buttons.length) return false;
+  const safeIndex = Math.max(0, Math.min(buttons.length - 1, Number(index) || 0));
+  applyMenuSelection(buttons, safeIndex);
+  if (focus) buttons[safeIndex]?.focus?.({ preventScroll: true });
+  return true;
 }
 
 function wireMenuActions(root, selector, handlers = {}) {
@@ -214,7 +226,7 @@ export function renderTitle(menuIndex, handlers) {
   app().querySelector(`[data-title-index="${menuIndex}"]`)?.focus?.({ preventScroll: true });
 }
 
-export function renderModeSelect(modes, selectedIndex, handlers) {
+export function renderModeSelect(modes, selectedIndex, handlers, { ensureSelectionVisible = false } = {}) {
   const selectedMode = selectedIndex >= 0 && selectedIndex < modes.length
     ? modes[selectedIndex]
     : null;
@@ -346,11 +358,11 @@ export function renderModeSelect(modes, selectedIndex, handlers) {
     }
   });
   const titleButtons = [...app().querySelectorAll('[data-action="mode-title"]')];
-  if (!titleButtons.length) titleButtons.push(app().querySelector('[data-action="mode-title"]'));
   titleButtons.filter(Boolean).forEach((titleButton) => {
     titleButton.onclick = handlers.back;
-    titleButton.onmousemove = () => handlers.select?.(modes.length);
   });
+  const homeButton = app().querySelector(`[data-mode-home-index="${modes.length}"]`);
+  if (homeButton) homeButton.onmousemove = () => handlers.select?.(modes.length);
   const focusTarget = selectedIndex === modes.length
     ? app().querySelector(`[data-mode-home-index="${modes.length}"]`)
     : app().querySelector(`[data-mode-index="${selectedIndex}"]`);
@@ -359,7 +371,7 @@ export function renderModeSelect(modes, selectedIndex, handlers) {
   // The Mode Select screen owns vertical scrolling on constrained viewports. Keep
   // keyboard-selected rows visible without forcing the initial Campaign view away
   // from the top-of-screen showcase.
-  if (focusTarget && selectedIndex > 0) {
+  if (focusTarget && (selectedIndex > 0 || ensureSelectionVisible)) {
     const scrollOwner = app().querySelector(".mode-select-screen");
     const ownerRect = scrollOwner?.getBoundingClientRect?.();
     const targetRect = focusTarget.getBoundingClientRect?.();

@@ -5,6 +5,7 @@ from pathlib import Path
 from threading import Thread
 import json
 import os
+import re
 import traceback
 
 from playwright.sync_api import sync_playwright, expect
@@ -195,6 +196,29 @@ def main():
                     assert bottom['screenScrollRange'] <= 1, bottom
                     assert bottom['screenScrollTop'] <= 1, bottom
                     assert bottom['max'] - bottom['y'] <= 4, bottom
+
+                    # Keyboard result navigation must update the existing action
+                    # menu in place. Rebuilding this long Results document used to
+                    # collapse its height and teleport the document scroll upward.
+                    result_actions = result_menu.locator('.arcade-button')
+                    result_actions.first.focus()
+                    shell.evaluate("element => { element.dataset.keyboardGuard = 'stable'; }")
+                    before_arrow = page.evaluate('window.scrollY')
+                    page.keyboard.press('ArrowDown')
+                    page.wait_for_timeout(80)
+                    expect(shell).to_have_attribute('data-keyboard-guard', 'stable')
+                    expect(result_actions.nth(1)).to_have_class(re.compile(r'\bselected\b'))
+                    after_arrow = page.evaluate('window.scrollY')
+                    assert after_arrow >= before_arrow - 2, (before_arrow, after_arrow)
+
+                    # Tab on Results is ordinary browser focus navigation. It must
+                    # never inherit the in-run "Tab = restart" shortcut.
+                    result_actions.first.focus()
+                    page.keyboard.press('Tab')
+                    page.wait_for_timeout(80)
+                    expect(page.locator('.speed-results-screen')).to_be_visible()
+                    assert page.locator('.speed-test-screen').count() == 0
+                    expect(shell).to_have_attribute('data-keyboard-guard', 'stable')
 
                 words_tab.focus()
                 page.keyboard.press('ArrowRight')

@@ -13,4 +13,15 @@ assert.equal(restoreScreenScroll(root, snapshot, windowRef), true);
 assert.equal(screen.scrollTop, 428);
 assert.equal(screen.scrollLeft, 9);
 assert.deepEqual(calls, [[3, 17]]);
-console.log("Same-screen scroll capture/restore keeps result/profile/settings positions stable.");
+
+const zeroCalls = [];
+const zeroWindow = { scrollX: 0, scrollY: 0, scrollTo: (...args) => zeroCalls.push(args) };
+const zeroSnapshot = captureScreenScroll(root, zeroWindow);
+screen.scrollTop = 99;
+screen.scrollLeft = 12;
+assert.equal(restoreScreenScroll(root, zeroSnapshot, zeroWindow), true);
+assert.equal(screen.scrollTop, 428);
+assert.equal(screen.scrollLeft, 9);
+assert.deepEqual(zeroCalls, [[0, 0]], "zero page coordinates must still be restored");
+
+console.log("Same-screen scroll capture/restore keeps result/profile/settings positions stable, including document origin.");

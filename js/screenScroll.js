@@ -22,7 +22,7 @@ export function restoreScreenScroll(root, snapshot, windowRef = globalThis.windo
     screen.scrollTop = snapshot.screenTop;
     screen.scrollLeft = snapshot.screenLeft;
   }
-  if (typeof windowRef?.scrollTo === "function" && (snapshot.pageX || snapshot.pageY)) {
+  if (typeof windowRef?.scrollTo === "function") {
     windowRef.scrollTo(snapshot.pageX, snapshot.pageY);
   }
   return Boolean(screen);

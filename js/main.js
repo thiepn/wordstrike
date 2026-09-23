@@ -80,6 +80,7 @@ import {
   updateHud,
   updateSpeedTestRun,
   updateGlobalSubmissionRegion,
+  updateRenderedMenuSelection,
 } from "./ui.js";
 import { getAllModes, isModeEnabled, MODE_IDS } from "./modes.js";
 import {
@@ -1199,9 +1200,11 @@ function confirmReset() {
 
 let lastRenderedScreen = null;
 
-function renderCurrentScreen() {
+function renderCurrentScreen({
+  preserveScroll = lastRenderedScreen === appState.screen,
+  ensureModeSelectionVisible = false,
+} = {}) {
   const appRoot = document.querySelector("#app");
-  const preserveScroll = lastRenderedScreen === appState.screen;
   const scrollSnapshot = preserveScroll ? captureScreenScroll(appRoot, window) : null;
 
   if (appState.screen === Screens.TITLE) {
@@ -1222,11 +1225,11 @@ function renderCurrentScreen() {
       select: (index) => {
         if (appState.modeSelection === index) return;
         appState.modeSelection = index;
-        renderCurrentScreen();
+        renderCurrentScreen({ preserveScroll: false });
       },
       activate: activateSelectedMode,
       back: openTitle,
-    });
+    }, { ensureSelectionVisible: ensureModeSelectionVisible });
   } else if (appState.screen === Screens.PRACTICE_LAB) {
     ensurePracticeLabController().mount();
   } else if (appState.screen === Screens.ENDLESS_READY) {
@@ -1615,6 +1618,19 @@ const nativeBackNavigation = createNativeBackNavigation({
   onBack: handleNativeBack,
 });
 
+function syncKeyboardResultsSelection(screen, index) {
+  const selector = screen === Screens.SPEED_TEST_RESULTS
+    ? ".speed-results-panel > .menu-list .arcade-button"
+    : screen === Screens.ENDLESS_RESULTS
+      ? ".endless-results-panel > .menu-list .arcade-button"
+      : screen === Screens.RESULTS
+        ? ".results-panel > .menu-list .arcade-button"
+        : null;
+  if (!selector) return false;
+  const focus = Boolean(document.activeElement?.closest?.(selector));
+  return updateRenderedMenuSelection(selector, index, { focus });
+}
+
 const handleGlobalKeydown = createGlobalKeyboardController({
   state: appState,
   currentTimeMs,
@@ -1626,6 +1642,7 @@ const handleGlobalKeydown = createGlobalKeyboardController({
   resumeGame,
   renderPauseOverlay,
   resetSpeedTestAttempt,
+  startCampaignPlacement,
   openModeSelect,
   startEndless,
   startArcadeRush,
@@ -1633,6 +1650,11 @@ const handleGlobalKeydown = createGlobalKeyboardController({
   backPracticeLab: () => practiceLabController?.back(),
   activateTitleAction,
   renderCurrentScreen,
+  syncModeSelection: () => renderCurrentScreen({
+    preserveScroll: false,
+    ensureModeSelectionVisible: true,
+  }),
+  syncResultsSelection: syncKeyboardResultsSelection,
   activateSelectedMode,
   moveLevelSelection,
   startLevel,

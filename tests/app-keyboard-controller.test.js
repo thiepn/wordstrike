@@ -4,13 +4,15 @@ import { createGlobalKeyboardController } from "../js/appKeyboardController.js";
 import { getAllModes } from "../js/modes.js";
 import { Screens } from "../js/state.js";
 
-function eventFor(key) {
+function eventFor(key, overrides = {}) {
   return {
     key,
     repeat: false,
+    defaultPrevented: false,
     target: { tagName: "DIV", matches: () => false, closest: () => null },
     prevented: false,
-    preventDefault() { this.prevented = true; },
+    preventDefault() { this.prevented = true; this.defaultPrevented = true; },
+    ...overrides,
   };
 }
 
@@ -29,6 +31,7 @@ function createHarness(overrides = {}) {
     arcadeRushResult: { score: 42 },
     arcadeRushResultsIndex: 0,
     arcadeRushResultsReadyAt: 0,
+    speedTestResult: null,
     speedTestResultsIndex: 0,
     speedTestResultsReadyAt: 0,
     levelSelection: 1,
@@ -50,6 +53,7 @@ function createHarness(overrides = {}) {
     resumeGame: record("resume"),
     renderPauseOverlay: record("pause-render"),
     resetSpeedTestAttempt: record("typing-reset"),
+    startCampaignPlacement: record("placement"),
     openModeSelect: record("modes"),
     startEndless: record("endless"),
     startArcadeRush: record("rush"),
@@ -57,6 +61,8 @@ function createHarness(overrides = {}) {
     backPracticeLab: record("practice-back"),
     activateTitleAction: record("title-action"),
     renderCurrentScreen: record("render"),
+    syncModeSelection: record("sync-mode"),
+    syncResultsSelection: record("sync-result"),
     activateSelectedMode: record("activate-mode"),
     moveLevelSelection: record("move-level"),
     startLevel: record("start-level"),
@@ -81,7 +87,43 @@ test("title and mode-select keyboard state is owned by the extracted controller"
   modes.handle(eventFor("ArrowLeft"));
   assert.equal(modes.state.modeSelection, getAllModes().length);
   modes.handle(eventFor("Enter"));
-  assert.deepEqual(modes.calls, [["render"], ["title"]]);
+  assert.deepEqual(modes.calls, [["sync-mode"], ["title"]]);
+});
+
+test("native controls and already-handled events are never hijacked by global shortcuts", () => {
+  const results = createHarness({
+    screen: Screens.SPEED_TEST_RESULTS,
+    speedTestResultsReadyAt: 0,
+  });
+  const summary = eventFor("Enter", {
+    target: {
+      tagName: "SUMMARY",
+      matches: (selector) => selector.includes("summary"),
+      closest: () => null,
+    },
+  });
+  results.handle(summary);
+  assert.equal(summary.prevented, false);
+  assert.deepEqual(results.calls, []);
+
+  const alreadyHandled = eventFor("ArrowDown", { defaultPrevented: true });
+  results.handle(alreadyHandled);
+  assert.equal(results.state.speedTestResultsIndex, 0);
+  assert.deepEqual(results.calls, []);
+});
+
+test("Home and End remain native outside components that explicitly own them", () => {
+  const modes = createHarness({ screen: Screens.MODE_SELECT });
+  const home = eventFor("Home");
+  modes.handle(home);
+  assert.equal(home.prevented, false);
+  assert.deepEqual(modes.calls, []);
+
+  const settings = createHarness({ screen: Screens.SETTINGS });
+  const end = eventFor("End");
+  settings.handle(end);
+  assert.equal(end.prevented, false);
+  assert.deepEqual(settings.calls, []);
 });
 
 test("Practice and Settings keyboard routes remain independent of gameplay execution", () => {
@@ -104,6 +146,72 @@ test("result navigation preserves readiness gates and selected action routing", 
   const ready = createHarness({ screen: Screens.RESULTS, resultsReadyAt: 0, resultsIndex: 0 });
   ready.handle(eventFor("Enter"));
   assert.deepEqual(ready.calls, [["start-level", 4, "next-level"]]);
+});
+
+test("Typing Results keeps Tab native and updates arrow selection without rebuilding the results screen", () => {
+  const typing = createHarness({
+    screen: Screens.SPEED_TEST_RESULTS,
+    speedTestResultsReadyAt: 0,
+    speedTestResultsIndex: 0,
+  });
+  const tab = eventFor("Tab");
+  typing.handle(tab);
+  assert.equal(tab.prevented, false);
+  assert.deepEqual(typing.calls, []);
+
+  const down = eventFor("ArrowDown");
+  typing.handle(down);
+  assert.equal(typing.state.speedTestResultsIndex, 1);
+  assert.equal(down.prevented, true);
+  assert.deepEqual(typing.calls, [["sync-result", Screens.SPEED_TEST_RESULTS, 1]]);
+});
+
+test("Campaign and Endless result arrows update selection in place", () => {
+  const campaign = createHarness({
+    screen: Screens.RESULTS,
+    resultsReadyAt: 0,
+    resultsIndex: 0,
+  });
+  campaign.handle(eventFor("ArrowDown"));
+  assert.equal(campaign.state.resultsIndex, 1);
+  assert.deepEqual(campaign.calls, [["sync-result", Screens.RESULTS, 1]]);
+
+  const endless = createHarness({
+    screen: Screens.ENDLESS_RESULTS,
+    endlessResultsReadyAt: 0,
+    endlessResultsIndex: 0,
+  });
+  endless.handle(eventFor("ArrowDown"));
+  assert.equal(endless.state.endlessResultsIndex, 1);
+  assert.deepEqual(endless.calls, [["sync-result", Screens.ENDLESS_RESULTS, 1]]);
+});
+
+test("Campaign placement result keyboard routes match RETURN / RETRY placement actions", () => {
+  const back = createHarness({
+    screen: Screens.SPEED_TEST_RESULTS,
+    speedTestResult: { sessionSource: "campaign-placement" },
+    speedTestResultsReadyAt: 0,
+    speedTestResultsIndex: 0,
+  });
+  back.handle(eventFor("Enter"));
+  assert.deepEqual(back.calls, [["levels", "placement-result"]]);
+
+  const retry = createHarness({
+    screen: Screens.SPEED_TEST_RESULTS,
+    speedTestResult: { sessionSource: "campaign-placement" },
+    speedTestResultsReadyAt: 0,
+    speedTestResultsIndex: 1,
+  });
+  retry.handle(eventFor("Enter"));
+  assert.deepEqual(retry.calls, [["placement"]]);
+
+  const escape = createHarness({
+    screen: Screens.SPEED_TEST_RESULTS,
+    speedTestResult: { sessionSource: "campaign-placement" },
+    speedTestResultsReadyAt: 0,
+  });
+  escape.handle(eventFor("Escape"));
+  assert.deepEqual(escape.calls, [["levels", "placement-result"]]);
 });
 
 test("Arcade Rush ready and results routes use injected high-level actions only", () => {

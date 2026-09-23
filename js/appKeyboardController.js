@@ -12,7 +12,7 @@ import { getResultsActions, isResultsInputBlocked, Screens } from "./state.js";
 import { observePracticePhysicalTelemetryKeyDown } from "./practiceLab/practicePhysicalTelemetryRuntime.js";
 
 const PREVENTED_NAVIGATION_KEYS = new Set([
-  "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Home", "End", "Enter", "Escape",
+  "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Enter", "Escape",
 ]);
 const LEADERBOARD_NAVIGATION_KEYS = new Set([
   "ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End",
@@ -33,6 +33,7 @@ export function createGlobalKeyboardController({
   resumeGame,
   renderPauseOverlay,
   resetSpeedTestAttempt,
+  startCampaignPlacement,
   openModeSelect,
   startEndless,
   startArcadeRush,
@@ -40,6 +41,8 @@ export function createGlobalKeyboardController({
   backPracticeLab,
   activateTitleAction,
   renderCurrentScreen,
+  syncModeSelection,
+  syncResultsSelection,
   activateSelectedMode,
   moveLevelSelection,
   startLevel,
@@ -52,8 +55,15 @@ export function createGlobalKeyboardController({
   if (!state || typeof state !== "object") throw new TypeError("Keyboard controller requires app state");
   if (typeof currentTimeMs !== "function") throw new TypeError("Keyboard controller requires a clock");
   if (typeof routeActiveGameplayKey !== "function") throw new TypeError("Keyboard controller requires gameplay routing");
+  const renderModeSelection = typeof syncModeSelection === "function"
+    ? syncModeSelection
+    : renderCurrentScreen;
+  const renderResultsSelection = typeof syncResultsSelection === "function"
+    ? syncResultsSelection
+    : () => renderCurrentScreen?.();
 
   return function handleGlobalKeydown(event) {
+    if (event?.defaultPrevented) return;
     // Native mode controls must not type, launch a level, restart, or navigate a menu.
     const presentation = event.target?.closest?.("[data-mode-presentation]");
     if (presentation) {
@@ -86,7 +96,10 @@ export function createGlobalKeyboardController({
     // an eligible physical-keyboard Practice session has explicitly activated it.
     if (state.screen === Screens.PRACTICE_LAB) observePracticePhysicalTelemetryKeyDown(event);
     if (isTextEntryTarget(event.target)) return;
-    if (["Enter", " "].includes(event.key) && event.target?.matches?.("button, a, [role=tab]")) return;
+    if (
+      ["Enter", " "].includes(event.key) &&
+      event.target?.matches?.("button, a, summary, [role=button], [role=tab]")
+    ) return;
     if (routeActiveGameplayKey(event)) return;
 
     if (state.screen === Screens.PROFILE_STATS) {
@@ -172,6 +185,7 @@ export function createGlobalKeyboardController({
     if (state.screen === Screens.LEADERBOARDS) {
       if (event.key === "Escape") openTitle();
       else if (LEADERBOARD_NAVIGATION_KEYS.has(event.key)) {
+        event.preventDefault?.();
         const boardKey = getLeaderboardKeyboardTarget(getLeaderboardState(), event.key);
         if (boardKey) void selectLeaderboardBoard(boardKey);
       } else if (event.key.toLowerCase() === "r") {
@@ -184,10 +198,10 @@ export function createGlobalKeyboardController({
       const itemCount = getAllModes().length + 1;
       if (event.key === "ArrowUp" || event.key === "ArrowLeft") {
         state.modeSelection = cycleIndex(state.modeSelection, -1, itemCount);
-        renderCurrentScreen();
+        renderModeSelection();
       } else if (event.key === "ArrowDown" || event.key === "ArrowRight") {
         state.modeSelection = cycleIndex(state.modeSelection, 1, itemCount);
-        renderCurrentScreen();
+        renderModeSelection();
       } else if (event.key === "Enter") {
         if (state.modeSelection === getAllModes().length) openTitle();
         else activateSelectedMode();
@@ -211,7 +225,7 @@ export function createGlobalKeyboardController({
       } else if (event.key === "ArrowUp" || event.key === "ArrowDown") {
         const direction = event.key === "ArrowUp" ? -1 : 1;
         state.endlessResultsIndex = cycleIndex(state.endlessResultsIndex, direction, actions.length);
-        renderCurrentScreen();
+        renderResultsSelection(Screens.ENDLESS_RESULTS, state.endlessResultsIndex);
       } else if (event.key === "Enter") {
         const action = actions[state.endlessResultsIndex];
         if (action === "retry") startEndless("retry");
@@ -246,23 +260,28 @@ export function createGlobalKeyboardController({
     }
 
     if (state.screen === Screens.SPEED_TEST_RESULTS) {
-      const actions = ["retry", "change", "modes", "title"];
+      const campaignPlacement = state.speedTestResult?.sessionSource === "campaign-placement";
+      const actions = campaignPlacement
+        ? ["campaign", "retry", "modes", "title"]
+        : ["retry", "change", "modes", "title"];
       if (isResultsInputBlocked(event, currentTimeMs(), state.speedTestResultsReadyAt)) return;
-      if (event.key === "Tab") {
+      if (event.key === "Escape") {
         event.preventDefault();
-        resetSpeedTestAttempt("retry");
-      } else if (event.key === "Escape") {
-        event.preventDefault();
-        resetSpeedTestAttempt("change-test");
+        if (campaignPlacement) openLevelSelect("placement-result");
+        else resetSpeedTestAttempt("change-test");
       } else if (event.key === "ArrowUp" || event.key === "ArrowDown") {
         event.preventDefault();
         const direction = event.key === "ArrowUp" ? -1 : 1;
         state.speedTestResultsIndex = cycleIndex(state.speedTestResultsIndex, direction, actions.length);
-        renderCurrentScreen();
+        renderResultsSelection(Screens.SPEED_TEST_RESULTS, state.speedTestResultsIndex);
       } else if (event.key === "Enter") {
         event.preventDefault();
         const action = actions[state.speedTestResultsIndex];
-        if (action === "retry") resetSpeedTestAttempt("retry");
+        if (action === "campaign") openLevelSelect("placement-result");
+        else if (action === "retry") {
+          if (campaignPlacement) startCampaignPlacement?.();
+          else resetSpeedTestAttempt("retry");
+        }
         else if (action === "change") resetSpeedTestAttempt("change-test");
         else if (action === "modes") openModeSelect();
         else openTitle();
@@ -285,7 +304,7 @@ export function createGlobalKeyboardController({
       } else if (event.key === "ArrowUp" || event.key === "ArrowDown") {
         const direction = event.key === "ArrowUp" ? -1 : 1;
         state.resultsIndex = cycleIndex(state.resultsIndex, direction, actions.length);
-        renderCurrentScreen();
+        renderResultsSelection(Screens.RESULTS, state.resultsIndex);
       } else if (event.key === "Enter") {
         const action = actions[state.resultsIndex];
         if (action === "retry") startLevel(state.results.levelNumber, "retry");

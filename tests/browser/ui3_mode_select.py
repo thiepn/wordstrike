@@ -164,6 +164,14 @@ def inspect_keyboard_and_routes(browser, base, browser_name, evidence):
     open_modes(page, base)
 
     assert focused_index(page) == "0", focused_index(page)
+
+    # The top BACK control exits Mode Select, but merely moving the pointer over
+    # it must not select/focus the footer Main Menu action or scroll the screen.
+    before_back_hover = page.evaluate("document.querySelector('.mode-select-screen').scrollTop")
+    page.locator('.mode-select-topline .screen-back-button').hover()
+    assert focused_index(page) == "0", focused_index(page)
+    assert page.evaluate("document.querySelector('.mode-select-screen').scrollTop") == before_back_hover
+
     expected = [
         ("ArrowRight", "1", "Typing Test"),
         ("ArrowDown", "2", "Endless"),
@@ -177,6 +185,13 @@ def inspect_keyboard_and_routes(browser, base, browser_name, evidence):
         assert_mode_select(page)
         assert focused_index(page) == index, (key, focused_index(page), index)
         expect(page.locator(".mode-showcase-heading h2")).to_have_text(title)
+        if index == "0":
+            campaign_box = page.locator('[data-mode-index="0"]').bounding_box()
+            assert campaign_box is not None, (key, index, "missing Campaign box")
+            assert campaign_box["y"] >= -1, (key, index, campaign_box)
+            assert campaign_box["y"] + campaign_box["height"] <= page.viewport_size["height"] + 1, (
+                key, index, campaign_box, page.viewport_size
+            )
 
     page.keyboard.press("ArrowLeft")
     assert focused_index(page) == "5", focused_index(page)
