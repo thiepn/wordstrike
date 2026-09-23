@@ -179,4 +179,4 @@ if (enabled) {
   queueMicrotask(decorateStructure);
 }
 
-export { previousWordDeleteCount };
+export { previousWordDeleteCount, decorateStructure as refreshFlowUiGuard };
