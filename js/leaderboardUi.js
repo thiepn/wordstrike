@@ -28,7 +28,7 @@ function metricText(entry, kind) {
   if (kind === "campaign") return `Level ${entry.level} · Grade ${entry.grade} · ${entry.accuracy.toFixed(1)}%`;
   if (kind === "typing") return `${entry.wpm.toFixed(1)} WPM · ${entry.accuracy.toFixed(1)}% · ${entry.rawWpm.toFixed(1)} raw`;
   if (kind === "arcade-rush") return `${entry.score.toLocaleString()} pts · ${entry.accuracy.toFixed(1)}% · ${duration(entry.durationMs)}`;
-  if (kind === "flow") return `${entry.score.toLocaleString()} pts · ${entry.wpm.toFixed(1)} WPM · ${entry.accuracy.toFixed(1)}% · ${entry.consistency?.toFixed?.(0) ?? 0} consistency`;
+  if (kind === "flow") return `${entry.score.toLocaleString()} pts · ${entry.wpm.toFixed(1)} WPM · ${Math.round(entry.wordsCompleted || 0)} words · ${entry.accuracy.toFixed(1)}%`;
   return `Stage ${entry.stage} · ${entry.score.toLocaleString()} pts · ${entry.accuracy.toFixed(1)}%`;
 }
 
@@ -36,7 +36,7 @@ function columns(kind) {
   if (kind === "campaign") return ["LEVEL", "GRADE", "ACCURACY"];
   if (kind === "typing") return ["WPM", "ACCURACY", "RAW WPM"];
   if (kind === "arcade-rush") return ["SCORE", "ACCURACY", "TIME"];
-  if (kind === "flow") return ["SCORE", "WPM", "ACCURACY"];
+  if (kind === "flow") return ["SCORE", "WPM", "WORDS"];
   return ["STAGE", "SCORE", "ACCURACY"];
 }
 
@@ -44,7 +44,7 @@ function values(entry, kind) {
   if (kind === "campaign") return [entry.level, entry.grade, `${entry.accuracy.toFixed(1)}%`];
   if (kind === "typing") return [entry.wpm.toFixed(1), `${entry.accuracy.toFixed(1)}%`, entry.rawWpm.toFixed(1)];
   if (kind === "arcade-rush") return [entry.score.toLocaleString(), `${entry.accuracy.toFixed(1)}%`, duration(entry.durationMs)];
-  if (kind === "flow") return [entry.score.toLocaleString(), entry.wpm.toFixed(1), `${entry.accuracy.toFixed(1)}%`];
+  if (kind === "flow") return [entry.score.toLocaleString(), entry.wpm.toFixed(1), Math.round(entry.wordsCompleted || 0).toLocaleString()];
   return [entry.stage, entry.score.toLocaleString(), `${entry.accuracy.toFixed(1)}%`];
 }
 
@@ -119,7 +119,6 @@ export function renderLeaderboards(
   const inferredSelection = getLeaderboardSelection(boardKey);
   const category = state.selectedCategory || inferredSelection.selectedCategory;
   const typingDuration = state.selectedTypingDuration || inferredSelection.selectedTypingDuration;
-  const flowLength = state.selectedFlowLength || inferredSelection.selectedFlowLength || "standard";
   const typing = category === LEADERBOARD_CATEGORIES.TYPING;
   const flow = category === LEADERBOARD_CATEGORIES.FLOW;
   const rush = boardKey === LEADERBOARD_BOARDS.ARCADE_RUSH;
@@ -130,7 +129,7 @@ export function renderLeaderboards(
         : typing
           ? `ENGLISH 200 // ${typingDuration} SECONDS`
           : flow
-            ? `LONGFORM FLOW // ${flowLength.toUpperCase()} // SCORE · ACCURACY · WPM`
+            ? "CONTINUOUS FLOW // SCORE REWARDS VOLUME · SPEED · ACCURACY"
             : "STANDARD ENDLESS";
   const tabs = [
     [LEADERBOARD_CATEGORIES.CAMPAIGN, "CAMPAIGN", "leaderboard-select-campaign"],
@@ -149,11 +148,6 @@ export function renderLeaderboards(
     ${typing ? `<nav class="leaderboard-duration-tabs" aria-label="Typing Test duration" role="tablist">
       <button role="tab" class="${typingDuration === 60 ? "selected" : ""}" data-action="leaderboard-typing-select-60" aria-selected="${typingDuration === 60}" tabindex="${typingDuration === 60 ? "0" : "-1"}">60 SECONDS</button>
       <button role="tab" class="${typingDuration === 15 ? "selected" : ""}" data-action="leaderboard-typing-select-15" aria-selected="${typingDuration === 15}" tabindex="${typingDuration === 15 ? "0" : "-1"}">15 SECONDS</button>
-    </nav>` : ""}
-    ${flow ? `<nav class="leaderboard-duration-tabs" aria-label="Flow run length" role="tablist">
-      <button role="tab" class="${flowLength === "quick" ? "selected" : ""}" data-action="leaderboard-flow-select-quick" aria-selected="${flowLength === "quick"}" tabindex="${flowLength === "quick" ? "0" : "-1"}">QUICK</button>
-      <button role="tab" class="${flowLength === "standard" ? "selected" : ""}" data-action="leaderboard-flow-select-standard" aria-selected="${flowLength === "standard"}" tabindex="${flowLength === "standard" ? "0" : "-1"}">STANDARD</button>
-      <button role="tab" class="${flowLength === "long" ? "selected" : ""}" data-action="leaderboard-flow-select-long" aria-selected="${flowLength === "long"}" tabindex="${flowLength === "long" ? "0" : "-1"}">LONG</button>
     </nav>` : ""}
     <div class="leaderboard-board-meta">${meta}</div>
     ${authenticationPanel(authState, profileState)}
