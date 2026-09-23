@@ -71,6 +71,7 @@ assert.equal(getCurrentSession().state, SESSION_STATES.COMPLETED);
 assert.equal(state.result.characters.correct, 1);
 assert.equal(state.result.characters.missed, 0);
 assert.ok(state.result.wpm > 0);
+assert.equal(state.result.localPersistence.status, "saved");
 assert.equal(handleCurrentSpeedTestKey(event("x", 1)), false);
 assert.equal(completed, 1);
 
@@ -156,6 +157,34 @@ abortSession("test-reset");
 clearSpeedTestRuntime();
 clearSession();
 
+const workingStorage = globalThis.localStorage;
+globalThis.localStorage = {
+  getItem() { return null; },
+  setItem() { throw new Error("quota"); },
+};
+clearSession();
+state = startSpeedTest({
+  config: getSpeedTestConfig("words-10"),
+  wordPool: pool,
+  attemptSeed: 998,
+});
+state.words.splice(0, state.words.length, ...Array(9).fill("cat"), "word");
+state.currentWordIndex = 9;
+for (const [index, key] of [..."word"].entries()) {
+  handleCurrentSpeedTestKey(event(key, 700000 + index), 700 + index);
+}
+assert.equal(state.ended, true);
+assert.equal(state.result.localPersistence.status, "failed");
+assert.match(state.result.localPersistence.warning, /could not be saved locally/i);
+assert.deepEqual(state.recordFlags, {
+  newWpmRecord: false,
+  newRawWpmRecord: false,
+  newAccuracyRecord: false,
+});
+clearSpeedTestRuntime();
+clearSession();
+globalThis.localStorage = workingStorage;
+
 state = startSpeedTest({
   config: getSpeedTestConfig("time-60"),
   wordPool: pool,
@@ -167,4 +196,4 @@ assert.equal(frames.size, 0);
 clearSpeedTestRuntime();
 assert.equal(getCurrentSpeedTest(), null);
 
-console.log("Typing Test delayed start, deadline, exact-once completion, retry identity, final-word, and cleanup tests passed.");
+console.log("Typing Test delayed start, deadline, exact-once completion, retry identity, final-word, persistence failure, and cleanup tests passed.");
