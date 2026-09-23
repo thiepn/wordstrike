@@ -510,6 +510,30 @@
   box-shadow: none;
 }
 
+.profile-stats-screen .account-sync-status,
+.settings-screen .account-sync-status {
+  display: grid;
+  gap: 0.45rem;
+  margin-top: 1.15rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--ui11-line);
+}
+
+.profile-stats-screen .account-sync-status > strong,
+.settings-screen .account-sync-status > strong {
+  color: var(--ui11-cyan);
+  font-family: var(--ui-font-mono, monospace);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+}
+
+.profile-stats-screen .account-sync-status > span,
+.settings-screen .account-sync-status > span {
+  color: var(--ui11-muted);
+  font-size: 0.72rem;
+  line-height: 1.55;
+}
+
 .profile-stats-screen .leaderboard-public-username strong,
 .settings-screen .leaderboard-public-username strong {
   color: var(--ui11-cyan);

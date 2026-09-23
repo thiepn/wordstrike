@@ -238,10 +238,10 @@ function renderProfile(profile, state) {
         ${state.copyMessage ? `<small class="copy-message">${escapeHtml(state.copyMessage)}</small>` : ""}</div>
       <div><span>PROFILE CREATED</span><strong>${formatDateTime(profile.createdAt)}</strong></div>
       <div><span>LAST UPDATED</span><strong>${formatDateTime(profile.updatedAt)}</strong></div>
-      <div><span>STORAGE</span><strong>STORED LOCALLY ON THIS DEVICE</strong></div>
+      <div><span>STORAGE</span><strong>LOCAL-FIRST${state.authState?.status === "signed-in" ? " + ACCOUNT SYNC" : ""}</strong></div>
     </div>
-    ${renderGlobalAccount(state.authState, state.leaderboardProfileState)}
-    <p class="profile-privacy">Your profile and statistics are stored in this browser.<br>They are not uploaded anywhere.</p>`;
+    ${renderGlobalAccount(state.authState, state.leaderboardProfileState, state.syncState)}
+    <p class="profile-privacy">Gameplay data is stored locally first. When you are signed in, supported WordStrike progress, statistics, and settings are synchronized to your account. Public leaderboard data is handled separately.</p>`;
 }
 
 function usernameFeedback(profileState) {
@@ -348,10 +348,46 @@ function globalAccountContent(authState = { status: "loading" }, profileState) {
     <p>Local gameplay and records are unaffected.</p>`;
 }
 
-export function renderGlobalAccount(authState, profileState) {
+function renderAccountSyncStatus(syncState = {}, authState = {}) {
+  if (authState?.status !== "signed-in") return "";
+  const status = syncState?.status || "idle";
+  let heading = "CLOUD SAVE";
+  let detail = "Waiting to synchronize game data.";
+  let action = "";
+
+  if (status === "syncing") {
+    heading = "SYNCING GAME DATA";
+    detail = "Merging this device with your latest cloud progress.";
+  } else if (status === "pending") {
+    heading = "CHANGES PENDING";
+    detail = "Local changes are queued and will synchronize shortly.";
+    action = '<button class="arcade-button" data-action="account-sync-retry">SYNC NOW</button>';
+  } else if (status === "synced") {
+    heading = "CLOUD SAVE UP TO DATE";
+    detail = syncState.lastSuccessAt
+      ? `Last synchronized ${escapeHtml(formatDateTime(syncState.lastSuccessAt))}.`
+      : "Your local and cloud data are synchronized.";
+  } else if (status === "offline") {
+    heading = "SYNC PAUSED — OFFLINE";
+    detail = "Changes remain on this device and will retry automatically when you are online.";
+  } else if (status === "error") {
+    heading = "CLOUD SAVE NEEDS RETRY";
+    detail = "Your local data is preserved. WordStrike will retry automatically.";
+    action = '<button class="arcade-button account-primary" data-action="account-sync-retry">RETRY CLOUD SAVE</button>';
+  }
+
+  return `<aside id="global-account-sync" class="account-sync-status" data-sync-status="${escapeHtml(status)}" aria-live="polite">
+    <strong>${heading}</strong>
+    <span>${detail}</span>
+    ${action ? `<div class="global-account-actions">${action}</div>` : ""}
+  </aside>`;
+}
+
+export function renderGlobalAccount(authState, profileState, syncState = null) {
   return `<section class="global-account" aria-labelledby="global-account-heading">
     <h3 id="global-account-heading">GLOBAL ACCOUNT</h3>
     <div id="global-account-content">${globalAccountContent(authState, profileState)}</div>
+    ${renderAccountSyncStatus(syncState, authState)}
   </section>`;
 }
 
@@ -363,6 +399,7 @@ export function renderSettingsAccountManagement({
   authState,
   leaderboardProfileState,
   pendingResultState = null,
+  syncState = null,
 } = {}) {
   const displayName = escapeHtml(localProfile?.displayName || "PLAYER");
   const localEditor = editing
@@ -378,7 +415,7 @@ export function renderSettingsAccountManagement({
     <h2 id="settings-account-heading">ACCOUNT &amp; LEADERBOARDS</h2>
     ${renderPendingResultNotice(pendingResultState, leaderboardProfileState)}
     <div class="settings-local-profile"><span>LOCAL DISPLAY NAME</span>${localEditor}</div>
-    ${renderGlobalAccount(authState, leaderboardProfileState)}
+    ${renderGlobalAccount(authState, leaderboardProfileState, syncState)}
   </section>`;
 }
 
@@ -438,9 +475,18 @@ export function renderPendingResultNotice(pendingResultState, profileState = {})
   </aside>`;
 }
 
-export function updateProfileAuthSection(authState, profileState) {
+export function updateProfileAuthSection(authState, profileState, syncState = null) {
   const content = document.querySelector("#global-account-content");
   if (content) content.innerHTML = globalAccountContent(authState, profileState);
+  const currentSync = document.querySelector("#global-account-sync");
+  const account = document.querySelector(".global-account");
+  const nextSync = renderAccountSyncStatus(syncState, authState);
+  if (currentSync) {
+    if (nextSync) currentSync.outerHTML = nextSync;
+    else currentSync.remove();
+  } else if (account && nextSync) {
+    account.insertAdjacentHTML("beforeend", nextSync);
+  }
 }
 
 export function updateLeaderboardUsernameFeedback(value) {
@@ -486,6 +532,7 @@ export function renderProfileStatistics({
   developerMode = false,
   authState = { status: "loading" },
   leaderboardProfileState = { status: "idle" },
+  syncState = null,
 } = {}, handlers = {}) {
   const tab = STATISTICS_TABS[Math.max(0, Math.min(STATISTICS_TABS.length - 1, activeTab))];
   const panel = tab === "OVERVIEW" ? renderOverview(snapshot)
@@ -495,7 +542,7 @@ export function renderProfileStatistics({
           : tab === "ARCADE RUSH" ? renderArcadeRush(snapshot.arcadeRush)
             : tab === "RECENT" ? renderRecent(storage, recentFilter)
               : renderProfile(snapshot.profile, {
-                editing, draft, nameError, copyMessage, authState, leaderboardProfileState,
+                editing, draft, nameError, copyMessage, authState, leaderboardProfileState, syncState,
               });
   app().innerHTML = `
     <section class="screen profile-stats-screen">

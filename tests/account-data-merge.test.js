@@ -1,6 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { mergeWordStrikeSnapshots } from "../js/accountDataMerge.js";
+import {
+  mergeWordStrikeSnapshots,
+  mergeWordStrikeSnapshotsWithSyncState,
+} from "../js/accountDataMerge.js";
 import { createDefaultModeData } from "../js/modeStorage.js";
 import { createDefaultSave } from "../js/storage.js";
 import { SPEED_TEST_WORD_SET } from "../js/speedTestWords.js";
@@ -37,17 +40,137 @@ test("account merge never downgrades campaign progress or placement records", ()
   assert.equal(record.sessionId, "remote");
 });
 
-test("fresh local browser restores remote settings while established local browser keeps local settings", () => {
-  const fresh = snapshot();
+test("legacy first sync restores remote settings even when the local browser has older progress", () => {
+  const local = snapshot();
+  const remote = snapshot();
+  local.campaign.campaignFurthestLevel = 40;
+  local.settings.screenShake = true;
+  local.campaign.settings.screenShake = true;
+  remote.settings.screenShake = false;
+  remote.campaign.settings.screenShake = false;
+
+  const merged = mergeWordStrikeSnapshots(local, { revision: 1, data: remote }, {
+    deviceId: "ws-device-a",
+    localState: {},
+    now: 1000,
+  });
+  assert.equal(merged.settings.screenShake, false);
+  assert.equal(merged.campaign.settings.screenShake, false);
+});
+
+test("settings conflicts use causal logical clocks instead of device wall clocks", () => {
+  const cloud = snapshot();
+  cloud.settings.accent = "blue";
+  cloud.campaign.settings.accent = "blue";
+
+  const a0 = mergeWordStrikeSnapshotsWithSyncState(snapshot(), {
+    revision: 1,
+    data: cloud,
+  }, {
+    deviceId: "ws-device-a",
+    localState: {},
+    now: 999999999999,
+  });
+  const b0 = mergeWordStrikeSnapshotsWithSyncState(snapshot(), {
+    revision: 1,
+    data: cloud,
+  }, {
+    deviceId: "ws-device-z",
+    localState: {},
+    now: 1,
+  });
+
+  const localA = structuredClone(a0.snapshot);
+  delete localA.sync;
+  localA.settings.accent = "red";
+  localA.campaign.settings.accent = "red";
+  const a1 = mergeWordStrikeSnapshotsWithSyncState(localA, {
+    revision: 2,
+    data: cloud,
+  }, {
+    deviceId: "ws-device-a",
+    localState: a0.localState,
+    now: 999999999999,
+  });
+
+  const localB = structuredClone(b0.snapshot);
+  delete localB.sync;
+  localB.settings.accent = "green";
+  localB.campaign.settings.accent = "green";
+  const b1 = mergeWordStrikeSnapshotsWithSyncState(localB, {
+    revision: 3,
+    data: a1.snapshot,
+  }, {
+    deviceId: "ws-device-z",
+    localState: b0.localState,
+    now: 1,
+  });
+  assert.equal(b1.snapshot.settings.accent, "green",
+    "concurrent version-1 writes use deterministic device-id tie breaking, not wall-clock time");
+
+  const aObserved = mergeWordStrikeSnapshotsWithSyncState(
+    structuredClone(b1.snapshot),
+    { revision: 4, data: b1.snapshot },
+    {
+      deviceId: "ws-device-a",
+      localState: a1.localState,
+      now: 0,
+    },
+  );
+  const causalEdit = structuredClone(aObserved.snapshot);
+  delete causalEdit.sync;
+  causalEdit.settings.accent = "purple";
+  causalEdit.campaign.settings.accent = "purple";
+  const a2 = mergeWordStrikeSnapshotsWithSyncState(causalEdit, {
+    revision: 5,
+    data: b1.snapshot,
+  }, {
+    deviceId: "ws-device-a",
+    localState: aObserved.localState,
+    now: 0,
+  });
+  assert.equal(a2.snapshot.settings.accent, "purple",
+    "a causally later edit increments the logical clock even with a backwards local clock");
+});
+
+test("settings use per-field last-writer clocks instead of local-progress preference", () => {
   const remote = snapshot();
   remote.settings.screenShake = false;
   remote.campaign.settings.screenShake = false;
-  let merged = mergeWordStrikeSnapshots(fresh, { revision: 1, data: remote });
-  assert.equal(merged.settings.screenShake, false);
 
-  fresh.campaign.campaignFurthestLevel = 2;
-  fresh.settings.screenShake = true;
-  fresh.campaign.settings.screenShake = true;
-  merged = mergeWordStrikeSnapshots(fresh, { revision: 1, data: remote });
-  assert.equal(merged.settings.screenShake, true);
+  const initial = mergeWordStrikeSnapshotsWithSyncState(snapshot(), {
+    revision: 1,
+    data: remote,
+  }, {
+    deviceId: "ws-device-a",
+    localState: {},
+    now: 1000,
+  });
+  assert.equal(initial.snapshot.settings.screenShake, false);
+
+  const changed = structuredClone(initial.snapshot);
+  delete changed.sync;
+  changed.settings.screenShake = true;
+  changed.campaign.settings.screenShake = true;
+  const localWins = mergeWordStrikeSnapshotsWithSyncState(changed, {
+    revision: 2,
+    data: initial.snapshot,
+  }, {
+    deviceId: "ws-device-a",
+    localState: initial.localState,
+    now: 2000,
+  });
+  assert.equal(localWins.snapshot.settings.screenShake, true);
+
+  const staleOtherDevice = structuredClone(initial.snapshot);
+  delete staleOtherDevice.sync;
+  const staleMerge = mergeWordStrikeSnapshotsWithSyncState(staleOtherDevice, {
+    revision: 3,
+    data: localWins.snapshot,
+  }, {
+    deviceId: "ws-device-b",
+    localState: initial.localState,
+    now: 3000,
+  });
+  assert.equal(staleMerge.snapshot.settings.screenShake, true);
 });
