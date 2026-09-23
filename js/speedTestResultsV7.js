@@ -38,8 +38,10 @@ const signed = (value, suffix = "") => {
 
 let rootObserver = null;
 let bodyObserver = null;
+let practiceStructureObserver = null;
 let practiceViewObserver = null;
 let observedPracticeOverlay = null;
+let observedPracticeRoot = null;
 let scheduled = false;
 let installed = false;
 
@@ -330,21 +332,29 @@ function onDocumentClickCapture(event) {
 }
 
 function disconnectPracticeViewObserver() {
+  practiceStructureObserver?.disconnect?.();
+  practiceStructureObserver = null;
   practiceViewObserver?.disconnect?.();
   practiceViewObserver = null;
   observedPracticeOverlay = null;
+  observedPracticeRoot = null;
 }
 
 function syncPracticeViewObserver() {
   const overlay = document.querySelector("[data-typing-coach-practice-overlay]");
-  if (overlay === observedPracticeOverlay) return;
+  const practiceRoot = overlay?.querySelector?.("[data-coach-practice-root]") || null;
+  if (overlay === observedPracticeOverlay && practiceRoot === observedPracticeRoot) return;
   disconnectPracticeViewObserver();
   observedPracticeOverlay = overlay || null;
-  if (!overlay) return;
-  practiceViewObserver = new MutationObserver(() => {
+  observedPracticeRoot = practiceRoot;
+  if (!practiceRoot) return;
+  const onPracticeStateChange = () => {
     if (syncPracticeCompletion()) scheduleEnhance();
-  });
-  practiceViewObserver.observe(overlay, {
+  };
+  practiceStructureObserver = new MutationObserver(onPracticeStateChange);
+  practiceStructureObserver.observe(practiceRoot, { childList: true });
+  practiceViewObserver = new MutationObserver(onPracticeStateChange);
+  practiceViewObserver.observe(practiceRoot, {
     attributes: true,
     subtree: true,
     attributeFilter: ["data-practice-view"],

@@ -34,7 +34,8 @@ assert.match(v6, /practiceAttributeObserver\.observe\(root, \{[\s\S]*?attributeF
 const v7 = sources["../js/speedTestResultsV7.js"];
 assert.match(v7, /rootObserver\.observe\(root, \{ childList: true \}\);/);
 assert.match(v7, /bodyObserver\.observe\(document\.body, \{ childList: true \}\);/);
-assert.match(v7, /practiceViewObserver\.observe\(overlay, \{[\s\S]*?attributes:\s*true,[\s\S]*?attributeFilter:\s*\["data-practice-view"\]/);
+assert.match(v7, /practiceStructureObserver\.observe\(practiceRoot, \{ childList: true \}\);/);
+assert.match(v7, /practiceViewObserver\.observe\(practiceRoot, \{[\s\S]*?attributes:\s*true,[\s\S]*?attributeFilter:\s*\["data-practice-view"\]/);
 assert.doesNotMatch(v7, /observe\(document\.body, \{ childList: true, subtree: true/);
 assert.match(v7, /document\.removeEventListener\("click", onDocumentClickCapture, true\)/);
 assert.match(v7, /window\.addEventListener\("pageshow", install\)/);
