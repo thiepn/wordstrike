@@ -6,7 +6,7 @@ import {
   markFlowOnboardingSeen,
   recordFlowSession,
   saveFlowLastSetup,
-} from "./flowProgression.js?v=20260923a";
+} from "./flowProgression.js?v=20260923b";
 
 const params = new URLSearchParams(globalThis.location?.search || "");
 const enabled = params.get("dev") === "1"
@@ -211,7 +211,8 @@ function completionMarkup(result) {
 function decorateComplete(screen) {
   const result = recordCompletion();
   if (!result) return false;
-  if (!screen.querySelector("[data-flow-integration-complete]")) {
+  const publicScoreV2 = screen.matches?.('[data-flow-score-v2="true"]');
+  if (!publicScoreV2 && !screen.querySelector("[data-flow-integration-complete]")) {
     const actions = screen.querySelector(".flow-complete-actions");
     actions?.insertAdjacentHTML("afterend", completionMarkup(result));
   }
