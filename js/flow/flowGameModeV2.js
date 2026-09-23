@@ -3,6 +3,10 @@ import {
   getFlowRecentRunsV2,
 } from "./flowRecordsV2.js?v=20260923a";
 import { FLOW_SESSION_LENGTHS } from "./flowConfig.js";
+import {
+  getFlowPersonalBestV2,
+  getFlowRecentRunsV2,
+} from "./flowRecordsV2.js?v=20260923a";
 
 const params = new URLSearchParams(globalThis.location?.search || "");
 const enabled = params.get("dev") === "1"
@@ -123,6 +127,7 @@ function lengthButtonsMarkup() {
   return LENGTH_ORDER.map((value) => {
     const meta = LENGTH_COPY[value];
     const selected = value === selectedLength;
+    const best = getFlowPersonalBestV2(value);
     return `
       <button
         type="button"
@@ -133,8 +138,26 @@ function lengthButtonsMarkup() {
       >
         <strong>${meta.label}</strong>
         <span>${meta.detail}</span>
+        <small>${best ? `PB ${best.score.toLocaleString("en-US")}` : "NO PB YET"}</small>
       </button>`;
   }).join("");
+}
+
+function recentRunsMarkup() {
+  const recent = getFlowRecentRunsV2(5);
+  if (!recent.length) return "";
+  return `
+    <details class="flow-v2-recent" data-flow-v2-recent>
+      <summary>Recent runs</summary>
+      <div class="flow-v2-recent-list">
+        ${recent.map((run) => `
+          <div class="flow-v2-recent-row">
+            <span>${run.sessionLength.toUpperCase()}</span>
+            <strong>${run.score.toLocaleString("en-US")}</strong>
+            <small>${run.wpm.toFixed(1)} WPM · ${run.accuracy.toFixed(1)}%</small>
+          </div>`).join("")}
+      </div>
+    </details>`;
 }
 
 function decorateReady(screen) {
