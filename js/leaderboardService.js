@@ -4,6 +4,7 @@ import {
   ARCADE_RUSH_LEADERBOARD_CATEGORY,
   ARCADE_RUSH_LEADERBOARD_RULES_VERSION,
 } from "./arcadeRushLeaderboard.js";
+import { FLOW_V2_BOARD_KEYS } from "./flow/flowScoreV2.js";
 
 export const LEADERBOARD_BOARDS = Object.freeze({
   CAMPAIGN: "campaign-highest-level-v1",
@@ -11,6 +12,9 @@ export const LEADERBOARD_BOARDS = Object.freeze({
   TYPING_15: "typing-15s-english200-v1",
   ENDLESS: "endless-v1",
   ARCADE_RUSH: ARCADE_RUSH_LEADERBOARD_BOARD_KEY,
+  FLOW_QUICK: FLOW_V2_BOARD_KEYS.quick,
+  FLOW_STANDARD: FLOW_V2_BOARD_KEYS.standard,
+  FLOW_LONG: FLOW_V2_BOARD_KEYS.long,
 });
 
 export const LEADERBOARD_CATEGORIES = Object.freeze({
@@ -18,6 +22,7 @@ export const LEADERBOARD_CATEGORIES = Object.freeze({
   TYPING: "typing",
   ENDLESS: "endless",
   ARCADE_RUSH: ARCADE_RUSH_LEADERBOARD_CATEGORY,
+  FLOW: "flow",
 });
 
 const LEGACY_DAILY_BOARD_KEY = "daily-strike-v1";
@@ -28,6 +33,7 @@ const PUBLIC_CATEGORIES = Object.freeze([
   LEADERBOARD_CATEGORIES.CAMPAIGN,
   LEADERBOARD_CATEGORIES.TYPING,
   LEADERBOARD_CATEGORIES.ENDLESS,
+  LEADERBOARD_CATEGORIES.FLOW,
 ]);
 const CACHE_TTL_MS = 30000;
 
@@ -37,6 +43,9 @@ export const EXPECTED_LEADERBOARD_RULES_VERSIONS = Object.freeze({
   [LEADERBOARD_BOARDS.TYPING_15]: 1,
   [LEADERBOARD_BOARDS.ENDLESS]: 1,
   [LEADERBOARD_BOARDS.ARCADE_RUSH]: ARCADE_RUSH_LEADERBOARD_RULES_VERSION,
+  [LEADERBOARD_BOARDS.FLOW_QUICK]: 2,
+  [LEADERBOARD_BOARDS.FLOW_STANDARD]: 2,
+  [LEADERBOARD_BOARDS.FLOW_LONG]: 2,
 });
 
 export function isLeaderboardCacheStateCurrent(boardKey, cachedState) {
@@ -47,6 +56,15 @@ export function isLeaderboardCacheStateCurrent(boardKey, cachedState) {
 }
 
 export function getLeaderboardSelection(boardKey) {
+  if (boardKey === LEADERBOARD_BOARDS.FLOW_QUICK) {
+    return { selectedCategory: LEADERBOARD_CATEGORIES.FLOW, selectedTypingDuration: 60, selectedFlowLength: "quick" };
+  }
+  if (boardKey === LEADERBOARD_BOARDS.FLOW_LONG) {
+    return { selectedCategory: LEADERBOARD_CATEGORIES.FLOW, selectedTypingDuration: 60, selectedFlowLength: "long" };
+  }
+  if (boardKey === LEADERBOARD_BOARDS.FLOW_STANDARD) {
+    return { selectedCategory: LEADERBOARD_CATEGORIES.FLOW, selectedTypingDuration: 60, selectedFlowLength: "standard" };
+  }
   if (boardKey === LEADERBOARD_BOARDS.TYPING_15) {
     return { selectedCategory: LEADERBOARD_CATEGORIES.TYPING, selectedTypingDuration: 15 };
   }
@@ -65,7 +83,12 @@ export function getLeaderboardSelection(boardKey) {
   return { selectedCategory: LEADERBOARD_CATEGORIES.CAMPAIGN, selectedTypingDuration: 60 };
 }
 
-export function getBoardKeyForSelection(category, typingDuration = 60) {
+export function getBoardKeyForSelection(category, typingDuration = 60, flowLength = "standard") {
+  if (category === LEADERBOARD_CATEGORIES.FLOW) {
+    if (flowLength === "quick") return LEADERBOARD_BOARDS.FLOW_QUICK;
+    if (flowLength === "long") return LEADERBOARD_BOARDS.FLOW_LONG;
+    return LEADERBOARD_BOARDS.FLOW_STANDARD;
+  }
   if (category === LEADERBOARD_CATEGORIES.TYPING) {
     return typingDuration === 15 ? LEADERBOARD_BOARDS.TYPING_15 : LEADERBOARD_BOARDS.TYPING_60;
   }
@@ -85,6 +108,14 @@ export function getLeaderboardKeyboardTarget(state, key) {
   const typingDuration = state?.selectedTypingDuration || selection.selectedTypingDuration;
   if (category === LEADERBOARD_CATEGORIES.TYPING && ["ArrowUp", "ArrowDown"].includes(key)) {
     return getBoardKeyForSelection(category, typingDuration === 60 ? 15 : 60);
+  }
+  if (category === LEADERBOARD_CATEGORIES.FLOW && ["ArrowUp", "ArrowDown"].includes(key)) {
+    const lengths = ["quick", "standard", "long"];
+    const current = selection.selectedFlowLength || "standard";
+    const index = lengths.indexOf(current);
+    const delta = key === "ArrowUp" ? -1 : 1;
+    const next = lengths[(index + delta + lengths.length) % lengths.length];
+    return getBoardKeyForSelection(category, 60, next);
   }
   const order = PUBLIC_KEYBOARD_CATEGORY_ORDER;
   let index = order.indexOf(category);
@@ -115,6 +146,7 @@ const safeEntry = (entry) => Object.freeze({
     ? null
     : Math.max(0, Number(entry.durationMs ?? entry.activeDurationMs) || 0),
   completed: entry?.completed === true,
+  consistency: entry?.consistency == null ? null : Math.max(0, Math.min(100, Number(entry.consistency) || 0)),
   submittedAt: String(entry?.submittedAt || ""),
 });
 
@@ -127,6 +159,7 @@ const makeState = ({
   status = "idle",
   selectedCategory = LEADERBOARD_CATEGORIES.CAMPAIGN,
   selectedTypingDuration = 60,
+  selectedFlowLength = "standard",
   selectedBoardKey = null,
   selectedBoard = null,
   board = null,
@@ -139,7 +172,10 @@ const makeState = ({
     ? selectedCategory
     : getLeaderboardSelection(selectedBoardKey || selectedBoard).selectedCategory;
   const typingDuration = selectedTypingDuration === 15 ? 15 : 60;
-  const inferredBoard = selectedBoardKey || selectedBoard || getBoardKeyForSelection(category, typingDuration);
+  const flowLength = ["quick", "standard", "long"].includes(selectedFlowLength)
+    ? selectedFlowLength
+    : "standard";
+  const inferredBoard = selectedBoardKey || selectedBoard || getBoardKeyForSelection(category, typingDuration, flowLength);
   const boardKey = VALID_BOARDS.includes(inferredBoard)
     ? inferredBoard
     : getBoardKeyForSelection(category, typingDuration);
@@ -148,6 +184,7 @@ const makeState = ({
     status,
     selectedCategory: selection.selectedCategory,
     selectedTypingDuration: selection.selectedTypingDuration,
+    selectedFlowLength: selection.selectedFlowLength || flowLength,
     selectedBoardKey: boardKey,
     selectedBoard: boardKey,
     board: board ? Object.freeze({
@@ -266,7 +303,11 @@ export function createLeaderboardService({
     selectLeaderboardBoard: selectBoard,
     selectLeaderboardCategory(category) {
       if (!PUBLIC_CATEGORIES.includes(category)) return Promise.resolve(state);
-      return selectBoard(getBoardKeyForSelection(category, 60));
+      return selectBoard(getBoardKeyForSelection(category, 60, category === LEADERBOARD_CATEGORIES.FLOW ? "standard" : state.selectedFlowLength));
+    },
+    selectFlowLength(length) {
+      if (!["quick", "standard", "long"].includes(length)) return Promise.resolve(state);
+      return selectBoard(getBoardKeyForSelection(LEADERBOARD_CATEGORIES.FLOW, 60, length));
     },
     selectTypingDuration(duration) {
       if (![15, 60].includes(duration)) return Promise.resolve(state);
@@ -294,6 +335,7 @@ export const getLeaderboardState = leaderboardService.getLeaderboardState;
 export const subscribeToLeaderboards = leaderboardService.subscribeToLeaderboards;
 export const selectLeaderboardBoard = leaderboardService.selectLeaderboardBoard;
 export const selectLeaderboardCategory = leaderboardService.selectLeaderboardCategory;
+export const selectFlowLength = leaderboardService.selectFlowLength;
 export const selectTypingDuration = leaderboardService.selectTypingDuration;
 export const refreshLeaderboard = leaderboardService.refreshLeaderboard;
 export const invalidateLeaderboardBoard = leaderboardService.invalidateLeaderboardBoard;
