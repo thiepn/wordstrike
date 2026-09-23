@@ -202,10 +202,17 @@ def main():
                 expect(page.locator('.speed-results-screen')).to_be_visible()
                 assert snapshot()['docks'] == 0
                 page.wait_for_timeout(250)
+                result_retry = page.locator('.speed-results-panel > .menu-list .arcade-button').first
+                result_retry.focus()
                 page.keyboard.press('Tab')
+                expect(page.locator('.speed-results-screen')).to_be_visible()
+                assert page.locator('.speed-test-screen').count() == 0
+                # Results owns normal browser Tab navigation now. Retry remains an
+                # explicit action rather than inheriting the in-run Tab shortcut.
+                result_retry.click()
                 expect(page.locator('.speed-test-screen')).to_be_visible()
                 assert snapshot()['phase'] == 'PREPARING' and snapshot()['docks'] == 1
-                checks.append({'browser': browser_name, 'case': 'completion, Results Tab retry and listener cleanup'})
+                checks.append({'browser': browser_name, 'case': 'completion, native Results Tab and explicit retry cleanup'})
                 assert not errors, errors
                 context.close()
 
