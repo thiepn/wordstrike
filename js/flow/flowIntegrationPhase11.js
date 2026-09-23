@@ -6,7 +6,7 @@ import {
   markFlowOnboardingSeen,
   recordFlowSession,
   saveFlowLastSetup,
-} from "./flowProgression.js";
+} from "./flowProgression.js?v=20260923a";
 
 const params = new URLSearchParams(globalThis.location?.search || "");
 const enabled = params.get("dev") === "1"
