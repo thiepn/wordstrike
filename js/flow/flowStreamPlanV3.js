@@ -72,10 +72,11 @@ export function createFlowStreamPlanV3({
   const pool = safeTheme === FLOW_V3_DEFAULT_THEME
     ? FLOW_CORPUS_V2_DOCUMENTS
     : FLOW_CORPUS_V2_DOCUMENTS.filter((document) => document.theme === safeTheme);
-  const safeCount = Math.max(1, Math.min(
-    Math.round(Number(documentCount) || FLOW_V3_STREAM_DOCUMENT_COUNT),
-    pool.length,
-  ));
+  const requestedCount = Math.round(Number(documentCount) || FLOW_V3_STREAM_DOCUMENT_COUNT);
+  const themedCount = safeTheme === FLOW_V3_DEFAULT_THEME
+    ? requestedCount
+    : Math.min(5, requestedCount);
+  const safeCount = Math.max(1, Math.min(themedCount, pool.length));
   const sources = selectFlowCorpusDocuments({
     seed: String(seed) + ":" + safeTheme + ":stream",
     count: safeCount,
