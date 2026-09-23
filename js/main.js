@@ -198,6 +198,7 @@ import {
   resetLeaderboardState,
   selectLeaderboardBoard,
   selectLeaderboardCategory,
+  selectFlowLength,
   selectTypingDuration,
   subscribeToLeaderboards,
 } from "./leaderboardService.js";
@@ -562,9 +563,15 @@ function openLeaderboardReturn(returnState) {
     ? returnState.typingDuration === 15 ? LEADERBOARD_BOARDS.TYPING_15 : LEADERBOARD_BOARDS.TYPING_60
     : returnState?.selectedCategory === LEADERBOARD_CATEGORIES.ENDLESS
       ? LEADERBOARD_BOARDS.ENDLESS
-      : returnState?.selectedCategory === LEADERBOARD_CATEGORIES.ARCADE_RUSH
-        ? LEADERBOARD_BOARDS.ARCADE_RUSH
-        : LEADERBOARD_BOARDS.CAMPAIGN;
+      : returnState?.selectedCategory === LEADERBOARD_CATEGORIES.FLOW
+        ? returnState.flowLength === "quick"
+          ? LEADERBOARD_BOARDS.FLOW_QUICK
+          : returnState.flowLength === "long"
+            ? LEADERBOARD_BOARDS.FLOW_LONG
+            : LEADERBOARD_BOARDS.FLOW_STANDARD
+        : returnState?.selectedCategory === LEADERBOARD_CATEGORIES.ARCADE_RUSH
+          ? LEADERBOARD_BOARDS.ARCADE_RUSH
+          : LEADERBOARD_BOARDS.CAMPAIGN;
   openLeaderboardBoard(boardKey);
 }
 
@@ -1504,6 +1511,14 @@ function handleAppClick(event) {
       void selectLeaderboardBoard(LEADERBOARD_BOARDS.ARCADE_RUSH);
     } else if (action === "leaderboard-select-endless") {
       void selectLeaderboardBoard(LEADERBOARD_BOARDS.ENDLESS);
+    } else if (action === "leaderboard-select-flow") {
+      void selectLeaderboardCategory(LEADERBOARD_CATEGORIES.FLOW);
+    } else if (action === "leaderboard-flow-select-quick") {
+      void selectFlowLength("quick");
+    } else if (action === "leaderboard-flow-select-standard") {
+      void selectFlowLength("standard");
+    } else if (action === "leaderboard-flow-select-long") {
+      void selectFlowLength("long");
     } else if (action === "leaderboard-refresh") {
       void refreshLeaderboard();
     } else if (action === "leaderboard-typing-select-60") {
@@ -1770,6 +1785,11 @@ async function bootstrap() {
   const appRoot = document.querySelector("#app");
   attachAppClickListener(appRoot, handleAppClick);
   appRoot?.addEventListener("input", handleAppInput);
+  document.addEventListener("wordstrike:open-leaderboard", (event) => {
+    const boardKey = event?.detail?.boardKey;
+    if (Object.values(LEADERBOARD_BOARDS).includes(boardKey)) openLeaderboardBoard(boardKey);
+  });
+  document.addEventListener("wordstrike:open-account-settings", () => openAccountSettings());
   bootstrapReady = true;
   if (
     appState.devMode &&
