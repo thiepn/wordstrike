@@ -10,7 +10,7 @@ import {
   FLOW_V3_THEME_IDS,
   normalizeFlowV3Theme,
   resolveFlowStreamPlanV3,
-} from "./flowStreamPlanV3.js?v=20260923a";
+} from "./flowStreamPlanV3.js?v=20260923b";
 import { resolveFlowSelection } from "./flowSelection.js";
 import {
   calculateFlowScoreV2,

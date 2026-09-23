@@ -38,13 +38,13 @@ assert.match(phase1, /recordFlowResultV3/);
 assert.match(phase1, /createLeaderboardSubmissionService/);
 
 assert.match(loader, /flowGameModeV2\.js\?v=20260923c/);
-assert.match(loader, /flowStreamPlanV3\.js\?v=20260923a/);
+assert.match(loader, /flowStreamPlanV3\.js\?v=20260923b/);
 assert.match(loader, /flowScoreV3\.js\?v=20260923a/);
 assert.match(loader, /flowRecordsV3\.js\?v=20260923a/);
 assert.match(loader, /flowTheme/);
 
 assert.match(index, /flow-game-mode-v2\.css\?v=20260923d/);
-assert.match(index, /flowRuntimeLoader\.js\?v=20260923i/);
+assert.match(index, /flowRuntimeLoader\.js\?v=20260923j/);
 assert.match(css, /FLOW V3: instant-play stream controls/);
 assert.match(css, /flow-v3-run-tools/);
 assert.match(css, /flow-v3-tab-hint/);

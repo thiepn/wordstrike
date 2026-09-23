@@ -1,5 +1,5 @@
 const CACHE_PREFIX = "wordstrike-pwa-";
-const CACHE_NAME = CACHE_PREFIX + "v68-flow-v3-instant-play";
+const CACHE_NAME = CACHE_PREFIX + "v69-flow-v3-instant-play-2";
 const APP_SHELL = [
   "./js/practiceLab/practiceAssessmentInput.js",
   "./js/practiceLab/practiceDurableManifest.js",
@@ -31,7 +31,7 @@ const APP_SHELL = [
   "./js/flow/flowCorpusV2.js",
   "./js/flow/flowCorpusHistory.js",
   "./js/flow/flowStreamPlanV3.js",
-  "./js/flow/flowStreamPlanV3.js?v=20260923a",
+  "./js/flow/flowStreamPlanV3.js?v=20260923b",
   "./js/flow/flowScoreV3.js",
   "./js/flow/flowScoreV3.js?v=20260923a",
   "./js/flow/flowRecordsV3.js",
@@ -51,7 +51,7 @@ const APP_SHELL = [
   "./js/flow/flowModifiersPhase9.js",
   "./js/flow/flowPassages.js",
   "./js/flow/flowPhase1.js",
-  "./js/flow/flowPhase1.js?v=20260923i",
+  "./js/flow/flowPhase1.js?v=20260923j",
   "./js/flow/flowProgression.js",
   "./js/flow/flowProgression.js?v=20260923a",
   "./js/flow/flowRunPlan.js",
@@ -61,7 +61,7 @@ const APP_SHELL = [
   "./js/flow/flowRecordsV2.js",
   "./js/flow/flowRecordsV2.js?v=20260923a",
   "./js/flow/flowRuntimeLoader.js",
-  "./js/flow/flowRuntimeLoader.js?v=20260923i",
+  "./js/flow/flowRuntimeLoader.js?v=20260923j",
   "./js/flow/flowSelection.js",
   "./js/flow/flowShell.js",
   "./js/flow/flowState.js",

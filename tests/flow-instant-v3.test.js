@@ -220,7 +220,7 @@ assert.doesNotMatch(ui, /aria-label="Flow run length"/);
 assert.doesNotMatch(ui, /leaderboard-flow-select-quick/);
 assert.match(ui, /SCORE.*WPM.*WORDS/s);
 assert.match(loader, /flowTheme/);
-assert.match(loader, /flowStreamPlanV3\.js\?v=20260923a/);
+assert.match(loader, /flowStreamPlanV3\.js\?v=20260923b/);
 assert.match(loader, /flowScoreV3\.js\?v=20260923a/);
 assert.match(loader, /flowRecordsV3\.js\?v=20260923a/);
 assert.match(migration, /where board_key in \('flow-quick-v1', 'flow-long-v1'\)/);
