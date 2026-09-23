@@ -6,11 +6,11 @@ assert.equal(getLeaderboardKeyboardTarget({ selectedBoardKey: LEADERBOARD_BOARDS
 assert.equal(getLeaderboardKeyboardTarget({ selectedBoardKey: LEADERBOARD_BOARDS.TYPING_60 }, "ArrowDown"), LEADERBOARD_BOARDS.TYPING_15);
 assert.equal(getLeaderboardKeyboardTarget({ selectedBoardKey: LEADERBOARD_BOARDS.TYPING_15 }, "ArrowUp"), LEADERBOARD_BOARDS.TYPING_60);
 assert.equal(getLeaderboardKeyboardTarget({ selectedBoardKey: "daily-strike-v1" }, "Home"), LEADERBOARD_BOARDS.CAMPAIGN);
-assert.equal(getLeaderboardKeyboardTarget({ selectedBoardKey: LEADERBOARD_BOARDS.CAMPAIGN }, "End"), LEADERBOARD_BOARDS.ENDLESS);
+assert.equal(getLeaderboardKeyboardTarget({ selectedBoardKey: LEADERBOARD_BOARDS.CAMPAIGN }, "End"), LEADERBOARD_BOARDS.FLOW_STANDARD);
 assert.equal(moveSpeedTestConfiguration("time-60", "ArrowLeft"), "time-30");
 assert.equal(moveSpeedTestConfiguration("time-60", "ArrowRight"), "time-120");
 assert.equal(moveSpeedTestConfiguration("time-60", "ArrowDown"), "words-50");
 assert.equal(moveSpeedTestConfiguration("words-50", "ArrowUp"), "time-60");
 assert.equal(moveSpeedTestConfiguration("words-50", "Home"), "words-10");
 
-console.log("Public leaderboard categories end at Endless after Rush retirement; nested durations and every Typing configuration retain deterministic arrow navigation.");
+console.log("Public leaderboard categories end at Flow after Rush retirement; nested Flow/Typing choices retain deterministic arrow navigation.");
