@@ -83,6 +83,7 @@ assert.equal(isFlowDeveloperRoute({ href: "https://wordstrike.test/?dev=1&mode=f
 
 const dirty = new URL(release.href);
 dirty.searchParams.set("flowLength", "quick");
+dirty.searchParams.set("flowTheme", "science");
 dirty.searchParams.set("flowModifierIds", "sprint");
 dirty.searchParams.set("flowWeaknesses", "profile");
 dirty.searchParams.set("dev", "1");
@@ -96,7 +97,7 @@ for (const key of FLOW_RELEASE_QUERY_KEYS) {
 assert.ok(FLOW_RELEASE_ASSETS.length >= 30, "release cache pack should cover the complete Flow stack");
 assert.equal(new Set(FLOW_RELEASE_ASSETS).size, FLOW_RELEASE_ASSETS.length, "release cache pack contains duplicates");
 for (const asset of [
-  "./js/flow/flowRuntimeLoader.js?v=20260923h",
+  "./js/flow/flowRuntimeLoader.js?v=20260923i",
   "./js/leaderboardService.js",
   "./js/supabaseConfig.js",
   "./js/supabaseClient.js",
@@ -116,23 +117,28 @@ for (const asset of [
   "./js/flow/flowCorpusHistory.js?v=20260923a",
   "./js/flow/flowLongformContent.js",
   "./js/flow/flowPassages.js",
-  "./js/flow/flowPhase1.js?v=20260923f",
+  "./js/flow/flowPhase1.js?v=20260923i",
   "./js/flow/flowProgression.js",
   "./js/flow/flowRunPlan.js?v=20260923e",
   "./js/flow/flowScoreV2.js?v=20260923f",
+  "./js/flow/flowRecordsV3.js?v=20260923a",
+  "./js/flow/flowRecordsV3.js",
+  "./js/flow/flowScoreV3.js?v=20260923a",
+  "./js/flow/flowScoreV3.js",
+  "./js/flow/flowStreamPlanV3.js?v=20260923a",
   "./js/flow/flowRecordsV2.js?v=20260923f",
   "./js/flow/flowProgression.js?v=20260923a",
   "./js/flow/flowUiPhase7KeyboardGuard.js?v=20260923a",
   "./js/flow/flowIntegrationPhase11.js?v=20260923b",
   "./styles/screens/flow-phase1.css?v=20260916d",
-  "./styles/screens/flow-game-mode-v2.css?v=20260923c",
+  "./styles/screens/flow-game-mode-v2.css?v=20260923d",
   "./styles/screens/flow-integration-phase11.css?v=20260916a",
 ]) {
   assert.ok(FLOW_RELEASE_ASSETS.includes(asset), `offline pack missing ${asset}`);
 }
 
 const mainIndex = index.indexOf('src="js/main.js?v=20260923g"');
-const releaseIndex = index.indexOf('src="js/flow/flowRuntimeLoader.js?v=20260923h"');
+const releaseIndex = index.indexOf('src="js/flow/flowRuntimeLoader.js?v=20260923i"');
 assert.ok(mainIndex >= 0 && releaseIndex > mainIndex, "main.js must boot before the release loader can temporarily emulate the developer route");
 assert.doesNotMatch(index, /src="js\/flow\/flowPhase1\.js/);
 assert.doesNotMatch(index, /const flowParams = new URLSearchParams/);
@@ -150,4 +156,4 @@ assert.match(loader, /cache\.addAll\(missing\)/);
 assert.match(loader, /requestIdleCallback/);
 assert.match(loader, /flowSeed/);
 
-console.log("Flow Phase 13 release contracts passed: public registry, fresh production seed, clean exit, cache-busted performance runtime, longform-aware offline module graph, and offline asset pack.");
+console.log("Flow release contracts passed: public instant-play registry, clean exit, V3 stream/scoring runtime, and complete offline asset pack.");
