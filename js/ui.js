@@ -1577,13 +1577,16 @@ export function renderGlobalSubmissionMarkup(state = {}, { localResultStored: st
     buttons = submissionButton("RETRY SUBMISSION", "retry-global-score") + submissionButton(viewLabel, viewAction);
   }
   const busy = ["checking", "submitting"].includes(state.status) || (state.status === "ready" && state.automatic);
-  return `<section id="global-submission-region" class="global-submission" aria-live="polite"${busy ? " aria-busy=\"true\"" : ""}><p>${message}</p><div class="global-submission-actions">${buttons}</div></section>`;
+  return `<section id="global-submission-region" class="global-submission" data-local-result-stored="${stored ? "true" : "false"}" aria-live="polite"${busy ? " aria-busy=\"true\"" : ""}><p>${message}</p><div class="global-submission-actions">${buttons}</div></section>`;
 }
 
-export function updateGlobalSubmissionRegion(state) {
+export function updateGlobalSubmissionRegion(state, options = {}) {
   const current = document.querySelector("#global-submission-region");
   if (!current) return false;
-  current.outerHTML = renderGlobalSubmissionMarkup(state);
+  const stored = typeof options.localResultStored === "boolean"
+    ? options.localResultStored
+    : current.dataset?.localResultStored !== "false";
+  current.outerHTML = renderGlobalSubmissionMarkup(state, { localResultStored: stored });
   return true;
 }
 
