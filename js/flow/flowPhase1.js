@@ -14,6 +14,30 @@ import {
 import { recordFlowResultV2 } from "./flowRecordsV2.js?v=20260923a";
 import { recordFlowCorpusRun } from "./flowCorpusHistory.js?v=20260923a";
 import { FLOW_PHASES } from "./flowState.js";
+import {
+  getAuthState,
+  signInWithGoogle,
+  subscribeToAuth,
+} from "../authService.js";
+import {
+  getLeaderboardProfileState,
+  initializeLeaderboardProfile,
+  subscribeToLeaderboardProfile,
+} from "../leaderboardProfileService.js";
+import {
+  clearSubmissionState,
+  getSubmissionState,
+  prepareResultSubmission,
+  refreshSubmissionEligibility,
+  retryCurrentSubmission,
+  submitCurrentResult,
+  subscribeToSubmissions,
+} from "../leaderboardSubmissionService.js";
+import { savePendingResultSubmission } from "../pendingResultSubmission.js";
+import {
+  leaderboardReturnStateForBoard,
+  saveLeaderboardReturnState,
+} from "../leaderboardReturnState.js";
 
 const root = () => document.querySelector("#app");
 const now = () => globalThis.performance?.now?.() ?? Date.now();
@@ -54,6 +78,7 @@ let lastCadenceRefreshAt = -Infinity;
 let publicRunSessionId = null;
 let lastPublicResult = null;
 let lastPublicRecordState = null;
+let flowAutomaticSubmissionSessionId = null;
 let performanceStats = createPerformanceStats();
 
 function createPerformanceStats() {
@@ -66,7 +91,7 @@ function createPerformanceStats() {
 function createPublicRunSessionId() {
   const random = globalThis.crypto?.randomUUID?.()
     || Math.random().toString(36).slice(2, 12);
-  return `flow-v2-${Date.now().toString(36)}-${random}`;
+  return `session-flow-v2-${Date.now().toString(36)}-${random}`;
 }
 
 function formatRunDuration(ms) {
@@ -539,6 +564,7 @@ function startRun() {
     run.passageId = passage.id;
   }
   if (isPublicLongformRun()) {
+    clearSubmissionState();
     publicRunSessionId = createPublicRunSessionId();
     lastPublicResult = null;
     lastPublicRecordState = null;
@@ -645,6 +671,84 @@ function renderHesitationAnalysis(cadence) {
     </section>`;
 }
 
+function flowSubmissionMarkup(result, state = getSubmissionState()) {
+  if (!result?.recordEligible) {
+    return '<div class="flow-v2-global-status is-local">Global ranking requires a completed run with at least 90% accuracy.</div>';
+  }
+  if (state?.sessionId !== result.sessionId) {
+    return '<div class="flow-v2-global-status">Checking global leaderboard eligibility...</div>';
+  }
+  if (state.status === "submitted" || state.status === "already-submitted") {
+    const rank = state.rank ? ` · GLOBAL #${state.rank}` : "";
+    return `<div class="flow-v2-global-status is-success"><strong>SCORE SUBMITTED${rank}</strong><button type="button" class="ui-button" data-flow-global-action="leaderboard">VIEW LEADERBOARD</button></div>`;
+  }
+  if (["submitting", "checking"].includes(state.status)) {
+    return '<div class="flow-v2-global-status">Submitting eligible score...</div>';
+  }
+  if (state.status === "offline" || state.status === "error") {
+    return `<div class="flow-v2-global-status"><span>${state.retryPersisted ? "Score saved for retry." : "Global submission unavailable."}</span><button type="button" class="ui-button" data-flow-global-action="retry">RETRY</button></div>`;
+  }
+  if (state.reason === "signed-out") {
+    return '<div class="flow-v2-global-status"><span>Sign in to submit this score globally.</span><button type="button" class="ui-button" data-flow-global-action="sign-in">SIGN IN</button></div>';
+  }
+  if (state.reason === "username-required") {
+    return '<div class="flow-v2-global-status"><span>Choose a public username to join the leaderboard.</span><button type="button" class="ui-button" data-flow-global-action="account">SET USERNAME</button></div>';
+  }
+  return '<div class="flow-v2-global-status">Global leaderboard ready.</div>';
+}
+
+function syncFlowSubmissionRegion() {
+  if (!lastPublicResult || view !== "complete") return;
+  const region = root()?.querySelector?.("[data-flow-global-submission]");
+  if (!region) return;
+  region.innerHTML = flowSubmissionMarkup(lastPublicResult);
+}
+
+function maybeSubmitPublicResult() {
+  if (!lastPublicResult?.recordEligible) return;
+  const auth = getAuthState();
+  const profile = getLeaderboardProfileState();
+  if (auth?.status === "signed-in" && auth.user?.id && ["idle", "loading"].includes(profile?.status)) {
+    void initializeLeaderboardProfile(auth.user);
+  }
+  const state = refreshSubmissionEligibility(auth, profile);
+  syncFlowSubmissionRegion();
+  if (state.status !== "ready" || flowAutomaticSubmissionSessionId === lastPublicResult.sessionId) return;
+  flowAutomaticSubmissionSessionId = lastPublicResult.sessionId;
+  void submitCurrentResult().finally(syncFlowSubmissionRegion);
+}
+
+function preparePublicGlobalSubmission(result) {
+  flowAutomaticSubmissionSessionId = null;
+  prepareResultSubmission("flow", result, getAuthState(), getLeaderboardProfileState());
+  maybeSubmitPublicResult();
+}
+
+function leaveFlowForAppEvent(name, detail = {}) {
+  restoreReturnSurface();
+  document.dispatchEvent(new CustomEvent(name, { detail }));
+}
+
+function bindFlowSubmissionActions(app, result) {
+  app.querySelector("[data-flow-global-submission]")?.addEventListener("click", (event) => {
+    const action = event.target?.closest?.("[data-flow-global-action]")?.dataset?.flowGlobalAction;
+    if (!action) return;
+    event.preventDefault();
+    if (action === "retry") {
+      void retryCurrentSubmission().finally(syncFlowSubmissionRegion);
+    } else if (action === "leaderboard") {
+      leaveFlowForAppEvent("wordstrike:open-leaderboard", { boardKey: result.boardKey });
+    } else if (action === "account") {
+      leaveFlowForAppEvent("wordstrike:open-account-settings");
+    } else if (action === "sign-in") {
+      const intent = savePendingResultSubmission("flow", result);
+      if (!intent) return;
+      saveLeaderboardReturnState(leaderboardReturnStateForBoard(result.boardKey));
+      void signInWithGoogle();
+    }
+  });
+}
+
 function ensurePublicResult(snapshot) {
   if (!isPublicLongformRun() || !snapshot || !publicRunSessionId) return null;
   if (lastPublicResult?.sessionId === publicRunSessionId) return lastPublicResult;
@@ -660,6 +764,7 @@ function ensurePublicResult(snapshot) {
     recordFlowCorpusRun(resolvedRunPlan, { completedAt: result.endedAt });
   }
   lastPublicResult = result;
+  preparePublicGlobalSubmission(result);
   return result;
 }
 
@@ -697,6 +802,9 @@ function renderPublicComplete(app, snapshot) {
           <span>${escapeHtml(result.sessionLength)} run</span>
         </div>
         ${eligibility}
+        <section class="flow-v2-global-submission" data-flow-global-submission aria-live="polite">
+          ${flowSubmissionMarkup(result)}
+        </section>
         <div class="flow-complete-actions">
           <button type="button" class="ui-button ui-button--primary" data-flow-action="restart">PLAY AGAIN</button>
           <button type="button" class="ui-button" data-flow-action="back">BACK</button>
@@ -705,6 +813,7 @@ function renderPublicComplete(app, snapshot) {
     </section>`;
   app.querySelector('[data-flow-action="restart"]')?.addEventListener("click", startRun);
   app.querySelector('[data-flow-action="back"]')?.addEventListener("click", restoreReturnSurface);
+  bindFlowSubmissionActions(app, result);
   app.querySelector('[data-flow-action="restart"]')?.focus?.({ preventScroll: true });
   return true;
 }
@@ -855,6 +964,16 @@ function startCurrentFlowRun() {
   startRun();
   return true;
 }
+
+subscribeToAuth(() => {
+  if (lastPublicResult && view === "complete") maybeSubmitPublicResult();
+});
+subscribeToLeaderboardProfile(() => {
+  if (lastPublicResult && view === "complete") maybeSubmitPublicResult();
+});
+subscribeToSubmissions((state) => {
+  if (state?.mode === "flow" && lastPublicResult?.sessionId === state.sessionId) syncFlowSubmissionRegion();
+});
 
 document.addEventListener("keydown", handleDocumentKeydown, true);
 if (developerFlowRequested) {
