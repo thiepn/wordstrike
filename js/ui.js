@@ -125,7 +125,7 @@ function resultMetricHelp({ grade = false } = {}) {
 function resultPersistenceWarning(result) {
   const warning = result?.localPersistence?.warning || result?.persistenceWarning;
   return warning
-    ? `<p class="result-save-warning" role="alert">${escapeHtml(warning)}</p>`
+    ? `<p class="result-save-warning campaign-save-warning" role="alert">${escapeHtml(warning)}</p>`
     : "";
 }
 
