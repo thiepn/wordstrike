@@ -179,12 +179,21 @@ def main():
 
                     page.mouse.wheel(0, 10000)
                     page.wait_for_timeout(120)
-                    bottom = page.evaluate("""() => ({
-                      y: window.scrollY,
-                      max: Math.max(0, document.documentElement.scrollHeight - window.innerHeight),
-                      screenOverflowY: getComputedStyle(document.querySelector('.speed-results-screen')).overflowY,
-                    })""")
-                    assert bottom['screenOverflowY'] == 'visible', bottom
+                    bottom = page.evaluate("""() => {
+                      const screen = document.querySelector('.speed-results-screen');
+                      return {
+                        y: window.scrollY,
+                        max: Math.max(0, document.documentElement.scrollHeight - window.innerHeight),
+                        screenOverflowY: getComputedStyle(screen).overflowY,
+                        screenScrollRange: Math.max(0, screen.scrollHeight - screen.clientHeight),
+                        screenScrollTop: screen.scrollTop,
+                      };
+                    }""")
+                    # overflow-x: clip may compute the paired visible y-axis as
+                    # auto. With auto height there must still be no nested
+                    # scroll range: only the document itself scrolls.
+                    assert bottom['screenScrollRange'] <= 1, bottom
+                    assert bottom['screenScrollTop'] <= 1, bottom
                     assert bottom['max'] - bottom['y'] <= 4, bottom
 
                 words_tab.focus()
