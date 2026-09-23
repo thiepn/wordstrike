@@ -9,7 +9,7 @@ const CATEGORIES = new Set([...Object.values(LEADERBOARD_CATEGORIES), LEGACY_DAI
 
 export function validateLeaderboardReturnState(value) {
   if (!value || typeof value !== "object" || Array.isArray(value)) return null;
-  if (Object.keys(value).some((key) => !["screen", "selectedCategory", "typingDuration"].includes(key))) return null;
+  if (Object.keys(value).some((key) => !["screen", "selectedCategory", "typingDuration", "flowLength"].includes(key))) return null;
   if (["title", "campaign"].includes(value.screen) && Object.keys(value).length === 1) {
     return Object.freeze({ screen: value.screen });
   }
@@ -22,6 +22,10 @@ export function validateLeaderboardReturnState(value) {
     ? value.typingDuration === 15 ? 15 : value.typingDuration === 60 ? 60 : null
     : 60;
   if (typingDuration == null) return null;
+  if (normalizedCategory === LEADERBOARD_CATEGORIES.FLOW) {
+    const flowLength = ["quick", "standard", "long"].includes(value.flowLength) ? value.flowLength : "standard";
+    return Object.freeze({ screen: "leaderboards", selectedCategory: normalizedCategory, typingDuration, flowLength });
+  }
   return Object.freeze({ screen: "leaderboards", selectedCategory: normalizedCategory, typingDuration });
 }
 
@@ -32,6 +36,7 @@ export function leaderboardReturnStateForBoard(boardKey) {
     screen: "leaderboards",
     selectedCategory,
     typingDuration: selection.selectedTypingDuration,
+    ...(selection.selectedFlowLength ? { flowLength: selection.selectedFlowLength } : {}),
   });
 }
 
