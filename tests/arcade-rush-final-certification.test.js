@@ -97,9 +97,7 @@ const CURRENT_BOARD_KEYS = [
   "typing-15s-english200-v1",
   "endless-v1",
   "arcade-rush-v1",
-  "flow-quick-v1",
   "flow-standard-v1",
-  "flow-long-v1",
 ];
 
 // 1. Flow owns the public replacement slot while Arcade Rush remains a hidden
@@ -329,8 +327,8 @@ try {
   else delete globalThis.localStorage;
 }
 
-// 5. Backend board compatibility remains intact while Flow adds three public
-// boards and the frontend still hides Arcade Rush as a normal leaderboard category.
+// 5. Backend board compatibility remains intact while Flow exposes one V3
+// board and the frontend still hides Arcade Rush as a normal leaderboard category.
 assert.deepEqual(PUBLIC_BOARD_KEYS, CURRENT_BOARD_KEYS);
 assert.deepEqual(SUPPORTED_BOARD_KEYS, CURRENT_BOARD_KEYS);
 assert.equal(validateLeaderboardRequest({ boardKey: "daily-strike-v1" }).code, "INVALID_BOARD");
