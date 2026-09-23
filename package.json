@@ -30,6 +30,7 @@
     "audit:practice-privacy-security": "node scripts/auditPracticePrivacySecurity.mjs",
     "test:practice-migrations": "node scripts/testPracticeMigrations.mjs",
     "test:pl39-integrity": "node --test tests/*pl39*.test.js",
-    "test:practice-integrity": "node scripts/auditPracticePrivacySecurity.mjs && node scripts/testPracticeMigrations.mjs && node --test tests/*pl39*.test.js"
+    "test:practice-integrity": "node scripts/auditPracticePrivacySecurity.mjs && node scripts/testPracticeMigrations.mjs && node --test tests/*pl39*.test.js",
+    "validate:flow-corpus": "node scripts/validateFlowCorpusV2.mjs"
   }
 }
