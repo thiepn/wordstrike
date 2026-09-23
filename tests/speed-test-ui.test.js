@@ -39,7 +39,7 @@ const app = {
     if (selector === "[data-speed-category]") {
       return this.buttons.filter((button) => button.dataset.speedCategory);
     }
-    if (selector === ".speed-results-panel .arcade-button") {
+    if (selector === ".speed-results-panel > .menu-list .arcade-button") {
       return this.buttons.filter((button) => button.dataset.action);
     }
     return [];
