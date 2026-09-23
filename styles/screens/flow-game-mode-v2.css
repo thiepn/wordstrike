@@ -353,3 +353,214 @@
     gap: 4px;
   }
 }
+
+
+/* ---------- PHASE 3: scoring V2, PBs and records ---------- */
+
+.flow-game-v2-record-summary {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: baseline;
+  gap: 4px 14px;
+  width: 100%;
+  padding: 12px 0 2px;
+  border-top: 1px solid var(--flow-line);
+}
+
+.flow-game-v2-record-summary > span,
+.flow-game-v2-recent-label {
+  color: var(--flow-ink-muted);
+  font-family: var(--flow-data-face);
+  font-size: 0.58rem;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.flow-game-v2-record-summary > strong {
+  justify-self: end;
+  color: var(--flow-ink);
+  font-family: var(--flow-reading-face);
+  font-size: clamp(1.5rem, 4vw, 2.25rem);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.flow-game-v2-record-summary > small {
+  grid-column: 1 / -1;
+  color: var(--flow-ink-muted);
+  font-family: var(--flow-ui-face);
+  font-size: 0.72rem;
+}
+
+.flow-game-v2-recent-panel {
+  display: grid;
+  gap: 9px;
+  width: 100%;
+  padding-top: 12px;
+  border-top: 1px solid var(--flow-line);
+}
+
+.flow-game-v2-recent-panel [data-flow-game-recent] {
+  display: grid;
+  gap: 4px;
+}
+
+.flow-game-v2-recent-row {
+  display: grid;
+  grid-template-columns: minmax(64px, auto) minmax(80px, auto) 1fr;
+  align-items: baseline;
+  gap: 12px;
+  min-width: 0;
+  padding: 5px 0;
+}
+
+.flow-game-v2-recent-row span {
+  color: var(--flow-ink-muted);
+  font-family: var(--flow-data-face);
+  font-size: 0.58rem;
+  letter-spacing: 0.1em;
+}
+
+.flow-game-v2-recent-row strong {
+  color: var(--flow-ink);
+  font-family: var(--flow-reading-face);
+  font-size: 1rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.flow-game-v2-recent-row small,
+.flow-game-v2-recent-empty {
+  min-width: 0;
+  margin: 0;
+  color: var(--flow-ink-muted);
+  font-family: var(--flow-ui-face);
+  font-size: 0.7rem;
+  text-align: right;
+}
+
+.flow-v2-results {
+  gap: clamp(18px, 3vw, 30px);
+}
+
+.flow-v2-pb-badge,
+.flow-v2-pb-reference {
+  width: fit-content;
+  color: var(--flow-signal);
+  font-family: var(--flow-data-face);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.flow-v2-pb-reference {
+  color: var(--flow-ink-muted);
+  font-weight: 600;
+}
+
+.flow-v2-pb-reference strong {
+  color: var(--flow-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.flow-v2-final-score {
+  padding: clamp(20px, 4vw, 32px) 0;
+}
+
+.flow-v2-final-score strong {
+  font-size: clamp(4rem, 13vw, 8.5rem);
+  letter-spacing: -0.055em;
+}
+
+.flow-v2-result-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  width: 100%;
+  border-top: 1px solid var(--flow-line-strong);
+  border-bottom: 1px solid var(--flow-line-strong);
+}
+
+.flow-v2-result-metrics > div {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+  padding: 16px 18px;
+  border-right: 1px solid var(--flow-line);
+}
+
+.flow-v2-result-metrics > div:first-child {
+  padding-left: 0;
+}
+
+.flow-v2-result-metrics > div:last-child {
+  padding-right: 0;
+  border-right: 0;
+}
+
+.flow-v2-result-metrics span {
+  color: var(--flow-ink-muted);
+  font-family: var(--flow-data-face);
+  font-size: 0.58rem;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.flow-v2-result-metrics strong {
+  color: var(--flow-ink);
+  font-family: var(--flow-reading-face);
+  font-size: clamp(1.8rem, 5vw, 3rem);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.flow-v2-result-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  color: var(--flow-ink-muted);
+  font-family: var(--flow-data-face);
+  font-size: 0.64rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.flow-v2-record-note {
+  margin: 0;
+  color: var(--flow-ink-muted);
+  font-family: var(--flow-ui-face);
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
+.flow-complete-screen[data-flow-score-v2="true"] .flow-integration-complete,
+.flow-complete-screen[data-flow-score-v2="true"] [data-flow-ui="session-rail"],
+.flow-complete-screen[data-flow-score-v2="true"] [data-flow-ui-action="setup"] {
+  display: none !important;
+}
+
+@media (max-width: 640px) {
+  .flow-game-v2-recent-row {
+    grid-template-columns: auto auto;
+  }
+
+  .flow-game-v2-recent-row small {
+    grid-column: 1 / -1;
+    text-align: left;
+  }
+
+  .flow-v2-result-metrics > div {
+    padding-inline: 10px;
+  }
+
+  .flow-v2-result-metrics > div:first-child {
+    padding-left: 0;
+  }
+
+  .flow-v2-result-metrics > div:last-child {
+    padding-right: 0;
+  }
+
+  .flow-v2-result-metrics strong {
+    font-size: clamp(1.35rem, 7vw, 2rem);
+  }
+}
