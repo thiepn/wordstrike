@@ -3,7 +3,7 @@ export const SUBMISSION_OUTBOX_SCHEMA_VERSION = 1;
 export const SUBMISSION_OUTBOX_MAX_ENTRIES = 50;
 export const SUBMISSION_OUTBOX_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000;
 
-const MODES = new Set(["campaign", "typing", "endless", "arcade-rush"]);
+const MODES = new Set(["campaign", "typing", "endless", "arcade-rush", "flow"]);
 
 function clone(value) {
   return value == null ? value : JSON.parse(JSON.stringify(value));
