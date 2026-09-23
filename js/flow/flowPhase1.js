@@ -10,8 +10,8 @@ import { resolveFlowSelection } from "./flowSelection.js";
 import {
   calculateFlowScoreV2,
   createFlowScoreV2Result,
-} from "./flowScoreV2.js?v=20260923a";
-import { recordFlowResultV2 } from "./flowRecordsV2.js?v=20260923a";
+} from "./flowScoreV2.js?v=20260923f";
+import { recordFlowResultV2 } from "./flowRecordsV2.js?v=20260923f";
 import { recordFlowCorpusRun } from "./flowCorpusHistory.js?v=20260923a";
 import { FLOW_PHASES } from "./flowState.js";
 import {
