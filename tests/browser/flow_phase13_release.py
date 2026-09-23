@@ -92,8 +92,16 @@ def finish_run(page, plan):
     assert hud_labels == ['Score', 'WPM', 'Accuracy', 'Progress'], hud_labels
     page.keyboard.type(plan['fullText'])
     assert page.locator('[data-flow-view="chapter"]').count() == 0
-    expect(page.locator('[data-flow-view="complete"]')).to_be_visible(timeout=10000)
-    expect(page.locator('[data-flow-integration-complete]')).to_be_visible(timeout=10000)
+    expect(page.locator('[data-flow-view="complete"][data-flow-score-v2="true"]')).to_be_visible(timeout=10000)
+    expect(page.locator('.flow-v2-final-score')).to_be_visible(timeout=10000)
+    metrics = page.locator('.flow-v2-result-metrics > div > span').all_text_contents()
+    assert metrics == ['WPM', 'Accuracy', 'Consistency'], metrics
+    assert page.locator('.flow-complete-screen').get_by_text('Momentum', exact=True).count() == 0
+    assert page.locator('.flow-complete-screen').get_by_text('Cadence', exact=True).count() == 0
+    # The legacy integration record remains active but its old progression card
+    # is intentionally hidden from the clean V2 result screen.
+    page.wait_for_timeout(50)
+    assert page.locator('[data-flow-integration-complete]').count() == 1
 
 
 def certify_public_journey(browser, browser_name, base, evidence):
@@ -112,8 +120,21 @@ def certify_public_journey(browser, browser_name, base, evidence):
     plan = make_quick_run(page, f'phase13-public-{browser_name}')
     finish_run(page, plan)
 
+    public_result = page.evaluate('window.wordstrikeFlowPhase1.getPublicResult()')
+    record_state = page.evaluate('window.wordstrikeFlowPhase1.getPublicRecordState()')
+    assert public_result['rulesVersion'] == 2, public_result
+    assert public_result['metricVersion'] == 1, public_result
+    assert public_result['boardKey'] == 'flow-quick-v1', public_result
+    assert public_result['score'] > 0, public_result
+    assert public_result['accuracy'] == 100, public_result
+    assert public_result['recordEligible'] is True, public_result
+    assert record_state['recorded'] is True, record_state
+    assert record_state['isPersonalBest'] is True, record_state
+    assert record_state['personalBest']['score'] == public_result['score'], record_state
+
     summary = page.evaluate('window.wordstrikeFlowIntegrationPhase11.getSummary()')
     assert summary['progress']['completedRuns'] == 1, summary
+    assert summary['progress']['best']['score'] == public_result['score'], summary
     assert summary['generic']['completedSessions'] == 1, summary
     assert summary['recent'][0]['modeId'] == 'flow', summary
     assert 'dev=1' not in page.url, page.url
@@ -135,6 +156,7 @@ def certify_public_journey(browser, browser_name, base, evidence):
     assert 'flowRelease=1' in page.url and 'dev=1' not in page.url, page.url
 
     persisted_plan = page.evaluate('window.wordstrikeFlowPhase1.getRunPlan()')
+    expect(page.locator('[data-flow-game-best]')).to_have_text(f"{public_result['score']:,}")
     assert persisted_plan['sessionLength'] == 'quick', persisted_plan
     assert persisted_plan['modifiers'] == [], persisted_plan
     assert persisted_plan['passageCount'] == 3, persisted_plan
@@ -258,11 +280,13 @@ def certify_offline(browser, browser_name, base, evidence):
 
     cached = page.evaluate("""async () => {
       const targets = [
-        './js/flow/flowRuntimeLoader.js?v=20260923c',
+        './js/flow/flowRuntimeLoader.js?v=20260923d',
         './js/flow/flowLongformContent.js',
-        './js/flow/flowGameModeV2.js?v=20260923b',
+        './js/flow/flowGameModeV2.js?v=20260923c',
+        './js/flow/flowScoreV2.js?v=20260923a',
+        './js/flow/flowRecordsV2.js?v=20260923a',
         './js/flow/flowUiPhase7KeyboardGuard.js?v=20260923a',
-        './js/flow/flowIntegrationPhase11.js?v=20260923a',
+        './js/flow/flowIntegrationPhase11.js?v=20260923b',
         './styles/screens/flow-integration-phase11.css?v=20260916a',
       ];
       const results = [];

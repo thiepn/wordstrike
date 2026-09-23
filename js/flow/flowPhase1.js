@@ -7,6 +7,11 @@ import {
 import { analyzeFlowCadence } from "./flowCadence.js";
 import { resolveFlowRunPlan } from "./flowRunPlan.js?v=20260923a";
 import { resolveFlowSelection } from "./flowSelection.js";
+import {
+  calculateFlowScoreV2,
+  createFlowScoreV2Result,
+} from "./flowScoreV2.js?v=20260923a";
+import { recordFlowResultV2 } from "./flowRecordsV2.js?v=20260923a";
 import { FLOW_PHASES } from "./flowState.js";
 
 const root = () => document.querySelector("#app");
@@ -45,6 +50,9 @@ let mountedCharacterNodes = new Map();
 let mountedRunHud = null;
 let cadenceRefreshTimer = null;
 let lastCadenceRefreshAt = -Infinity;
+let publicRunSessionId = null;
+let lastPublicResult = null;
+let lastPublicRecordState = null;
 let performanceStats = createPerformanceStats();
 
 function createPerformanceStats() {
@@ -52,6 +60,19 @@ function createPerformanceStats() {
     characterNodeUpdates: 0,
     cadenceRefreshes: 0,
   };
+}
+
+function createPublicRunSessionId() {
+  const random = globalThis.crypto?.randomUUID?.()
+    || Math.random().toString(36).slice(2, 12);
+  return `flow-v2-${Date.now().toString(36)}-${random}`;
+}
+
+function formatRunDuration(ms) {
+  const totalSeconds = Math.max(0, Math.round((Number(ms) || 0) / 1000));
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = String(totalSeconds % 60).padStart(2, "0");
+  return `${minutes}:${seconds}`;
 }
 
 function escapeHtml(value) {
@@ -92,6 +113,9 @@ function restoreReturnSurface() {
   active = false;
   view = "idle";
   run = null;
+  publicRunSessionId = null;
+  lastPublicResult = null;
+  lastPublicRecordState = null;
   activeSegmentIndex = 0;
   chapterPauseStartedAt = null;
   if (storedReturnNodes.length) app.replaceChildren(...storedReturnNodes);
@@ -383,7 +407,19 @@ function refreshCadenceHud() {
   if (!mountedRunHud) return;
   lastCadenceRefreshAt = now();
   performanceStats.cadenceRefreshes += 1;
-  updateGameplayHud(mountedRunHud, null, analyzeFlowCadence(run));
+  const cadence = analyzeFlowCadence(run);
+  if (isPublicLongformRun()) {
+    const score = calculateFlowScoreV2({
+      wpm: cadence.finalWpm,
+      accuracy: currentAccuracyPercent(),
+      consistency: cadence.cadenceScore ?? 0,
+    });
+    setTextIfChanged(mountedRunHud.score, score.score.toLocaleString("en-US"));
+    setTextIfChanged(mountedRunHud.finalWpm, cadence.finalWpm.toFixed(1));
+    setTextIfChanged(mountedRunHud.accuracy, `${currentAccuracyPercent().toFixed(1)}%`);
+    return;
+  }
+  updateGameplayHud(mountedRunHud, null, cadence);
 }
 
 function scheduleCadenceHud(immediate = false) {
@@ -410,7 +446,11 @@ function syncRunHud() {
   );
   setTextIfChanged(hud.corrected, String(run.correctedErrors));
   setTextIfChanged(hud.unresolved, String(run.uncorrectedErrors));
-  updateGameplayHud(hud, liveGameplaySnapshot(), null);
+  if (isPublicLongformRun()) {
+    setTextIfChanged(hud.accuracy, `${currentAccuracyPercent().toFixed(1)}%`);
+  } else {
+    updateGameplayHud(hud, liveGameplaySnapshot(), null);
+  }
 }
 
 function renderRun() {
@@ -496,6 +536,15 @@ function startRun() {
       sessionLength: "quick",
     });
     run.passageId = passage.id;
+  }
+  if (isPublicLongformRun()) {
+    publicRunSessionId = createPublicRunSessionId();
+    lastPublicResult = null;
+    lastPublicRecordState = null;
+  } else {
+    publicRunSessionId = null;
+    lastPublicResult = null;
+    lastPublicRecordState = null;
   }
   performanceStats = createPerformanceStats();
   lastCadenceRefreshAt = -Infinity;
@@ -595,6 +644,67 @@ function renderHesitationAnalysis(cadence) {
     </section>`;
 }
 
+function ensurePublicResult(snapshot) {
+  if (!isPublicLongformRun() || !snapshot || !publicRunSessionId) return null;
+  if (lastPublicResult?.sessionId === publicRunSessionId) return lastPublicResult;
+  const result = createFlowScoreV2Result({
+    sessionId: publicRunSessionId,
+    endedAt: Date.now(),
+    snapshot,
+    plan: resolvedRunPlan,
+  });
+  if (!result) return null;
+  lastPublicRecordState = recordFlowResultV2(result);
+  lastPublicResult = result;
+  return result;
+}
+
+function renderPublicComplete(app, snapshot) {
+  const result = ensurePublicResult(snapshot);
+  if (!result) return false;
+  const recordState = lastPublicRecordState || {};
+  const personalBest = recordState.personalBest;
+  const pbCopy = recordState.isPersonalBest
+    ? '<div class="flow-v2-pb-badge" data-flow-v2-pb="new">NEW PERSONAL BEST</div>'
+    : personalBest
+      ? `<div class="flow-v2-pb-reference">Personal best <strong>${personalBest.score.toLocaleString("en-US")}</strong></div>`
+      : "";
+  const eligibility = result.recordEligible
+    ? ""
+    : `<p class="flow-v2-record-note">Competitive personal bests require at least 90% accuracy.</p>`;
+  app.innerHTML = `
+    <section class="screen flow-phase1-screen flow-complete-screen" data-flow-view="complete" data-flow-score-v2="true">
+      <main class="flow-phase1-shell flow-complete-shell flow-v2-results">
+        <div class="flow-phase1-kicker">${escapeHtml(result.sessionLength.toUpperCase())} LONGFORM COMPLETE</div>
+        <h1>FLOW COMPLETE</h1>
+        ${pbCopy}
+        <div class="flow-final-score flow-v2-final-score">
+          <span>Score</span>
+          <strong data-flow-final-score>${result.score.toLocaleString("en-US")}</strong>
+        </div>
+        <section class="flow-v2-result-metrics" aria-label="Flow results">
+          <div><span>WPM</span><strong>${result.wpm.toFixed(1)}</strong></div>
+          <div><span>Accuracy</span><strong>${result.accuracy.toFixed(1)}%</strong></div>
+          <div><span>Consistency</span><strong>${result.consistency.toFixed(0)}</strong></div>
+        </section>
+        <div class="flow-v2-result-meta">
+          <span>${result.wordsCompleted.toLocaleString("en-US")} words</span>
+          <span>${formatRunDuration(result.activeDurationMs)}</span>
+          <span>${escapeHtml(result.sessionLength)} run</span>
+        </div>
+        ${eligibility}
+        <div class="flow-complete-actions">
+          <button type="button" class="ui-button ui-button--primary" data-flow-action="restart">PLAY AGAIN</button>
+          <button type="button" class="ui-button" data-flow-action="back">BACK</button>
+        </div>
+      </main>
+    </section>`;
+  app.querySelector('[data-flow-action="restart"]')?.addEventListener("click", startRun);
+  app.querySelector('[data-flow-action="back"]')?.addEventListener("click", restoreReturnSurface);
+  app.querySelector('[data-flow-action="restart"]')?.focus?.({ preventScroll: true });
+  return true;
+}
+
 function renderComplete() {
   const app = root();
   if (!app || !run) return;
@@ -602,6 +712,7 @@ function renderComplete() {
   resetMountedCharacterNodes();
   view = "complete";
   const snapshot = getFlowTypingSnapshot(run);
+  if (isPublicLongformRun() && renderPublicComplete(app, snapshot)) return;
   const gameplay = snapshot.gameplay;
   const cadence = snapshot.cadence;
   const breakdown = gameplay.scoreBreakdown;
@@ -759,6 +870,14 @@ if (globalThis.window) {
     activateFromLocation: activateFlowFromLocation,
     refreshPlanFromLocation: refreshFlowPlanFromLocation,
     startCurrentRun: startCurrentFlowRun,
+    getPublicSessionId: () => publicRunSessionId,
+    getPublicResult: () => lastPublicResult ? { ...lastPublicResult, seriesIds: [...lastPublicResult.seriesIds] } : null,
+    getPublicRecordState: () => lastPublicRecordState ? {
+      recorded: lastPublicRecordState.recorded,
+      isPersonalBest: lastPublicRecordState.isPersonalBest,
+      previousBest: lastPublicRecordState.previousBest ? { ...lastPublicRecordState.previousBest } : null,
+      personalBest: lastPublicRecordState.personalBest ? { ...lastPublicRecordState.personalBest } : null,
+    } : null,
     developerRouteEnabled: developerFlowRequested,
   });
 }

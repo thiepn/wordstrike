@@ -6,6 +6,7 @@ import {
 } from "../modeStorageV2.js";
 import { buildFlowWeaknessProfile } from "./flowAdaptive.js";
 import { normalizeFlowModifierIds } from "./flowModifiers.js";
+import { createFlowScoreV2Result } from "./flowScoreV2.js?v=20260923a";
 
 export const FLOW_PROGRESS_STORAGE_KEY = "wordstrike_flow_progress_v1";
 export const FLOW_ONBOARDING_STORAGE_KEY = "wordstrike_flow_onboarding_v1";
@@ -192,6 +193,11 @@ export function recordFlowProgression({ sessionId, endedAt = Date.now(), snapsho
 
   const gameplay = snapshot.gameplay || {};
   const cadence = snapshot.cadence || {};
+  const publicResult = createFlowScoreV2Result({ sessionId, endedAt, snapshot, plan });
+  const resultScore = publicResult?.score ?? gameplay.score;
+  const resultWpm = publicResult?.wpm ?? cadence.finalWpm;
+  const resultAccuracy = publicResult?.accuracy ?? gameplay.accuracyPercent;
+  const resultConsistency = publicResult?.consistency ?? cadence.cadenceScore;
   const sessionLength = plan?.sessionLength || snapshot.sessionLength || "standard";
   const category = plan?.category || snapshot.category || "mixed";
   const difficulty = plan?.difficulty || snapshot.difficulty || "natural";
@@ -205,10 +211,10 @@ export function recordFlowProgression({ sessionId, endedAt = Date.now(), snapsho
   progress.totalActiveMs += Math.max(0, finite(cadence.typingDurationMs));
   progress.lastPlayedAt = endedAt;
   progress.lastSetup = safeSetup({ sessionLength, category, difficulty, modifiers });
-  progress.best.score = max(progress.best.score, gameplay.score);
-  progress.best.wpm = max(progress.best.wpm, cadence.finalWpm);
-  progress.best.accuracy = max(progress.best.accuracy, gameplay.accuracyPercent);
-  progress.best.cadence = max(progress.best.cadence, cadence.cadenceScore);
+  progress.best.score = max(progress.best.score, resultScore);
+  progress.best.wpm = max(progress.best.wpm, resultWpm);
+  progress.best.accuracy = max(progress.best.accuracy, resultAccuracy);
+  progress.best.cadence = max(progress.best.cadence, resultConsistency);
   progress.best.averageFlow = max(progress.best.averageFlow, gameplay.averageFlow);
   progress.best.averageMomentum = max(progress.best.averageMomentum, gameplay.averageMomentum, 1);
   if (progress.counts.length[sessionLength] != null) progress.counts.length[sessionLength] += 1;
@@ -230,10 +236,10 @@ export function recordFlowProgression({ sessionId, endedAt = Date.now(), snapsho
   progress.history.unshift({
     sessionId,
     endedAt,
-    score: Math.max(0, Math.round(finite(gameplay.score))),
-    wpm: Math.max(0, finite(cadence.finalWpm)),
-    accuracy: Math.max(0, Math.min(100, finite(gameplay.accuracyPercent))),
-    cadence: cadence.cadenceScore == null ? null : Math.max(0, finite(cadence.cadenceScore)),
+    score: Math.max(0, Math.round(finite(resultScore))),
+    wpm: Math.max(0, finite(resultWpm)),
+    accuracy: Math.max(0, Math.min(100, finite(resultAccuracy))),
+    cadence: resultConsistency == null ? null : Math.max(0, finite(resultConsistency)),
     averageFlow: Math.max(0, finite(gameplay.averageFlow)),
     sessionLength,
     category,
@@ -250,6 +256,7 @@ export function recordFlowProgression({ sessionId, endedAt = Date.now(), snapsho
 export function createFlowSessionResult({ sessionId, endedAt = Date.now(), snapshot, plan = null }) {
   const gameplay = snapshot?.gameplay || {};
   const cadence = snapshot?.cadence || {};
+  const publicResult = createFlowScoreV2Result({ sessionId, endedAt, snapshot, plan });
   const raw = Array.isArray(snapshot?.rawKeystrokes) ? snapshot.rawKeystrokes : [];
   const blockedBackspaces = Math.max(0, Math.round(finite(snapshot?.blockedBackspaces)));
   const correct = Math.max(0, Math.round(finite(gameplay.correctKeystrokes)));
@@ -259,16 +266,17 @@ export function createFlowSessionResult({ sessionId, endedAt = Date.now(), snaps
     schemaVersion: 1,
     sessionId,
     modeId: MODE_IDS.FLOW,
-    variantId: `${plan?.sessionLength || snapshot?.sessionLength || "standard"}:${plan?.difficulty || snapshot?.difficulty || "natural"}`,
+    variantId: publicResult?.variantId
+      || `${plan?.sessionLength || snapshot?.sessionLength || "standard"}:${plan?.difficulty || snapshot?.difficulty || "natural"}`,
     endedAt,
     state: "complete",
     sessionState: "complete",
     success: true,
     developerMode: false,
-    score: Math.max(0, Math.round(finite(gameplay.score))),
+    score: Math.max(0, Math.round(finite(publicResult?.score ?? gameplay.score))),
     grade: null,
-    accuracy: Math.max(0, Math.min(100, finite(gameplay.accuracyPercent))),
-    wpm: Math.max(0, finite(cadence.finalWpm)),
+    accuracy: Math.max(0, Math.min(100, finite(publicResult?.accuracy ?? gameplay.accuracyPercent))),
+    wpm: Math.max(0, finite(publicResult?.wpm ?? cadence.finalWpm)),
     activeDurationMs: Math.max(0, finite(cadence.typingDurationMs)),
     characters: {
       correct,
@@ -282,6 +290,11 @@ export function createFlowSessionResult({ sessionId, endedAt = Date.now(), snaps
     },
     modeData: {
       cadenceScore: cadence.cadenceScore,
+      consistencyScore: publicResult?.consistency ?? cadence.cadenceScore,
+      flowScoreRulesVersion: publicResult?.rulesVersion ?? null,
+      flowScoreMetricVersion: publicResult?.metricVersion ?? null,
+      flowBoardKey: publicResult?.boardKey ?? null,
+      recordEligible: publicResult?.recordEligible ?? null,
       averageFlow: gameplay.averageFlow,
       averageMomentum: gameplay.averageMomentum,
       sessionLength: plan?.sessionLength || snapshot?.sessionLength || "standard",
