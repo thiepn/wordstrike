@@ -74,6 +74,11 @@ assert.match(phase1, /<span>Score<\/span>/);
 assert.match(phase1, /<span>WPM<\/span>/);
 assert.match(phase1, /<span>Accuracy<\/span>/);
 assert.match(phase1, /<span>Progress<\/span>/);
+assert.match(
+  phase1,
+  /if \(hud\.meter && hud\.meter\.dataset\.flowBand !== flowBand\(gameplay\.flowValue\)\)/,
+  "public HUD may omit the legacy Flow meter without throwing during live updates",
+);
 assert.match(gameCss, /flow-game-v2-hud/);
 assert.match(gameCss, /flow-longform-paragraph/);
 assert.match(gameCss, /data-flow-paragraph-break/);
