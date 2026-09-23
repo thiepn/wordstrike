@@ -7,8 +7,8 @@ import {
 
 const expected = Object.freeze({
   quick: Object.freeze({ sections: 3, documents: 1, minutes: 3, minWords: 200 }),
-  standard: Object.freeze({ sections: 5, documents: 1, minutes: 6, minWords: 400 }),
-  long: Object.freeze({ sections: 10, documents: 2, minutes: 10, minWords: 800 }),
+  standard: Object.freeze({ sections: 5, documents: 2, minutes: 6, minWords: 400 }),
+  long: Object.freeze({ sections: 10, documents: 3, minutes: 10, minWords: 800 }),
 });
 
 for (const [length, contract] of Object.entries(expected)) {
@@ -45,16 +45,34 @@ for (const [length, contract] of Object.entries(expected)) {
     }
   }
 
-  if (length === "long") {
-    assert.equal(new Set(plan.seriesIds).size, 2, "Long must use two distinct source texts");
-  } else {
-    assert.equal(plan.seriesIds.length, 1);
-  }
+  assert.equal(
+    new Set(plan.seriesIds).size,
+    contract.documents,
+    length + " must use the expected number of distinct source documents",
+  );
 }
 
-assert.deepEqual(FLOW_PUBLIC_LONGFORM_PROFILES.quick, { sectionCount: 3, documentCount: 1, targetMinutes: 3 });
-assert.deepEqual(FLOW_PUBLIC_LONGFORM_PROFILES.standard, { sectionCount: 5, documentCount: 1, targetMinutes: 6 });
-assert.deepEqual(FLOW_PUBLIC_LONGFORM_PROFILES.long, { sectionCount: 10, documentCount: 2, targetMinutes: 10 });
+assert.deepEqual(FLOW_PUBLIC_LONGFORM_PROFILES.quick, {
+  sectionCount: 3,
+  documentCount: 1,
+  paragraphsPerDocument: [3],
+  targetMinutes: 3,
+  targetDifficulty: "smooth",
+});
+assert.deepEqual(FLOW_PUBLIC_LONGFORM_PROFILES.standard, {
+  sectionCount: 5,
+  documentCount: 2,
+  paragraphsPerDocument: [3, 2],
+  targetMinutes: 6,
+  targetDifficulty: "natural",
+});
+assert.deepEqual(FLOW_PUBLIC_LONGFORM_PROFILES.long, {
+  sectionCount: 10,
+  documentCount: 3,
+  paragraphsPerDocument: [4, 3, 3],
+  targetMinutes: 10,
+  targetDifficulty: "natural",
+});
 
 const first = createPublicFlowRunPlan({ sessionLength: "standard", seed: "deterministic-seed" });
 const second = createPublicFlowRunPlan({ sessionLength: "standard", seed: "deterministic-seed" });
