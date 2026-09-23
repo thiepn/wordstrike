@@ -76,6 +76,9 @@ const result = createFlowScoreV2Result({
 assert.ok(result);
 assert.equal(result.modeId, "flow");
 assert.equal(result.variantId, "flow-standard-v2");
+assert.equal(result.sessionSource, "flow-v2");
+assert.equal(result.scoreFormula, "wpm-accuracy-consistency-v1");
+assert.equal(result.developerMode, false);
 assert.equal(result.boardKey, FLOW_V2_BOARD_KEYS.standard);
 assert.equal(result.rulesVersion, 2);
 assert.equal(result.metricVersion, 1);
@@ -115,6 +118,13 @@ const ineligible = createFlowScoreV2Result({
 assert.equal(ineligible.completed, true);
 assert.equal(ineligible.recordEligible, false);
 assert.ok(ineligible.score > 0, "ineligible runs still receive a result score");
+
+const missingIdentity = createFlowScoreV2Result({
+  sessionId: "",
+  snapshot,
+  plan,
+});
+assert.equal(missingIdentity.recordEligible, false, "ranked eligibility requires a canonical session id");
 
 const noConsistency = createFlowScoreV2Result({
   sessionId: "flow-v2-session-too-short",
