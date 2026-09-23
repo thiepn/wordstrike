@@ -73,7 +73,7 @@ def make_quick_run(page, seed):
     assert plan['sessionLength'] == 'quick', plan
     assert plan['modifiers'] == [], plan
     assert plan['category'] == 'mixed', plan
-    assert plan['difficulty'] == 'natural', plan
+    assert plan['difficulty'] == 'smooth', plan
     assert plan['passageCount'] == 3, plan
     assert plan['paragraphCount'] == 3, plan
     assert plan['documentCount'] == 1, plan
