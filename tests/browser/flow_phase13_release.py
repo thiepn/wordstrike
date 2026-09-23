@@ -178,7 +178,7 @@ def certify_public_journey(browser, browser_name, base, evidence):
     assert default_plan['continuous'] is True, default_plan
     assert default_plan['passageCount'] == 5, default_plan
     assert default_plan['paragraphCount'] == 5, default_plan
-    assert default_plan['documentCount'] == 1, default_plan
+    assert default_plan['documentCount'] == 2, default_plan
     assert default_plan['targetMinutes'] == 6, default_plan
     assert default_plan['chapterCount'] == 1, default_plan
     assert default_plan['seriesTitle'], default_plan
