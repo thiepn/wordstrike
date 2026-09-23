@@ -452,7 +452,11 @@ export function selectFlowCorpusDocuments({
   const recent = new Set(Array.isArray(recentDocumentIds) ? recentDocumentIds : []);
   const fresh = documents.filter((document) => !recent.has(document.id));
   const source = fresh.length >= safeCount ? fresh : documents;
-  const ranked = [...source].sort((left, right) => {
+  const exactDifficulty = Object.hasOwn(DIFFICULTY_ORDER, targetDifficulty)
+    ? source.filter((document) => document.difficulty === targetDifficulty)
+    : [];
+  const calibratedSource = exactDifficulty.length >= safeCount ? exactDifficulty : source;
+  const ranked = [...calibratedSource].sort((left, right) => {
     const leftRecentPenalty = recent.has(left.id) ? 4 : 0;
     const rightRecentPenalty = recent.has(right.id) ? 4 : 0;
     const leftScore = seededRank(seed, left.id) - (difficultyDistance(left, targetDifficulty) * 0.18) - leftRecentPenalty;
