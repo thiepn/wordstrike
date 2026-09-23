@@ -23,7 +23,7 @@ const FLOW_RELEASE_QUERY_KEYS = Object.freeze([
 ]);
 
 const FLOW_RELEASE_ASSETS = Object.freeze([
-  "./js/flow/flowRuntimeLoader.js?v=20260923d",
+  "./js/flow/flowRuntimeLoader.js?v=20260923e",
   "./js/flow/flowMigrationPresentation.js?v=20260923a",
   "./js/flow/flowAdaptive.js",
   "./js/flow/flowAdaptivePhase10.js?v=20260923a",
