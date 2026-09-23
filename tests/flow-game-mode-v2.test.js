@@ -32,13 +32,17 @@ assert.match(gameMode, /Long/);
 assert.match(gameMode, /start\.textContent = "PLAY"/);
 assert.match(gameMode, /restart\.textContent = "PLAY AGAIN"/);
 assert.match(gameMode, /Text, topic, difficulty, and seed are chosen automatically/);
+assert.match(gameMode, /data-flow-game-best/);
+assert.match(gameMode, /data-flow-game-recent/);
+assert.match(gameMode, /getFlowPersonalBestV2/);
+assert.match(gameMode, /getFlowRecentRunsV2/);
 assert.doesNotMatch(gameMode, /data-flow-choice-group="category"/);
 assert.doesNotMatch(gameMode, /data-flow-choice-group="difficulty"/);
 assert.doesNotMatch(gameMode, /data-flow-modifier-id/);
 assert.match(gameMode, /history\?\.replaceState/);
 assert.doesNotMatch(gameMode, /location\.(?:assign|replace)|location\.reload/);
 
-assert.match(loader, /flowGameModeV2\.js\?v=20260923b/);
+assert.match(loader, /flowGameModeV2\.js\?v=20260923c/);
 assert.match(loader, /flowModifiers", "0"/);
 assert.match(loader, /flowAdaptive", "0"/);
 assert.match(bootstrap, /const publicGameMode = url\.searchParams\.get\("flowRelease"\) === "1"/);
@@ -47,9 +51,11 @@ assert.match(bootstrap, /!publicGameMode &&\s*url\.searchParams\.get\("flowModif
 assert.match(phase1, /refreshPlanFromLocation: refreshFlowPlanFromLocation/);
 assert.match(phase1, /startCurrentRun: startCurrentFlowRun/);
 
-assert.match(index, /flow-game-mode-v2\.css\?v=20260923b/);
+assert.match(index, /flow-game-mode-v2\.css\?v=20260923c/);
 assert.match(css, /flow-game-v2-lengths/);
 assert.match(css, /flow-game-v2-play-button/);
+assert.match(css, /flow-game-v2-record-summary/);
+assert.match(css, /flow-v2-result-metrics/);
 assert.match(modes, /shortLabel: "Longform"/);
 assert.match(modes, /description: "Type long-form texts and chase a higher score\."/);
 
