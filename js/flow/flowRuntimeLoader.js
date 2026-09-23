@@ -1,6 +1,6 @@
 const RELEASE_FLAG = "flowRelease";
-const FLOW_RELEASE_VERSION = 3;
-const FLOW_RELEASE_CACHE_NAME = "wordstrike-flow-release-v4";
+const FLOW_RELEASE_VERSION = 4;
+const FLOW_RELEASE_CACHE_NAME = "wordstrike-flow-release-v5";
 const FLOW_RELEASE_QUERY_KEYS = Object.freeze([
   "mode",
   RELEASE_FLAG,
@@ -23,7 +23,7 @@ const FLOW_RELEASE_QUERY_KEYS = Object.freeze([
 ]);
 
 const FLOW_RELEASE_ASSETS = Object.freeze([
-  "./js/flow/flowRuntimeLoader.js?v=20260923c",
+  "./js/flow/flowRuntimeLoader.js?v=20260923d",
   "./js/flow/flowMigrationPresentation.js?v=20260923a",
   "./js/flow/flowAdaptive.js",
   "./js/flow/flowAdaptivePhase10.js?v=20260923a",
@@ -34,28 +34,31 @@ const FLOW_RELEASE_ASSETS = Object.freeze([
   "./js/flow/flowContentExpansion.js",
   "./js/flow/flowEngine.js",
   "./js/flow/flowGameplay.js",
-  "./js/flow/flowGameModeV2.js?v=20260923b",
+  "./js/flow/flowGameModeV2.js?v=20260923c",
   "./js/flow/flowIntegrationBootstrap.js?v=20260923b",
-  "./js/flow/flowIntegrationPhase11.js?v=20260923a",
+  "./js/flow/flowIntegrationPhase11.js?v=20260923b",
   "./js/flow/flowLongformContent.js",
   "./js/flow/flowModifiers.js",
   "./js/flow/flowModifiersPhase9.js?v=20260923a",
   "./js/flow/flowPassages.js",
-  "./js/flow/flowPhase1.js?v=20260923c",
+  "./js/flow/flowPhase1.js?v=20260923d",
   "./js/flow/flowProgression.js",
+  "./js/flow/flowProgression.js?v=20260923a",
   "./js/flow/flowRunPlan.js",
   "./js/flow/flowRunPlan.js?v=20260923a",
+  "./js/flow/flowScoreV2.js?v=20260923a",
+  "./js/flow/flowRecordsV2.js?v=20260923a",
   "./js/flow/flowSelection.js",
   "./js/flow/flowShell.js",
   "./js/flow/flowState.js",
   "./js/flow/flowUiPhase7.js?v=20260923a",
   "./js/flow/flowUiPhase7KeyboardGuard.js?v=20260923a",
   "./js/flow/flowUiPhase7Polish.js?v=20260923a",
-  "./js/flow/flowUxPhase8.js?v=20260923a",
+  "./js/flow/flowUxPhase8.js?v=20260923b",
   "./js/flow/flowVisualPhase6.js?v=20260923a",
   "./styles/screens/flow-phase1.css?v=20260916d",
   "./styles/screens/flow-phase5.css?v=20260916a",
-  "./styles/screens/flow-game-mode-v2.css?v=20260923b",
+  "./styles/screens/flow-game-mode-v2.css?v=20260923c",
   "./styles/screens/flow-visual-phase6.css?v=20260923a",
   "./styles/screens/flow-visual-phase6-polish.css?v=20260916a",
   "./styles/screens/flow-ui-phase7.css?v=20260916a",
@@ -338,7 +341,7 @@ async function importFlowRuntime() {
     const integrationBootstrap = await import("./flowIntegrationBootstrap.js?v=20260923b");
     integrationBootstrap.applyFlowIntegrationDefaults?.();
     await Promise.all([
-      import("./flowPhase1.js?v=20260923c"),
+      import("./flowPhase1.js?v=20260923d"),
       import("./flowVisualPhase6.js?v=20260923a"),
     ]);
 
@@ -356,17 +359,17 @@ async function importFlowRuntime() {
       keyboardGuard.refreshFlowUiGuard?.();
       await import("./flowUiPhase7Polish.js?v=20260923a");
       if (params.get("flowUx") === "1") {
-        await import("./flowUxPhase8.js?v=20260923a");
+        await import("./flowUxPhase8.js?v=20260923b");
         await Promise.resolve();
         const extensions = [];
         if (params.get("flowModifiers") === "1") extensions.push(import("./flowModifiersPhase9.js?v=20260923a"));
         if (params.get("flowAdaptive") === "1") extensions.push(import("./flowAdaptivePhase10.js?v=20260923a"));
-        if (params.get("flowIntegration") === "1") extensions.push(import("./flowIntegrationPhase11.js?v=20260923a"));
+        if (params.get("flowIntegration") === "1") extensions.push(import("./flowIntegrationPhase11.js?v=20260923b"));
         await Promise.all(extensions);
       }
     }
     if (release) {
-      await import("./flowGameModeV2.js?v=20260923b");
+      await import("./flowGameModeV2.js?v=20260923c");
     }
     // Dynamic imports are cached after the first visit. Explicit activation lets
     // the same document re-enter Flow with a freshly resolved release seed/setup
