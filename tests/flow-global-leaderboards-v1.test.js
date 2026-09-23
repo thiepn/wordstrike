@@ -72,7 +72,7 @@ assert.equal(
   "SCORE_MISMATCH",
 );
 assert.equal(
-  validateScoreSubmission({ ...payload, result: { ...payload.result, wpm: 130 } }).code,
+  validateScoreSubmission({ ...payload, result: { ...payload.result, wpm: 130, rawWpm: 132 } }).code,
   "METRIC_MISMATCH",
 );
 assert.equal(
