@@ -9,6 +9,16 @@ const MODE_BOARDS = Object.freeze({
   "arcade-rush": LEADERBOARD_BOARDS.ARCADE_RUSH,
 });
 
+const TYPING_SUBMISSION_SOURCE_ALIASES = Object.freeze({
+  "topbar-restart": "retry",
+  "pause-restart": "retry",
+  "campaign-placement": "mode-select",
+});
+
+function canonicalTypingSubmissionSource(source) {
+  return TYPING_SUBMISSION_SOURCE_ALIASES[source] || source;
+}
+
 function boardForMode(mode, result) {
   if (mode === "typing") {
     if (result?.modeData?.durationSeconds === 60) return LEADERBOARD_BOARDS.TYPING_60;
@@ -160,7 +170,7 @@ export function buildTypingSubmissionResult(result, durationSeconds) {
     completed: result?.success === true,
     recordEligible: data?.recordEligible === true,
     developerMode: result?.developerMode === true,
-    sessionSource: result?.sessionSource,
+    sessionSource: canonicalTypingSubmissionSource(result?.sessionSource),
   };
   return hasCompleteMetrics(normalized) ? normalized : null;
 }

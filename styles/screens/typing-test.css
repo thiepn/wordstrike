@@ -555,10 +555,14 @@ body.gameplay-active .speed-test-screen {
 /* ---------- Results: execution -> analysis ---------- */
 
 .speed-results-screen {
+  height: auto;
   min-height: 100dvh;
   place-items: center;
+  align-items: start;
   padding: clamp(1rem, 4vw, 2.5rem);
   overflow-x: clip;
+  overflow-y: visible;
+  overflow-anchor: none;
   background:
     radial-gradient(circle at 50% 32%, rgb(var(--custom-accent-rgb, 0 255 242) / 0.045), transparent 31rem),
     var(--background, var(--custom-bg, #0a0e14));
@@ -567,6 +571,7 @@ body.gameplay-active .speed-test-screen {
 .speed-results-panel {
   position: relative;
   width: min(100%, 58rem);
+  overflow-anchor: none;
   padding: clamp(1.25rem, 4vw, 3rem);
   border: 0;
   background: transparent;

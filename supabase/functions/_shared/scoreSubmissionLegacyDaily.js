@@ -24,8 +24,14 @@ const NORMAL_SOURCES = Object.freeze({
   [DAILY_BOARD_KEY]: new Set(["daily-ready", "retry"]),
   [ENDLESS_BOARD_KEY]: new Set(["mode-select", "retry", "restart"]),
   [CAMPAIGN_BOARD_KEY]: new Set(["level-select", "retry", "next-level"]),
-  [TYPING_60_BOARD_KEY]: new Set(["mode-select", "retry", "change-test", "tab-reset", "quit-test"]),
-  [TYPING_15_BOARD_KEY]: new Set(["mode-select", "retry", "change-test", "tab-reset", "quit-test"]),
+  [TYPING_60_BOARD_KEY]: new Set([
+    "mode-select", "retry", "change-test", "tab-reset", "quit-test",
+    "topbar-restart", "pause-restart", "campaign-placement",
+  ]),
+  [TYPING_15_BOARD_KEY]: new Set([
+    "mode-select", "retry", "change-test", "tab-reset", "quit-test",
+    "topbar-restart", "pause-restart", "campaign-placement",
+  ]),
   [ARCADE_RUSH_BOARD_KEY]: new Set(["arcade-rush-ready", "retry", "restart"]),
 });
 const DAILY_FIELDS = new Set([
