@@ -117,7 +117,7 @@ def settings_profile_leaderboards(browser, base, browser_name, checks):
     page.locator('[data-action="open-leaderboards"]').click()
     expect(page.locator(".leaderboards-screen")).to_be_visible()
     labels = page.locator(".leaderboard-tabs button").evaluate_all("els => els.map(e => e.textContent.trim())")
-    assert labels == ["CAMPAIGN", "TYPING TEST", "ENDLESS"], labels
+    assert labels == ["CAMPAIGN", "TYPING TEST", "ENDLESS", "FLOW"], labels
     assert page.locator('[data-action="leaderboard-select-arcade-rush"]').count() == 0
     assert overflow(page, ".leaderboards-screen") <= 1
     checks.append({"browser": browser_name, "case": "settings persistence plus retired-mode profile and leaderboard suppression"})
