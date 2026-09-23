@@ -87,11 +87,11 @@ const gameMode = await readFile(new URL("../js/flow/flowGameModeV2.js", import.m
 assert.match(phase1, /data-flow-longform="true"/);
 assert.match(phase1, /publicLongformMarkup/);
 assert.match(phase1, /syncPublicSegmentIndex/);
-assert.match(phase1, /if \(isPublicLongformRun\(\)\) syncPublicSegmentIndex\(\);\s*else if \(maybeAdvanceRunPlan\(\)\) return;/s);
+assert.match(phase1, /if \(isPublicLongformRun\(\)\) \{[\s\S]*syncPublicSegmentIndex\(\);[\s\S]*\} else if \(maybeAdvanceRunPlan\(\)\) return;/s);
 assert.match(phase1, /<span>Score<\/span>/);
 assert.match(phase1, /<span>WPM<\/span>/);
 assert.match(phase1, /<span>Accuracy<\/span>/);
-assert.match(phase1, /<span>Progress<\/span>/);
+assert.match(phase1, /isPublicStreamRun\(\) \? "Words" : "Progress"/);
 assert.match(
   phase1,
   /if \(hud\.meter && hud\.meter\.dataset\.flowBand !== flowBand\(gameplay\.flowValue\)\)/,

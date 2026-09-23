@@ -57,20 +57,21 @@ def certify_public_entry(browser_type, base, evidence):
       return window.__flowEntryDocumentMarker;
     }""")
     flow.click()
-    expect(page.locator('[data-flow-view="ready"]')).to_be_visible(timeout=15000)
-    expect(page.locator('[data-flow-game-home]')).to_be_visible(timeout=15000)
-    assert page.locator('[data-flow-choice-group="category"]').count() == 0
-    assert page.locator('[data-flow-choice-group="difficulty"]').count() == 0
+    expect(page.locator('[data-flow-view="run"]')).to_be_visible(timeout=15000)
+    assert page.locator('[data-flow-view="ready"]').count() == 0
+    assert page.locator('[data-flow-ui="setup"]').count() == 0
     result = page.evaluate("""entry => ({
       sameDocument: window.__flowEntryDocumentMarker === entry,
       elapsedMs: performance.now() - window.__flowEntryStartedAt,
       releaseRoute: new URL(location.href).searchParams.get('flowRelease') === '1',
       ready: Boolean(window.wordstrikeFlowPhase1?.isActive?.()),
+      gameplayVersion: window.wordstrikeFlowPhase1?.getRunPlan?.()?.gameplayVersion,
     })""", entry)
 
     assert result["sameDocument"], result
     assert result["releaseRoute"], result
     assert result["ready"], result
+    assert result["gameplayVersion"] == 3, result
     # Generous enough for CI cold caches; this guards multi-second startup
     # regressions while the same-document assertion catches reloads exactly.
     assert result["elapsedMs"] < 3000, result
@@ -78,7 +79,7 @@ def certify_public_entry(browser_type, base, evidence):
 
     evidence.append({
         "browser": browser_type.name,
-        "case": "public-entry",
+        "case": "public-entry-instant-run",
         "sameDocument": result["sameDocument"],
         "elapsedMs": round(result["elapsedMs"], 2),
     })

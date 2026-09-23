@@ -656,10 +656,12 @@ function startRun() {
     run.passageId = passage.id;
   }
   if (isPublicLongformRun()) {
-    clearSubmissionState();
+    if (!isPublicStreamRun()) {
+      clearSubmissionState();
+      lastPublicResult = null;
+      lastPublicRecordState = null;
+    }
     publicRunSessionId = createPublicRunSessionId();
-    lastPublicResult = null;
-    lastPublicRecordState = null;
   } else {
     publicRunSessionId = null;
     lastPublicResult = null;

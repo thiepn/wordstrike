@@ -209,10 +209,12 @@ def inspect_keyboard_and_routes(browser, base, browser_name, evidence):
         page.locator(f'[data-mode-id="{mode_id}"]').click()
         expect(page.locator(destination)).to_be_visible()
 
-    # Flow is a real public route in Phase 13.
+    # Flow is a real public route and V3 enters gameplay immediately.
     open_modes(page, base)
     page.locator('[data-mode-id="flow"]').click()
-    expect(page.locator('[data-flow-view="ready"]')).to_be_visible(timeout=15000)
+    expect(page.locator('[data-flow-view="run"]')).to_be_visible(timeout=15000)
+    assert page.locator('[data-flow-view="ready"]').count() == 0
+    assert page.evaluate("window.wordstrikeFlowPhase1.getRunPlan().gameplayVersion") == 3
     assert "flowRelease=1" in page.url, page.url
     assert "dev=1" not in page.url, page.url
 

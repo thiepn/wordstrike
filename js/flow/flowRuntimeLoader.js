@@ -24,7 +24,7 @@ const FLOW_RELEASE_QUERY_KEYS = Object.freeze([
 ]);
 
 const FLOW_RELEASE_ASSETS = Object.freeze([
-  "./js/flow/flowRuntimeLoader.js?v=20260923h",
+  "./js/flow/flowRuntimeLoader.js?v=20260923i",
   "./js/leaderboardReturnState.js",
   "./js/pendingResultSubmission.js",
   "./js/submissionOutbox.js",
