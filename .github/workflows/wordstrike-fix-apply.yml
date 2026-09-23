@@ -37,7 +37,7 @@ jobs:
           git apply /tmp/wordstrike-fix.patch
 
           fetch_blob js/authService.js a0b83dadaa34177a9361f66b0d89bb77679b6860
-          fetch_blob js/accountDataMerge.js 6278f20ca4a34e9773f7eb78d8bcc4e619dab183
+          fetch_blob js/accountDataMerge.js 73f4828565ce9f24cb009db7b0778164235c7add
           fetch_blob js/accountDataSync.js c48d456d04aa39fa1e151f163291b56720b03b61
           fetch_blob js/localDataEvents.js 2cebe103354f13de29e2a7d49aa56f6dc27e0011
           fetch_blob js/screenScroll.js e6f0a5861fe7aae943d20e9c522096f59ea84121
