@@ -71,6 +71,6 @@ function queueEnhancement() {
 
 const root = appRoot();
 if (root) {
-  new MutationObserver(queueEnhancement).observe(root, { childList: true, subtree: true });
+  new MutationObserver(queueEnhancement).observe(root, { childList: true });
 }
 enhance();

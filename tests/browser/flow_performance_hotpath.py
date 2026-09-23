@@ -31,6 +31,54 @@ def route(base):
     )
 
 
+
+def certify_public_entry(browser_type, base, evidence):
+    browser = browser_type.launch()
+    context = browser.new_context(viewport={"width": 1440, "height": 900})
+    context.add_init_script(ONBOARDING_SEED)
+    context.route("**/*", lambda req: req.continue_() if req.request.url.startswith(base) else req.abort())
+    page = context.new_page()
+    errors = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+
+    page.goto(base)
+    modes = page.locator('[data-action="modes"]')
+    if modes.is_visible():
+        modes.click()
+    flow = page.locator('button[data-mode-id="flow"]')
+    expect(flow).to_be_visible(timeout=15000)
+
+    entry = page.evaluate("""() => {
+      window.__flowEntryDocumentMarker = `flow-${Math.random()}`;
+      window.__flowEntryStartedAt = performance.now();
+      return window.__flowEntryDocumentMarker;
+    }""")
+    flow.click()
+    expect(page.locator('[data-flow-view="ready"]')).to_be_visible(timeout=15000)
+    result = page.evaluate("""entry => ({
+      sameDocument: window.__flowEntryDocumentMarker === entry,
+      elapsedMs: performance.now() - window.__flowEntryStartedAt,
+      releaseRoute: new URL(location.href).searchParams.get('flowRelease') === '1',
+      ready: Boolean(window.wordstrikeFlowPhase1?.isActive?.()),
+    })""", entry)
+
+    assert result["sameDocument"], result
+    assert result["releaseRoute"], result
+    assert result["ready"], result
+    # Generous enough for CI cold caches; this guards multi-second startup
+    # regressions while the same-document assertion catches reloads exactly.
+    assert result["elapsedMs"] < 3000, result
+    assert not errors, errors
+
+    evidence.append({
+        "browser": browser_type.name,
+        "case": "public-entry",
+        "sameDocument": result["sameDocument"],
+        "elapsedMs": round(result["elapsedMs"], 2),
+    })
+    context.close()
+    browser.close()
+
 def certify(browser_type, base, evidence):
     browser = browser_type.launch()
     context = browser.new_context(viewport={"width": 1440, "height": 900})
@@ -106,7 +154,9 @@ def main():
     evidence = []
     try:
         with sync_playwright() as p:
+            certify_public_entry(p.chromium, base, evidence)
             certify(p.chromium, base, evidence)
+            certify_public_entry(p.firefox, base, evidence)
             certify(p.firefox, base, evidence)
     finally:
         server.shutdown()

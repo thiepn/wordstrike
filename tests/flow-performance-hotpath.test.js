@@ -5,6 +5,8 @@ const source = await readFile(new URL("../js/flow/flowPhase1.js", import.meta.ur
 
 assert.match(source, /const LIVE_CADENCE_INTERVAL_MS = 180;/);
 assert.match(source, /let mountedCharacterNodes = new Map\(\);/);
+assert.match(source, /let mountedRunHud = null;/);
+assert.match(source, /function mountRunHud\(/);
 assert.match(source, /function updateCharacterRange\(/);
 assert.match(source, /function scheduleCadenceHud\(/);
 assert.match(source, /getPerformanceStats: \(\) => \(\{ \.\.\.performanceStats \}\)/);
@@ -16,6 +18,7 @@ assert.doesNotMatch(updateRunView[0], /getFlowTypingSnapshot\(run\)/, "live typi
 assert.doesNotMatch(updateRunView[0], /querySelector\(`\[data-flow-char=/, "live typing must use the mounted character-node cache");
 assert.match(updateRunView[0], /updateCharacterRange\(startIndex, endIndex\)/);
 assert.match(updateRunView[0], /scheduleCadenceHud\(\)/);
+assert.doesNotMatch(updateRunView[0], /querySelector/, "live update path should use mounted HUD and character caches");
 
 const inputHandlers = source.match(/function deleteBackward\([\s\S]*?\n}\n\nfunction tryLaunchDeveloperFlow/);
 assert.ok(inputHandlers, "Flow input handlers are missing");

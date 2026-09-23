@@ -250,7 +250,7 @@ function showNoBackspaceStatus() {
 
 if (enabled) {
   const app = document.querySelector("#app");
-  if (app) new MutationObserver(() => queueMicrotask(decorate)).observe(app, { childList: true, subtree: true });
+  if (app) new MutationObserver(() => queueMicrotask(decorate)).observe(app, { childList: true });
   document.addEventListener("click", launchConfiguredRun, true);
   window.addEventListener("keydown", (event) => {
     if (event.key === "Backspace" && currentScreen()?.matches?.('[data-flow-view="run"]') && activeModifierIds().includes("no-backspace")) {

@@ -363,7 +363,7 @@ function decorateScreen() {
 
 if (phase7Requested) {
   const app = document.querySelector("#app");
-  if (app) new MutationObserver(() => queueMicrotask(decorateScreen)).observe(app, { childList: true, subtree: true });
+  if (app) new MutationObserver(() => queueMicrotask(decorateScreen)).observe(app, { childList: true });
   queueMicrotask(decorateScreen);
 }
 
