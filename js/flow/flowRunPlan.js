@@ -2,6 +2,11 @@ import { FLOW_CATEGORIES, FLOW_DIFFICULTIES, FLOW_SESSION_LENGTHS } from "./flow
 import { FLOW_PASSAGE_CATALOG } from "./flowCatalog.js";
 import { FLOW_LONGFORM_SERIES } from "./flowLongformContent.js";
 import {
+  createFlowCorpusExcerpt,
+  selectFlowCorpusDocuments,
+} from "./flowCorpusV2.js?v=20260923a";
+import { loadFlowCorpusHistory } from "./flowCorpusHistory.js?v=20260923a";
+import {
   createAdaptiveFocusSchedule,
   getAdaptivePassageFit,
   normalizeFlowWeaknessProfile,
@@ -38,9 +43,27 @@ const SPRINT_CHAPTER_INDEXES = Object.freeze({
 const LONGFORM_SECTION_COUNTS = Object.freeze({ quick: 1, standard: 3, long: 5 });
 
 export const FLOW_PUBLIC_LONGFORM_PROFILES = Object.freeze({
-  quick: Object.freeze({ sectionCount: 3, documentCount: 1, targetMinutes: 3 }),
-  standard: Object.freeze({ sectionCount: 5, documentCount: 1, targetMinutes: 6 }),
-  long: Object.freeze({ sectionCount: 10, documentCount: 2, targetMinutes: 10 }),
+  quick: Object.freeze({
+    sectionCount: 3,
+    documentCount: 1,
+    paragraphsPerDocument: Object.freeze([3]),
+    targetMinutes: 3,
+    targetDifficulty: "smooth",
+  }),
+  standard: Object.freeze({
+    sectionCount: 5,
+    documentCount: 2,
+    paragraphsPerDocument: Object.freeze([3, 2]),
+    targetMinutes: 6,
+    targetDifficulty: "natural",
+  }),
+  long: Object.freeze({
+    sectionCount: 10,
+    documentCount: 3,
+    paragraphsPerDocument: Object.freeze([4, 3, 3]),
+    targetMinutes: 10,
+    targetDifficulty: "natural",
+  }),
 });
 
 const DIFFICULTY_LADDERS = Object.freeze({
@@ -276,80 +299,83 @@ function createPublicLongformSegments(documents) {
 export function createPublicFlowRunPlan({
   sessionLength = "standard",
   seed = "flow-v2-public",
+  recentDocumentIds = null,
+  recentExcerptIds = null,
+  history = null,
 } = {}) {
-  if (!FLOW_LONGFORM_SERIES.length) throw new TypeError("Public Flow requires longform content");
   const safeLength = Object.hasOwn(FLOW_PUBLIC_LONGFORM_PROFILES, sessionLength) ? sessionLength : "standard";
   const profile = FLOW_PUBLIC_LONGFORM_PROFILES[safeLength];
-  const orderedSeries = seriesOrderForSeed(seed);
-  const perDocument = Math.max(1, Math.ceil(profile.sectionCount / profile.documentCount));
-  let remaining = profile.sectionCount;
+  const storedHistory = history || loadFlowCorpusHistory();
+  const avoidedDocuments = Array.isArray(recentDocumentIds)
+    ? recentDocumentIds
+    : storedHistory.recentDocumentIds;
+  const avoidedExcerpts = Array.isArray(recentExcerptIds)
+    ? recentExcerptIds
+    : storedHistory.recentExcerptIds;
 
-  const documents = [];
-  for (let documentIndex = 0; documentIndex < profile.documentCount && remaining > 0; documentIndex += 1) {
-    const series = orderedSeries[documentIndex % orderedSeries.length];
-    const take = Math.min(perDocument, remaining, series.sections.length);
-    const maxStart = Math.max(0, series.sections.length - take);
-    const start = safeLength === "quick" && maxStart > 0
-      ? hashSeed(`${seed}:${series.id}:quick-window`) % (maxStart + 1)
-      : 0;
-    const passages = Object.freeze(series.sections.slice(start, start + take));
-    documents.push(Object.freeze({
+  const sourceDocuments = selectFlowCorpusDocuments({
+    seed: String(seed) + ":" + safeLength + ":documents",
+    count: profile.documentCount,
+    recentDocumentIds: avoidedDocuments,
+    targetDifficulty: profile.targetDifficulty,
+  });
+
+  const documents = sourceDocuments.map((source, documentIndex) => {
+    const paragraphCount = profile.paragraphsPerDocument[documentIndex]
+      ?? profile.paragraphsPerDocument[profile.paragraphsPerDocument.length - 1]
+      ?? 3;
+    const excerpt = createFlowCorpusExcerpt(source, {
+      seed: String(seed) + ":" + safeLength + ":excerpt:" + String(documentIndex),
+      paragraphCount,
+      recentExcerptIds: avoidedExcerpts,
+    });
+    return Object.freeze({
       index: documentIndex,
-      seriesId: series.id,
-      title: series.title,
-      passages,
-      paragraphCount: passages.length,
-      wordCount: passages.reduce((sum, passage) => sum + passage.wordCount, 0),
-    }));
-    remaining -= passages.length;
-  }
-
-  // A future corpus may contain shorter documents. Fill any remaining slots
-  // deterministically from additional distinct series rather than repeating text.
-  let fallbackIndex = documents.length;
-  while (remaining > 0 && fallbackIndex < orderedSeries.length) {
-    const series = orderedSeries[fallbackIndex];
-    const take = Math.min(remaining, series.sections.length);
-    const passages = Object.freeze(series.sections.slice(0, take));
-    documents.push(Object.freeze({
-      index: documents.length,
-      seriesId: series.id,
-      title: series.title,
-      passages,
-      paragraphCount: passages.length,
-      wordCount: passages.reduce((sum, passage) => sum + passage.wordCount, 0),
-    }));
-    remaining -= passages.length;
-    fallbackIndex += 1;
-  }
+      documentId: source.id,
+      seriesId: source.id,
+      title: source.title,
+      theme: source.theme,
+      themeLabel: source.themeLabel,
+      difficulty: source.difficulty,
+      typabilityScore: source.typabilityScore,
+      excerptId: excerpt.id,
+      excerptStartParagraph: excerpt.startParagraph,
+      passages: excerpt.passages,
+      paragraphCount: excerpt.passages.length,
+      wordCount: excerpt.wordCount,
+    });
+  });
 
   const frozenDocuments = Object.freeze(documents);
   const segments = createPublicLongformSegments(frozenDocuments);
   const fullText = segments.map((segment) => (
-    segment.separatorIndex == null ? segment.text : `${segment.text} `
+    segment.separatorIndex == null ? segment.text : segment.text + " "
   )).join("");
   const allPassages = Object.freeze(frozenDocuments.flatMap((document) => document.passages));
   const wordCount = frozenDocuments.reduce((sum, document) => sum + document.wordCount, 0);
   const titles = Object.freeze(frozenDocuments.map((document) => document.title));
-  const ids = Object.freeze(frozenDocuments.map((document) => document.seriesId));
+  const ids = Object.freeze(frozenDocuments.map((document) => document.documentId));
+  const excerptIds = Object.freeze(frozenDocuments.map((document) => document.excerptId));
+  const themes = Object.freeze([...new Set(frozenDocuments.map((document) => document.theme))]);
   const compatibilityChapter = Object.freeze({
     index: 0,
     templateIndex: 0,
     id: "longform-v2",
     title: titles.length === 1 ? titles[0] : "Longform Run",
     description: "Continuous longform typing without chapter transitions.",
-    difficulty: "natural",
+    difficulty: profile.targetDifficulty,
     passages: allPassages,
     wordCount,
   });
 
   return Object.freeze({
-    id: `flow-v2-${safeLength}-${hashSeed(`${seed}:${ids.join("+")}`).toString(16)}`,
+    id: "flow-v2-" + safeLength + "-" + hashSeed(String(seed) + ":" + excerptIds.join("+")).toString(16),
     gameplayVersion: 2,
+    corpusVersion: 2,
     structure: "continuous-longform",
     seed: String(seed),
     category: "mixed",
-    difficulty: "natural",
+    difficulty: profile.targetDifficulty,
     sessionLength: safeLength,
     modifiers: Object.freeze([]),
     targetMinutes: profile.targetMinutes,
@@ -365,6 +391,13 @@ export function createPublicFlowRunPlan({
     seriesTitle: titles.join(" / "),
     seriesIds: ids,
     seriesTitles: titles,
+    corpusDocumentIds: ids,
+    corpusExcerptIds: excerptIds,
+    corpusThemes: themes,
+    recentAvoidance: Object.freeze({
+      documentIdsConsidered: Object.freeze([...(avoidedDocuments || [])]),
+      excerptIdsConsidered: Object.freeze([...(avoidedExcerpts || [])]),
+    }),
     adaptive: Object.freeze({
       enabled: false,
       targetedPassageCount: 0,
