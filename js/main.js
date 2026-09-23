@@ -207,6 +207,7 @@ import {
   savePendingResultSubmission,
 } from "./pendingResultSubmission.js";
 import { createPendingResultCoordinator } from "./pendingResultCoordinator.js";
+import { createSubmissionOutboxCoordinator } from "./submissionOutboxCoordinator.js";
 import { createPracticeFeatureGate } from "./practiceLab/practiceFeatureGate.js";
 import { createPracticeExperimentRegistry } from "./practiceLab/practiceExperimentRegistry.js";
 import { createPracticeLabController } from "./practiceLab/practiceLabController.js";
@@ -302,6 +303,8 @@ function ensureArcadeRushAppController() {
   });
   return arcadeRushAppController;
 }
+
+const submissionOutboxCoordinator = createSubmissionOutboxCoordinator();
 
 const pendingResultCoordinator = createPendingResultCoordinator({
   onUsernameRequired: () => {
@@ -1637,6 +1640,7 @@ async function bootstrap() {
       void handleAutomaticSubmissionStateChange(authState, getLeaderboardProfileState());
     }
     if (bootstrapReady) void pendingResultCoordinator.evaluate(authState, getLeaderboardProfileState());
+    void submissionOutboxCoordinator.drain(authState, getLeaderboardProfileState());
     if (authUiChanged && appState.screen === Screens.LEVEL_SELECT) {
       renderCurrentScreen();
     }
@@ -1660,6 +1664,7 @@ async function bootstrap() {
       void handleAutomaticSubmissionStateChange(getAuthState(), profileState);
     }
     if (bootstrapReady) void pendingResultCoordinator.evaluate(getAuthState(), profileState);
+    void submissionOutboxCoordinator.drain(getAuthState(), profileState);
   });
   subscribeToSubmissions((submissionState) => {
     if ([Screens.ARCADE_RUSH_RESULTS, Screens.ENDLESS_RESULTS, Screens.SPEED_TEST_RESULTS, Screens.RESULTS].includes(appState.screen)) {
@@ -1719,6 +1724,9 @@ async function bootstrap() {
     loadCommonWordBank(),
   ]);
   document.addEventListener("keydown", handleGlobalKeydown);
+  window.addEventListener("online", () => {
+    void submissionOutboxCoordinator.drain(getAuthState(), getLeaderboardProfileState());
+  });
   nativeBackNavigation.mount();
   const appRoot = document.querySelector("#app");
   attachAppClickListener(appRoot, handleAppClick);
@@ -1751,6 +1759,7 @@ async function bootstrap() {
     });
   }
   void pendingResultCoordinator.evaluate(getAuthState(), getLeaderboardProfileState());
+  void submissionOutboxCoordinator.drain(getAuthState(), getLeaderboardProfileState());
 }
 
 bootstrap();
