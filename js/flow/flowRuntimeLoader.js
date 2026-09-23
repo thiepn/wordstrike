@@ -328,13 +328,16 @@ async function importFlowRuntime() {
 
     const params = new URLSearchParams(globalThis.location.search);
     if (params.get("flowUi") === "1") {
-      await Promise.all([
+      const [keyboardGuard] = await Promise.all([
         import("./flowUiPhase7KeyboardGuard.js?v=20260923a"),
         import("./flowUiPhase7.js?v=20260923a"),
       ]);
-      // Let Phase 7's initial decorator microtask finish before layers that
-      // depend on its setup/run structure are evaluated.
+      // UI7 inserts its setup inside the already-mounted READY screen. The
+      // root-only observer intentionally ignores that subtree mutation, so
+      // explicitly refresh the keyboard/presentation guard once after UI7's
+      // initial decorator microtask instead of observing every typed character.
       await Promise.resolve();
+      keyboardGuard.refreshFlowUiGuard?.();
       await import("./flowUiPhase7Polish.js?v=20260923a");
       if (params.get("flowUx") === "1") {
         await import("./flowUxPhase8.js?v=20260923a");
