@@ -21,8 +21,14 @@ import {
 assert.equal(FLOW_CORPUS_V2_STATS.valid, true);
 assert.equal(FLOW_CORPUS_V2_DOCUMENTS.length, 120);
 assert.equal(FLOW_CORPUS_V2_THEMES.length, 12);
-assert.ok(FLOW_CORPUS_V2_STATS.totalWords >= 18000);
+assert.ok(FLOW_CORPUS_V2_STATS.totalWords >= 65000);
+assert.ok(FLOW_CORPUS_V2_STATS.averageWords >= 500);
 assert.ok(FLOW_CORPUS_V2_STATS.averageTypability >= 45);
+assert.deepEqual(FLOW_CORPUS_V2_STATS.difficultyCoverage, {
+  smooth: 24,
+  natural: 48,
+  advanced: 48,
+});
 assert.deepEqual(validateFlowCorpusV2(), FLOW_CORPUS_V2_STATS);
 
 const ids = new Set(FLOW_CORPUS_V2_DOCUMENTS.map((document) => document.id));
@@ -41,6 +47,17 @@ assert.deepEqual(
   deterministicB.map((document) => document.id),
 );
 assert.equal(new Set(deterministicA.map((document) => document.theme)).size, 3);
+
+for (const difficulty of ["smooth", "natural", "advanced"]) {
+  for (let index = 0; index < 100; index += 1) {
+    const [selected] = selectFlowCorpusDocuments({
+      seed: "difficulty-" + difficulty + "-" + index,
+      count: 1,
+      targetDifficulty: difficulty,
+    });
+    assert.equal(selected.difficulty, difficulty);
+  }
+}
 
 const avoidedIds = FLOW_CORPUS_V2_DOCUMENTS.slice(0, 30).map((document) => document.id);
 const avoidedSelection = selectFlowCorpusDocuments({
