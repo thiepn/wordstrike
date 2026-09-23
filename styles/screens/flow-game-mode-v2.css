@@ -1,7 +1,7 @@
 /* =========================================================
-   WORDSTRIKE FLOW V2 — PHASE 1 PRODUCT RESET
-   Public Flow is a game mode: choose only run length, then play.
-   Legacy developer configuration remains available off the public route.
+   WORDSTRIKE FLOW — INSTANT PLAY
+   Public Flow opens directly into continuous typing.
+   Legacy setup styles remain below for developer compatibility only.
    ========================================================= */
 
 .flow-ready-screen[data-flow-game-mode-v2="true"] .flow-phase1-shell {
@@ -587,4 +587,97 @@
 
 .flow-v2-global-status.is-success strong {
   letter-spacing: 0.04em;
+}
+
+
+/* ---------- FLOW V3: instant-play stream controls ---------- */
+
+.flow-v3-run-tools {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 14px;
+  margin-left: auto;
+  color: var(--flow-ink-muted);
+  font-family: var(--flow-data-face);
+  font-size: 0.58rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.flow-v3-run-tools label {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  white-space: nowrap;
+}
+
+.flow-v3-run-tools select {
+  min-height: 32px;
+  max-width: 160px;
+  padding: 5px 24px 5px 8px;
+  border: 1px solid var(--flow-line-strong);
+  border-radius: 0;
+  background: var(--flow-bg-deep);
+  color: var(--flow-ink-soft);
+  font: inherit;
+  font-size: 0.6rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.flow-v3-run-tools select:hover,
+.flow-v3-run-tools select:focus-visible {
+  border-color: var(--flow-signal);
+  color: var(--flow-ink);
+  outline: none;
+}
+
+.flow-v3-tab-hint {
+  color: var(--flow-signal);
+  white-space: nowrap;
+}
+
+.flow-run-screen[data-flow-longform-v2="true"] .flow-run-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+}
+
+.flow-run-screen[data-flow-longform-v2="true"] .flow-run-header > div:nth-child(2) {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+@media (max-width: 720px) {
+  .flow-run-screen[data-flow-longform-v2="true"] .flow-run-header {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .flow-v3-run-tools {
+    order: 3;
+    justify-content: space-between;
+    width: 100%;
+    margin-left: 0;
+    padding-top: 8px;
+    border-top: 1px solid var(--flow-line);
+  }
+
+  .flow-v3-run-tools select {
+    max-width: 132px;
+  }
+}
+
+@media (max-width: 420px) {
+  .flow-v3-tab-hint {
+    font-size: 0.52rem;
+    letter-spacing: 0.07em;
+  }
+
+  .flow-v3-run-tools label {
+    font-size: 0.52rem;
+  }
 }
