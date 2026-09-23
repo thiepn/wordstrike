@@ -336,9 +336,20 @@ function inferDifficulty(metrics, variantIndex) {
   return "natural";
 }
 
+const LONGFORM_EXTENSIONS = Object.freeze([
+  (theme, topic) => "That first observation also established a useful baseline for the rest of the task. It showed which parts were stable, which details might change, and where attention would have the highest return. With that baseline in place, later choices could be compared against something concrete instead of being made from memory or guesswork.",
+  (theme, topic) => "The sequence mattered because every extra branch created another chance to lose context. Keeping the objective visible made it possible to finish one step, confirm the result, and then move on. That pattern reduced rechecking and gave the work a steady rhythm even when the surrounding conditions were not completely predictable.",
+  (theme, topic) => "The interruption also made the tradeoffs easier to see. Speed still mattered, but not enough to justify a choice that would create more work later. A brief check of " + theme.terms[0] + " and " + theme.terms[2] + " was usually cheaper than correcting a larger mistake after several steps had already depended on it.",
+  (theme, topic) => "Once that clue was noticed, the remaining information became easier to organize. The useful question was no longer whether every detail could be known, but whether enough was known to choose the next safe action. That narrower question kept attention on evidence that could actually change the decision.",
+  (theme, topic) => "Maintaining the rhythm required small checks rather than constant hesitation. Each completed step reduced the number of open possibilities, which made the next one easier to judge. The process stayed flexible without becoming vague, and the growing trail of confirmed results made unnecessary backtracking less likely.",
+  (theme, topic) => "Looking back, the strongest part of the process was its repeatability. The outcome did not depend on perfect timing or one unusually clever move; it came from clear priorities, observable feedback, and controlled adjustments. The same approach could be used again in a different setting without copying every detail of this situation."
+]);
+
 function buildDocument(theme, topic, topicIndex) {
   const style = PARAGRAPH_STYLES[topicIndex % PARAGRAPH_STYLES.length];
-  const paragraphs = Object.freeze(style.map((builder) => builder(theme, topic).replace(/\s+/g, " ").trim()));
+  const paragraphs = Object.freeze(style.map((builder, paragraphIndex) => (
+    builder(theme, topic) + " " + LONGFORM_EXTENSIONS[paragraphIndex](theme, topic)
+  ).replace(/\s+/g, " ").trim()));
   const text = paragraphs.join(" ");
   const metrics = analyzeFlowCorpusText(text);
   return Object.freeze({
