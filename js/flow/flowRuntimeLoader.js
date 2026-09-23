@@ -320,7 +320,8 @@ async function importFlowRuntime() {
     // Integration defaults must run before Phase 1 resolves its immutable run
     // plan. Everything after that is presentation/integration and can load in
     // dependency-safe waves instead of eleven serial network/parse waits.
-    await import("./flowIntegrationBootstrap.js?v=20260916a");
+    const integrationBootstrap = await import("./flowIntegrationBootstrap.js?v=20260916a");
+    integrationBootstrap.applyFlowIntegrationDefaults?.();
     await Promise.all([
       import("./flowPhase1.js?v=20260923a"),
       import("./flowVisualPhase6.js?v=20260923a"),

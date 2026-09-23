@@ -356,6 +356,7 @@ function decorateScreen() {
     else if (view === "run") decorateRun(screen);
     else if (view === "chapter") decorateChapter(screen);
     else if (view === "complete") decorateComplete(screen);
+    document.dispatchEvent(new CustomEvent("wordstrike:flow-ui7-decorated", { detail: { view } }));
   } finally {
     decorating = false;
   }

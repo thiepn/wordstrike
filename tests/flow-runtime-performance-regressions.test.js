@@ -23,6 +23,7 @@ assert.match(source.loader, /requestIdleCallback/);
 assert.match(source.loader, /cache\.addAll\(missing\)/);
 assert.match(source.loader, /await Promise\.all\(\[/);
 assert.match(source.loader, /activateFromLocation/);
+assert.match(source.loader, /integrationBootstrap\.applyFlowIntegrationDefaults\?\.\(\)/, "same-document re-entry must replay persisted Flow setup defaults");
 assert.match(source.loader, /keyboardGuard\.refreshFlowUiGuard\?\.\(\)/, "Phase 7 setup must be explicitly refreshed after parallel module load");
 assert.match(source.loader, /new MutationObserver\(bindPublicModeEntry\)\.observe\(app, \{ childList: true \}\)/);
 
@@ -30,6 +31,8 @@ for (const key of ["migration", "ui7", "keyboard", "modifiers", "adaptive", "int
   assert.doesNotMatch(source[key], /observe\(app, \{ childList: true, subtree: true \}\)/, `${key} must not wake on every live Flow subtree mutation`);
 }
 assert.match(source.keyboard, /decorateStructure as refreshFlowUiGuard/, "root-only Phase 7 observer needs an explicit one-shot refresh API");
+assert.match(source.ui7, /wordstrike:flow-ui7-decorated/, "screen lifecycle must explicitly signal nested UI decoration");
+assert.match(source.keyboard, /wordstrike:flow-ui7-decorated/, "Phase 7 guard must refresh on explicit screen lifecycle signals");
 assert.doesNotMatch(source.visual, /attributeFilter:\s*\["aria-valuenow"\]/, "visual layer must not observe the live Flow meter attribute");
 assert.doesNotMatch(source.visual, /subtree:\s*true/, "visual decorator should only react to root screen replacement");
 assert.doesNotMatch(source.ux8, /passageObserver/, "caret visibility must not rely on a live passage MutationObserver");

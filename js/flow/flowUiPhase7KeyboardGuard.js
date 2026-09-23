@@ -168,6 +168,7 @@ if (enabled) {
     new MutationObserver(() => queueMicrotask(decorateStructure)).observe(app, { childList: true });
   }
   const setupControl = (target) => target?.closest?.("[data-flow-choice-group]");
+  document.addEventListener("wordstrike:flow-ui7-decorated", () => queueMicrotask(decorateStructure));
   document.addEventListener("click", (event) => {
     if (setupControl(event.target)) queueMicrotask(decorateStructure);
   });
