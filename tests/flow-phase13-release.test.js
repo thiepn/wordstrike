@@ -96,7 +96,7 @@ for (const key of FLOW_RELEASE_QUERY_KEYS) {
 assert.ok(FLOW_RELEASE_ASSETS.length >= 30, "release cache pack should cover the complete Flow stack");
 assert.equal(new Set(FLOW_RELEASE_ASSETS).size, FLOW_RELEASE_ASSETS.length, "release cache pack contains duplicates");
 for (const asset of [
-  "./js/flow/flowRuntimeLoader.js?v=20260923e",
+  "./js/flow/flowRuntimeLoader.js?v=20260923f",
   "./js/flow/flowEngine.js",
   "./js/flow/flowCadence.js",
   "./js/flow/flowGameplay.js",
@@ -106,11 +106,11 @@ for (const asset of [
   "./js/flow/flowCorpusHistory.js?v=20260923a",
   "./js/flow/flowLongformContent.js",
   "./js/flow/flowPassages.js",
-  "./js/flow/flowPhase1.js?v=20260923e",
+  "./js/flow/flowPhase1.js?v=20260923f",
   "./js/flow/flowProgression.js",
   "./js/flow/flowRunPlan.js?v=20260923e",
-  "./js/flow/flowScoreV2.js?v=20260923a",
-  "./js/flow/flowRecordsV2.js?v=20260923a",
+  "./js/flow/flowScoreV2.js?v=20260923f",
+  "./js/flow/flowRecordsV2.js?v=20260923f",
   "./js/flow/flowProgression.js?v=20260923a",
   "./js/flow/flowUiPhase7KeyboardGuard.js?v=20260923a",
   "./js/flow/flowIntegrationPhase11.js?v=20260923b",
@@ -122,7 +122,7 @@ for (const asset of [
 }
 
 const mainIndex = index.indexOf('src="js/main.js?v=20260923e"');
-const releaseIndex = index.indexOf('src="js/flow/flowRuntimeLoader.js?v=20260923e"');
+const releaseIndex = index.indexOf('src="js/flow/flowRuntimeLoader.js?v=20260923f"');
 assert.ok(mainIndex >= 0 && releaseIndex > mainIndex, "main.js must boot before the release loader can temporarily emulate the developer route");
 assert.doesNotMatch(index, /src="js\/flow\/flowPhase1\.js/);
 assert.doesNotMatch(index, /const flowParams = new URLSearchParams/);
