@@ -871,6 +871,7 @@ if (globalThis.window) {
     refreshPlanFromLocation: refreshFlowPlanFromLocation,
     startCurrentRun: startCurrentFlowRun,
     getPublicSessionId: () => publicRunSessionId,
+    getPublicSessionId: () => publicRunSessionId,
     getPublicResult: () => lastPublicResult ? { ...lastPublicResult, seriesIds: [...lastPublicResult.seriesIds] } : null,
     getPublicRecordState: () => lastPublicRecordState ? {
       recorded: lastPublicRecordState.recorded,
