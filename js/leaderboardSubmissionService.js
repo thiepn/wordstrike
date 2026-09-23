@@ -233,9 +233,9 @@ export function createLeaderboardSubmissionService({
     return enqueueOutbox(activeMode, payload, activeUserId);
   };
 
-  const markRetryAttempt = (errorCode = null) => {
-    if (!payload?.sessionId || !activeUserId) return false;
-    return markOutboxAttempt(payload.sessionId, activeUserId, { errorCode });
+  const markRetryAttempt = (errorCode = null, userId = activeUserId, sessionId = payload?.sessionId) => {
+    if (!sessionId || !userId) return false;
+    return markOutboxAttempt(sessionId, userId, { errorCode });
   };
 
   const eligibility = (authState, profileState) => {
@@ -334,8 +334,10 @@ export function createLeaderboardSubmissionService({
     const retryPersisted = retryIntent.ok === true;
     const retryPersistenceError = retryIntent.ok ? null : retryIntent.error;
 
+    const submittedUserId = activeUserId;
+
     if (!isOnline()) {
-      markRetryAttempt("OFFLINE");
+      markRetryAttempt("OFFLINE", submittedUserId);
       return publish({
         ...state,
         status: "offline",
@@ -347,7 +349,7 @@ export function createLeaderboardSubmissionService({
 
     const client = getClient();
     if (!client?.functions?.invoke) {
-      markRetryAttempt("CLIENT_UNAVAILABLE");
+      markRetryAttempt("CLIENT_UNAVAILABLE", submittedUserId);
       return publish({
         ...state,
         status: "error",
@@ -375,7 +377,7 @@ export function createLeaderboardSubmissionService({
       if (requestId !== requestSequence || payload?.sessionId !== submittedSessionId) return state;
       if (!response?.ok) {
         const code = response?.error?.code || "SERVER_ERROR";
-        markRetryAttempt(code);
+        markRetryAttempt(code, submittedUserId, submittedSessionId);
         if (code === "NOT_AUTHENTICATED") {
           return publish({
             ...state,
@@ -406,7 +408,7 @@ export function createLeaderboardSubmissionService({
           retryPersistenceError,
         });
       }
-      removeOutbox(submittedSessionId, activeUserId);
+      removeOutbox(submittedSessionId, submittedUserId);
       return publish({
         ...state,
         status: response.data?.duplicate ? "already-submitted" : "submitted",
@@ -419,7 +421,7 @@ export function createLeaderboardSubmissionService({
     } catch {
       if (requestId !== requestSequence || payload?.sessionId !== submittedSessionId) return state;
       const code = isOnline() ? "SERVER_ERROR" : "OFFLINE";
-      markRetryAttempt(code);
+      markRetryAttempt(code, submittedUserId, submittedSessionId);
       return publish({
         ...state,
         status: isOnline() ? "error" : "offline",
