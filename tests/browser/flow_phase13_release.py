@@ -286,7 +286,7 @@ def certify_offline(browser, browser_name, base, evidence):
         './js/flow/flowScoreV2.js?v=20260923a',
         './js/flow/flowRecordsV2.js?v=20260923a',
         './js/flow/flowUiPhase7KeyboardGuard.js?v=20260923a',
-        './js/flow/flowIntegrationPhase11.js?v=20260923a',
+        './js/flow/flowIntegrationPhase11.js?v=20260923b',
         './styles/screens/flow-integration-phase11.css?v=20260916a',
       ];
       const results = [];
