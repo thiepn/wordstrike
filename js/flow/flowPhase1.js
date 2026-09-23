@@ -6,12 +6,22 @@ import {
 } from "./flowEngine.js";
 import { analyzeFlowCadence } from "./flowCadence.js";
 import { resolveFlowRunPlan } from "./flowRunPlan.js?v=20260923e";
+import {
+  FLOW_V3_THEME_IDS,
+  normalizeFlowV3Theme,
+  resolveFlowStreamPlanV3,
+} from "./flowStreamPlanV3.js?v=20260923a";
 import { resolveFlowSelection } from "./flowSelection.js";
 import {
   calculateFlowScoreV2,
   createFlowScoreV2Result,
 } from "./flowScoreV2.js?v=20260923f";
 import { recordFlowResultV2 } from "./flowRecordsV2.js?v=20260923f";
+import {
+  calculateFlowScoreV3,
+  createFlowScoreV3Result,
+} from "./flowScoreV3.js?v=20260923a";
+import { recordFlowResultV3 } from "./flowRecordsV3.js?v=20260923a";
 import { recordFlowCorpusRun } from "./flowCorpusHistory.js?v=20260923a";
 import { FLOW_PHASES } from "./flowState.js";
 import {
@@ -26,6 +36,7 @@ import {
 } from "../leaderboardProfileService.js";
 import {
   clearSubmissionState,
+  createLeaderboardSubmissionService,
   getSubmissionState,
   prepareResultSubmission,
   refreshSubmissionEligibility,
@@ -49,7 +60,9 @@ const LIVE_CADENCE_INTERVAL_MS = 180;
 
 function refreshFlowPlanFromLocation(locationLike = globalThis.location) {
   const params = new URLSearchParams(locationLike?.search || "");
-  resolvedRunPlan = resolveFlowRunPlan(params);
+  resolvedRunPlan = params.get("flowRelease") === "1"
+    ? resolveFlowStreamPlanV3(params)
+    : resolveFlowRunPlan(params);
   resolvedSelection = resolvedRunPlan ? null : resolveFlowSelection(params);
   return resolvedRunPlan || resolvedSelection;
 }
@@ -59,7 +72,7 @@ function resolveFlowRouteState(locationLike = globalThis.location) {
   developerFlowRequested = params.get("dev") === "1" && params.get("mode") === "flow";
   publicFlowRequested = params.get("flowRelease") === "1" && params.get("mode") === "flow";
   refreshFlowPlanFromLocation(locationLike);
-  return developerFlowRequested;
+  return developerFlowRequested || publicFlowRequested;
 }
 
 resolveFlowRouteState();
@@ -91,7 +104,33 @@ function createPerformanceStats() {
 function createPublicRunSessionId() {
   const random = globalThis.crypto?.randomUUID?.()
     || Math.random().toString(36).slice(2, 12);
-  return `session-flow-v2-${Date.now().toString(36)}-${random}`;
+  return `session-flow-v3-${Date.now().toString(36)}-${random}`;
+}
+
+function createPublicFlowSeed() {
+  const stamp = Date.now().toString(36);
+  try {
+    const values = new Uint32Array(2);
+    globalThis.crypto?.getRandomValues?.(values);
+    if (values[0] || values[1]) {
+      return `flow-v3-${stamp}-${values[0].toString(36)}${values[1].toString(36)}`;
+    }
+  } catch {
+    // Date + random fallback keeps rerolls fresh on older browsers.
+  }
+  return `flow-v3-${stamp}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
+function updatePublicFlowUrl({ theme = resolvedRunPlan?.theme || "mixed", newSeed = true } = {}) {
+  const url = new URL(globalThis.location.href);
+  url.searchParams.set("mode", "flow");
+  url.searchParams.set("flowRelease", "1");
+  url.searchParams.set("flowRun", "1");
+  url.searchParams.set("flowTheme", normalizeFlowV3Theme(theme));
+  if (newSeed || !url.searchParams.get("flowSeed")) url.searchParams.set("flowSeed", createPublicFlowSeed());
+  globalThis.history?.replaceState?.(null, "", url.href);
+  refreshFlowPlanFromLocation(url);
+  return resolvedRunPlan;
 }
 
 function formatRunDuration(ms) {
@@ -157,14 +196,36 @@ function currentChapter() {
   return segment ? resolvedRunPlan.chapters[segment.chapterIndex] : null;
 }
 
+function isPublicStreamRun() {
+  return publicFlowRequested
+    && resolvedRunPlan?.gameplayVersion === 3
+    && resolvedRunPlan?.structure === "continuous-stream";
+}
+
 function isPublicLongformRun() {
   return publicFlowRequested
-    && resolvedRunPlan?.gameplayVersion === 2
-    && resolvedRunPlan?.structure === "continuous-longform";
+    && (
+      (resolvedRunPlan?.gameplayVersion === 2 && resolvedRunPlan?.structure === "continuous-longform")
+      || isPublicStreamRun()
+    );
 }
 
 function publicLongformMarkup() {
   if (!run || !isPublicLongformRun()) return "";
+  if (isPublicStreamRun()) {
+    return resolvedRunPlan.segments.slice(activeSegmentIndex, activeSegmentIndex + 3).map((segment) => {
+      const characters = [];
+      for (let index = segment.startIndex; index <= segment.endIndex; index += 1) {
+        const character = flowCharacterAt(index);
+        if (character) characters.push(charMarkup(character));
+      }
+      if (segment.separatorIndex != null) {
+        const separator = flowCharacterAt(segment.separatorIndex);
+        if (separator) characters.push(charMarkup(separator, { paragraphBreak: true }));
+      }
+      return `<p class="flow-longform-paragraph" data-flow-paragraph="${segment.index}">${characters.join("")}</p>`;
+    }).join("");
+  }
   const documents = resolvedRunPlan.documents || [];
   return documents.map((document, documentIndex) => {
     const segments = resolvedRunPlan.segments.filter((segment) => segment.documentIndex === documentIndex);
@@ -350,6 +411,9 @@ function updateCharacterRange(startIndex, endIndex) {
 
 function runHeaderLabel() {
   if (!resolvedRunPlan) return `FLOW · ${resolvedSelection?.passage?.id || "passage"}`;
+  if (isPublicStreamRun()) {
+    return `FLOW · ${String(resolvedRunPlan.theme || "mixed").toUpperCase()}`;
+  }
   if (isPublicLongformRun()) {
     return `FLOW · ${resolvedRunPlan.sessionLength.toUpperCase()} · ${resolvedRunPlan.wordCount} WORDS`;
   }
@@ -435,14 +499,22 @@ function refreshCadenceHud() {
   performanceStats.cadenceRefreshes += 1;
   const cadence = analyzeFlowCadence(run);
   if (isPublicLongformRun()) {
-    const score = calculateFlowScoreV2({
-      wpm: cadence.finalWpm,
-      accuracy: currentAccuracyPercent(),
-      consistency: cadence.cadenceScore ?? 0,
-    });
+    const score = isPublicStreamRun()
+      ? calculateFlowScoreV3({
+        correctCharacters: Math.max(0, (Number(run.currentIndex) || 0) - (Number(run.uncorrectedErrors) || 0)),
+        wpm: cadence.finalWpm,
+        accuracy: currentAccuracyPercent(),
+        consistency: cadence.cadenceScore ?? 0,
+      })
+      : calculateFlowScoreV2({
+        wpm: cadence.finalWpm,
+        accuracy: currentAccuracyPercent(),
+        consistency: cadence.cadenceScore ?? 0,
+      });
     setTextIfChanged(mountedRunHud.score, score.score.toLocaleString("en-US"));
     setTextIfChanged(mountedRunHud.finalWpm, cadence.finalWpm.toFixed(1));
     setTextIfChanged(mountedRunHud.accuracy, `${currentAccuracyPercent().toFixed(1)}%`);
+    if (isPublicStreamRun()) setTextIfChanged(mountedRunHud.progress, String(score.standardWords || 0));
     return;
   }
   updateGameplayHud(mountedRunHud, null, cadence);
@@ -466,9 +538,11 @@ function syncRunHud() {
   if (!hud) return;
   setTextIfChanged(
     hud.progress,
-    isPublicLongformRun()
-      ? `${Math.min(100, Math.round((run.currentIndex / Math.max(1, run.passage.length)) * 100))}%`
-      : `${run.currentIndex} / ${run.passage.length}`,
+    isPublicStreamRun()
+      ? String(Math.floor(Math.max(0, run.currentIndex - run.uncorrectedErrors) / 5))
+      : isPublicLongformRun()
+        ? `${Math.min(100, Math.round((run.currentIndex / Math.max(1, run.passage.length)) * 100))}%`
+        : `${run.currentIndex} / ${run.passage.length}`,
   );
   setTextIfChanged(hud.corrected, String(run.correctedErrors));
   setTextIfChanged(hud.unresolved, String(run.uncorrectedErrors));
@@ -491,7 +565,7 @@ function renderRun() {
         <div><span>Score</span><strong data-flow-score>0</strong></div>
         <div><span>WPM</span><strong data-flow-final-wpm>0.0</strong></div>
         <div><span>Accuracy</span><strong data-flow-accuracy>100.0%</strong></div>
-        <div><span>Progress</span><strong data-flow-progress>0%</strong></div>
+        <div><span>${isPublicStreamRun() ? "Words" : "Progress"}</span><strong data-flow-progress>${isPublicStreamRun() ? "0" : "0%"}</strong></div>
       </section>`
     : `<section class="flow-gameplay-hud flow-cadence-hud" aria-label="Flow gameplay and cadence status">
         <div class="flow-score-block"><span>Score</span><strong data-flow-score>0</strong></div>
@@ -513,6 +587,14 @@ function renderRun() {
         <header class="flow-run-header">
           <button type="button" class="screen-back-button" data-flow-action="back">BACK</button>
           <div><span>${escapeHtml(runHeaderLabel())}</span>${publicLongform ? "" : `<strong data-flow-progress>0 / ${run.passage.length}</strong>`}</div>
+          ${isPublicStreamRun() ? `<div class="flow-v3-run-tools">
+            <label>TEXT
+              <select data-flow-theme-select aria-label="Flow text type">
+                ${FLOW_V3_THEME_IDS.map((theme) => `<option value="${theme}"${theme === resolvedRunPlan.theme ? " selected" : ""}>${theme.replaceAll("-", " ").toUpperCase()}</option>`).join("")}
+              </select>
+            </label>
+            <span class="flow-v3-tab-hint">TAB · NEW TEXT</span>
+          </div>` : ""}
         </header>
         ${!publicLongform && chapter ? `<div class="flow-chapter-strip" data-flow-chapter><span>${escapeHtml(chapter.title)}</span><strong>${escapeHtml(chapter.difficulty)}</strong></div>` : ""}
         ${hud}
@@ -536,6 +618,13 @@ function renderRun() {
   input?.addEventListener("beforeinput", handleBeforeInput);
   input?.addEventListener("input", () => { input.value = ""; });
   app.querySelector("[data-flow-passage]")?.addEventListener("pointerdown", () => input?.focus?.({ preventScroll: true }));
+  app.querySelector("[data-flow-theme-select]")?.addEventListener("change", (event) => {
+    if (!isPublicStreamRun()) return;
+    const theme = normalizeFlowV3Theme(event.target?.value);
+    finalizePublicStreamRun("theme-change");
+    updatePublicFlowUrl({ theme, newSeed: true });
+    startRun();
+  });
   input?.focus?.({ preventScroll: true });
   syncRunHud();
   scheduleCadenceHud(true);
@@ -643,11 +732,23 @@ function updateRunView(startIndex = run?.currentIndex ?? 0, endIndex = startInde
   if (!run || view !== "run") return;
   if (run.phase === FLOW_PHASES.COMPLETE) {
     clearCadenceRefresh();
-    renderComplete();
+    if (isPublicStreamRun()) {
+      finalizePublicStreamRun("complete");
+      updatePublicFlowUrl({ newSeed: true });
+      startRun();
+    } else {
+      renderComplete();
+    }
     return;
   }
-  if (isPublicLongformRun()) syncPublicSegmentIndex();
-  else if (maybeAdvanceRunPlan()) return;
+  if (isPublicLongformRun()) {
+    const beforeSegment = activeSegmentIndex;
+    syncPublicSegmentIndex();
+    if (isPublicStreamRun() && activeSegmentIndex !== beforeSegment) {
+      renderRun();
+      return;
+    }
+  } else if (maybeAdvanceRunPlan()) return;
 
   if (!root()) return;
   updateCharacterRange(startIndex, endIndex);
@@ -875,6 +976,45 @@ function renderComplete() {
   app.querySelector('[data-flow-action="restart"]')?.focus?.({ preventScroll: true });
 }
 
+function submitPublicStreamBestInBackground(result, recordState) {
+  if (!result?.recordEligible || !recordState?.isPersonalBest) return;
+  const service = createLeaderboardSubmissionService();
+  const prepared = service.prepareResultSubmission(
+    "flow",
+    result,
+    getAuthState(),
+    getLeaderboardProfileState(),
+  );
+  if (prepared.status === "ready") void service.submitCurrentResult();
+}
+
+function finalizePublicStreamRun(endedReason = "reset") {
+  if (!isPublicStreamRun() || !run || !publicRunSessionId || run.currentIndex <= 0) return null;
+  const result = createFlowScoreV3Result({
+    sessionId: publicRunSessionId,
+    endedAt: Date.now(),
+    endedReason,
+    snapshot: getFlowTypingSnapshot(run),
+    plan: resolvedRunPlan,
+  });
+  if (!result) return null;
+  const recordState = recordFlowResultV3(result);
+  lastPublicResult = result;
+  lastPublicRecordState = recordState;
+  if (result.completed && resolvedRunPlan?.corpusVersion === 2) {
+    recordFlowCorpusRun(resolvedRunPlan, { completedAt: result.endedAt });
+  }
+  submitPublicStreamBestInBackground(result, recordState);
+  return result;
+}
+
+function rerollPublicStream() {
+  finalizePublicStreamRun("reset");
+  updatePublicFlowUrl({ newSeed: true });
+  startRun();
+  return true;
+}
+
 function deleteBackward() {
   if (!run) return;
   const beforeIndex = run.currentIndex;
@@ -907,7 +1047,14 @@ function handleDocumentKeydown(event) {
   if (event.key === "Escape") {
     event.preventDefault();
     event.stopImmediatePropagation();
+    if (isPublicStreamRun()) finalizePublicStreamRun("exit");
     restoreReturnSurface();
+    return;
+  }
+  if (isPublicStreamRun() && event.key === "Tab" && view === "run") {
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    rerollPublicStream();
     return;
   }
   if (view === "chapter") {
@@ -942,13 +1089,17 @@ function handleDocumentKeydown(event) {
 }
 
 function tryLaunchDeveloperFlow() {
-  if (!developerFlowRequested || active || dismissed) return false;
+  if ((!developerFlowRequested && !publicFlowRequested) || active || dismissed) return false;
   const app = root();
   if (!app || app.childNodes.length === 0) return false;
   preserveReturnSurface();
   active = true;
-  view = "ready";
-  renderReady();
+  if (isPublicStreamRun()) {
+    startRun();
+  } else {
+    view = "ready";
+    renderReady();
+  }
   return true;
 }
 
@@ -976,7 +1127,7 @@ subscribeToSubmissions((state) => {
 });
 
 document.addEventListener("keydown", handleDocumentKeydown, true);
-if (developerFlowRequested) {
+if (developerFlowRequested || publicFlowRequested) {
   const app = root();
   if (app) new MutationObserver(() => queueMicrotask(tryLaunchDeveloperFlow)).observe(app, { childList: true });
   queueMicrotask(tryLaunchDeveloperFlow);
@@ -993,6 +1144,14 @@ if (globalThis.window) {
     activateFromLocation: activateFlowFromLocation,
     refreshPlanFromLocation: refreshFlowPlanFromLocation,
     startCurrentRun: startCurrentFlowRun,
+    rerollPublicRun: () => isPublicStreamRun() ? rerollPublicStream() : false,
+    setPublicTheme: (theme) => {
+      if (!isPublicStreamRun()) return false;
+      finalizePublicStreamRun("theme-change");
+      updatePublicFlowUrl({ theme, newSeed: true });
+      startRun();
+      return true;
+    },
     getPublicSessionId: () => publicRunSessionId,
     getPublicResult: () => lastPublicResult ? { ...lastPublicResult, seriesIds: [...lastPublicResult.seriesIds] } : null,
     getPublicRecordState: () => lastPublicRecordState ? {
