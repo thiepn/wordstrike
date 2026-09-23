@@ -66,7 +66,7 @@ function ensureRunIdentity() {
   if (!snapshot || snapshot.startedAt == null) return null;
   if (snapshot.startedAt !== trackedStartedAt) {
     trackedStartedAt = snapshot.startedAt;
-    currentSessionId = makeSessionId();
+    currentSessionId = controller()?.getPublicSessionId?.() || makeSessionId();
     completion = null;
     const currentPlan = plan();
     saveFlowLastSetup({
