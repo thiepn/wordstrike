@@ -66,8 +66,8 @@ const MODE_DEFINITIONS = Object.freeze([
   Object.freeze({
     id: MODE_IDS.FLOW,
     name: "Flow",
-    shortLabel: "Natural Typing",
-    description: "Build rhythm through continuous, real-world text.",
+    shortLabel: "Longform",
+    description: "Type long-form texts and chase a higher score.",
     enabled: true,
     visible: true,
     status: "available",

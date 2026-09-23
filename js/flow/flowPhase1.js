@@ -16,11 +16,17 @@ let resolvedRunPlan = null;
 let resolvedSelection = null;
 const LIVE_CADENCE_INTERVAL_MS = 180;
 
+function refreshFlowPlanFromLocation(locationLike = globalThis.location) {
+  const params = new URLSearchParams(locationLike?.search || "");
+  resolvedRunPlan = resolveFlowRunPlan(params);
+  resolvedSelection = resolvedRunPlan ? null : resolveFlowSelection(params);
+  return resolvedRunPlan || resolvedSelection;
+}
+
 function resolveFlowRouteState(locationLike = globalThis.location) {
   const params = new URLSearchParams(locationLike?.search || "");
   developerFlowRequested = params.get("dev") === "1" && params.get("mode") === "flow";
-  resolvedRunPlan = resolveFlowRunPlan(params);
-  resolvedSelection = resolvedRunPlan ? null : resolveFlowSelection(params);
+  refreshFlowPlanFromLocation(locationLike);
   return developerFlowRequested;
 }
 
@@ -662,6 +668,12 @@ function activateFlowFromLocation() {
   return tryLaunchDeveloperFlow();
 }
 
+function startCurrentFlowRun() {
+  if (!active || !resolvedRunPlan) return false;
+  startRun();
+  return true;
+}
+
 document.addEventListener("keydown", handleDocumentKeydown, true);
 if (developerFlowRequested) {
   const app = root();
@@ -678,6 +690,8 @@ if (globalThis.window) {
     getPerformanceStats: () => ({ ...performanceStats }),
     isActive: () => active,
     activateFromLocation: activateFlowFromLocation,
+    refreshPlanFromLocation: refreshFlowPlanFromLocation,
+    startCurrentRun: startCurrentFlowRun,
     developerRouteEnabled: developerFlowRequested,
   });
 }

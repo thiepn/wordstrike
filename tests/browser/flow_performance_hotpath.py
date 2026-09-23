@@ -58,6 +58,9 @@ def certify_public_entry(browser_type, base, evidence):
     }""")
     flow.click()
     expect(page.locator('[data-flow-view="ready"]')).to_be_visible(timeout=15000)
+    expect(page.locator('[data-flow-game-home]')).to_be_visible(timeout=15000)
+    assert page.locator('[data-flow-choice-group="category"]').count() == 0
+    assert page.locator('[data-flow-choice-group="difficulty"]').count() == 0
     result = page.evaluate("""entry => ({
       sameDocument: window.__flowEntryDocumentMarker === entry,
       elapsedMs: performance.now() - window.__flowEntryStartedAt,

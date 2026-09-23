@@ -51,35 +51,36 @@ def launch_public_flow(page):
     assert page.evaluate('window.wordstrikeFlowReleasePhase13.runtimeReady()') is True
     assert 'dev=1' not in page.url, page.url
     assert page.evaluate('window.wordstrikeFlowReleasePhase13.isReleaseRoute()') is True
-    expect(page.locator('.flow-phase1-screen[data-flow-ui-phase7="true"]')).to_be_visible()
-    expect(page.locator('[data-flow-integration-profile]')).to_be_visible(timeout=10000)
+    expect(page.locator('.flow-phase1-screen[data-flow-ui-phase7="true"][data-flow-game-mode-v2="true"]')).to_be_visible()
+    expect(page.locator('[data-flow-game-home]')).to_be_visible(timeout=10000)
+    assert page.locator('[data-flow-choice-group="category"]').count() == 0
+    assert page.locator('[data-flow-choice-group="difficulty"]').count() == 0
+    assert page.locator('[data-flow-modifier-id]').count() == 0
 
 
-def make_quick_sprint(page, seed):
-    page.goto(page.evaluate("""seed => {
+def make_quick_run(page, seed):
+    page.evaluate("""seed => {
       const url = new URL(location.href);
-      url.searchParams.set('flowLength', 'quick');
-      url.searchParams.set('flowCategory', 'mixed');
-      url.searchParams.set('flowDifficulty', 'natural');
-      url.searchParams.set('flowModifierIds', 'sprint');
       url.searchParams.set('flowSeed', seed);
-      return url.href;
-    }""", seed), wait_until='domcontentloaded')
-    expect(page.locator('[data-flow-view="ready"]')).to_be_visible(timeout=15000)
-    assert page.evaluate('window.wordstrikeFlowReleasePhase13.runtimeReady()') is True
-    assert 'dev=1' not in page.url, page.url
-    onboarding = page.locator('[data-flow-integration-onboarding-done]')
-    if onboarding.count():
-        onboarding.click()
+      history.replaceState(null, '', url.href);
+    }""", seed)
+    expect(page.locator('[data-flow-game-length="quick"]')).to_be_visible(timeout=10000)
+    page.locator('[data-flow-game-length="quick"]').click()
+    expect(page.locator('[data-flow-game-length="quick"]')).to_have_attribute('aria-pressed', 'true')
+    page.locator('[data-flow-action="start"]').click()
+    expect(page.locator('[data-flow-view="run"]')).to_be_visible(timeout=15000)
     plan = page.evaluate('window.wordstrikeFlowPhase1.getRunPlan()')
     assert plan['sessionLength'] == 'quick', plan
-    assert plan['modifiers'] == ['sprint'], plan
+    assert plan['modifiers'] == [], plan
+    assert plan['category'] == 'mixed', plan
+    assert plan['difficulty'] == 'natural', plan
     assert plan['passageCount'] == 1, plan
     return plan
 
 
 def finish_run(page, plan):
-    page.locator('[data-flow-action="start"]').click()
+    if page.locator('[data-flow-view="ready"]').is_visible():
+        page.locator('[data-flow-action="start"]').click()
     for index, segment in enumerate(plan['segments']):
         expect(page.locator('[data-flow-view="run"]')).to_be_visible(timeout=10000)
         page.keyboard.type(segment['text'])
@@ -105,7 +106,7 @@ def certify_public_journey(browser, browser_name, base, evidence):
     assert page.locator('[data-mode-id="arcade-rush"]').count() == 0
 
     launch_public_flow(page)
-    plan = make_quick_sprint(page, f'phase13-public-{browser_name}')
+    plan = make_quick_run(page, f'phase13-public-{browser_name}')
     finish_run(page, plan)
 
     summary = page.evaluate('window.wordstrikeFlowIntegrationPhase11.getSummary()')
@@ -132,7 +133,7 @@ def certify_public_journey(browser, browser_name, base, evidence):
 
     persisted_plan = page.evaluate('window.wordstrikeFlowPhase1.getRunPlan()')
     assert persisted_plan['sessionLength'] == 'quick', persisted_plan
-    assert persisted_plan['modifiers'] == ['sprint'], persisted_plan
+    assert persisted_plan['modifiers'] == [], persisted_plan
     assert persisted_plan['passageCount'] == 1, persisted_plan
     assert not errors, errors
     context.close()
@@ -158,7 +159,7 @@ def certify_public_journey(browser, browser_name, base, evidence):
 
     evidence.append({
         'browser': browser_name,
-        'case': 'public Flow persists explicit setup while a fresh profile starts coherent Standard',
+        'case': 'public Flow remembers only run length while a fresh profile starts coherent Standard',
         'completedRuns': summary['progress']['completedRuns'],
         'canonicalSessions': summary['generic']['completedSessions'],
         'persistedLength': persisted_plan['sessionLength'],
@@ -182,7 +183,7 @@ def certify_mobile(browser, browser_name, base, evidence):
       overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
       viewport: document.documentElement.clientWidth,
       screen: document.querySelector('.flow-phase1-screen').getBoundingClientRect().width,
-      setup: document.querySelector('[data-flow-ui="setup"]')?.getBoundingClientRect().width || 0,
+      setup: document.querySelector('[data-flow-game-home]')?.getBoundingClientRect().width || 0,
     })""")
     assert geometry['overflow'] <= 1, geometry
     assert geometry['screen'] <= geometry['viewport'] + 1, geometry
@@ -235,8 +236,9 @@ def certify_offline(browser, browser_name, base, evidence):
 
     cached = page.evaluate("""async () => {
       const targets = [
-        './js/flow/flowRuntimeLoader.js?v=20260923a',
+        './js/flow/flowRuntimeLoader.js?v=20260923b',
         './js/flow/flowLongformContent.js',
+        './js/flow/flowGameModeV2.js?v=20260923a',
         './js/flow/flowUiPhase7KeyboardGuard.js?v=20260923a',
         './js/flow/flowIntegrationPhase11.js?v=20260923a',
         './styles/screens/flow-integration-phase11.css?v=20260916a',

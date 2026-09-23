@@ -1,0 +1,166 @@
+/* =========================================================
+   WORDSTRIKE FLOW V2 — PHASE 1 PRODUCT RESET
+   Public Flow is a game mode: choose only run length, then play.
+   Legacy developer configuration remains available off the public route.
+   ========================================================= */
+
+.flow-ready-screen[data-flow-game-mode-v2="true"] .flow-phase1-shell {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: clamp(16px, 2.6vw, 28px);
+  width: min(calc(100% - 48px), 980px);
+  min-height: 100%;
+  padding: clamp(34px, 7vw, 88px) 0;
+}
+
+.flow-ready-screen[data-flow-game-mode-v2="true"] .screen-back-button {
+  order: 0;
+}
+
+.flow-ready-screen[data-flow-game-mode-v2="true"] .flow-phase1-kicker {
+  order: 1;
+  margin-top: clamp(10px, 2vw, 24px);
+}
+
+.flow-ready-screen[data-flow-game-mode-v2="true"] h1 {
+  order: 2;
+  font-size: clamp(5rem, 15vw, 11rem);
+  line-height: 0.76;
+}
+
+.flow-ready-screen[data-flow-game-mode-v2="true"] .flow-phase1-lead {
+  order: 3;
+  max-width: 48rem;
+  margin: 0;
+  color: var(--flow-ink-soft);
+  font-size: clamp(1.05rem, 2vw, 1.35rem);
+}
+
+.flow-game-v2-home {
+  order: 4;
+  display: grid;
+  gap: 18px;
+  width: min(100%, 640px);
+  margin-top: 8px;
+}
+
+.flow-game-v2-lengths {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  width: 100%;
+}
+
+.flow-game-v2-length {
+  display: grid;
+  gap: 4px;
+  min-height: 64px;
+  padding: 10px 14px;
+  border: 1px solid var(--flow-line-strong);
+  background: transparent;
+  color: var(--flow-ink-muted);
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+  transition:
+    border-color 120ms ease,
+    background-color 120ms ease,
+    color 120ms ease;
+}
+
+.flow-game-v2-length strong {
+  color: inherit;
+  font-family: var(--flow-data-face);
+  font-size: 0.76rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.flow-game-v2-length span {
+  color: var(--flow-ink-muted);
+  font-family: var(--flow-ui-face);
+  font-size: 0.72rem;
+}
+
+.flow-game-v2-length.is-selected {
+  border-color: var(--flow-signal);
+  background: var(--flow-signal-faint);
+  color: var(--flow-ink);
+}
+
+.flow-game-v2-length:hover,
+.flow-game-v2-length:focus-visible {
+  border-color: var(--flow-signal);
+  color: var(--flow-ink);
+  outline: none;
+}
+
+.flow-game-v2-auto {
+  margin: 0;
+  color: var(--flow-ink-muted);
+  font-family: var(--flow-data-face);
+  font-size: 0.62rem;
+  letter-spacing: 0.07em;
+  line-height: 1.55;
+  text-transform: uppercase;
+}
+
+.flow-game-v2-play {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.flow-game-v2-play-button {
+  min-width: min(100%, 220px);
+  min-height: 52px;
+  font-size: 0.8rem;
+  letter-spacing: 0.16em;
+}
+
+.flow-run-screen[data-flow-game-mode-v2="true"] .flow-session-rail,
+.flow-chapter-screen[data-flow-game-mode-v2="true"] .flow-session-rail,
+.flow-complete-screen[data-flow-game-mode-v2="true"] .flow-session-rail {
+  display: none !important;
+}
+
+.flow-complete-screen[data-flow-game-mode-v2="true"] .flow-complete-shell {
+  gap: clamp(18px, 2.8vw, 28px);
+}
+
+@media (max-width: 640px) {
+  .flow-ready-screen[data-flow-game-mode-v2="true"] .flow-phase1-shell {
+    width: min(calc(100% - 28px), 980px);
+    padding: 24px 0 40px;
+  }
+
+  .flow-ready-screen[data-flow-game-mode-v2="true"] h1 {
+    font-size: clamp(4.2rem, 26vw, 6.5rem);
+  }
+
+  .flow-game-v2-home {
+    width: 100%;
+  }
+
+  .flow-game-v2-lengths {
+    grid-template-columns: 1fr;
+  }
+
+  .flow-game-v2-length {
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    min-height: 52px;
+  }
+
+  .flow-game-v2-play-button {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flow-game-v2-length {
+    transition: none;
+  }
+}
