@@ -6,6 +6,7 @@ import {
   compareFlowScoreV2Results,
   createFlowScoreV2Result,
 } from "../js/flow/flowScoreV2.js";
+import { createFlowSessionResult } from "../js/flow/flowProgression.js";
 
 const perfect100 = calculateFlowScoreV2({ wpm: 100, accuracy: 100, consistency: 100 });
 assert.equal(perfect100.score, 100000);
@@ -89,6 +90,19 @@ assert.equal(
   result.score,
   calculateFlowScoreV2({ wpm: 101.2, accuracy: 98.4, consistency: 91 }).score,
 );
+const genericResult = createFlowSessionResult({
+  sessionId: "flow-v2-session-score",
+  endedAt: 1700000000000,
+  snapshot,
+  plan,
+});
+assert.equal(genericResult.score, result.score);
+assert.equal(genericResult.wpm, result.wpm);
+assert.equal(genericResult.accuracy, result.accuracy);
+assert.equal(genericResult.variantId, result.variantId);
+assert.equal(genericResult.modeData.consistencyScore, result.consistency);
+assert.equal(genericResult.modeData.flowScoreRulesVersion, 2);
+assert.equal(genericResult.modeData.flowBoardKey, FLOW_V2_BOARD_KEYS.standard);
 
 const ineligible = createFlowScoreV2Result({
   sessionId: "flow-v2-session-low-accuracy",
