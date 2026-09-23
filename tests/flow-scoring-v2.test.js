@@ -76,6 +76,9 @@ const result = createFlowScoreV2Result({
 assert.ok(result);
 assert.equal(result.modeId, "flow");
 assert.equal(result.variantId, "flow-standard-v2");
+assert.equal(result.sessionSource, "flow-v2");
+assert.equal(result.scoreFormula, "wpm-accuracy-consistency-v1");
+assert.equal(result.developerMode, false);
 assert.equal(result.boardKey, FLOW_V2_BOARD_KEYS.standard);
 assert.equal(result.rulesVersion, 2);
 assert.equal(result.metricVersion, 1);
