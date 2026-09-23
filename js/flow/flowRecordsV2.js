@@ -34,6 +34,7 @@ function cleanResult(value) {
     rawWpm: Math.max(0, finite(value.rawWpm)),
     accuracy: Math.max(0, Math.min(100, finite(value.accuracy))),
     consistency: Math.max(0, Math.min(100, finite(value.consistency))),
+    consistencySamples: Math.max(0, Math.round(finite(value.consistencySamples))),
     activeDurationMs: Math.max(0, finite(value.activeDurationMs)),
     wordsCompleted: Math.max(0, Math.round(finite(value.wordsCompleted))),
     charactersCompleted: Math.max(0, Math.round(finite(value.charactersCompleted))),
