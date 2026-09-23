@@ -82,6 +82,7 @@ export function createFlowScoreV2Result({
   const completed = snapshot.phase === "complete"
     && finite(snapshot.currentIndex) >= finite(snapshot.passageLength);
   const recordEligible = completed
+    && String(sessionId || "").length > 0
     && consistencyAvailable
     && breakdown.wpm > 0
     && breakdown.accuracy >= FLOW_SCORE_V2_RULES.minimumRecordAccuracy;
@@ -93,6 +94,9 @@ export function createFlowScoreV2Result({
     metricVersion: FLOW_SCORE_V2_RULES.metricVersion,
     modeId: "flow",
     variantId: `flow-${sessionLength}-v2`,
+    sessionSource: "flow-v2",
+    scoreFormula: "wpm-accuracy-consistency-v1",
+    developerMode: false,
     boardKey: FLOW_V2_BOARD_KEYS[sessionLength],
     sessionId: String(sessionId || ""),
     endedAt: Math.max(0, finite(endedAt)),
