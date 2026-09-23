@@ -1,0 +1,98 @@
+name: Flow V2 production certification
+
+on:
+  pull_request:
+    paths:
+      - 'js/flow/**'
+      - 'js/leaderboard*.js'
+      - 'js/pendingResult*.js'
+      - 'js/submissionOutbox*.js'
+      - 'js/authService.js'
+      - 'js/supabaseClient.js'
+      - 'js/supabaseConfig.js'
+      - 'js/appClickRouting.js'
+      - 'js/main.js'
+      - 'supabase/functions/**'
+      - 'supabase/migrations/*flow*'
+      - 'styles/screens/flow-*.css'
+      - 'tests/flow-*.test.js'
+      - 'tests/browser/flow_phase13_release.py'
+      - 'tests/browser/ui11_profile_leaderboards_settings.py'
+      - '.github/workflows/flow-v2-release-certification.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'js/flow/**'
+      - 'js/leaderboard*.js'
+      - 'js/pendingResult*.js'
+      - 'js/submissionOutbox*.js'
+      - 'supabase/functions/**'
+      - 'supabase/migrations/*flow*'
+      - 'tests/flow-*.test.js'
+      - '.github/workflows/flow-v2-release-certification.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: flow-v2-certification-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Validate Flow corpus
+        run: npm run validate:flow-corpus
+      - name: Certify Flow V2 release contracts
+        run: |
+          node tests/flow-corpus-v2.test.js
+          node tests/flow-longform-gameplay-v2.test.js
+          node tests/flow-scoring-v2.test.js
+          node tests/flow-records-v2.test.js
+          node tests/flow-global-leaderboards-v1.test.js
+          node tests/flow-phase13-release.test.js
+          node tests/flow-v2-release-certification.test.js
+      - name: Certify shared leaderboard contracts
+        run: |
+          node tests/leaderboardService.test.js
+          node tests/leaderboardTabOrder.test.js
+          node tests/leaderboardRanking.test.js
+          node tests/leaderboardSubmissionValidation.test.js
+          node tests/extendedLeaderboardSecurity.test.js
+          node tests/leaderboardRulesRollback.test.js
+          node tests/submissionOutbox.test.js
+          node tests/submissionOutboxCoordinator.test.js
+          node tests/pendingResultSubmission.test.js
+
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    container:
+      image: mcr.microsoft.com/playwright/python:v1.57.0-noble
+      options: --ipc=host
+    env:
+      HOME: /root
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install browser test dependencies
+        run: python3 -m pip install -r tests/browser/requirements.txt
+      - name: Certify Flow public runtime
+        run: python3 tests/browser/flow_phase13_release.py
+      - name: Certify leaderboard shell
+        run: python3 tests/browser/ui11_profile_leaderboards_settings.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: flow-v2-production-certification-evidence
+          path: |
+            browser-artifacts/flow-phase13/
+            browser-artifacts/ui11-profile-leaderboards-settings/
+          retention-days: 14
+          if-no-files-found: warn
