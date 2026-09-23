@@ -1,4 +1,4 @@
-name: Flow V2 production certification
+name: Flow V3 production certification
 
 on:
   pull_request:
@@ -66,8 +66,9 @@ jobs:
           node-version: 22
       - name: Validate Flow corpus
         run: npm run validate:flow-corpus
-      - name: Certify Flow V2 release contracts
+      - name: Certify Flow V3 release contracts
         run: |
+          node tests/flow-instant-v3.test.js
           node tests/flow-corpus-v2.test.js
           node tests/flow-longform-gameplay-v2.test.js
           node tests/flow-scoring-v2.test.js
@@ -113,7 +114,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: flow-v2-production-certification-evidence
+          name: flow-v3-production-certification-evidence
           path: |
             browser-artifacts/flow-phase13/
             browser-artifacts/ui11-profile-leaderboards-settings/
