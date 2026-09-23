@@ -1,6 +1,6 @@
 const RELEASE_FLAG = "flowRelease";
-const FLOW_RELEASE_VERSION = 6;
-const FLOW_RELEASE_CACHE_NAME = "wordstrike-flow-release-v9";
+const FLOW_RELEASE_VERSION = 7;
+const FLOW_RELEASE_CACHE_NAME = "wordstrike-flow-release-v10";
 const FLOW_RELEASE_QUERY_KEYS = Object.freeze([
   "mode",
   RELEASE_FLAG,
@@ -14,6 +14,7 @@ const FLOW_RELEASE_QUERY_KEYS = Object.freeze([
   "flowResumeAdaptive",
   "flowIntegration",
   "flowLength",
+  "flowTheme",
   "flowCategory",
   "flowDifficulty",
   "flowSeed",
@@ -63,12 +64,17 @@ const FLOW_RELEASE_ASSETS = Object.freeze([
   "./js/flow/flowModifiers.js",
   "./js/flow/flowModifiersPhase9.js?v=20260923a",
   "./js/flow/flowPassages.js",
-  "./js/flow/flowPhase1.js?v=20260923f",
+  "./js/flow/flowPhase1.js?v=20260923i",
   "./js/flow/flowProgression.js",
   "./js/flow/flowProgression.js?v=20260923a",
   "./js/flow/flowRunPlan.js",
   "./js/flow/flowRunPlan.js?v=20260923e",
   "./js/flow/flowScoreV2.js?v=20260923f",
+  "./js/flow/flowRecordsV3.js?v=20260923a",
+  "./js/flow/flowRecordsV3.js",
+  "./js/flow/flowScoreV3.js?v=20260923a",
+  "./js/flow/flowScoreV3.js",
+  "./js/flow/flowStreamPlanV3.js?v=20260923a",
   "./js/flow/flowScoreV2.js",
   "./js/flow/flowScoreV2.js?v=20260923a",
   "./js/flow/flowRecordsV2.js?v=20260923a",
@@ -83,7 +89,7 @@ const FLOW_RELEASE_ASSETS = Object.freeze([
   "./js/flow/flowVisualPhase6.js?v=20260923a",
   "./styles/screens/flow-phase1.css?v=20260916d",
   "./styles/screens/flow-phase5.css?v=20260916a",
-  "./styles/screens/flow-game-mode-v2.css?v=20260923c",
+  "./styles/screens/flow-game-mode-v2.css?v=20260923d",
   "./styles/screens/flow-visual-phase6.css?v=20260923a",
   "./styles/screens/flow-visual-phase6-polish.css?v=20260916a",
   "./styles/screens/flow-ui-phase7.css?v=20260916a",
@@ -366,7 +372,7 @@ async function importFlowRuntime() {
     const integrationBootstrap = await import("./flowIntegrationBootstrap.js?v=20260923b");
     integrationBootstrap.applyFlowIntegrationDefaults?.();
     await Promise.all([
-      import("./flowPhase1.js?v=20260923f"),
+      import("./flowPhase1.js?v=20260923i"),
       import("./flowVisualPhase6.js?v=20260923a"),
     ]);
 
