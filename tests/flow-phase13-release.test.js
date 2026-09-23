@@ -96,27 +96,28 @@ for (const key of FLOW_RELEASE_QUERY_KEYS) {
 assert.ok(FLOW_RELEASE_ASSETS.length >= 30, "release cache pack should cover the complete Flow stack");
 assert.equal(new Set(FLOW_RELEASE_ASSETS).size, FLOW_RELEASE_ASSETS.length, "release cache pack contains duplicates");
 for (const asset of [
-  "./js/flow/flowRuntimeLoader.js?v=20260923b",
+  "./js/flow/flowRuntimeLoader.js?v=20260923c",
   "./js/flow/flowEngine.js",
   "./js/flow/flowCadence.js",
   "./js/flow/flowGameplay.js",
-  "./js/flow/flowGameModeV2.js?v=20260923a",
+  "./js/flow/flowGameModeV2.js?v=20260923b",
   "./js/flow/flowContentExpansion.js",
   "./js/flow/flowLongformContent.js",
   "./js/flow/flowPassages.js",
-  "./js/flow/flowPhase1.js?v=20260923b",
+  "./js/flow/flowPhase1.js?v=20260923c",
   "./js/flow/flowProgression.js",
+  "./js/flow/flowRunPlan.js?v=20260923a",
   "./js/flow/flowUiPhase7KeyboardGuard.js?v=20260923a",
   "./js/flow/flowIntegrationPhase11.js?v=20260923a",
   "./styles/screens/flow-phase1.css?v=20260916d",
-  "./styles/screens/flow-game-mode-v2.css?v=20260923a",
+  "./styles/screens/flow-game-mode-v2.css?v=20260923b",
   "./styles/screens/flow-integration-phase11.css?v=20260916a",
 ]) {
   assert.ok(FLOW_RELEASE_ASSETS.includes(asset), `offline pack missing ${asset}`);
 }
 
 const mainIndex = index.indexOf('src="js/main.js?v=20260923b"');
-const releaseIndex = index.indexOf('src="js/flow/flowRuntimeLoader.js?v=20260923b"');
+const releaseIndex = index.indexOf('src="js/flow/flowRuntimeLoader.js?v=20260923c"');
 assert.ok(mainIndex >= 0 && releaseIndex > mainIndex, "main.js must boot before the release loader can temporarily emulate the developer route");
 assert.doesNotMatch(index, /src="js\/flow\/flowPhase1\.js/);
 assert.doesNotMatch(index, /const flowParams = new URLSearchParams/);
@@ -125,7 +126,7 @@ assert.match(loader, /replaceUrl\(next\)/, "public Flow entry should activate in
 assert.doesNotMatch(loader, /location\.assign\(next\.href\)/, "public Flow entry must not force a full navigation");
 assert.match(loader, /await Promise\.all\(\[/, "Flow modules should load in dependency-safe parallel waves");
 assert.match(loader, /activateFromLocation/, "cached Flow modules must support same-document re-entry");
-assert.match(loader, /flowGameModeV2\.js\?v=20260923a/, "public release must load the Flow V2 game-mode layer");
+assert.match(loader, /flowGameModeV2\.js\?v=20260923b/, "public release must load the Flow V2 game-mode layer");
 assert.match(loader, /temporary\.searchParams\.set\("dev", "1"\)/);
 assert.match(loader, /removeTemporaryDeveloperFlag\(\)/);
 assert.match(loader, /installReleaseExitCleanup\(\)/);

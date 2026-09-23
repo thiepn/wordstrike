@@ -37,6 +37,12 @@ const SPRINT_CHAPTER_INDEXES = Object.freeze({
 
 const LONGFORM_SECTION_COUNTS = Object.freeze({ quick: 1, standard: 3, long: 5 });
 
+export const FLOW_PUBLIC_LONGFORM_PROFILES = Object.freeze({
+  quick: Object.freeze({ sectionCount: 3, documentCount: 1, targetMinutes: 3 }),
+  standard: Object.freeze({ sectionCount: 5, documentCount: 1, targetMinutes: 6 }),
+  long: Object.freeze({ sectionCount: 10, documentCount: 2, targetMinutes: 10 }),
+});
+
 const DIFFICULTY_LADDERS = Object.freeze({
   smooth: Object.freeze(["smooth", "smooth", "smooth", "smooth", "smooth", "smooth"]),
   natural: Object.freeze(["smooth", "natural", "natural", "natural", "natural", "natural"]),
@@ -210,6 +216,170 @@ function createDefaultLongformPlan({ safeLength, seed }) {
   });
 }
 
+function seriesOrderForSeed(seed) {
+  const count = FLOW_LONGFORM_SERIES.length;
+  if (!count) return [];
+  const start = hashSeed(`${seed}:public-series-start`) % count;
+  const rawStep = count <= 1 ? 1 : (hashSeed(`${seed}:public-series-step`) % (count - 1)) + 1;
+  const order = [];
+  const used = new Set();
+  for (let offset = 0; offset < count * 2 && order.length < count; offset += 1) {
+    const index = (start + (offset * rawStep)) % count;
+    if (used.has(index)) continue;
+    used.add(index);
+    order.push(FLOW_LONGFORM_SERIES[index]);
+  }
+  for (const series of FLOW_LONGFORM_SERIES) {
+    if (!used.has(FLOW_LONGFORM_SERIES.indexOf(series))) order.push(series);
+  }
+  return order;
+}
+
+function createPublicLongformSegments(documents) {
+  const flat = documents.flatMap((document, documentIndex) => (
+    document.passages.map((passage, paragraphIndex) => ({
+      passage,
+      documentIndex,
+      paragraphIndex,
+      documentTitle: document.title,
+      seriesId: document.seriesId,
+    }))
+  ));
+  const segments = [];
+  let cursor = 0;
+  for (let index = 0; index < flat.length; index += 1) {
+    const item = flat[index];
+    const startIndex = cursor;
+    const endIndex = startIndex + item.passage.text.length - 1;
+    const separatorIndex = index < flat.length - 1 ? endIndex + 1 : null;
+    segments.push(Object.freeze({
+      index,
+      chapterIndex: 0,
+      passageIndex: index,
+      passageId: item.passage.id,
+      startIndex,
+      endIndex,
+      separatorIndex,
+      text: item.passage.text,
+      title: item.passage.title || null,
+      documentIndex: item.documentIndex,
+      paragraphIndex: item.paragraphIndex,
+      documentTitle: item.documentTitle,
+      seriesId: item.seriesId,
+      adaptiveFocus: null,
+    }));
+    cursor = endIndex + 1 + (separatorIndex == null ? 0 : 1);
+  }
+  return Object.freeze(segments);
+}
+
+export function createPublicFlowRunPlan({
+  sessionLength = "standard",
+  seed = "flow-v2-public",
+} = {}) {
+  if (!FLOW_LONGFORM_SERIES.length) throw new TypeError("Public Flow requires longform content");
+  const safeLength = Object.hasOwn(FLOW_PUBLIC_LONGFORM_PROFILES, sessionLength) ? sessionLength : "standard";
+  const profile = FLOW_PUBLIC_LONGFORM_PROFILES[safeLength];
+  const orderedSeries = seriesOrderForSeed(seed);
+  const perDocument = Math.max(1, Math.ceil(profile.sectionCount / profile.documentCount));
+  let remaining = profile.sectionCount;
+
+  const documents = [];
+  for (let documentIndex = 0; documentIndex < profile.documentCount && remaining > 0; documentIndex += 1) {
+    const series = orderedSeries[documentIndex % orderedSeries.length];
+    const take = Math.min(perDocument, remaining, series.sections.length);
+    const maxStart = Math.max(0, series.sections.length - take);
+    const start = safeLength === "quick" && maxStart > 0
+      ? hashSeed(`${seed}:${series.id}:quick-window`) % (maxStart + 1)
+      : 0;
+    const passages = Object.freeze(series.sections.slice(start, start + take));
+    documents.push(Object.freeze({
+      index: documentIndex,
+      seriesId: series.id,
+      title: series.title,
+      passages,
+      paragraphCount: passages.length,
+      wordCount: passages.reduce((sum, passage) => sum + passage.wordCount, 0),
+    }));
+    remaining -= passages.length;
+  }
+
+  // A future corpus may contain shorter documents. Fill any remaining slots
+  // deterministically from additional distinct series rather than repeating text.
+  let fallbackIndex = documents.length;
+  while (remaining > 0 && fallbackIndex < orderedSeries.length) {
+    const series = orderedSeries[fallbackIndex];
+    const take = Math.min(remaining, series.sections.length);
+    const passages = Object.freeze(series.sections.slice(0, take));
+    documents.push(Object.freeze({
+      index: documents.length,
+      seriesId: series.id,
+      title: series.title,
+      passages,
+      paragraphCount: passages.length,
+      wordCount: passages.reduce((sum, passage) => sum + passage.wordCount, 0),
+    }));
+    remaining -= passages.length;
+    fallbackIndex += 1;
+  }
+
+  const frozenDocuments = Object.freeze(documents);
+  const segments = createPublicLongformSegments(frozenDocuments);
+  const fullText = segments.map((segment) => (
+    segment.separatorIndex == null ? segment.text : `${segment.text} `
+  )).join("");
+  const allPassages = Object.freeze(frozenDocuments.flatMap((document) => document.passages));
+  const wordCount = frozenDocuments.reduce((sum, document) => sum + document.wordCount, 0);
+  const titles = Object.freeze(frozenDocuments.map((document) => document.title));
+  const ids = Object.freeze(frozenDocuments.map((document) => document.seriesId));
+  const compatibilityChapter = Object.freeze({
+    index: 0,
+    templateIndex: 0,
+    id: "longform-v2",
+    title: titles.length === 1 ? titles[0] : "Longform Run",
+    description: "Continuous longform typing without chapter transitions.",
+    difficulty: "natural",
+    passages: allPassages,
+    wordCount,
+  });
+
+  return Object.freeze({
+    id: `flow-v2-${safeLength}-${hashSeed(`${seed}:${ids.join("+")}`).toString(16)}`,
+    gameplayVersion: 2,
+    structure: "continuous-longform",
+    seed: String(seed),
+    category: "mixed",
+    difficulty: "natural",
+    sessionLength: safeLength,
+    modifiers: Object.freeze([]),
+    targetMinutes: profile.targetMinutes,
+    chapterCount: 1,
+    passageCount: segments.length,
+    paragraphCount: segments.length,
+    documentCount: frozenDocuments.length,
+    repeatedPassageCount: 0,
+    wordCount,
+    coherent: true,
+    continuous: true,
+    seriesId: ids[0] || null,
+    seriesTitle: titles.join(" / "),
+    seriesIds: ids,
+    seriesTitles: titles,
+    adaptive: Object.freeze({
+      enabled: false,
+      targetedPassageCount: 0,
+      normalPassageCount: segments.length,
+      targetRatio: 0,
+      weaknesses: Object.freeze([]),
+    }),
+    documents: frozenDocuments,
+    chapters: Object.freeze([compatibilityChapter]),
+    segments,
+    fullText,
+    cadenceExcludedAfterIndexes: Object.freeze([]),
+  });
+}
+
 export function createFlowRunPlan({
   category = "mixed",
   difficulty = "natural",
@@ -329,10 +499,13 @@ export function createFlowRunPlan({
 export function resolveFlowRunPlan(searchLike = "") {
   const params = searchLike instanceof URLSearchParams ? searchLike : new URLSearchParams(searchLike);
   if (params.get("flowRun") !== "1") return null;
-  const category = FLOW_CATEGORIES.includes(params.get("flowCategory")) ? params.get("flowCategory") : "mixed";
-  const difficulty = FLOW_DIFFICULTIES.includes(params.get("flowDifficulty")) ? params.get("flowDifficulty") : "natural";
   const sessionLength = Object.hasOwn(RUN_PROFILES, params.get("flowLength")) ? params.get("flowLength") : "standard";
   const seed = params.get("flowSeed") || "phase5-default";
+  if (params.get("flowRelease") === "1") {
+    return createPublicFlowRunPlan({ sessionLength, seed });
+  }
+  const category = FLOW_CATEGORIES.includes(params.get("flowCategory")) ? params.get("flowCategory") : "mixed";
+  const difficulty = FLOW_DIFFICULTIES.includes(params.get("flowDifficulty")) ? params.get("flowDifficulty") : "natural";
   const modifiers = normalizeFlowModifierIds(params.get("flowModifierIds") || "");
   const adaptiveProfile = params.get("flowAdaptive") === "1"
     ? parseFlowWeaknessProfile(params.get("flowWeaknesses") || "")

@@ -74,21 +74,24 @@ def make_quick_run(page, seed):
     assert plan['modifiers'] == [], plan
     assert plan['category'] == 'mixed', plan
     assert plan['difficulty'] == 'natural', plan
-    assert plan['passageCount'] == 1, plan
+    assert plan['passageCount'] == 3, plan
+    assert plan['paragraphCount'] == 3, plan
+    assert plan['documentCount'] == 1, plan
+    assert plan['targetMinutes'] == 3, plan
     return plan
 
 
 def finish_run(page, plan):
     if page.locator('[data-flow-view="ready"]').is_visible():
         page.locator('[data-flow-action="start"]').click()
-    for index, segment in enumerate(plan['segments']):
-        expect(page.locator('[data-flow-view="run"]')).to_be_visible(timeout=10000)
-        page.keyboard.type(segment['text'])
-        if index < len(plan['segments']) - 1:
-            next_segment = plan['segments'][index + 1]
-            if next_segment['chapterIndex'] != segment['chapterIndex']:
-                expect(page.locator('[data-flow-view="chapter"]')).to_be_visible(timeout=10000)
-                page.locator('[data-flow-action="continue-chapter"]').click()
+    expect(page.locator('[data-flow-view="run"][data-flow-longform-v2="true"]')).to_be_visible(timeout=10000)
+    expect(page.locator('[data-flow-longform="true"]')).to_be_visible(timeout=10000)
+    assert page.locator('[data-flow-paragraph]').count() == plan['paragraphCount']
+    assert page.locator('[data-flow-view="chapter"]').count() == 0
+    hud_labels = page.locator('.flow-game-v2-hud > div > span').all_text_contents()
+    assert hud_labels == ['Score', 'WPM', 'Accuracy', 'Progress'], hud_labels
+    page.keyboard.type(plan['fullText'])
+    assert page.locator('[data-flow-view="chapter"]').count() == 0
     expect(page.locator('[data-flow-view="complete"]')).to_be_visible(timeout=10000)
     expect(page.locator('[data-flow-integration-complete]')).to_be_visible(timeout=10000)
 
@@ -134,7 +137,8 @@ def certify_public_journey(browser, browser_name, base, evidence):
     persisted_plan = page.evaluate('window.wordstrikeFlowPhase1.getRunPlan()')
     assert persisted_plan['sessionLength'] == 'quick', persisted_plan
     assert persisted_plan['modifiers'] == [], persisted_plan
-    assert persisted_plan['passageCount'] == 1, persisted_plan
+    assert persisted_plan['passageCount'] == 3, persisted_plan
+    assert persisted_plan['paragraphCount'] == 3, persisted_plan
     assert not errors, errors
     context.close()
 
@@ -150,7 +154,10 @@ def certify_public_journey(browser, browser_name, base, evidence):
     assert default_plan['modifiers'] == [], default_plan
     assert default_plan['coherent'] is True, default_plan
     assert default_plan['continuous'] is True, default_plan
-    assert default_plan['passageCount'] == 3, default_plan
+    assert default_plan['passageCount'] == 5, default_plan
+    assert default_plan['paragraphCount'] == 5, default_plan
+    assert default_plan['documentCount'] == 1, default_plan
+    assert default_plan['targetMinutes'] == 6, default_plan
     assert default_plan['chapterCount'] == 1, default_plan
     assert default_plan['seriesTitle'], default_plan
     assert all('"' not in segment['text'] for segment in default_plan['segments']), default_plan
@@ -188,6 +195,21 @@ def certify_mobile(browser, browser_name, base, evidence):
     assert geometry['overflow'] <= 1, geometry
     assert geometry['screen'] <= geometry['viewport'] + 1, geometry
     assert geometry['setup'] <= geometry['viewport'] + 1, geometry
+
+    page.locator('[data-flow-game-length="quick"]').click()
+    page.locator('[data-flow-action="start"]').click()
+    expect(page.locator('[data-flow-view="run"][data-flow-longform-v2="true"]')).to_be_visible(timeout=10000)
+    gameplay_geometry = page.evaluate("""() => ({
+      overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      hud: document.querySelector('.flow-game-v2-hud').getBoundingClientRect().width,
+      passage: document.querySelector('[data-flow-longform="true"]').getBoundingClientRect().width,
+      viewport: document.documentElement.clientWidth,
+      paragraphs: document.querySelectorAll('[data-flow-paragraph]').length,
+    })""")
+    assert gameplay_geometry['overflow'] <= 1, gameplay_geometry
+    assert gameplay_geometry['hud'] <= gameplay_geometry['viewport'] + 1, gameplay_geometry
+    assert gameplay_geometry['passage'] <= gameplay_geometry['viewport'] + 1, gameplay_geometry
+    assert gameplay_geometry['paragraphs'] == 3, gameplay_geometry
     page.screenshot(path=str(ARTIFACTS / 'chromium-public-mobile.png'), full_page=True)
     evidence.append({'browser': browser_name, 'case': '390px public Flow entry/setup', **geometry})
     context.close()
@@ -236,9 +258,9 @@ def certify_offline(browser, browser_name, base, evidence):
 
     cached = page.evaluate("""async () => {
       const targets = [
-        './js/flow/flowRuntimeLoader.js?v=20260923b',
+        './js/flow/flowRuntimeLoader.js?v=20260923c',
         './js/flow/flowLongformContent.js',
-        './js/flow/flowGameModeV2.js?v=20260923a',
+        './js/flow/flowGameModeV2.js?v=20260923b',
         './js/flow/flowUiPhase7KeyboardGuard.js?v=20260923a',
         './js/flow/flowIntegrationPhase11.js?v=20260923a',
         './styles/screens/flow-integration-phase11.css?v=20260916a',
@@ -269,7 +291,8 @@ def certify_offline(browser, browser_name, base, evidence):
     assert 'dev=1' not in page.url, page.url
     offline_plan = page.evaluate('window.wordstrikeFlowPhase1.getRunPlan()')
     assert offline_plan['coherent'] is True, offline_plan
-    assert offline_plan['passageCount'] == 3, offline_plan
+    assert offline_plan['passageCount'] == 5, offline_plan
+    assert offline_plan['paragraphCount'] == 5, offline_plan
     context.set_offline(False)
 
     evidence.append({
