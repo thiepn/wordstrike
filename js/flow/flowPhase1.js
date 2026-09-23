@@ -1007,7 +1007,14 @@ function finalizePublicStreamRun(endedReason = "reset") {
   lastPublicResult = result;
   lastPublicRecordState = recordState;
   if (result.completed && resolvedRunPlan?.corpusVersion === 2) {
-    recordFlowCorpusRun(resolvedRunPlan, { completedAt: result.endedAt });
+    let reachedDocumentIndex = 0;
+    for (const segment of resolvedRunPlan.segments || []) {
+      if (run.currentIndex > segment.startIndex) reachedDocumentIndex = Math.max(reachedDocumentIndex, segment.documentIndex || 0);
+    }
+    recordFlowCorpusRun({
+      ...resolvedRunPlan,
+      documents: resolvedRunPlan.documents.slice(0, reachedDocumentIndex + 1),
+    }, { completedAt: result.endedAt });
   }
   submitPublicStreamBestInBackground(result, recordState);
   return result;
