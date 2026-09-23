@@ -1,0 +1,72 @@
+name: Apply WordStrike account repair
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/wordstrike-fix-apply.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: github.event.head_commit.message == 'chore: stage WordStrike account repair'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Materialize verified repair blobs
+        shell: bash
+        run: |
+          set -euo pipefail
+          fetch_blob() {
+            local path="$1"
+            local sha="$2"
+            mkdir -p "$(dirname "$path")"
+            gh api "repos/${GITHUB_REPOSITORY}/git/blobs/${sha}" --jq .content | tr -d '\n' | base64 --decode > "$path"
+          }
+
+          fetch_blob /tmp/wordstrike-fix.patch 58fb80389856d62692b775a6cb69ebf5bf1aee16
+          git apply --check /tmp/wordstrike-fix.patch
+          git apply /tmp/wordstrike-fix.patch
+
+          fetch_blob js/authService.js a0b83dadaa34177a9361f66b0d89bb77679b6860
+          fetch_blob js/accountDataMerge.js 6278f20ca4a34e9773f7eb78d8bcc4e619dab183
+          fetch_blob js/accountDataSync.js c48d456d04aa39fa1e151f163291b56720b03b61
+          fetch_blob js/localDataEvents.js 2cebe103354f13de29e2a7d49aa56f6dc27e0011
+          fetch_blob js/screenScroll.js e6f0a5861fe7aae943d20e9c522096f59ea84121
+
+          fetch_blob supabase/functions/wordstrike-profile-sync/index.ts 4a6ba9f51603916d2efaa56e7e628fda0c6ea269
+          fetch_blob supabase/migrations/20260922222007_wordstrike_private_player_profiles.sql cce3d29eeeef7e6ea7ece79c438368fb9556e2b8
+          fetch_blob supabase/migrations/20260922222424_wordstrike_profile_minimal_grants.sql 305111026f17fbd2f053d207d826e3c1d8b716b0
+          fetch_blob supabase/migrations/20260922235104_wordstrike_profile_server_only.sql 3d5111867b266f846fdfa0f5c41d585ded96bda8
+
+          fetch_blob tests/account-data-merge.test.js 4361fc995dc67be07bc20716232426faa38ee76e
+          fetch_blob tests/account-sync-contract.test.js e3d188f66306586dfcb524ae1eabdc772caa9574
+          fetch_blob tests/auth-service.test.js d2aacabaf0cea056c3e5f2687339849c4c2a9542
+          fetch_blob tests/campaign-speed-unlocks.test.js 11094719c4932640adea75a650018a443aeb9217
+          fetch_blob tests/screen-scroll.test.js a51f4c363d6bac6b808670ab99d07c6f2fc47d5e
+          fetch_blob tests/typing-indicator-regression.test.js 2b12c4706a395bef489ac2c790ebd7abe35a4a1b
+          fetch_blob tests/edgeEntrySmoothing.test.js 1a4648dcbc3e8a2fc1b154656de7bbab24cb07db
+
+          rm -f .github/workflows/wordstrike-fix-apply.yml
+          git diff --check
+
+      - name: Run full regression suite
+        run: npm test
+
+      - name: Commit repair
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "fix(wordstrike): harden auth progress and gameplay regressions"
+          git push origin HEAD:main
