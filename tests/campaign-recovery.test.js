@@ -250,7 +250,7 @@ test("Campaign results source exposes a visible save failure warning", async () 
     fs.readFile(new URL("../js/ui.js", import.meta.url), "utf8"),
   ]);
   assert.match(mainSource, /persistenceWarning/);
-  assert.match(uiSource, /campaign-save-warning/);
+  assert.match(uiSource, /result-save-warning/);
   assert.match(uiSource, /role="alert"/);
 });
 

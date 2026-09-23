@@ -129,10 +129,27 @@ assert.equal(result.modeId, "endless");
 assert.equal(result.failureReason, "core-destroyed");
 assert.equal(result.modeData.recordEligible, true);
 assert.equal(result.modeData.survivalPoints, 6000);
+assert.equal(result.localPersistence.status, "saved");
 assert.equal("modifiersSurvived" in result.modeData, false);
 assert.equal("activeModifier" in result.modeData, false);
 assert.equal(getCurrentSession().state, "completed");
 assert.equal(completeEndlessRun(game), null);
 clearEndlessRuntime();
 
-console.log("Endless stage progression, immunity, lifecycle, normalized result, and exact completion tests passed.");
+const workingStorage = globalThis.localStorage;
+globalThis.localStorage = {
+  getItem() { return null; },
+  setItem() { throw new Error("quota"); },
+};
+clearSession();
+game = startEndlessRun({ seed: 10, vocabulary, source: "test" });
+game.elapsedMs = 30000;
+game.integrity = 0;
+const unsaved = completeEndlessRun(game);
+assert.equal(unsaved.localPersistence.status, "failed");
+assert.match(unsaved.localPersistence.warning, /could not be saved locally/i);
+clearEndlessRuntime();
+clearSession();
+globalThis.localStorage = workingStorage;
+
+console.log("Endless stage progression, immunity, lifecycle, normalized result, persistence failure, and exact completion tests passed.");

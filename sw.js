@@ -1,5 +1,5 @@
 const CACHE_PREFIX = "wordstrike-pwa-";
-const CACHE_NAME = CACHE_PREFIX + "v63-practice-architecture-account-fix-1-flow-v2-p3-score-records-1";
+const CACHE_NAME = CACHE_PREFIX + "v63-practice-architecture-account-fix-1-flow-v2-p3-score-records-1-integrity-1";
 const APP_SHELL = [
   "./js/practiceLab/practiceAssessmentInput.js",
   "./js/practiceLab/practiceDurableManifest.js",
@@ -277,7 +277,7 @@ const APP_SHELL = [
   "./js/levelGenerator.js",
   "./js/lifetimeStatistics.js",
   "./js/main.js",
-  "./js/main.js?v=20260923b",
+  "./js/main.js?v=20260923d",
   "./js/mobileInputAdapter.js",
   "./js/modeCustomization.js",
   "./js/modeCustomizationPresentation.js",
@@ -290,6 +290,9 @@ const APP_SHELL = [
   "./js/onboardingView.js",
   "./js/pendingResultCoordinator.js",
   "./js/pendingResultSubmission.js",
+  "./js/submissionOutbox.js",
+  "./js/submissionOutboxCoordinator.js",
+  "./js/localResultPersistence.js",
   "./js/playerProfile.js",
   "./js/practiceLab/generated/practiceTypabilityRuntimeData.js",
   "./js/practiceLab/practiceAbilityComparison.js",
@@ -847,7 +850,7 @@ const CORE_SHELL = Object.freeze([
   "./style.css",
   "./styles/ui-system.css",
   "./js/main.js",
-  "./js/main.js?v=20260923b",
+  "./js/main.js?v=20260923d",
 ]);
 
 async function precacheAppShell() {

@@ -17,8 +17,32 @@ assert.match(submitting, /Submitting global score/);
 assert.match(submitting, /aria-busy="true"/);
 assert.match(renderGlobalSubmissionMarkup({ ...endless, status: "submitted", rank: 42 }), /Global score submitted.*Rank #42/s);
 assert.match(renderGlobalSubmissionMarkup({ ...endless, status: "already-submitted" }), /already submitted/);
-assert.match(renderGlobalSubmissionMarkup({ ...endless, status: "error" }), /local result is safe.*RETRY.*VIEW ENDLESS LEADERBOARD/s);
-assert.match(renderGlobalSubmissionMarkup({ ...endless, status: "offline" }), /offline.*local result is safe.*RETRY/s);
+assert.match(renderGlobalSubmissionMarkup({ ...endless, status: "error" }), /result is saved locally.*Keep this page open.*RETRY.*VIEW ENDLESS LEADERBOARD/s);
+assert.match(renderGlobalSubmissionMarkup({ ...endless, status: "offline" }), /offline.*result is saved locally.*Keep this page open.*RETRY/s);
+assert.match(
+  renderGlobalSubmissionMarkup({ ...endless, status: "error", retryPersisted: true }),
+  /Queued for automatic retry.*result is saved locally/s,
+);
+assert.match(
+  renderGlobalSubmissionMarkup({ ...endless, status: "offline", retryPersisted: true }, { localResultStored: false }),
+  /Submission queued for retry.*not saved to local history/s,
+);
+assert.match(
+  renderGlobalSubmissionMarkup({
+    ...endless,
+    status: "error",
+    retryPersistenceError: "STORAGE_ERROR",
+  }),
+  /automatic retry could not be queued.*Keep this page open and retry/s,
+);
+assert.match(
+  renderGlobalSubmissionMarkup({ ...endless, status: "error" }, { localResultStored: false }),
+  /not saved locally or queued.*Keep this page open and retry/s,
+);
+assert.match(
+  renderGlobalSubmissionMarkup({ ...endless, status: "ready" }, { localResultStored: false }),
+  /could not be saved locally.*Submit now before leaving this page/s,
+);
 assert.doesNotMatch(renderGlobalSubmissionMarkup({ ...endless, status: "ready" }), /email|token|user-?id/i);
 assert.match(renderGlobalSubmissionMarkup({ boardKey: "campaign-highest-level-v1", status: "ready" }), /VIEW CAMPAIGN LEADERBOARD/);
 const failedCampaign = renderGlobalSubmissionMarkup({ boardKey: "campaign-highest-level-v1", status: "ineligible", reason: "campaign-failed" });
