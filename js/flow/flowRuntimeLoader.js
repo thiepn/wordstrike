@@ -1,6 +1,6 @@
 const RELEASE_FLAG = "flowRelease";
-const FLOW_RELEASE_VERSION = 4;
-const FLOW_RELEASE_CACHE_NAME = "wordstrike-flow-release-v5";
+const FLOW_RELEASE_VERSION = 5;
+const FLOW_RELEASE_CACHE_NAME = "wordstrike-flow-release-v6";
 const FLOW_RELEASE_QUERY_KEYS = Object.freeze([
   "mode",
   RELEASE_FLAG,
@@ -32,6 +32,8 @@ const FLOW_RELEASE_ASSETS = Object.freeze([
   "./js/flow/flowConfig.js",
   "./js/flow/flowContent.js",
   "./js/flow/flowContentExpansion.js",
+  "./js/flow/flowCorpusV2.js?v=20260923a",
+  "./js/flow/flowCorpusHistory.js?v=20260923a",
   "./js/flow/flowEngine.js",
   "./js/flow/flowGameplay.js",
   "./js/flow/flowGameModeV2.js?v=20260923c",
@@ -41,11 +43,11 @@ const FLOW_RELEASE_ASSETS = Object.freeze([
   "./js/flow/flowModifiers.js",
   "./js/flow/flowModifiersPhase9.js?v=20260923a",
   "./js/flow/flowPassages.js",
-  "./js/flow/flowPhase1.js?v=20260923d",
+  "./js/flow/flowPhase1.js?v=20260923e",
   "./js/flow/flowProgression.js",
   "./js/flow/flowProgression.js?v=20260923a",
   "./js/flow/flowRunPlan.js",
-  "./js/flow/flowRunPlan.js?v=20260923a",
+  "./js/flow/flowRunPlan.js?v=20260923e",
   "./js/flow/flowScoreV2.js?v=20260923a",
   "./js/flow/flowRecordsV2.js?v=20260923a",
   "./js/flow/flowSelection.js",
@@ -341,7 +343,7 @@ async function importFlowRuntime() {
     const integrationBootstrap = await import("./flowIntegrationBootstrap.js?v=20260923b");
     integrationBootstrap.applyFlowIntegrationDefaults?.();
     await Promise.all([
-      import("./flowPhase1.js?v=20260923d"),
+      import("./flowPhase1.js?v=20260923e"),
       import("./flowVisualPhase6.js?v=20260923a"),
     ]);
 
