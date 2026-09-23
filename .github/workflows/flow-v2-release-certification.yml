@@ -29,6 +29,8 @@ on:
       - 'supabase/functions/**'
       - 'supabase/migrations/*flow*'
       - 'tests/flow-*.test.js'
+      - 'tests/browser/flow_phase13_release.py'
+      - 'tests/browser/ui11_profile_leaderboards_settings.py'
       - '.github/workflows/flow-v2-release-certification.yml'
   workflow_dispatch:
 
