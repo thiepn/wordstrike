@@ -98,10 +98,10 @@ def finish_run(page, plan):
     assert metrics == ['WPM', 'Accuracy', 'Consistency'], metrics
     assert page.locator('.flow-complete-screen').get_by_text('Momentum', exact=True).count() == 0
     assert page.locator('.flow-complete-screen').get_by_text('Cadence', exact=True).count() == 0
-    # The legacy integration record remains active but its old progression card
-    # is intentionally hidden from the clean V2 result screen.
+    # Legacy compatibility recording remains active, but the old progression
+    # card must not exist on the competitive V2 result surface.
     page.wait_for_timeout(50)
-    assert page.locator('[data-flow-integration-complete]').count() == 1
+    assert page.locator('[data-flow-integration-complete]').count() == 0
 
 
 def certify_public_journey(browser, browser_name, base, evidence):
@@ -124,6 +124,9 @@ def certify_public_journey(browser, browser_name, base, evidence):
     record_state = page.evaluate('window.wordstrikeFlowPhase1.getPublicRecordState()')
     assert public_result['rulesVersion'] == 2, public_result
     assert public_result['metricVersion'] == 1, public_result
+    assert public_result['sessionSource'] == 'flow-v2', public_result
+    assert public_result['scoreFormula'] == 'wpm-accuracy-consistency-v1', public_result
+    assert public_result['developerMode'] is False, public_result
     assert public_result['boardKey'] == 'flow-quick-v1', public_result
     assert public_result['score'] > 0, public_result
     assert public_result['accuracy'] == 100, public_result
@@ -131,6 +134,9 @@ def certify_public_journey(browser, browser_name, base, evidence):
     assert record_state['recorded'] is True, record_state
     assert record_state['isPersonalBest'] is True, record_state
     assert record_state['personalBest']['score'] == public_result['score'], record_state
+
+    integration_session_id = page.evaluate('window.wordstrikeFlowIntegrationPhase11.getSessionId()')
+    assert integration_session_id == public_result['sessionId'], (integration_session_id, public_result)
 
     summary = page.evaluate('window.wordstrikeFlowIntegrationPhase11.getSummary()')
     assert summary['progress']['completedRuns'] == 1, summary
@@ -280,13 +286,13 @@ def certify_offline(browser, browser_name, base, evidence):
 
     cached = page.evaluate("""async () => {
       const targets = [
-        './js/flow/flowRuntimeLoader.js?v=20260923d',
+        './js/flow/flowRuntimeLoader.js?v=20260923e',
         './js/flow/flowLongformContent.js',
-        './js/flow/flowGameModeV2.js?v=20260923c',
-        './js/flow/flowScoreV2.js?v=20260923a',
-        './js/flow/flowRecordsV2.js?v=20260923a',
+        './js/flow/flowGameModeV2.js?v=20260923d',
+        './js/flow/flowScoreV2.js?v=20260923b',
+        './js/flow/flowRecordsV2.js?v=20260923b',
         './js/flow/flowUiPhase7KeyboardGuard.js?v=20260923a',
-        './js/flow/flowIntegrationPhase11.js?v=20260923b',
+        './js/flow/flowIntegrationPhase11.js?v=20260923c',
         './styles/screens/flow-integration-phase11.css?v=20260916a',
       ];
       const results = [];
