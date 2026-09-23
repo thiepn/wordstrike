@@ -52,7 +52,7 @@ test("Arcade Rush is retained only as hidden legacy compatibility while Flow own
   const flow = getModeDefinition(MODE_IDS.FLOW);
   assert.ok(flow);
   assert.equal(flow.name, "Flow");
-  assert.equal(flow.shortLabel, "Natural Typing");
+  assert.equal(flow.shortLabel, "Longform");
   assert.equal(flow.enabled, true);
   assert.equal(flow.visible, true);
   assert.equal(flow.route, "flow-release");
