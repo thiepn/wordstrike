@@ -144,7 +144,14 @@ import {
 import { createGlobalKeyboardController } from "./appKeyboardController.js";
 import { createNativeBackNavigation, createWordStrikeBackHandler } from "./nativeBackNavigation.js";
 import { captureScreenScroll, restoreScreenScroll } from "./screenScroll.js";
-import { startAccountDataSync, stopAccountDataSync } from "./accountDataSync.js";
+import {
+  getAccountDataSyncState,
+  startAccountDataSync,
+  stopAccountDataSync,
+  subscribeToAccountDataSync,
+  syncAccountDataNow,
+  updateAccountDataSyncAccessToken,
+} from "./accountDataSync.js";
 import {
   getAuthState,
   initializeAuth,
@@ -1353,6 +1360,7 @@ function renderCurrentScreen() {
       authState: getAuthState(),
       leaderboardProfileState: getLeaderboardProfileState(),
       pendingResultState: pendingResultCoordinator.getState(),
+      syncState: getAccountDataSyncState(),
     }));
   } else if (appState.screen === Screens.PROFILE_STATS) {
     const storage = loadModeData();
@@ -1370,6 +1378,7 @@ function renderCurrentScreen() {
       developerMode: appState.devMode,
       authState: getAuthState(),
       leaderboardProfileState: getLeaderboardProfileState(),
+      syncState: getAccountDataSyncState(),
     }, {
       selectTab: selectStatisticsTab,
       viewRecent: () => selectStatisticsTab(5),
@@ -1427,6 +1436,9 @@ function handleAppClick(event) {
     else if (action === "leaderboard-profile-retry") {
       const user = getAuthState().user;
       if (user?.id) void initializeLeaderboardProfile(user, { force: true });
+    }
+    else if (action === "account-sync-retry") {
+      void syncAccountDataNow();
     }
     else if (action === "leaderboard-username-start-change") startUsernameChange();
     else if (action === "leaderboard-username-cancel-change") cancelUsernameChange();
@@ -1628,9 +1640,11 @@ async function bootstrap() {
       if (appState.screen === Screens.LEADERBOARDS) void initializeLeaderboards(selectedBoard);
     }
     if (authState.status === "signed-in") {
+      updateAccountDataSyncAccessToken(authState.session?.access_token ?? null);
       void initializeLeaderboardProfile(authState.user);
       if (authUiChanged) {
         void startAccountDataSync(authState.user, {
+          accessToken: authState.session?.access_token ?? null,
           onApplied: () => {
             // Rehydrate through storage.js so Campaign's computed availability
             // accessors remain authoritative after a cloud restore/merge.
@@ -1665,7 +1679,7 @@ async function bootstrap() {
       appState.screen === Screens.SETTINGS ||
       (appState.screen === Screens.PROFILE_STATS && appState.statisticsTabIndex === 6)
     )) {
-      updateProfileAuthSection(authState, getLeaderboardProfileState());
+      updateProfileAuthSection(authState, getLeaderboardProfileState(), getAccountDataSyncState());
     }
   });
   subscribeToLeaderboardProfile((profileState) => {
@@ -1674,13 +1688,22 @@ async function bootstrap() {
       (appState.screen === Screens.PROFILE_STATS && appState.statisticsTabIndex === 6)
     ) {
       if (appState.screen === Screens.SETTINGS) renderCurrentScreen();
-      else updateProfileAuthSection(getAuthState(), profileState);
+      else updateProfileAuthSection(getAuthState(), profileState, getAccountDataSyncState());
     }
     if (appState.screen === Screens.LEADERBOARDS || appState.screen === Screens.LEVEL_SELECT) renderCurrentScreen();
     if ([Screens.ARCADE_RUSH_RESULTS, Screens.ENDLESS_RESULTS, Screens.SPEED_TEST_RESULTS, Screens.RESULTS].includes(appState.screen)) {
       void handleAutomaticSubmissionStateChange(getAuthState(), profileState);
     }
     if (bootstrapReady) void resumeDurableSubmissions(getAuthState(), profileState);
+  });
+  subscribeToAccountDataSync((syncState) => {
+    if (!bootstrapReady) return;
+    if (
+      appState.screen === Screens.SETTINGS ||
+      (appState.screen === Screens.PROFILE_STATS && appState.statisticsTabIndex === 6)
+    ) {
+      updateProfileAuthSection(getAuthState(), getLeaderboardProfileState(), syncState);
+    }
   });
   subscribeToSubmissions((submissionState) => {
     if ([Screens.ARCADE_RUSH_RESULTS, Screens.ENDLESS_RESULTS, Screens.SPEED_TEST_RESULTS, Screens.RESULTS].includes(appState.screen)) {

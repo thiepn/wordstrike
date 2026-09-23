@@ -19,11 +19,14 @@ const signedIn = renderSettingsAccountManagement({
   draft: "NEW NAME",
   authState: { status: "signed-in", user: { id: "user-1" } },
   leaderboardProfileState: { status: "ready", profile: { username: "Player_1", canChangeAt: null } },
+  syncState: { status: "error", dirty: true, errorCode: "SYNC_UNAVAILABLE" },
 });
 assert.match(signedIn, /profile-name-input/);
 assert.match(signedIn, /PUBLIC USERNAME/);
 assert.match(signedIn, /CHANGE USERNAME/);
 assert.match(signedIn, /SIGN OUT/);
+assert.match(signedIn, /CLOUD SAVE NEEDS RETRY/);
+assert.match(signedIn, /account-sync-retry/);
 
 const usernameRequired = renderPendingResultNotice(
   { status: "username-required" },

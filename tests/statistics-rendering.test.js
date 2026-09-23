@@ -165,9 +165,10 @@ renderProfileStatistics({
 }, {});
 assert.match(app.html, /EDIT NAME|SAVE/);
 assert.match(app.html, /COPY PLAYER ID/);
-assert.match(app.html, /STORED LOCALLY ON THIS DEVICE/);
+assert.match(app.html, /LOCAL-FIRST/);
 assert.match(app.html, /Online account services are unavailable|Local gameplay and records are unaffected/i);
-assert.match(app.html, /not uploaded anywhere/i);
+assert.match(app.html, /stored locally first/i);
+assert.match(app.html, /synchronized to your account/i);
 assert.doesNotMatch(app.html, /NaN|undefined|Invalid Date/);
 
 const [css, statisticsSource] = await Promise.all([

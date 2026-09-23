@@ -5,6 +5,11 @@ import {
   migrateModeDataToV2,
 } from "./modeStorage.js";
 import { MODE_IDS } from "./modes.js";
+import {
+  ACCOUNT_SNAPSHOT_SCHEMA_VERSION,
+  applyAccountCounters,
+  mergeAccountSyncState,
+} from "./accountSyncMerge.js";
 
 const clone = (value) => value == null ? value : JSON.parse(JSON.stringify(value));
 const finite = (value) => value == null ? null : (Number.isFinite(Number(value)) ? Number(value) : null);
@@ -201,11 +206,18 @@ function mergeModeData(localValue, remoteValue) {
   }
   const recentSessions = [...recent.values()].sort((a, b) => (finite(b.endedAt) ?? 0) - (finite(a.endedAt) ?? 0)).slice(0, 30);
   const profile = profileTime(local.profile) >= profileTime(remote.profile) ? clone(local.profile) : clone(remote.profile);
+  const lifetime = {
+    ...mergeNumericObject(local.lifetime, remote.lifetime),
+    firstSessionAt: minimumNullable(local.lifetime?.firstSessionAt, remote.lifetime?.firstSessionAt),
+    lastSessionAt: maximum(local.lifetime?.lastSessionAt, remote.lifetime?.lastSessionAt),
+    historicalBackfillApplied: local.lifetime?.historicalBackfillApplied === true
+      || remote.lifetime?.historicalBackfillApplied === true,
+  };
   return migrateModeDataToV2({
     ...remote,
     ...local,
     profile,
-    lifetime: mergeNumericObject(local.lifetime, remote.lifetime),
+    lifetime,
     totals: mergeNumericObject(local.totals, remote.totals),
     modes,
     recentSessions,
@@ -222,25 +234,32 @@ export function hasMeaningfulLocalProgress(snapshot) {
   return Object.values(speedRecords).some((records) => Object.values(records || {}).some((record) => finite(record?.bestWpm) != null));
 }
 
-export function mergeWordStrikeSnapshots(localSnapshot, remoteSnapshot) {
-  if (!remoteSnapshot?.data) {
-    return {
-      ...clone(localSnapshot),
-      schemaVersion: 1,
-      updatedAt: Date.now(),
-    };
-  }
-  const remote = remoteSnapshot.data;
-  const preferLocal = hasMeaningfulLocalProgress(localSnapshot);
-  const campaign = mergeCampaign(localSnapshot.campaign, remote.campaign, preferLocal);
-  const mode = mergeModeData(localSnapshot.mode, remote.mode);
-  const settings = clone(preferLocal ? (localSnapshot.settings ?? campaign.settings ?? remote.settings ?? {}) : (remote.settings ?? remote.campaign?.settings ?? localSnapshot.settings ?? {}));
+export function mergeWordStrikeSnapshotsWithSyncState(
+  localSnapshot,
+  remoteSnapshot,
+  options = {},
+) {
+  const remote = remoteSnapshot?.data || {};
+  const syncMerge = mergeAccountSyncState(localSnapshot, remoteSnapshot, options);
+  const campaign = mergeCampaign(localSnapshot?.campaign, remote.campaign, true);
+  const mergedMode = mergeModeData(localSnapshot?.mode, remote.mode);
+  const mode = applyAccountCounters(mergedMode, syncMerge.counters);
+  const settings = clone(syncMerge.settings || {});
   campaign.settings = clone(settings);
+  const updatedAt = Number(options.now);
   return {
-    schemaVersion: 1,
-    updatedAt: Date.now(),
-    campaign,
-    mode,
-    settings,
+    snapshot: {
+      schemaVersion: ACCOUNT_SNAPSHOT_SCHEMA_VERSION,
+      updatedAt: Number.isFinite(updatedAt) ? updatedAt : Date.now(),
+      campaign,
+      mode,
+      settings,
+      sync: syncMerge.sync,
+    },
+    localState: syncMerge.localState,
   };
+}
+
+export function mergeWordStrikeSnapshots(localSnapshot, remoteSnapshot, options = {}) {
+  return mergeWordStrikeSnapshotsWithSyncState(localSnapshot, remoteSnapshot, options).snapshot;
 }

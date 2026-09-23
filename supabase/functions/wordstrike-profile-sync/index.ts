@@ -7,6 +7,7 @@ const ERROR_MESSAGES: Record<string, string> = Object.freeze({
   NOT_AUTHENTICATED: "Sign in to sync WordStrike progress.",
   INVALID_REQUEST: "The cloud-save request is invalid.",
   REVISION_CONFLICT: "Cloud progress changed on another client.",
+  CLIENT_UPGRADE_REQUIRED: "Update WordStrike before syncing this account again.",
   METHOD_NOT_ALLOWED: "This request method is not supported.",
   SERVER_ERROR: "Cloud save is temporarily unavailable.",
 });
@@ -33,8 +34,14 @@ function isObject(value: unknown): value is Record<string, unknown> {
 }
 
 function validSnapshot(value: unknown) {
-  if (!isObject(value) || value.schemaVersion !== 1) return false;
+  if (!isObject(value) || ![1, 2].includes(Number(value.schemaVersion))) return false;
   if (!isObject(value.campaign) || !isObject(value.mode) || !isObject(value.settings)) return false;
+  if (Number(value.schemaVersion) === 2) {
+    if (!isObject(value.sync) || Number(value.sync.version) !== 1) return false;
+    if (!isObject(value.sync.counterBase) || !isObject(value.sync.devices) || !isObject(value.sync.settingClocks)) {
+      return false;
+    }
+  }
   try {
     return new TextEncoder().encode(JSON.stringify(value)).byteLength <= MAX_PAYLOAD_BYTES;
   } catch {
@@ -86,6 +93,22 @@ Deno.serve(async (request) => {
       if (!error && data) return success(profileData(data), corsHeaders, requestId);
       if (error?.code === "23505") return failure("REVISION_CONFLICT", 409, corsHeaders, requestId);
       return failure("SERVER_ERROR", 500, corsHeaders, requestId);
+    }
+
+    const { data: current, error: currentError } = await serverClient
+      .from("wordstrike_player_profiles")
+      .select("revision,data")
+      .eq("user_id", userId)
+      .maybeSingle();
+    if (currentError) return failure("SERVER_ERROR", 500, corsHeaders, requestId);
+    if (!current || Number(current.revision) !== expectedRevision) {
+      return failure("REVISION_CONFLICT", 409, corsHeaders, requestId);
+    }
+
+    const currentSchema = Number((current.data as Record<string, unknown> | null)?.schemaVersion) || 1;
+    const incomingSchema = Number((body.data as Record<string, unknown>).schemaVersion) || 1;
+    if (currentSchema >= 2 && incomingSchema < currentSchema) {
+      return failure("CLIENT_UPGRADE_REQUIRED", 409, corsHeaders, requestId);
     }
 
     const { data, error } = await serverClient.from("wordstrike_player_profiles")
