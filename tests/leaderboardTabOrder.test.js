@@ -21,7 +21,8 @@ assert.equal(service.getLeaderboardState().selectedTypingDuration, 15);
 await service.selectLeaderboardCategory("flow");
 assert.equal(calls[3].boardKey, LEADERBOARD_BOARDS.FLOW_STANDARD);
 await service.selectFlowLength("quick");
-assert.equal(calls[4].boardKey, LEADERBOARD_BOARDS.FLOW_QUICK);
-assert.equal(service.getLeaderboardState().selectedFlowLength, "quick");
+assert.equal(calls.length, 4, "legacy Flow length selection must not create a second public board request");
+assert.equal(service.getLeaderboardState().selectedBoardKey, LEADERBOARD_BOARDS.FLOW_STANDARD);
+assert.equal(service.getLeaderboardState().selectedFlowLength, "standard");
 
-console.log("Public leaderboard tabs use the Campaign/Typing/Endless order after Rush retirement, with Campaign default and independent Typing durations.");
+console.log("Public leaderboard tabs use Campaign/Typing/Endless/Flow with one canonical Flow board and independent Typing durations.");
