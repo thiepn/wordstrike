@@ -47,7 +47,8 @@ assert.doesNotMatch(ui, /class="mode-card/);
 assert.doesNotMatch(ui, /class="mode-grid/);
 assert.doesNotMatch(ui, /class="mode-panel/);
 assert.match(ui, /card\.onmousemove = \(\) => handlers\.select\?\.\(index\)/);
-assert.doesNotMatch(ui, /titleButton\.onmousemove = \(\) => handlers\.select\?\.\(modes\.length\)/);\nassert.match(ui, /homeButton\.onmousemove = \(\) => handlers\.select\?\.\(modes\.length\)/);
+assert.doesNotMatch(ui, /titleButton\.onmousemove = \(\) => handlers\.select\?\.\(modes\.length\)/);
+assert.match(ui, /homeButton\.onmousemove = \(\) => handlers\.select\?\.\(modes\.length\)/);
 assert.doesNotMatch(ui, /card\.onmouseenter = \(\) => handlers\.select/);
 assert.doesNotMatch(ui, /titleButton\.onmouseenter = \(\) => handlers\.select/);
 
