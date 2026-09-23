@@ -21,9 +21,7 @@ const PRE_FLOW_ACTIVE_BOARDS = [
 ];
 const ACTIVE_BOARDS = [
   ...PRE_FLOW_ACTIVE_BOARDS,
-  "flow-quick-v1",
   "flow-standard-v1",
-  "flow-long-v1",
 ];
 
 assert.deepEqual(PUBLIC_BOARD_KEYS, ACTIVE_BOARDS);
@@ -101,4 +99,4 @@ assert.equal(getModeDefinition(MODE_IDS.FLOW).enabled, true);
 assert.equal(getModeDefinition(MODE_IDS.FLOW).status, "available");
 assert.equal(getModeDefinition(MODE_IDS.FLOW).route, "flow-release");
 
-console.log("AR15 Daily retirement remains immutable while current backend contracts add Flow boards and preserve archived Rush/Daily data.");
+console.log("AR15 Daily retirement remains immutable while the current backend exposes one Flow V3 board and preserves archived Rush/Daily data.");
