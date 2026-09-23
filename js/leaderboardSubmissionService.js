@@ -215,7 +215,9 @@ export function createLeaderboardSubmissionService({
   const captureUser = (authState) => {
     if (authState?.status === "signed-in" && typeof authState.user?.id === "string" && authState.user.id) {
       activeUserId = authState.user.id;
-    } else if (authState?.status === "signed-out") {
+    } else if (!["idle", "loading", "signing-in"].includes(authState?.status)) {
+      // Never bind a new result to a stale account after an explicit sign-out,
+      // unavailable auth state, or failed session restoration.
       activeUserId = null;
     }
     return activeUserId;
