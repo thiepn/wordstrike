@@ -166,7 +166,7 @@ def certify(browser_type, browser_name, base, evidence):
     expect(page.locator('[data-speed-config="time-60"]')).to_be_visible()
     snapshot = page.evaluate("""async () => {
       const {getCurrentSpeedTest}=await import('./js/speedTest.js');
-      return getCurrentSpeedTest()?.configId;
+      return getCurrentSpeedTest()?.config?.configId;
     }""")
     assert snapshot == "time-60", snapshot
 
@@ -176,7 +176,7 @@ def certify(browser_type, browser_name, base, evidence):
         page.wait_for_timeout(50)
         locked_snapshot = page.evaluate("""async () => {
           const {getCurrentSpeedTest}=await import('./js/speedTest.js');
-          return {configId:getCurrentSpeedTest()?.configId, source:getCurrentSpeedTest()?.sessionSource};
+          return {configId:getCurrentSpeedTest()?.config?.configId, source:getCurrentSpeedTest()?.sessionSource};
         }""")
         assert locked_snapshot == {"configId": "time-60", "source": "campaign-placement"}, locked_snapshot
 
