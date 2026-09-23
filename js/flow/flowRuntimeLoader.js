@@ -1,6 +1,6 @@
 const RELEASE_FLAG = "flowRelease";
-const FLOW_RELEASE_VERSION = 2;
-const FLOW_RELEASE_CACHE_NAME = "wordstrike-flow-release-v3";
+const FLOW_RELEASE_VERSION = 3;
+const FLOW_RELEASE_CACHE_NAME = "wordstrike-flow-release-v4";
 const FLOW_RELEASE_QUERY_KEYS = Object.freeze([
   "mode",
   RELEASE_FLAG,
@@ -23,7 +23,7 @@ const FLOW_RELEASE_QUERY_KEYS = Object.freeze([
 ]);
 
 const FLOW_RELEASE_ASSETS = Object.freeze([
-  "./js/flow/flowRuntimeLoader.js?v=20260923b",
+  "./js/flow/flowRuntimeLoader.js?v=20260923c",
   "./js/flow/flowMigrationPresentation.js?v=20260923a",
   "./js/flow/flowAdaptive.js",
   "./js/flow/flowAdaptivePhase10.js?v=20260923a",
@@ -34,16 +34,17 @@ const FLOW_RELEASE_ASSETS = Object.freeze([
   "./js/flow/flowContentExpansion.js",
   "./js/flow/flowEngine.js",
   "./js/flow/flowGameplay.js",
-  "./js/flow/flowGameModeV2.js?v=20260923a",
+  "./js/flow/flowGameModeV2.js?v=20260923b",
   "./js/flow/flowIntegrationBootstrap.js?v=20260923b",
   "./js/flow/flowIntegrationPhase11.js?v=20260923a",
   "./js/flow/flowLongformContent.js",
   "./js/flow/flowModifiers.js",
   "./js/flow/flowModifiersPhase9.js?v=20260923a",
   "./js/flow/flowPassages.js",
-  "./js/flow/flowPhase1.js?v=20260923b",
+  "./js/flow/flowPhase1.js?v=20260923c",
   "./js/flow/flowProgression.js",
   "./js/flow/flowRunPlan.js",
+  "./js/flow/flowRunPlan.js?v=20260923a",
   "./js/flow/flowSelection.js",
   "./js/flow/flowShell.js",
   "./js/flow/flowState.js",
@@ -54,7 +55,7 @@ const FLOW_RELEASE_ASSETS = Object.freeze([
   "./js/flow/flowVisualPhase6.js?v=20260923a",
   "./styles/screens/flow-phase1.css?v=20260916d",
   "./styles/screens/flow-phase5.css?v=20260916a",
-  "./styles/screens/flow-game-mode-v2.css?v=20260923a",
+  "./styles/screens/flow-game-mode-v2.css?v=20260923b",
   "./styles/screens/flow-visual-phase6.css?v=20260923a",
   "./styles/screens/flow-visual-phase6-polish.css?v=20260916a",
   "./styles/screens/flow-ui-phase7.css?v=20260916a",
@@ -337,7 +338,7 @@ async function importFlowRuntime() {
     const integrationBootstrap = await import("./flowIntegrationBootstrap.js?v=20260923b");
     integrationBootstrap.applyFlowIntegrationDefaults?.();
     await Promise.all([
-      import("./flowPhase1.js?v=20260923b"),
+      import("./flowPhase1.js?v=20260923c"),
       import("./flowVisualPhase6.js?v=20260923a"),
     ]);
 
@@ -365,7 +366,7 @@ async function importFlowRuntime() {
       }
     }
     if (release) {
-      await import("./flowGameModeV2.js?v=20260923a");
+      await import("./flowGameModeV2.js?v=20260923b");
     }
     // Dynamic imports are cached after the first visit. Explicit activation lets
     // the same document re-enter Flow with a freshly resolved release seed/setup
