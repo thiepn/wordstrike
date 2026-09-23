@@ -43,8 +43,11 @@ def certify_public_entry(browser_type, base, evidence):
 
     page.goto(base)
     modes = page.locator('[data-action="modes"]')
-    if modes.is_visible():
+    mode_screen = page.locator('.mode-select-screen')
+    if not mode_screen.is_visible():
+        expect(modes).to_be_visible(timeout=15000)
         modes.click()
+    expect(mode_screen).to_be_visible(timeout=15000)
     flow = page.locator('button[data-mode-id="flow"]')
     expect(flow).to_be_visible(timeout=15000)
 
