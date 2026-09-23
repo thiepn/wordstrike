@@ -326,7 +326,9 @@ export function createLeaderboardSubmissionService({
 
     // Persist before the network request. A page close, reload, browser crash, or
     // offline transition after this point must not erase an eligible signed-in run.
-    const retryIntent = persistRetryIntent();
+    const retryIntent = state.retryPersisted
+      ? Object.freeze({ ok: true, error: null, entry: null })
+      : persistRetryIntent();
     const retryPersisted = retryIntent.ok === true;
     const retryPersistenceError = retryIntent.ok ? null : retryIntent.error;
 
