@@ -564,3 +564,27 @@
     font-size: clamp(1.35rem, 7vw, 2rem);
   }
 }
+
+
+.flow-v2-global-submission {
+  width: min(100%, 720px);
+  margin: 0 auto;
+}
+
+.flow-v2-global-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  min-height: 3.25rem;
+  padding: 0.8rem 1rem;
+  border: 1px solid var(--ui-border, rgba(255,255,255,.14));
+  border-radius: 0.9rem;
+  background: rgba(255,255,255,.035);
+  text-align: center;
+}
+
+.flow-v2-global-status.is-success strong {
+  letter-spacing: 0.04em;
+}
