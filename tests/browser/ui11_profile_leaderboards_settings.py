@@ -170,12 +170,9 @@ def inspect_leaderboards(browser, base, browser_name, evidence):
     expect(page.locator('[data-action="leaderboard-select-endless"]')).to_have_attribute("aria-selected", "true")
     page.locator('[data-action="leaderboard-select-flow"]').click()
     expect(page.locator('[data-action="leaderboard-select-flow"]')).to_have_attribute("aria-selected", "true")
-    expect(page.locator('[aria-label="Flow run length"]')).to_be_visible()
-    expect(page.locator('[data-action="leaderboard-flow-select-standard"]')).to_have_attribute("aria-selected", "true")
-    page.locator('[data-action="leaderboard-flow-select-quick"]').click()
-    expect(page.locator('[data-action="leaderboard-flow-select-quick"]')).to_have_attribute("aria-selected", "true")
-    page.locator('[data-action="leaderboard-flow-select-long"]').click()
-    expect(page.locator('[data-action="leaderboard-flow-select-long"]')).to_have_attribute("aria-selected", "true")
+    assert page.locator('[aria-label="Flow run length"]').count() == 0
+    assert page.locator('[data-action^="leaderboard-flow-select-"]').count() == 0
+    expect(page.locator(".leaderboard-board-meta")).to_contain_text("CONTINUOUS FLOW")
     assert page.locator('[data-action="leaderboard-select-arcade-rush"]').count() == 0
 
     if browser_name == "chromium":
