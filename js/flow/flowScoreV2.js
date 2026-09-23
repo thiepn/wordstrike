@@ -28,7 +28,8 @@ export function calculateFlowScoreV2({
   accuracy = 0,
   consistency = 0,
 } = {}) {
-  const scoredWpm = clamp(finite(wpm), 0, FLOW_SCORE_V2_RULES.maximumScoredWpm);
+  const measuredWpm = Math.max(0, finite(wpm));
+  const scoredWpm = clamp(measuredWpm, 0, FLOW_SCORE_V2_RULES.maximumScoredWpm);
   const scoredAccuracy = clamp(finite(accuracy), 0, 100);
   const scoredConsistency = clamp(finite(consistency), 0, 100);
   const accuracyMultiplier = Math.pow(scoredAccuracy / 100, FLOW_SCORE_V2_RULES.accuracyExponent);
@@ -42,7 +43,8 @@ export function calculateFlowScoreV2({
   );
   return Object.freeze({
     score,
-    wpm: round(scoredWpm, 1),
+    wpm: round(measuredWpm, 1),
+    scoredWpm: round(scoredWpm, 1),
     accuracy: round(scoredAccuracy, 2),
     consistency: round(scoredConsistency, 1),
     accuracyMultiplier: round(accuracyMultiplier, 6),
