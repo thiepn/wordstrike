@@ -344,6 +344,6 @@ function queueSync() {
 injectSpeedUnlockStyles();
 const appRoot = document.querySelector("#app");
 if (appRoot) {
-  new MutationObserver(queueSync).observe(appRoot, { childList: true, subtree: true });
+  new MutationObserver(queueSync).observe(appRoot, { childList: true });
   queueSync();
 }

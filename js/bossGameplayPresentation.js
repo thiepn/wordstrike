@@ -258,7 +258,7 @@ function queue() {
 const appRoot = document.querySelector("#app");
 if (appRoot) {
   observer = new MutationObserver(queue);
-  observer.observe(appRoot, { childList: true, subtree: true });
+  observer.observe(appRoot, { childList: true });
   queue();
 }
 

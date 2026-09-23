@@ -349,7 +349,7 @@ function install() {
   if (!root) return;
   enhanceV2();
   const observer = new MutationObserver(enhanceV2);
-  observer.observe(root, { childList: true, subtree: true });
+  observer.observe(root, { childList: true });
 }
 
 if (typeof document !== "undefined") {

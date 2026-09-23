@@ -298,7 +298,7 @@ function queuePresentation() {
 const appRoot = document.querySelector("#app");
 if (appRoot) {
   observer = new MutationObserver(queuePresentation);
-  observer.observe(appRoot, { childList: true, subtree: true });
+  observer.observe(appRoot, { childList: true });
   queuePresentation();
 }
 

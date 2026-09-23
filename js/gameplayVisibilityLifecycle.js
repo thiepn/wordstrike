@@ -29,16 +29,19 @@ export function createGameplayVisibilityLifecycle({
   pauseGameplay,
 } = {}) {
   let mounted = false;
-  const handleVisibilityChange = () => pauseHiddenGameplay({
-    hidden: documentRef?.hidden === true,
+  const pause = (hidden) => pauseHiddenGameplay({
+    hidden,
     screen: getScreen?.(),
     screens,
     speedTest: getSpeedTest?.(),
     pauseTypingTest,
     pauseGameplay,
   });
+  const handleVisibilityChange = () => pause(documentRef?.hidden === true);
+  const pauseForHidden = () => pause(true);
   return Object.freeze({
     handleVisibilityChange,
+    pauseForHidden,
     mount() {
       if (mounted || typeof documentRef?.addEventListener !== "function") return false;
       documentRef.addEventListener("visibilitychange", handleVisibilityChange);

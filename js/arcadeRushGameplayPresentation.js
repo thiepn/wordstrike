@@ -16,7 +16,9 @@ const TRANSITION_ROLE = '[data-rush-role="transition-overlay"]';
 const PAUSE_ROLE = '[data-rush-role="pause-overlay"]';
 
 let frameId = null;
-let observer = null;
+let rootObserver = null;
+let viewObserver = null;
+let observedView = null;
 
 function integer(value, fallback = 0) {
   const parsed = Number.parseInt(String(value ?? ""), 10);
@@ -33,6 +35,29 @@ function scheduleEnhancement() {
   frameId = schedule(() => {
     frameId = null;
     enhanceCurrentArcadeRushView();
+    syncViewObserver();
+  });
+}
+
+function disconnectViewObserver() {
+  viewObserver?.disconnect?.();
+  viewObserver = null;
+  observedView = null;
+}
+
+function syncViewObserver() {
+  const nextView = document.querySelector(GAMEPLAY_SELECTOR) || document.querySelector(READY_SELECTOR);
+  if (nextView === observedView) return;
+  disconnectViewObserver();
+  observedView = nextView || null;
+  if (!nextView || !globalThis.MutationObserver) return;
+  viewObserver = new MutationObserver(scheduleEnhancement);
+  viewObserver.observe(nextView, {
+    childList: true,
+    subtree: true,
+    characterData: true,
+    attributes: true,
+    attributeFilter: ["hidden"],
   });
 }
 
@@ -219,27 +244,27 @@ export function enhanceCurrentArcadeRushView() {
 }
 
 export function startArcadeRushGameplayPresentation() {
-  if (observer || !globalThis.MutationObserver || !document?.querySelector) {
+  if (rootObserver || !globalThis.MutationObserver || !document?.querySelector) {
+    syncViewObserver();
     scheduleEnhancement();
-    return Boolean(observer);
+    return Boolean(rootObserver);
   }
   const app = document.querySelector("#app");
   if (!app) return false;
-  observer = new MutationObserver(scheduleEnhancement);
-  observer.observe(app, {
-    childList: true,
-    subtree: true,
-    characterData: true,
-    attributes: true,
-    attributeFilter: ["hidden"],
+  rootObserver = new MutationObserver(() => {
+    syncViewObserver();
+    scheduleEnhancement();
   });
+  rootObserver.observe(app, { childList: true });
+  syncViewObserver();
   scheduleEnhancement();
   return true;
 }
 
 export function stopArcadeRushGameplayPresentation() {
-  observer?.disconnect?.();
-  observer = null;
+  rootObserver?.disconnect?.();
+  rootObserver = null;
+  disconnectViewObserver();
   if (frameId != null) {
     const cancel = globalThis.cancelAnimationFrame || globalThis.clearTimeout;
     cancel?.(frameId);

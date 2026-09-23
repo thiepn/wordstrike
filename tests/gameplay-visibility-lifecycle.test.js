@@ -54,6 +54,11 @@ documentRef.hidden = false;
 screen = screens.PLAYING;
 documentRef.dispatch("visibilitychange");
 assert.equal(gameplayPauses, 1);
+screen = screens.PLAYING;
+documentRef.hidden = false;
+assert.equal(lifecycle.pauseForHidden(), true);
+assert.equal(gameplayPauses, 2);
+
 assert.equal(lifecycle.unmount(), true);
 assert.equal(lifecycle.unmount(), false);
 assert.equal(documentRef.listenerCount("visibilitychange"), 0);
@@ -72,4 +77,4 @@ for (let index = 0; index < 100; index += 1) {
   assert.equal(probe.unmount(), true);
   assert.equal(documentRef.listenerCount("visibilitychange"), 0);
 }
-console.log("Visibility lifecycle auto-pauses active gameplay once and leaves no listeners after repeated mount/unmount cycles.");
+console.log("Visibility lifecycle auto-pauses hidden/pagehide gameplay and leaves no listeners after repeated mount/unmount cycles.");

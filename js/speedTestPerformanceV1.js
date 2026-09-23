@@ -243,7 +243,7 @@ function installEnhancer() {
   if (!root) return;
   enhanceSpeedTestResults();
   const observer = new MutationObserver(() => enhanceSpeedTestResults());
-  observer.observe(root, { childList: true, subtree: true });
+  observer.observe(root, { childList: true });
 }
 
 if (typeof document !== "undefined") {

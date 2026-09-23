@@ -1817,7 +1817,10 @@ async function bootstrap() {
     pauseGameplay: pauseGame,
   });
   gameplayVisibilityLifecycle.mount();
-  window.addEventListener("pagehide", () => gameplayVisibilityLifecycle?.unmount?.());
+  window.addEventListener("pagehide", () => {
+    gameplayVisibilityLifecycle?.pauseForHidden?.();
+    gameplayVisibilityLifecycle?.unmount?.();
+  });
   window.addEventListener("pageshow", () => gameplayVisibilityLifecycle?.mount?.());
   window.addEventListener("online", () => {
     void resumeDurableSubmissions(getAuthState(), getLeaderboardProfileState());
