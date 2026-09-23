@@ -318,6 +318,11 @@ const pendingResultCoordinator = createPendingResultCoordinator({
   },
 });
 
+async function resumeDurableSubmissions(authState = getAuthState(), profileState = getLeaderboardProfileState()) {
+  await pendingResultCoordinator.evaluate(authState, profileState);
+  return submissionOutboxCoordinator.drain(authState, profileState);
+}
+
 function ensureOnboardingView() {
   onboardingView ||= createOnboardingView(onboardingController);
   return onboardingView;
@@ -1639,8 +1644,7 @@ async function bootstrap() {
     if ([Screens.ARCADE_RUSH_RESULTS, Screens.ENDLESS_RESULTS, Screens.SPEED_TEST_RESULTS, Screens.RESULTS].includes(appState.screen)) {
       void handleAutomaticSubmissionStateChange(authState, getLeaderboardProfileState());
     }
-    if (bootstrapReady) void pendingResultCoordinator.evaluate(authState, getLeaderboardProfileState());
-    void submissionOutboxCoordinator.drain(authState, getLeaderboardProfileState());
+    if (bootstrapReady) void resumeDurableSubmissions(authState, getLeaderboardProfileState());
     if (authUiChanged && appState.screen === Screens.LEVEL_SELECT) {
       renderCurrentScreen();
     }
@@ -1663,8 +1667,7 @@ async function bootstrap() {
     if ([Screens.ARCADE_RUSH_RESULTS, Screens.ENDLESS_RESULTS, Screens.SPEED_TEST_RESULTS, Screens.RESULTS].includes(appState.screen)) {
       void handleAutomaticSubmissionStateChange(getAuthState(), profileState);
     }
-    if (bootstrapReady) void pendingResultCoordinator.evaluate(getAuthState(), profileState);
-    void submissionOutboxCoordinator.drain(getAuthState(), profileState);
+    if (bootstrapReady) void resumeDurableSubmissions(getAuthState(), profileState);
   });
   subscribeToSubmissions((submissionState) => {
     if ([Screens.ARCADE_RUSH_RESULTS, Screens.ENDLESS_RESULTS, Screens.SPEED_TEST_RESULTS, Screens.RESULTS].includes(appState.screen)) {
@@ -1725,7 +1728,7 @@ async function bootstrap() {
   ]);
   document.addEventListener("keydown", handleGlobalKeydown);
   window.addEventListener("online", () => {
-    void submissionOutboxCoordinator.drain(getAuthState(), getLeaderboardProfileState());
+    void resumeDurableSubmissions(getAuthState(), getLeaderboardProfileState());
   });
   nativeBackNavigation.mount();
   const appRoot = document.querySelector("#app");
@@ -1758,8 +1761,7 @@ async function bootstrap() {
       }
     });
   }
-  void pendingResultCoordinator.evaluate(getAuthState(), getLeaderboardProfileState());
-  void submissionOutboxCoordinator.drain(getAuthState(), getLeaderboardProfileState());
+  void resumeDurableSubmissions(getAuthState(), getLeaderboardProfileState());
 }
 
 bootstrap();
