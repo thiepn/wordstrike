@@ -1,5 +1,5 @@
 const CACHE_PREFIX = "wordstrike-pwa-";
-const CACHE_NAME = CACHE_PREFIX + "v63-practice-architecture-account-fix-1-flow-v2-p1";
+const CACHE_NAME = CACHE_PREFIX + "v63-practice-architecture-account-fix-1-flow-v2-p1-score-scroll-1";
 const APP_SHELL = [
   "./js/practiceLab/practiceAssessmentInput.js",
   "./js/practiceLab/practiceDurableManifest.js",
@@ -269,7 +269,7 @@ const APP_SHELL = [
   "./js/levelGenerator.js",
   "./js/lifetimeStatistics.js",
   "./js/main.js",
-  "./js/main.js?v=20260910f",
+  "./js/main.js?v=20260923b",
   "./js/mobileInputAdapter.js",
   "./js/modeCustomization.js",
   "./js/modeCustomizationPresentation.js",
@@ -706,6 +706,7 @@ const APP_SHELL = [
   "./styles/screens/typing-performance-v5.css",
   "./styles/screens/typing-test-ui8-contract.css",
   "./styles/screens/typing-test.css",
+  "./styles/screens/typing-test.css?v=20260923b",
   "./styles/screens/ui12-global-polish.css",
   "./styles/ui-system.css",
   "./data/VOCABULARY_SOURCE.md",
@@ -838,7 +839,7 @@ const CORE_SHELL = Object.freeze([
   "./style.css",
   "./styles/ui-system.css",
   "./js/main.js",
-  "./js/main.js?v=20260910f",
+  "./js/main.js?v=20260923b",
 ]);
 
 async function precacheAppShell() {
