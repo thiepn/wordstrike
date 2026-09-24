@@ -242,6 +242,74 @@ def certify_fresh_default(browser, browser_name, base, evidence):
     context.close()
 
 
+def certify_theme_stream_integrity(browser, browser_name, base, evidence):
+    if browser_name != "chromium":
+        return
+
+    context = context_for(browser, base)
+    context.add_init_script(
+        "localStorage.setItem('wordstrike_flow_theme_preference_v1', 'future-theme');"
+    )
+    page = context.new_page()
+    errors = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+
+    open_modes(page, base)
+    plan = launch_public_flow(page)
+
+    assert plan["theme"] == "mixed", plan
+    assert "flowTheme=mixed" in page.url, page.url
+    assert "future-theme" not in page.url, page.url
+    assert page.locator('[data-flow-theme-select]').input_value() == "mixed"
+
+    next_document_segment = next(
+        (segment for segment in plan["segments"] if segment["documentIndex"] == 1),
+        None,
+    )
+    assert next_document_segment is not None, plan
+    target_index = next_document_segment["startIndex"] + 1
+    prefix = plan["fullText"][:target_index]
+    page.locator("[data-flow-input]").evaluate(
+        """(el, value) => el.dispatchEvent(new InputEvent('beforeinput', {
+          inputType: 'insertText',
+          data: value,
+          bubbles: true,
+          cancelable: true,
+        }))""",
+        prefix,
+    )
+    snapshot = page.evaluate("window.wordstrikeFlowPhase1.getSnapshot()")
+    assert snapshot["currentIndex"] == target_index, (snapshot["currentIndex"], target_index)
+    expect(page.locator("[data-flow-source-title]")).to_have_text(plan["documents"][1]["title"])
+    expect(page.locator("[data-flow-source-position]")).to_contain_text("Text 2 /")
+
+    for _ in range(12):
+        page.keyboard.press("Tab")
+        expect(page.locator('[data-flow-view="run"]')).to_be_visible(timeout=10000)
+        assert page.locator('[data-flow-view="ready"]').count() == 0
+        assert page.locator('[data-flow-view="complete"]').count() == 0
+
+    page.keyboard.press("Escape")
+    expect(page.locator(".mode-select-screen")).to_be_visible(timeout=10000)
+    assert page.evaluate("window.wordstrikeFlowPhase1.isActive()") is False
+    assert "flowRelease=1" not in page.url, page.url
+
+    page.locator('button[data-mode-id="flow"]').click()
+    expect(page.locator('[data-flow-view="run"]')).to_be_visible(timeout=15000)
+    reentry_plan = page.evaluate("window.wordstrikeFlowPhase1.getRunPlan()")
+    assert reentry_plan["theme"] == "mixed", reentry_plan
+    assert page.locator('[data-flow-view="ready"]').count() == 0
+    assert not errors, errors
+
+    evidence.append({
+        "browser": browser_name,
+        "case": "Flow V4 theme and stream integrity stress",
+        "documentTransitionIndex": target_index,
+        "rerolls": 12,
+    })
+    context.close()
+
+
 def certify_mobile(browser, browser_name, base, evidence):
     if browser_name != "chromium":
         return
@@ -391,6 +459,7 @@ def main():
                 name = browser_type.name
                 certify_public_journey(browser, name, base, evidence)
                 certify_fresh_default(browser, name, base, evidence)
+                certify_theme_stream_integrity(browser, name, base, evidence)
                 certify_mobile(browser, name, base, evidence)
                 certify_offline(browser, name, base, evidence)
                 browser.close()
