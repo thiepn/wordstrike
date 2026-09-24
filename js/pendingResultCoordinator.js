@@ -136,7 +136,7 @@ export function createPendingResultCoordinator({
     }
     publish({ status: "submitting", intent: context.intent });
     let request = null;
-    request = Promise.resolve(submit()).then((result) => {
+    request = Promise.resolve().then(() => submit()).then((result) => {
       if (generation !== lifecycleGeneration) return state;
       const finalState = result || submissionState();
       if (["submitted", "already-submitted"].includes(finalState.status)) {
