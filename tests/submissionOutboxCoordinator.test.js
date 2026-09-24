@@ -134,4 +134,107 @@ assert.equal(skipped.status, "empty");
 assert.equal(requests.length, requestsBeforeSkip);
 assert.equal(listSubmissionOutbox({ storage, now: 2500, userId: "user-1" }).length, 1);
 
-console.log("Submission outbox drains after reload, stays user-bound, skips foreground-owned results, retries later, and never drops offline failures.");
+
+const makeDeferredRequest = () => {
+  let resolve;
+  const promise = new Promise((done) => { resolve = done; });
+  return { promise, resolve };
+};
+
+// Cross-account lifecycle stress: B must be able to replace A's active drain,
+// and A's late completion must not mutate either outbox or clear B's ownership.
+{
+  const requestA = makeDeferredRequest();
+  const requestB = makeDeferredRequest();
+  const raceEntries = {
+    "user-a": [{
+      mode: "campaign",
+      sessionId: "outbox-session-user-a-0001",
+      immutablePayload: { sessionId: "outbox-session-user-a-0001" },
+    }],
+    "user-b": [{
+      mode: "campaign",
+      sessionId: "outbox-session-user-b-0002",
+      immutablePayload: { sessionId: "outbox-session-user-b-0002" },
+    }],
+  };
+  const removals = [];
+  const attempts = [];
+  let serviceCount = 0;
+  const raceCoordinator = createSubmissionOutboxCoordinator({
+    list: ({ userId }) => raceEntries[userId] || [],
+    markAttempt: (sessionId, userId, options) => {
+      attempts.push({ sessionId, userId, options });
+      return true;
+    },
+    remove: (sessionId, userId) => {
+      removals.push({ sessionId, userId });
+      raceEntries[userId] = (raceEntries[userId] || []).filter((entry) => entry.sessionId !== sessionId);
+      return true;
+    },
+    makeService: () => {
+      serviceCount += 1;
+      let hydratedUserId = null;
+      return {
+        restorePreparedSubmission(_mode, payload, authState) {
+          hydratedUserId = authState.user.id;
+          return { status: "ready", sessionId: payload.sessionId };
+        },
+        submitCurrentResult() {
+          return hydratedUserId === "user-a" ? requestA.promise : requestB.promise;
+        },
+      };
+    },
+  });
+
+  const drainA = raceCoordinator.drain({ status: "signed-in", user: { id: "user-a" } }, profile);
+  assert.equal(raceCoordinator.isActive(), true);
+  const drainB = raceCoordinator.drain({ status: "signed-in", user: { id: "user-b" } }, profile);
+  assert.notEqual(drainB, drainA);
+  assert.equal(serviceCount, 2);
+
+  requestA.resolve({ status: "submitted" });
+  await drainA;
+  assert.deepEqual(removals, []);
+  assert.deepEqual(attempts, []);
+  assert.equal(raceCoordinator.isActive(), true, "stale A finalizer must not clear B's active drain");
+
+  requestB.resolve({ status: "submitted" });
+  assert.equal((await drainB).status, "drained");
+  assert.deepEqual(removals, [{
+    sessionId: "outbox-session-user-b-0002",
+    userId: "user-b",
+  }]);
+  assert.equal(raceCoordinator.isActive(), false);
+}
+
+// Sign-out must detach an active account drain instead of returning that
+// account's promise to an unauthenticated lifecycle.
+{
+  const request = makeDeferredRequest();
+  const signoutCoordinator = createSubmissionOutboxCoordinator({
+    list: ({ userId }) => userId === "user-a" ? [{
+      mode: "campaign",
+      sessionId: "outbox-session-signout-0003",
+      immutablePayload: { sessionId: "outbox-session-signout-0003" },
+    }] : [],
+    markAttempt: () => true,
+    remove: () => true,
+    makeService: () => ({
+      restorePreparedSubmission: (_mode, payload) => ({ status: "ready", sessionId: payload.sessionId }),
+      submitCurrentResult: () => request.promise,
+    }),
+  });
+  const activeDrain = signoutCoordinator.drain({ status: "signed-in", user: { id: "user-a" } }, profile);
+  const signedOutState = await signoutCoordinator.drain(
+    { status: "signed-out", user: null },
+    { status: "idle", profile: null },
+  );
+  assert.equal(signedOutState.status, "waiting");
+  assert.equal(signoutCoordinator.isActive(), false);
+  request.resolve({ status: "submitted" });
+  await activeDrain;
+  assert.equal(signoutCoordinator.getState().status, "waiting");
+}
+
+console.log("Submission outbox drains after reload, stays user-bound, skips foreground-owned results, retries later, never drops offline failures, and invalidates stale drains on account changes.");
