@@ -40,6 +40,8 @@ assert.match(presentation, /Typing itself stays silent/);
 assert.match(presentation, /isPracticeTarget/);
 assert.match(presentation, /\.practice-lab-screen/);
 assert.match(presentation, /new MutationObserver/);
+assert.match(presentation, /observer\.observe\(root, \{ childList: true \}\)/);
+assert.doesNotMatch(presentation, /observer\.observe\(root, \{[^}]*subtree:\s*true/);
 assert.doesNotMatch(presentation, /leaderboardService|statistics\.js|gameLoop|bossLoop|endlessMode|arcadeRushRuntime|scoring\.js/);
 
 assert.match(css, /UI12 — Final motion \/ audio \/ global consistency pass/);
