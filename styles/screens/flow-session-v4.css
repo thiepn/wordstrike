@@ -1,0 +1,242 @@
+/* =========================================================
+   WORDSTRIKE FLOW — PHASE 7A
+   Micro-results, session continuity, momentum feedback.
+   Public Flow only; no setup or blocking result surfaces.
+   ========================================================= */
+
+.flow-v4-session-strip {
+  display: grid;
+  grid-template-columns: 0.7fr 1.2fr 1.35fr 1.2fr 1fr;
+  width: 100%;
+  border-top: 1px solid var(--flow-line);
+  border-bottom: 1px solid var(--flow-line);
+}
+
+.flow-v4-session-strip > div {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  padding: 9px 12px 10px;
+  border-right: 1px solid var(--flow-line);
+}
+
+.flow-v4-session-strip > div:first-child {
+  padding-left: 0;
+}
+
+.flow-v4-session-strip > div:last-child {
+  padding-right: 0;
+  border-right: 0;
+  text-align: right;
+}
+
+.flow-v4-session-strip span {
+  overflow: hidden;
+  color: var(--flow-ink-muted);
+  font-family: var(--flow-data-face);
+  font-size: 0.5rem;
+  letter-spacing: 0.11em;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.flow-v4-session-strip strong {
+  overflow: hidden;
+  color: var(--flow-ink-soft);
+  font-family: var(--flow-data-face);
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 650;
+  letter-spacing: 0.035em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.flow-v4-micro-result {
+  position: fixed;
+  z-index: 24;
+  top: clamp(82px, 11vh, 118px);
+  right: clamp(18px, 3vw, 42px);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "title score"
+    "metrics score";
+  gap: 6px 22px;
+  width: min(calc(100vw - 36px), 430px);
+  padding: 14px 16px;
+  border: 1px solid var(--flow-line-strong);
+  border-left: 2px solid var(--flow-signal);
+  background: var(--flow-bg-deep);
+  box-shadow: 0 14px 40px rgb(0 0 0 / 28%);
+  color: var(--flow-ink);
+  pointer-events: none;
+  animation: flow-v4-result-in 180ms ease-out both;
+}
+
+.flow-v4-micro-result.is-leaving {
+  animation: flow-v4-result-out 180ms ease-in both;
+}
+
+.flow-v4-micro-result.is-saved {
+  border-left-color: var(--flow-ink-muted);
+}
+
+.flow-v4-micro-result-title {
+  grid-area: title;
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+  min-width: 0;
+}
+
+.flow-v4-micro-result-title strong,
+.flow-v4-micro-result-title span,
+.flow-v4-micro-result-metrics,
+.flow-v4-micro-result-score small {
+  font-family: var(--flow-data-face);
+  text-transform: uppercase;
+}
+
+.flow-v4-micro-result-title strong {
+  overflow: hidden;
+  color: var(--flow-signal);
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.flow-v4-micro-result.is-saved .flow-v4-micro-result-title strong {
+  color: var(--flow-ink-soft);
+}
+
+.flow-v4-micro-result-title span {
+  overflow: hidden;
+  color: var(--flow-ink-muted);
+  font-size: 0.51rem;
+  letter-spacing: 0.08em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.flow-v4-micro-result-score {
+  grid-area: score;
+  align-self: center;
+  color: var(--flow-ink);
+  font-family: var(--flow-reading-face);
+  font-size: clamp(1.35rem, 3vw, 1.9rem);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.flow-v4-micro-result-score small {
+  color: var(--flow-ink-muted);
+  font-size: 0.48rem;
+  letter-spacing: 0.1em;
+}
+
+.flow-v4-micro-result-metrics {
+  grid-area: metrics;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px 12px;
+  color: var(--flow-ink-muted);
+  font-size: 0.52rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.06em;
+}
+
+@keyframes flow-v4-result-in {
+  from {
+    opacity: 0;
+    transform: translateY(-7px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes flow-v4-result-out {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+}
+
+@media (max-width: 720px) {
+  .flow-v4-session-strip {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  .flow-v4-session-strip > div {
+    padding: 8px 6px 9px;
+  }
+
+  .flow-v4-session-strip > div:first-child {
+    padding-left: 0;
+  }
+
+  .flow-v4-session-strip > div:last-child {
+    padding-right: 0;
+  }
+
+  .flow-v4-session-strip span {
+    font-size: 0.44rem;
+    letter-spacing: 0.06em;
+  }
+
+  .flow-v4-session-strip strong {
+    font-size: 0.62rem;
+  }
+
+  .flow-v4-micro-result {
+    top: 74px;
+    right: 12px;
+    left: 12px;
+    width: auto;
+  }
+}
+
+@media (max-width: 440px) {
+  .flow-v4-session-strip > div {
+    padding-inline: 4px;
+  }
+
+  .flow-v4-session-strip span {
+    font-size: 0.41rem;
+    letter-spacing: 0.035em;
+  }
+
+  .flow-v4-session-strip strong {
+    font-size: 0.56rem;
+  }
+
+  .flow-v4-micro-result {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "title"
+      "score"
+      "metrics";
+    gap: 5px;
+    padding: 12px 13px;
+  }
+
+  .flow-v4-micro-result-score {
+    font-size: 1.45rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flow-v4-micro-result,
+  .flow-v4-micro-result.is-leaving {
+    animation: none;
+  }
+}
