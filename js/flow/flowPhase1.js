@@ -23,8 +23,14 @@ import {
 } from "./flowScoreV3.js?v=20260923a";
 import {
   getFlowPersonalBestV3,
+  loadFlowRecordsV3,
   recordFlowResultV3,
 } from "./flowRecordsV3.js?v=20260923a";
+import {
+  getFlowProgressionSummaryV4,
+  loadFlowProgressionV4,
+  recordFlowProgressionV4,
+} from "./flowProgressionV4.js?v=20260924a";
 import {
   createFlowSessionV4,
   formatFlowSessionDurationV4,
@@ -203,7 +209,7 @@ function setPendingMicroResultV4(feedback) {
   if (!feedback) return;
   pendingMicroResultV4 = Object.freeze({
     ...feedback,
-    expiresAt: Date.now() + 2600,
+    expiresAt: Date.now() + (feedback.progressionReward ? 4400 : 2600),
   });
 }
 
@@ -234,6 +240,45 @@ function publicSessionStripMarkup() {
   </section>`;
 }
 
+function publicProgressionStripMarkup() {
+  if (!isPublicStreamRun()) return "";
+  const progression = loadFlowProgressionV4({ sourceRecords: loadFlowRecordsV3() });
+  const summary = getFlowProgressionSummaryV4(progression);
+  const next = summary.nextMilestone;
+  const percent = next ? Math.max(0, Math.min(100, Math.round(next.ratio * 100))) : 100;
+  const nextCopy = next
+    ? `NEXT · ${next.name.toUpperCase()} · ${next.currentLabel} / ${next.targetLabel}`
+    : "ALL MILESTONES COMPLETE";
+  return `<section class="flow-v4-progression-strip" data-flow-progression data-flow-reward-tier="${escapeHtml(summary.tier.id)}" aria-label="Flow long-term progression">
+    <div class="flow-v4-progression-title">
+      <span>Flow title</span>
+      <strong data-flow-progression-title>${escapeHtml(summary.tier.name)}</strong>
+    </div>
+    <div class="flow-v4-progression-track">
+      <div class="flow-v4-progression-heading">
+        <span>Milestones</span>
+        <strong data-flow-progression-count>${summary.earnedCount} / ${summary.totalMilestones}</strong>
+      </div>
+      <div class="flow-v4-progression-bar" role="progressbar" aria-label="${escapeHtml(next?.name || "Flow milestones")}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${percent}">
+        <span style="width:${percent}%"></span>
+      </div>
+      <small data-flow-progression-next>${escapeHtml(nextCopy)}</small>
+    </div>
+  </section>`;
+}
+
+function progressionRewardFromUpdate(update) {
+  if (!update?.newlyEarned?.length) return null;
+  const names = update.newlyEarned.map((milestone) => milestone.name);
+  return Object.freeze({
+    count: names.length,
+    primaryName: names[0],
+    extraCount: Math.max(0, names.length - 1),
+    tierUnlocked: update.tierUnlocked === true,
+    tierName: update.rewardTier?.name || null,
+  });
+}
+
 function microResultSecondaryCopy(feedback) {
   const base = feedback.isPersonalBest && feedback.personalBestDelta != null
     ? `PB ${signedScore(feedback.personalBestDelta)}`
@@ -258,7 +303,15 @@ function publicMicroResultMarkup() {
   const feedback = getActiveMicroResultV4();
   if (!feedback || !isPublicStreamRun()) return "";
   const secondary = microResultSecondaryCopy(feedback);
-  return `<aside class="flow-v4-micro-result is-${feedback.tone}" data-flow-micro-result data-flow-feedback-id="${escapeHtml(feedback.id)}" role="status" aria-live="polite">
+  const reward = feedback.progressionReward;
+  const rewardMarkup = reward
+    ? `<div class="flow-v4-milestone-reward" data-flow-milestone-reward>
+        <span>${reward.count > 1 ? "MILESTONES" : "MILESTONE"} UNLOCKED</span>
+        <strong>${escapeHtml(reward.primaryName)}${reward.extraCount ? ` +${reward.extraCount}` : ""}</strong>
+        ${reward.tierUnlocked && reward.tierName ? `<em>TITLE · ${escapeHtml(reward.tierName)}</em>` : ""}
+      </div>`
+    : "";
+  return `<aside class="flow-v4-micro-result is-${feedback.tone}${reward ? " has-reward" : ""}" data-flow-micro-result data-flow-feedback-id="${escapeHtml(feedback.id)}" role="status" aria-live="polite">
     <div class="flow-v4-micro-result-title"><strong>${escapeHtml(feedback.title)}</strong><span data-flow-micro-secondary>${escapeHtml(secondary)}</span></div>
     <div class="flow-v4-micro-result-score">${feedback.score.toLocaleString("en-US")} <small>PTS</small></div>
     <div class="flow-v4-micro-result-metrics">
@@ -266,6 +319,7 @@ function publicMicroResultMarkup() {
       <span>${feedback.accuracy.toFixed(1)}%</span>
       <span>${feedback.words.toLocaleString("en-US")} WORDS</span>
     </div>
+    ${rewardMarkup}
   </aside>`;
 }
 
@@ -822,6 +876,7 @@ function renderRun() {
         ${!publicLongform && chapter ? `<div class="flow-chapter-strip" data-flow-chapter><span>${escapeHtml(chapter.title)}</span><strong>${escapeHtml(chapter.difficulty)}</strong></div>` : ""}
         ${hud}
         ${publicSessionStripMarkup()}
+        ${publicProgressionStripMarkup()}
         ${publicMicroResultMarkup()}
         <div class="flow-run-copy">
           <div class="flow-passages" aria-label="Typing passage">${passage}</div>
@@ -1234,6 +1289,10 @@ function finalizePublicStreamRun(endedReason = "reset") {
     plan: resolvedRunPlan,
   });
   if (!result) return null;
+  const progressionUpdate = recordFlowProgressionV4(result, {
+    plan: resolvedRunPlan,
+    sourceRecords: loadFlowRecordsV3(),
+  });
   const recordState = recordFlowResultV3(result);
   const sessionUpdate = recordFlowSessionRunV4(
     ensurePublicFlowSessionV4(),
@@ -1244,7 +1303,12 @@ function finalizePublicStreamRun(endedReason = "reset") {
     },
   );
   flowSessionV4 = sessionUpdate.session;
-  if (endedReason !== "exit") setPendingMicroResultV4(sessionUpdate.feedback);
+  if (endedReason !== "exit" && sessionUpdate.feedback) {
+    setPendingMicroResultV4({
+      ...sessionUpdate.feedback,
+      progressionReward: progressionRewardFromUpdate(progressionUpdate),
+    });
+  }
   lastPublicResult = result;
   lastPublicRecordState = recordState;
   if (result.completed && resolvedRunPlan?.corpusVersion === 2) {
@@ -1427,6 +1491,13 @@ if (globalThis.window) {
     getPublicMicroResult: () => {
       const feedback = getActiveMicroResultV4();
       return feedback ? { ...feedback } : null;
+    },
+    getPublicProgressionState: () => {
+      const progression = loadFlowProgressionV4({ sourceRecords: loadFlowRecordsV3() });
+      return {
+        progression,
+        summary: getFlowProgressionSummaryV4(progression),
+      };
     },
     getPublicRecordState: () => lastPublicRecordState ? {
       recorded: lastPublicRecordState.recorded,
