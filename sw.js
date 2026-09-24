@@ -1,5 +1,5 @@
 const CACHE_PREFIX = "wordstrike-pwa-";
-const CACHE_NAME = CACHE_PREFIX + "v71-gameplay-runtime-pass4";
+const CACHE_NAME = CACHE_PREFIX + "v72-gameplay-runtime-pass4-results";
 const APP_SHELL = [
   "./js/practiceLab/practiceAssessmentInput.js",
   "./js/practiceLab/practiceDurableManifest.js",
@@ -74,11 +74,11 @@ const APP_SHELL = [
   "./js/flow/flowUxPhase8.js?v=20260923b",
   "./js/flow/flowVisualPhase6.js",
   "./js/nativeBackNavigation.js",
-  "./js/speedTestPerformanceV1.js?v=20260910a",
-  "./js/speedTestPerformanceV2.js?v=20260910b",
-  "./js/speedTestPerformanceV3.js?v=20260911a",
-  "./js/speedTestPerformanceV4.js?v=20260919a",
-  "./js/speedTestPerformanceV5.js?v=20260911a",
+  "./js/speedTestPerformanceV1.js?v=20260924a",
+  "./js/speedTestPerformanceV2.js?v=20260924a",
+  "./js/speedTestPerformanceV3.js?v=20260924a",
+  "./js/speedTestPerformanceV4.js?v=20260924a",
+  "./js/speedTestPerformanceV5.js?v=20260924a",
   "./js/speedTestResultsV6.js?v=20260919a",
   "./js/thiepnAccountPresentation.js",
   "./js/thiepnAccountPresentation.js?v=20260912a",
@@ -690,6 +690,7 @@ const APP_SHELL = [
   "./js/speedTestResultsV7.js",
   "./js/speedTestTimeline.js",
   "./js/speedTestWordProfileV4.js",
+  "./js/speedTestWordProfileV4.js?v=20260924a",
   "./js/speedTestWords.js",
   "./js/state.js",
   "./js/statistics.js",
