@@ -113,6 +113,22 @@ assert.equal(update.feedback.scoreDelta, -1_500);
 assert.equal(update.feedback.momentumStreak, 0);
 assert.equal(session.bestRun.score, 15_500);
 
+const momentumRun = run({
+  sessionId: "session-flow-v4-momentum",
+  score: 15_000,
+  wordsCompleted: 130,
+  correctCharacters: 650,
+  activeDurationMs: 78_000,
+});
+update = recordFlowSessionRunV4(session, momentumRun);
+session = update.session;
+assert.equal(update.feedback.title, "MOMENTUM UP");
+assert.equal(update.feedback.tone, "momentum");
+assert.equal(update.feedback.scoreDelta, 1_000);
+assert.equal(update.feedback.momentumStreak, 1);
+assert.equal(update.feedback.isSessionBest, false);
+assert.equal(session.bestRun.score, 15_500);
+
 const pbRun = run({
   sessionId: "session-flow-v4-pb",
   score: 22_500,
@@ -129,12 +145,12 @@ assert.equal(update.feedback.title, "NEW PERSONAL BEST");
 assert.equal(update.feedback.tone, "personal-best");
 assert.equal(update.feedback.personalBestDelta, 2_500);
 assert.equal(session.personalBestScore, 22_500);
-assert.equal(session.runCount, 4);
-assert.equal(session.eligibleRunCount, 4);
-assert.equal(session.totalScore, 64_000);
-assert.equal(session.totalWords, 560);
-assert.equal(session.totalCorrectCharacters, 2_800);
-assert.equal(session.activeDurationMs, 315_000);
+assert.equal(session.runCount, 5);
+assert.equal(session.eligibleRunCount, 5);
+assert.equal(session.totalScore, 79_000);
+assert.equal(session.totalWords, 690);
+assert.equal(session.totalCorrectCharacters, 3_450);
+assert.equal(session.activeDurationMs, 393_000);
 assert.equal(session.bestRun.score, 22_500);
 
 const live = getFlowSessionLiveSummaryV4(session, {
@@ -143,14 +159,14 @@ const live = getFlowSessionLiveSummaryV4(session, {
   correctCharacters: 250,
   durationMs: 30_000,
 });
-assert.equal(live.currentRunNumber, 5);
-assert.equal(live.completedRuns, 4);
-assert.equal(live.totalScore, 69_000);
-assert.equal(live.totalWords, 610);
-assert.equal(live.totalCorrectCharacters, 3_050);
-assert.equal(live.activeDurationMs, 345_000);
+assert.equal(live.currentRunNumber, 6);
+assert.equal(live.completedRuns, 5);
+assert.equal(live.totalScore, 84_000);
+assert.equal(live.totalWords, 740);
+assert.equal(live.totalCorrectCharacters, 3_700);
+assert.equal(live.activeDurationMs, 423_000);
 assert.equal(live.bestScore, 22_500);
-assert.equal(formatFlowSessionDurationV4(live.activeDurationMs), "5:45");
+assert.equal(formatFlowSessionDurationV4(live.activeDurationMs), "7:03");
 
 const ignored = recordFlowSessionRunV4(session, run({
   sessionId: "session-flow-v4-empty",
