@@ -1706,6 +1706,9 @@ const handleNativeBack = createWordStrikeBackHandler({
   onboardingController,
   getSpeedTestState: getCurrentSpeedTest,
   backPracticeLab: () => practiceLabController?.back(),
+  backFlow: () => (
+    globalThis.window?.wordstrikeFlowPhase1?.exitToReturnSurface?.("native-back") === true
+  ),
   cancelProfileNameEdit,
   openTitle,
   openModeSelect,
