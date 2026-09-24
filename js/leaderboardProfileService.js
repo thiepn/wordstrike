@@ -224,8 +224,15 @@ export function createLeaderboardProfileService({ getClient = getSupabaseClient 
       return publish(baseState({ editing: false, draft: "" }));
     },
     setUsernameDraft(value) {
-      if (state.status === "checking") requestSequence += 1;
-      state = makeState({ ...state, draft: String(value || ""), availability: null, error: null });
+      const checking = state.status === "checking";
+      if (checking) requestSequence += 1;
+      state = makeState({
+        ...state,
+        status: checking ? (state.profile ? "ready" : "needs-username") : state.status,
+        draft: String(value || ""),
+        availability: null,
+        error: null,
+      });
       return state;
     },
     resetLeaderboardProfile() {
