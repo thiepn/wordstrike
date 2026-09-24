@@ -344,10 +344,17 @@ function syncPracticeViewObserver() {
   const overlay = document.querySelector("[data-typing-coach-practice-overlay]");
   const practiceRoot = overlay?.querySelector?.("[data-coach-practice-root]") || null;
   if (overlay === observedPracticeOverlay && practiceRoot === observedPracticeRoot) return;
+  const hadObservedPracticeSurface = Boolean(observedPracticeOverlay || observedPracticeRoot);
   disconnectPracticeViewObserver();
   observedPracticeOverlay = overlay || null;
   observedPracticeRoot = practiceRoot;
-  if (!practiceRoot) return;
+  if (!practiceRoot) {
+    // Overlay removal is already a direct body mutation. Schedule one V7 refresh
+    // here so a just-persisted practice completion is reflected without widening
+    // observation into the typing/practice subtree.
+    if (hadObservedPracticeSurface) scheduleEnhance();
+    return;
+  }
   const onPracticeStateChange = () => {
     if (syncPracticeCompletion()) scheduleEnhance();
   };
