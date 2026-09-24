@@ -53,6 +53,7 @@ def set_scene(page, phase="ACTIVE", intro_ms=0, remaining_ms=18500):
           const state = await import('./js/state.js');
           const renderer = await import('./js/renderer.js');
           const ui = await import('./js/ui.js');
+          const presentation = await import('./js/bossGameplayPresentation.js?v=20260924b');
           bossLoop.stopBossLoop();
           const game = state.appState.game;
           game.phrases = ['signal focus', 'precision control', 'tempo survive'];
@@ -76,6 +77,7 @@ def set_scene(page, phase="ACTIVE", intro_ms=0, remaining_ms=18500):
           game.config = {...game.config, segmentCount:3, totalWordCount:6};
           renderer.renderBossPhrase(game);
           ui.updateBossHud(game);
+          presentation.syncBossGameplayPresentation(game);
         }""",
         {"phase": phase, "introMs": intro_ms, "remainingMs": remaining_ms},
     )
