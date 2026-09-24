@@ -71,7 +71,7 @@ assert.match(flowLoader, /let releaseExitObserver = null/);
 assert.match(flowLoader, /releaseExitObserver\?\.disconnect\?\.\(\)/);
 assert.match(
   flowUx,
-  /if \(!screen\) \{[\s\S]*?setupObserver\?\.disconnect\?\.\(\);[\s\S]*?setupObserver = null;[\s\S]*?decoratedScreen = null;/,
+  /if \(!screen\) \{[\s\S]*?setupObserver\?\.disconnect\(\);[\s\S]*?setupObserver = null;[\s\S]*?decoratedScreen = null;/,
   "Flow UX must release observers that retain detached setup screens after exit",
 );
 
