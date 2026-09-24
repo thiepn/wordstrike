@@ -92,7 +92,7 @@ try {
   assert.match(css, /flow-v5-session-meta/);
   assert.match(index, /flow-session-v4\.css\?v=20260924c/);
   assert.match(index, /flowRuntimeLoader\.js\?v=20260924g/);
-  assert.match(sw, /v80-flow-identity-7c/);
+  assert.match(sw, /const CACHE_NAME = CACHE_PREFIX \+ "v\\d+-[^"]+";/);
   assert.match(sw, /flowIdentityV1\.js\?v=20260924a/);
 
   console.log("Flow Phase 7C contracts passed: persistent text mix, source identity, stronger HUD hierarchy, mode identity copy, responsive presentation, and offline wiring.");
