@@ -1,6 +1,8 @@
+import { loadPreferredFlowTheme } from "./flowIdentityV1.js?v=20260924a";
+
 const RELEASE_FLAG = "flowRelease";
-const FLOW_RELEASE_VERSION = 15;
-const FLOW_RELEASE_CACHE_NAME = "wordstrike-flow-release-v18";
+const FLOW_RELEASE_VERSION = 16;
+const FLOW_RELEASE_CACHE_NAME = "wordstrike-flow-release-v19";
 const FLOW_RELEASE_QUERY_KEYS = Object.freeze([
   "mode",
   RELEASE_FLAG,
@@ -24,7 +26,7 @@ const FLOW_RELEASE_QUERY_KEYS = Object.freeze([
 ]);
 
 const FLOW_RELEASE_ASSETS = Object.freeze([
-  "./js/flow/flowRuntimeLoader.js?v=20260924f",
+  "./js/flow/flowRuntimeLoader.js?v=20260924g",
   "./js/leaderboardReturnState.js",
   "./js/pendingResultSubmission.js",
   "./js/submissionOutbox.js",
@@ -61,11 +63,13 @@ const FLOW_RELEASE_ASSETS = Object.freeze([
   "./js/flow/flowGameModeV2.js?v=20260923c",
   "./js/flow/flowIntegrationBootstrap.js?v=20260923b",
   "./js/flow/flowIntegrationPhase11.js?v=20260923b",
+  "./js/flow/flowIdentityV1.js",
+  "./js/flow/flowIdentityV1.js?v=20260924a",
   "./js/flow/flowLongformContent.js",
   "./js/flow/flowModifiers.js",
   "./js/flow/flowModifiersPhase9.js?v=20260923a",
   "./js/flow/flowPassages.js",
-  "./js/flow/flowPhase1.js?v=20260924e",
+  "./js/flow/flowPhase1.js?v=20260924f",
   "./js/flow/flowProgression.js",
   "./js/flow/flowProgression.js?v=20260923a",
   "./js/flow/flowProgressionV4.js",
@@ -96,7 +100,7 @@ const FLOW_RELEASE_ASSETS = Object.freeze([
   "./styles/screens/flow-phase5.css?v=20260916a",
   "./styles/screens/flow-game-mode-v2.css?v=20260923d",
   "./styles/screens/flow-session-v4.css",
-  "./styles/screens/flow-session-v4.css?v=20260924b",
+  "./styles/screens/flow-session-v4.css?v=20260924c",
   "./styles/screens/flow-visual-phase6.css?v=20260923a",
   "./styles/screens/flow-visual-phase6-polish.css?v=20260916a",
   "./styles/screens/flow-ui-phase7.css?v=20260916a",
@@ -156,6 +160,9 @@ function releaseUrl(locationLike = globalThis.location) {
     "flowPassage",
   ]) {
     url.searchParams.delete(key);
+  }
+  if (!url.searchParams.has("flowTheme")) {
+    url.searchParams.set("flowTheme", loadPreferredFlowTheme("mixed"));
   }
   if (!url.searchParams.has("flowSeed")) url.searchParams.set("flowSeed", createReleaseSeed());
   return url;
