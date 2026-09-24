@@ -20,6 +20,13 @@ assert.equal(release.searchParams.get("flowRelease"), "1");
 assert.equal(release.searchParams.get("flowRun"), "1");
 assert.equal(release.searchParams.get("flowModifiers"), "0");
 assert.equal(release.searchParams.get("flowAdaptive"), "0");
+
+const staleThemeRelease = new URL(buildFlowReleaseUrl({
+  href: "https://wordstrike.test/?flowTheme=future-theme",
+  search: "?flowTheme=future-theme",
+}));
+assert.equal(staleThemeRelease.searchParams.get("flowTheme"), "mixed");
+
 for (const key of ["flowCategory", "flowDifficulty", "flowModifierIds", "flowWeaknesses", "flowResumeAdaptive", "flowUiStart", "flowCatalog", "flowPassage"]) {
   assert.equal(release.searchParams.has(key), false, `public Flow must strip legacy practice option ${key}`);
 }
@@ -42,6 +49,7 @@ assert.match(loader, /flowStreamPlanV3\.js\?v=20260923b/);
 assert.match(loader, /flowScoreV3\.js\?v=20260923a/);
 assert.match(loader, /flowRecordsV3\.js\?v=20260923a/);
 assert.match(loader, /flowTheme/);
+assert.match(loader, /normalizeStoredFlowTheme/);
 
 assert.match(index, /flow-game-mode-v2\.css\?v=20260923d/);
 assert.match(index, /flowRuntimeLoader\.js\?v=20260924j/);
