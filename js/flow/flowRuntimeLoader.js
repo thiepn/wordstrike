@@ -1,6 +1,6 @@
 const RELEASE_FLAG = "flowRelease";
-const FLOW_RELEASE_VERSION = 11;
-const FLOW_RELEASE_CACHE_NAME = "wordstrike-flow-release-v14";
+const FLOW_RELEASE_VERSION = 12;
+const FLOW_RELEASE_CACHE_NAME = "wordstrike-flow-release-v15";
 const FLOW_RELEASE_QUERY_KEYS = Object.freeze([
   "mode",
   RELEASE_FLAG,
@@ -24,7 +24,7 @@ const FLOW_RELEASE_QUERY_KEYS = Object.freeze([
 ]);
 
 const FLOW_RELEASE_ASSETS = Object.freeze([
-  "./js/flow/flowRuntimeLoader.js?v=20260924b",
+  "./js/flow/flowRuntimeLoader.js?v=20260924c",
   "./js/leaderboardReturnState.js",
   "./js/pendingResultSubmission.js",
   "./js/submissionOutbox.js",
@@ -65,7 +65,7 @@ const FLOW_RELEASE_ASSETS = Object.freeze([
   "./js/flow/flowModifiers.js",
   "./js/flow/flowModifiersPhase9.js?v=20260923a",
   "./js/flow/flowPassages.js",
-  "./js/flow/flowPhase1.js?v=20260924a",
+  "./js/flow/flowPhase1.js?v=20260924c",
   "./js/flow/flowProgression.js",
   "./js/flow/flowProgression.js?v=20260923a",
   "./js/flow/flowRunPlan.js",
@@ -74,6 +74,8 @@ const FLOW_RELEASE_ASSETS = Object.freeze([
   "./js/flow/flowRecordsV3.js?v=20260923a",
   "./js/flow/flowRecordsV3.js",
   "./js/flow/flowScoreV3.js?v=20260923a",
+  "./js/flow/flowSessionV4.js",
+  "./js/flow/flowSessionV4.js?v=20260924a",
   "./js/flow/flowScoreV3.js",
   "./js/flow/flowStreamPlanV3.js?v=20260923b",
   "./js/flow/flowScoreV2.js",
@@ -91,6 +93,8 @@ const FLOW_RELEASE_ASSETS = Object.freeze([
   "./styles/screens/flow-phase1.css?v=20260916d",
   "./styles/screens/flow-phase5.css?v=20260916a",
   "./styles/screens/flow-game-mode-v2.css?v=20260923d",
+  "./styles/screens/flow-session-v4.css",
+  "./styles/screens/flow-session-v4.css?v=20260924a",
   "./styles/screens/flow-visual-phase6.css?v=20260923a",
   "./styles/screens/flow-visual-phase6-polish.css?v=20260916a",
   "./styles/screens/flow-ui-phase7.css?v=20260916a",
@@ -373,7 +377,7 @@ async function importFlowRuntime() {
     const integrationBootstrap = await import("./flowIntegrationBootstrap.js?v=20260923b");
     integrationBootstrap.applyFlowIntegrationDefaults?.();
     await Promise.all([
-      import("./flowPhase1.js?v=20260924a"),
+      import("./flowPhase1.js?v=20260924c"),
       import("./flowVisualPhase6.js?v=20260923a"),
     ]);
 
