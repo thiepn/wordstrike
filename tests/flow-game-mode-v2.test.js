@@ -52,7 +52,7 @@ assert.match(loader, /flowTheme/);
 assert.match(loader, /normalizeStoredFlowTheme/);
 
 assert.match(index, /flow-game-mode-v2\.css\?v=20260923d/);
-assert.match(index, /flowRuntimeLoader\.js\?v=20260924l/);
+assert.match(index, /flowRuntimeLoader\.js\?v=20260924m/);
 assert.match(css, /FLOW V3: instant-play stream controls/);
 assert.match(css, /flow-v3-run-tools/);
 assert.match(css, /flow-v3-tab-hint/);
