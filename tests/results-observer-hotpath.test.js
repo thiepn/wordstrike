@@ -13,6 +13,7 @@ const paths = [
   "../js/endlessGameplayPresentation.js",
   "../js/bossGameplayPresentation.js",
   "../js/arcadeRushGameplayPresentation.js",
+  "../js/speedTestWordProfileV4.js",
 ];
 const sources = Object.fromEntries(await Promise.all(paths.map(async (path) => [
   path,
@@ -40,6 +41,13 @@ assert.doesNotMatch(v7, /observe\(document\.body, \{ childList: true, subtree: t
 assert.match(v7, /document\.removeEventListener\("click", onDocumentClickCapture, true\)/);
 assert.match(v7, /window\.addEventListener\("pageshow", install\)/);
 
+const profiler = sources["../js/speedTestWordProfileV4.js"];
+assert.match(profiler, /observer\.observe\(root, \{ childList: true \}\);/);
+assert.doesNotMatch(profiler, /observer\.observe\(root, \{[^}]*subtree:\s*true/);
+assert.match(profiler, /if \(state\.phase === "PAUSED"\) return;/);
+assert.match(profiler, /window\.addEventListener\("pagehide", teardownSpeedTestWordProfiler\)/);
+assert.match(profiler, /window\.addEventListener\("pageshow", installSpeedTestWordProfiler\)/);
+
 const campaign = sources["../js/campaignGameplayPresentation.js"];
 const endless = sources["../js/endlessGameplayPresentation.js"];
 const boss = sources["../js/bossGameplayPresentation.js"];
@@ -54,4 +62,4 @@ assert.doesNotMatch(arcade, /rootObserver\.observe\(app, \{[^}]*subtree:\s*true/
 assert.match(arcade, /viewObserver\.observe\(nextView, \{[\s\S]*?subtree:\s*true/);
 assert.match(arcade, /disconnectViewObserver\(\)/);
 
-console.log("Results and presentation observers stay off unrelated typing mutation hot paths while preserving mode-scoped observation.");
+console.log("Results, profiler, and presentation observers stay off unrelated typing mutation hot paths and clean up lifecycle state.");
