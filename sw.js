@@ -1,5 +1,5 @@
 const CACHE_PREFIX = "wordstrike-pwa-";
-const CACHE_NAME = CACHE_PREFIX + "v78-flow-progression-v4-pass4";
+const CACHE_NAME = CACHE_PREFIX + "v79-flow-progression-v4-pass4";
 const APP_SHELL = [
   "./js/practiceLab/practiceAssessmentInput.js",
   "./js/practiceLab/practiceDurableManifest.js",
@@ -66,7 +66,7 @@ const APP_SHELL = [
   "./js/flow/flowRecordsV2.js",
   "./js/flow/flowRecordsV2.js?v=20260923a",
   "./js/flow/flowRuntimeLoader.js",
-  "./js/flow/flowRuntimeLoader.js?v=20260924e",
+  "./js/flow/flowRuntimeLoader.js?v=20260924f",
   "./js/flow/flowSelection.js",
   "./js/flow/flowShell.js",
   "./js/flow/flowState.js",
