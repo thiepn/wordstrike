@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { getModeDefinition, MODE_IDS } from "../js/modes.js";
 import {
+  FLOW_PUBLIC_THEME_IDS,
   FLOW_THEME_PREFERENCE_STORAGE_KEY,
   formatFlowThemeLabel,
   getFlowStreamIdentity,
@@ -9,6 +10,7 @@ import {
   normalizeStoredFlowTheme,
   savePreferredFlowTheme,
 } from "../js/flow/flowIdentityV1.js";
+import { FLOW_V3_THEME_IDS } from "../js/flow/flowStreamPlanV3.js?v=20260923b";
 
 class MemoryStorage {
   constructor() { this.values = new Map(); }
@@ -21,16 +23,23 @@ const previousStorage = globalThis.localStorage;
 globalThis.localStorage = new MemoryStorage();
 
 try {
+  assert.deepEqual(FLOW_PUBLIC_THEME_IDS, FLOW_V3_THEME_IDS);
   assert.equal(normalizeStoredFlowTheme(" SCIENCE "), "science");
   assert.equal(normalizeStoredFlowTheme("../bad"), "mixed");
+  assert.equal(normalizeStoredFlowTheme("future-theme"), "mixed");
+  assert.equal(normalizeStoredFlowTheme("science", "future-theme"), "science");
+  assert.equal(normalizeStoredFlowTheme("future-theme", "future-theme"), "mixed");
   assert.equal(formatFlowThemeLabel("science"), "Science");
-  assert.equal(formatFlowThemeLabel("history-culture"), "History Culture");
+  assert.equal(formatFlowThemeLabel("technology"), "Technology");
+  assert.equal(formatFlowThemeLabel("future-theme"), "Mixed");
 
   assert.equal(loadPreferredFlowTheme(), "mixed");
   assert.equal(savePreferredFlowTheme("science"), "science");
   assert.equal(globalThis.localStorage.getItem(FLOW_THEME_PREFERENCE_STORAGE_KEY), "science");
   assert.equal(loadPreferredFlowTheme(), "science");
   globalThis.localStorage.setItem(FLOW_THEME_PREFERENCE_STORAGE_KEY, "<invalid>");
+  assert.equal(loadPreferredFlowTheme(), "mixed");
+  globalThis.localStorage.setItem(FLOW_THEME_PREFERENCE_STORAGE_KEY, "future-theme");
   assert.equal(loadPreferredFlowTheme(), "mixed");
 
   const plan = {
@@ -77,6 +86,7 @@ try {
   ]);
 
   assert.match(loader, /loadPreferredFlowTheme/);
+  assert.match(loader, /normalizeStoredFlowTheme/);
   assert.match(loader, /flowIdentityV1\.js\?v=20260924b/);
   assert.match(loader, /wordstrike-flow-release-v22/);
   assert.match(phase1, /getFlowStreamIdentity/);
@@ -95,7 +105,7 @@ try {
   assert.match(sw, /const CACHE_NAME = CACHE_PREFIX \+ "v\d+-[^"]+";/);
   assert.match(sw, /flowIdentityV1\.js\?v=20260924b/);
 
-  console.log("Flow Phase 7C contracts passed: persistent text mix, source identity, stronger HUD hierarchy, mode identity copy, responsive presentation, and offline wiring.");
+  console.log("Flow V4 identity hardening contracts passed: canonical theme allowlist, stale-preference fallback, source identity, and offline wiring.");
 } finally {
   if (previousStorage === undefined) delete globalThis.localStorage;
   else globalThis.localStorage = previousStorage;
