@@ -1,4 +1,7 @@
-import { loadPreferredFlowTheme } from "./flowIdentityV1.js?v=20260924b";
+import {
+  loadPreferredFlowTheme,
+  normalizeStoredFlowTheme,
+} from "./flowIdentityV1.js?v=20260924b";
 
 const RELEASE_FLAG = "flowRelease";
 const FLOW_RELEASE_VERSION = 17;
@@ -161,9 +164,11 @@ function releaseUrl(locationLike = globalThis.location) {
   ]) {
     url.searchParams.delete(key);
   }
-  if (!url.searchParams.has("flowTheme")) {
-    url.searchParams.set("flowTheme", loadPreferredFlowTheme("mixed"));
-  }
+  const requestedTheme = url.searchParams.get("flowTheme");
+  url.searchParams.set(
+    "flowTheme",
+    normalizeStoredFlowTheme(requestedTheme ?? loadPreferredFlowTheme("mixed")),
+  );
   if (!url.searchParams.has("flowSeed")) url.searchParams.set("flowSeed", createReleaseSeed());
   return url;
 }
