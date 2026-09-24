@@ -24,6 +24,8 @@ for (const path of paths.slice(0, 5)) {
   const source = sources[path];
   assert.match(source, /observer\.observe\(root, \{ childList: true \}\);/);
   assert.doesNotMatch(source, /observer\.observe\(root, \{[^}]*subtree:\s*true/);
+  assert.match(source, /window\.addEventListener\("pagehide"/);
+  assert.match(source, /window\.addEventListener\("pageshow"/);
 }
 
 const v6 = sources["../js/speedTestResultsV6b.js"];
