@@ -61,6 +61,7 @@ export function createLeaderboardProfileService({ getClient = getSupabaseClient 
   let state = makeState();
   let activeUserId = null;
   let initializationPromise = null;
+  let requestSequence = 0;
   const listeners = new Set();
 
   const publish = (next) => {
@@ -89,6 +90,7 @@ export function createLeaderboardProfileService({ getClient = getSupabaseClient 
   const initialize = (user, { force = false } = {}) => {
     const userId = typeof user?.id === "string" ? user.id : null;
     if (!userId) {
+      requestSequence += 1;
       activeUserId = null;
       initializationPromise = null;
       return Promise.resolve(publish(makeState()));
@@ -101,10 +103,11 @@ export function createLeaderboardProfileService({ getClient = getSupabaseClient 
     ) return Promise.resolve(state);
 
     activeUserId = userId;
+    const requestId = ++requestSequence;
     publish({ status: "loading" });
     const request = (async () => {
       const result = await invoke("get");
-      if (activeUserId !== userId) return state;
+      if (activeUserId !== userId || requestId !== requestSequence) return state;
       if (result.unavailable) return publish({ status: "unavailable" });
       if (!result.ok) return publish({ status: "error", error: result.error });
       const profile = result.data?.profile ?? null;
@@ -144,8 +147,11 @@ export function createLeaderboardProfileService({ getClient = getSupabaseClient 
   const check = async (username) => {
     const validation = validateOperation(username);
     if (!validation) return state;
+    const userId = activeUserId;
+    const requestId = ++requestSequence;
     publish(baseState({ status: "checking", draft: validation.username }));
     const result = await invoke("check", validation.username);
+    if (activeUserId !== userId || requestId !== requestSequence) return state;
     if (!result.ok) return publish(baseState({ draft: validation.username, error: result.error }));
     return publish(baseState({
       draft: validation.username,
@@ -156,8 +162,11 @@ export function createLeaderboardProfileService({ getClient = getSupabaseClient 
   const claim = async (username) => {
     const validation = validateOperation(username);
     if (!validation) return state;
+    const userId = activeUserId;
+    const requestId = ++requestSequence;
     publish(baseState({ status: "claiming", draft: validation.username }));
     const result = await invoke("claim", validation.username);
+    if (activeUserId !== userId || requestId !== requestSequence) return state;
     if (!result.ok) return publish(baseState({ draft: validation.username, error: result.error }));
     return publish({
       status: "ready",
@@ -169,8 +178,11 @@ export function createLeaderboardProfileService({ getClient = getSupabaseClient 
   const change = async (username) => {
     const validation = validateOperation(username);
     if (!validation) return state;
+    const userId = activeUserId;
+    const requestId = ++requestSequence;
     publish(baseState({ status: "changing", draft: validation.username, editing: true }));
     const result = await invoke("change", validation.username);
+    if (activeUserId !== userId || requestId !== requestSequence) return state;
     if (!result.ok) {
       const profile = result.error?.canChangeAt
         ? { ...state.profile, canChangeAt: result.error.canChangeAt }
@@ -203,17 +215,21 @@ export function createLeaderboardProfileService({ getClient = getSupabaseClient 
     changeUsername: change,
     startUsernameChange() {
       if (!state.profile) return state;
+      requestSequence += 1;
       return publish(baseState({ editing: true, draft: state.profile.username }));
     },
     cancelUsernameChange() {
       if (!state.profile) return state;
+      requestSequence += 1;
       return publish(baseState({ editing: false, draft: "" }));
     },
     setUsernameDraft(value) {
+      if (state.status === "checking") requestSequence += 1;
       state = makeState({ ...state, draft: String(value || ""), availability: null, error: null });
       return state;
     },
     resetLeaderboardProfile() {
+      requestSequence += 1;
       activeUserId = null;
       initializationPromise = null;
       return publish(makeState());
