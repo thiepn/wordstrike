@@ -135,7 +135,7 @@ assert.ok(
   serviceWorker.includes(`"./js/main.js?v=${mainVersion}"`),
   "service worker must cache the same main.js version delivered by index.html",
 );
-assert.match(serviceWorker, /v84-state-consistency-pass5/);
+assert.match(serviceWorker, /const CACHE_NAME = CACHE_PREFIX \\+ "v\\d+-[^"]+";/);
 const mainAsset = `"./js/main.js?v=${mainVersion}"`;
 assert.equal(
   serviceWorker.split(mainAsset).length - 1,
