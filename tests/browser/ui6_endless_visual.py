@@ -51,6 +51,7 @@ def seed_scene(page):
       const endless = await import('./js/endlessMode.js');
       const renderer = await import('./js/renderer.js');
       const ui = await import('./js/ui.js');
+      const presentation = await import('./js/endlessGameplayPresentation.js?v=20260924b');
       endless.stopEndlessLoop();
       const game = endless.getCurrentEndless();
       const area = document.querySelector('#play-area');
@@ -88,6 +89,7 @@ def seed_scene(page):
       renderer.updateWordElement(game.words[2], false, {candidate:true, prefixLength:2});
       for (const word of game.words.slice(3)) renderer.updateWordElement(word, false);
       ui.updateEndlessHud(game);
+      presentation.syncEndlessGameplayPresentation(game);
       window.__ui6Visual = {endless, renderer, game};
     }""")
     page.wait_for_timeout(180)
