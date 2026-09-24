@@ -4,7 +4,7 @@ import {
   getFlowTypingSnapshot,
   insertFlowText,
 } from "./flowEngine.js";
-import { analyzeFlowCadence } from "./flowCadence.js";
+import { analyzeFlowCadence } from "./flowCadence.js?v=20260924a";
 import { resolveFlowRunPlan } from "./flowRunPlan.js?v=20260923e";
 import {
   FLOW_V3_THEME_IDS,
