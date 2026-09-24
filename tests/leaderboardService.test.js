@@ -147,4 +147,59 @@ assert.equal(
   LEADERBOARD_BOARDS.FLOW_STANDARD,
 );
 
-console.log("Leaderboard service stays lazy and rules-versioned; legacy Daily can resolve to hidden Rush while public keyboard navigation excludes the retired board.");
+
+{
+  const raceCalls = [];
+  const racePending = [];
+  const raceService = createLeaderboardService({
+    now: (() => { let value = 5000; return () => ++value; })(),
+    getClient: () => ({ functions: { invoke: (_name, { body }) => {
+      raceCalls.push(body.boardKey);
+      const request = deferred();
+      racePending.push(request);
+      return request.promise;
+    } } }),
+  });
+
+  const firstCampaign = raceService.initializeLeaderboards(LEADERBOARD_BOARDS.CAMPAIGN);
+  const endless = raceService.selectLeaderboardBoard(LEADERBOARD_BOARDS.ENDLESS);
+  const secondCampaign = raceService.selectLeaderboardBoard(LEADERBOARD_BOARDS.CAMPAIGN);
+
+  assert.notEqual(secondCampaign, firstCampaign, "returning to A must start a fresh request after A was invalidated");
+  assert.deepEqual(raceCalls, [
+    LEADERBOARD_BOARDS.CAMPAIGN,
+    LEADERBOARD_BOARDS.ENDLESS,
+    LEADERBOARD_BOARDS.CAMPAIGN,
+  ]);
+  assert.equal(raceService.getLeaderboardState().selectedBoardKey, LEADERBOARD_BOARDS.CAMPAIGN);
+  assert.equal(raceService.getLeaderboardState().status, "loading");
+
+  racePending[0].resolve({ data: { ok: true, data: {
+    board: { boardKey: LEADERBOARD_BOARDS.CAMPAIGN, displayName: "Old Campaign", rulesVersion: 1 },
+    entries: [{ rank: 1, username: "OldCampaign", level: 50, accuracy: 90 }],
+    viewer: null,
+  } } });
+  await firstCampaign;
+  assert.equal(raceService.getLeaderboardState().status, "loading");
+  assert.equal(raceService.getLeaderboardState().entries.length, 0);
+
+  racePending[1].resolve({ data: { ok: true, data: {
+    board: { boardKey: LEADERBOARD_BOARDS.ENDLESS, displayName: "Endless", rulesVersion: 1 },
+    entries: [{ rank: 1, username: "OldEndless", stage: 20, score: 10, accuracy: 90 }],
+    viewer: null,
+  } } });
+  await endless;
+  assert.equal(raceService.getLeaderboardState().selectedBoardKey, LEADERBOARD_BOARDS.CAMPAIGN);
+  assert.equal(raceService.getLeaderboardState().status, "loading");
+
+  racePending[2].resolve({ data: { ok: true, data: {
+    board: { boardKey: LEADERBOARD_BOARDS.CAMPAIGN, displayName: "Campaign", rulesVersion: 1 },
+    entries: [{ rank: 1, username: "NewestCampaign", level: 99, accuracy: 99 }],
+    viewer: null,
+  } } });
+  await secondCampaign;
+  assert.equal(raceService.getLeaderboardState().status, "ready");
+  assert.equal(raceService.getLeaderboardState().entries[0].username, "NewestCampaign");
+}
+
+console.log("Leaderboard service stays lazy and rules-versioned; legacy Daily can resolve to hidden Rush while public keyboard navigation excludes the retired board, and rapid A→B→A switches keep the newest request authoritative.");
