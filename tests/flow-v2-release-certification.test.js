@@ -39,7 +39,7 @@ assert.equal(getLeaderboardSelection(LEADERBOARD_BOARDS.FLOW_STANDARD).selectedC
 
 assert.match(loader, /const FLOW_RELEASE_VERSION = 12/);
 assert.match(loader, /wordstrike-flow-release-v15/);
-assert.match(index, /js\/flow\/flowRuntimeLoader\.js\?v=20260924b/);
+assert.match(index, /js\/flow\/flowRuntimeLoader\.js\?v=20260924c/);
 for (const asset of [
   "./js/authService.js",
   "./js/leaderboardProfileService.js",
@@ -53,6 +53,10 @@ for (const asset of [
   "./js/flow/flowRecordsV3.js",
   "./js/flow/flowRecordsV3.js?v=20260923a",
   "./js/flow/flowPhase1.js?v=20260924c",
+  "./styles/screens/flow-session-v4.css?v=20260924a",
+  "./styles/screens/flow-session-v4.css",
+  "./js/flow/flowSessionV4.js?v=20260924a",
+  "./js/flow/flowSessionV4.js",
   "./js/flow/flowCadence.js?v=20260924a",
 ]) {
   assert.equal(loader.includes(JSON.stringify(asset)), true, "offline pack missing " + asset);
