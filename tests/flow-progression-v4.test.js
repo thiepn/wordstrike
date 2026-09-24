@@ -175,14 +175,14 @@ try {
   assert.match(phase1, /data-flow-milestone-reward/);
   assert.match(phase1, /getPublicProgressionState/);
   assert.match(loader, /flowProgressionV4\.js\?v=20260924a/);
-  assert.match(loader, /wordstrike-flow-release-v18/);
-  assert.match(sw, /v79-flow-progression-v4-pass4/);
+  assert.match(loader, /wordstrike-flow-release-v19/);
+  assert.match(sw, /v80-flow-identity-7c/);
   assert.match(sw, /flowProgressionV4\.js\?v=20260924a/);
   assert.match(css, /WORDSTRIKE FLOW — PHASE 7B/);
   assert.match(css, /flow-v4-progression-strip/);
   assert.match(css, /flow-v4-milestone-reward/);
-  assert.match(index, /flow-session-v4\.css\?v=20260924b/);
-  assert.match(index, /flowRuntimeLoader\.js\?v=20260924f/);
+  assert.match(index, /flow-session-v4\.css\?v=20260924c/);
+  assert.match(index, /flowRuntimeLoader\.js\?v=20260924g/);
 
   console.log("Flow Phase 7B contracts passed: V3 bootstrap, passive milestones, streaks, theme breadth, endurance, reward tiers, idempotency, persistence recovery, and offline wiring.");
 } finally {

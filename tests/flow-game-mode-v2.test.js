@@ -32,7 +32,7 @@ assert.match(phase1, /if \(isPublicStreamRun\(\)\) \{\s*startRun\(\);/);
 assert.match(phase1, /event\.key === "Tab"/);
 assert.match(phase1, /rerollPublicStream\(\)/);
 assert.match(phase1, /data-flow-theme-select/);
-assert.match(phase1, /TAB · NEW TEXT/);
+assert.match(phase1, /TAB · NEXT TEXT/);
 assert.match(phase1, /calculateFlowScoreV3/);
 assert.match(phase1, /recordFlowResultV3/);
 assert.match(phase1, /createLeaderboardSubmissionService/);
@@ -44,7 +44,7 @@ assert.match(loader, /flowRecordsV3\.js\?v=20260923a/);
 assert.match(loader, /flowTheme/);
 
 assert.match(index, /flow-game-mode-v2\.css\?v=20260923d/);
-assert.match(index, /flowRuntimeLoader\.js\?v=20260924f/);
+assert.match(index, /flowRuntimeLoader\.js\?v=20260924g/);
 assert.match(css, /FLOW V3: instant-play stream controls/);
 assert.match(css, /flow-v3-run-tools/);
 assert.match(css, /flow-v3-tab-hint/);

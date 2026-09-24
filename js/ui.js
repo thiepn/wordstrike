@@ -241,6 +241,7 @@ export function renderModeSelect(modes, selectedIndex, handlers, { ensureSelecti
     if (mode.id === "campaign") return "campaign";
     if (mode.id === "speed-test") return "typing";
     if (mode.id === "endless") return "endless";
+    if (mode.id === "flow") return "flow";
     if (mode.id === "arcade-rush") return "rush";
     return "neutral";
   };
@@ -264,6 +265,14 @@ export function renderModeSelect(modes, selectedIndex, handlers, { ensureSelecti
       return `<div class="mode-motif-endless">
         <span class="ring"></span><span class="ring"></span><span class="ring"></span><span class="ring"></span>
         <span class="sweep"></span><span class="center"></span>
+      </div>`;
+    }
+    if (mode.id === "flow") {
+      return `<div class="mode-motif-flow">
+        <div class="flow-stream-line"><span>the current holds</span><strong>focus</strong><span>through the passage</span></div>
+        <div class="flow-stream-line"><span>accuracy</span><span>rhythm</span><strong>continuity</strong><i class="flow-stream-caret"></i></div>
+        <div class="flow-stream-line"><span>read</span><span>type</span><span>continue</span></div>
+        <span class="flow-stream-rule"></span>
       </div>`;
     }
     if (mode.id === "arcade-rush") {

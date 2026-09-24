@@ -427,3 +427,379 @@
     transition: none;
   }
 }
+
+
+/* =========================================================
+   WORDSTRIKE FLOW — PHASE 7C
+   HUD hierarchy, identity, source context, progression polish.
+   ========================================================= */
+
+.flow-v5-run-header {
+  display: grid !important;
+  grid-template-columns: auto minmax(118px, 0.52fr) minmax(0, 1.4fr) auto;
+  align-items: center !important;
+  gap: clamp(12px, 2vw, 22px) !important;
+  width: 100%;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--flow-line);
+}
+
+.flow-v5-run-header > div {
+  min-width: 0;
+  text-align: left;
+}
+
+.flow-v5-brand {
+  display: grid !important;
+  gap: 3px !important;
+}
+
+.flow-v5-brand strong {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--flow-ink);
+  font-family: var(--flow-data-face);
+  font-size: 0.76rem;
+  font-weight: 760;
+  letter-spacing: 0.18em;
+  line-height: 1;
+}
+
+.flow-v5-brand strong i {
+  width: 6px;
+  height: 6px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--flow-signal);
+  box-shadow: 0 0 0 3px var(--flow-signal-faint);
+}
+
+.flow-v5-brand span,
+.flow-v5-source span,
+.flow-v5-source small,
+.flow-game-v2-hud[data-flow-hud-v5="true"] small {
+  color: var(--flow-ink-muted);
+  font-family: var(--flow-data-face);
+  text-transform: uppercase;
+}
+
+.flow-v5-brand span {
+  font-size: 0.45rem;
+  letter-spacing: 0.09em;
+}
+
+.flow-v5-source {
+  display: grid !important;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-areas:
+    "position title"
+    "position meta";
+  column-gap: 10px;
+  row-gap: 2px !important;
+  align-items: center;
+  min-width: 0;
+}
+
+.flow-v5-source > span {
+  grid-area: position;
+  align-self: stretch;
+  display: grid;
+  place-items: center;
+  min-width: 58px;
+  padding-right: 10px;
+  border-right: 1px solid var(--flow-line);
+  font-size: 0.45rem;
+  letter-spacing: 0.07em;
+  white-space: nowrap;
+}
+
+.flow-v5-source > strong {
+  grid-area: title;
+  overflow: hidden;
+  color: var(--flow-ink-soft);
+  font-family: var(--flow-reading-face);
+  font-size: 0.78rem;
+  font-weight: 560;
+  letter-spacing: 0.005em;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.flow-v5-source > small {
+  grid-area: meta;
+  overflow: hidden;
+  font-size: 0.43rem;
+  letter-spacing: 0.065em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.flow-v5-run-tools {
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: 6px 12px;
+  align-items: center;
+}
+
+.flow-v5-run-tools label {
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: 6px;
+}
+
+.flow-v5-run-tools label > span {
+  align-self: center;
+  color: var(--flow-ink-muted);
+  font-size: 0.46rem;
+  letter-spacing: 0.08em;
+}
+
+.flow-v5-run-tools .flow-v3-tab-hint {
+  grid-column: 1 / -1;
+  justify-self: end;
+  font-size: 0.45rem;
+  letter-spacing: 0.075em;
+}
+
+.flow-game-v2-hud[data-flow-hud-v5="true"] {
+  grid-template-columns: minmax(0, 1.45fr) repeat(3, minmax(0, 1fr));
+  gap: 0;
+  overflow: hidden;
+  border: 1px solid var(--flow-line-strong);
+  border-left: 2px solid var(--flow-signal);
+  background:
+    linear-gradient(90deg, var(--flow-signal-faint), transparent 26%),
+    var(--flow-bg-deep);
+}
+
+.flow-game-v2-hud[data-flow-hud-v5="true"] > div {
+  align-content: center;
+  min-height: 76px;
+  padding: 11px 15px 10px;
+  border-right: 1px solid var(--flow-line);
+  text-align: left;
+}
+
+.flow-game-v2-hud[data-flow-hud-v5="true"] > div:first-child,
+.flow-game-v2-hud[data-flow-hud-v5="true"] > div:last-child {
+  padding-inline: 15px;
+}
+
+.flow-game-v2-hud[data-flow-hud-v5="true"] > div:last-child {
+  border-right: 0;
+  text-align: right;
+}
+
+.flow-game-v2-hud[data-flow-hud-v5="true"] > div:nth-child(2),
+.flow-game-v2-hud[data-flow-hud-v5="true"] > div:nth-child(3) {
+  text-align: center;
+}
+
+.flow-game-v2-hud[data-flow-hud-v5="true"] span {
+  font-size: 0.49rem;
+  letter-spacing: 0.11em;
+}
+
+.flow-game-v2-hud[data-flow-hud-v5="true"] strong {
+  font-size: clamp(1.22rem, 2.5vw, 1.72rem);
+  font-weight: 540;
+}
+
+.flow-game-v2-hud[data-flow-hud-v5="true"] .flow-v5-hud-score strong {
+  color: var(--flow-signal);
+  font-size: clamp(1.62rem, 3vw, 2.22rem);
+}
+
+.flow-game-v2-hud[data-flow-hud-v5="true"] small {
+  margin-top: 1px;
+  font-size: 0.39rem;
+  letter-spacing: 0.085em;
+}
+
+.flow-v5-session-meta {
+  overflow: hidden;
+  border: 1px solid var(--flow-line);
+  background: color-mix(in srgb, var(--flow-bg-deep) 94%, var(--flow-signal) 6%);
+}
+
+.flow-v5-session-meta .flow-v4-session-strip {
+  border-top: 0;
+  border-bottom-color: var(--flow-line);
+}
+
+.flow-v5-session-meta .flow-v4-session-strip > div:first-child {
+  padding-left: 12px;
+}
+
+.flow-v5-session-meta .flow-v4-session-strip > div:last-child {
+  padding-right: 12px;
+}
+
+.flow-v5-session-meta .flow-v4-progression-strip {
+  padding: 8px 12px 9px;
+  border-bottom: 0;
+}
+
+.flow-v5-session-meta .flow-v4-progression-title strong {
+  font-size: 0.62rem;
+}
+
+.flow-v5-session-meta .flow-v4-progression-bar {
+  height: 2px;
+}
+
+.flow-v5-session-meta .flow-v4-progression-track small {
+  margin-top: 4px;
+}
+
+.flow-v4-micro-result.has-reward {
+  border-left-width: 3px;
+}
+
+@media (max-width: 840px) {
+  .flow-v5-run-header {
+    grid-template-columns: auto minmax(104px, 0.55fr) minmax(0, 1fr);
+  }
+
+  .flow-v5-run-tools {
+    grid-column: 1 / -1;
+    grid-template-columns: auto 1fr;
+    width: 100%;
+    padding-top: 8px;
+    border-top: 1px solid var(--flow-line);
+  }
+
+  .flow-v5-run-tools .flow-v3-tab-hint {
+    grid-column: auto;
+    justify-self: end;
+    align-self: center;
+  }
+}
+
+@media (max-width: 620px) {
+  .flow-v5-run-header {
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 10px 12px !important;
+  }
+
+  .flow-v5-brand {
+    align-self: center;
+  }
+
+  .flow-v5-source {
+    grid-column: 1 / -1;
+    order: 4;
+    padding-top: 8px;
+    border-top: 1px solid var(--flow-line);
+  }
+
+  .flow-v5-run-tools {
+    grid-column: 1 / -1;
+    order: 5;
+  }
+
+  .flow-game-v2-hud[data-flow-hud-v5="true"] {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .flow-game-v2-hud[data-flow-hud-v5="true"] > div {
+    min-height: 66px;
+    border-bottom: 1px solid var(--flow-line);
+  }
+
+  .flow-game-v2-hud[data-flow-hud-v5="true"] > div:nth-child(2) {
+    border-right: 0;
+    text-align: right;
+  }
+
+  .flow-game-v2-hud[data-flow-hud-v5="true"] > div:nth-child(3) {
+    border-bottom: 0;
+    text-align: left;
+  }
+
+  .flow-game-v2-hud[data-flow-hud-v5="true"] > div:last-child {
+    border-bottom: 0;
+  }
+
+  .flow-v5-session-meta .flow-v4-session-strip {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .flow-v5-session-meta .flow-v4-session-strip > div {
+    border-bottom: 1px solid var(--flow-line);
+  }
+
+  .flow-v5-session-meta .flow-v4-session-strip > div:nth-child(3) {
+    border-right: 0;
+  }
+
+  .flow-v5-session-meta .flow-v4-session-strip > div:nth-child(4),
+  .flow-v5-session-meta .flow-v4-session-strip > div:nth-child(5) {
+    border-bottom: 0;
+  }
+
+  .flow-v5-session-meta .flow-v4-session-strip > div:nth-child(4) {
+    grid-column: 1 / span 2;
+  }
+
+  .flow-v5-session-meta .flow-v4-session-strip > div:nth-child(5) {
+    grid-column: 3;
+  }
+}
+
+@media (max-width: 440px) {
+  .flow-v5-run-header .screen-back-button {
+    min-height: 36px;
+  }
+
+  .flow-v5-brand strong {
+    font-size: 0.7rem;
+  }
+
+  .flow-v5-source > span {
+    min-width: 52px;
+    font-size: 0.41rem;
+  }
+
+  .flow-v5-source > strong {
+    font-size: 0.7rem;
+  }
+
+  .flow-v5-source > small {
+    font-size: 0.39rem;
+  }
+
+  .flow-v5-run-tools {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .flow-v5-run-tools label {
+    min-width: 0;
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .flow-v5-run-tools select {
+    min-width: 0;
+    max-width: 128px;
+  }
+
+  .flow-v5-run-tools .flow-v3-tab-hint {
+    font-size: 0.41rem;
+  }
+
+  .flow-game-v2-hud[data-flow-hud-v5="true"] > div {
+    padding: 9px 10px;
+  }
+
+  .flow-v5-session-meta .flow-v4-progression-strip {
+    padding-inline: 9px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flow-v5-brand strong i {
+    box-shadow: none;
+  }
+}

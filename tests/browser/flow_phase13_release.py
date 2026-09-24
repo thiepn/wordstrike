@@ -71,7 +71,11 @@ def launch_public_flow(page):
     labels = page.locator(".flow-game-v2-hud > div > span").all_text_contents()
     assert labels == ["Score", "WPM", "Accuracy", "Words"], labels
     expect(page.locator('[data-flow-theme-select]')).to_be_visible()
-    expect(page.locator(".flow-v3-tab-hint")).to_contain_text("TAB")
+    expect(page.locator(".flow-v3-tab-hint")).to_contain_text("NEXT TEXT")
+    expect(page.locator('[data-flow-identity]')).to_be_visible()
+    expect(page.locator('[data-flow-source-title]')).to_have_text(plan["documents"][0]["title"])
+    expect(page.locator('[data-flow-source-position]')).to_contain_text("Text 1 /")
+    expect(page.locator('[data-flow-hud-v5="true"]')).to_be_visible()
     expect(page.locator('[data-flow-progression]')).to_be_visible()
     progression = page.evaluate("window.wordstrikeFlowPhase1.getPublicProgressionState()")
     assert progression["summary"]["totalMilestones"] == 25, progression
@@ -155,6 +159,9 @@ def certify_public_journey(browser, browser_name, base, evidence):
     assert themed_plan["theme"] == "science", themed_plan
     assert all(doc["theme"] == "science" for doc in themed_plan["documents"]), themed_plan
     assert "flowTheme=science" in page.url, page.url
+    assert page.evaluate("localStorage.getItem('wordstrike_flow_theme_preference_v1')") == "science"
+    expect(page.locator('[data-flow-source-title]')).to_have_text(themed_plan["documents"][0]["title"])
+    expect(page.locator('[data-flow-source-meta]')).to_contain_text("Science")
     assert page.locator('[data-flow-view="ready"]').count() == 0
 
     if browser_name == "chromium":
@@ -165,6 +172,16 @@ def certify_public_journey(browser, browser_name, base, evidence):
     assert "flowRelease=1" not in page.url, page.url
     assert "flowTheme=" not in page.url, page.url
     assert page.evaluate("window.wordstrikeFlowPhase1.getPublicSessionState()") is None
+
+    # Phase 7C: the text mix is a preference, not a one-run query option.
+    page.locator('button[data-mode-id="flow"]').click()
+    expect(page.locator('[data-flow-view="run"]')).to_be_visible(timeout=15000)
+    reentry_plan = page.evaluate("window.wordstrikeFlowPhase1.getRunPlan()")
+    assert reentry_plan["theme"] == "science", reentry_plan
+    assert page.locator('[data-flow-theme-select]').input_value() == "science"
+    expect(page.locator('[data-flow-source-title]')).to_have_text(reentry_plan["documents"][0]["title"])
+    page.keyboard.press("Escape")
+    expect(page.locator(".mode-select-screen")).to_be_visible(timeout=10000)
     assert not errors, errors
 
     evidence.append({
@@ -234,6 +251,8 @@ def certify_mobile(browser, browser_name, base, evidence):
       hud: document.querySelector('.flow-game-v2-hud').getBoundingClientRect().width,
       session: document.querySelector('[data-flow-session-strip]').getBoundingClientRect().width,
       progression: document.querySelector('[data-flow-progression]').getBoundingClientRect().width,
+      identity: document.querySelector('[data-flow-identity]').getBoundingClientRect().width,
+      source: document.querySelector('[data-flow-source]').getBoundingClientRect().width,
       passage: document.querySelector('[data-flow-longform="true"]').getBoundingClientRect().width,
       theme: document.querySelector('[data-flow-theme-select]').getBoundingClientRect().width,
     })""")
@@ -242,6 +261,8 @@ def certify_mobile(browser, browser_name, base, evidence):
     assert geometry["hud"] <= geometry["viewport"] + 1, geometry
     assert geometry["session"] <= geometry["viewport"] + 1, geometry
     assert geometry["progression"] <= geometry["viewport"] + 1, geometry
+    assert geometry["identity"] <= geometry["viewport"] + 1, geometry
+    assert geometry["source"] <= geometry["viewport"] + 1, geometry
     assert geometry["passage"] <= geometry["viewport"] + 1, geometry
     assert geometry["theme"] <= geometry["viewport"], geometry
 
@@ -300,11 +321,12 @@ def certify_offline(browser, browser_name, base, evidence):
 
     cached = page.evaluate("""async () => {
       const targets = [
-        './js/flow/flowRuntimeLoader.js?v=20260924f',
-        './js/flow/flowPhase1.js?v=20260924e',
+        './js/flow/flowRuntimeLoader.js?v=20260924g',
+        './js/flow/flowPhase1.js?v=20260924f',
         './js/flow/flowSessionV4.js?v=20260924a',
         './js/flow/flowProgressionV4.js?v=20260924a',
-        './styles/screens/flow-session-v4.css?v=20260924b',
+        './js/flow/flowIdentityV1.js?v=20260924a',
+        './styles/screens/flow-session-v4.css?v=20260924c',
         './js/flow/flowCadence.js?v=20260924a',
         './js/flow/flowStreamPlanV3.js?v=20260923b',
         './js/flow/flowScoreV3.js?v=20260923a',

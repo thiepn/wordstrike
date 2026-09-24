@@ -142,7 +142,9 @@ def inspect_foundation(browser, base, browser_name, evidence):
     assert page.locator(".mode-motif-typing").count() == 1
     page.locator('button[data-mode-id="flow"]').hover()
     expect(page.locator(".mode-showcase-heading h2")).to_have_text("Flow")
-    assert page.locator(".mode-motif-neutral").count() == 1
+    expect(page.locator(".mode-showcase-heading p")).to_have_text("Continuous")
+    assert page.locator(".mode-motif-flow").count() == 1
+    assert page.locator(".mode-motif-neutral").count() == 0
     expect(page.locator(".mode-showcase-command")).to_contain_text("Launch Flow")
     page.locator('button[data-mode-id="practice"]').hover()
     expect(page.locator(".mode-showcase-heading h2")).to_have_text("Practice Lab")

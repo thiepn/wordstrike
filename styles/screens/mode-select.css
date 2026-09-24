@@ -433,6 +433,89 @@
   box-shadow: var(--bloom-accent-sm);
 }
 
+/* Flow continuous-reading motif */
+.mode-motif-flow {
+  position: relative;
+  display: grid;
+  width: min(520px, 86%);
+  gap: 14px;
+  padding: 22px 8px;
+  font-family: var(--font-game);
+}
+
+.mode-motif-flow .flow-stream-line {
+  display: flex;
+  align-items: baseline;
+  gap: 15px;
+  min-width: 0;
+  color: rgb(237 244 247 / 24%);
+  font-size: clamp(0.82rem, 1.45vw, 1.06rem);
+  white-space: nowrap;
+}
+
+.mode-motif-flow .flow-stream-line:nth-child(1) {
+  transform: translateX(-4%);
+}
+
+.mode-motif-flow .flow-stream-line:nth-child(2) {
+  transform: translateX(7%);
+}
+
+.mode-motif-flow .flow-stream-line:nth-child(3) {
+  transform: translateX(1%);
+}
+
+.mode-motif-flow strong {
+  color: var(--color-text-primary);
+  font-weight: 620;
+}
+
+.mode-motif-flow .flow-stream-caret {
+  width: 2px;
+  height: 1.2em;
+  margin-left: -8px;
+  background: var(--color-accent);
+  box-shadow: var(--bloom-accent-sm);
+  animation: mode-caret 1.1s steps(1, end) infinite;
+}
+
+.mode-motif-flow .flow-stream-rule {
+  position: absolute;
+  right: 3%;
+  bottom: 2px;
+  left: 3%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgb(var(--custom-accent-rgb, 0 255 242) / 65%), transparent);
+}
+
+.mode-motif-flow .flow-stream-rule::after {
+  content: "";
+  position: absolute;
+  top: -2px;
+  left: 18%;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  box-shadow: var(--bloom-accent-sm);
+  animation: mode-flow-current 5.8s var(--ease-standard) infinite;
+}
+
+.mode-tone-flow .mode-showcase-visual::before {
+  background: radial-gradient(circle, rgb(var(--custom-accent-rgb, 0 255 242) / 12%), transparent 64%);
+}
+
+.mode-option[data-mode-id="flow"].selected {
+  background: linear-gradient(90deg, rgb(var(--custom-accent-rgb, 0 255 242) / 10%), transparent 78%);
+}
+
+@keyframes mode-flow-current {
+  0% { transform: translateX(0); opacity: 0; }
+  12% { opacity: 0.95; }
+  86% { opacity: 0.75; }
+  100% { transform: translateX(330px); opacity: 0; }
+}
+
 /* Arcade Rush intersecting energy motif */
 .mode-motif-rush {
   position: relative;
@@ -888,6 +971,17 @@ button.mode-option { cursor: pointer; }
   .mode-motif-endless .ring:nth-child(3) { width: 132px; height: 132px; }
   .mode-motif-endless .ring:nth-child(4) { width: 168px; height: 168px; }
   .mode-motif-endless .sweep { height: 76px; }
+
+  .mode-motif-flow {
+    width: 92%;
+    gap: 10px;
+    padding-block: 12px;
+  }
+
+  .mode-motif-flow .flow-stream-line {
+    gap: 10px;
+    font-size: 0.78rem;
+  }
 
   .mode-motif-rush {
     width: 91%;
