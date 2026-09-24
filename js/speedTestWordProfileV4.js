@@ -303,23 +303,42 @@ function samplingFrame() {
     return;
   }
   captureCommittedWords(state);
+  if (state.phase === "PAUSED") return;
   frameId = globalThis.requestAnimationFrame?.(samplingFrame) ?? null;
 }
 
 function ensureSampling() {
   const state = getCurrentSpeedTest();
   if (!state) return;
+  if (state.ended) {
+    finalizeCurrentSpeedTestWordProfile(state);
+    return;
+  }
+  if (state.phase === "PAUSED") return;
   if (frameId == null) frameId = globalThis.requestAnimationFrame?.(samplingFrame) ?? null;
+}
+
+export function teardownSpeedTestWordProfiler() {
+  if (frameId != null) globalThis.cancelAnimationFrame?.(frameId);
+  frameId = null;
+  observer?.disconnect?.();
+  observer = null;
+  installed = false;
 }
 
 export function installSpeedTestWordProfiler() {
   if (installed || typeof document === "undefined") return;
-  installed = true;
   const root = document.querySelector("#app");
   if (!root) return;
+  installed = true;
   ensureSampling();
-  observer = new MutationObserver(() => ensureSampling());
-  observer.observe(root, { childList: true, subtree: true });
+  observer = new MutationObserver(ensureSampling);
+  observer.observe(root, { childList: true });
+}
+
+if (typeof window !== "undefined") {
+  window.addEventListener("pagehide", teardownSpeedTestWordProfiler);
+  window.addEventListener("pageshow", installSpeedTestWordProfiler);
 }
 
 export const SPEED_TEST_WORD_PROFILE_STORAGE_KEY = STORAGE_KEY;
