@@ -189,6 +189,7 @@ function replaceUrl(url) {
 
 let runtimeReady = Promise.resolve(false);
 let publicLaunchPromise = null;
+let releaseExitObserver = null;
 
 function runFlowRuntime() {
   const request = importFlowRuntime().catch((error) => {
@@ -303,9 +304,9 @@ function installReleaseExitCleanup() {
   if (typeof document === "undefined") return;
   const app = document.querySelector("#app");
   if (!app) return;
+  releaseExitObserver?.disconnect?.();
   let seenActive = false;
   let cleaned = false;
-  let observer = null;
   const inspect = () => {
     const controller = globalThis.window?.wordstrikeFlowPhase1;
     if (controller?.isActive?.()) {
@@ -316,10 +317,11 @@ function installReleaseExitCleanup() {
     cleaned = true;
     replaceUrl(stripFlowReleaseUrl());
     bindPublicModeEntry();
-    observer?.disconnect();
+    releaseExitObserver?.disconnect?.();
+    releaseExitObserver = null;
   };
-  observer = new MutationObserver(() => queueMicrotask(inspect));
-  observer.observe(app, { childList: true });
+  releaseExitObserver = new MutationObserver(() => queueMicrotask(inspect));
+  releaseExitObserver.observe(app, { childList: true });
   queueMicrotask(inspect);
 }
 
