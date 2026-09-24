@@ -227,7 +227,14 @@ export function createLeaderboardService({
     const boardKey = normalizeBoardKey(requestedBoardKey);
     if (!VALID_BOARDS.includes(boardKey)) return Promise.resolve(state);
     const key = requestKey(boardKey);
-    if (inFlight.has(key)) return inFlight.get(key);
+    const activeRequest = inFlight.get(key);
+    if (
+      !force &&
+      activeRequest?.requestId === requestSequence &&
+      state.selectedBoardKey === boardKey
+    ) {
+      return activeRequest.promise;
+    }
     const selection = getLeaderboardSelection(boardKey);
     const cached = cache.get(key);
     const currentCache = cached && isLeaderboardCacheStateCurrent(boardKey, cached.state);
@@ -265,10 +272,10 @@ export function createLeaderboardService({
         if (requestId !== requestSequence || state.selectedBoardKey !== boardKey) return state;
         return publish({ status: isOnline() ? "error" : "offline", ...selection, selectedBoardKey: boardKey, error: true });
       } finally {
-        inFlight.delete(key);
+        if (inFlight.get(key)?.promise === promise) inFlight.delete(key);
       }
     })();
-    inFlight.set(key, promise);
+    inFlight.set(key, { requestId, promise });
     return promise;
   };
 
@@ -276,7 +283,7 @@ export function createLeaderboardService({
     const boardKey = normalizeBoardKey(requestedBoardKey);
     if (!VALID_BOARDS.includes(boardKey)) return Promise.resolve(state);
     if (state.selectedBoardKey === boardKey && ["loading", "refreshing", "ready", "empty"].includes(state.status)) {
-      return inFlight.get(requestKey(boardKey)) || Promise.resolve(state);
+      return inFlight.get(requestKey(boardKey))?.promise || Promise.resolve(state);
     }
     requestSequence += 1;
     return load(boardKey);
