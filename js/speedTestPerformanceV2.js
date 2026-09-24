@@ -344,11 +344,22 @@ function enhanceV2() {
   if (v2) base.insertAdjacentElement("afterend", v2);
 }
 
+let observer = null;
+let installed = false;
+
+function teardown() {
+  observer?.disconnect?.();
+  observer = null;
+  installed = false;
+}
+
 function install() {
+  if (installed) return;
   const root = document.querySelector("#app");
   if (!root) return;
+  installed = true;
   enhanceV2();
-  const observer = new MutationObserver(enhanceV2);
+  observer = new MutationObserver(enhanceV2);
   observer.observe(root, { childList: true });
 }
 
@@ -358,6 +369,10 @@ if (typeof document !== "undefined") {
   } else {
     install();
   }
+}
+if (typeof window !== "undefined") {
+  window.addEventListener("pagehide", teardown);
+  window.addEventListener("pageshow", install);
 }
 
 export const SPEED_TEST_PERFORMANCE_V2_LAYER_STORAGE_KEY = LAYER_STORAGE_KEY;
