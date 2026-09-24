@@ -82,7 +82,7 @@ def prepare_deterministic_boss(page, *, phase="ACTIVE", remaining_ms=9000, intro
           renderer.renderBossPhrase(game);
           ui.updateBossHud(game);
           presentation.syncBossGameplayPresentation(game);
-          window.__ui7 = {bossLoop, state, renderer, ui, game};
+          window.__ui7 = {bossLoop, state, renderer, ui, presentation, game};
         }""",
         {"phase": phase, "remainingMs": remaining_ms, "introMs": intro_ms},
     )
@@ -175,13 +175,13 @@ def certify_intro_and_active(browser, browser_name, base, evidence):
     assert state["backHeight"] >= 44, state
 
     critical = page.evaluate("""() => {
-      const game = window.__ui7.game;
+      const {game, ui, presentation} = window.__ui7;
       game.remainingMs = 4000;
-      window.__ui7.ui.updateBossHud(game);
+      ui.updateBossHud(game);
+      presentation.syncBossGameplayPresentation(game);
       return true;
     }""")
     assert critical is True
-    page.wait_for_timeout(40)
     assert page.locator('.boss-gameplay-screen').get_attribute('data-boss-time-tier') == "critical"
     expect(page.locator('#boss-timer')).to_have_text("4.0")
 
@@ -197,13 +197,12 @@ def certify_intro_and_active(browser, browser_name, base, evidence):
     assert "boss-ui-wrong" in transient["animation"], transient
 
     transition = page.evaluate("""async () => {
-      const {bossLoop, game, ui} = window.__ui7;
+      const {bossLoop, game, ui, presentation} = window.__ui7;
       bossLoop.stopBossLoop();
       game.phase = 'TRANSITION';
       game.transitionElapsedMs = 0;
       ui.updateBossHud(game);
-      await new Promise((resolve) => requestAnimationFrame(() => resolve()));
-      await new Promise((resolve) => requestAnimationFrame(() => resolve()));
+      presentation.syncBossGameplayPresentation(game);
       bossLoop.stopBossLoop();
       const screen = document.querySelector('.boss-gameplay-screen');
       return {
