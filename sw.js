@@ -878,12 +878,30 @@ const CORE_SHELL = Object.freeze([
   "./js/main.js?v=20260924f",
 ]);
 
+const OPTIONAL_PRECACHE_BATCH_SIZE = 24;
+
+async function cacheOptionalAssets(cache, assets) {
+  for (let index = 0; index < assets.length; index += OPTIONAL_PRECACHE_BATCH_SIZE) {
+    const batch = assets.slice(index, index + OPTIONAL_PRECACHE_BATCH_SIZE);
+    await Promise.allSettled(batch.map(asset => cache.add(asset)));
+  }
+}
+
 async function precacheAppShell() {
   const cache = await caches.open(CACHE_NAME);
   await cache.addAll(CORE_SHELL);
   const required = new Set(CORE_SHELL);
   const optional = APP_SHELL.filter(asset => !required.has(asset));
-  await Promise.allSettled(optional.map(asset => cache.add(asset)));
+  await cacheOptionalAssets(cache, optional);
+}
+
+function cacheNetworkResponseInBackground(event, networkPromise, cacheKey) {
+  const cacheUpdate = networkPromise.then(async response => {
+    if (!response?.ok) return;
+    const cache = await caches.open(CACHE_NAME);
+    await cache.put(cacheKey, response.clone());
+  }).catch(() => {});
+  event.waitUntil(cacheUpdate);
 }
 
 self.addEventListener("install", event => {
@@ -902,14 +920,9 @@ self.addEventListener("fetch", event => {
   if (url.origin !== self.location.origin) return;
 
   if (request.mode === "navigate") {
-    event.respondWith(fetch(request).then(async response => {
-      if (response && response.ok) {
-        const copy = response.clone();
-        const cache = await caches.open(CACHE_NAME);
-        await cache.put("./index.html", copy);
-      }
-      return response;
-    }).catch(async () => (
+    const networkPromise = fetch(request);
+    cacheNetworkResponseInBackground(event, networkPromise, "./index.html");
+    event.respondWith(networkPromise.catch(async () => (
       await caches.match("./index.html", { ignoreSearch: true })
       || await caches.match("./", { ignoreSearch: true })
       || new Response("WORDSTRIKE is unavailable offline until the app shell has been cached.", {
@@ -920,14 +933,9 @@ self.addEventListener("fetch", event => {
     return;
   }
 
-  event.respondWith(fetch(request).then(async response => {
-    if (response && response.ok) {
-      const copy = response.clone();
-      const cache = await caches.open(CACHE_NAME);
-      await cache.put(request, copy);
-    }
-    return response;
-  }).catch(async () => (
+  const networkPromise = fetch(request);
+  cacheNetworkResponseInBackground(event, networkPromise, request);
+  event.respondWith(networkPromise.catch(async () => (
     await caches.match(request)
     || await caches.match(request, { ignoreSearch: true })
     || new Response("Offline asset unavailable", {
