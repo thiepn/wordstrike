@@ -54,6 +54,7 @@ def seed_scene(page):
       const endless = await import('./js/endlessMode.js');
       const renderer = await import('./js/renderer.js');
       const ui = await import('./js/ui.js');
+      const presentation = await import('./js/endlessGameplayPresentation.js?v=20260924b');
       endless.stopEndlessLoop();
       const game = endless.getCurrentEndless();
       const area = document.querySelector('#play-area');
@@ -93,6 +94,7 @@ def seed_scene(page):
       renderer.updateWordElement(game.words[1], true);
       renderer.updateWordElement(game.words[2], false, {candidate:true, prefixLength:2});
       ui.updateEndlessHud(game);
+      presentation.syncEndlessGameplayPresentation(game);
       const banner = document.querySelector('#endless-stage-banner');
       banner.hidden = false;
       banner.textContent = 'STAGE 7';
