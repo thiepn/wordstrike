@@ -44,12 +44,13 @@ assert.equal(
   "telemetry compaction must not affect authoritative raw input history",
 );
 
-const [ui11, ui12, serviceWorker, flowLoader, flowPhase1] = await Promise.all([
+const [ui11, ui12, serviceWorker, flowLoader, flowPhase1, flowUx] = await Promise.all([
   readFile(new URL("../js/profileLeaderboardsSettingsPresentation.js", import.meta.url), "utf8"),
   readFile(new URL("../js/ui12GlobalPresentation.js", import.meta.url), "utf8"),
   readFile(new URL("../sw.js", import.meta.url), "utf8"),
   readFile(new URL("../js/flow/flowRuntimeLoader.js", import.meta.url), "utf8"),
   readFile(new URL("../js/flow/flowPhase1.js", import.meta.url), "utf8"),
+  readFile(new URL("../js/flow/flowUxPhase8.js", import.meta.url), "utf8"),
 ]);
 
 for (const source of [ui11, ui12]) {
@@ -68,6 +69,11 @@ assert.match(flowPhase1, /let launchObserver = null/);
 assert.match(flowPhase1, /launchObserver\?\.disconnect\?\.\(\)/);
 assert.match(flowLoader, /let releaseExitObserver = null/);
 assert.match(flowLoader, /releaseExitObserver\?\.disconnect\?\.\(\)/);
+assert.match(
+  flowUx,
+  /if \(!screen\) \{[\s\S]*?setupObserver\?\.disconnect\?\.\(\);[\s\S]*?setupObserver = null;[\s\S]*?decoratedScreen = null;/,
+  "Flow UX must release observers that retain detached setup screens after exit",
+);
 
 assert.match(serviceWorker, /OPTIONAL_PRECACHE_BATCH_SIZE = 24/);
 assert.match(serviceWorker, /cacheOptionalAssets\(cache, optional\)/);
@@ -84,4 +90,4 @@ assert.match(flowLoader, /FLOW_OFFLINE_CACHE_BATCH_SIZE = 16/);
 assert.match(flowLoader, /cacheFlowAssetsInBatches\(cache, missing\)/);
 assert.doesNotMatch(flowLoader, /cache\.addAll\(missing\)/);
 
-console.log("Pass 6 performance/memory contracts passed: bounded live Flow analysis, compact duplicate telemetry, screen-swap-only global observers, and background/batched cache work.");
+console.log("Pass 6 performance/memory contracts passed: bounded live Flow analysis, compact duplicate telemetry, detached-screen observer cleanup, screen-swap-only global observers, and background/batched cache work.");
