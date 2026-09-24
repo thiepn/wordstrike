@@ -1,5 +1,7 @@
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 
+export const FLOW_LIVE_CADENCE_EVENT_WINDOW = 2048;
+
 export const FLOW_CADENCE_RULES = Object.freeze({
   minimumIntervals: 5,
   pauseFloorMs: 500,
@@ -51,12 +53,12 @@ function excludedPauseOverlapMs(run, startAt, endAt) {
   }, 0);
 }
 
-function buildUninterruptedIntervals(run) {
+function buildUninterruptedIntervals(run, events = run?.rawKeystrokes || []) {
   const intervals = [];
   const excludedAfterIndexes = cadenceBoundarySet(run);
   let previousInsert = null;
   let interrupted = false;
-  for (const event of run?.rawKeystrokes || []) {
+  for (const event of events) {
     if (event.type === "backspace") {
       interrupted = true;
       continue;
@@ -167,7 +169,9 @@ function getWpm(run) {
   const durationMs = typingDurationMs(run);
   if (durationMs <= 0) return { rawWpm: 0, finalWpm: 0, typingDurationMs: 0 };
   const minutes = durationMs / 60000;
-  const inserted = (run?.rawKeystrokes || []).filter((event) => event.type === "insert").length;
+  const inserted = Number.isFinite(Number(run?.totalInsertedCharacters))
+    ? Math.max(0, Number(run.totalInsertedCharacters))
+    : (run?.rawKeystrokes || []).filter((event) => event.type === "insert").length;
   return {
     rawWpm: round((inserted / 5) / minutes, 1),
     finalWpm: round(((run?.correctChars || 0) / 5) / minutes, 1),
@@ -302,6 +306,31 @@ function correctionCost(run) {
     totalMs: round(values.reduce((sum, value) => sum + value, 0), 1),
     medianMs: round(median(values), 1),
     averageMs: round(mean(values), 1),
+  });
+}
+
+export function analyzeFlowCadenceLive(run, {
+  maxEvents = FLOW_LIVE_CADENCE_EVENT_WINDOW,
+} = {}) {
+  if (!run) return null;
+  const raw = Array.isArray(run.rawKeystrokes) ? run.rawKeystrokes : [];
+  const boundedMax = Math.max(
+    FLOW_CADENCE_RULES.minimumIntervals + 1,
+    Math.min(8192, Math.trunc(Number(maxEvents) || FLOW_LIVE_CADENCE_EVENT_WINDOW)),
+  );
+  const events = raw.length > boundedMax ? raw.slice(-boundedMax) : raw;
+  const intervals = buildUninterruptedIntervals(run, events);
+  const cadence = classifyCadence(intervals);
+  const speed = getWpm(run);
+
+  return Object.freeze({
+    sampleCount: intervals.length,
+    ...cadence,
+    ...speed,
+    featureLatencies: Object.freeze([]),
+    slowestHesitations: Object.freeze([]),
+    liveWindowEventCount: events.length,
+    liveWindowTruncated: raw.length > events.length,
   });
 }
 
