@@ -114,6 +114,9 @@ import {
   stopSpeedTestLoop,
 } from "./speedTest.js";
 import { createGameplayVisibilityLifecycle } from "./gameplayVisibilityLifecycle.js";
+import { syncCampaignGameplayPresentation } from "./campaignGameplayPresentation.js?v=20260924b";
+import { syncEndlessGameplayPresentation } from "./endlessGameplayPresentation.js?v=20260924b";
+import { syncBossGameplayPresentation } from "./bossGameplayPresentation.js?v=20260924b";
 import { createEndlessVocabulary } from "./endlessWords.js";
 import {
   clearEndlessRuntime,
@@ -731,6 +734,7 @@ function startLevel(levelNumber, source = "level-select") {
       onHudUpdate: (currentGame) => {
         syncCampaignSession(currentGame);
         updateHud(currentGame);
+        syncCampaignGameplayPresentation(currentGame);
         if (
           tutorialHintMode === "campaign" &&
           !getActiveContextualHint() &&
@@ -891,7 +895,10 @@ function startEndless(source = "mode-select") {
     recordEligible: !appState.devMode,
     developerMode: appState.devMode,
     source,
-    onUpdate: updateEndlessHud,
+    onUpdate: (currentGame) => {
+      updateEndlessHud(currentGame);
+      syncEndlessGameplayPresentation(currentGame);
+    },
     onComplete: finishEndless,
   });
   if (!game) {
@@ -902,6 +909,7 @@ function startEndless(source = "mode-select") {
   renderEndlessShell(game, appState.devMode, { pause: pauseGame });
   mountGameplayInput();
   updateEndlessHud(game);
+  syncEndlessGameplayPresentation(game);
   if (!appState.devMode) beginContextualHints("endless", "DIFFICULTY INCREASES AS YOU SURVIVE");
 }
 
@@ -967,6 +975,7 @@ function startBossLevel(levelNumber, legitimatelyUnlocked, source) {
     onUpdate: (currentGame) => {
       syncCampaignSession(currentGame);
       updateBossHud(currentGame);
+      syncBossGameplayPresentation(currentGame);
     },
     onEnd: finishLevel,
   });
