@@ -24,7 +24,7 @@ assert.deepEqual(modes.map(({ enabled }) => enabled), [true, true, true, true, t
 assert.deepEqual(modes.slice(-2).map(({ status }) => status), ["available", "available"]);
 
 assert.match(index, /styles\/ui-system\.css[\s\S]*styles\/screens\/title\.css[\s\S]*styles\/screens\/mode-select\.css/);
-assert.match(index, /js\/flow\/flowRuntimeLoader\.js\?v=20260924l/);
+assert.match(index, /js\/flow\/flowRuntimeLoader\.js\?v=20260924m/);
 assert.match(ui, /<section class="screen mode-screen mode-select-screen">/);
 assert.match(ui, /class="mode-select-shell"/);
 assert.match(ui, /class="mode-showcase mode-tone-\$\{toneFor\(selectedMode\)\}"/);
