@@ -27,11 +27,18 @@ function createActions(calls) {
   const calls = [];
   const state = { screen: Screens.TITLE, profileEditing: false, game: null };
   let speed = null;
+  let flowActive = false;
   const onboarding = { getState: () => null, close: () => calls.push(["tutorial-close"]) };
   const handler = createWordStrikeBackHandler({
     state,
     onboardingController: onboarding,
     getSpeedTestState: () => speed,
+    backFlow: () => {
+      if (!flowActive) return false;
+      flowActive = false;
+      calls.push(["flow-back"]);
+      return true;
+    },
     ...createActions(calls),
   });
 
@@ -39,6 +46,10 @@ function createActions(calls) {
   assert.deepEqual(calls, []);
 
   state.screen = Screens.MODE_SELECT;
+  flowActive = true;
+  assert.equal(handler(), true);
+  assert.deepEqual(calls.pop(), ["flow-back"], "active Flow owns native Back before the underlying app screen");
+  assert.equal(flowActive, false);
   assert.equal(handler(), true);
   assert.deepEqual(calls.pop(), ["title"]);
 
