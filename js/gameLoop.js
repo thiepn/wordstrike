@@ -216,10 +216,13 @@ function finish(game, success) {
 
 function tick(timestamp) {
   const game = appState.game;
-  if (!game || game.ended) return;
+  if (!game || game.ended) {
+    animationFrameId = null;
+    return;
+  }
   if (appState.screen !== Screens.PLAYING) {
     game.lastTimestamp = null;
-    animationFrameId = requestAnimationFrame(tick);
+    animationFrameId = null;
     return;
   }
 
@@ -285,12 +288,16 @@ export function startLevelLoop(
   return appState.game;
 }
 
-export function stopGameLoop() {
+export function suspendGameLoop() {
   if (animationFrameId !== null) cancelAnimationFrame(animationFrameId);
   animationFrameId = null;
+  if (appState.game?.mode === "normal") appState.game.lastTimestamp = null;
+}
+
+export function stopGameLoop() {
+  suspendGameLoop();
   clearWordElements();
   callbacks = {};
-  if (appState.game?.mode === "normal") appState.game.lastTimestamp = null;
 }
 
 export function resumeGameLoop() {
