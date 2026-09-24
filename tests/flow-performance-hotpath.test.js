@@ -10,6 +10,9 @@ assert.match(source, /function mountRunHud\(/);
 assert.match(source, /function updateCharacterRange\(/);
 assert.match(source, /function scheduleCadenceHud\(/);
 assert.match(source, /getPerformanceStats: \(\) => \(\{ \.\.\.performanceStats \}\)/);
+assert.match(source, /document\.addEventListener\("visibilitychange", handleFlowVisibilityChange\)/);
+assert.match(source, /reason: "visibility-hidden"/);
+assert.match(source, /function beginVisibilityPause\([\s\S]*?clearCadenceRefresh\(\)/);
 
 const updateRunView = source.match(/function updateRunView\([\s\S]*?\n}\n\nfunction renderHesitationAnalysis/);
 assert.ok(updateRunView, "Flow updateRunView implementation is missing");
