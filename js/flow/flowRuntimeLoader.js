@@ -1,4 +1,7 @@
-import {\n  loadPreferredFlowTheme,\n  normalizeStoredFlowTheme,\n} from "./flowIdentityV1.js?v=20260924b";
+import {
+  loadPreferredFlowTheme,
+  normalizeStoredFlowTheme,
+} from "./flowIdentityV1.js?v=20260924b";
 
 const RELEASE_FLAG = "flowRelease";
 const FLOW_RELEASE_VERSION = 18;
