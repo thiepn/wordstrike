@@ -175,7 +175,7 @@ assert.equal(sequenceCount.textContent, "SEQUENCE 1 / 1");
 stopBossLoop();
 assert.equal(frames.size, 0);
 
-startLevelLoop(
+const campaignRuntime = startLevelLoop(
   9,
   {
     lives: 3,
@@ -188,17 +188,26 @@ startLevelLoop(
   {},
 );
 assert.equal(frames.size, 1);
-suspendGameLoop();
-assert.equal(frames.size, 0, "campaign pause must cancel its RAF without clearing the runtime");
-resumeGameLoop();
-assert.equal(frames.size, 1);
+frame(5_000);
+assert.equal(campaignRuntime.elapsedMs, 0, "first campaign frame establishes the timestamp baseline");
+frame(5_000);
+assert.equal(campaignRuntime.elapsedMs, 100, "campaign frame jumps must be capped at 100 ms");
+for (let index = 0; index < 100; index += 1) {
+  suspendGameLoop();
+  assert.equal(frames.size, 0, "campaign pause must cancel its RAF without clearing the runtime");
+  resumeGameLoop();
+  assert.equal(frames.size, 1, "campaign resume must restore exactly one RAF");
+}
 stopGameLoop();
+
 startBossLoop(10, { timeLimitSec: 1 }, ["a"], {});
 assert.equal(frames.size, 1);
-suspendBossLoop();
-assert.equal(frames.size, 0, "boss pause must cancel its RAF without clearing the encounter");
-resumeBossLoop();
-assert.equal(frames.size, 1);
+for (let index = 0; index < 100; index += 1) {
+  suspendBossLoop();
+  assert.equal(frames.size, 0, "boss pause must cancel its RAF without clearing the encounter");
+  resumeBossLoop();
+  assert.equal(frames.size, 1, "boss resume must restore exactly one RAF");
+}
 stopBossLoop();
 startLevelLoop(
   11,
@@ -246,4 +255,4 @@ for (const [key, expected] of [["a", "SEQUENCE 2 / 3"], ["b", "SEQUENCE 3 / 3"]]
 }
 stopBossLoop();
 
-console.log("Boss intro, pause, final-key priority, timeout, retry, and mode-switch tests passed.");
+console.log("Boss/campaign runtime contracts passed: pause parking, frame-jump caps, 100-cycle lifecycle stress, timeout priority, retry, and mode switching.");
