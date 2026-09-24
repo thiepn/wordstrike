@@ -21,7 +21,16 @@ import {
   calculateFlowScoreV3,
   createFlowScoreV3Result,
 } from "./flowScoreV3.js?v=20260923a";
-import { recordFlowResultV3 } from "./flowRecordsV3.js?v=20260923a";
+import {
+  getFlowPersonalBestV3,
+  recordFlowResultV3,
+} from "./flowRecordsV3.js?v=20260923a";
+import {
+  createFlowSessionV4,
+  formatFlowSessionDurationV4,
+  getFlowSessionLiveSummaryV4,
+  recordFlowSessionRunV4,
+} from "./flowSessionV4.js?v=20260924a";
 import { recordFlowCorpusRun } from "./flowCorpusHistory.js?v=20260923a";
 import { FLOW_PHASES } from "./flowState.js";
 import {
@@ -93,6 +102,9 @@ let lastCadenceRefreshAt = -Infinity;
 let publicRunSessionId = null;
 let lastPublicResult = null;
 let lastPublicRecordState = null;
+let flowSessionV4 = null;
+let pendingMicroResultV4 = null;
+let microResultTimer = null;
 let flowAutomaticSubmissionSessionId = null;
 let performanceStats = createPerformanceStats();
 
@@ -166,6 +178,98 @@ function clearCadenceRefresh() {
   cadenceRefreshTimer = null;
 }
 
+function clearMicroResultTimer() {
+  if (microResultTimer != null) globalThis.clearTimeout?.(microResultTimer);
+  microResultTimer = null;
+}
+
+function ensurePublicFlowSessionV4() {
+  if (!flowSessionV4) {
+    flowSessionV4 = createFlowSessionV4({
+      startedAt: Date.now(),
+      personalBest: getFlowPersonalBestV3(),
+    });
+  }
+  return flowSessionV4;
+}
+
+function resetPublicFlowSessionV4() {
+  clearMicroResultTimer();
+  flowSessionV4 = null;
+  pendingMicroResultV4 = null;
+}
+
+function setPendingMicroResultV4(feedback) {
+  if (!feedback) return;
+  pendingMicroResultV4 = Object.freeze({
+    ...feedback,
+    expiresAt: Date.now() + 2600,
+  });
+}
+
+function getActiveMicroResultV4() {
+  if (!pendingMicroResultV4) return null;
+  if (pendingMicroResultV4.expiresAt <= Date.now()) {
+    pendingMicroResultV4 = null;
+    return null;
+  }
+  return pendingMicroResultV4;
+}
+
+function signedScore(value) {
+  const score = Math.round(Number(value) || 0);
+  if (score === 0) return "±0";
+  return `${score > 0 ? "+" : "−"}${Math.abs(score).toLocaleString("en-US")}`;
+}
+
+function publicSessionStripMarkup() {
+  if (!isPublicStreamRun()) return "";
+  const summary = getFlowSessionLiveSummaryV4(ensurePublicFlowSessionV4());
+  return `<section class="flow-v4-session-strip" data-flow-session-strip aria-label="Flow session totals">
+    <div><span>Run</span><strong data-flow-session-run>${summary.currentRunNumber}</strong></div>
+    <div><span>Session words</span><strong data-flow-session-words>${summary.totalWords.toLocaleString("en-US")}</strong></div>
+    <div><span>Session score</span><strong data-flow-session-score>${summary.totalScore.toLocaleString("en-US")}</strong></div>
+    <div><span>Session best</span><strong data-flow-session-best>${summary.bestScore.toLocaleString("en-US")}</strong></div>
+    <div><span>Active time</span><strong data-flow-session-time>${formatFlowSessionDurationV4(summary.activeDurationMs)}</strong></div>
+  </section>`;
+}
+
+function publicMicroResultMarkup() {
+  const feedback = getActiveMicroResultV4();
+  if (!feedback || !isPublicStreamRun()) return "";
+  const secondary = feedback.isPersonalBest && feedback.personalBestDelta != null
+    ? `PB ${signedScore(feedback.personalBestDelta)}`
+    : feedback.scoreDelta > 0
+      ? `MOMENTUM ${signedScore(feedback.scoreDelta)}${feedback.momentumStreak > 1 ? ` · ${feedback.momentumStreak} UP` : ""}`
+      : `SESSION ${feedback.runNumber}`;
+  return `<aside class="flow-v4-micro-result is-${feedback.tone}" data-flow-micro-result data-flow-feedback-id="${escapeHtml(feedback.id)}" role="status" aria-live="polite">
+    <div class="flow-v4-micro-result-title"><strong>${escapeHtml(feedback.title)}</strong><span>${escapeHtml(secondary)}</span></div>
+    <div class="flow-v4-micro-result-score">${feedback.score.toLocaleString("en-US")} <small>PTS</small></div>
+    <div class="flow-v4-micro-result-metrics">
+      <span>${feedback.wpm.toFixed(1)} WPM</span>
+      <span>${feedback.accuracy.toFixed(1)}%</span>
+      <span>${feedback.words.toLocaleString("en-US")} WORDS</span>
+    </div>
+  </aside>`;
+}
+
+function scheduleMicroResultDismiss(app) {
+  clearMicroResultTimer();
+  const feedback = getActiveMicroResultV4();
+  const toast = app?.querySelector?.("[data-flow-micro-result]");
+  if (!feedback || !toast) return;
+  const remaining = Math.max(0, feedback.expiresAt - Date.now());
+  microResultTimer = globalThis.setTimeout?.(() => {
+    microResultTimer = null;
+    const current = app.querySelector?.("[data-flow-micro-result]");
+    if (current?.dataset?.flowFeedbackId === feedback.id) {
+      current.classList.add("is-leaving");
+      globalThis.setTimeout?.(() => current.remove(), 180);
+    }
+    if (pendingMicroResultV4?.id === feedback.id) pendingMicroResultV4 = null;
+  }, remaining) ?? null;
+}
+
 function resetVisibilityPause() {
   visibilityPauseStartedAt = null;
   visibilityPausedRun = null;
@@ -214,6 +318,7 @@ function restoreReturnSurface() {
   const app = root();
   if (!app) return;
   clearCadenceRefresh();
+  clearMicroResultTimer();
   resetMountedCharacterNodes();
   dismissed = true;
   active = false;
@@ -222,6 +327,7 @@ function restoreReturnSurface() {
   publicRunSessionId = null;
   lastPublicResult = null;
   lastPublicRecordState = null;
+  resetPublicFlowSessionV4();
   activeSegmentIndex = 0;
   chapterPauseStartedAt = null;
   resetVisibilityPause();
@@ -506,8 +612,33 @@ function mountRunHud(app) {
     cadenceLabel: app.querySelector("[data-flow-cadence-label]"),
     finalWpm: app.querySelector("[data-flow-final-wpm]"),
     pauses: app.querySelector("[data-flow-pauses]"),
+    sessionRun: app.querySelector("[data-flow-session-run]"),
+    sessionWords: app.querySelector("[data-flow-session-words]"),
+    sessionScore: app.querySelector("[data-flow-session-score]"),
+    sessionBest: app.querySelector("[data-flow-session-best]"),
+    sessionTime: app.querySelector("[data-flow-session-time]"),
   });
   return mountedRunHud;
+}
+
+function updatePublicSessionHud(hud, {
+  score = 0,
+  words = 0,
+  correctCharacters = 0,
+  durationMs = 0,
+} = {}) {
+  if (!hud || !isPublicStreamRun()) return;
+  const summary = getFlowSessionLiveSummaryV4(ensurePublicFlowSessionV4(), {
+    score,
+    words,
+    correctCharacters,
+    durationMs,
+  });
+  setTextIfChanged(hud.sessionRun, String(summary.currentRunNumber));
+  setTextIfChanged(hud.sessionWords, summary.totalWords.toLocaleString("en-US"));
+  setTextIfChanged(hud.sessionScore, summary.totalScore.toLocaleString("en-US"));
+  setTextIfChanged(hud.sessionBest, summary.bestScore.toLocaleString("en-US"));
+  setTextIfChanged(hud.sessionTime, formatFlowSessionDurationV4(summary.activeDurationMs));
 }
 
 function updateGameplayHud(hud, gameplay, cadence) {
@@ -556,7 +687,15 @@ function refreshCadenceHud() {
     setTextIfChanged(mountedRunHud.score, score.score.toLocaleString("en-US"));
     setTextIfChanged(mountedRunHud.finalWpm, cadence.finalWpm.toFixed(1));
     setTextIfChanged(mountedRunHud.accuracy, `${currentAccuracyPercent().toFixed(1)}%`);
-    if (isPublicStreamRun()) setTextIfChanged(mountedRunHud.progress, String(score.standardWords || 0));
+    if (isPublicStreamRun()) {
+      setTextIfChanged(mountedRunHud.progress, String(score.standardWords || 0));
+      updatePublicSessionHud(mountedRunHud, {
+        score: score.score,
+        words: score.standardWords,
+        correctCharacters: score.correctCharacters,
+        durationMs: cadence.typingDurationMs,
+      });
+    }
     return;
   }
   updateGameplayHud(mountedRunHud, null, cadence);
@@ -640,6 +779,8 @@ function renderRun() {
         </header>
         ${!publicLongform && chapter ? `<div class="flow-chapter-strip" data-flow-chapter><span>${escapeHtml(chapter.title)}</span><strong>${escapeHtml(chapter.difficulty)}</strong></div>` : ""}
         ${hud}
+        ${publicSessionStripMarkup()}
+        ${publicMicroResultMarkup()}
         <div class="flow-run-copy">
           <div class="flow-passages" aria-label="Typing passage">${passage}</div>
         </div>
@@ -673,6 +814,7 @@ function renderRun() {
   input?.focus?.({ preventScroll: true });
   syncRunHud();
   scheduleCadenceHud(true);
+  scheduleMicroResultDismiss(app);
 }
 
 function startRun() {
@@ -699,6 +841,7 @@ function startRun() {
     run.passageId = passage.id;
   }
   if (isPublicLongformRun()) {
+    if (isPublicStreamRun()) ensurePublicFlowSessionV4();
     if (!isPublicStreamRun()) {
       clearSubmissionState();
       lastPublicResult = null;
@@ -1047,6 +1190,16 @@ function finalizePublicStreamRun(endedReason = "reset") {
   });
   if (!result) return null;
   const recordState = recordFlowResultV3(result);
+  const sessionUpdate = recordFlowSessionRunV4(
+    ensurePublicFlowSessionV4(),
+    result,
+    {
+      isPersonalBest: recordState.isPersonalBest,
+      previousPersonalBest: recordState.previousBest,
+    },
+  );
+  flowSessionV4 = sessionUpdate.session;
+  if (endedReason !== "exit") setPendingMicroResultV4(sessionUpdate.feedback);
   lastPublicResult = result;
   lastPublicRecordState = recordState;
   if (result.completed && resolvedRunPlan?.corpusVersion === 2) {
@@ -1221,6 +1374,15 @@ if (globalThis.window) {
     },
     getPublicSessionId: () => publicRunSessionId,
     getPublicResult: () => lastPublicResult ? { ...lastPublicResult, seriesIds: [...lastPublicResult.seriesIds] } : null,
+    getPublicSessionState: () => flowSessionV4 ? {
+      ...flowSessionV4,
+      bestRun: flowSessionV4.bestRun ? { ...flowSessionV4.bestRun } : null,
+      lastRun: flowSessionV4.lastRun ? { ...flowSessionV4.lastRun } : null,
+    } : null,
+    getPublicMicroResult: () => {
+      const feedback = getActiveMicroResultV4();
+      return feedback ? { ...feedback } : null;
+    },
     getPublicRecordState: () => lastPublicRecordState ? {
       recorded: lastPublicRecordState.recorded,
       isPersonalBest: lastPublicRecordState.isPersonalBest,
