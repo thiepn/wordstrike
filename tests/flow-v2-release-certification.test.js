@@ -37,9 +37,9 @@ assert.equal(validateLeaderboardRequest({ boardKey: LEADERBOARD_BOARDS.FLOW_QUIC
 assert.equal(EXPECTED_LEADERBOARD_RULES_VERSIONS[LEADERBOARD_BOARDS.FLOW_STANDARD], 3);
 assert.equal(getLeaderboardSelection(LEADERBOARD_BOARDS.FLOW_STANDARD).selectedCategory, LEADERBOARD_CATEGORIES.FLOW);
 
-assert.match(loader, /const FLOW_RELEASE_VERSION = 10/);
-assert.match(loader, /wordstrike-flow-release-v13/);
-assert.match(index, /js\/flow\/flowRuntimeLoader\.js\?v=20260924a/);
+assert.match(loader, /const FLOW_RELEASE_VERSION = 11/);
+assert.match(loader, /wordstrike-flow-release-v14/);
+assert.match(index, /js\/flow\/flowRuntimeLoader\.js\?v=20260924b/);
 for (const asset of [
   "./js/authService.js",
   "./js/leaderboardProfileService.js",
