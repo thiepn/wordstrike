@@ -256,6 +256,8 @@ let practiceLabRegistry = null;
 let practiceLabController = null;
 let arcadeRushAppController = null;
 let arcadeRushDeveloperSeed = null;
+let profileSurfaceGeneration = 0;
+let profileCopyRequestSequence = 0;
 
 function getPracticeLabFeatureGate() {
   if (!practiceLabFeatureGate) practiceLabFeatureGate = createPracticeFeatureGate({ developerMode: appState.devMode });
@@ -560,6 +562,7 @@ function openTitle() {
 }
 
 function openProfileStatistics() {
+  profileSurfaceGeneration += 1;
   cleanupCampaignAttempt("profile-stats");
   ensureStoredPlayerProfile();
   appState.statisticsTabIndex = 0;
@@ -1218,14 +1221,26 @@ function saveProfileName(value = document.querySelector("#profile-name-input")?.
 
 async function copyPlayerId() {
   const profile = ensureStoredPlayerProfile();
+  const surfaceGeneration = profileSurfaceGeneration;
+  const requestId = ++profileCopyRequestSequence;
   const copied = await copyPlayerIdToClipboard(profile.playerId);
+  if (
+    requestId !== profileCopyRequestSequence ||
+    surfaceGeneration !== profileSurfaceGeneration ||
+    appState.screen !== Screens.PROFILE_STATS
+  ) return copied;
+
   appState.profileCopyMessage = copied ? "ID COPIED" : "COPY UNAVAILABLE";
-  if (appState.screen === Screens.PROFILE_STATS) renderCurrentScreen();
+  renderCurrentScreen();
   window.setTimeout(() => {
-    if (appState.screen !== Screens.PROFILE_STATS) return;
+    if (
+      requestId !== profileCopyRequestSequence ||
+      surfaceGeneration !== profileSurfaceGeneration
+    ) return;
     appState.profileCopyMessage = "";
-    renderCurrentScreen();
+    if (appState.screen === Screens.PROFILE_STATS) renderCurrentScreen();
   }, 1800);
+  return copied;
 }
 
 function activateSelectedMode(modeId = getAllModes()[appState.modeSelection]?.id) {
