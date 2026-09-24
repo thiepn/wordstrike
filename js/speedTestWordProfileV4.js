@@ -21,6 +21,8 @@ const round = (value, digits = 1) => {
 let tracker = null;
 let frameId = null;
 let observer = null;
+let pauseStateObserver = null;
+let observedSpeedTestScreen = null;
 let installed = false;
 
 function snapshotMetrics(state) {
@@ -309,13 +311,42 @@ function samplingFrame() {
 
 function ensureSampling() {
   const state = getCurrentSpeedTest();
-  if (!state) return;
+  if (!state) {
+    if (frameId != null) globalThis.cancelAnimationFrame?.(frameId);
+    frameId = null;
+    return;
+  }
   if (state.ended) {
+    if (frameId != null) globalThis.cancelAnimationFrame?.(frameId);
+    frameId = null;
     finalizeCurrentSpeedTestWordProfile(state);
     return;
   }
-  if (state.phase === "PAUSED") return;
+  if (state.phase === "PAUSED") {
+    if (frameId != null) globalThis.cancelAnimationFrame?.(frameId);
+    frameId = null;
+    return;
+  }
   if (frameId == null) frameId = globalThis.requestAnimationFrame?.(samplingFrame) ?? null;
+}
+
+function syncPauseStateObserver() {
+  const nextScreen = document.querySelector(".speed-test-screen");
+  if (nextScreen === observedSpeedTestScreen) return;
+  pauseStateObserver?.disconnect?.();
+  pauseStateObserver = null;
+  observedSpeedTestScreen = nextScreen || null;
+  if (!nextScreen) return;
+  pauseStateObserver = new MutationObserver(ensureSampling);
+  pauseStateObserver.observe(nextScreen, {
+    attributes: true,
+    attributeFilter: ["class"],
+  });
+}
+
+function syncProfilerLifecycle() {
+  syncPauseStateObserver();
+  ensureSampling();
 }
 
 export function teardownSpeedTestWordProfiler() {
@@ -323,6 +354,9 @@ export function teardownSpeedTestWordProfiler() {
   frameId = null;
   observer?.disconnect?.();
   observer = null;
+  pauseStateObserver?.disconnect?.();
+  pauseStateObserver = null;
+  observedSpeedTestScreen = null;
   installed = false;
 }
 
@@ -331,8 +365,8 @@ export function installSpeedTestWordProfiler() {
   const root = document.querySelector("#app");
   if (!root) return;
   installed = true;
-  ensureSampling();
-  observer = new MutationObserver(ensureSampling);
+  syncProfilerLifecycle();
+  observer = new MutationObserver(syncProfilerLifecycle);
   observer.observe(root, { childList: true });
 }
 
