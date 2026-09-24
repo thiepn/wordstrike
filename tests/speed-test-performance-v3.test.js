@@ -77,7 +77,7 @@ assert.deepEqual(
 );
 
 const index = readFileSync(new URL("../index.html", import.meta.url), "utf8");
-assert.match(index, /js\/speedTestPerformanceV3\.js\?v=20260911a/);
+assert.match(index, /js\/speedTestPerformanceV3\.js\?v=20260924a/);
 assert.doesNotMatch(index, /<link[^>]+typing-performance-v3\.css/,
   "V3 styling should remain lazy so unrelated screens keep certified default pixels");
 

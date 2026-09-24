@@ -1,6 +1,6 @@
 const RELEASE_FLAG = "flowRelease";
-const FLOW_RELEASE_VERSION = 13;
-const FLOW_RELEASE_CACHE_NAME = "wordstrike-flow-release-v16";
+const FLOW_RELEASE_VERSION = 14;
+const FLOW_RELEASE_CACHE_NAME = "wordstrike-flow-release-v17";
 const FLOW_RELEASE_QUERY_KEYS = Object.freeze([
   "mode",
   RELEASE_FLAG,
@@ -24,7 +24,7 @@ const FLOW_RELEASE_QUERY_KEYS = Object.freeze([
 ]);
 
 const FLOW_RELEASE_ASSETS = Object.freeze([
-  "./js/flow/flowRuntimeLoader.js?v=20260924d",
+  "./js/flow/flowRuntimeLoader.js?v=20260924e",
   "./js/leaderboardReturnState.js",
   "./js/pendingResultSubmission.js",
   "./js/submissionOutbox.js",
@@ -65,9 +65,11 @@ const FLOW_RELEASE_ASSETS = Object.freeze([
   "./js/flow/flowModifiers.js",
   "./js/flow/flowModifiersPhase9.js?v=20260923a",
   "./js/flow/flowPassages.js",
-  "./js/flow/flowPhase1.js?v=20260924d",
+  "./js/flow/flowPhase1.js?v=20260924e",
   "./js/flow/flowProgression.js",
   "./js/flow/flowProgression.js?v=20260923a",
+  "./js/flow/flowProgressionV4.js",
+  "./js/flow/flowProgressionV4.js?v=20260924a",
   "./js/flow/flowRunPlan.js",
   "./js/flow/flowRunPlan.js?v=20260923e",
   "./js/flow/flowScoreV2.js?v=20260923f",
@@ -94,7 +96,7 @@ const FLOW_RELEASE_ASSETS = Object.freeze([
   "./styles/screens/flow-phase5.css?v=20260916a",
   "./styles/screens/flow-game-mode-v2.css?v=20260923d",
   "./styles/screens/flow-session-v4.css",
-  "./styles/screens/flow-session-v4.css?v=20260924a",
+  "./styles/screens/flow-session-v4.css?v=20260924b",
   "./styles/screens/flow-visual-phase6.css?v=20260923a",
   "./styles/screens/flow-visual-phase6-polish.css?v=20260916a",
   "./styles/screens/flow-ui-phase7.css?v=20260916a",

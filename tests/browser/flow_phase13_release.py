@@ -72,6 +72,9 @@ def launch_public_flow(page):
     assert labels == ["Score", "WPM", "Accuracy", "Words"], labels
     expect(page.locator('[data-flow-theme-select]')).to_be_visible()
     expect(page.locator(".flow-v3-tab-hint")).to_contain_text("TAB")
+    expect(page.locator('[data-flow-progression]')).to_be_visible()
+    progression = page.evaluate("window.wordstrikeFlowPhase1.getPublicProgressionState()")
+    assert progression["summary"]["totalMilestones"] == 25, progression
     return plan
 
 
@@ -128,9 +131,17 @@ def certify_public_journey(browser, browser_name, base, evidence):
     assert session_state["bestRun"]["score"] == previous_result["score"], session_state
     assert micro["title"] == "NEW SESSION BEST", micro
     assert micro["score"] == previous_result["score"], micro
+    progression = page.evaluate("window.wordstrikeFlowPhase1.getPublicProgressionState()")
+    assert progression["progression"]["totals"]["runs"] == 1, progression
+    assert progression["progression"]["totals"]["words"] == previous_result["wordsCompleted"], progression
+    assert "runs-1" in progression["progression"]["milestones"], progression
+    assert progression["summary"]["earnedCount"] >= 1, progression
+    assert micro["progressionReward"]["primaryName"] == "First Current", micro
     expect(page.locator('[data-flow-micro-result]')).to_be_visible()
+    expect(page.locator('[data-flow-milestone-reward]')).to_contain_text("First Current")
     expect(page.locator('[data-flow-session-run]')).to_have_text("2")
     expect(page.locator('[data-flow-session-words]')).to_have_text(str(previous_result["wordsCompleted"]))
+    expect(page.locator('[data-flow-progression-count]')).to_contain_text("/ 25")
 
     live_prefix = second_plan["fullText"][:20]
     page.keyboard.type(live_prefix)
@@ -177,6 +188,10 @@ def certify_fresh_default(browser, browser_name, base, evidence):
     assert page.locator('[data-flow-theme-select]').input_value() == "mixed"
     assert page.locator('[data-flow-view="ready"]').count() == 0
     assert page.locator('[data-flow-action="start"]').count() == 0
+    fresh_progression = page.evaluate("window.wordstrikeFlowPhase1.getPublicProgressionState()")
+    assert fresh_progression["summary"]["earnedCount"] == 0, fresh_progression
+    assert fresh_progression["summary"]["tier"]["name"] == "Open Current", fresh_progression
+    expect(page.locator('[data-flow-progression-count]')).to_have_text("0 / 25")
 
     first_document = plan["documents"][0]["documentId"]
     first_session = page.evaluate("window.wordstrikeFlowPhase1.getPublicSessionId()")
@@ -218,6 +233,7 @@ def certify_mobile(browser, browser_name, base, evidence):
       screen: document.querySelector('.flow-phase1-screen').getBoundingClientRect().width,
       hud: document.querySelector('.flow-game-v2-hud').getBoundingClientRect().width,
       session: document.querySelector('[data-flow-session-strip]').getBoundingClientRect().width,
+      progression: document.querySelector('[data-flow-progression]').getBoundingClientRect().width,
       passage: document.querySelector('[data-flow-longform="true"]').getBoundingClientRect().width,
       theme: document.querySelector('[data-flow-theme-select]').getBoundingClientRect().width,
     })""")
@@ -225,6 +241,7 @@ def certify_mobile(browser, browser_name, base, evidence):
     assert geometry["screen"] <= geometry["viewport"] + 1, geometry
     assert geometry["hud"] <= geometry["viewport"] + 1, geometry
     assert geometry["session"] <= geometry["viewport"] + 1, geometry
+    assert geometry["progression"] <= geometry["viewport"] + 1, geometry
     assert geometry["passage"] <= geometry["viewport"] + 1, geometry
     assert geometry["theme"] <= geometry["viewport"], geometry
 
@@ -283,10 +300,11 @@ def certify_offline(browser, browser_name, base, evidence):
 
     cached = page.evaluate("""async () => {
       const targets = [
-        './js/flow/flowRuntimeLoader.js?v=20260924d',
-        './js/flow/flowPhase1.js?v=20260924d',
+        './js/flow/flowRuntimeLoader.js?v=20260924e',
+        './js/flow/flowPhase1.js?v=20260924e',
         './js/flow/flowSessionV4.js?v=20260924a',
-        './styles/screens/flow-session-v4.css?v=20260924a',
+        './js/flow/flowProgressionV4.js?v=20260924a',
+        './styles/screens/flow-session-v4.css?v=20260924b',
         './js/flow/flowCadence.js?v=20260924a',
         './js/flow/flowStreamPlanV3.js?v=20260923b',
         './js/flow/flowScoreV3.js?v=20260923a',

@@ -65,7 +65,7 @@ assert.equal(previous?.sessionId, "previous");
 const index = readFileSync(new URL("../index.html", import.meta.url), "utf8");
 assert.doesNotMatch(index, /<link[^>]+typing-performance-v2\.css/,
   "V2 results styling must not be globally loaded on unrelated screens");
-assert.match(index, /js\/speedTestPerformanceV2\.js\?v=20260910b/);
+assert.match(index, /js\/speedTestPerformanceV2\.js\?v=20260924a/);
 
 const v2Source = readFileSync(new URL("../js/speedTestPerformanceV2.js", import.meta.url), "utf8");
 assert.match(v2Source, /styles\/screens\/typing-performance-v2\.css\?v=20260910a/,

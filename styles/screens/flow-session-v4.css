@@ -240,3 +240,190 @@
     animation: none;
   }
 }
+
+
+/* =========================================================
+   WORDSTRIKE FLOW — PHASE 7B
+   Passive milestones, long-term progression, cosmetic titles.
+   ========================================================= */
+
+.flow-v4-progression-strip {
+  display: grid;
+  grid-template-columns: minmax(120px, 0.7fr) minmax(0, 2.3fr);
+  gap: 18px;
+  align-items: center;
+  width: 100%;
+  padding: 9px 0 10px;
+  border-bottom: 1px solid var(--flow-line);
+}
+
+.flow-v4-progression-title,
+.flow-v4-progression-track {
+  min-width: 0;
+}
+
+.flow-v4-progression-title {
+  display: grid;
+  gap: 3px;
+}
+
+.flow-v4-progression-title span,
+.flow-v4-progression-heading span,
+.flow-v4-progression-track small,
+.flow-v4-milestone-reward span,
+.flow-v4-milestone-reward em {
+  color: var(--flow-ink-muted);
+  font-family: var(--flow-data-face);
+  text-transform: uppercase;
+}
+
+.flow-v4-progression-title span,
+.flow-v4-progression-heading span {
+  font-size: 0.46rem;
+  letter-spacing: 0.1em;
+}
+
+.flow-v4-progression-title strong {
+  overflow: hidden;
+  color: var(--flow-signal);
+  font-family: var(--flow-data-face);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.075em;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.flow-v4-progression-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 5px;
+}
+
+.flow-v4-progression-heading strong {
+  color: var(--flow-ink-soft);
+  font-family: var(--flow-data-face);
+  font-size: 0.5rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.065em;
+}
+
+.flow-v4-progression-bar {
+  position: relative;
+  overflow: hidden;
+  height: 3px;
+  background: color-mix(in srgb, var(--flow-line) 72%, transparent);
+}
+
+.flow-v4-progression-bar > span {
+  position: absolute;
+  inset: 0 auto 0 0;
+  min-width: 2px;
+  background: var(--flow-signal);
+  transition: width 220ms ease-out;
+}
+
+.flow-v4-progression-track small {
+  display: block;
+  overflow: hidden;
+  margin-top: 5px;
+  font-size: 0.45rem;
+  letter-spacing: 0.055em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.flow-v4-micro-result.has-reward {
+  grid-template-areas:
+    "title score"
+    "metrics score"
+    "reward reward";
+}
+
+.flow-v4-milestone-reward {
+  grid-area: reward;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: baseline;
+  min-width: 0;
+  padding-top: 7px;
+  border-top: 1px solid var(--flow-line);
+}
+
+.flow-v4-milestone-reward span,
+.flow-v4-milestone-reward em {
+  font-size: 0.47rem;
+  font-style: normal;
+  letter-spacing: 0.075em;
+  white-space: nowrap;
+}
+
+.flow-v4-milestone-reward strong {
+  overflow: hidden;
+  color: var(--flow-signal);
+  font-family: var(--flow-data-face);
+  font-size: 0.56rem;
+  font-weight: 700;
+  letter-spacing: 0.075em;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.flow-v4-milestone-reward em {
+  color: var(--flow-ink-soft);
+}
+
+@media (max-width: 720px) {
+  .flow-v4-progression-strip {
+    grid-template-columns: minmax(92px, 0.75fr) minmax(0, 2.25fr);
+    gap: 10px;
+    padding-block: 8px 9px;
+  }
+
+  .flow-v4-progression-title strong {
+    font-size: 0.58rem;
+  }
+
+  .flow-v4-progression-track small {
+    font-size: 0.42rem;
+  }
+}
+
+@media (max-width: 440px) {
+  .flow-v4-progression-strip {
+    grid-template-columns: 1fr;
+    gap: 7px;
+  }
+
+  .flow-v4-progression-title {
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 8px;
+    align-items: baseline;
+  }
+
+  .flow-v4-micro-result.has-reward {
+    grid-template-areas:
+      "title"
+      "score"
+      "metrics"
+      "reward";
+  }
+
+  .flow-v4-milestone-reward {
+    grid-template-columns: 1fr auto;
+  }
+
+  .flow-v4-milestone-reward span {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flow-v4-progression-bar > span {
+    transition: none;
+  }
+}
