@@ -1,4 +1,4 @@
-import { FLOW_V3_THEME_IDS } from "./flowStreamPlanV3.js";
+import { FLOW_V3_THEME_IDS } from "./flowStreamPlanV3.js?v=20260923b";
 
 export const FLOW_PROGRESSION_V4_STORAGE_KEY = "wordstrike_flow_progression_v4";
 export const FLOW_PROGRESSION_V4_VERSION = 1;
