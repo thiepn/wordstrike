@@ -276,6 +276,8 @@ def certify_offline(browser, browser_name, base, evidence):
       const targets = [
         './js/flow/flowRuntimeLoader.js?v=20260924c',
         './js/flow/flowPhase1.js?v=20260924c',
+        './js/flow/flowSessionV4.js?v=20260924a',
+        './styles/screens/flow-session-v4.css?v=20260924a',
         './js/flow/flowCadence.js?v=20260924a',
         './js/flow/flowStreamPlanV3.js?v=20260923b',
         './js/flow/flowScoreV3.js?v=20260923a',
