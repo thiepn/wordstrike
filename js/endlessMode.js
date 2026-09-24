@@ -405,10 +405,13 @@ export function completeEndlessRun(game = currentEndless) {
 
 function tick(timestamp) {
   const game = currentEndless;
-  if (!game || game.ended) return;
+  if (!game || game.ended) {
+    animationFrameId = null;
+    return;
+  }
   if (appState.screen !== Screens.PLAYING) {
     game.lastTimestamp = null;
-    animationFrameId = requestAnimationFrame(tick);
+    animationFrameId = null;
     return;
   }
   const deltaMs = clampGameplayFrameDelta(timestamp, game.lastTimestamp);
