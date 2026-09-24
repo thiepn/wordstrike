@@ -19,7 +19,7 @@ import {
   formatFlowThemeLabel,
   getFlowStreamIdentity,
   savePreferredFlowTheme,
-} from "./flowIdentityV1.js?v=20260924a";
+} from "./flowIdentityV1.js?v=20260924b";
 import { resolveFlowSelection } from "./flowSelection.js";
 import {
   calculateFlowScoreV2,
