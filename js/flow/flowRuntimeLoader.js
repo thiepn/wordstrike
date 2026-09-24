@@ -1,5 +1,5 @@
 const RELEASE_FLAG = "flowRelease";
-const FLOW_RELEASE_VERSION = 9;
+const FLOW_RELEASE_VERSION = 10;
 const FLOW_RELEASE_CACHE_NAME = "wordstrike-flow-release-v13";
 const FLOW_RELEASE_QUERY_KEYS = Object.freeze([
   "mode",
