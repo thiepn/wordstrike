@@ -14,6 +14,7 @@ export function createWordStrikeBackHandler({
   onboardingController,
   getSpeedTestState,
   backPracticeLab,
+  backFlow,
   cancelProfileNameEdit,
   openTitle,
   openModeSelect,
@@ -32,6 +33,10 @@ export function createWordStrikeBackHandler({
   return function handleWordStrikeBack() {
     if (onboardingController?.getState?.()) {
       onboardingController.close?.();
+      return true;
+    }
+
+    if (typeof backFlow === "function" && backFlow() === true) {
       return true;
     }
 
