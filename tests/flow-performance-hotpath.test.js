@@ -11,7 +11,7 @@ assert.match(source, /let mountedRunHud = null;/);
 assert.match(source, /function mountRunHud\(/);
 assert.match(source, /function updateCharacterRange\(/);
 assert.match(source, /function scheduleCadenceHud\(/);
-assert.match(source, /getPerformanceStats: \(\) => \(\{ \.\.\.performanceStats \}\)/);
+assert.match(source, /getPerformanceStats: \(\) => \(\{[\s\S]*?\.\.\.performanceStats[\s\S]*?liveCadenceEventWindow: FLOW_LIVE_CADENCE_EVENT_WINDOW[\s\S]*?\}\)/);
 assert.match(source, /document\.addEventListener\("visibilitychange", handleFlowVisibilityChange\)/);
 assert.match(source, /reason: "visibility-hidden"/);
 assert.match(source, /function beginVisibilityPause\([\s\S]*?clearCadenceRefresh\(\)/);
