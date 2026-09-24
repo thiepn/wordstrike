@@ -1,5 +1,5 @@
 const CACHE_PREFIX = "wordstrike-pwa-";
-const CACHE_NAME = CACHE_PREFIX + "v70-flow-v3-instant-play-3";
+const CACHE_NAME = CACHE_PREFIX + "v71-gameplay-runtime-pass4";
 const APP_SHELL = [
   "./js/practiceLab/practiceAssessmentInput.js",
   "./js/practiceLab/practiceDurableManifest.js",
@@ -23,7 +23,7 @@ const APP_SHELL = [
   "./data/practice/read-ahead/en-v1/WS-READAHEAD-EN-1.manifest.json",
   "./js/flow/flowAdaptive.js",
   "./js/flow/flowAdaptivePhase10.js",
-  "./js/flow/flowCadence.js",
+  "./js/flow/flowCadence.js?v=20260924a",
   "./js/flow/flowCatalog.js",
   "./js/flow/flowConfig.js",
   "./js/flow/flowContent.js",
@@ -51,7 +51,7 @@ const APP_SHELL = [
   "./js/flow/flowModifiersPhase9.js",
   "./js/flow/flowPassages.js",
   "./js/flow/flowPhase1.js",
-  "./js/flow/flowPhase1.js?v=20260923k",
+  "./js/flow/flowPhase1.js?v=20260924a",
   "./js/flow/flowProgression.js",
   "./js/flow/flowProgression.js?v=20260923a",
   "./js/flow/flowRunPlan.js",
@@ -61,7 +61,7 @@ const APP_SHELL = [
   "./js/flow/flowRecordsV2.js",
   "./js/flow/flowRecordsV2.js?v=20260923a",
   "./js/flow/flowRuntimeLoader.js",
-  "./js/flow/flowRuntimeLoader.js?v=20260923k",
+  "./js/flow/flowRuntimeLoader.js?v=20260924a",
   "./js/flow/flowSelection.js",
   "./js/flow/flowShell.js",
   "./js/flow/flowState.js",
@@ -289,7 +289,7 @@ const APP_SHELL = [
   "./js/levelGenerator.js",
   "./js/lifetimeStatistics.js",
   "./js/main.js",
-  "./js/main.js?v=20260923g",
+  "./js/main.js?v=20260924a",
   "./js/mobileInputAdapter.js",
   "./js/modeCustomization.js",
   "./js/modeCustomizationPresentation.js",
@@ -862,7 +862,7 @@ const CORE_SHELL = Object.freeze([
   "./style.css",
   "./styles/ui-system.css",
   "./js/main.js",
-  "./js/main.js?v=20260923g",
+  "./js/main.js?v=20260924a",
 ]);
 
 async function precacheAppShell() {
