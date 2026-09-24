@@ -1,6 +1,6 @@
 const RELEASE_FLAG = "flowRelease";
 const FLOW_RELEASE_VERSION = 9;
-const FLOW_RELEASE_CACHE_NAME = "wordstrike-flow-release-v12";
+const FLOW_RELEASE_CACHE_NAME = "wordstrike-flow-release-v13";
 const FLOW_RELEASE_QUERY_KEYS = Object.freeze([
   "mode",
   RELEASE_FLAG,
@@ -48,6 +48,7 @@ const FLOW_RELEASE_ASSETS = Object.freeze([
   "./js/flow/flowMigrationPresentation.js?v=20260923a",
   "./js/flow/flowAdaptive.js",
   "./js/flow/flowAdaptivePhase10.js?v=20260923a",
+  "./js/flow/flowCadence.js",
   "./js/flow/flowCadence.js?v=20260924a",
   "./js/flow/flowCatalog.js",
   "./js/flow/flowConfig.js",
