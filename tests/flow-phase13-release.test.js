@@ -97,7 +97,7 @@ for (const key of FLOW_RELEASE_QUERY_KEYS) {
 assert.ok(FLOW_RELEASE_ASSETS.length >= 30, "release cache pack should cover the complete Flow stack");
 assert.equal(new Set(FLOW_RELEASE_ASSETS).size, FLOW_RELEASE_ASSETS.length, "release cache pack contains duplicates");
 for (const asset of [
-  "./js/flow/flowRuntimeLoader.js?v=20260924e",
+  "./js/flow/flowRuntimeLoader.js?v=20260924f",
   "./js/leaderboardService.js",
   "./js/supabaseConfig.js",
   "./js/supabaseClient.js",
@@ -144,7 +144,7 @@ for (const asset of [
 }
 
 const mainIndex = index.indexOf('src="js/main.js?v=20260924b"');
-const releaseIndex = index.indexOf('src="js/flow/flowRuntimeLoader.js?v=20260924e"');
+const releaseIndex = index.indexOf('src="js/flow/flowRuntimeLoader.js?v=20260924f"');
 assert.ok(mainIndex >= 0 && releaseIndex > mainIndex, "main.js must boot before the release loader can temporarily emulate the developer route");
 assert.doesNotMatch(index, /src="js\/flow\/flowPhase1\.js/);
 assert.doesNotMatch(index, /const flowParams = new URLSearchParams/);
