@@ -243,4 +243,44 @@ const makeDeferred = () => {
   assert.equal(successCalls, 1);
 }
 
-console.log("Pending results survive OAuth reloads, wait for settled profiles, submit once, retry safely, reject mismatched users, and ignore stale lifecycle completions.");
+
+{
+  const request = makeDeferred();
+  let storedIntent = {
+    mode: "campaign",
+    boardKey: "campaign-highest-level-v1",
+    sessionId: "session-passive-signout-00003",
+    immutablePayload: {},
+  };
+  let successCalls = 0;
+  let failureCalls = 0;
+  const coordinator = createPendingResultCoordinator({
+    inspectIntent: () => ({ intent: storedIntent, error: null }),
+    loadIntent: () => storedIntent,
+    bindIntent: () => ({ intent: storedIntent, error: null }),
+    clearIntent: () => { storedIntent = null; },
+    hydrate: () => ({ status: "ready", sessionId: "session-passive-signout-00003" }),
+    submit: () => request.promise,
+    submissionState: () => ({ status: "submitted" }),
+    onSuccess: () => { successCalls += 1; },
+    onFailure: () => { failureCalls += 1; },
+  });
+
+  const signedInRequest = coordinator.evaluate(signedIn("user-passive"), readyProfile);
+  assert.equal(coordinator.getState().status, "submitting");
+  const signedOutState = await coordinator.evaluate(
+    { status: "signed-out", user: null },
+    { status: "idle", profile: null },
+  );
+  assert.equal(signedOutState.status, "waiting-for-auth");
+  assert.equal(signedOutState.errorCode, "AUTH_REQUIRED");
+
+  request.resolve({ status: "submitted" });
+  await signedInRequest;
+  assert.equal(coordinator.getState().status, "waiting-for-auth");
+  assert.equal(successCalls, 0);
+  assert.equal(failureCalls, 0);
+  assert.ok(storedIntent, "passive sign-out must preserve the durable intent for a later valid sign-in");
+}
+
+console.log("Pending results survive OAuth reloads, wait for settled profiles, submit once, retry safely, reject mismatched users, ignore stale lifecycle completions, and detach on passive sign-out.");
