@@ -1279,6 +1279,34 @@ function submitPublicStreamBestInBackground(result, recordState) {
   });
 }
 
+function reachedPublicStreamDocumentIndex() {
+  if (!isPublicStreamRun() || !run || !resolvedRunPlan?.documents?.length) return 0;
+  let reachedDocumentIndex = 0;
+  for (const segment of resolvedRunPlan.segments || []) {
+    if (run.currentIndex > segment.startIndex) {
+      reachedDocumentIndex = Math.max(reachedDocumentIndex, segment.documentIndex || 0);
+    }
+  }
+  return Math.min(reachedDocumentIndex, resolvedRunPlan.documents.length - 1);
+}
+
+function publicProgressionPlan() {
+  if (!resolvedRunPlan || resolvedRunPlan.corpusVersion !== 2 || !resolvedRunPlan.documents?.length) {
+    return resolvedRunPlan;
+  }
+  const reachedDocumentIndex = reachedPublicStreamDocumentIndex();
+  const reachedThemes = [...new Set(
+    resolvedRunPlan.documents
+      .slice(0, reachedDocumentIndex + 1)
+      .map((document) => document.theme)
+      .filter(Boolean),
+  )];
+  return {
+    ...resolvedRunPlan,
+    corpusThemes: reachedThemes,
+  };
+}
+
 function finalizePublicStreamRun(endedReason = "reset") {
   if (!isPublicStreamRun() || !run || !publicRunSessionId || run.currentIndex <= 0) return null;
   const result = createFlowScoreV3Result({
@@ -1290,7 +1318,7 @@ function finalizePublicStreamRun(endedReason = "reset") {
   });
   if (!result) return null;
   const progressionUpdate = recordFlowProgressionV4(result, {
-    plan: resolvedRunPlan,
+    plan: publicProgressionPlan(),
     sourceRecords: loadFlowRecordsV3(),
   });
   const recordState = recordFlowResultV3(result);
@@ -1312,10 +1340,7 @@ function finalizePublicStreamRun(endedReason = "reset") {
   lastPublicResult = result;
   lastPublicRecordState = recordState;
   if (result.completed && resolvedRunPlan?.corpusVersion === 2) {
-    let reachedDocumentIndex = 0;
-    for (const segment of resolvedRunPlan.segments || []) {
-      if (run.currentIndex > segment.startIndex) reachedDocumentIndex = Math.max(reachedDocumentIndex, segment.documentIndex || 0);
-    }
+    const reachedDocumentIndex = reachedPublicStreamDocumentIndex();
     recordFlowCorpusRun({
       ...resolvedRunPlan,
       documents: resolvedRunPlan.documents.slice(0, reachedDocumentIndex + 1),
