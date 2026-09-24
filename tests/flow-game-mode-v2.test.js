@@ -32,7 +32,7 @@ assert.match(phase1, /if \(isPublicStreamRun\(\)\) \{\s*startRun\(\);/);
 assert.match(phase1, /event\.key === "Tab"/);
 assert.match(phase1, /rerollPublicStream\(\)/);
 assert.match(phase1, /data-flow-theme-select/);
-assert.match(phase1, /TAB · NEW TEXT/);
+assert.match(phase1, /TAB · NEXT TEXT/);
 assert.match(phase1, /calculateFlowScoreV3/);
 assert.match(phase1, /recordFlowResultV3/);
 assert.match(phase1, /createLeaderboardSubmissionService/);
