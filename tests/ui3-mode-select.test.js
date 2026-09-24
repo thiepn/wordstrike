@@ -39,9 +39,9 @@ assert.match(ui, /mode\.id === "campaign"/);
 assert.match(ui, /mode\.id === "speed-test"/);
 assert.match(ui, /mode\.id === "endless"/);
 // Hidden legacy Rush presentation branches may remain for developer compatibility.
-// Flow is now public but intentionally retains the calm neutral Mode Select motif.
+// Flow now owns a dedicated calm continuous-reading identity; Practice stays neutral.
 assert.match(ui, /mode\.id === "arcade-rush"/);
-assert.doesNotMatch(ui, /mode\.id === "flow"/);
+assert.match(ui, /mode\.id === "flow"/);
 assert.doesNotMatch(ui, /mode\.id === "practice"/);
 assert.doesNotMatch(ui, /class="mode-card/);
 assert.doesNotMatch(ui, /class="mode-grid/);
@@ -58,6 +58,8 @@ assert.match(css, /\.mode-motif-campaign/);
 assert.match(css, /\.mode-motif-typing/);
 assert.match(css, /\.mode-motif-endless/);
 assert.match(css, /\.mode-motif-rush/);
+assert.match(css, /\.mode-motif-flow/);
+assert.match(css, /mode-flow-current/);
 assert.match(css, /\.mode-motif-neutral/);
 assert.match(css, /\.mode-option\.coming-soon/);
 assert.match(css, /\.mode-home-action/);
@@ -83,6 +85,8 @@ assert.match(keyboard, /else if \(event\.key === "Escape"\) \{\s*openTitle\(\)/s
 // mode alongside Practice; hidden Rush
 // remains available only through explicit compatibility access.
 assert.match(modesSource, /FLOW: "flow"/);
+assert.match(modesSource, /shortLabel: "Continuous"/);
+assert.match(modesSource, /continuous long-form texts, build momentum, and chase lasting records/);
 assert.match(modesSource, /id: MODE_IDS\.FLOW,[\s\S]*enabled: true,[\s\S]*visible: true,[\s\S]*status: "available",[\s\S]*route: "flow-release"/);
 assert.match(modesSource, /PRACTICE: "practice"/);
 assert.match(modesSource, /id: MODE_IDS\.PRACTICE,[\s\S]*enabled: true,[\s\S]*visible: true,[\s\S]*status: "available",[\s\S]*route: "practice-lab"/);
