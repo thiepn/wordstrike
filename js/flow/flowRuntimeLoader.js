@@ -386,7 +386,7 @@ async function importFlowRuntime() {
     const integrationBootstrap = await import("./flowIntegrationBootstrap.js?v=20260923b");
     integrationBootstrap.applyFlowIntegrationDefaults?.();
     await Promise.all([
-      import("./flowPhase1.js?v=20260924e"),
+      import("./flowPhase1.js?v=20260924f"),
       import("./flowVisualPhase6.js?v=20260923a"),
     ]);
 
