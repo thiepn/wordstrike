@@ -46,7 +46,9 @@ assert.match(v7, /window\.addEventListener\("pageshow", install\)/);
 const profiler = sources["../js/speedTestWordProfileV4.js"];
 assert.match(profiler, /observer\.observe\(root, \{ childList: true \}\);/);
 assert.doesNotMatch(profiler, /observer\.observe\(root, \{[^}]*subtree:\s*true/);
-assert.match(profiler, /if \(state\.phase === "PAUSED"\) return;/);
+assert.match(profiler, /if \(state\.phase === "PAUSED"\) \{[\s\S]*?cancelAnimationFrame/);
+assert.match(profiler, /pauseStateObserver\.observe\(nextScreen, \{[\s\S]*?attributes:\s*true,[\s\S]*?attributeFilter:\s*\["class"\]/);
+assert.doesNotMatch(profiler, /pauseStateObserver\.observe\(nextScreen, \{[^}]*subtree:\s*true/);
 assert.match(profiler, /window\.addEventListener\("pagehide", teardownSpeedTestWordProfiler\)/);
 assert.match(profiler, /window\.addEventListener\("pageshow", installSpeedTestWordProfiler\)/);
 
