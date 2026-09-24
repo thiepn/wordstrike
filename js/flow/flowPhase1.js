@@ -11,6 +11,11 @@ import {
   normalizeFlowV3Theme,
   resolveFlowStreamPlanV3,
 } from "./flowStreamPlanV3.js?v=20260923b";
+import {
+  formatFlowThemeLabel,
+  getFlowStreamIdentity,
+  savePreferredFlowTheme,
+} from "./flowIdentityV1.js?v=20260924a";
 import { resolveFlowSelection } from "./flowSelection.js";
 import {
   calculateFlowScoreV2,
@@ -142,11 +147,13 @@ function createPublicFlowSeed() {
 }
 
 function updatePublicFlowUrl({ theme = resolvedRunPlan?.theme || "mixed", newSeed = true } = {}) {
+  const normalizedTheme = normalizeFlowV3Theme(theme);
   const url = new URL(globalThis.location.href);
   url.searchParams.set("mode", "flow");
   url.searchParams.set("flowRelease", "1");
   url.searchParams.set("flowRun", "1");
-  url.searchParams.set("flowTheme", normalizeFlowV3Theme(theme));
+  url.searchParams.set("flowTheme", normalizedTheme);
+  savePreferredFlowTheme(normalizedTheme);
   if (newSeed || !url.searchParams.get("flowSeed")) url.searchParams.set("flowSeed", createPublicFlowSeed());
   globalThis.history?.replaceState?.(null, "", url.href);
   refreshFlowPlanFromLocation(url);
@@ -655,15 +662,43 @@ function updateCharacterRange(startIndex, endIndex) {
 
 function runHeaderLabel() {
   if (!resolvedRunPlan) return `FLOW · ${resolvedSelection?.passage?.id || "passage"}`;
-  if (isPublicStreamRun()) {
-    return `FLOW · ${String(resolvedRunPlan.theme || "mixed").toUpperCase()}`;
-  }
   if (isPublicLongformRun()) {
     return `FLOW · ${resolvedRunPlan.sessionLength.toUpperCase()} · ${resolvedRunPlan.wordCount} WORDS`;
   }
   const segment = currentSegment();
   const chapter = currentChapter();
   return `CHAPTER ${segment.chapterIndex + 1}/${resolvedRunPlan.chapterCount} · ${chapter.title.toUpperCase()} · ${segment.passageIndex + 1}/${chapter.passages.length}`;
+}
+
+function publicStreamIdentityMarkup() {
+  if (!isPublicStreamRun()) return "";
+  const identity = getFlowStreamIdentity(resolvedRunPlan, activeSegmentIndex);
+  const sourceMeta = [
+    identity.sourceThemeLabel,
+    identity.difficulty,
+    identity.wordCount ? `${identity.wordCount.toLocaleString("en-US")} words` : null,
+  ].filter(Boolean).join(" · ");
+  return `<div class="flow-v5-brand" data-flow-identity>
+      <strong><i aria-hidden="true"></i>${escapeHtml(identity.modeLabel)}</strong>
+      <span>${escapeHtml(identity.modeDescriptor)}</span>
+    </div>
+    <div class="flow-v5-source" data-flow-source>
+      <span data-flow-source-position>${escapeHtml(identity.sourcePosition)}</span>
+      <strong data-flow-source-title title="${escapeHtml(identity.sourceTitle)}">${escapeHtml(identity.sourceTitle)}</strong>
+      <small data-flow-source-meta>${escapeHtml(sourceMeta)}</small>
+    </div>`;
+}
+
+function publicStreamToolsMarkup() {
+  if (!isPublicStreamRun()) return "";
+  return `<div class="flow-v3-run-tools flow-v5-run-tools">
+    <label><span>Text mix</span>
+      <select data-flow-theme-select aria-label="Flow text mix">
+        ${FLOW_V3_THEME_IDS.map((theme) => `<option value="${theme}"${theme === resolvedRunPlan.theme ? " selected" : ""}>${escapeHtml(formatFlowThemeLabel(theme))}</option>`).join("")}
+      </select>
+    </label>
+    <span class="flow-v3-tab-hint">TAB · NEXT TEXT</span>
+  </div>`;
 }
 
 function visiblePassageText() {
@@ -838,11 +873,11 @@ function renderRun() {
   const chapter = currentChapter();
   const publicLongform = isPublicLongformRun();
   const hud = publicLongform
-    ? `<section class="flow-gameplay-hud flow-game-v2-hud" aria-label="Flow run status">
-        <div><span>Score</span><strong data-flow-score>0</strong></div>
-        <div><span>WPM</span><strong data-flow-final-wpm>0.0</strong></div>
-        <div><span>Accuracy</span><strong data-flow-accuracy>100.0%</strong></div>
-        <div><span>${isPublicStreamRun() ? "Words" : "Progress"}</span><strong data-flow-progress>${isPublicStreamRun() ? "0" : "0%"}</strong></div>
+    ? `<section class="flow-gameplay-hud flow-game-v2-hud"${isPublicStreamRun() ? ' data-flow-hud-v5="true"' : ""} aria-label="Flow run status">
+        <div class="flow-v5-hud-score"><span>Score</span><strong data-flow-score>0</strong>${isPublicStreamRun() ? "<small>LIVE RUN</small>" : ""}</div>
+        <div><span>WPM</span><strong data-flow-final-wpm>0.0</strong>${isPublicStreamRun() ? "<small>PACE</small>" : ""}</div>
+        <div><span>Accuracy</span><strong data-flow-accuracy>100.0%</strong>${isPublicStreamRun() ? "<small>PRECISION</small>" : ""}</div>
+        <div><span>${isPublicStreamRun() ? "Words" : "Progress"}</span><strong data-flow-progress>${isPublicStreamRun() ? "0" : "0%"}</strong>${isPublicStreamRun() ? "<small>VOLUME</small>" : ""}</div>
       </section>`
     : `<section class="flow-gameplay-hud flow-cadence-hud" aria-label="Flow gameplay and cadence status">
         <div class="flow-score-block"><span>Score</span><strong data-flow-score>0</strong></div>
@@ -861,22 +896,16 @@ function renderRun() {
   app.innerHTML = `
     <section class="screen flow-phase1-screen flow-run-screen" data-flow-view="run"${publicLongform ? ' data-flow-longform-v2="true"' : ""}>
       <main class="flow-run-shell">
-        <header class="flow-run-header">
+        <header class="flow-run-header${isPublicStreamRun() ? " flow-v5-run-header" : ""}">
           <button type="button" class="screen-back-button" data-flow-action="back">BACK</button>
-          <div><span>${escapeHtml(runHeaderLabel())}</span>${publicLongform ? "" : `<strong data-flow-progress>0 / ${run.passage.length}</strong>`}</div>
-          ${isPublicStreamRun() ? `<div class="flow-v3-run-tools">
-            <label>TEXT
-              <select data-flow-theme-select aria-label="Flow text type">
-                ${FLOW_V3_THEME_IDS.map((theme) => `<option value="${theme}"${theme === resolvedRunPlan.theme ? " selected" : ""}>${theme.replaceAll("-", " ").toUpperCase()}</option>`).join("")}
-              </select>
-            </label>
-            <span class="flow-v3-tab-hint">TAB · NEW TEXT</span>
-          </div>` : ""}
+          ${isPublicStreamRun()
+            ? publicStreamIdentityMarkup()
+            : `<div><span>${escapeHtml(runHeaderLabel())}</span>${publicLongform ? "" : `<strong data-flow-progress>0 / ${run.passage.length}</strong>`}</div>`}
+          ${publicStreamToolsMarkup()}
         </header>
         ${!publicLongform && chapter ? `<div class="flow-chapter-strip" data-flow-chapter><span>${escapeHtml(chapter.title)}</span><strong>${escapeHtml(chapter.difficulty)}</strong></div>` : ""}
         ${hud}
-        ${publicSessionStripMarkup()}
-        ${publicProgressionStripMarkup()}
+        ${isPublicStreamRun() ? `<div class="flow-v5-session-meta">${publicSessionStripMarkup()}${publicProgressionStripMarkup()}</div>` : ""}
         ${publicMicroResultMarkup()}
         <div class="flow-run-copy">
           <div class="flow-passages" aria-label="Typing passage">${passage}</div>
