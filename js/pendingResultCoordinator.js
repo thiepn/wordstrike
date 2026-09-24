@@ -35,6 +35,7 @@ export function createPendingResultCoordinator({
   let automaticAttemptKey = null;
   let usernamePromptKey = null;
   let activePromise = null;
+  let activeUserId = null;
   let lifecycleGeneration = 0;
   const listeners = new Set();
   const readIntent = () => inspectIntent?.() || { intent: loadIntent(), error: null };
@@ -102,7 +103,20 @@ export function createPendingResultCoordinator({
   };
 
   const resume = (authState, profileState, { automatic = false } = {}) => {
-    if (activePromise) return activePromise;
+    const requestedUserId = authState?.status === "signed-in" && typeof authState.user?.id === "string"
+      ? authState.user.id
+      : null;
+    if (activePromise) {
+      const settledAwayFromAccount = (
+        !AUTH_PENDING.has(authState?.status) &&
+        authState?.status !== "signed-in"
+      );
+      const accountChanged = Boolean(requestedUserId && requestedUserId !== activeUserId);
+      if (!settledAwayFromAccount && !accountChanged) return activePromise;
+      lifecycleGeneration += 1;
+      activePromise = null;
+      activeUserId = null;
+    }
     const generation = lifecycleGeneration;
     const context = settledContext(authState, profileState);
     if (!context.intent) return Promise.resolve(context.state);
@@ -144,8 +158,12 @@ export function createPendingResultCoordinator({
       onFailure(failed, context.intent);
       return failed;
     }).finally(() => {
-      if (activePromise === request) activePromise = null;
+      if (activePromise === request) {
+        activePromise = null;
+        activeUserId = null;
+      }
     });
+    activeUserId = authState.user.id;
     activePromise = request;
     return request;
   };
@@ -153,15 +171,13 @@ export function createPendingResultCoordinator({
   return Object.freeze({
     getState: () => state,
     evaluate(authState, profileState) {
-      if (activePromise) return activePromise;
-      const context = settledContext(authState, profileState);
-      if (!context.intent) return Promise.resolve(context.state);
       return resume(authState, profileState, { automatic: true });
     },
     resume: (authState, profileState) => resume(authState, profileState, { automatic: false }),
     discard() {
       lifecycleGeneration += 1;
       activePromise = null;
+      activeUserId = null;
       clearIntent();
       automaticAttemptKey = null;
       usernamePromptKey = null;
@@ -172,6 +188,7 @@ export function createPendingResultCoordinator({
       automaticAttemptKey = null;
       usernamePromptKey = null;
       activePromise = null;
+      activeUserId = null;
       const intent = readIntent().intent;
       return publish(intent ? { status: "restoring", intent } : {});
     },
