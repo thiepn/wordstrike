@@ -138,7 +138,7 @@ def certify_public_journey(browser, browser_name, base, evidence):
     assert progression["summary"]["earnedCount"] >= 1, progression
     assert micro["progressionReward"]["primaryName"] == "First Current", micro
     expect(page.locator('[data-flow-micro-result]')).to_be_visible()
-    expect(page.locator('[data-flow-milestone-reward]')).to_contain_text("FIRST CURRENT")
+    expect(page.locator('[data-flow-milestone-reward]')).to_contain_text("First Current")
     expect(page.locator('[data-flow-session-run]')).to_have_text("2")
     expect(page.locator('[data-flow-session-words]')).to_have_text(str(previous_result["wordsCompleted"]))
     expect(page.locator('[data-flow-progression-count]')).to_contain_text("/ 25")
