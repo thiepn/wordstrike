@@ -105,4 +105,71 @@ assert.equal(retryMock.calls.length, 2, "settled healthy profile checks stay ded
 await retryService.initializeLeaderboardProfile({ id: "user-retry" }, { force: true });
 assert.equal(retryMock.calls.length, 3, "explicit profile retry forces a fresh server check");
 
-console.log("Leaderboard profile initialization, deduplication, retry recovery, operations, errors, and sign-out reset passed.");
+
+const profileDeferred = () => {
+  let resolve;
+  const promise = new Promise((done) => { resolve = done; });
+  return { promise, resolve };
+};
+
+// A username availability response from a signed-out/reset lifecycle must never
+// repopulate the cleared profile state.
+{
+  const checkRequest = profileDeferred();
+  const client = { functions: { invoke: async (_name, { body }) => {
+    if (body.action === "get") {
+      return { data: { ok: true, data: { profile } }, error: null };
+    }
+    if (body.action === "check") return checkRequest.promise;
+    throw new Error("unexpected profile action");
+  } } };
+  const raceService = createLeaderboardProfileService({ getClient: () => client });
+  await raceService.initializeLeaderboardProfile({ id: "race-user-1" });
+  const pendingCheck = raceService.checkUsernameAvailability("Available_Name");
+  assert.equal(raceService.getLeaderboardProfileState().status, "checking");
+  raceService.resetLeaderboardProfile();
+  assert.equal(raceService.getLeaderboardProfileState().status, "idle");
+  checkRequest.resolve({ data: { ok: true, data: { username: "Available_Name", available: true } }, error: null });
+  await pendingCheck;
+  assert.equal(raceService.getLeaderboardProfileState().status, "idle");
+  assert.equal(raceService.getLeaderboardProfileState().profile, null);
+  assert.equal(raceService.getLeaderboardProfileState().availability, null);
+}
+
+// Editing the draft invalidates an older availability lookup and returns the
+// editor to a settled state so a fresh check can start immediately.
+{
+  const firstCheck = profileDeferred();
+  const secondCheck = profileDeferred();
+  let checks = 0;
+  const client = { functions: { invoke: async (_name, { body }) => {
+    if (body.action === "get") {
+      return { data: { ok: true, data: { profile } }, error: null };
+    }
+    if (body.action === "check") {
+      checks += 1;
+      return checks === 1 ? firstCheck.promise : secondCheck.promise;
+    }
+    throw new Error("unexpected profile action");
+  } } };
+  const raceService = createLeaderboardProfileService({ getClient: () => client });
+  await raceService.initializeLeaderboardProfile({ id: "race-user-2" });
+  const staleCheck = raceService.checkUsernameAvailability("Old_Name");
+  raceService.setUsernameDraft("Fresh_Name");
+  assert.equal(raceService.getLeaderboardProfileState().status, "ready");
+  assert.equal(raceService.getLeaderboardProfileState().draft, "Fresh_Name");
+
+  const freshCheck = raceService.checkUsernameAvailability("Fresh_Name");
+  assert.equal(checks, 2);
+  firstCheck.resolve({ data: { ok: true, data: { username: "Old_Name", available: true } }, error: null });
+  await staleCheck;
+  assert.equal(raceService.getLeaderboardProfileState().draft, "Fresh_Name");
+  assert.equal(raceService.getLeaderboardProfileState().availability, null);
+
+  secondCheck.resolve({ data: { ok: true, data: { username: "Fresh_Name", available: true } }, error: null });
+  await freshCheck;
+  assert.equal(raceService.getLeaderboardProfileState().availability.username, "Fresh_Name");
+  assert.equal(raceService.getLeaderboardProfileState().availability.available, true);
+}
+
+console.log("Leaderboard profile initialization, deduplication, retry recovery, operations, errors, sign-out reset, and stale async ownership passed.");
