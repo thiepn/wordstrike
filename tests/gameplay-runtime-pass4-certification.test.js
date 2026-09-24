@@ -1,3 +1,4 @@
+// CI probe: exact final Pass 4 snapshot after Flow/UI7 fixes.
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
