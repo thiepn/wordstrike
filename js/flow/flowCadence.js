@@ -34,6 +34,23 @@ function cadenceBoundarySet(run) {
   return new Set(run?.cadenceExcludedAfterIndexes || []);
 }
 
+const EXCLUDED_PAUSE_REASONS = new Set(["chapter-transition", "visibility-hidden"]);
+
+function excludedPauseOverlapMs(run, startAt, endAt) {
+  const start = Number(startAt);
+  const end = Number(endAt);
+  if (!Number.isFinite(start) || !Number.isFinite(end) || end <= start) return 0;
+  return (run?.pauses || []).reduce((total, pause) => {
+    if (!EXCLUDED_PAUSE_REASONS.has(pause?.reason)) return total;
+    const pauseStart = Number(pause.startAt);
+    const pauseEnd = Number(pause.endAt);
+    if (!Number.isFinite(pauseStart) || !Number.isFinite(pauseEnd) || pauseEnd <= pauseStart) return total;
+    const overlapStart = Math.max(start, pauseStart);
+    const overlapEnd = Math.min(end, pauseEnd);
+    return overlapEnd > overlapStart ? total + (overlapEnd - overlapStart) : total;
+  }, 0);
+}
+
 function buildUninterruptedIntervals(run) {
   const intervals = [];
   const excludedAfterIndexes = cadenceBoundarySet(run);
@@ -46,8 +63,11 @@ function buildUninterruptedIntervals(run) {
     }
     if (event.type !== "insert") continue;
     if (previousInsert && !interrupted && !excludedAfterIndexes.has(previousInsert.index)) {
-      const ms = Number(event.at) - Number(previousInsert.at);
-      if (Number.isFinite(ms) && ms > 0 && ms < 60000) {
+      const previousAt = Number(previousInsert.at);
+      const currentAt = Number(event.at);
+      const ms = currentAt - previousAt;
+      const crossedExcludedPause = excludedPauseOverlapMs(run, previousAt, currentAt) > 0;
+      if (!crossedExcludedPause && Number.isFinite(ms) && ms > 0 && ms < 60000) {
         intervals.push(Object.freeze({
           fromIndex: previousInsert.index,
           toIndex: event.index,
@@ -131,16 +151,6 @@ function classifyCadence(intervals) {
   };
 }
 
-function deliberatePauseMs(run) {
-  return (run?.pauses || []).reduce((total, pause) => {
-    if (pause?.reason !== "chapter-transition") return total;
-    const startAt = Number(pause.startAt);
-    const endAt = Number(pause.endAt);
-    if (!Number.isFinite(startAt) || !Number.isFinite(endAt) || endAt <= startAt) return total;
-    return total + (endAt - startAt);
-  }, 0);
-}
-
 function typingDurationMs(run) {
   const start = Number(run?.startedAt);
   if (!Number.isFinite(start)) return 0;
@@ -150,7 +160,7 @@ function typingDurationMs(run) {
     ? Number(completedAt)
     : Number(raw.at(-1)?.at);
   if (!Number.isFinite(finalAt) || finalAt <= start) return 0;
-  return Math.max(0, (finalAt - start) - deliberatePauseMs(run));
+  return Math.max(0, (finalAt - start) - excludedPauseOverlapMs(run, start, finalAt));
 }
 
 function getWpm(run) {
@@ -176,7 +186,10 @@ function latency(run, fromIndex, toIndex, excludedAfterIndexes = null) {
   const from = finalEntry(run, fromIndex);
   const to = finalEntry(run, toIndex);
   if (!from || !to) return null;
-  const value = Number(to.at) - Number(from.at);
+  const fromAt = Number(from.at);
+  const toAt = Number(to.at);
+  if (excludedPauseOverlapMs(run, fromAt, toAt) > 0) return null;
+  const value = toAt - fromAt;
   return Number.isFinite(value) && value > 0 ? value : null;
 }
 
@@ -275,7 +288,14 @@ function summarizeFeatureLatencies(run, baselineIntervalMs) {
 
 function correctionCost(run) {
   const values = (run?.correctionTimings || [])
-    .map((entry) => Number(entry.correctionDelayMs))
+    .map((entry) => {
+      const rawDelay = Number(entry.correctionDelayMs);
+      const errorAt = Number(entry.errorAt);
+      const correctedAt = Number(entry.correctedAt);
+      if (!Number.isFinite(rawDelay)) return null;
+      const excluded = excludedPauseOverlapMs(run, errorAt, correctedAt);
+      return Math.max(0, rawDelay - excluded);
+    })
     .filter((value) => Number.isFinite(value) && value >= 0);
   return Object.freeze({
     count: values.length,
