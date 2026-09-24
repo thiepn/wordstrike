@@ -116,6 +116,7 @@ def inspect_desktop(browser, base, browser_name, evidence):
     # Drive display-only state through the real authoritative game object and let UI5 derive presentation.
     state = page.evaluate("""async () => {
       const { appState } = await import('./js/state.js');
+      const presentation = await import('./js/campaignGameplayPresentation.js?v=20260924b');
       const game = appState.game;
       game.completedWordCount = 3;
       game.missedWordCount = 1;
@@ -129,9 +130,9 @@ def inspect_desktop(browser, base, browser_name, evidence):
       document.querySelector('#hud-lives').textContent = '◆';
       document.querySelector('#hud-score').textContent = '1234';
       document.querySelector('#hud-combo').textContent = 'x1.4';
+      presentation.syncCampaignGameplayPresentation(game);
       return {total:game.config.wordCount};
     }""")
-    page.wait_for_timeout(80)
     expect(page.locator('.campaign-gameplay-screen')).to_have_attribute("data-core-integrity", "1")
     expect(page.locator('.campaign-core')).to_have_attribute("data-integrity", "1")
     expect(page.locator('.campaign-core')).to_have_attribute("aria-label", "Campaign Core, integrity 1 of 3")
