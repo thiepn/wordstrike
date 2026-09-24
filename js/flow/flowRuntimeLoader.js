@@ -4,8 +4,8 @@ import {
 } from "./flowIdentityV1.js?v=20260924b";
 
 const RELEASE_FLAG = "flowRelease";
-const FLOW_RELEASE_VERSION = 21;
-const FLOW_RELEASE_CACHE_NAME = "wordstrike-flow-release-v24";
+const FLOW_RELEASE_VERSION = 22;
+const FLOW_RELEASE_CACHE_NAME = "wordstrike-flow-release-v25";
 const FLOW_OFFLINE_CACHE_BATCH_SIZE = 16;
 const FLOW_RELEASE_QUERY_KEYS = Object.freeze([
   "mode",
@@ -30,7 +30,7 @@ const FLOW_RELEASE_QUERY_KEYS = Object.freeze([
 ]);
 
 const FLOW_RELEASE_ASSETS = Object.freeze([
-  "./js/flow/flowRuntimeLoader.js?v=20260924l",
+  "./js/flow/flowRuntimeLoader.js?v=20260924m",
   "./js/leaderboardReturnState.js",
   "./js/pendingResultSubmission.js",
   "./js/submissionOutbox.js",
