@@ -97,7 +97,7 @@ for (const key of FLOW_RELEASE_QUERY_KEYS) {
 assert.ok(FLOW_RELEASE_ASSETS.length >= 30, "release cache pack should cover the complete Flow stack");
 assert.equal(new Set(FLOW_RELEASE_ASSETS).size, FLOW_RELEASE_ASSETS.length, "release cache pack contains duplicates");
 for (const asset of [
-  "./js/flow/flowRuntimeLoader.js?v=20260923k",
+  "./js/flow/flowRuntimeLoader.js?v=20260924a",
   "./js/leaderboardService.js",
   "./js/supabaseConfig.js",
   "./js/supabaseClient.js",
@@ -110,6 +110,7 @@ for (const asset of [
   "./js/flow/flowRecordsV2.js?v=20260923a",
   "./js/flow/flowEngine.js",
   "./js/flow/flowCadence.js",
+  "./js/flow/flowCadence.js?v=20260924a",
   "./js/flow/flowGameplay.js",
   "./js/flow/flowGameModeV2.js?v=20260923c",
   "./js/flow/flowContentExpansion.js",
@@ -117,7 +118,7 @@ for (const asset of [
   "./js/flow/flowCorpusHistory.js?v=20260923a",
   "./js/flow/flowLongformContent.js",
   "./js/flow/flowPassages.js",
-  "./js/flow/flowPhase1.js?v=20260923k",
+  "./js/flow/flowPhase1.js?v=20260924a",
   "./js/flow/flowProgression.js",
   "./js/flow/flowRunPlan.js?v=20260923e",
   "./js/flow/flowScoreV2.js?v=20260923f",
@@ -137,8 +138,8 @@ for (const asset of [
   assert.ok(FLOW_RELEASE_ASSETS.includes(asset), `offline pack missing ${asset}`);
 }
 
-const mainIndex = index.indexOf('src="js/main.js?v=20260923g"');
-const releaseIndex = index.indexOf('src="js/flow/flowRuntimeLoader.js?v=20260923k"');
+const mainIndex = index.indexOf('src="js/main.js?v=20260924a"');
+const releaseIndex = index.indexOf('src="js/flow/flowRuntimeLoader.js?v=20260924a"');
 assert.ok(mainIndex >= 0 && releaseIndex > mainIndex, "main.js must boot before the release loader can temporarily emulate the developer route");
 assert.doesNotMatch(index, /src="js\/flow\/flowPhase1\.js/);
 assert.doesNotMatch(index, /const flowParams = new URLSearchParams/);
