@@ -35,6 +35,7 @@ export function createPendingResultCoordinator({
   let automaticAttemptKey = null;
   let usernamePromptKey = null;
   let activePromise = null;
+  let lifecycleGeneration = 0;
   const listeners = new Set();
   const readIntent = () => inspectIntent?.() || { intent: loadIntent(), error: null };
   const publish = (next) => {
@@ -102,6 +103,7 @@ export function createPendingResultCoordinator({
 
   const resume = (authState, profileState, { automatic = false } = {}) => {
     if (activePromise) return activePromise;
+    const generation = lifecycleGeneration;
     const context = settledContext(authState, profileState);
     if (!context.intent) return Promise.resolve(context.state);
     const key = `${authState.user.id}:${context.intent.sessionId}`;
@@ -119,7 +121,9 @@ export function createPendingResultCoordinator({
       return Promise.resolve(failed);
     }
     publish({ status: "submitting", intent: context.intent });
-    activePromise = Promise.resolve(submit()).then((result) => {
+    let request = null;
+    request = Promise.resolve(submit()).then((result) => {
+      if (generation !== lifecycleGeneration) return state;
       const finalState = result || submissionState();
       if (["submitted", "already-submitted"].includes(finalState.status)) {
         clearIntent();
@@ -135,11 +139,15 @@ export function createPendingResultCoordinator({
       onFailure(failed, context.intent);
       return failed;
     }).catch(() => {
+      if (generation !== lifecycleGeneration) return state;
       const failed = publish({ status: "failed", errorCode: "SUBMISSION_FAILED", intent: context.intent });
       onFailure(failed, context.intent);
       return failed;
-    }).finally(() => { activePromise = null; });
-    return activePromise;
+    }).finally(() => {
+      if (activePromise === request) activePromise = null;
+    });
+    activePromise = request;
+    return request;
   };
 
   return Object.freeze({
@@ -152,12 +160,15 @@ export function createPendingResultCoordinator({
     },
     resume: (authState, profileState) => resume(authState, profileState, { automatic: false }),
     discard() {
+      lifecycleGeneration += 1;
+      activePromise = null;
       clearIntent();
       automaticAttemptKey = null;
       usernamePromptKey = null;
       return publish({ status: "discarded" });
     },
     resetLifecycle() {
+      lifecycleGeneration += 1;
       automaticAttemptKey = null;
       usernamePromptKey = null;
       activePromise = null;
