@@ -1,6 +1,6 @@
 const RELEASE_FLAG = "flowRelease";
-const FLOW_RELEASE_VERSION = 10;
-const FLOW_RELEASE_CACHE_NAME = "wordstrike-flow-release-v13";
+const FLOW_RELEASE_VERSION = 11;
+const FLOW_RELEASE_CACHE_NAME = "wordstrike-flow-release-v14";
 const FLOW_RELEASE_QUERY_KEYS = Object.freeze([
   "mode",
   RELEASE_FLAG,
@@ -24,7 +24,7 @@ const FLOW_RELEASE_QUERY_KEYS = Object.freeze([
 ]);
 
 const FLOW_RELEASE_ASSETS = Object.freeze([
-  "./js/flow/flowRuntimeLoader.js?v=20260924a",
+  "./js/flow/flowRuntimeLoader.js?v=20260924b",
   "./js/leaderboardReturnState.js",
   "./js/pendingResultSubmission.js",
   "./js/submissionOutbox.js",
@@ -373,7 +373,7 @@ async function importFlowRuntime() {
     const integrationBootstrap = await import("./flowIntegrationBootstrap.js?v=20260923b");
     integrationBootstrap.applyFlowIntegrationDefaults?.();
     await Promise.all([
-      import("./flowPhase1.js?v=20260923k"),
+      import("./flowPhase1.js?v=20260924a"),
       import("./flowVisualPhase6.js?v=20260923a"),
     ]);
 
