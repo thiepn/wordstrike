@@ -55,7 +55,7 @@ assert.match(source, /addEventListener\(["']click["']/);
 assert.match(source, /addEventListener\(["']focusin["']/);
 
 const index = readFileSync(new URL("../index.html", import.meta.url), "utf8");
-assert.match(index, /js\/speedTestPerformanceV4\.js\?v=20260919a/);
+assert.match(index, /js\/speedTestPerformanceV4\.js\?v=20260924b/);
 assert.doesNotMatch(index, /<link[^>]+typing-performance-v4\.css/,
   "V4 styling should remain lazy so unrelated screens keep certified default pixels");
 
