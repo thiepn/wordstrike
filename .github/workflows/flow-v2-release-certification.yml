@@ -69,6 +69,7 @@ jobs:
       - name: Certify Flow V3 release contracts
         run: |
           node tests/flow-instant-v3.test.js
+          node tests/flow-session-v4.test.js
           node tests/flow-corpus-v2.test.js
           node tests/flow-longform-gameplay-v2.test.js
           node tests/flow-scoring-v2.test.js
