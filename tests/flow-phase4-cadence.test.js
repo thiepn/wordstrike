@@ -65,6 +65,37 @@ assert.equal(correctionAnalysis.correctionCost.totalMs, 1000);
 assert.equal(correctionAnalysis.pauseCount, 0, "backspace repair gap must not be double-counted as a cadence pause");
 assert.equal(correctionAnalysis.cadenceScore, 100);
 
+const hiddenRun = createFlowTypingRun("abcdefgh", { difficulty: "natural" });
+for (const [character, at] of [["a", 100], ["b", 200], ["c", 300], ["d", 400]]) {
+  insertFlowText(hiddenRun, character, at);
+}
+hiddenRun.pauses.push({ reason: "visibility-hidden", startAt: 400, endAt: 5400 });
+for (const [character, at] of [["e", 5500], ["f", 5600], ["g", 5700], ["h", 5800]]) {
+  insertFlowText(hiddenRun, character, at);
+}
+const hiddenAnalysis = analyzeFlowCadence(hiddenRun);
+const visibleEquivalent = typeWithIntervals("abcdefgh", 100, { startAt: 100 });
+const visibleEquivalentAnalysis = analyzeFlowCadence(visibleEquivalent);
+assert.equal(hiddenAnalysis.finalWpm, visibleEquivalentAnalysis.finalWpm);
+assert.equal(hiddenAnalysis.rawWpm, visibleEquivalentAnalysis.rawWpm);
+assert.equal(hiddenAnalysis.pauseCount, 0, "background-tab time must not count as a cadence hesitation");
+assert.equal(hiddenAnalysis.cadenceScore, 100);
+
+const hiddenCorrection = createFlowTypingRun("abcdefg", { difficulty: "natural" });
+insertFlowText(hiddenCorrection, "a", 100);
+insertFlowText(hiddenCorrection, "b", 200);
+insertFlowText(hiddenCorrection, "x", 300);
+hiddenCorrection.pauses.push({ reason: "visibility-hidden", startAt: 300, endAt: 5300 });
+backspaceFlowText(hiddenCorrection, 5400);
+insertFlowText(hiddenCorrection, "c", 5500);
+insertFlowText(hiddenCorrection, "d", 5600);
+insertFlowText(hiddenCorrection, "e", 5700);
+insertFlowText(hiddenCorrection, "f", 5800);
+insertFlowText(hiddenCorrection, "g", 5900);
+const hiddenCorrectionAnalysis = analyzeFlowCadence(hiddenCorrection);
+assert.equal(hiddenCorrectionAnalysis.correctionCost.totalMs, 100);
+assert.equal(hiddenCorrectionAnalysis.pauseCount, 0);
+
 const featureText = `She said, "Amy's code is 7."`;
 const featureRun = createFlowTypingRun(featureText, { difficulty: "advanced" });
 let featureAt = 1000;
@@ -100,4 +131,4 @@ assert.equal(snapshot.cadence.cadenceScore, featureAnalysis.cadenceScore);
 assert.ok(snapshot.cadence.rawWpm > 0);
 assert.ok(snapshot.cadence.finalWpm > 0);
 
-console.log("Flow Phase 4 cadence contracts passed: speed-relative consistency, pauses, bursts, correction cost, feature hesitation, and score independence.");
+console.log("Flow cadence contracts passed: active-time WPM, hidden-tab fairness, pauses, bursts, correction cost, feature hesitation, and score independence.");
