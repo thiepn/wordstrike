@@ -1,5 +1,5 @@
 const CACHE_PREFIX = "wordstrike-pwa-";
-const CACHE_NAME = CACHE_PREFIX + "v86-performance-memory-pass6";
+const CACHE_NAME = CACHE_PREFIX + "v87-performance-memory-pass6";
 const APP_SHELL = [
   "./js/practiceLab/practiceAssessmentInput.js",
   "./js/practiceLab/practiceDurableManifest.js",
@@ -68,7 +68,7 @@ const APP_SHELL = [
   "./js/flow/flowRecordsV2.js",
   "./js/flow/flowRecordsV2.js?v=20260923a",
   "./js/flow/flowRuntimeLoader.js",
-  "./js/flow/flowRuntimeLoader.js?v=20260924i",
+  "./js/flow/flowRuntimeLoader.js?v=20260924j",
   "./js/flow/flowSelection.js",
   "./js/flow/flowShell.js",
   "./js/flow/flowState.js",
@@ -77,7 +77,7 @@ const APP_SHELL = [
   "./js/flow/flowUiPhase7KeyboardGuard.js?v=20260923a",
   "./js/flow/flowUiPhase7Polish.js",
   "./js/flow/flowUxPhase8.js",
-  "./js/flow/flowUxPhase8.js?v=20260923b",
+  "./js/flow/flowUxPhase8.js?v=20260924c",
   "./js/flow/flowVisualPhase6.js",
   "./js/nativeBackNavigation.js",
   "./js/speedTestPerformanceV1.js?v=20260924a",
