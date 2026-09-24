@@ -180,8 +180,14 @@ def certify_public_journey(browser, browser_name, base, evidence):
     assert reentry_plan["theme"] == "science", reentry_plan
     assert page.locator('[data-flow-theme-select]').input_value() == "science"
     expect(page.locator('[data-flow-source-title]')).to_have_text(reentry_plan["documents"][0]["title"])
-    page.keyboard.press("Escape")
+
+    # Browser/OS Back must be owned by Flow before the underlying MODE_SELECT
+    # app state. Otherwise the DOM can leave Flow while its key handler remains active.
+    page.evaluate("history.back()")
     expect(page.locator(".mode-select-screen")).to_be_visible(timeout=10000)
+    assert page.evaluate("window.wordstrikeFlowPhase1.isActive()") is False
+    assert page.evaluate("window.wordstrikeFlowPhase1.getSnapshot()") is None
+    assert "flowRelease=1" not in page.url, page.url
     assert not errors, errors
 
     evidence.append({
