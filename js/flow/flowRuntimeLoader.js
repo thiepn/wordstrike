@@ -1,8 +1,8 @@
-import { loadPreferredFlowTheme } from "./flowIdentityV1.js?v=20260924a";
+import { loadPreferredFlowTheme } from "./flowIdentityV1.js?v=20260924b";
 
 const RELEASE_FLAG = "flowRelease";
-const FLOW_RELEASE_VERSION = 16;
-const FLOW_RELEASE_CACHE_NAME = "wordstrike-flow-release-v19";
+const FLOW_RELEASE_VERSION = 17;
+const FLOW_RELEASE_CACHE_NAME = "wordstrike-flow-release-v20";
 const FLOW_RELEASE_QUERY_KEYS = Object.freeze([
   "mode",
   RELEASE_FLAG,
@@ -26,7 +26,7 @@ const FLOW_RELEASE_QUERY_KEYS = Object.freeze([
 ]);
 
 const FLOW_RELEASE_ASSETS = Object.freeze([
-  "./js/flow/flowRuntimeLoader.js?v=20260924g",
+  "./js/flow/flowRuntimeLoader.js?v=20260924h",
   "./js/leaderboardReturnState.js",
   "./js/pendingResultSubmission.js",
   "./js/submissionOutbox.js",
@@ -64,12 +64,12 @@ const FLOW_RELEASE_ASSETS = Object.freeze([
   "./js/flow/flowIntegrationBootstrap.js?v=20260923b",
   "./js/flow/flowIntegrationPhase11.js?v=20260923b",
   "./js/flow/flowIdentityV1.js",
-  "./js/flow/flowIdentityV1.js?v=20260924a",
+  "./js/flow/flowIdentityV1.js?v=20260924b",
   "./js/flow/flowLongformContent.js",
   "./js/flow/flowModifiers.js",
   "./js/flow/flowModifiersPhase9.js?v=20260923a",
   "./js/flow/flowPassages.js",
-  "./js/flow/flowPhase1.js?v=20260924f",
+  "./js/flow/flowPhase1.js?v=20260924g",
   "./js/flow/flowProgression.js",
   "./js/flow/flowProgression.js?v=20260923a",
   "./js/flow/flowProgressionV4.js",
@@ -386,7 +386,7 @@ async function importFlowRuntime() {
     const integrationBootstrap = await import("./flowIntegrationBootstrap.js?v=20260923b");
     integrationBootstrap.applyFlowIntegrationDefaults?.();
     await Promise.all([
-      import("./flowPhase1.js?v=20260924f"),
+      import("./flowPhase1.js?v=20260924g"),
       import("./flowVisualPhase6.js?v=20260923a"),
     ]);
 
