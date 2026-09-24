@@ -18,15 +18,19 @@ test("Phase 7 service worker has resilient core and optional precache layers", a
   const source=await readFile(new URL("../sw.js",import.meta.url),"utf8");
   assert.match(source,/const CORE_SHELL = Object\.freeze/);
   assert.match(source,/await cache\.addAll\(CORE_SHELL\)/);
-  assert.match(source,/Promise\.allSettled\(optional\.map\(asset => cache\.add\(asset\)\)\)/);
+  assert.match(source,/const OPTIONAL_PRECACHE_BATCH_SIZE = 24/);
+  assert.match(source,/cacheOptionalAssets\(cache, optional\)/);
+  assert.match(source,/Promise\.allSettled\(batch\.map\(asset => cache\.add\(asset\)\)\)/);
   assert.doesNotMatch(source,/cache\.addAll\(APP_SHELL\)/);
 });
 
-test("Phase 7 service worker awaits cache writes and handles query-version drift", async () => {
+test("Phase 7 service worker backgrounds cache writes and handles query-version drift", async () => {
   const source=await readFile(new URL("../sw.js",import.meta.url),"utf8");
-  assert.match(source,/const cache = await caches\.open\(CACHE_NAME\);/);
-  assert.match(source,/await cache\.put\("\.\/index\.html", copy\)/);
-  assert.match(source,/await cache\.put\(request, copy\)/);
+  assert.match(source,/function cacheNetworkResponseInBackground\(/);
+  assert.match(source,/event\.waitUntil\(cacheUpdate\)/);
+  assert.match(source,/await cache\.put\(cacheKey, response\.clone\(\)\)/);
+  const fetchHandler=source.slice(source.indexOf('self.addEventListener("fetch"'));
+  assert.doesNotMatch(fetchHandler,/fetch\(request\)\.then\(async response =>[\s\S]*?await cache\.put/);
   assert.match(source,/caches\.match\(request, \{ ignoreSearch: true \}\)/);
   assert.match(source,/caches\.match\("\.\/index\.html", \{ ignoreSearch: true \}\)/);
 });
