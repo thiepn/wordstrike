@@ -119,6 +119,24 @@ def certify_public_journey(browser, browser_name, base, evidence):
     assert previous_result["score"] > 0, previous_result
     assert page.locator('[data-flow-view="complete"]').count() == 0
 
+    # Phase 7A: the next run is already live while the previous run summary is visible.
+    session_state = page.evaluate("window.wordstrikeFlowPhase1.getPublicSessionState()")
+    micro = page.evaluate("window.wordstrikeFlowPhase1.getPublicMicroResult()")
+    assert session_state["runCount"] == 1, session_state
+    assert session_state["totalWords"] == previous_result["wordsCompleted"], session_state
+    assert session_state["totalScore"] == previous_result["score"], session_state
+    assert session_state["bestRun"]["score"] == previous_result["score"], session_state
+    assert micro["title"] == "NEW SESSION BEST", micro
+    assert micro["score"] == previous_result["score"], micro
+    expect(page.locator('[data-flow-micro-result]')).to_be_visible()
+    expect(page.locator('[data-flow-session-run]')).to_have_text("2")
+    expect(page.locator('[data-flow-session-words]')).to_have_text(str(previous_result["wordsCompleted"]))
+
+    live_prefix = second_plan["fullText"][:20]
+    page.keyboard.type(live_prefix)
+    live_snapshot = page.evaluate("window.wordstrikeFlowPhase1.getSnapshot()")
+    assert live_snapshot["currentIndex"] == len(live_prefix), live_snapshot
+
     # Optional text-kind filtering is secondary and never returns to a setup screen.
     page.locator('[data-flow-theme-select]').select_option("science")
     expect(page.locator('[data-flow-view="run"]')).to_be_visible(timeout=10000)
@@ -135,6 +153,7 @@ def certify_public_journey(browser, browser_name, base, evidence):
     expect(page.locator(".mode-select-screen")).to_be_visible(timeout=10000)
     assert "flowRelease=1" not in page.url, page.url
     assert "flowTheme=" not in page.url, page.url
+    assert page.evaluate("window.wordstrikeFlowPhase1.getPublicSessionState()") is None
     assert not errors, errors
 
     evidence.append({
