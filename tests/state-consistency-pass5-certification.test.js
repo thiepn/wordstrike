@@ -25,6 +25,7 @@ const [
 // Reset/discard detach the old promise, and old continuations are inert.
 assert.match(pending, /let lifecycleGeneration = 0/);
 assert.match(pending, /const generation = lifecycleGeneration/);
+assert.match(pending, /Promise\.resolve\(\)\.then\(\(\) => submit\(\)\)/);
 assert.match(pending, /if \(generation !== lifecycleGeneration\) return state/);
 assert.match(pending, /let activeUserId = null/);
 assert.match(pending, /if \(activePromise === request\) \{[\s\S]*?activePromise = null;[\s\S]*?activeUserId = null/);
@@ -108,6 +109,19 @@ assert.match(
   main,
   /async function managePracticeData\(action\) \{[\s\S]*?const ownerScreen = appState\.screen;[\s\S]*?appState\.screen === ownerScreen[\s\S]*?unmountPracticeLab\(\)/,
 );
+assert.match(main, /let settingsSurfaceGeneration = 0/);
+assert.match(
+  main,
+  /function openSettings\(\) \{[\s\S]*?settingsSurfaceGeneration \+= 1/,
+);
+assert.match(
+  main,
+  /surfaceGeneration !== settingsSurfaceGeneration[\s\S]*?querySelector\("#settings-account-management"\)/,
+);
+assert.match(
+  main,
+  /surfaceGeneration !== settingsSurfaceGeneration[\s\S]*?querySelector\("\.settings-practice-data"\)/,
+);
 assert.match(main, /let profileSurfaceGeneration = 0/);
 assert.match(main, /let profileCopyRequestSequence = 0/);
 assert.match(
@@ -121,7 +135,7 @@ assert.ok(
   serviceWorker.includes(`"./js/main.js?v=${mainVersion}"`),
   "service worker must cache the same main.js version delivered by index.html",
 );
-assert.match(serviceWorker, /v82-state-consistency-pass5/);
+assert.match(serviceWorker, /v83-state-consistency-pass5/);
 const mainAsset = `"./js/main.js?v=${mainVersion}"`;
 assert.equal(
   serviceWorker.split(mainAsset).length - 1,
