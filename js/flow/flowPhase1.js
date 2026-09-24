@@ -234,16 +234,32 @@ function publicSessionStripMarkup() {
   </section>`;
 }
 
+function microResultSecondaryCopy(feedback) {
+  const base = feedback.isPersonalBest && feedback.personalBestDelta != null
+    ? `PB ${signedScore(feedback.personalBestDelta)}`
+    : feedback.isPersonalBest
+      ? "FIRST PB"
+      : feedback.scoreDelta > 0
+        ? `MOMENTUM ${signedScore(feedback.scoreDelta)}${feedback.momentumStreak > 1 ? ` · ${feedback.momentumStreak} UP` : ""}`
+        : `SESSION ${feedback.runNumber}`;
+  if (Number.isInteger(feedback.globalRank) && feedback.globalRank > 0) {
+    return `${base} · GLOBAL #${feedback.globalRank}`;
+  }
+  if (["submitted", "already-submitted"].includes(feedback.submissionStatus)) {
+    return `${base} · SCORE SUBMITTED`;
+  }
+  if (feedback.submissionStatus === "retry-saved") {
+    return `${base} · GLOBAL RETRY SAVED`;
+  }
+  return base;
+}
+
 function publicMicroResultMarkup() {
   const feedback = getActiveMicroResultV4();
   if (!feedback || !isPublicStreamRun()) return "";
-  const secondary = feedback.isPersonalBest && feedback.personalBestDelta != null
-    ? `PB ${signedScore(feedback.personalBestDelta)}`
-    : feedback.scoreDelta > 0
-      ? `MOMENTUM ${signedScore(feedback.scoreDelta)}${feedback.momentumStreak > 1 ? ` · ${feedback.momentumStreak} UP` : ""}`
-      : `SESSION ${feedback.runNumber}`;
+  const secondary = microResultSecondaryCopy(feedback);
   return `<aside class="flow-v4-micro-result is-${feedback.tone}" data-flow-micro-result data-flow-feedback-id="${escapeHtml(feedback.id)}" role="status" aria-live="polite">
-    <div class="flow-v4-micro-result-title"><strong>${escapeHtml(feedback.title)}</strong><span>${escapeHtml(secondary)}</span></div>
+    <div class="flow-v4-micro-result-title"><strong>${escapeHtml(feedback.title)}</strong><span data-flow-micro-secondary>${escapeHtml(secondary)}</span></div>
     <div class="flow-v4-micro-result-score">${feedback.score.toLocaleString("en-US")} <small>PTS</small></div>
     <div class="flow-v4-micro-result-metrics">
       <span>${feedback.wpm.toFixed(1)} WPM</span>
@@ -268,6 +284,32 @@ function scheduleMicroResultDismiss(app) {
     }
     if (pendingMicroResultV4?.id === feedback.id) pendingMicroResultV4 = null;
   }, remaining) ?? null;
+}
+
+function syncMicroResultSubmissionV4(sessionId, submissionState) {
+  if (!pendingMicroResultV4 || pendingMicroResultV4.id !== sessionId) return;
+  const status = String(submissionState?.status || "");
+  const rank = Number(submissionState?.rank);
+  const successful = status === "submitted" || status === "already-submitted";
+  const retrySaved = ["offline", "error"].includes(status) && submissionState?.retryPersisted === true;
+  if (!successful && !retrySaved) return;
+
+  pendingMicroResultV4 = Object.freeze({
+    ...pendingMicroResultV4,
+    globalRank: successful && Number.isSafeInteger(rank) && rank > 0 ? rank : null,
+    submissionStatus: retrySaved ? "retry-saved" : status,
+    expiresAt: Math.max(pendingMicroResultV4.expiresAt, Date.now() + 2200),
+  });
+
+  const app = root();
+  const toast = app?.querySelector?.("[data-flow-micro-result]");
+  if (toast?.dataset?.flowFeedbackId === sessionId) {
+    setTextIfChanged(
+      toast.querySelector("[data-flow-micro-secondary]"),
+      microResultSecondaryCopy(pendingMicroResultV4),
+    );
+    scheduleMicroResultDismiss(app);
+  }
 }
 
 function resetVisibilityPause() {
@@ -1176,7 +1218,10 @@ function submitPublicStreamBestInBackground(result, recordState) {
     getAuthState(),
     getLeaderboardProfileState(),
   );
-  if (prepared.status === "ready") void service.submitCurrentResult();
+  if (prepared.status !== "ready") return;
+  void service.submitCurrentResult().then((state) => {
+    syncMicroResultSubmissionV4(result.sessionId, state);
+  });
 }
 
 function finalizePublicStreamRun(endedReason = "reset") {
