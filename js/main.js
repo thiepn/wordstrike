@@ -256,6 +256,7 @@ let practiceLabRegistry = null;
 let practiceLabController = null;
 let arcadeRushAppController = null;
 let arcadeRushDeveloperSeed = null;
+let settingsSurfaceGeneration = 0;
 let profileSurfaceGeneration = 0;
 let profileCopyRequestSequence = 0;
 
@@ -682,6 +683,7 @@ function signInFromCampaign() {
 }
 
 function openSettings() {
+  settingsSurfaceGeneration += 1;
   changeScreen(Screens.SETTINGS);
   appState.settingsIndex = 0;
   renderCurrentScreen();
@@ -690,7 +692,12 @@ function openSettings() {
 function openAccountSettings() {
   cleanupCampaignAttempt("account-settings");
   openSettings();
+  const surfaceGeneration = settingsSurfaceGeneration;
   globalThis.requestAnimationFrame?.(() => {
+    if (
+      appState.screen !== Screens.SETTINGS ||
+      surfaceGeneration !== settingsSurfaceGeneration
+    ) return;
     const account = document.querySelector("#settings-account-management");
     account?.scrollIntoView?.({ block: "start", behavior: "smooth" });
     account?.focus?.({ preventScroll: true });
@@ -712,7 +719,12 @@ function openPracticeDataSettings() {
   unmountPracticeLab();
   cleanupCampaignAttempt("practice-data-settings");
   openSettings();
+  const surfaceGeneration = settingsSurfaceGeneration;
   globalThis.requestAnimationFrame?.(() => {
+    if (
+      appState.screen !== Screens.SETTINGS ||
+      surfaceGeneration !== settingsSurfaceGeneration
+    ) return;
     const section = document.querySelector(".settings-practice-data");
     if (!section) return;
     section.open = true;
