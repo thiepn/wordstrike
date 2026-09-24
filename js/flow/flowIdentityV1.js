@@ -1,11 +1,28 @@
 export const FLOW_THEME_PREFERENCE_STORAGE_KEY = "wordstrike_flow_theme_preference_v1";
 export const FLOW_THEME_PREFERENCE_VERSION = 1;
 
-const SAFE_THEME_PATTERN = /^[a-z0-9-]{1,32}$/;
+export const FLOW_PUBLIC_THEME_IDS = Object.freeze([
+  "mixed",
+  "everyday",
+  "travel",
+  "nature",
+  "technology",
+  "science",
+  "work",
+  "learning",
+  "culture",
+  "community",
+  "food",
+  "craft",
+  "exploration",
+]);
+
+const FLOW_PUBLIC_THEME_SET = new Set(FLOW_PUBLIC_THEME_IDS);
 
 export function normalizeStoredFlowTheme(value, fallback = "mixed") {
+  const safeFallback = FLOW_PUBLIC_THEME_SET.has(fallback) ? fallback : "mixed";
   const theme = typeof value === "string" ? value.trim().toLowerCase() : "";
-  return SAFE_THEME_PATTERN.test(theme) ? theme : fallback;
+  return FLOW_PUBLIC_THEME_SET.has(theme) ? theme : safeFallback;
 }
 
 export function loadPreferredFlowTheme(fallback = "mixed") {
