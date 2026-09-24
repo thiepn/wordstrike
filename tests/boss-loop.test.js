@@ -30,11 +30,18 @@ globalThis.cancelAnimationFrame = (id) => frames.delete(id);
 const { appState, Screens } = await import("../js/state.js");
 const {
   completeBossPhrase,
+  resumeBossLoop,
   startBossLoop,
   stopBossLoop,
+  suspendBossLoop,
 } = await import("../js/bossLoop.js");
 const { updateBossHud } = await import("../js/ui.js");
-const { startLevelLoop, stopGameLoop } = await import("../js/gameLoop.js");
+const {
+  resumeGameLoop,
+  startLevelLoop,
+  stopGameLoop,
+  suspendGameLoop,
+} = await import("../js/gameLoop.js");
 const { handleBossKey } = await import("../js/input.js");
 
 appState.screen = Screens.PLAYING;
@@ -62,12 +69,15 @@ assert.equal(sequenceCount.textContent, "SEQUENCE 1 / 1");
 
 const remainingBeforePause = game.remainingMs;
 appState.screen = Screens.PAUSED;
-for (let index = 0; index < 5; index += 1) frame();
+frame();
+assert.equal(frames.size, 0, "paused boss loop must park instead of rescheduling RAF");
 assert.equal(game.remainingMs, remainingBeforePause);
 assert.equal(game.elapsedMs, 0);
 appState.screen = Screens.PLAYING;
-frame(100);
-assert.equal(game.remainingMs, 1000);
+assert.equal(resumeBossLoop(), undefined);
+assert.equal(frames.size, 1);
+frame(5_000);
+assert.equal(game.remainingMs, 1000, "first resumed frame must reset the timestamp baseline");
 frame(100);
 assert.equal(game.remainingMs, 900);
 
@@ -107,12 +117,14 @@ updateBossHud(game);
 assert.equal(sequenceCount.textContent, "SEQUENCE 1 / 2");
 const transitionStartTime = game.remainingMs;
 appState.screen = Screens.PAUSED;
-for (let index = 0; index < 3; index += 1) frame();
+frame();
+assert.equal(frames.size, 0);
 assert.equal(game.phase, "TRANSITION");
 assert.equal(game.remainingMs, transitionStartTime);
 updateBossHud(game);
 assert.equal(sequenceCount.textContent, "SEQUENCE 1 / 2");
 appState.screen = Screens.PLAYING;
+resumeBossLoop();
 while (game.phase === "TRANSITION") frame();
 assert.equal(game.phase, "ACTIVE");
 assert.equal(game.phraseIndex, 1);
@@ -176,8 +188,16 @@ startLevelLoop(
   {},
 );
 assert.equal(frames.size, 1);
+suspendGameLoop();
+assert.equal(frames.size, 0, "campaign pause must cancel its RAF without clearing the runtime");
+resumeGameLoop();
+assert.equal(frames.size, 1);
 stopGameLoop();
 startBossLoop(10, { timeLimitSec: 1 }, ["a"], {});
+assert.equal(frames.size, 1);
+suspendBossLoop();
+assert.equal(frames.size, 0, "boss pause must cancel its RAF without clearing the encounter");
+resumeBossLoop();
 assert.equal(frames.size, 1);
 stopBossLoop();
 startLevelLoop(
