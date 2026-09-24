@@ -37,9 +37,9 @@ assert.equal(validateLeaderboardRequest({ boardKey: LEADERBOARD_BOARDS.FLOW_QUIC
 assert.equal(EXPECTED_LEADERBOARD_RULES_VERSIONS[LEADERBOARD_BOARDS.FLOW_STANDARD], 3);
 assert.equal(getLeaderboardSelection(LEADERBOARD_BOARDS.FLOW_STANDARD).selectedCategory, LEADERBOARD_CATEGORIES.FLOW);
 
-assert.match(loader, /const FLOW_RELEASE_VERSION = 15/);
-assert.match(loader, /wordstrike-flow-release-v18/);
-assert.match(index, /js\/flow\/flowRuntimeLoader\.js\?v=20260924f/);
+assert.match(loader, /const FLOW_RELEASE_VERSION = 16/);
+assert.match(loader, /wordstrike-flow-release-v19/);
+assert.match(index, /js\/flow\/flowRuntimeLoader\.js\?v=20260924g/);
 for (const asset of [
   "./js/authService.js",
   "./js/leaderboardProfileService.js",
@@ -52,9 +52,10 @@ for (const asset of [
   "./js/flow/flowScoreV3.js?v=20260923a",
   "./js/flow/flowRecordsV3.js",
   "./js/flow/flowRecordsV3.js?v=20260923a",
-  "./js/flow/flowPhase1.js?v=20260924e",
+  "./js/flow/flowPhase1.js?v=20260924f",
   "./js/flow/flowProgressionV4.js?v=20260924a",
-  "./styles/screens/flow-session-v4.css?v=20260924b",
+  "./js/flow/flowIdentityV1.js?v=20260924a",
+  "./styles/screens/flow-session-v4.css?v=20260924c",
   "./styles/screens/flow-session-v4.css",
   "./js/flow/flowSessionV4.js?v=20260924a",
   "./js/flow/flowSessionV4.js",
