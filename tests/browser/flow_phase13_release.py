@@ -217,18 +217,27 @@ def certify_mobile(browser, browser_name, base, evidence):
       viewport: document.documentElement.clientWidth,
       screen: document.querySelector('.flow-phase1-screen').getBoundingClientRect().width,
       hud: document.querySelector('.flow-game-v2-hud').getBoundingClientRect().width,
+      session: document.querySelector('[data-flow-session-strip]').getBoundingClientRect().width,
       passage: document.querySelector('[data-flow-longform="true"]').getBoundingClientRect().width,
       theme: document.querySelector('[data-flow-theme-select]').getBoundingClientRect().width,
     })""")
     assert geometry["overflow"] <= 1, geometry
     assert geometry["screen"] <= geometry["viewport"] + 1, geometry
     assert geometry["hud"] <= geometry["viewport"] + 1, geometry
+    assert geometry["session"] <= geometry["viewport"] + 1, geometry
     assert geometry["passage"] <= geometry["viewport"] + 1, geometry
     assert geometry["theme"] <= geometry["viewport"], geometry
 
     page.keyboard.type(plan["fullText"][:80])
     page.keyboard.press("Tab")
     expect(page.locator('[data-flow-view="run"]')).to_be_visible(timeout=10000)
+    expect(page.locator('[data-flow-micro-result]')).to_be_visible()
+    toast = page.locator('[data-flow-micro-result]').evaluate("""el => {
+      const rect = el.getBoundingClientRect();
+      return {left: rect.left, right: rect.right, width: rect.width};
+    }""")
+    assert toast["left"] >= -1, toast
+    assert toast["right"] <= geometry["viewport"] + 1, (toast, geometry)
     page.screenshot(path=str(ARTIFACTS / "chromium-instant-flow-mobile.png"), full_page=True)
     evidence.append({"browser": browser_name, "case": "390px instant Flow and Tab reroll", **geometry})
     context.close()
