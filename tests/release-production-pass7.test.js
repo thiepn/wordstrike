@@ -137,6 +137,7 @@ for (const contract of [
   "corrupt persisted state boots safely",
   "80 rapid top-level surface transitions",
   "Flow duplicate launch plus 12 mount/unmount cycles with native Back",
+  "public Practice Lab launches and exits cleanly",
   "service-worker controlled offline restart",
 ]) {
   assert.ok(browserStress.includes(contract), `missing adversarial browser contract: ${contract}`);
