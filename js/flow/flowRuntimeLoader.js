@@ -24,7 +24,7 @@ const FLOW_RELEASE_QUERY_KEYS = Object.freeze([
 ]);
 
 const FLOW_RELEASE_ASSETS = Object.freeze([
-  "./js/flow/flowRuntimeLoader.js?v=20260923k",
+  "./js/flow/flowRuntimeLoader.js?v=20260924a",
   "./js/leaderboardReturnState.js",
   "./js/pendingResultSubmission.js",
   "./js/submissionOutbox.js",
@@ -48,7 +48,7 @@ const FLOW_RELEASE_ASSETS = Object.freeze([
   "./js/flow/flowMigrationPresentation.js?v=20260923a",
   "./js/flow/flowAdaptive.js",
   "./js/flow/flowAdaptivePhase10.js?v=20260923a",
-  "./js/flow/flowCadence.js",
+  "./js/flow/flowCadence.js?v=20260924a",
   "./js/flow/flowCatalog.js",
   "./js/flow/flowConfig.js",
   "./js/flow/flowContent.js",
@@ -64,7 +64,7 @@ const FLOW_RELEASE_ASSETS = Object.freeze([
   "./js/flow/flowModifiers.js",
   "./js/flow/flowModifiersPhase9.js?v=20260923a",
   "./js/flow/flowPassages.js",
-  "./js/flow/flowPhase1.js?v=20260923k",
+  "./js/flow/flowPhase1.js?v=20260924a",
   "./js/flow/flowProgression.js",
   "./js/flow/flowProgression.js?v=20260923a",
   "./js/flow/flowRunPlan.js",
