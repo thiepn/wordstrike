@@ -229,7 +229,6 @@ export function createLeaderboardService({
     const key = requestKey(boardKey);
     const activeRequest = inFlight.get(key);
     if (
-      !force &&
       activeRequest?.requestId === requestSequence &&
       state.selectedBoardKey === boardKey
     ) {
