@@ -1,5 +1,5 @@
 const CACHE_PREFIX = "wordstrike-pwa-";
-const CACHE_NAME = CACHE_PREFIX + "v83-state-consistency-pass5";
+const CACHE_NAME = CACHE_PREFIX + "v84-state-consistency-pass5";
 const APP_SHELL = [
   "./js/practiceLab/practiceAssessmentInput.js",
   "./js/practiceLab/practiceDurableManifest.js",
@@ -300,7 +300,7 @@ const APP_SHELL = [
   "./js/levelGenerator.js",
   "./js/lifetimeStatistics.js",
   "./js/main.js",
-  "./js/main.js?v=20260924e",
+  "./js/main.js?v=20260924f",
   "./js/mobileInputAdapter.js",
   "./js/modeCustomization.js",
   "./js/modeCustomizationPresentation.js",
@@ -875,7 +875,7 @@ const CORE_SHELL = Object.freeze([
   "./style.css",
   "./styles/ui-system.css",
   "./js/main.js",
-  "./js/main.js?v=20260924e",
+  "./js/main.js?v=20260924f",
 ]);
 
 async function precacheAppShell() {
