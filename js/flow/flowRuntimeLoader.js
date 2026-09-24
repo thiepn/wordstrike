@@ -230,9 +230,16 @@ function bindPublicModeEntry() {
 function installModeEntryRouting() {
   if (typeof document === "undefined") return;
   document.addEventListener("click", (event) => {
-    if (isFlowReleaseRoute()) return;
     const target = event.target?.closest?.('button[data-mode-id="flow"]');
     if (!target) return;
+    // During same-document launch the URL flips to the release route before
+    // Flow replaces Mode Select. Consume any duplicate click in that window so
+    // the button's normal onclick cannot recursively re-enter activateSelectedMode().
+    if (isFlowReleaseRoute()) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      return;
+    }
     event.preventDefault();
     event.stopImmediatePropagation();
     void launchPublicFlow();
