@@ -46,12 +46,14 @@ import {
   resumeGameLoop,
   startLevelLoop,
   stopGameLoop,
+  suspendGameLoop,
 } from "./gameLoop.js";
 import {
   completeBossPhrase,
   resumeBossLoop,
   startBossLoop,
   stopBossLoop,
+  suspendBossLoop,
 } from "./bossLoop.js";
 import { createAttemptSeed, parseDeveloperSeed } from "./random.js";
 import {
@@ -1022,9 +1024,6 @@ function pauseGame() {
   deactivateGameplayInput.blur?.();
   dismissContextualHint();
   tutorialHintMode = null;
-  if (["normal", "boss"].includes(appState.game?.mode)) {
-    appState.game.lastTimestamp = null;
-  }
   if (appState.game?.mode === ARCADE_RUSH_MODE_ID) {
     if (!ensureArcadeRushAppController()?.pause()) return;
     changeScreen(Screens.PAUSED);
@@ -1032,9 +1031,13 @@ function pauseGame() {
     renderPauseOverlay();
     return;
   }
+
+  if (appState.game?.mode === "normal") suspendGameLoop();
+  else if (appState.game?.mode === "boss") suspendBossLoop();
+  else if (appState.game?.mode === "endless") stopEndlessLoop();
+
   changeScreen(Screens.PAUSED);
   pauseSession();
-  if (appState.game?.mode === "endless") stopEndlessLoop();
   appState.pauseIndex = 0;
   renderPauseOverlay();
 }
