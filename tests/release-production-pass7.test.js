@@ -129,6 +129,18 @@ assert.match(serviceWorker, /cacheNetworkResponseInBackground/);
 assert.match(serviceWorker, /OPTIONAL_PRECACHE_BATCH_SIZE = 24/);
 assert.match(flowLoader, /FLOW_OFFLINE_CACHE_BATCH_SIZE = 16/);
 
+const modeEntryRouting = flowLoader.match(/function installModeEntryRouting\(\) \{[\s\S]*?\n\}/)?.[0] || "";
+assert.match(modeEntryRouting, /const target = event\.target\?\.closest\?\.\('button\[data-mode-id="flow"\]'\)/);
+assert.match(
+  modeEntryRouting,
+  /if \(isFlowReleaseRoute\(\)\) \{[\s\S]*?event\.preventDefault\(\);[\s\S]*?event\.stopImmediatePropagation\(\);[\s\S]*?return;/,
+  "duplicate Flow clicks during release bootstrap must be consumed before normal mode onclick routing",
+);
+assert.ok(
+  modeEntryRouting.indexOf("const target =") < modeEntryRouting.indexOf("if (isFlowReleaseRoute())"),
+  "Flow target detection must precede the release-route duplicate-click guard",
+);
+
 assert.match(workflow, /Certify Pass 7 adversarial release stress/);
 assert.match(workflow, /python3 tests\/browser\/release_adversarial_pass7\.py/);
 assert.match(workflow, /browser-artifacts\/release-adversarial-pass7\//);
@@ -146,4 +158,4 @@ for (const contract of [
 assert.doesNotMatch(index, /Daily Strike/i);
 assert.doesNotMatch(index, /Arcade Rush/i);
 
-console.log("Pass 7 production contracts passed: corrupt-state recovery, frozen five-mode public surface, Flow-native Back ownership, exact offline/runtime version alignment, and adversarial browser certification wiring.");
+console.log("Pass 7 production contracts passed: corrupt-state recovery, frozen five-mode public surface, Flow-native Back ownership, duplicate-launch suppression, exact offline/runtime version alignment, and adversarial browser certification wiring.");
