@@ -18,13 +18,13 @@ from playwright.sync_api import sync_playwright, expect
 ROOT = Path(__file__).resolve().parents[2]
 ARTIFACTS = ROOT / "browser-artifacts" / "release-adversarial-pass7"
 
-ONBOARDING_SEED = """() => {
+ONBOARDING_SEED = """(() => {
   for (const [id, version] of Object.entries({
     general:3, campaign:2, typing:1, practice:1, endless:1, boss:1, leaderboards:1
   })) localStorage.setItem(`wordstrike.onboarding.${id}.v${version}`, 'seen');
-}"""
+})();"""
 
-CORRUPT_STORAGE = """() => {
+CORRUPT_STORAGE = """(() => {
   localStorage.setItem('wordstrike_save', '{not-json');
   localStorage.setItem('wordstrike_mode_data_v2', '{"schemaVersion":2,"recentSessions":"bad"}');
   localStorage.setItem('wordstrike.pending-result-submission.v1', '{bad');
@@ -35,7 +35,7 @@ CORRUPT_STORAGE = """() => {
   for (const [id, version] of Object.entries({
     general:3, campaign:2, typing:1, practice:1, endless:1, boss:1, leaderboards:1
   })) localStorage.setItem(`wordstrike.onboarding.${id}.v${version}`, 'seen');
-}"""
+})();"""
 
 
 class QuietHandler(SimpleHTTPRequestHandler):
