@@ -936,8 +936,7 @@ function renderRun() {
   rebuildMountedCharacterNodes(app);
   mountRunHud(app);
   app.querySelector('[data-flow-action="back"]')?.addEventListener("click", () => {
-    if (isPublicStreamRun()) finalizePublicStreamRun("exit");
-    restoreReturnSurface();
+    exitFlowToReturnSurface("exit");
   });
   const input = app.querySelector("[data-flow-input]");
   input?.addEventListener("beforeinput", handleBeforeInput);
