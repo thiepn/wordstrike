@@ -1,5 +1,5 @@
 const CACHE_PREFIX = "wordstrike-pwa-";
-const CACHE_NAME = CACHE_PREFIX + "v74-gameplay-runtime-pass4-final";
+const CACHE_NAME = CACHE_PREFIX + "v75-flow-session-v4";
 const APP_SHELL = [
   "./js/practiceLab/practiceAssessmentInput.js",
   "./js/practiceLab/practiceDurableManifest.js",
@@ -35,6 +35,8 @@ const APP_SHELL = [
   "./js/flow/flowStreamPlanV3.js?v=20260923b",
   "./js/flow/flowScoreV3.js",
   "./js/flow/flowScoreV3.js?v=20260923a",
+  "./js/flow/flowSessionV4.js",
+  "./js/flow/flowSessionV4.js?v=20260924a",
   "./js/flow/flowRecordsV3.js",
   "./js/flow/flowRecordsV3.js?v=20260923a",
   "./js/flow/flowEngine.js",
@@ -52,7 +54,7 @@ const APP_SHELL = [
   "./js/flow/flowModifiersPhase9.js",
   "./js/flow/flowPassages.js",
   "./js/flow/flowPhase1.js",
-  "./js/flow/flowPhase1.js?v=20260924a",
+  "./js/flow/flowPhase1.js?v=20260924c",
   "./js/flow/flowProgression.js",
   "./js/flow/flowProgression.js?v=20260923a",
   "./js/flow/flowRunPlan.js",
@@ -62,7 +64,7 @@ const APP_SHELL = [
   "./js/flow/flowRecordsV2.js",
   "./js/flow/flowRecordsV2.js?v=20260923a",
   "./js/flow/flowRuntimeLoader.js",
-  "./js/flow/flowRuntimeLoader.js?v=20260924b",
+  "./js/flow/flowRuntimeLoader.js?v=20260924c",
   "./js/flow/flowSelection.js",
   "./js/flow/flowShell.js",
   "./js/flow/flowState.js",
@@ -96,6 +98,8 @@ const APP_SHELL = [
   "./styles/screens/flow-phase5.css?v=20260916a",
   "./styles/screens/flow-game-mode-v2.css",
   "./styles/screens/flow-game-mode-v2.css?v=20260923d",
+  "./styles/screens/flow-session-v4.css",
+  "./styles/screens/flow-session-v4.css?v=20260924a",
   "./styles/screens/flow-ui-phase7-polish.css",
   "./styles/screens/flow-ui-phase7-polish.css?v=20260916b",
   "./styles/screens/flow-ui-phase7.css",
