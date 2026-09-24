@@ -4,7 +4,11 @@ import {
   getFlowTypingSnapshot,
   insertFlowText,
 } from "./flowEngine.js";
-import { analyzeFlowCadence } from "./flowCadence.js?v=20260924a";
+import {
+  analyzeFlowCadence,
+  analyzeFlowCadenceLive,
+  FLOW_LIVE_CADENCE_EVENT_WINDOW,
+} from "./flowCadence.js?v=20260924b";
 import { resolveFlowRunPlan } from "./flowRunPlan.js?v=20260923e";
 import {
   FLOW_V3_THEME_IDS,
@@ -123,6 +127,8 @@ function createPerformanceStats() {
   return {
     characterNodeUpdates: 0,
     cadenceRefreshes: 0,
+    lastCadenceWindowEvents: 0,
+    maxCadenceWindowEvents: 0,
   };
 }
 
@@ -801,7 +807,13 @@ function refreshCadenceHud() {
   if (!mountedRunHud) return;
   lastCadenceRefreshAt = now();
   performanceStats.cadenceRefreshes += 1;
-  const cadence = analyzeFlowCadence(run);
+  const cadence = analyzeFlowCadenceLive(run);
+  const windowEvents = Math.max(0, Number(cadence?.liveWindowEventCount) || 0);
+  performanceStats.lastCadenceWindowEvents = windowEvents;
+  performanceStats.maxCadenceWindowEvents = Math.max(
+    performanceStats.maxCadenceWindowEvents,
+    windowEvents,
+  );
   if (isPublicLongformRun()) {
     const score = isPublicStreamRun()
       ? calculateFlowScoreV3({
@@ -1522,7 +1534,10 @@ if (globalThis.window) {
     getSelection: () => resolvedSelection,
     getRunPlan: () => resolvedRunPlan,
     getActiveSegmentIndex: () => activeSegmentIndex,
-    getPerformanceStats: () => ({ ...performanceStats }),
+    getPerformanceStats: () => ({
+      ...performanceStats,
+      liveCadenceEventWindow: FLOW_LIVE_CADENCE_EVENT_WINDOW,
+    }),
     isActive: () => active,
     activateFromLocation: activateFlowFromLocation,
     refreshPlanFromLocation: refreshFlowPlanFromLocation,
