@@ -26,13 +26,22 @@ const [
 assert.match(pending, /let lifecycleGeneration = 0/);
 assert.match(pending, /const generation = lifecycleGeneration/);
 assert.match(pending, /if \(generation !== lifecycleGeneration\) return state/);
-assert.match(pending, /if \(activePromise === request\) activePromise = null/);
+assert.match(pending, /let activeUserId = null/);
+assert.match(pending, /if \(activePromise === request\) \{[\s\S]*?activePromise = null;[\s\S]*?activeUserId = null/);
+assert.match(pending, /const accountChanged = Boolean\(requestedUserId && requestedUserId !== activeUserId\)/);
 assert.match(pending, /discard\(\) \{[\s\S]*?lifecycleGeneration \+= 1[\s\S]*?activePromise = null/);
 assert.match(pending, /resetLifecycle\(\) \{[\s\S]*?lifecycleGeneration \+= 1[\s\S]*?activePromise = null/);
 
 // Leaderboard selection owns request freshness. A stale A request must not be
 // reused after A -> B -> A or delete the replacement A request in finally.
 assert.match(leaderboard, /activeRequest\?\.requestId === requestSequence/);
+assert.doesNotMatch(
+  leaderboard.slice(
+    leaderboard.indexOf("const activeRequest = inFlight.get(key)"),
+    leaderboard.indexOf("const selection = getLeaderboardSelection(boardKey)"),
+  ),
+  /!force/,
+);
 assert.match(leaderboard, /inFlight\.set\(key, \{ requestId, promise \}\)/);
 assert.match(leaderboard, /if \(inFlight\.get\(key\)\?\.promise === promise\) inFlight\.delete\(key\)/);
 assert.match(leaderboard, /inFlight\.get\(requestKey\(boardKey\)\)\?\.promise/);
@@ -55,7 +64,14 @@ assert.match(outbox, /if \(activePromise === request\) \{[\s\S]*?activePromise =
 
 // Background durable-submission callbacks may only own navigation on explicit
 // result/account surfaces, never active gameplay or Flow.
-assert.match(main, /const PENDING_RESULT_PROMPT_SCREENS = new Set\(\[/);
+assert.match(main, /const PENDING_RESULT_PROMPT_SCREENS = new Set\(\[[\s\S]*?Screens\.LEADERBOARDS[\s\S]*?\]\)/);
+assert.doesNotMatch(
+  main.slice(
+    main.indexOf("const PENDING_RESULT_PROMPT_SCREENS"),
+    main.indexOf("function pendingResultMayOwnNavigation"),
+  ),
+  /Screens\.(RESULTS|SPEED_TEST_RESULTS|ENDLESS_RESULTS|ARCADE_RUSH_RESULTS)/,
+);
 assert.match(main, /wordstrikeFlowPhase1\?\.isActive\?\.\(\) !== true/);
 assert.match(main, /appState\.screen === Screens\.SETTINGS\)[\s\S]*?openLeaderboardBoard\(intent\.boardKey/);
 assert.doesNotMatch(
@@ -70,6 +86,10 @@ assert.doesNotMatch(
 // fresh auth/profile read.
 assert.match(main, /await pendingResultCoordinator\.evaluate\(authState, profileState\);[\s\S]*?const latestAuthState = getAuthState\(\);[\s\S]*?const latestProfileState = getLeaderboardProfileState\(\);/);
 assert.match(main, /submissionOutboxCoordinator\.drain\(latestAuthState, latestProfileState/);
+assert.match(
+  main,
+  /if \(authUiChanged\) \{[\s\S]*?clearSubmissionState\(\);[\s\S]*?resetLeaderboardState\(\);/,
+);
 
 // Late runtime callbacks cannot reopen a previous run's results.
 assert.match(main, /state !== getCurrentSpeedTest\(\)[\s\S]*?appState\.screen !== Screens\.SPEED_TEST_RUN/);
@@ -83,12 +103,30 @@ assert.match(main, /route === "flow-release"/);
 assert.match(main, /querySelector\('button\[data-mode-id="flow"\]'\)/);
 assert.match(main, /flowEntry\.click\(\)/);
 
+// Async UI completions must remain owned by the surface/request that started them.
+assert.match(
+  main,
+  /async function managePracticeData\(action\) \{[\s\S]*?const ownerScreen = appState\.screen;[\s\S]*?appState\.screen === ownerScreen[\s\S]*?unmountPracticeLab\(\)/,
+);
+assert.match(main, /let profileSurfaceGeneration = 0/);
+assert.match(main, /let profileCopyRequestSequence = 0/);
+assert.match(
+  main,
+  /surfaceGeneration !== profileSurfaceGeneration[\s\S]*?appState\.screen !== Screens\.PROFILE_STATS/,
+);
+
 const mainVersion = index.match(/src="js\/main\.js\?v=([^"]+)"/)?.[1];
 assert.ok(mainVersion, "index must cache-bust main.js");
 assert.ok(
   serviceWorker.includes(`"./js/main.js?v=${mainVersion}"`),
   "service worker must cache the same main.js version delivered by index.html",
 );
-assert.match(serviceWorker, /v81-state-consistency-pass5/);
+assert.match(serviceWorker, /v82-state-consistency-pass5/);
+const mainAsset = `"./js/main.js?v=${mainVersion}"`;
+assert.equal(
+  serviceWorker.split(mainAsset).length - 1,
+  2,
+  "both APP_SHELL and required CORE_SHELL must use the current main.js version",
+);
 
-console.log("Pass 5 state-consistency certification passed: async generations, account ownership, stale-result rejection, safe durable navigation, unified Flow entry, and cache alignment.");
+console.log("Pass 5 state-consistency certification passed: async generations, account ownership, forced-refresh single-flight, stale-result rejection, safe durable navigation, UI surface ownership, unified Flow entry, and required-shell cache alignment.");
