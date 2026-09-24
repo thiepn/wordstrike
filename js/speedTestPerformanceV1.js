@@ -238,11 +238,22 @@ function enhanceSpeedTestResults() {
   wireGraph(section, timeline, result.wpm ?? 0);
 }
 
+let observer = null;
+let installed = false;
+
+function teardownEnhancer() {
+  observer?.disconnect?.();
+  observer = null;
+  installed = false;
+}
+
 function installEnhancer() {
+  if (installed) return;
   const root = document.querySelector("#app");
   if (!root) return;
+  installed = true;
   enhanceSpeedTestResults();
-  const observer = new MutationObserver(() => enhanceSpeedTestResults());
+  observer = new MutationObserver(() => enhanceSpeedTestResults());
   observer.observe(root, { childList: true });
 }
 
@@ -252,6 +263,10 @@ if (typeof document !== "undefined") {
   } else {
     installEnhancer();
   }
+}
+if (typeof window !== "undefined") {
+  window.addEventListener("pagehide", teardownEnhancer);
+  window.addEventListener("pageshow", installEnhancer);
 }
 
 export { graphMarkup as speedTestPerformanceGraphMarkup };
