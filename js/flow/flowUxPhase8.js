@@ -304,10 +304,16 @@ function decorateResults(screen) {
 function decorate() {
   if (!enabled) return;
   const screen = currentScreen();
-  if (!screen) return;
+  if (!screen) {
+    setupObserver?.disconnect();
+    setupObserver = null;
+    decoratedScreen = null;
+    return;
+  }
   if (screen !== decoratedScreen) {
     decoratedScreen = screen;
     setupObserver?.disconnect();
+    setupObserver = null;
   }
   if (screen.dataset.flowUxPhase8 === "true") return;
   const view = screen.dataset.flowView;
