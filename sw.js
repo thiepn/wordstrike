@@ -1,5 +1,5 @@
 const CACHE_PREFIX = "wordstrike-pwa-";
-const CACHE_NAME = CACHE_PREFIX + "v77-flow-progression-v4";
+const CACHE_NAME = CACHE_PREFIX + "v78-flow-progression-v4-pass4";
 const APP_SHELL = [
   "./js/practiceLab/practiceAssessmentInput.js",
   "./js/practiceLab/practiceDurableManifest.js",
@@ -263,11 +263,12 @@ const APP_SHELL = [
   "./js/screenScroll.js",
   "./js/automaticSubmissionController.js",
   "./js/bossGameplayPresentation.js",
+  "./js/bossGameplayPresentation.js?v=20260924b",
   "./js/bossGenerator.js",
   "./js/bossLoop.js",
   "./js/campaignDifficulty.js",
   "./js/campaignGameplayPresentation.js",
-  "./js/campaignGameplayPresentation.js?v=20260920a",
+  "./js/campaignGameplayPresentation.js?v=20260924b",
   "./js/campaignSession.js",
   "./js/contextualHints.js",
   "./js/customization.js",
@@ -275,6 +276,7 @@ const APP_SHELL = [
   "./js/endlessConfig.js",
   "./js/endlessDifficulty.js",
   "./js/endlessGameplayPresentation.js",
+  "./js/endlessGameplayPresentation.js?v=20260924b",
   "./js/endlessMode.js",
   "./js/endlessScoring.js",
   "./js/endlessWords.js",
@@ -296,7 +298,7 @@ const APP_SHELL = [
   "./js/levelGenerator.js",
   "./js/lifetimeStatistics.js",
   "./js/main.js",
-  "./js/main.js?v=20260924a",
+  "./js/main.js?v=20260924b",
   "./js/mobileInputAdapter.js",
   "./js/modeCustomization.js",
   "./js/modeCustomizationPresentation.js",
@@ -870,7 +872,7 @@ const CORE_SHELL = Object.freeze([
   "./style.css",
   "./styles/ui-system.css",
   "./js/main.js",
-  "./js/main.js?v=20260924a",
+  "./js/main.js?v=20260924b",
 ]);
 
 async function precacheAppShell() {
