@@ -64,6 +64,10 @@ for (const source of [ui11, ui12]) {
 assert.match(flowPhase1, /analyzeFlowCadenceLive\(run\)/);
 assert.match(flowPhase1, /maxCadenceWindowEvents/);
 assert.match(flowPhase1, /liveCadenceEventWindow: FLOW_LIVE_CADENCE_EVENT_WINDOW/);
+assert.match(flowPhase1, /let launchObserver = null/);
+assert.match(flowPhase1, /launchObserver\?\.disconnect\?\.\(\)/);
+assert.match(flowLoader, /let releaseExitObserver = null/);
+assert.match(flowLoader, /releaseExitObserver\?\.disconnect\?\.\(\)/);
 
 assert.match(serviceWorker, /OPTIONAL_PRECACHE_BATCH_SIZE = 24/);
 assert.match(serviceWorker, /cacheOptionalAssets\(cache, optional\)/);
