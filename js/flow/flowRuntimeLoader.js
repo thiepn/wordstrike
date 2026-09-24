@@ -3,6 +3,7 @@ import { loadPreferredFlowTheme } from "./flowIdentityV1.js?v=20260924a";
 const RELEASE_FLAG = "flowRelease";
 const FLOW_RELEASE_VERSION = 16;
 const FLOW_RELEASE_CACHE_NAME = "wordstrike-flow-release-v19";
+const FLOW_OFFLINE_CACHE_BATCH_SIZE = 16;
 const FLOW_RELEASE_QUERY_KEYS = Object.freeze([
   "mode",
   RELEASE_FLAG,
@@ -322,6 +323,12 @@ function installReleaseExitCleanup() {
   queueMicrotask(inspect);
 }
 
+async function cacheFlowAssetsInBatches(cache, urls) {
+  for (let index = 0; index < urls.length; index += FLOW_OFFLINE_CACHE_BATCH_SIZE) {
+    await cache.addAll(urls.slice(index, index + FLOW_OFFLINE_CACHE_BATCH_SIZE));
+  }
+}
+
 export async function warmFlowOfflineCache() {
   if (!globalThis.caches?.open || !globalThis.fetch) return { supported: false, cached: 0 };
   try {
@@ -331,7 +338,7 @@ export async function warmFlowOfflineCache() {
     for (const url of urls) {
       if (!(await cache.match(url))) missing.push(url);
     }
-    if (missing.length) await cache.addAll(missing);
+    if (missing.length) await cacheFlowAssetsInBatches(cache, missing);
     return { supported: true, cached: urls.length, cacheName: FLOW_RELEASE_CACHE_NAME };
   } catch (error) {
     return {
