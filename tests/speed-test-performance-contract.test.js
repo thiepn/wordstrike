@@ -36,8 +36,8 @@ assert.match(css, /touch-action:\s*pan-y/);
 assert.match(css, /@media \(max-width:\s*720px\)/);
 
 assert.match(index, /typing-performance-v1\.css\?v=20260910a/);
-assert.match(index, /speedTestPerformanceV1\.js\?v=20260910a/);
-assert.match(index, /js\/main\.js\?v=20260923g/);
+assert.match(index, /speedTestPerformanceV1\.js\?v=20260924a/);
+assert.match(index, /js\/main\.js\?v=20260924a/);
 
 assert.doesNotMatch(leaderboard, /performanceTimeline/,
   "rich per-second analytics must remain local and outside leaderboard submissions");
