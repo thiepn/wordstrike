@@ -23,6 +23,7 @@ const APP_SHELL = [
   "./data/practice/read-ahead/en-v1/WS-READAHEAD-EN-1.manifest.json",
   "./js/flow/flowAdaptive.js",
   "./js/flow/flowAdaptivePhase10.js",
+  "./js/flow/flowCadence.js",
   "./js/flow/flowCadence.js?v=20260924a",
   "./js/flow/flowCatalog.js",
   "./js/flow/flowConfig.js",
