@@ -84,6 +84,8 @@ let storedReturnNodes = [];
 let run = null;
 let activeSegmentIndex = 0;
 let chapterPauseStartedAt = null;
+let visibilityPauseStartedAt = null;
+let visibilityPausedRun = null;
 let mountedCharacterNodes = new Map();
 let mountedRunHud = null;
 let cadenceRefreshTimer = null;
@@ -164,6 +166,45 @@ function clearCadenceRefresh() {
   cadenceRefreshTimer = null;
 }
 
+function resetVisibilityPause() {
+  visibilityPauseStartedAt = null;
+  visibilityPausedRun = null;
+}
+
+function beginVisibilityPause(at = now()) {
+  if (
+    !active
+    || view !== "run"
+    || !run
+    || run.phase !== FLOW_PHASES.RUNNING
+    || visibilityPauseStartedAt != null
+  ) return false;
+  visibilityPauseStartedAt = at;
+  visibilityPausedRun = run;
+  clearCadenceRefresh();
+  return true;
+}
+
+function endVisibilityPause(at = now()) {
+  if (visibilityPauseStartedAt == null) return false;
+  const startAt = visibilityPauseStartedAt;
+  const pausedRun = visibilityPausedRun;
+  resetVisibilityPause();
+  if (pausedRun !== run || !pausedRun || !Number.isFinite(at) || at <= startAt) return false;
+  pausedRun.pauses ||= [];
+  pausedRun.pauses.push(Object.freeze({
+    reason: "visibility-hidden",
+    startAt,
+    endAt: at,
+  }));
+  return true;
+}
+
+function handleFlowVisibilityChange() {
+  if (document.hidden === true) beginVisibilityPause();
+  else endVisibilityPause();
+}
+
 function resetMountedCharacterNodes() {
   mountedCharacterNodes = new Map();
   mountedRunHud = null;
@@ -183,6 +224,7 @@ function restoreReturnSurface() {
   lastPublicRecordState = null;
   activeSegmentIndex = 0;
   chapterPauseStartedAt = null;
+  resetVisibilityPause();
   if (storedReturnNodes.length) app.replaceChildren(...storedReturnNodes);
   storedReturnNodes = [];
 }
@@ -635,6 +677,7 @@ function renderRun() {
 
 function startRun() {
   clearCadenceRefresh();
+  resetVisibilityPause();
   if (resolvedRunPlan) {
     run = createFlowTypingRun(resolvedRunPlan.fullText, {
       category: resolvedRunPlan.category,
@@ -1148,6 +1191,9 @@ subscribeToSubmissions((state) => {
 });
 
 document.addEventListener("keydown", handleDocumentKeydown, true);
+document.addEventListener("visibilitychange", handleFlowVisibilityChange);
+globalThis.window?.addEventListener?.("pagehide", () => beginVisibilityPause());
+globalThis.window?.addEventListener?.("pageshow", () => endVisibilityPause());
 if (developerFlowRequested || publicFlowRequested) {
   const app = root();
   if (app) new MutationObserver(() => queueMicrotask(tryLaunchDeveloperFlow)).observe(app, { childList: true });
