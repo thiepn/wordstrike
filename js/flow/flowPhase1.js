@@ -1435,13 +1435,19 @@ function handleBeforeInput(event) {
   }
 }
 
+function exitFlowToReturnSurface(reason = "exit") {
+  if (!active) return false;
+  if (isPublicStreamRun()) finalizePublicStreamRun(reason === "native-back" ? "exit" : reason);
+  restoreReturnSurface();
+  return true;
+}
+
 function handleDocumentKeydown(event) {
   if (!active) return;
   if (event.key === "Escape") {
     event.preventDefault();
     event.stopImmediatePropagation();
-    if (isPublicStreamRun()) finalizePublicStreamRun("exit");
-    restoreReturnSurface();
+    exitFlowToReturnSurface("exit");
     return;
   }
   if (isPublicStreamRun() && event.key === "Tab" && view === "run") {
@@ -1545,6 +1551,7 @@ if (globalThis.window) {
       liveCadenceEventWindow: FLOW_LIVE_CADENCE_EVENT_WINDOW,
     }),
     isActive: () => active,
+    exitToReturnSurface: exitFlowToReturnSurface,
     activateFromLocation: activateFlowFromLocation,
     refreshPlanFromLocation: refreshFlowPlanFromLocation,
     startCurrentRun: startCurrentFlowRun,
