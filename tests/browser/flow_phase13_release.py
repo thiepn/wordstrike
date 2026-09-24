@@ -57,6 +57,9 @@ def launch_public_flow(page):
     assert "dev=1" not in page.url, page.url
     assert page.evaluate("window.wordstrikeFlowReleasePhase13.runtimeReady()") is True
     assert page.evaluate("window.wordstrikeFlowReleasePhase13.isReleaseRoute()") is True
+    lifecycle = page.evaluate("window.wordstrikeFlowPhase1.getLifecycleDiagnostics()")
+    assert lifecycle["active"] is True, lifecycle
+    assert lifecycle["launchObserverActive"] is False, lifecycle
 
     plan = page.evaluate("window.wordstrikeFlowPhase1.getRunPlan()")
     assert plan["gameplayVersion"] == 3, plan
@@ -236,6 +239,82 @@ def certify_fresh_default(browser, browser_name, base, evidence):
     context.close()
 
 
+def certify_v4_hardening(browser, browser_name, base, evidence):
+    if browser_name != "chromium":
+        return
+
+    context = context_for(browser, base)
+    context.add_init_script(
+        "localStorage.setItem('wordstrike_flow_theme_preference_v1', 'future-theme');"
+    )
+    page = context.new_page()
+    errors = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+
+    open_modes(page, base)
+    plan = launch_public_flow(page)
+
+    assert plan["theme"] == "mixed", plan
+    assert "flowTheme=mixed" in page.url, page.url
+    assert "future-theme" not in page.url, page.url
+
+    lifecycle = page.evaluate("window.wordstrikeFlowPhase1.getLifecycleDiagnostics()")
+    assert lifecycle["launchObserverActive"] is False, lifecycle
+
+    next_document_segment = next(
+        (segment for segment in plan["segments"] if segment["documentIndex"] == 1),
+        None,
+    )
+    assert next_document_segment is not None, plan
+    target_index = next_document_segment["startIndex"] + 1
+    prefix = plan["fullText"][:target_index]
+    page.locator("[data-flow-input]").evaluate(
+        """(el, value) => el.dispatchEvent(new InputEvent('beforeinput', {
+          inputType: 'insertText',
+          data: value,
+          bubbles: true,
+          cancelable: true,
+        }))""",
+        prefix,
+    )
+    snapshot = page.evaluate("window.wordstrikeFlowPhase1.getSnapshot()")
+    assert snapshot["currentIndex"] == target_index, (snapshot["currentIndex"], target_index)
+    active_segment = page.evaluate("window.wordstrikeFlowPhase1.getActiveSegmentIndex()")
+    assert active_segment >= next_document_segment["index"], active_segment
+    expect(page.locator("[data-flow-source-title]")).to_have_text(plan["documents"][1]["title"])
+    expect(page.locator("[data-flow-source-position]")).to_contain_text("Text 2 /")
+
+    for _ in range(12):
+        page.keyboard.press("Tab")
+        expect(page.locator('[data-flow-view="run"]')).to_be_visible(timeout=10000)
+        lifecycle = page.evaluate("window.wordstrikeFlowPhase1.getLifecycleDiagnostics()")
+        assert lifecycle["launchObserverActive"] is False, lifecycle
+        assert page.locator('[data-flow-view="ready"]').count() == 0
+
+    page.keyboard.press("Escape")
+    expect(page.locator(".mode-select-screen")).to_be_visible(timeout=10000)
+    lifecycle = page.evaluate("window.wordstrikeFlowPhase1.getLifecycleDiagnostics()")
+    assert lifecycle["active"] is False, lifecycle
+    assert lifecycle["dismissed"] is True, lifecycle
+    assert lifecycle["launchObserverActive"] is False, lifecycle
+
+    page.locator('button[data-mode-id="flow"]').click()
+    expect(page.locator('[data-flow-view="run"]')).to_be_visible(timeout=15000)
+    lifecycle = page.evaluate("window.wordstrikeFlowPhase1.getLifecycleDiagnostics()")
+    assert lifecycle["active"] is True, lifecycle
+    assert lifecycle["launchObserverActive"] is False, lifecycle
+    assert not errors, errors
+
+    evidence.append({
+        "browser": browser_name,
+        "case": "Flow V4 stale preference, document identity transition, reroll/re-entry lifecycle stress",
+        "documentTransitionIndex": target_index,
+        "rerolls": 12,
+        "observerDetached": True,
+    })
+    context.close()
+
+
 def certify_mobile(browser, browser_name, base, evidence):
     if browser_name != "chromium":
         return
@@ -321,13 +400,13 @@ def certify_offline(browser, browser_name, base, evidence):
 
     cached = page.evaluate("""async () => {
       const targets = [
-        './js/flow/flowRuntimeLoader.js?v=20260924g',
-        './js/flow/flowPhase1.js?v=20260924f',
+        './js/flow/flowRuntimeLoader.js?v=20260924i',
+        './js/flow/flowPhase1.js?v=20260924h',
         './js/flow/flowSessionV4.js?v=20260924a',
         './js/flow/flowProgressionV4.js?v=20260924a',
-        './js/flow/flowIdentityV1.js?v=20260924a',
+        './js/flow/flowIdentityV1.js?v=20260924b',
         './styles/screens/flow-session-v4.css?v=20260924c',
-        './js/flow/flowCadence.js?v=20260924a',
+        './js/flow/flowCadence.js?v=20260924b',
         './js/flow/flowStreamPlanV3.js?v=20260923b',
         './js/flow/flowScoreV3.js?v=20260923a',
         './js/flow/flowRecordsV3.js?v=20260923a',
@@ -385,6 +464,7 @@ def main():
                 name = browser_type.name
                 certify_public_journey(browser, name, base, evidence)
                 certify_fresh_default(browser, name, base, evidence)
+                certify_v4_hardening(browser, name, base, evidence)
                 certify_mobile(browser, name, base, evidence)
                 certify_offline(browser, name, base, evidence)
                 browser.close()
