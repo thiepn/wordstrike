@@ -92,6 +92,7 @@ import {
 } from "./campaignSession.js";
 import {
   clearSession,
+  getCurrentSession,
   pauseSession,
   resumeSession,
 } from "./sessionManager.js";
@@ -323,20 +324,55 @@ function ensureArcadeRushAppController() {
 
 const submissionOutboxCoordinator = createSubmissionOutboxCoordinator();
 
+const PENDING_RESULT_PROMPT_SCREENS = new Set([
+  Screens.LEADERBOARDS,
+  Screens.ARCADE_RUSH_RESULTS,
+  Screens.ENDLESS_RESULTS,
+  Screens.SPEED_TEST_RESULTS,
+  Screens.RESULTS,
+]);
+
+function pendingResultMayOwnNavigation() {
+  return (
+    bootstrapReady &&
+    globalThis.window?.wordstrikeFlowPhase1?.isActive?.() !== true
+  );
+}
+
 const pendingResultCoordinator = createPendingResultCoordinator({
   onUsernameRequired: () => {
-    if (bootstrapReady && appState.screen !== Screens.SETTINGS) openAccountSettings();
+    if (
+      pendingResultMayOwnNavigation() &&
+      appState.screen !== Screens.SETTINGS &&
+      PENDING_RESULT_PROMPT_SCREENS.has(appState.screen)
+    ) {
+      openAccountSettings();
+    }
   },
   onFailure: () => {
-    if (bootstrapReady && appState.screen !== Screens.SETTINGS) openAccountSettings();
+    if (
+      pendingResultMayOwnNavigation() &&
+      appState.screen !== Screens.SETTINGS &&
+      PENDING_RESULT_PROMPT_SCREENS.has(appState.screen)
+    ) {
+      openAccountSettings();
+    }
   },
   onSuccess: (_state, intent) => {
-    if (bootstrapReady) openLeaderboardBoard(intent.boardKey, { notice: "LAST RESULT SUBMITTED" });
+    // Durable submissions can finish long after the user has moved elsewhere.
+    // Only an explicitly open account-management surface owns this navigation.
+    if (pendingResultMayOwnNavigation() && appState.screen === Screens.SETTINGS) {
+      openLeaderboardBoard(intent.boardKey, { notice: "LAST RESULT SUBMITTED" });
+    }
   },
 });
 
 async function resumeDurableSubmissions(authState = getAuthState(), profileState = getLeaderboardProfileState()) {
   await pendingResultCoordinator.evaluate(authState, profileState);
+  // Auth/profile state may have changed while the pending submission was in
+  // flight. Never drain a previous account's outbox with stale snapshots.
+  const latestAuthState = getAuthState();
+  const latestProfileState = getLeaderboardProfileState();
   const resultScreen = [
     Screens.ARCADE_RUSH_RESULTS,
     Screens.ENDLESS_RESULTS,
@@ -346,7 +382,7 @@ async function resumeDurableSubmissions(authState = getAuthState(), profileState
   const foregroundSessionId = resultScreen ? getSubmissionState().sessionId : null;
   const pendingSessionId = pendingResultCoordinator.getState().sessionId;
   const skipSessionId = foregroundSessionId || pendingSessionId || null;
-  return submissionOutboxCoordinator.drain(authState, profileState, { skipSessionId });
+  return submissionOutboxCoordinator.drain(latestAuthState, latestProfileState, { skipSessionId });
 }
 
 function ensureOnboardingView() {
@@ -757,7 +793,11 @@ function startLevel(levelNumber, source = "level-select") {
 }
 
 function finishSpeedTest(state, result) {
-  if (!result || appState.screen === Screens.SPEED_TEST_RESULTS) return;
+  if (
+    !result ||
+    state !== getCurrentSpeedTest() ||
+    appState.screen !== Screens.SPEED_TEST_RUN
+  ) return;
   unmountGameplayInput();
   appState.speedTestResult = result;
   appState.speedTestRecordFlags = { ...state.recordFlags };
@@ -833,7 +873,11 @@ function changeSpeedTestTimerPosition(position) {
 }
 
 function finishEndless(game, result) {
-  if (!result || appState.screen === Screens.ENDLESS_RESULTS) return;
+  if (
+    !result ||
+    game !== appState.game ||
+    appState.screen !== Screens.PLAYING
+  ) return;
   unmountGameplayInput();
   appState.endlessResult = result;
   appState.endlessResultsIndex = 0;
@@ -845,7 +889,14 @@ function finishEndless(game, result) {
 }
 
 function finishArcadeRush(snapshot, result) {
-  if (!result || appState.screen === Screens.ARCADE_RUSH_RESULTS) return;
+  const session = getCurrentSession();
+  if (
+    !result ||
+    appState.screen !== Screens.PLAYING ||
+    appState.game?.mode !== ARCADE_RUSH_MODE_ID ||
+    session?.modeId !== ARCADE_RUSH_MODE_ID ||
+    session?.id !== result.sessionId
+  ) return;
   unmountGameplayInput();
   syncArcadeRushSnapshot(snapshot);
   appState.arcadeRushResult = result;
@@ -984,6 +1035,7 @@ function startBossLevel(levelNumber, legitimatelyUnlocked, source) {
 }
 
 function finishLevel(game, success) {
+  if (game !== appState.game || appState.screen !== Screens.PLAYING) return;
   unmountGameplayInput();
   const wpm = calculateSessionWpm({
     characterCount: game.correctCharacters,
@@ -1198,6 +1250,14 @@ function activateSelectedMode(modeId = getAllModes()[appState.modeSelection]?.id
   }
   else if (route === "endless-ready") openEndlessReady("mode-select");
   else if (route === "arcade-rush-ready") openArcadeRushReady("mode-select");
+  else if (route === "flow-release") {
+    // Flow owns its release bootstrap in the capture-phase runtime loader.
+    // Reuse that exact entry path so keyboard activation and pointer activation
+    // cannot diverge into different lifecycle behavior.
+    const flowEntry = document.querySelector('button[data-mode-id="flow"]');
+    if (!flowEntry) return false;
+    flowEntry.click();
+  }
   else return false;
   return true;
 }
