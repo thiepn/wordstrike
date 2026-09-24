@@ -282,24 +282,20 @@ function enhanceEndlessScreen() {
   return screen;
 }
 
-function tickPresentation() {
-  frameId = null;
+export function syncEndlessGameplayPresentation(game = getCurrentEndless()) {
   const screen = enhanceEndlessScreen();
-  const game = getCurrentEndless();
-  if (screen && game && game.mode === "endless") syncPresentation(screen, game);
-  if (screen) frameId = requestAnimationFrame(tickPresentation);
+  if (screen && game?.mode === "endless") syncPresentation(screen, game);
+  return Boolean(screen);
+}
+
+function flushPresentation() {
+  frameId = null;
+  syncEndlessGameplayPresentation();
 }
 
 function queuePresentation() {
   if (frameId != null) return;
-  frameId = requestAnimationFrame(tickPresentation);
-}
-
-const appRoot = document.querySelector("#app");
-if (appRoot) {
-  observer = new MutationObserver(queuePresentation);
-  observer.observe(appRoot, { childList: true });
-  queuePresentation();
+  frameId = requestAnimationFrame(flushPresentation);
 }
 
 export function stopEndlessPresentation() {
@@ -307,4 +303,21 @@ export function stopEndlessPresentation() {
   frameId = null;
   observer?.disconnect?.();
   observer = null;
+}
+
+export function startEndlessPresentation() {
+  const appRoot = document.querySelector("#app");
+  if (!appRoot) return false;
+  if (!observer) {
+    observer = new MutationObserver(queuePresentation);
+    observer.observe(appRoot, { childList: true });
+  }
+  queuePresentation();
+  return true;
+}
+
+startEndlessPresentation();
+if (typeof window !== "undefined") {
+  window.addEventListener("pagehide", stopEndlessPresentation);
+  window.addEventListener("pageshow", startEndlessPresentation);
 }
