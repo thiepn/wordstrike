@@ -113,6 +113,7 @@ let visibilityPausedRun = null;
 let mountedCharacterNodes = new Map();
 let mountedRunHud = null;
 let cadenceRefreshTimer = null;
+let launchObserver = null;
 let lastCadenceRefreshAt = -Infinity;
 let publicRunSessionId = null;
 let lastPublicResult = null;
@@ -1485,6 +1486,8 @@ function tryLaunchDeveloperFlow() {
   const app = root();
   if (!app || app.childNodes.length === 0) return false;
   preserveReturnSurface();
+  launchObserver?.disconnect?.();
+  launchObserver = null;
   active = true;
   if (isPublicStreamRun()) {
     startRun();
@@ -1524,7 +1527,10 @@ globalThis.window?.addEventListener?.("pagehide", () => beginVisibilityPause());
 globalThis.window?.addEventListener?.("pageshow", () => endVisibilityPause());
 if (developerFlowRequested || publicFlowRequested) {
   const app = root();
-  if (app) new MutationObserver(() => queueMicrotask(tryLaunchDeveloperFlow)).observe(app, { childList: true });
+  if (app) {
+    launchObserver = new MutationObserver(() => queueMicrotask(tryLaunchDeveloperFlow));
+    launchObserver.observe(app, { childList: true });
+  }
   queueMicrotask(tryLaunchDeveloperFlow);
 }
 
