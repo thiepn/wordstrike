@@ -492,15 +492,30 @@ function enhanceV5() {
   base.dataset.performanceV5 = "true";
 }
 
+let observer = null;
+let installed = false;
+
+function teardown() {
+  observer?.disconnect?.();
+  observer = null;
+  installed = false;
+}
+
 function install() {
+  if (installed) return;
   const root = document.querySelector("#app");
   if (!root) return;
+  installed = true;
   enhanceV5();
-  const observer = new MutationObserver(enhanceV5);
+  observer = new MutationObserver(enhanceV5);
   observer.observe(root, { childList: true });
 }
 
 if (typeof document !== "undefined") {
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", install, { once: true });
   else install();
+}
+if (typeof window !== "undefined") {
+  window.addEventListener("pagehide", teardown);
+  window.addEventListener("pageshow", install);
 }
