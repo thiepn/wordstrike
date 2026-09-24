@@ -98,11 +98,14 @@ function beginNextPhrase(game) {
 
 function tick(timestamp) {
   const game = appState.game;
-  if (!game || game.mode !== "boss" || game.ended) return;
+  if (!game || game.mode !== "boss" || game.ended) {
+    animationFrameId = null;
+    return;
+  }
 
   if (appState.screen !== Screens.PLAYING) {
     game.lastTimestamp = null;
-    animationFrameId = requestAnimationFrame(tick);
+    animationFrameId = null;
     return;
   }
 
@@ -153,12 +156,16 @@ export function startBossLoop(levelNumber, config, phrases, nextCallbacks = {}) 
   return appState.game;
 }
 
-export function stopBossLoop() {
+export function suspendBossLoop() {
   if (animationFrameId !== null) cancelAnimationFrame(animationFrameId);
   animationFrameId = null;
+  if (appState.game?.mode === "boss") appState.game.lastTimestamp = null;
+}
+
+export function stopBossLoop() {
+  suspendBossLoop();
   clearBossPhrase();
   callbacks = {};
-  if (appState.game?.mode === "boss") appState.game.lastTimestamp = null;
 }
 
 export function resumeBossLoop() {
