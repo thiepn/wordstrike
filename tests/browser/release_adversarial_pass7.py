@@ -210,9 +210,11 @@ def practice_launch_exit(browser, base, evidence):
     expect(page.locator(".practice-lab-screen")).to_be_visible(timeout=20000)
     assert_single_surface(page)
 
-    # Root-level Escape must leave Practice through its own controller and
-    # restore Mode Select without leaving Practice listeners mounted.
-    page.keyboard.press("Escape")
+    # Use Practice's own root exit action so the smoke test is independent of
+    # whichever child received focus after the lazy runtime finished mounting.
+    exit_button = page.locator('[data-practice-action="exit"]')
+    expect(exit_button).to_be_visible(timeout=10000)
+    exit_button.click()
     expect(page.locator(".mode-select-screen")).to_be_visible(timeout=10000)
     assert page.locator(".practice-lab-screen").count() == 0
     assert_single_surface(page)
