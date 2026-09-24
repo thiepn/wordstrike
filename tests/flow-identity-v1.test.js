@@ -86,8 +86,8 @@ try {
   ]);
 
   assert.match(loader, /loadPreferredFlowTheme/);
-  assert.match(loader, /flowIdentityV1\.js\?v=20260924a/);
-  assert.match(loader, /wordstrike-flow-release-v19/);
+  assert.match(loader, /flowIdentityV1\.js\?v=20260924b/);
+  assert.match(loader, /wordstrike-flow-release-v20/);
   assert.match(phase1, /getFlowStreamIdentity/);
   assert.match(phase1, /savePreferredFlowTheme/);
   assert.match(phase1, /data-flow-identity/);
@@ -103,9 +103,9 @@ try {
   assert.match(css, /flow-game-v2-hud\[data-flow-hud-v5="true"\]/);
   assert.match(css, /flow-v5-session-meta/);
   assert.match(index, /flow-session-v4\.css\?v=20260924c/);
-  assert.match(index, /flowRuntimeLoader\.js\?v=20260924g/);
+  assert.match(index, /flowRuntimeLoader\.js\?v=20260924h/);
   assert.match(sw, /const CACHE_NAME = CACHE_PREFIX \+ "v\d+-[^"]+";/);
-  assert.match(sw, /flowIdentityV1\.js\?v=20260924a/);
+  assert.match(sw, /flowIdentityV1\.js\?v=20260924b/);
 
   console.log("Flow V4 identity hardening contracts passed: canonical text-mix allowlist, stale-preference fallback, source identity, bounded bootstrap observer lifecycle, responsive presentation, and offline wiring.");
 } finally {
