@@ -1,8 +1,11 @@
-import { loadPreferredFlowTheme } from "./flowIdentityV1.js?v=20260924a";
+import {
+  loadPreferredFlowTheme,
+  normalizeStoredFlowTheme,
+} from "./flowIdentityV1.js?v=20260924b";
 
 const RELEASE_FLAG = "flowRelease";
-const FLOW_RELEASE_VERSION = 19;
-const FLOW_RELEASE_CACHE_NAME = "wordstrike-flow-release-v22";
+const FLOW_RELEASE_VERSION = 20;
+const FLOW_RELEASE_CACHE_NAME = "wordstrike-flow-release-v23";
 const FLOW_OFFLINE_CACHE_BATCH_SIZE = 16;
 const FLOW_RELEASE_QUERY_KEYS = Object.freeze([
   "mode",
@@ -27,7 +30,7 @@ const FLOW_RELEASE_QUERY_KEYS = Object.freeze([
 ]);
 
 const FLOW_RELEASE_ASSETS = Object.freeze([
-  "./js/flow/flowRuntimeLoader.js?v=20260924j",
+  "./js/flow/flowRuntimeLoader.js?v=20260924k",
   "./js/leaderboardReturnState.js",
   "./js/pendingResultSubmission.js",
   "./js/submissionOutbox.js",
@@ -65,12 +68,12 @@ const FLOW_RELEASE_ASSETS = Object.freeze([
   "./js/flow/flowIntegrationBootstrap.js?v=20260923b",
   "./js/flow/flowIntegrationPhase11.js?v=20260923b",
   "./js/flow/flowIdentityV1.js",
-  "./js/flow/flowIdentityV1.js?v=20260924a",
+  "./js/flow/flowIdentityV1.js?v=20260924b",
   "./js/flow/flowLongformContent.js",
   "./js/flow/flowModifiers.js",
   "./js/flow/flowModifiersPhase9.js?v=20260923a",
   "./js/flow/flowPassages.js",
-  "./js/flow/flowPhase1.js?v=20260924h",
+  "./js/flow/flowPhase1.js?v=20260924i",
   "./js/flow/flowProgression.js",
   "./js/flow/flowProgression.js?v=20260923a",
   "./js/flow/flowProgressionV4.js",
@@ -162,9 +165,11 @@ function releaseUrl(locationLike = globalThis.location) {
   ]) {
     url.searchParams.delete(key);
   }
-  if (!url.searchParams.has("flowTheme")) {
-    url.searchParams.set("flowTheme", loadPreferredFlowTheme("mixed"));
-  }
+  const requestedTheme = url.searchParams.get("flowTheme");
+  url.searchParams.set(
+    "flowTheme",
+    normalizeStoredFlowTheme(requestedTheme ?? loadPreferredFlowTheme("mixed")),
+  );
   if (!url.searchParams.has("flowSeed")) url.searchParams.set("flowSeed", createReleaseSeed());
   return url;
 }
@@ -395,7 +400,7 @@ async function importFlowRuntime() {
     const integrationBootstrap = await import("./flowIntegrationBootstrap.js?v=20260923b");
     integrationBootstrap.applyFlowIntegrationDefaults?.();
     await Promise.all([
-      import("./flowPhase1.js?v=20260924h"),
+      import("./flowPhase1.js?v=20260924i"),
       import("./flowVisualPhase6.js?v=20260923a"),
     ]);
 
