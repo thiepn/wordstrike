@@ -20,7 +20,7 @@ ARTIFACTS = ROOT / "browser-artifacts" / "release-adversarial-pass7"
 
 ONBOARDING_SEED = """() => {
   for (const [id, version] of Object.entries({
-    general:3, campaign:2, typing:1, endless:1, boss:1, leaderboards:1
+    general:3, campaign:2, typing:1, practice:1, endless:1, boss:1, leaderboards:1
   })) localStorage.setItem(`wordstrike.onboarding.${id}.v${version}`, 'seen');
 }"""
 
@@ -33,7 +33,7 @@ CORRUPT_STORAGE = """() => {
   localStorage.setItem('wordstrike_flow_progression_v4', '[]');
   localStorage.setItem('wordstrike:flow-corpus-v2-history', '{"recentRuns":"bad"}');
   for (const [id, version] of Object.entries({
-    general:3, campaign:2, typing:1, endless:1, boss:1, leaderboards:1
+    general:3, campaign:2, typing:1, practice:1, endless:1, boss:1, leaderboards:1
   })) localStorage.setItem(`wordstrike.onboarding.${id}.v${version}`, 'seen');
 }"""
 
@@ -196,6 +196,31 @@ def flow_reentry_and_back_stress(browser, base, evidence):
     context.close()
 
 
+def practice_launch_exit(browser, base, evidence):
+    context = make_context(browser, base)
+    page, errors = page_with_errors(context)
+    page.goto(base, wait_until="domcontentloaded")
+    expect(page.locator(".title-screen")).to_be_visible(timeout=10000)
+    page.locator('[data-action="modes"]').click()
+    expect(page.locator(".mode-select-screen")).to_be_visible(timeout=10000)
+
+    practice = page.locator('button[data-mode-id="practice"]')
+    expect(practice).to_be_enabled()
+    practice.click()
+    expect(page.locator(".practice-lab-screen")).to_be_visible(timeout=20000)
+    assert_single_surface(page)
+
+    # Root-level Escape must leave Practice through its own controller and
+    # restore Mode Select without leaving Practice listeners mounted.
+    page.keyboard.press("Escape")
+    expect(page.locator(".mode-select-screen")).to_be_visible(timeout=10000)
+    assert page.locator(".practice-lab-screen").count() == 0
+    assert_single_surface(page)
+    assert not errors, errors
+    evidence.append({"case": "public Practice Lab launches and exits cleanly"})
+    context.close()
+
+
 def offline_restart(browser, base, evidence):
     context = make_context(browser, base)
     page, errors = page_with_errors(context)
@@ -241,6 +266,7 @@ def main():
             corrupt_storage_bootstrap(browser, base, evidence)
             rapid_surface_churn(browser, base, evidence)
             flow_reentry_and_back_stress(browser, base, evidence)
+            practice_launch_exit(browser, base, evidence)
             offline_restart(browser, base, evidence)
             browser.close()
         result["success"] = True
