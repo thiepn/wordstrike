@@ -78,7 +78,7 @@ try {
 
   assert.match(loader, /loadPreferredFlowTheme/);
   assert.match(loader, /flowIdentityV1\.js\?v=20260924a/);
-  assert.match(loader, /wordstrike-flow-release-v22/);
+  assert.match(loader, /wordstrike-flow-release-v23/);
   assert.match(phase1, /getFlowStreamIdentity/);
   assert.match(phase1, /savePreferredFlowTheme/);
   assert.match(phase1, /data-flow-identity/);
@@ -91,7 +91,7 @@ try {
   assert.match(css, /flow-game-v2-hud\[data-flow-hud-v5="true"\]/);
   assert.match(css, /flow-v5-session-meta/);
   assert.match(index, /flow-session-v4\.css\?v=20260924c/);
-  assert.match(index, /flowRuntimeLoader\.js\?v=20260924j/);
+  assert.match(index, /flowRuntimeLoader\.js\?v=20260924k/);
   assert.match(sw, /const CACHE_NAME = CACHE_PREFIX \+ "v\d+-[^"]+";/);
   assert.match(sw, /flowIdentityV1\.js\?v=20260924a/);
 
