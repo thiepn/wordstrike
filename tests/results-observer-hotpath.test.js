@@ -39,6 +39,7 @@ assert.match(v7, /rootObserver\.observe\(root, \{ childList: true \}\);/);
 assert.match(v7, /bodyObserver\.observe\(document\.body, \{ childList: true \}\);/);
 assert.match(v7, /practiceStructureObserver\.observe\(practiceRoot, \{ childList: true \}\);/);
 assert.match(v7, /practiceViewObserver\.observe\(practiceRoot, \{[\s\S]*?attributes:\s*true,[\s\S]*?attributeFilter:\s*\["data-practice-view"\]/);
+assert.match(v7, /if \(!practiceRoot\) \{[\s\S]*?hadObservedPracticeSurface[\s\S]*?scheduleEnhance\(\)/);
 assert.doesNotMatch(v7, /observe\(document\.body, \{ childList: true, subtree: true/);
 assert.match(v7, /document\.removeEventListener\("click", onDocumentClickCapture, true\)/);
 assert.match(v7, /window\.addEventListener\("pageshow", install\)/);
@@ -58,7 +59,17 @@ const boss = sources["../js/bossGameplayPresentation.js"];
 for (const [name, source] of Object.entries({ campaign, endless, boss })) {
   assert.match(source, /observe\(appRoot, \{ childList: true \}\);/, `${name} presentation must only watch app-level screen swaps`);
   assert.doesNotMatch(source, /observe\(appRoot, \{[^}]*subtree:\s*true/);
+  assert.doesNotMatch(
+    source,
+    /if \(screen\) frameId = requestAnimationFrame/,
+    `${name} presentation must not run a shadow RAF alongside gameplay`,
+  );
+  assert.match(source, /window\.addEventListener\("pagehide"/);
+  assert.match(source, /window\.addEventListener\("pageshow"/);
 }
+assert.match(campaign, /export function syncCampaignGameplayPresentation/);
+assert.match(endless, /export function syncEndlessGameplayPresentation/);
+assert.match(boss, /export function syncBossGameplayPresentation/);
 
 const arcade = sources["../js/arcadeRushGameplayPresentation.js"];
 assert.match(arcade, /rootObserver\.observe\(app, \{ childList: true \}\);/);
