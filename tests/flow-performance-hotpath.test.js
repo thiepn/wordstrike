@@ -4,6 +4,8 @@ import { readFile } from "node:fs/promises";
 const source = await readFile(new URL("../js/flow/flowPhase1.js", import.meta.url), "utf8");
 
 assert.match(source, /const LIVE_CADENCE_INTERVAL_MS = 180;/);
+assert.match(source, /analyzeFlowCadenceLive\(run\)/);
+assert.match(source, /liveCadenceEventWindow: FLOW_LIVE_CADENCE_EVENT_WINDOW/);
 assert.match(source, /let mountedCharacterNodes = new Map\(\);/);
 assert.match(source, /let mountedRunHud = null;/);
 assert.match(source, /function mountRunHud\(/);
