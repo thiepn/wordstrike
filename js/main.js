@@ -326,10 +326,6 @@ const submissionOutboxCoordinator = createSubmissionOutboxCoordinator();
 
 const PENDING_RESULT_PROMPT_SCREENS = new Set([
   Screens.LEADERBOARDS,
-  Screens.ARCADE_RUSH_RESULTS,
-  Screens.ENDLESS_RESULTS,
-  Screens.SPEED_TEST_RESULTS,
-  Screens.RESULTS,
 ]);
 
 function pendingResultMayOwnNavigation() {
@@ -699,8 +695,13 @@ function openAccountSettings() {
 }
 
 async function managePracticeData(action) {
+  const ownerScreen = appState.screen;
   const result = await runPracticeDataAction(action);
-  if (result.status === "success") unmountPracticeLab();
+  // A destructive/import action can outlive Settings. Do not let its old
+  // completion unmount a newly-entered Practice Lab instance.
+  if (result.status === "success" && appState.screen === ownerScreen) {
+    unmountPracticeLab();
+  }
   return result;
 }
 
@@ -1753,6 +1754,10 @@ async function bootstrap() {
     lastAuthUiKey = authUiKey;
     if (authUiChanged) {
       const selectedBoard = getLeaderboardState().selectedBoardKey;
+      // Submission state is account-scoped. Invalidating it here prevents an
+      // in-flight request prepared under the previous identity from publishing
+      // into the new account lifecycle.
+      clearSubmissionState();
       resetLeaderboardState();
       if (appState.screen === Screens.LEADERBOARDS) void initializeLeaderboards(selectedBoard);
     }
