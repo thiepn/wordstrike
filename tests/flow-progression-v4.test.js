@@ -176,7 +176,7 @@ try {
   assert.match(phase1, /getPublicProgressionState/);
   assert.match(loader, /flowProgressionV4\.js\?v=20260924a/);
   assert.match(loader, /wordstrike-flow-release-v17/);
-  assert.match(sw, /v77-flow-progression-v4/);
+  assert.match(sw, /v78-flow-progression-v4-pass4/);
   assert.match(sw, /flowProgressionV4\.js\?v=20260924a/);
   assert.match(css, /WORDSTRIKE FLOW — PHASE 7B/);
   assert.match(css, /flow-v4-progression-strip/);
