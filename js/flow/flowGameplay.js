@@ -5,6 +5,9 @@ import {
 
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 
+export const FLOW_GAMEPLAY_EVENT_RETAIN_LIMIT = 4096;
+const FLOW_GAMEPLAY_EVENT_TRIM_TO = 3072;
+
 export const FLOW_GAMEPLAY_RULES = Object.freeze({
   startingFlow: 60,
   flow: Object.freeze({
@@ -135,6 +138,11 @@ function sampleQuality(run) {
 }
 
 function recordGameplayEvent(run, event) {
+  if (run.gameplayEvents.length >= FLOW_GAMEPLAY_EVENT_RETAIN_LIMIT) {
+    const removeCount = run.gameplayEvents.length - FLOW_GAMEPLAY_EVENT_TRIM_TO;
+    run.gameplayEvents.splice(0, removeCount);
+    run.gameplayEventsDropped = (run.gameplayEventsDropped || 0) + removeCount;
+  }
   run.gameplayEvents.push(Object.freeze({
     ...event,
     flow: run.flowValue,
@@ -159,6 +167,7 @@ export function initializeFlowGameplay(run) {
   run.momentumSampleTotal = 0;
   run.momentumSampleCount = 0;
   run.gameplayEvents = [];
+  run.gameplayEventsDropped = 0;
   run.score = 0;
   run.scoreBreakdown = calculateFlowScore(run);
   return run;
@@ -254,5 +263,6 @@ export function getFlowGameplaySnapshot(run) {
     scoreBreakdown: run.scoreBreakdown ? { ...run.scoreBreakdown } : calculateFlowScore(run),
     furthestIndexReached: run.furthestIndexReached,
     gameplayEvents: run.gameplayEvents.map((event) => ({ ...event })),
+    gameplayEventsDropped: Math.max(0, Number(run.gameplayEventsDropped) || 0),
   });
 }
