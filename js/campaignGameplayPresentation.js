@@ -5,6 +5,8 @@ const CAMPAIGN_SCREEN_SELECTOR = ".game-screen:not(.endless-screen):not(.boss-sc
 const CAMPAIGN_ROUTE_SELECTOR = ".campaign-progress-screen";
 const MAX_INTEGRITY = 3;
 let syncQueued = false;
+let frameId = null;
+let observer = null;
 
 function setText(node, value) {
   if (!node) return;
@@ -224,8 +226,7 @@ function syncIntegrity(screen, lives) {
   });
 }
 
-function syncPresentation(screen) {
-  const game = appState.game;
+function syncPresentation(screen, game = appState.game) {
   if (!game || game.mode !== "normal") return;
 
   const completed = Math.max(0, Number(game.completedWordCount) || 0);
@@ -255,12 +256,12 @@ function syncPresentation(screen) {
 
 function enhanceCampaignScreen() {
   const screen = document.querySelector(CAMPAIGN_SCREEN_SELECTOR);
-  if (!screen) return;
+  if (!screen) return null;
   screen.classList.add("campaign-gameplay-screen");
   enhanceHud(screen);
   enhanceCore(screen);
   enhanceKeyboardTrigger(screen);
-  syncPresentation(screen);
+  return screen;
 }
 
 function speedUnlockCopy(wpm, level, bestWpm) {
@@ -331,19 +332,45 @@ function injectSpeedUnlockStyles() {
   document.head.append(style);
 }
 
+export function syncCampaignGameplayPresentation(game = appState.game) {
+  const screen = enhanceCampaignScreen();
+  enhanceCampaignSpeedUnlocks();
+  if (screen && game?.mode === "normal") syncPresentation(screen, game);
+  return Boolean(screen);
+}
+
 function queueSync() {
   if (syncQueued) return;
   syncQueued = true;
-  requestAnimationFrame(() => {
+  frameId = requestAnimationFrame(() => {
+    frameId = null;
     syncQueued = false;
-    enhanceCampaignScreen();
-    enhanceCampaignSpeedUnlocks();
+    syncCampaignGameplayPresentation();
   });
 }
 
-injectSpeedUnlockStyles();
-const appRoot = document.querySelector("#app");
-if (appRoot) {
-  new MutationObserver(queueSync).observe(appRoot, { childList: true });
+export function stopCampaignPresentation() {
+  if (frameId != null) cancelAnimationFrame(frameId);
+  frameId = null;
+  syncQueued = false;
+  observer?.disconnect?.();
+  observer = null;
+}
+
+export function startCampaignPresentation() {
+  const appRoot = document.querySelector("#app");
+  if (!appRoot) return false;
+  injectSpeedUnlockStyles();
+  if (!observer) {
+    observer = new MutationObserver(queueSync);
+    observer.observe(appRoot, { childList: true });
+  }
   queueSync();
+  return true;
+}
+
+startCampaignPresentation();
+if (typeof window !== "undefined") {
+  window.addEventListener("pagehide", stopCampaignPresentation);
+  window.addEventListener("pageshow", startCampaignPresentation);
 }
