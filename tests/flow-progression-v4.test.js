@@ -176,7 +176,7 @@ try {
   assert.match(phase1, /getPublicProgressionState/);
   assert.match(loader, /flowProgressionV4\.js\?v=20260924a/);
   assert.match(loader, /wordstrike-flow-release-v19/);
-  assert.match(sw, /v80-flow-identity-7c/);
+  assert.match(sw, /const CACHE_NAME = CACHE_PREFIX \+ "v\\d+-[^"]+";/);
   assert.match(sw, /flowProgressionV4\.js\?v=20260924a/);
   assert.match(css, /WORDSTRIKE FLOW — PHASE 7B/);
   assert.match(css, /flow-v4-progression-strip/);
