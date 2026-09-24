@@ -725,6 +725,7 @@ const APP_SHELL = [
   "./styles/screens/campaign-progression.css?v=20260920a",
   "./styles/screens/endless-gameplay.css",
   "./styles/screens/mode-select.css",
+  "./styles/screens/mode-select.css?v=20260924a",
   "./styles/screens/profile-leaderboards-settings-ui11-contract.css",
   "./styles/screens/profile-leaderboards-settings.css",
   "./styles/screens/results-pause-onboarding.css",
