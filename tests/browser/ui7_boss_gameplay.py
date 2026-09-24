@@ -56,6 +56,7 @@ def prepare_deterministic_boss(page, *, phase="ACTIVE", remaining_ms=9000, intro
           const state = await import('./js/state.js');
           const renderer = await import('./js/renderer.js');
           const ui = await import('./js/ui.js');
+          const presentation = await import('./js/bossGameplayPresentation.js?v=20260924b');
           bossLoop.stopBossLoop();
           const game = state.appState.game;
           game.phrases = ['signal focus', 'precision control', 'tempo survive'];
@@ -80,6 +81,7 @@ def prepare_deterministic_boss(page, *, phase="ACTIVE", remaining_ms=9000, intro
           game.config = {...game.config, bossIndex:8, segmentCount:3, totalWordCount:6};
           renderer.renderBossPhrase(game);
           ui.updateBossHud(game);
+          presentation.syncBossGameplayPresentation(game);
           window.__ui7 = {bossLoop, state, renderer, ui, game};
         }""",
         {"phase": phase, "remainingMs": remaining_ms, "introMs": intro_ms},
