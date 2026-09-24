@@ -145,4 +145,102 @@ const malformedPage = createHarness(malformedStorage);
 assert.equal((await malformedPage.coordinator.evaluate(signedIn(), readyProfile)).errorCode, "MALFORMED_INTENT");
 assert.equal(malformedPage.requests, 0);
 
-console.log("Pending results survive OAuth reloads, wait for settled profiles, submit once, retry safely, and reject mismatched users.");
+
+const makeDeferred = () => {
+  let resolve;
+  let reject;
+  const promise = new Promise((done, fail) => {
+    resolve = done;
+    reject = fail;
+  });
+  return { promise, resolve, reject };
+};
+
+// Discarding a durable intent while its network request is in flight must make
+// that completion observationally stale. It may not clear a newer intent,
+// publish a success/failure state, or invoke a navigation callback.
+{
+  const request = makeDeferred();
+  let storedIntent = {
+    mode: "campaign",
+    boardKey: "campaign-highest-level-v1",
+    sessionId: "session-discard-race-0000001",
+    immutablePayload: {},
+  };
+  let clearCalls = 0;
+  let successCalls = 0;
+  let failureCalls = 0;
+  const coordinator = createPendingResultCoordinator({
+    inspectIntent: () => ({ intent: storedIntent, error: null }),
+    loadIntent: () => storedIntent,
+    bindIntent: () => ({ intent: storedIntent, error: null }),
+    clearIntent: () => { storedIntent = null; clearCalls += 1; },
+    hydrate: () => ({ status: "ready", sessionId: "session-discard-race-0000001" }),
+    submit: () => request.promise,
+    submissionState: () => ({ status: "submitted" }),
+    onSuccess: () => { successCalls += 1; },
+    onFailure: () => { failureCalls += 1; },
+  });
+
+  const pending = coordinator.evaluate(signedIn(), readyProfile);
+  assert.equal(coordinator.getState().status, "submitting");
+  coordinator.discard();
+  assert.equal(coordinator.getState().status, "discarded");
+  request.resolve({ status: "submitted" });
+  await pending;
+  assert.equal(coordinator.getState().status, "discarded");
+  assert.equal(clearCalls, 1);
+  assert.equal(successCalls, 0);
+  assert.equal(failureCalls, 0);
+}
+
+// Resetting the coordinator is a lifecycle boundary, not merely a UI reset.
+// A replacement request may start immediately; the previous request must not
+// clear the new active promise or win the final state race.
+{
+  const first = makeDeferred();
+  const second = makeDeferred();
+  let submitCalls = 0;
+  let clearCalls = 0;
+  let successCalls = 0;
+  const intent = {
+    mode: "campaign",
+    boardKey: "campaign-highest-level-v1",
+    sessionId: "session-reset-race-00000002",
+    immutablePayload: {},
+  };
+  let storedIntent = intent;
+  const coordinator = createPendingResultCoordinator({
+    inspectIntent: () => ({ intent: storedIntent, error: null }),
+    loadIntent: () => storedIntent,
+    bindIntent: () => ({ intent: storedIntent, error: null }),
+    clearIntent: () => { storedIntent = null; clearCalls += 1; },
+    hydrate: () => ({ status: "ready", sessionId: intent.sessionId }),
+    submit: () => (++submitCalls === 1 ? first.promise : second.promise),
+    submissionState: () => ({ status: "submitted" }),
+    onSuccess: () => { successCalls += 1; },
+  });
+
+  const oldRequest = coordinator.evaluate(signedIn(), readyProfile);
+  assert.equal(coordinator.getState().status, "submitting");
+  coordinator.resetLifecycle();
+  assert.equal(coordinator.getState().status, "restoring");
+  const newRequest = coordinator.evaluate(signedIn(), readyProfile);
+  assert.notEqual(newRequest, oldRequest);
+  assert.equal(submitCalls, 2);
+  assert.equal(coordinator.getState().status, "submitting");
+
+  first.resolve({ status: "submitted" });
+  await oldRequest;
+  assert.equal(coordinator.getState().status, "submitting");
+  assert.equal(clearCalls, 0);
+  assert.equal(successCalls, 0);
+
+  second.resolve({ status: "submitted" });
+  await newRequest;
+  assert.equal(coordinator.getState().status, "submitted");
+  assert.equal(clearCalls, 1);
+  assert.equal(successCalls, 1);
+}
+
+console.log("Pending results survive OAuth reloads, wait for settled profiles, submit once, retry safely, reject mismatched users, and ignore stale lifecycle completions.");
