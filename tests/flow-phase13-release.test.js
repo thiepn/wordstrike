@@ -144,7 +144,8 @@ for (const asset of [
   assert.ok(FLOW_RELEASE_ASSETS.includes(asset), `offline pack missing ${asset}`);
 }
 
-const mainIndex = index.indexOf('src="js/main.js?v=20260924b"');
+const mainEntry = index.match(/src="js\/main\.js\?v=[^"]+"/)?.[0] || "";
+const mainIndex = mainEntry ? index.indexOf(mainEntry) : -1;
 const releaseIndex = index.indexOf('src="js/flow/flowRuntimeLoader.js?v=20260924g"');
 assert.ok(mainIndex >= 0 && releaseIndex > mainIndex, "main.js must boot before the release loader can temporarily emulate the developer route");
 assert.doesNotMatch(index, /src="js\/flow\/flowPhase1\.js/);
