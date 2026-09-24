@@ -2,7 +2,7 @@ import { getCurrentSpeedTest } from "./speedTest.js";
 import {
   finalizeCurrentSpeedTestWordProfile,
   installSpeedTestWordProfiler,
-} from "./speedTestWordProfileV4.js";
+} from "./speedTestWordProfileV4.js?v=20260924a";
 
 const V4_STYLE_HREF = "styles/screens/typing-performance-v4.css?v=20260919a";
 const MAX_WORD_MARKERS = 160;
