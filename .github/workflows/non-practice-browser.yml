@@ -53,6 +53,8 @@ jobs:
           python3 tests/browser/ui11_mobile_heading_contract.py
       - name: Certify UI12 final motion, audio, and consistency
         run: python3 tests/browser/ui12_final_polish.py
+      - name: Certify Pass 7 adversarial release stress
+        run: python3 tests/browser/release_adversarial_pass7.py
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -70,4 +72,5 @@ jobs:
             browser-artifacts/ui10-results-pause-onboarding/
             browser-artifacts/ui11-profile-leaderboards-settings/
             browser-artifacts/ui12-final-polish/
+            browser-artifacts/release-adversarial-pass7/
           retention-days: 7
