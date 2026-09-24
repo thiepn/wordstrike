@@ -117,6 +117,7 @@ let flowSessionV4 = null;
 let pendingMicroResultV4 = null;
 let microResultTimer = null;
 let flowAutomaticSubmissionSessionId = null;
+let flowLaunchObserver = null;
 let performanceStats = createPerformanceStats();
 
 function createPerformanceStats() {
@@ -1468,12 +1469,32 @@ function handleDocumentKeydown(event) {
   }
 }
 
+function stopFlowLaunchObserver() {
+  flowLaunchObserver?.disconnect?.();
+  flowLaunchObserver = null;
+}
+
+function armFlowLaunchObserver() {
+  if (
+    flowLaunchObserver
+    || active
+    || dismissed
+    || (!developerFlowRequested && !publicFlowRequested)
+  ) return false;
+  const app = root();
+  if (!app) return false;
+  flowLaunchObserver = new MutationObserver(() => queueMicrotask(tryLaunchDeveloperFlow));
+  flowLaunchObserver.observe(app, { childList: true });
+  return true;
+}
+
 function tryLaunchDeveloperFlow() {
   if ((!developerFlowRequested && !publicFlowRequested) || active || dismissed) return false;
   const app = root();
   if (!app || app.childNodes.length === 0) return false;
   preserveReturnSurface();
   active = true;
+  stopFlowLaunchObserver();
   if (isPublicStreamRun()) {
     startRun();
   } else {
@@ -1484,10 +1505,18 @@ function tryLaunchDeveloperFlow() {
 }
 
 function activateFlowFromLocation() {
-  if (!resolveFlowRouteState()) return false;
-  if (active) return true;
+  if (!resolveFlowRouteState()) {
+    stopFlowLaunchObserver();
+    return false;
+  }
+  if (active) {
+    stopFlowLaunchObserver();
+    return true;
+  }
   dismissed = false;
-  return tryLaunchDeveloperFlow();
+  const launched = tryLaunchDeveloperFlow();
+  if (!launched) armFlowLaunchObserver();
+  return launched;
 }
 
 function startCurrentFlowRun() {
@@ -1511,8 +1540,7 @@ document.addEventListener("visibilitychange", handleFlowVisibilityChange);
 globalThis.window?.addEventListener?.("pagehide", () => beginVisibilityPause());
 globalThis.window?.addEventListener?.("pageshow", () => endVisibilityPause());
 if (developerFlowRequested || publicFlowRequested) {
-  const app = root();
-  if (app) new MutationObserver(() => queueMicrotask(tryLaunchDeveloperFlow)).observe(app, { childList: true });
+  armFlowLaunchObserver();
   queueMicrotask(tryLaunchDeveloperFlow);
 }
 
@@ -1523,6 +1551,12 @@ if (globalThis.window) {
     getRunPlan: () => resolvedRunPlan,
     getActiveSegmentIndex: () => activeSegmentIndex,
     getPerformanceStats: () => ({ ...performanceStats }),
+    getLifecycleDiagnostics: () => ({
+      active,
+      dismissed,
+      view,
+      launchObserverActive: Boolean(flowLaunchObserver),
+    }),
     isActive: () => active,
     activateFromLocation: activateFlowFromLocation,
     refreshPlanFromLocation: refreshFlowPlanFromLocation,
