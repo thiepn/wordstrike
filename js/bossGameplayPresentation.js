@@ -242,24 +242,20 @@ function syncPresentation(screen, game) {
   if (arena) arena.setAttribute("aria-busy", game.phase === "TRANSITION" ? "true" : "false");
 }
 
-function tick() {
-  frameId = null;
+export function syncBossGameplayPresentation(game = appState.game) {
   const screen = enhanceBossScreen();
-  const game = appState.game;
   if (screen && game?.mode === "boss") syncPresentation(screen, game);
-  if (screen) frameId = requestAnimationFrame(tick);
+  return Boolean(screen);
+}
+
+function flushPresentation() {
+  frameId = null;
+  syncBossGameplayPresentation();
 }
 
 function queue() {
   if (frameId != null) return;
-  frameId = requestAnimationFrame(tick);
-}
-
-const appRoot = document.querySelector("#app");
-if (appRoot) {
-  observer = new MutationObserver(queue);
-  observer.observe(appRoot, { childList: true });
-  queue();
+  frameId = requestAnimationFrame(flushPresentation);
 }
 
 export function stopBossPresentation() {
@@ -267,4 +263,21 @@ export function stopBossPresentation() {
   frameId = null;
   observer?.disconnect?.();
   observer = null;
+}
+
+export function startBossPresentation() {
+  const appRoot = document.querySelector("#app");
+  if (!appRoot) return false;
+  if (!observer) {
+    observer = new MutationObserver(queue);
+    observer.observe(appRoot, { childList: true });
+  }
+  queue();
+  return true;
+}
+
+startBossPresentation();
+if (typeof window !== "undefined") {
+  window.addEventListener("pagehide", stopBossPresentation);
+  window.addEventListener("pageshow", startBossPresentation);
 }
