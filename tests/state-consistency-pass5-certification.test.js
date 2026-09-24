@@ -25,7 +25,7 @@ const [
 // Reset/discard detach the old promise, and old continuations are inert.
 assert.match(pending, /let lifecycleGeneration = 0/);
 assert.match(pending, /const generation = lifecycleGeneration/);
-assert.match(pending, /Promise\.resolve\(\)\.then\(\(\) => submit\(\)\)/);
+assert.match(pending, /try \{[\s\S]*?submission = submit\(\);[\s\S]*?\} catch \(error\) \{[\s\S]*?submission = Promise\.reject\(error\);/);
 assert.match(pending, /if \(generation !== lifecycleGeneration\) return state/);
 assert.match(pending, /let activeUserId = null/);
 assert.match(pending, /if \(activePromise === request\) \{[\s\S]*?activePromise = null;[\s\S]*?activeUserId = null/);
@@ -135,7 +135,7 @@ assert.ok(
   serviceWorker.includes(`"./js/main.js?v=${mainVersion}"`),
   "service worker must cache the same main.js version delivered by index.html",
 );
-assert.match(serviceWorker, /v83-state-consistency-pass5/);
+assert.match(serviceWorker, /v84-state-consistency-pass5/);
 const mainAsset = `"./js/main.js?v=${mainVersion}"`;
 assert.equal(
   serviceWorker.split(mainAsset).length - 1,
