@@ -49,6 +49,8 @@ assert.doesNotMatch(narrowContract, /practice-lab|practiceLab|\.practice-/i);
 assert.doesNotMatch(presentation, /^import\s/m);
 assert.match(presentation, /new MutationObserver/);
 assert.match(presentation, /childList:\s*true/);
+assert.match(presentation, /observer\.observe\(root, \{ childList: true \}\)/);
+assert.doesNotMatch(presentation, /observer\.observe\(root, \{[^}]*subtree:\s*true/);
 assert.match(presentation, /dataset\.ui11Surface = "profile"/);
 assert.match(presentation, /dataset\.ui11Surface = "leaderboards"/);
 assert.match(presentation, /dataset\.ui11Surface = "settings"/);
