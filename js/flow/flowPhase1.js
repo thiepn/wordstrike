@@ -1597,6 +1597,11 @@ function renderPublicStreamSessionComplete(result) {
     : profile.id !== "standard"
       ? '<p class="flow-v2-record-note">Global ranking uses the 3-minute Flow session. Quick, Deep, and Endless remain local.</p>'
       : '<p class="flow-v2-record-note">Global ranking requires at least 90% accuracy and enough typed text.</p>';
+  const globalSubmission = result.recordEligible && recordState.isPersonalBest
+    ? `<section class="flow-v2-global-submission" data-flow-global-submission aria-live="polite">
+        ${flowSubmissionMarkup(result)}
+      </section>`
+    : "";
 
   app.innerHTML = `
     <section class="screen flow-phase1-screen flow-complete-screen" data-flow-view="complete" data-flow-score-v3="true">
@@ -1619,6 +1624,7 @@ function renderPublicStreamSessionComplete(result) {
           <span>${result.correctCharacters.toLocaleString("en-US")} correct chars</span>
         </div>
         ${eligibility}
+        ${globalSubmission}
         <div class="flow-complete-actions">
           <button type="button" class="ui-button ui-button--primary" data-flow-action="restart">PLAY AGAIN</button>
           <button type="button" class="ui-button" data-flow-action="back">BACK</button>
@@ -1627,6 +1633,7 @@ function renderPublicStreamSessionComplete(result) {
     </section>`;
   app.querySelector('[data-flow-action="restart"]')?.addEventListener("click", () => restartPublicStreamSession());
   app.querySelector('[data-flow-action="back"]')?.addEventListener("click", restoreReturnSurface);
+  bindFlowSubmissionActions(app, result);
   app.querySelector('[data-flow-action="restart"]')?.focus?.({ preventScroll: true });
   return true;
 }
@@ -1654,17 +1661,9 @@ function finishPublicStreamSession() {
 
 function submitPublicStreamBestInBackground(result, recordState) {
   if (!result?.recordEligible || !recordState?.isPersonalBest) return;
-  const service = createLeaderboardSubmissionService();
-  const prepared = service.prepareResultSubmission(
-    "flow",
-    result,
-    getAuthState(),
-    getLeaderboardProfileState(),
-  );
-  if (prepared.status !== "ready") return;
-  void service.submitCurrentResult().then((state) => {
-    syncMicroResultSubmissionV4(result.sessionId, state);
-  });
+  // Use the shared submission state machine so the result screen can surface
+  // sign-in, retry, submission progress, and global rank for a new PB.
+  preparePublicGlobalSubmission(result);
 }
 
 function typedPublicStreamDocumentIndexes() {
