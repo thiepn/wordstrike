@@ -56,6 +56,9 @@ assert.match(source.phase1, /typedPublicStreamDocumentIndexes/, "Flow progressio
 assert.match(source.phase1, /const nativeControl = target\?\.matches/, "Flow gameplay keys must ignore native run controls");
 assert.match(source.phase1, /event\.inputType !== "insertText"/, "Flow must reject paste/drop/replacement beforeinput paths");
 assert.match(source.phase1, /addEventListener\("paste", \(event\) => event\.preventDefault\(\)\)/, "Flow capture must block paste explicitly");
+assert.match(source.phase1, /if \(isPublicStreamRun\(\)\) \{\s*clearPublicSessionTimer\(\);\s*clearCadenceRefresh\(\);/s, "public timed Flow must not convert hidden time into a pause");
+assert.doesNotMatch(source.phase1, /publicSessionDeadlineAt\s*\+=/, "public Flow visibility changes must never extend the session deadline");
+assert.match(source.phase1, /const completedAt = timedDeadlineReached \? publicSessionDeadlineAt : currentAt/, "timed Flow completion must stamp the exact deadline");
 assert.match(source.ux8, /screen\.addEventListener\("pointerdown"/, "non-interactive run clicks must restore typing focus");
 assert.match(source.ux8, /screen\.addEventListener\("focusin"/, "Flow focus state must follow the whole run surface");
 assert.match(source.uxCss, /\.flow-ux-focus-hint\s*\{[\s\S]*position:\s*absolute/, "focus recovery hint must not move typing layout");
