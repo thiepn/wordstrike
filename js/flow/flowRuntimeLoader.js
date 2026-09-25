@@ -4,8 +4,8 @@ import {
 } from "./flowIdentityV1.js?v=20260924b";
 
 const RELEASE_FLAG = "flowRelease";
-const FLOW_RELEASE_VERSION = 22;
-const FLOW_RELEASE_CACHE_NAME = "wordstrike-flow-release-v25";
+const FLOW_RELEASE_VERSION = 23;
+const FLOW_RELEASE_CACHE_NAME = "wordstrike-flow-release-v26";
 const FLOW_OFFLINE_CACHE_BATCH_SIZE = 16;
 const FLOW_RELEASE_QUERY_KEYS = Object.freeze([
   "mode",
@@ -30,7 +30,7 @@ const FLOW_RELEASE_QUERY_KEYS = Object.freeze([
 ]);
 
 const FLOW_RELEASE_ASSETS = Object.freeze([
-  "./js/flow/flowRuntimeLoader.js?v=20260924m",
+  "./js/flow/flowRuntimeLoader.js?v=20260925a",
   "./js/leaderboardReturnState.js",
   "./js/pendingResultSubmission.js",
   "./js/submissionOutbox.js",
@@ -62,7 +62,7 @@ const FLOW_RELEASE_ASSETS = Object.freeze([
   "./js/flow/flowContentExpansion.js",
   "./js/flow/flowCorpusV2.js?v=20260923a",
   "./js/flow/flowCorpusHistory.js?v=20260923a",
-  "./js/flow/flowEngine.js",
+  "./js/flow/flowEngine.js?v=20260925a",
   "./js/flow/flowGameplay.js",
   "./js/flow/flowGameModeV2.js?v=20260923c",
   "./js/flow/flowIntegrationBootstrap.js?v=20260923b",
@@ -73,7 +73,7 @@ const FLOW_RELEASE_ASSETS = Object.freeze([
   "./js/flow/flowModifiers.js",
   "./js/flow/flowModifiersPhase9.js?v=20260923a",
   "./js/flow/flowPassages.js",
-  "./js/flow/flowPhase1.js?v=20260924j",
+  "./js/flow/flowPhase1.js?v=20260925a",
   "./js/flow/flowProgression.js",
   "./js/flow/flowProgression.js?v=20260923a",
   "./js/flow/flowProgressionV4.js",
@@ -98,11 +98,11 @@ const FLOW_RELEASE_ASSETS = Object.freeze([
   "./js/flow/flowUiPhase7.js?v=20260923a",
   "./js/flow/flowUiPhase7KeyboardGuard.js?v=20260923a",
   "./js/flow/flowUiPhase7Polish.js?v=20260923a",
-  "./js/flow/flowUxPhase8.js?v=20260924c",
+  "./js/flow/flowUxPhase8.js?v=20260925a",
   "./js/flow/flowVisualPhase6.js?v=20260923a",
   "./styles/screens/flow-phase1.css?v=20260916d",
   "./styles/screens/flow-phase5.css?v=20260916a",
-  "./styles/screens/flow-game-mode-v2.css?v=20260923d",
+  "./styles/screens/flow-game-mode-v2.css?v=20260925a",
   "./styles/screens/flow-session-v4.css",
   "./styles/screens/flow-session-v4.css?v=20260924c",
   "./styles/screens/flow-visual-phase6.css?v=20260923a",
