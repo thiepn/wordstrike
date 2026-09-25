@@ -101,7 +101,7 @@ try {
   assert.match(css, /flow-game-v2-hud\[data-flow-hud-v5="true"\]/);
   assert.match(css, /flow-v5-session-meta/);
   assert.match(index, /flow-session-v4\.css\?v=20260924c/);
-  assert.match(index, /flowRuntimeLoader\.js\?v=20260925d/);
+  assert.match(index, /flowRuntimeLoader\.js\?v=20260925g/);
   assert.match(sw, /const CACHE_NAME = CACHE_PREFIX \+ "v\d+-[^"]+";/);
   assert.match(sw, /flowIdentityV1\.js\?v=20260924b/);
 
