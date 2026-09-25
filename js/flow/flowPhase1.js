@@ -1742,9 +1742,20 @@ function rememberDisplayedPublicStreamText() {
   }, { completedAt: Date.now() });
 }
 
+function nextPublicStreamDocumentSegment() {
+  if (!isPublicStreamRun() || !resolvedRunPlan?.segments?.length) return null;
+  const current = resolvedRunPlan.segments[activeSegmentIndex];
+  if (!current) return null;
+  return resolvedRunPlan.segments.find((segment) => (
+    segment.index > activeSegmentIndex
+    && segment.documentIndex > current.documentIndex
+    && segment.paragraphIndex === 0
+  )) || null;
+}
+
 function skipPublicStreamText() {
   if (!isPublicStreamRun() || !run || view !== "run") return false;
-  const next = resolvedRunPlan?.segments?.[activeSegmentIndex + 1];
+  const next = nextPublicStreamDocumentSegment();
   if (!next) return false;
   rememberDisplayedPublicStreamText();
   const at = now();
@@ -1766,7 +1777,7 @@ function skipPublicStreamText() {
   run.currentWordStartIndex = next.startIndex;
   run.minimumBackspaceIndex = next.startIndex;
   run.furthestIndexReached = Math.max(Number(run.furthestIndexReached) || 0, next.startIndex);
-  activeSegmentIndex += 1;
+  activeSegmentIndex = next.index;
   refreshPublicStreamPassage();
   updateCharacterNode(fromIndex);
   updateCharacterNode(next.startIndex);
