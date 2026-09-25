@@ -2,6 +2,7 @@ import {
   getCurrentSpeedTest,
   getSpeedTestActiveDuration,
 } from "./speedTest.js";
+import { getResilientBrowserStorage } from "./browserStorage.js";
 
 const PROFILE_VERSION = 1;
 const STORAGE_KEY = "wordstrike_speed_test_word_profiles_v4";
@@ -230,7 +231,7 @@ function sanitizeProfile(value) {
 
 function readStore() {
   try {
-    const parsed = JSON.parse(globalThis.localStorage?.getItem(STORAGE_KEY) || "[]");
+    const parsed = JSON.parse(getResilientBrowserStorage()?.getItem(STORAGE_KEY) || "[]");
     return Array.isArray(parsed) ? parsed : [];
   } catch {
     return [];
@@ -243,7 +244,9 @@ export function persistSpeedTestWordProfile(profile) {
   try {
     const existing = readStore().filter((entry) => entry?.sessionId !== safe.sessionId);
     const next = [{ sessionId: safe.sessionId, profile: safe }, ...existing].slice(0, MAX_STORED_PROFILES);
-    globalThis.localStorage?.setItem(STORAGE_KEY, JSON.stringify(next));
+    const storage = getResilientBrowserStorage();
+    if (!storage) return false;
+    storage.setItem(STORAGE_KEY, JSON.stringify(next));
     return true;
   } catch {
     return false;

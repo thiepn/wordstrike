@@ -194,6 +194,126 @@ def mobile_campaign_input(browser, base, browser_name, checks):
     context.close()
 
 
+
+def firefox_storage_fallback(browser, base, browser_name, checks):
+    if browser_name != "firefox":
+        return
+
+    context = browser.new_context(viewport={"width": 1280, "height": 800})
+    context.add_init_script("""(() => {
+      const local = window.localStorage;
+      for (const method of ['getItem', 'setItem', 'removeItem']) {
+        const original = Storage.prototype[method];
+        Storage.prototype[method] = function(...args) {
+          if (this === local) {
+            throw new DOMException('Firefox storage access blocked for certification', 'SecurityError');
+          }
+          return original.apply(this, args);
+        };
+      }
+    })();""")
+    local_only(context, base)
+    page = context.new_page()
+    errors = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+
+    page.goto(base)
+    expect(page.locator(".menu-screen")).to_be_visible(timeout=10000)
+
+    result = page.evaluate("""async () => {
+      const storageModule = await import('./js/storage.js');
+      const modeModule = await import('./js/modeStorage.js');
+      const speedModule = await import('./js/speedTest.js');
+      const configModule = await import('./js/speedTestConfig.js');
+      const authStorageModule = await import('./js/supabaseClient.js');
+
+      const campaign = storageModule.createDefaultSave();
+      const campaignSaved = storageModule.saveGame(campaign);
+      const campaignProgressSaved = storageModule.updateLevelResult(campaign, 1, {
+        grade: 'A',
+        accuracy: 98,
+        wpm: 72,
+        score: 1400,
+        maxCombo: 12,
+        timeRemaining: 4,
+        isBoss: false,
+      });
+
+      const mode = modeModule.createDefaultModeData();
+      mode.totals.completedSessions = 4;
+      const modeSaved = modeModule.saveModeData(mode);
+
+      const authStorage = authStorageModule.createAuthStorageAdapter();
+      authStorage?.setItem('wordstrike-firefox-auth-cert', 'persisted-auth');
+
+      const speed = speedModule.startSpeedTest({
+        config: configModule.getSpeedTestConfig('words-10'),
+        wordPool: ['cat', 'word', 'type', 'fast', 'test', 'code', 'line', 'data'],
+        attemptSeed: 9191,
+      });
+      speed.words.splice(0, speed.words.length, ...Array(9).fill('cat'), 'word');
+      speed.currentWordIndex = 9;
+      const start = performance.now();
+      for (const [index, key] of [...'word'].entries()) {
+        speedModule.handleCurrentSpeedTestKey({
+          key,
+          preventDefault() {},
+          ctrlKey: false,
+          metaKey: false,
+          altKey: false,
+        }, start + index + 1);
+      }
+
+      return {
+        campaignSaved,
+        campaignProgressSaved,
+        modeSaved,
+        typingStatus: speed.result?.localPersistence?.status ?? null,
+        typingWarning: speed.result?.localPersistence?.warning ?? null,
+        sessionCampaign: Boolean(sessionStorage.getItem('wordstrike_save')),
+        sessionMode: Boolean(sessionStorage.getItem('wordstrike_mode_data_v2')),
+        sessionAuth: sessionStorage.getItem('wordstrike-firefox-auth-cert'),
+        fallbackMarker: sessionStorage.getItem('wordstrike.browser-storage-fallback-keys.v1'),
+      };
+    }""")
+
+    assert result["campaignSaved"] is True, result
+    assert result["campaignProgressSaved"] is True, result
+    assert result["modeSaved"] is True, result
+    assert result["typingStatus"] == "saved", result
+    assert result["typingWarning"] is None, result
+    assert result["sessionCampaign"] is True and result["sessionMode"] is True, result
+    assert result["sessionAuth"] == "persisted-auth", result
+    assert "wordstrike_save" in (result["fallbackMarker"] or ""), result
+    assert "wordstrike_mode_data_v2" in (result["fallbackMarker"] or ""), result
+    assert "wordstrike-firefox-auth-cert" in (result["fallbackMarker"] or ""), result
+
+    page.reload(wait_until="domcontentloaded")
+    expect(page.locator(".menu-screen")).to_be_visible(timeout=10000)
+    restored = page.evaluate("""async () => {
+      const storageModule = await import('./js/storage.js');
+      const modeModule = await import('./js/modeStorage.js');
+      const campaign = storageModule.loadSave();
+      const mode = modeModule.loadModeData();
+      return {
+        campaignFurthestLevel: campaign.campaignFurthestLevel,
+        level1Wpm: campaign.levels?.['1']?.bestWPM ?? null,
+        completedSessions: mode.totals.completedSessions,
+      };
+    }""")
+    assert restored["campaignFurthestLevel"] >= 2, restored
+    assert restored["level1Wpm"] == 72, restored
+    assert restored["completedSessions"] >= 4, restored
+    assert_no_errors(errors, "firefox blocked-localStorage fallback")
+
+    checks.append({
+      "browser": browser_name,
+      "case": "blocked localStorage fallback survives reload",
+      **restored,
+    })
+    context.close()
+
+
 def main():
     ARTIFACTS.mkdir(parents=True, exist_ok=True)
     server = ThreadingHTTPServer(("127.0.0.1", 0), partial(QuietHandler, directory=str(ROOT)))
@@ -210,6 +330,7 @@ def main():
                 campaign_and_boss(browser, base, browser_name, checks)
                 endless(browser, base, browser_name, checks)
                 mobile_campaign_input(browser, base, browser_name, checks)
+                firefox_storage_fallback(browser, base, browser_name, checks)
                 browser.close()
         result["success"] = True
         print(f"PASS: {len(checks)} non-Practice browser scenarios; all assertions passed.", flush=True)

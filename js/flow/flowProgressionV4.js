@@ -1,3 +1,4 @@
+import { getResilientBrowserStorage } from "../browserStorage.js";
 import { FLOW_V3_THEME_IDS } from "./flowStreamPlanV3.js?v=20260923b";
 
 export const FLOW_PROGRESSION_V4_STORAGE_KEY = "wordstrike_flow_progression_v4";
@@ -264,7 +265,7 @@ export function bootstrapFlowProgressionV4(sourceRecords) {
 
 export function loadFlowProgressionV4({ sourceRecords = null } = {}) {
   try {
-    const raw = globalThis.localStorage?.getItem(FLOW_PROGRESSION_V4_STORAGE_KEY);
+    const raw = getResilientBrowserStorage()?.getItem(FLOW_PROGRESSION_V4_STORAGE_KEY);
     if (raw) return sanitizeFlowProgressionV4(JSON.parse(raw));
   } catch {
     // Fall through to a recoverable baseline.
@@ -275,7 +276,7 @@ export function loadFlowProgressionV4({ sourceRecords = null } = {}) {
 export function saveFlowProgressionV4(value) {
   const clean = sanitizeFlowProgressionV4(value);
   try {
-    globalThis.localStorage?.setItem(FLOW_PROGRESSION_V4_STORAGE_KEY, JSON.stringify(clean));
+    getResilientBrowserStorage()?.setItem(FLOW_PROGRESSION_V4_STORAGE_KEY, JSON.stringify(clean));
   } catch {
     // Progress feedback remains non-blocking when storage is unavailable.
   }
@@ -386,6 +387,6 @@ export function recordFlowProgressionV4(result, { plan = null, sourceRecords = n
 }
 
 export function resetFlowProgressionV4() {
-  try { globalThis.localStorage?.removeItem(FLOW_PROGRESSION_V4_STORAGE_KEY); } catch { /* no-op */ }
+  try { getResilientBrowserStorage()?.removeItem(FLOW_PROGRESSION_V4_STORAGE_KEY); } catch { /* no-op */ }
   return createDefaultFlowProgressionV4();
 }

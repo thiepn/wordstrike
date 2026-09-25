@@ -1,3 +1,4 @@
+import { getResilientBrowserStorage } from "../browserStorage.js";
 export const FLOW_THEME_PREFERENCE_STORAGE_KEY = "wordstrike_flow_theme_preference_v1";
 export const FLOW_THEME_PREFERENCE_VERSION = 1;
 
@@ -27,7 +28,7 @@ export function normalizeStoredFlowTheme(value, fallback = "mixed") {
 
 export function loadPreferredFlowTheme(fallback = "mixed") {
   try {
-    const stored = globalThis.localStorage?.getItem(FLOW_THEME_PREFERENCE_STORAGE_KEY);
+    const stored = getResilientBrowserStorage()?.getItem(FLOW_THEME_PREFERENCE_STORAGE_KEY);
     return normalizeStoredFlowTheme(stored, fallback);
   } catch {
     return fallback;
@@ -37,7 +38,7 @@ export function loadPreferredFlowTheme(fallback = "mixed") {
 export function savePreferredFlowTheme(theme, fallback = "mixed") {
   const normalized = normalizeStoredFlowTheme(theme, fallback);
   try {
-    globalThis.localStorage?.setItem(FLOW_THEME_PREFERENCE_STORAGE_KEY, normalized);
+    getResilientBrowserStorage()?.setItem(FLOW_THEME_PREFERENCE_STORAGE_KEY, normalized);
   } catch {
     // Flow remains fully playable if preference storage is unavailable.
   }

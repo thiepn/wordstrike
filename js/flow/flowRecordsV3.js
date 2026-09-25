@@ -1,4 +1,5 @@
 import { compareFlowScoreV3Results } from "./flowScoreV3.js";
+import { getResilientBrowserStorage } from "../browserStorage.js";
 
 export const FLOW_RECORDS_V3_STORAGE_KEY = "wordstrike_flow_records_v3_timed_3m";
 export const FLOW_RECORDS_V3_VERSION = 2;
@@ -85,7 +86,7 @@ export function sanitizeFlowRecordsV3(value) {
 
 export function loadFlowRecordsV3() {
   try {
-    const raw = globalThis.localStorage?.getItem(FLOW_RECORDS_V3_STORAGE_KEY);
+    const raw = getResilientBrowserStorage()?.getItem(FLOW_RECORDS_V3_STORAGE_KEY);
     return raw ? sanitizeFlowRecordsV3(JSON.parse(raw)) : createDefaultFlowRecordsV3();
   } catch {
     return createDefaultFlowRecordsV3();
@@ -95,7 +96,7 @@ export function loadFlowRecordsV3() {
 export function saveFlowRecordsV3(value) {
   const clean = sanitizeFlowRecordsV3(value);
   try {
-    globalThis.localStorage?.setItem(FLOW_RECORDS_V3_STORAGE_KEY, JSON.stringify(clean));
+    getResilientBrowserStorage()?.setItem(FLOW_RECORDS_V3_STORAGE_KEY, JSON.stringify(clean));
   } catch {
     // Gameplay remains available when storage is unavailable.
   }
@@ -157,6 +158,6 @@ export function recordFlowResultV3(result) {
 
 export function resetFlowRecordsV3() {
   const defaults = createDefaultFlowRecordsV3();
-  try { globalThis.localStorage?.removeItem(FLOW_RECORDS_V3_STORAGE_KEY); } catch { /* no-op */ }
+  try { getResilientBrowserStorage()?.removeItem(FLOW_RECORDS_V3_STORAGE_KEY); } catch { /* no-op */ }
   return defaults;
 }

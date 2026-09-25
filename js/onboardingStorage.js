@@ -1,9 +1,10 @@
 import { ONBOARDING_VERSIONS } from "./onboardingContent.js";
+import { getResilientBrowserStorage } from "./browserStorage.js";
 
 const PREFIX = "wordstrike.onboarding";
 const HINTS_KEY = `${PREFIX}.hints.v1`;
 
-const storage = () => globalThis.localStorage;
+const storage = () => getResilientBrowserStorage();
 const tutorialKey = (id) => `${PREFIX}.${id}.v${ONBOARDING_VERSIONS[id]}`;
 
 function readHints() {

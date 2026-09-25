@@ -1,3 +1,4 @@
+import { getResilientBrowserStorage } from "../browserStorage.js";
 import { compareFlowScoreV2Results } from "./flowScoreV2.js";
 
 export const FLOW_RECORDS_V2_STORAGE_KEY = "wordstrike_flow_records_v2";
@@ -93,7 +94,7 @@ export function sanitizeFlowRecordsV2(value) {
 
 export function loadFlowRecordsV2() {
   try {
-    const raw = globalThis.localStorage?.getItem(FLOW_RECORDS_V2_STORAGE_KEY);
+    const raw = getResilientBrowserStorage()?.getItem(FLOW_RECORDS_V2_STORAGE_KEY);
     return raw ? sanitizeFlowRecordsV2(JSON.parse(raw)) : createDefaultFlowRecordsV2();
   } catch {
     return createDefaultFlowRecordsV2();
@@ -103,7 +104,7 @@ export function loadFlowRecordsV2() {
 export function saveFlowRecordsV2(value) {
   const clean = sanitizeFlowRecordsV2(value);
   try {
-    globalThis.localStorage?.setItem(FLOW_RECORDS_V2_STORAGE_KEY, JSON.stringify(clean));
+    getResilientBrowserStorage()?.setItem(FLOW_RECORDS_V2_STORAGE_KEY, JSON.stringify(clean));
   } catch {
     // Local records are best-effort; gameplay/results remain available if storage is full.
   }
@@ -169,6 +170,6 @@ export function recordFlowResultV2(result) {
 
 export function resetFlowRecordsV2() {
   const defaults = createDefaultFlowRecordsV2();
-  try { globalThis.localStorage?.removeItem(FLOW_RECORDS_V2_STORAGE_KEY); } catch { /* no-op */ }
+  try { getResilientBrowserStorage()?.removeItem(FLOW_RECORDS_V2_STORAGE_KEY); } catch { /* no-op */ }
   return defaults;
 }

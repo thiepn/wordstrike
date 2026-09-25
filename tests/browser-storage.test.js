@@ -106,7 +106,7 @@ test("per-key fallback keeps the newest session copy authoritative after a local
     sessionStorage: session,
   });
   assert.equal(reloaded.getItem("large-key"), "new-session");
-  assert.equal(local.getItem("large-key"), "old-local");
+  assert.equal(local.getItem("large-key"), null, "stale persistent copy should be cleared after the failed write");
 });
 
 test("Campaign saves and compact progress backup survive Firefox localStorage failure", () => {
@@ -166,6 +166,22 @@ test("Typing/mode history persists through the same Firefox fallback", () => {
   } finally {
     restore();
   }
+});
+
+test("legacy read/write storage shims remain compatible without removeItem", () => {
+  const values = new Map();
+  const legacyStorage = {
+    getItem(key) { return values.get(String(key)) ?? null; },
+    setItem(key, value) { values.set(String(key), String(value)); },
+  };
+  const storage = createResilientBrowserStorage({
+    localStorage: legacyStorage,
+    sessionStorage: null,
+  });
+  assert.ok(storage);
+  storage.setItem("legacy-key", "legacy-value");
+  assert.equal(storage.getItem("legacy-key"), "legacy-value");
+  assert.doesNotThrow(() => storage.removeItem("legacy-key"));
 });
 
 console.log("Firefox browser-storage fallback preserves Campaign and mode history when localStorage is unavailable.");

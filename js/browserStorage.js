@@ -12,9 +12,12 @@ function hasStorageApi(storage) {
   return Boolean(
     storage &&
     typeof storage.getItem === "function" &&
-    typeof storage.setItem === "function" &&
-    typeof storage.removeItem === "function"
+    typeof storage.setItem === "function"
   );
+}
+
+function canRemove(storage) {
+  return Boolean(storage && typeof storage.removeItem === "function");
 }
 
 function readFallbackKeys(sessionStorage) {
@@ -36,7 +39,16 @@ function writeFallbackKeys(sessionStorage, keys) {
   if (!hasStorageApi(sessionStorage)) return false;
   try {
     if (!keys.size) {
-      sessionStorage.removeItem(BROWSER_STORAGE_FALLBACK_MARKER_KEY);
+      if (canRemove(sessionStorage)) {
+        try {
+          sessionStorage.removeItem(BROWSER_STORAGE_FALLBACK_MARKER_KEY);
+          return true;
+        } catch {
+          // Some restricted/legacy storage implementations expose removeItem
+          // but reject it. An empty marker is equivalent and keeps reads correct.
+        }
+      }
+      sessionStorage.setItem(BROWSER_STORAGE_FALLBACK_MARKER_KEY, "[]");
     } else {
       sessionStorage.setItem(
         BROWSER_STORAGE_FALLBACK_MARKER_KEY,
@@ -102,11 +114,16 @@ export function createResilientBrowserStorage({
         try {
           local.setItem(storageKey, storageValue);
           // Clear any fallback copy/marker after local persistence recovers.
-          try { session?.removeItem(storageKey); } catch {}
+          try { if (canRemove(session)) session.removeItem(storageKey); } catch {}
           markSessionFallback(session, storageKey, false);
           return;
         } catch (error) {
           lastError = error;
+          // If this key already existed locally, remove the stale copy when
+          // possible before falling back. This prevents a later read from
+          // preferring obsolete persistent data if the fallback marker itself
+          // cannot be written under extreme storage pressure.
+          try { if (canRemove(local)) local.removeItem(storageKey); } catch {}
         }
       }
 
@@ -129,7 +146,7 @@ export function createResilientBrowserStorage({
       let lastError = null;
 
       for (const storage of [local, session]) {
-        if (!storage) continue;
+        if (!storage || !canRemove(storage)) continue;
         try {
           storage.removeItem(storageKey);
           removed = true;
@@ -146,4 +163,16 @@ export function createResilientBrowserStorage({
 
 export function getResilientBrowserStorage() {
   return createResilientBrowserStorage();
+}
+
+
+export function getSessionBrowserStorage() {
+  const storage = safeGlobalStorage("sessionStorage");
+  if (
+    !storage ||
+    typeof storage.getItem !== "function" ||
+    typeof storage.setItem !== "function" ||
+    typeof storage.removeItem !== "function"
+  ) return null;
+  return storage;
 }

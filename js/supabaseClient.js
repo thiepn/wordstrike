@@ -1,56 +1,39 @@
 import { SUPABASE_CONFIG, hasValidSupabaseConfig } from "./supabaseConfig.js";
+import {
+  createResilientBrowserStorage,
+  getResilientBrowserStorage,
+} from "./browserStorage.js";
 
 export const SUPABASE_AUTH_STORAGE_KEY = "sb-hycegznamzjhwinegaai-auth-token";
 export const RETIRED_WORDSTRIKE_AUTH_STORAGE_KEY = "wordstrike_supabase_auth_v1";
-const AUTH_STORAGE_PROBE_KEY = "wordstrike_auth_storage_probe_v1";
 
 let clientSingleton = null;
 
-function safeGlobalStorage(name) {
-  try {
-    return globalThis?.[name] ?? null;
-  } catch {
-    // Firefox can throw while merely reading a Web Storage property in
-    // restricted contexts. Treat that storage backend as unavailable.
-    return null;
-  }
-}
-
-function browserStorageCandidates() {
-  return [
-    safeGlobalStorage("localStorage"),
-    safeGlobalStorage("sessionStorage"),
-  ].filter(Boolean);
-}
-
-function isUsableStorage(storage) {
+function wrapExplicitStorage(storage) {
   if (
     !storage ||
     typeof storage.getItem !== "function" ||
-    typeof storage.setItem !== "function" ||
-    typeof storage.removeItem !== "function"
-  ) return false;
+    typeof storage.setItem !== "function"
+  ) return null;
 
-  try {
-    storage.setItem(AUTH_STORAGE_PROBE_KEY, "1");
-    const readable = storage.getItem(AUTH_STORAGE_PROBE_KEY) === "1";
-    storage.removeItem(AUTH_STORAGE_PROBE_KEY);
-    return readable;
-  } catch {
-    try { storage.removeItem(AUTH_STORAGE_PROBE_KEY); } catch {}
-    return false;
-  }
+  const resilient = createResilientBrowserStorage({
+    localStorage: storage,
+    sessionStorage: null,
+  });
+  return resilient;
 }
 
 export function createAuthStorageAdapter(storage = undefined) {
-  const candidates = storage === undefined ? browserStorageCandidates() : [storage];
-  const target = candidates.find(isUsableStorage) ?? null;
+  const target = storage === undefined
+    ? getResilientBrowserStorage()
+    : wrapExplicitStorage(storage);
   if (!target) return null;
 
-  // Supplying storage explicitly prevents supabase-js from silently falling
-  // back to in-memory auth when its own localStorage capability check differs
-  // across browsers. localStorage remains preferred; sessionStorage is a
-  // refresh-safe fallback when Firefox rejects persistent localStorage.
+  // Supabase always receives an explicit storage implementation so browser
+  // capability differences cannot silently downgrade authentication to memory.
+  // The shared adapter retries each failed persistent write in sessionStorage,
+  // including cases where a tiny localStorage probe would have succeeded but a
+  // larger token write later fails under Firefox storage/quota restrictions.
   return Object.freeze({
     getItem(key) {
       return target.getItem(key);
@@ -65,18 +48,15 @@ export function createAuthStorageAdapter(storage = undefined) {
 }
 
 export function cleanupRetiredAuthStorage(storage = undefined) {
-  const targets = storage === undefined ? browserStorageCandidates() : [storage];
+  const target = createAuthStorageAdapter(storage);
+  if (!target) return false;
   let cleaned = false;
-  for (const target of targets) {
-    if (!target?.removeItem) continue;
+  for (const suffix of ["", "-code-verifier", "-user"]) {
     try {
-      for (const suffix of ["", "-code-verifier", "-user"]) {
-        target.removeItem(`${RETIRED_WORDSTRIKE_AUTH_STORAGE_KEY}${suffix}`);
-      }
+      target.removeItem(`${RETIRED_WORDSTRIKE_AUTH_STORAGE_KEY}${suffix}`);
       cleaned = true;
     } catch {
-      // Keep checking other storage backends. Retired-key cleanup must never
-      // prevent the live Supabase client from being created.
+      // Retired-key cleanup must never prevent creation of the live auth client.
     }
   }
   return cleaned;
