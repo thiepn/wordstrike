@@ -70,7 +70,7 @@ import {
   retryCurrentSubmission,
   submitCurrentResult,
   subscribeToSubmissions,
-} from "../leaderboardSubmissionService.js";
+} from "../leaderboardSubmissionService.js?v=20260925a";
 import { savePendingResultSubmission } from "../pendingResultSubmission.js";
 import {
   leaderboardReturnStateForBoard,
