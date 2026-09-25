@@ -4,8 +4,8 @@ import {
 } from "./flowIdentityV1.js?v=20260924b";
 
 const RELEASE_FLAG = "flowRelease";
-const FLOW_RELEASE_VERSION = 37;
-const FLOW_RELEASE_CACHE_NAME = "wordstrike-flow-release-v40";
+const FLOW_RELEASE_VERSION = 38;
+const FLOW_RELEASE_CACHE_NAME = "wordstrike-flow-release-v41";
 const FLOW_OFFLINE_CACHE_BATCH_SIZE = 16;
 const FLOW_RELEASE_QUERY_KEYS = Object.freeze([
   "mode",
@@ -30,7 +30,7 @@ const FLOW_RELEASE_QUERY_KEYS = Object.freeze([
 ]);
 
 const FLOW_RELEASE_ASSETS = Object.freeze([
-  "./js/flow/flowRuntimeLoader.js?v=20260925o",
+  "./js/flow/flowRuntimeLoader.js?v=20260925p",
   "./js/leaderboardReturnState.js",
   "./js/pendingResultSubmission.js",
   "./js/submissionOutbox.js",
@@ -73,17 +73,17 @@ const FLOW_RELEASE_ASSETS = Object.freeze([
   "./js/flow/flowModifiers.js",
   "./js/flow/flowModifiersPhase9.js?v=20260923a",
   "./js/flow/flowPassages.js",
-  "./js/flow/flowPhase1.js?v=20260925l",
+  "./js/flow/flowPhase1.js?v=20260925m",
   "./js/flow/flowProgression.js",
   "./js/flow/flowProgression.js?v=20260923a",
   "./js/flow/flowProgressionV4.js",
-  "./js/flow/flowProgressionV4.js?v=20260924a",
+  "./js/flow/flowProgressionV4.js?v=20260925b",
   "./js/flow/flowRunPlan.js",
   "./js/flow/flowRunPlan.js?v=20260923e",
   "./js/flow/flowScoreV2.js?v=20260923f",
-  "./js/flow/flowRecordsV3.js?v=20260923a",
+  "./js/flow/flowRecordsV3.js?v=20260925a",
   "./js/flow/flowRecordsV3.js",
-  "./js/flow/flowScoreV3.js?v=20260925d",
+  "./js/flow/flowScoreV3.js?v=20260925e",
   "./js/flow/flowSessionV4.js",
   "./js/flow/flowSessionV4.js?v=20260924a",
   "./js/flow/flowScoreV3.js",
@@ -414,7 +414,7 @@ async function importFlowRuntime() {
     const integrationBootstrap = await import("./flowIntegrationBootstrap.js?v=20260923b");
     integrationBootstrap.applyFlowIntegrationDefaults?.();
     await Promise.all([
-      import("./flowPhase1.js?v=20260925l"),
+      import("./flowPhase1.js?v=20260925m"),
       import("./flowVisualPhase6.js?v=20260923a"),
     ]);
 
