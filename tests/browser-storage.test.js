@@ -168,4 +168,20 @@ test("Typing/mode history persists through the same Firefox fallback", () => {
   }
 });
 
+test("legacy read/write storage shims remain compatible without removeItem", () => {
+  const values = new Map();
+  const legacyStorage = {
+    getItem(key) { return values.get(String(key)) ?? null; },
+    setItem(key, value) { values.set(String(key), String(value)); },
+  };
+  const storage = createResilientBrowserStorage({
+    localStorage: legacyStorage,
+    sessionStorage: null,
+  });
+  assert.ok(storage);
+  storage.setItem("legacy-key", "legacy-value");
+  assert.equal(storage.getItem("legacy-key"), "legacy-value");
+  assert.doesNotThrow(() => storage.removeItem("legacy-key"));
+});
+
 console.log("Firefox browser-storage fallback preserves Campaign and mode history when localStorage is unavailable.");
