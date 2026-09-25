@@ -616,16 +616,31 @@ function isPublicLongformRun() {
 
 function publicStreamSegmentMarkup(segment) {
   if (!segment) return "";
-  const characters = [];
+  const words = [];
+  let wordCharacters = [];
+
+  const flushWord = () => {
+    if (!wordCharacters.length) return;
+    words.push(`<span class="flow-word">${wordCharacters.join("")}</span>`);
+    wordCharacters = [];
+  };
+
   for (let index = segment.startIndex; index <= segment.endIndex; index += 1) {
     const character = flowCharacterAt(index);
-    if (character) characters.push(charMarkup(character));
+    if (!character) continue;
+    wordCharacters.push(charMarkup(character));
+    if (/\s/.test(character.expected)) flushWord();
   }
+
   if (segment.separatorIndex != null) {
     const separator = flowCharacterAt(segment.separatorIndex);
-    if (separator) characters.push(charMarkup(separator, { paragraphBreak: true }));
+    if (separator) {
+      wordCharacters.push(charMarkup(separator, { paragraphBreak: true }));
+    }
   }
-  return `<p class="flow-longform-paragraph" data-flow-paragraph="${segment.index}">${characters.join("")}</p>`;
+  flushWord();
+
+  return `<p class="flow-longform-paragraph" data-flow-paragraph="${segment.index}">${words.join("")}</p>`;
 }
 
 function publicLongformMarkup() {
