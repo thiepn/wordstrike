@@ -858,7 +858,7 @@ function refreshCadenceHud() {
   if (isPublicLongformRun()) {
     const score = isPublicStreamRun()
       ? calculateFlowScoreV3({
-        correctCharacters: Math.max(0, (Number(run.currentIndex) || 0) - (Number(run.uncorrectedErrors) || 0)),
+        correctCharacters: Math.max(0, Number(run.correctChars) || 0),
         wpm: cadence.finalWpm,
         accuracy: currentAccuracyPercent(),
         consistency: cadence.cadenceScore ?? 0,
