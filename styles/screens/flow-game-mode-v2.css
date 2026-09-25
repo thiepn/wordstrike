@@ -913,3 +913,23 @@
     line-height: 1.55;
   }
 }
+
+
+/* ---------- FLOW V3: geometry-safe substitution typos ---------- */
+
+.flow-run-screen[data-flow-stream-v3="true"] .flow-char--incorrect[data-flow-actual]:not(.flow-char--has-extra) {
+  position: relative;
+  color: transparent;
+  text-shadow: none;
+}
+
+.flow-run-screen[data-flow-stream-v3="true"] .flow-char--incorrect[data-flow-actual]:not(.flow-char--has-extra)::after {
+  content: attr(data-flow-actual);
+  position: absolute;
+  inset: 0 auto auto 0;
+  color: var(--flow-danger);
+  font: inherit;
+  line-height: inherit;
+  white-space: pre;
+  pointer-events: none;
+}
