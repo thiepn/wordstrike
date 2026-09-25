@@ -524,19 +524,33 @@ function beginVisibilityPause(at = now()) {
     || view !== "run"
     || !run
     || run.phase !== FLOW_PHASES.RUNNING
-    || visibilityPauseStartedAt != null
   ) return false;
+
+  if (isPublicStreamRun()) {
+    clearPublicSessionTimer();
+    clearCadenceRefresh();
+    return true;
+  }
+
+  if (visibilityPauseStartedAt != null) return false;
   visibilityPauseStartedAt = at;
   visibilityPausedRun = run;
-  if (publicSessionStartedAt != null && publicSessionPausedAt == null) {
-    publicSessionPausedAt = at;
-    clearPublicSessionTimer();
-  }
   clearCadenceRefresh();
   return true;
 }
 
 function endVisibilityPause(at = now()) {
+  if (isPublicStreamRun()) {
+    updatePublicSessionTimerUi(at);
+    if (publicSessionStartedAt != null && !publicSessionFinished) {
+      const remaining = publicSessionRemainingMs(at);
+      if (remaining != null && remaining <= 0) finishPublicStreamSession();
+      else schedulePublicSessionTimer();
+    }
+    scheduleCadenceHud();
+    return true;
+  }
+
   if (visibilityPauseStartedAt == null) return false;
   const startAt = visibilityPauseStartedAt;
   const pausedRun = visibilityPausedRun;
@@ -548,14 +562,6 @@ function endVisibilityPause(at = now()) {
     startAt,
     endAt: at,
   }));
-  if (publicSessionPausedAt != null) {
-    if (publicSessionDeadlineAt != null) {
-      publicSessionDeadlineAt += Math.max(0, at - publicSessionPausedAt);
-    }
-    publicSessionPausedAt = null;
-    updatePublicSessionTimerUi(at);
-    schedulePublicSessionTimer();
-  }
   return true;
 }
 
