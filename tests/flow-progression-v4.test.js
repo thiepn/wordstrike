@@ -182,7 +182,7 @@ try {
   assert.match(css, /flow-v4-progression-strip/);
   assert.match(css, /flow-v4-milestone-reward/);
   assert.match(index, /flow-session-v4\.css\?v=20260924c/);
-  assert.match(index, /flowRuntimeLoader\.js\?v=20260925d/);
+  assert.match(index, /flowRuntimeLoader\.js\?v=20260925g/);
 
   console.log("Flow Phase 7B contracts passed: V3 bootstrap, passive milestones, streaks, theme breadth, endurance, reward tiers, idempotency, persistence recovery, and offline wiring.");
 } finally {
