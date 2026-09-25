@@ -8,7 +8,6 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const jsRoot = path.join(root, "js");
 const allowedDirectStorageOwners = new Set([
   "browserStorage.js",
-  "supabaseClient.js",
 ]);
 
 function collectJsFiles(directory, relative = "") {
