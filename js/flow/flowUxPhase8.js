@@ -8,6 +8,9 @@ const enabled = params.get("dev") === "1"
 let scheduledCaretCheck = false;
 let decoratedScreen = null;
 let setupObserver = null;
+let streamScrollFrame = null;
+let streamScrollTarget = null;
+let streamScrollGeneration = 0;
 
 function controller() {
   return globalThis.window?.wordstrikeFlowPhase1 || null;
@@ -198,6 +201,74 @@ function positionStreamCaret(screen, current, viewport) {
   return true;
 }
 
+function cancelStreamLineShift() {
+  streamScrollGeneration += 1;
+  if (streamScrollFrame != null) cancelAnimationFrame(streamScrollFrame);
+  streamScrollFrame = null;
+  streamScrollTarget = null;
+}
+
+function positionCurrentStreamCaret(screen, viewport) {
+  const current = screen?.querySelector?.(".flow-char--current");
+  return current ? positionStreamCaret(screen, current, viewport) : false;
+}
+
+function shiftStreamViewport(screen, viewport, targetScrollTop) {
+  const target = Math.max(0, targetScrollTop);
+  const reducedMotion = globalThis.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches === true;
+
+  if (reducedMotion || Math.abs(viewport.scrollTop - target) <= 1) {
+    cancelStreamLineShift();
+    viewport.scrollTop = target;
+    positionCurrentStreamCaret(screen, viewport);
+    return;
+  }
+
+  if (streamScrollFrame != null && streamScrollTarget != null && Math.abs(streamScrollTarget - target) <= 1) {
+    positionCurrentStreamCaret(screen, viewport);
+    return;
+  }
+
+  const generation = ++streamScrollGeneration;
+  if (streamScrollFrame != null) cancelAnimationFrame(streamScrollFrame);
+  streamScrollTarget = target;
+  const startTop = viewport.scrollTop;
+  const startAt = globalThis.performance?.now?.() ?? Date.now();
+  const durationMs = 85;
+
+  const step = (frameAt) => {
+    if (
+      generation !== streamScrollGeneration
+      || !screen?.isConnected
+      || !viewport?.isConnected
+    ) {
+      if (generation === streamScrollGeneration) {
+        streamScrollFrame = null;
+        streamScrollTarget = null;
+      }
+      return;
+    }
+
+    const elapsed = Math.max(0, frameAt - startAt);
+    const progress = Math.min(1, elapsed / durationMs);
+    const eased = 1 - ((1 - progress) ** 3);
+    viewport.scrollTop = startTop + ((target - startTop) * eased);
+    positionCurrentStreamCaret(screen, viewport);
+
+    if (progress < 1) {
+      streamScrollFrame = requestAnimationFrame(step);
+      return;
+    }
+
+    viewport.scrollTop = target;
+    streamScrollFrame = null;
+    streamScrollTarget = null;
+    positionCurrentStreamCaret(screen, viewport);
+  };
+
+  streamScrollFrame = requestAnimationFrame(step);
+}
+
 function keepStreamCaretInTypingViewport(screen, current) {
   if (screen?.dataset?.flowStreamV3 !== "true") return false;
   const viewport = screen.querySelector(".flow-passages");
@@ -216,9 +287,7 @@ function keepStreamCaretInTypingViewport(screen, current) {
   const absoluteTop = currentRect.top - viewportRect.top + viewport.scrollTop;
   const activeLine = Math.max(0, Math.floor((absoluteTop + (lineHeight * 0.2)) / lineHeight));
   const targetScrollTop = Math.max(0, (activeLine - 1) * lineHeight);
-  if (Math.abs(viewport.scrollTop - targetScrollTop) > 1) {
-    viewport.scrollTop = targetScrollTop;
-  }
+  shiftStreamViewport(screen, viewport, targetScrollTop);
   positionStreamCaret(screen, current, viewport);
   return true;
 }
