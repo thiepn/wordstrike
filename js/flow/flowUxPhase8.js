@@ -175,17 +175,12 @@ function focusTypingInput(screen) {
   queueMicrotask(() => setTypingFocusState(screen));
 }
 
-let caretMeasureCanvas = null;
-
 function measureCaretExtraWidth(current) {
   const extra = current?.dataset?.flowExtra || "";
   if (!extra) return 0;
-  caretMeasureCanvas ||= document.createElement("canvas");
-  const context = caretMeasureCanvas.getContext("2d");
-  if (!context) return 0;
-  const style = globalThis.getComputedStyle?.(current);
-  if (style?.font) context.font = style.font;
-  return context.measureText(extra).width;
+  const glyphWidth = current.getBoundingClientRect().width;
+  if (!Number.isFinite(glyphWidth) || glyphWidth <= 0) return 0;
+  return glyphWidth * Array.from(extra).length;
 }
 
 function positionStreamCaret(screen, current, viewport) {
