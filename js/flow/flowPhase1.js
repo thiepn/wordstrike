@@ -1554,7 +1554,9 @@ function renderPublicStreamSessionComplete(result) {
     : `${profile.minutes}:00 session`;
   const eligibility = result.recordEligible
     ? ""
-    : '<p class="flow-v2-record-note">Global ranking requires at least 90% accuracy and enough typed text.</p>';
+    : profile.id !== "standard"
+      ? '<p class="flow-v2-record-note">Global ranking uses the 3-minute Flow session. Quick, Deep, and Endless remain local.</p>'
+      : '<p class="flow-v2-record-note">Global ranking requires at least 90% accuracy and enough typed text.</p>';
 
   app.innerHTML = `
     <section class="screen flow-phase1-screen flow-complete-screen" data-flow-view="complete" data-flow-score-v3="true">
