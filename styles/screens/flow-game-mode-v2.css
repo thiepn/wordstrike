@@ -718,6 +718,13 @@
   transition: none;
 }
 
+.flow-run-screen[data-flow-stream-v3="true"] .flow-char--incorrect.flow-char--current {
+  color: var(--flow-danger);
+  opacity: 1;
+  background: rgb(255 107 112 / 9%);
+  box-shadow: inset 0 -1px 0 var(--flow-danger);
+}
+
 .flow-run-screen[data-flow-stream-v3="true"] .flow-char--missed {
   color: var(--flow-danger);
   opacity: 0.62;
