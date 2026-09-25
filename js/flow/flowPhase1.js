@@ -1593,7 +1593,7 @@ function renderPublicStreamSessionComplete(result) {
         <section class="flow-v2-result-metrics" aria-label="Flow results">
           <div><span>WPM</span><strong>${result.wpm.toFixed(1)}</strong></div>
           <div><span>Accuracy</span><strong>${result.accuracy.toFixed(1)}%</strong></div>
-          <div><span>Consistency</span><strong>${result.consistency.toFixed(0)}</strong></div>
+          <div><span>Consistency</span><strong>${consistencyLabel}</strong></div>
         </section>
         <div class="flow-v2-result-meta">
           <span>${result.wordsCompleted.toLocaleString("en-US")} words</span>
