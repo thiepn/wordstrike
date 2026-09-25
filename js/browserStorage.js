@@ -40,10 +40,15 @@ function writeFallbackKeys(sessionStorage, keys) {
   try {
     if (!keys.size) {
       if (canRemove(sessionStorage)) {
-        sessionStorage.removeItem(BROWSER_STORAGE_FALLBACK_MARKER_KEY);
-      } else {
-        sessionStorage.setItem(BROWSER_STORAGE_FALLBACK_MARKER_KEY, "[]");
+        try {
+          sessionStorage.removeItem(BROWSER_STORAGE_FALLBACK_MARKER_KEY);
+          return true;
+        } catch {
+          // Some restricted/legacy storage implementations expose removeItem
+          // but reject it. An empty marker is equivalent and keeps reads correct.
+        }
       }
+      sessionStorage.setItem(BROWSER_STORAGE_FALLBACK_MARKER_KEY, "[]");
     } else {
       sessionStorage.setItem(
         BROWSER_STORAGE_FALLBACK_MARKER_KEY,
@@ -153,4 +158,16 @@ export function createResilientBrowserStorage({
 
 export function getResilientBrowserStorage() {
   return createResilientBrowserStorage();
+}
+
+
+export function getSessionBrowserStorage() {
+  const storage = safeGlobalStorage("sessionStorage");
+  if (
+    !storage ||
+    typeof storage.getItem !== "function" ||
+    typeof storage.setItem !== "function" ||
+    typeof storage.removeItem !== "function"
+  ) return null;
+  return storage;
 }
