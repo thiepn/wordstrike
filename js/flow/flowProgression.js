@@ -1,3 +1,4 @@
+import { getResilientBrowserStorage } from "../browserStorage.js";
 import { MODE_IDS } from "../modes.js";
 import {
   getModeSummary,
@@ -128,7 +129,7 @@ export function sanitizeFlowProgress(value) {
 
 export function loadFlowProgress() {
   try {
-    const raw = globalThis.localStorage?.getItem(FLOW_PROGRESS_STORAGE_KEY);
+    const raw = getResilientBrowserStorage()?.getItem(FLOW_PROGRESS_STORAGE_KEY);
     if (!raw) return createDefaultFlowProgress();
     return sanitizeFlowProgress(JSON.parse(raw));
   } catch {
@@ -139,7 +140,7 @@ export function loadFlowProgress() {
 export function saveFlowProgress(progress) {
   const clean = sanitizeFlowProgress(progress);
   try {
-    globalThis.localStorage?.setItem(FLOW_PROGRESS_STORAGE_KEY, JSON.stringify(clean));
+    getResilientBrowserStorage()?.setItem(FLOW_PROGRESS_STORAGE_KEY, JSON.stringify(clean));
     return clean;
   } catch {
     return clean;
@@ -147,11 +148,11 @@ export function saveFlowProgress(progress) {
 }
 
 export function hasSeenFlowOnboarding() {
-  try { return globalThis.localStorage?.getItem(FLOW_ONBOARDING_STORAGE_KEY) === "seen"; } catch { return false; }
+  try { return getResilientBrowserStorage()?.getItem(FLOW_ONBOARDING_STORAGE_KEY) === "seen"; } catch { return false; }
 }
 
 export function markFlowOnboardingSeen() {
-  try { globalThis.localStorage?.setItem(FLOW_ONBOARDING_STORAGE_KEY, "seen"); return true; } catch { return false; }
+  try { getResilientBrowserStorage()?.setItem(FLOW_ONBOARDING_STORAGE_KEY, "seen"); return true; } catch { return false; }
 }
 
 export function saveFlowLastSetup(setup) {
