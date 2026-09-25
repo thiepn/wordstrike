@@ -53,6 +53,12 @@ assert.match(source.ux8, /cancelAnimationFrame\(streamScrollFrame\)/, "public Fl
 assert.match(source.ux8, /const durationMs = 85/, "public Flow line shift must stay short and bounded");
 assert.doesNotMatch(source.ux8, /scrollIntoView\([\s\S]*behavior:\s*"smooth"[\s\S]*data-flow-stream-v3/, "public Flow stream must not queue browser smooth-scroll operations");
 assert.match(source.phase1, /typedPublicStreamDocumentIndexes/, "Flow progression must derive document credit from typed input");
+assert.match(source.phase1, /const nativeControl = target\?\.matches/, "Flow gameplay keys must ignore native run controls");
+assert.match(source.phase1, /event\.inputType !== "insertText"/, "Flow must reject paste/drop/replacement beforeinput paths");
+assert.match(source.phase1, /addEventListener\("paste", \(event\) => event\.preventDefault\(\)\)/, "Flow capture must block paste explicitly");
+assert.match(source.ux8, /screen\.addEventListener\("pointerdown"/, "non-interactive run clicks must restore typing focus");
+assert.match(source.ux8, /screen\.addEventListener\("focusin"/, "Flow focus state must follow the whole run surface");
+assert.match(source.uxCss, /\.flow-ux-focus-hint\s*\{[\s\S]*position:\s*absolute/, "focus recovery hint must not move typing layout");
 assert.match(source.phase1, /event\?\.type !== "insert"/, "Tab skip events must not count as typed corpus exposure");
 assert.match(source.phase1, /class="flow-word"/, "public Flow must group characters into unbreakable word units");
 assert.match(source.gameCss, /font-family:\s*var\(--flow-data-face\)/, "public Flow typing surface must use typing-oriented monospace geometry");
