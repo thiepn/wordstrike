@@ -34,7 +34,8 @@ function boardForMode(mode, result) {
   if (mode === "flow") {
     if (
       result?.variantId === "flow-v3" &&
-      result?.rulesVersion === 3 &&
+      result?.contractVersion === 3 &&
+      result?.rulesVersion === 4 &&
       result?.boardKey === LEADERBOARD_BOARDS.FLOW_STANDARD
     ) return LEADERBOARD_BOARDS.FLOW_STANDARD;
     const length = ["quick", "standard", "long"].includes(result?.sessionLength)
@@ -188,8 +189,8 @@ export function buildFlowSubmissionResult(result) {
     result?.modeId !== "flow" ||
     result?.boardKey !== LEADERBOARD_BOARDS.FLOW_STANDARD ||
     result?.variantId !== "flow-v3" ||
-    result?.contractVersion !== 2 ||
-    result?.rulesVersion !== 3 ||
+    result?.contractVersion !== 3 ||
+    result?.rulesVersion !== 4 ||
     result?.metricVersion !== 2 ||
     result?.sessionLength !== "flow" ||
     result?.completed !== true
