@@ -1029,3 +1029,54 @@
   letter-spacing: 0;
   text-decoration: none;
 }
+
+
+/* ---------- FLOW V3: accessible next-text control ---------- */
+
+.flow-v3-tab-hint {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  min-height: 28px;
+  padding: 3px 0;
+  border: 0;
+  background: transparent;
+  color: var(--flow-signal);
+  font: inherit;
+  letter-spacing: 0.075em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.flow-v3-tab-hint:hover,
+.flow-v3-tab-hint:focus-visible {
+  color: var(--flow-ink);
+  outline: none;
+}
+
+.flow-v3-tab-hint:disabled {
+  color: var(--flow-ink-muted);
+  cursor: default;
+  opacity: 0.58;
+}
+
+.flow-v3-tab-shortcut {
+  padding: 2px 4px;
+  border: 1px solid var(--flow-line-strong);
+  color: inherit;
+  font-size: 0.78em;
+  line-height: 1;
+}
+
+@media (max-width: 620px), (pointer: coarse) {
+  .flow-v3-tab-shortcut {
+    display: none;
+  }
+
+  .flow-v3-tab-hint {
+    min-height: 34px;
+    padding-inline: 6px;
+  }
+}
