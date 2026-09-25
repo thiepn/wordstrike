@@ -64,7 +64,6 @@ import {
 } from "../leaderboardProfileService.js";
 import {
   clearSubmissionState,
-  createLeaderboardSubmissionService,
   getSubmissionState,
   prepareResultSubmission,
   refreshSubmissionEligibility,
@@ -486,32 +485,6 @@ function scheduleMicroResultDismiss(app) {
     }
     if (pendingMicroResultV4?.id === feedback.id) pendingMicroResultV4 = null;
   }, remaining) ?? null;
-}
-
-function syncMicroResultSubmissionV4(sessionId, submissionState) {
-  if (!pendingMicroResultV4 || pendingMicroResultV4.id !== sessionId) return;
-  const status = String(submissionState?.status || "");
-  const rank = Number(submissionState?.rank);
-  const successful = status === "submitted" || status === "already-submitted";
-  const retrySaved = ["offline", "error"].includes(status) && submissionState?.retryPersisted === true;
-  if (!successful && !retrySaved) return;
-
-  pendingMicroResultV4 = Object.freeze({
-    ...pendingMicroResultV4,
-    globalRank: successful && Number.isSafeInteger(rank) && rank > 0 ? rank : null,
-    submissionStatus: retrySaved ? "retry-saved" : status,
-    expiresAt: Math.max(pendingMicroResultV4.expiresAt, Date.now() + 2200),
-  });
-
-  const app = root();
-  const toast = app?.querySelector?.("[data-flow-micro-result]");
-  if (toast?.dataset?.flowFeedbackId === sessionId) {
-    setTextIfChanged(
-      toast.querySelector("[data-flow-micro-secondary]"),
-      microResultSecondaryCopy(pendingMicroResultV4),
-    );
-    scheduleMicroResultDismiss(app);
-  }
 }
 
 function resetVisibilityPause() {
