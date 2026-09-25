@@ -120,6 +120,8 @@ export function createFlowTypingRun(passage, options = {}) {
   run.sentenceTimings = [];
   run.extraCharacters = [];
   run.currentWordStartIndex = 0;
+  run.minimumBackspaceIndex = 0;
+  run.skippedRanges = [];
   run.totalInsertedCharacters = 0;
   initializeFlowGameplay(run);
   return run;
@@ -183,7 +185,7 @@ function commitEarlyWordSeparator(run, actual, at) {
       missed: true,
       at,
     });
-    run.typedCharacters.push(missed);
+    run.typedCharacters[index] = missed;
     run.currentIndex += 1;
     run.incorrectChars += 1;
     run.uncorrectedErrors += 1;
@@ -194,14 +196,14 @@ function commitEarlyWordSeparator(run, actual, at) {
     ? recordBoundaryTimings(run, boundaryIndex - 1, at)
     : { cleanWord: false, cleanSentence: false };
   const expected = run.passage[boundaryIndex];
-  run.typedCharacters.push(Object.freeze({
+  run.typedCharacters[boundaryIndex] = Object.freeze({
     index: boundaryIndex,
     expected,
     actual,
     correct: true,
     wordCommit: true,
     at,
-  }));
+  });
   run.currentIndex = boundaryIndex + 1;
   run.correctChars += 1;
   run.totalInsertedCharacters += 1;
@@ -254,7 +256,7 @@ export function insertFlowText(run, value, at = currentNow()) {
     const correct = actual === expected;
     const newProgress = index >= (run.furthestIndexReached || 0);
     const entry = { index, expected, actual, correct, at };
-    run.typedCharacters.push(entry);
+    run.typedCharacters[index] = entry;
     run.rawKeystrokes.push({ type: "insert", ...entry });
     run.totalInsertedCharacters += 1;
     run.currentIndex += 1;
@@ -334,8 +336,13 @@ export function backspaceFlowText(run, at = currentNow()) {
     return true;
   }
 
-  const removed = run.typedCharacters.pop();
-  run.currentIndex -= 1;
+  const minimumBackspaceIndex = Math.max(0, Number(run.minimumBackspaceIndex) || 0);
+  if (run.currentIndex <= minimumBackspaceIndex) return false;
+  const removedIndex = run.currentIndex - 1;
+  const removed = run.typedCharacters[removedIndex];
+  if (!removed) return false;
+  delete run.typedCharacters[removedIndex];
+  run.currentIndex = removedIndex;
   if (run.currentIndex < (run.currentWordStartIndex || 0)) {
     run.currentWordStartIndex = findTokenStart(run.passage, run.currentIndex);
   }
@@ -408,6 +415,8 @@ export function getFlowTypingSnapshot(run) {
     incorrectChars: run.incorrectChars,
     correctedErrors: run.correctedErrors,
     uncorrectedErrors: run.uncorrectedErrors,
+    totalInsertedCharacters: run.totalInsertedCharacters,
+    skippedRanges: (run.skippedRanges || []).map((entry) => ({ ...entry })),
     startedAt: run.startedAt,
     completedAt: run.completedAt,
     gameplay: getFlowGameplaySnapshot(run),
