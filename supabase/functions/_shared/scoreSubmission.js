@@ -42,11 +42,13 @@ export {
 };
 
 export const FLOW_QUICK_BOARD_KEY = "flow-quick-v1";
-export const FLOW_STANDARD_BOARD_KEY = "flow-standard-v1";
+export const FLOW_STANDARD_BOARD_KEY = "flow-standard-3m-v1";
 export const FLOW_LONG_BOARD_KEY = "flow-long-v1";
-export const FLOW_RULES_VERSION = 3;
+export const FLOW_RULES_VERSION = 4;
 export const FLOW_METRIC_VERSION = 2;
-export const FLOW_CONTRACT_VERSION = 2;
+export const FLOW_CONTRACT_VERSION = 3;
+export const FLOW_STANDARD_MIN_DURATION_MS = 179_900;
+export const FLOW_STANDARD_MAX_DURATION_MS = 180_100;
 
 export const FLOW_BOARD_KEYS = Object.freeze([
   FLOW_STANDARD_BOARD_KEY,
@@ -171,7 +173,7 @@ export function validateFlowScoreSubmission(body) {
     !finite(result.accuracy, 90, 100) ||
     !integer(result.consistency, 0, 100) ||
     !integer(result.consistencySamples, 20, 500_000) ||
-    !integer(result.durationMs, 20_000, 14_400_000) ||
+    !integer(result.durationMs, FLOW_STANDARD_MIN_DURATION_MS, FLOW_STANDARD_MAX_DURATION_MS) ||
     !integer(result.wordsCompleted, 50, 100_000) ||
     !integer(result.charactersCompleted, 250, 1_000_000) ||
     !integer(result.correctCharacters, 250, result.charactersCompleted) ||
