@@ -856,3 +856,31 @@
     animation: none;
   }
 }
+
+
+/* ---------- FLOW V3: layout-stable typo paint ---------- */
+
+.flow-run-screen[data-flow-stream-v3="true"] .flow-char--has-extra {
+  position: relative;
+}
+
+.flow-run-screen[data-flow-stream-v3="true"] .flow-char--has-extra::before {
+  content: attr(data-flow-extra);
+  position: absolute;
+  z-index: 2;
+  left: 0;
+  top: 0;
+  color: var(--flow-danger);
+  font: inherit;
+  line-height: inherit;
+  white-space: pre;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+  pointer-events: none;
+}
+
+.flow-run-screen[data-flow-stream-v3="true"] .flow-char--incorrect,
+.flow-run-screen[data-flow-stream-v3="true"] .flow-char--missed {
+  font-variant-ligatures: none;
+}
