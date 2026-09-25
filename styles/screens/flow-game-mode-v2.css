@@ -954,3 +954,63 @@
 .flow-run-screen[data-flow-stream-v3="true"] .flow-v3-live-caret {
   box-shadow: none;
 }
+
+
+/* ---------- FLOW V3: text-first spacing ---------- */
+
+.flow-run-screen[data-flow-stream-v3="true"] .flow-run-shell {
+  gap: 10px;
+  padding-top: 14px;
+  padding-bottom: 22px;
+}
+
+.flow-run-screen[data-flow-stream-v3="true"] .flow-v3-session-clock {
+  gap: 4px 12px;
+  margin: 0 auto;
+}
+
+.flow-run-screen[data-flow-stream-v3="true"] .flow-v3-session-clock > span {
+  font-size: 0.46rem;
+  letter-spacing: 0.09em;
+}
+
+.flow-run-screen[data-flow-stream-v3="true"] .flow-v3-session-clock > strong {
+  font-size: clamp(1.02rem, 2vw, 1.28rem);
+}
+
+.flow-run-screen[data-flow-stream-v3="true"] .flow-v3-session-progress {
+  height: 2px;
+}
+
+.flow-run-screen[data-flow-stream-v3="true"] .flow-run-copy {
+  align-content: center;
+  min-height: clamp(260px, 46dvh, 500px);
+  padding: clamp(10px, 2vh, 20px) 0 clamp(18px, 3vh, 30px);
+}
+
+@media (max-width: 620px) {
+  .flow-run-screen[data-flow-stream-v3="true"] .flow-run-shell {
+    gap: 8px;
+    padding-top: 10px;
+    padding-bottom: 18px;
+  }
+
+  .flow-run-screen[data-flow-stream-v3="true"] .flow-v3-run-tools {
+    padding-top: 5px;
+  }
+
+  .flow-run-screen[data-flow-stream-v3="true"] .flow-v3-run-tools select {
+    min-height: 28px;
+    padding-top: 3px;
+    padding-bottom: 3px;
+  }
+
+  .flow-run-screen[data-flow-stream-v3="true"] .flow-v3-session-clock > strong {
+    font-size: 1.02rem;
+  }
+
+  .flow-run-screen[data-flow-stream-v3="true"] .flow-run-copy {
+    min-height: clamp(250px, 43dvh, 410px);
+    padding: 10px 0 18px;
+  }
+}
