@@ -138,7 +138,7 @@ const snapshot = {
 const result = createFlowScoreV3Result({
   sessionId: "session-flow-v3-contract-12345678",
   endedAt: 1700000000000,
-  endedReason: "reset",
+  endedReason: "complete",
   snapshot,
   plan: firstPlan,
 });
@@ -167,15 +167,33 @@ const quickResult = createFlowScoreV3Result({
 assert.equal(quickResult.recordEligible, false,
   "Quick, Deep, and Endless sessions must not compete on the standard 3-minute board");
 
+const resetResult = createFlowScoreV3Result({
+  sessionId: "session-flow-v3-reset-12345678",
+  endedAt: 1700000000750,
+  endedReason: "reset",
+  snapshot,
+  plan: firstPlan,
+});
+assert.equal(resetResult.completed, false);
+assert.equal(resetResult.recordEligible, false,
+  "Leaving or resetting before FLOW COMPLETE must never create a competitive result");
+
 const normalized = buildFlowSubmissionResult(result);
 assert.ok(normalized);
 assert.equal(normalized.sessionLength, "flow");
 assert.equal(normalized.correctCharacters, 600);
-assert.equal(normalized.endedReason, "reset");
+assert.equal(normalized.endedReason, "complete");
 const payload = buildSubmissionPayload("flow", result);
 assert.ok(payload);
 assert.equal(payload.boardKey, "flow-standard-v1");
 assert.equal(validateScoreSubmission(payload).valid, true);
+assert.equal(
+  validateScoreSubmission({
+    ...payload,
+    result: { ...payload.result, endedReason: "reset", recordEligible: true },
+  }).code,
+  "TEST_NOT_COMPLETED",
+);
 assert.equal(
   validateScoreSubmission({
     ...payload,
