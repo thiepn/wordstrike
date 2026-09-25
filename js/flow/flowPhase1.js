@@ -1055,7 +1055,7 @@ function syncRunHud() {
   setTextIfChanged(
     hud.progress,
     isPublicStreamRun()
-      ? String(Math.floor(Math.max(0, run.currentIndex - run.uncorrectedErrors) / 5))
+      ? String(Math.floor(Math.max(0, Number(run.correctChars) || 0) / 5))
       : isPublicLongformRun()
         ? `${Math.min(100, Math.round((run.currentIndex / Math.max(1, run.passage.length)) * 100))}%`
         : `${run.currentIndex} / ${run.passage.length}`,
@@ -1623,7 +1623,12 @@ function publicProgressionPlan() {
 }
 
 function finalizePublicStreamRun(endedReason = "reset") {
-  if (!isPublicStreamRun() || !run || !publicRunSessionId || run.currentIndex <= 0) return null;
+  if (
+    !isPublicStreamRun()
+    || !run
+    || !publicRunSessionId
+    || (Number(run.totalInsertedCharacters) || 0) <= 0
+  ) return null;
   const result = createFlowScoreV3Result({
     sessionId: publicRunSessionId,
     endedAt: Date.now(),
