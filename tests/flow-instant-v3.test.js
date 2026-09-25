@@ -146,6 +146,7 @@ assert.ok(result);
 assert.equal(result.variantId, "flow-v3");
 assert.equal(result.boardKey, "flow-standard-v1");
 assert.equal(result.sessionLength, "flow");
+assert.equal(result.sessionPreset, "standard");
 assert.equal(result.completed, true);
 assert.equal(result.recordEligible, true);
 assert.equal(result.correctCharacters, 600);
@@ -164,6 +165,7 @@ const quickResult = createFlowScoreV3Result({
   snapshot,
   plan: quickPlan,
 });
+assert.equal(quickResult.sessionPreset, "quick");
 assert.equal(quickResult.recordEligible, false,
   "Quick, Deep, and Endless sessions must not compete on the standard 3-minute board");
 
@@ -181,6 +183,8 @@ assert.equal(resetResult.recordEligible, false,
 const normalized = buildFlowSubmissionResult(result);
 assert.ok(normalized);
 assert.equal(normalized.sessionLength, "flow");
+assert.equal("sessionPreset" in normalized, false,
+  "session preset is local metadata and must not alter the server submission schema");
 assert.equal(normalized.correctCharacters, 600);
 assert.equal(normalized.endedReason, "complete");
 const payload = buildSubmissionPayload("flow", result);
