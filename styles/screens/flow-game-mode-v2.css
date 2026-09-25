@@ -884,3 +884,32 @@
 .flow-run-screen[data-flow-stream-v3="true"] .flow-char--missed {
   font-variant-ligatures: none;
 }
+
+
+/* ---------- FLOW V3: typing typography and word geometry ---------- */
+
+.flow-run-screen[data-flow-stream-v3="true"] .flow-longform-passage {
+  font-family: var(--flow-data-face);
+  font-size: clamp(1.42rem, 2.15vw, 1.9rem);
+  font-weight: 450;
+  line-height: 1.58;
+  letter-spacing: 0;
+  font-kerning: none;
+  font-variant-ligatures: none;
+  text-rendering: geometricPrecision;
+  overflow-wrap: normal;
+  word-break: normal;
+}
+
+.flow-run-screen[data-flow-stream-v3="true"] .flow-word {
+  display: inline-block;
+  white-space: pre;
+  vertical-align: baseline;
+}
+
+@media (max-width: 640px) {
+  .flow-run-screen[data-flow-stream-v3="true"] .flow-longform-passage {
+    font-size: clamp(1.16rem, 5vw, 1.42rem);
+    line-height: 1.55;
+  }
+}
