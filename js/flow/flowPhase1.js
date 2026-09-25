@@ -614,21 +614,27 @@ function isPublicLongformRun() {
     );
 }
 
+function publicStreamSegmentMarkup(segment) {
+  if (!segment) return "";
+  const characters = [];
+  for (let index = segment.startIndex; index <= segment.endIndex; index += 1) {
+    const character = flowCharacterAt(index);
+    if (character) characters.push(charMarkup(character));
+  }
+  if (segment.separatorIndex != null) {
+    const separator = flowCharacterAt(segment.separatorIndex);
+    if (separator) characters.push(charMarkup(separator, { paragraphBreak: true }));
+  }
+  return `<p class="flow-longform-paragraph" data-flow-paragraph="${segment.index}">${characters.join("")}</p>`;
+}
+
 function publicLongformMarkup() {
   if (!run || !isPublicLongformRun()) return "";
   if (isPublicStreamRun()) {
-    return resolvedRunPlan.segments.slice(activeSegmentIndex, activeSegmentIndex + 3).map((segment) => {
-      const characters = [];
-      for (let index = segment.startIndex; index <= segment.endIndex; index += 1) {
-        const character = flowCharacterAt(index);
-        if (character) characters.push(charMarkup(character));
-      }
-      if (segment.separatorIndex != null) {
-        const separator = flowCharacterAt(segment.separatorIndex);
-        if (separator) characters.push(charMarkup(separator, { paragraphBreak: true }));
-      }
-      return `<p class="flow-longform-paragraph" data-flow-paragraph="${segment.index}">${characters.join("")}</p>`;
-    }).join("");
+    return resolvedRunPlan.segments
+      .slice(activeSegmentIndex, activeSegmentIndex + 3)
+      .map(publicStreamSegmentMarkup)
+      .join("");
   }
   const documents = resolvedRunPlan.documents || [];
   return documents.map((document, documentIndex) => {
@@ -669,11 +675,22 @@ function refreshPublicStreamPassage() {
   const app = root();
   const passage = app?.querySelector?.("[data-flow-passage]");
   if (!app || !passage) return false;
-  passage.innerHTML = publicLongformMarkup();
-  rebuildMountedCharacterNodes(app);
+
+  // Never replace the live typing surface at a paragraph boundary. The next
+  // two paragraphs are already mounted; append only newly-needed look-ahead.
+  const visibleEnd = Math.min(
+    resolvedRunPlan.segments.length,
+    activeSegmentIndex + 3,
+  );
+  let appended = false;
+  for (let index = activeSegmentIndex; index < visibleEnd; index += 1) {
+    const segment = resolvedRunPlan.segments[index];
+    if (!segment || passage.querySelector(`[data-flow-paragraph="${segment.index}"]`)) continue;
+    passage.insertAdjacentHTML("beforeend", publicStreamSegmentMarkup(segment));
+    appended = true;
+  }
+  if (appended) rebuildMountedCharacterNodes(app);
   syncPublicStreamIdentity(app);
-  const viewport = app.querySelector(".flow-passages");
-  if (viewport) viewport.scrollTop = 0;
   globalThis.window?.wordstrikeFlowUxPhase8?.scheduleCaretVisibility?.();
   return true;
 }
@@ -1274,9 +1291,6 @@ function updateRunView(startIndex = run?.currentIndex ?? 0, endIndex = startInde
     syncPublicSegmentIndex();
     if (isPublicStreamRun() && activeSegmentIndex !== beforeSegment) {
       refreshPublicStreamPassage();
-      syncRunHud();
-      scheduleCadenceHud();
-      return;
     }
   } else if (maybeAdvanceRunPlan()) return;
 
@@ -1704,6 +1718,9 @@ function skipPublicStreamText() {
   run.furthestIndexReached = Math.max(Number(run.furthestIndexReached) || 0, next.startIndex);
   activeSegmentIndex += 1;
   refreshPublicStreamPassage();
+  updateCharacterNode(fromIndex);
+  updateCharacterNode(next.startIndex);
+  globalThis.window?.wordstrikeFlowUxPhase8?.scheduleCaretVisibility?.();
   syncRunHud();
   scheduleCadenceHud(true);
   root()?.querySelector?.("[data-flow-input]")?.focus?.({ preventScroll: true });
