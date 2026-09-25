@@ -98,7 +98,7 @@ for (const key of FLOW_RELEASE_QUERY_KEYS) {
 assert.ok(FLOW_RELEASE_ASSETS.length >= 30, "release cache pack should cover the complete Flow stack");
 assert.equal(new Set(FLOW_RELEASE_ASSETS).size, FLOW_RELEASE_ASSETS.length, "release cache pack contains duplicates");
 for (const asset of [
-  "./js/flow/flowRuntimeLoader.js?v=20260925o",
+  "./js/flow/flowRuntimeLoader.js?v=20260925p",
   "./js/leaderboardService.js",
   "./js/supabaseConfig.js",
   "./js/supabaseClient.js",
@@ -119,8 +119,8 @@ for (const asset of [
   "./js/flow/flowCorpusHistory.js?v=20260923a",
   "./js/flow/flowLongformContent.js",
   "./js/flow/flowPassages.js",
-  "./js/flow/flowPhase1.js?v=20260925l",
-  "./js/flow/flowProgressionV4.js?v=20260924a",
+  "./js/flow/flowPhase1.js?v=20260925m",
+  "./js/flow/flowProgressionV4.js?v=20260925b",
   "./js/flow/flowIdentityV1.js?v=20260924b",
   "./styles/screens/flow-session-v4.css?v=20260925a",
   "./styles/screens/flow-session-v4.css",
@@ -129,9 +129,9 @@ for (const asset of [
   "./js/flow/flowProgression.js",
   "./js/flow/flowRunPlan.js?v=20260923e",
   "./js/flow/flowScoreV2.js?v=20260923f",
-  "./js/flow/flowRecordsV3.js?v=20260923a",
+  "./js/flow/flowRecordsV3.js?v=20260925a",
   "./js/flow/flowRecordsV3.js",
-  "./js/flow/flowScoreV3.js?v=20260925d",
+  "./js/flow/flowScoreV3.js?v=20260925e",
   "./js/flow/flowScoreV3.js",
   "./js/flow/flowStreamPlanV3.js?v=20260925b",
   "./js/flow/flowRecordsV2.js?v=20260923f",
@@ -147,7 +147,7 @@ for (const asset of [
 
 const mainEntry = index.match(/src="js\/main\.js\?v=[^"]+"/)?.[0] || "";
 const mainIndex = mainEntry ? index.indexOf(mainEntry) : -1;
-const releaseIndex = index.indexOf('src="js/flow/flowRuntimeLoader.js?v=20260925o"');
+const releaseIndex = index.indexOf('src="js/flow/flowRuntimeLoader.js?v=20260925p"');
 assert.ok(mainIndex >= 0 && releaseIndex > mainIndex, "main.js must boot before the release loader can temporarily emulate the developer route");
 assert.doesNotMatch(index, /src="js\/flow\/flowPhase1\.js/);
 assert.doesNotMatch(index, /const flowParams = new URLSearchParams/);
