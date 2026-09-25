@@ -119,6 +119,11 @@ export function createResilientBrowserStorage({
           return;
         } catch (error) {
           lastError = error;
+          // If this key already existed locally, remove the stale copy when
+          // possible before falling back. This prevents a later read from
+          // preferring obsolete persistent data if the fallback marker itself
+          // cannot be written under extreme storage pressure.
+          try { if (canRemove(local)) local.removeItem(storageKey); } catch {}
         }
       }
 
