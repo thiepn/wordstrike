@@ -12,9 +12,12 @@ function hasStorageApi(storage) {
   return Boolean(
     storage &&
     typeof storage.getItem === "function" &&
-    typeof storage.setItem === "function" &&
-    typeof storage.removeItem === "function"
+    typeof storage.setItem === "function"
   );
+}
+
+function canRemove(storage) {
+  return Boolean(storage && typeof storage.removeItem === "function");
 }
 
 function readFallbackKeys(sessionStorage) {
@@ -36,7 +39,11 @@ function writeFallbackKeys(sessionStorage, keys) {
   if (!hasStorageApi(sessionStorage)) return false;
   try {
     if (!keys.size) {
-      sessionStorage.removeItem(BROWSER_STORAGE_FALLBACK_MARKER_KEY);
+      if (canRemove(sessionStorage)) {
+        sessionStorage.removeItem(BROWSER_STORAGE_FALLBACK_MARKER_KEY);
+      } else {
+        sessionStorage.setItem(BROWSER_STORAGE_FALLBACK_MARKER_KEY, "[]");
+      }
     } else {
       sessionStorage.setItem(
         BROWSER_STORAGE_FALLBACK_MARKER_KEY,
@@ -102,7 +109,7 @@ export function createResilientBrowserStorage({
         try {
           local.setItem(storageKey, storageValue);
           // Clear any fallback copy/marker after local persistence recovers.
-          try { session?.removeItem(storageKey); } catch {}
+          try { if (canRemove(session)) session.removeItem(storageKey); } catch {}
           markSessionFallback(session, storageKey, false);
           return;
         } catch (error) {
@@ -129,7 +136,7 @@ export function createResilientBrowserStorage({
       let lastError = null;
 
       for (const storage of [local, session]) {
-        if (!storage) continue;
+        if (!storage || !canRemove(storage)) continue;
         try {
           storage.removeItem(storageKey);
           removed = true;
