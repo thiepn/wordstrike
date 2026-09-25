@@ -187,9 +187,20 @@ function commitEarlyWordSeparator(run, actual, at) {
     });
     run.typedCharacters[index] = missed;
     run.currentIndex += 1;
+  }
+
+  const skippedCount = Math.max(0, boundaryIndex - skippedStart);
+  if (skippedCount > 0) {
     run.incorrectChars += 1;
     run.uncorrectedErrors += 1;
-    run.errorTimings.push({ index, expected, actual: "", at, missed: true });
+    run.errorTimings.push({
+      index: skippedStart,
+      expected: run.passage[skippedStart],
+      actual,
+      at,
+      missed: true,
+      skippedCount,
+    });
   }
 
   const boundaryState = boundaryIndex > 0
@@ -214,7 +225,7 @@ function commitEarlyWordSeparator(run, actual, at) {
     actual,
     correct: false,
     wordCommit: true,
-    skippedCount: Math.max(0, boundaryIndex - skippedStart),
+    skippedCount,
     at,
   }));
   applyFlowInsertGameplay(run, {
@@ -226,6 +237,7 @@ function commitEarlyWordSeparator(run, actual, at) {
     at,
   });
   run.currentWordStartIndex = run.currentIndex;
+  run.minimumBackspaceIndex = Math.max(run.minimumBackspaceIndex || 0, run.currentIndex);
   return true;
 }
 
