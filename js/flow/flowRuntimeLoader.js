@@ -4,8 +4,8 @@ import {
 } from "./flowIdentityV1.js?v=20260924b";
 
 const RELEASE_FLAG = "flowRelease";
-const FLOW_RELEASE_VERSION = 32;
-const FLOW_RELEASE_CACHE_NAME = "wordstrike-flow-release-v35";
+const FLOW_RELEASE_VERSION = 33;
+const FLOW_RELEASE_CACHE_NAME = "wordstrike-flow-release-v36";
 const FLOW_OFFLINE_CACHE_BATCH_SIZE = 16;
 const FLOW_RELEASE_QUERY_KEYS = Object.freeze([
   "mode",
@@ -30,7 +30,7 @@ const FLOW_RELEASE_QUERY_KEYS = Object.freeze([
 ]);
 
 const FLOW_RELEASE_ASSETS = Object.freeze([
-  "./js/flow/flowRuntimeLoader.js?v=20260925j",
+  "./js/flow/flowRuntimeLoader.js?v=20260925k",
   "./js/leaderboardReturnState.js",
   "./js/pendingResultSubmission.js",
   "./js/submissionOutbox.js",
@@ -98,7 +98,7 @@ const FLOW_RELEASE_ASSETS = Object.freeze([
   "./js/flow/flowUiPhase7.js?v=20260923a",
   "./js/flow/flowUiPhase7KeyboardGuard.js?v=20260923a",
   "./js/flow/flowUiPhase7Polish.js?v=20260923a",
-  "./js/flow/flowUxPhase8.js?v=20260925d",
+  "./js/flow/flowUxPhase8.js?v=20260925e",
   "./js/flow/flowVisualPhase6.js?v=20260923a",
   "./styles/screens/flow-phase1.css?v=20260916d",
   "./styles/screens/flow-phase5.css?v=20260916a",
@@ -432,7 +432,7 @@ async function importFlowRuntime() {
       keyboardGuard.refreshFlowUiGuard?.();
       await import("./flowUiPhase7Polish.js?v=20260923a");
       if (params.get("flowUx") === "1") {
-        await import("./flowUxPhase8.js?v=20260925d");
+        await import("./flowUxPhase8.js?v=20260925e");
         await Promise.resolve();
         const extensions = [];
         if (params.get("flowModifiers") === "1") extensions.push(import("./flowModifiersPhase9.js?v=20260923a"));
