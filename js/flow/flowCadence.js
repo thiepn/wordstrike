@@ -59,7 +59,7 @@ function buildUninterruptedIntervals(run, events = run?.rawKeystrokes || []) {
   let previousInsert = null;
   let interrupted = false;
   for (const event of events) {
-    if (event.type === "backspace") {
+    if (event.type === "backspace" || event.type === "skip") {
       interrupted = true;
       continue;
     }
