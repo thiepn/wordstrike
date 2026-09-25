@@ -27,14 +27,17 @@ assert.equal(run.correctChars, 1);
 assert.equal(run.currentIndex, 1);
 
 assert.equal(insertFlowText(run, "x", 110), true);
-assert.equal(run.currentIndex, 2);
+assert.equal(run.currentIndex, 1, "an extra letter at a word boundary must stay inside the current word");
 assert.equal(run.incorrectChars, 1);
 assert.equal(run.uncorrectedErrors, 1);
 assert.equal(run.errorTimings.length, 1);
+assert.equal(run.extraCharacters.length, 1);
 assert.equal(getFlowCharacterView(run)[1].status, "incorrect");
+assert.equal(getFlowCharacterView(run)[1].actual, "x ");
 
 assert.equal(backspaceFlowText(run, 125), true);
 assert.equal(run.currentIndex, 1);
+assert.equal(run.extraCharacters.length, 0);
 assert.equal(run.correctedErrors, 1);
 assert.equal(run.uncorrectedErrors, 0);
 assert.equal(run.correctionTimings.length, 1);
