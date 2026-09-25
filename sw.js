@@ -1,5 +1,5 @@
 const CACHE_PREFIX = "wordstrike-pwa-";
-const CACHE_NAME = CACHE_PREFIX + "v106-flow-word-boundary-v39";
+const CACHE_NAME = CACHE_PREFIX + "v107-flow-submission-v40";
 const APP_SHELL = [
   "./js/practiceLab/practiceAssessmentInput.js",
   "./js/practiceLab/practiceDurableManifest.js",
@@ -57,7 +57,7 @@ const APP_SHELL = [
   "./js/flow/flowModifiersPhase9.js",
   "./js/flow/flowPassages.js",
   "./js/flow/flowPhase1.js",
-  "./js/flow/flowPhase1.js?v=20260925n",
+  "./js/flow/flowPhase1.js?v=20260925o",
   "./js/flow/flowProgression.js",
   "./js/flow/flowProgression.js?v=20260923a",
   "./js/flow/flowProgressionV4.js",
@@ -69,7 +69,7 @@ const APP_SHELL = [
   "./js/flow/flowRecordsV2.js",
   "./js/flow/flowRecordsV2.js?v=20260923a",
   "./js/flow/flowRuntimeLoader.js",
-  "./js/flow/flowRuntimeLoader.js?v=20260925q",
+  "./js/flow/flowRuntimeLoader.js?v=20260925r",
   "./js/flow/flowSelection.js",
   "./js/flow/flowShell.js",
   "./js/flow/flowState.js",
@@ -296,6 +296,7 @@ const APP_SHELL = [
   "./js/leaderboardReturnState.js",
   "./js/leaderboardService.js",
   "./js/leaderboardSubmissionService.js",
+  "./js/leaderboardSubmissionService.js?v=20260925a",
   "./js/leaderboardUi.js",
   "./js/leaderboardUsername.js",
   "./js/levelGenerator.js",
