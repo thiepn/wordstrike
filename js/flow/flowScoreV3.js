@@ -132,6 +132,9 @@ export function createFlowScoreV3Result({
     endedAt: Math.max(0, finite(endedAt)),
     endedReason: normalizedReason,
     sessionLength: "flow",
+    sessionPreset: ["quick", "standard", "deep", "endless"].includes(plan.sessionPreset)
+      ? plan.sessionPreset
+      : "standard",
     completed,
     recordEligible,
     score: breakdown.score,
