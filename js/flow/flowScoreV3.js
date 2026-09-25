@@ -136,7 +136,9 @@ export function createFlowScoreV3Result({
     consistencySamples: Math.max(0, Math.round(finite(cadence.sampleCount))),
     activeDurationMs,
     wordsCompleted: breakdown.standardWords,
-    charactersCompleted: Math.max(0, Math.round(finite(snapshot.currentIndex))),
+    charactersCompleted: Math.max(0, Math.round(
+      finite(snapshot.totalInsertedCharacters, snapshot.currentIndex),
+    )),
     correctCharacters: breakdown.correctCharacters,
     correctKeystrokes: Math.max(0, Math.round(finite(gameplay.correctKeystrokes))),
     incorrectKeystrokes: Math.max(0, Math.round(finite(gameplay.incorrectKeystrokes))),
