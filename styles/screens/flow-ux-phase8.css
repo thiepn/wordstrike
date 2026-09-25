@@ -80,10 +80,16 @@
 }
 
 .flow-ux-focus-hint {
+  position: absolute;
+  z-index: 5;
+  top: 6px;
+  left: 50%;
   display: inline-flex;
-  width: fit-content;
-  margin: 0 0 2px;
+  width: max-content;
+  max-width: calc(100% - 24px);
+  margin: 0;
   padding: 5px 8px;
+  transform: translateX(-50%);
   border-left: 1px solid var(--flow-signal);
   color: var(--flow-ink-soft);
   background: var(--flow-signal-faint);
