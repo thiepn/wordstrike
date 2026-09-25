@@ -1,3 +1,4 @@
+import { getResilientBrowserStorage } from "./browserStorage.js";
 const TIMELINE_VERSION = 1;
 const DEFAULT_BUCKET_MS = 1000;
 const MAX_TIMELINE_POINTS = 600;
@@ -271,8 +272,10 @@ function sanitizeStoredTimeline(value) {
 }
 
 function readTimelineStore() {
+  const storage = getResilientBrowserStorage();
+  if (!storage) return [];
   try {
-    const parsed = JSON.parse(globalThis.localStorage?.getItem(STORAGE_KEY) || "[]");
+    const parsed = JSON.parse(storage.getItem(STORAGE_KEY) || "[]");
     return Array.isArray(parsed) ? parsed : [];
   } catch {
     return [];
@@ -287,7 +290,9 @@ export function persistSpeedTestTimeline(sessionId, timeline, endedAt = Date.now
     const existing = readTimelineStore().filter((entry) => entry?.sessionId !== sessionId);
     const next = [{ sessionId, endedAt: nonNegative(endedAt, Date.now()), timeline: safeTimeline }, ...existing]
       .slice(0, MAX_STORED_TIMELINES);
-    globalThis.localStorage?.setItem(STORAGE_KEY, JSON.stringify(next));
+    const storage = getResilientBrowserStorage();
+    if (!storage) return false;
+    storage.setItem(STORAGE_KEY, JSON.stringify(next));
     return true;
   } catch {
     return false;
