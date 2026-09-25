@@ -54,9 +54,9 @@ const long = calculateFlowScoreV3({
 assert.ok(short.score > 0);
 assert.ok(long.score > short.score * 2,
   "more correctly typed text must directly increase score and earn an endurance bonus");
-assert.equal(FLOW_SCORE_V3_RULES.rulesVersion, 3);
+assert.equal(FLOW_SCORE_V3_RULES.rulesVersion, 4);
 assert.equal(FLOW_SCORE_V3_RULES.metricVersion, 2);
-assert.equal(FLOW_V3_BOARD_KEY, "flow-standard-v1");
+assert.equal(FLOW_V3_BOARD_KEY, "flow-standard-3m-v1");
 
 const emptyHistory = {
   recentDocumentIds: [],
@@ -116,23 +116,23 @@ assert.equal(FLOW_V3_SESSION_PRESETS.endless.durationMs, null);
 
 const snapshot = {
   phase: "running",
-  currentIndex: 600,
+  currentIndex: 900,
   passageLength: firstPlan.fullText.length,
-  correctChars: 600,
-  correctedErrors: 20,
+  correctChars: 900,
+  correctedErrors: 30,
   uncorrectedErrors: 0,
   wordTimings: [],
   gameplay: {
-    correctKeystrokes: 600,
-    incorrectKeystrokes: 20,
-    accuracyPercent: 600 / 620 * 100,
+    correctKeystrokes: 900,
+    incorrectKeystrokes: 30,
+    accuracyPercent: 900 / 930 * 100,
   },
   cadence: {
     finalWpm: 60,
     rawWpm: 62,
     cadenceScore: 90,
     sampleCount: 500,
-    typingDurationMs: 120000,
+    typingDurationMs: 180000,
   },
 };
 const result = createFlowScoreV3Result({
@@ -144,17 +144,17 @@ const result = createFlowScoreV3Result({
 });
 assert.ok(result);
 assert.equal(result.variantId, "flow-v3");
-assert.equal(result.boardKey, "flow-standard-v1");
+assert.equal(result.boardKey, "flow-standard-3m-v1");
 assert.equal(result.sessionLength, "flow");
 assert.equal(result.sessionPreset, "standard");
 assert.equal(result.completed, true);
 assert.equal(result.recordEligible, true);
-assert.equal(result.correctCharacters, 600);
-assert.equal(result.wordsCompleted, 120);
+assert.equal(result.correctCharacters, 900);
+assert.equal(result.wordsCompleted, 180);
 assert.equal(result.score, calculateFlowScoreV3({
-  correctCharacters: 600,
+  correctCharacters: 900,
   wpm: 60,
-  accuracy: 600 / 620 * 100,
+  accuracy: 900 / 930 * 100,
   consistency: 90,
 }).score);
 
@@ -185,11 +185,11 @@ assert.ok(normalized);
 assert.equal(normalized.sessionLength, "flow");
 assert.equal("sessionPreset" in normalized, false,
   "session preset is local metadata and must not alter the server submission schema");
-assert.equal(normalized.correctCharacters, 600);
+assert.equal(normalized.correctCharacters, 900);
 assert.equal(normalized.endedReason, "complete");
 const payload = buildSubmissionPayload("flow", result);
 assert.ok(payload);
-assert.equal(payload.boardKey, "flow-standard-v1");
+assert.equal(payload.boardKey, "flow-standard-3m-v1");
 assert.equal(validateScoreSubmission(payload).valid, true);
 assert.equal(
   validateScoreSubmission({
@@ -220,15 +220,15 @@ assert.equal(
   "METRIC_MISMATCH",
 );
 
-assert.equal(FLOW_CONTRACT_VERSION, 2);
-assert.equal(FLOW_RULES_VERSION, 3);
+assert.equal(FLOW_CONTRACT_VERSION, 3);
+assert.equal(FLOW_RULES_VERSION, 4);
 assert.equal(FLOW_METRIC_VERSION, 2);
-assert.deepEqual(FLOW_BOARD_KEYS, ["flow-standard-v1"]);
-assert.equal(FLOW_LEADERBOARD_RULES_VERSION, 3);
-assert.equal(PUBLIC_BOARD_KEYS.includes("flow-standard-v1"), true);
+assert.deepEqual(FLOW_BOARD_KEYS, ["flow-standard-3m-v1"]);
+assert.equal(FLOW_LEADERBOARD_RULES_VERSION, 4);
+assert.equal(PUBLIC_BOARD_KEYS.includes("flow-standard-3m-v1"), true);
 assert.equal(PUBLIC_BOARD_KEYS.includes("flow-quick-v1"), false);
 assert.equal(PUBLIC_BOARD_KEYS.includes("flow-long-v1"), false);
-assert.equal(validateLeaderboardRequest({ boardKey: "flow-standard-v1" }).valid, true);
+assert.equal(validateLeaderboardRequest({ boardKey: "flow-standard-3m-v1" }).valid, true);
 assert.equal(validateLeaderboardRequest({ boardKey: "flow-quick-v1" }).code, "INVALID_BOARD");
 assert.equal(validateLeaderboardRequest({ boardKey: "flow-long-v1" }).code, "INVALID_BOARD");
 
@@ -258,7 +258,7 @@ const [phase1, loader, ui, migration] = await Promise.all([
   readFile(new URL("../js/flow/flowPhase1.js", import.meta.url), "utf8"),
   readFile(new URL("../js/flow/flowRuntimeLoader.js", import.meta.url), "utf8"),
   readFile(new URL("../js/leaderboardUi.js", import.meta.url), "utf8"),
-  readFile(new URL("../supabase/migrations/20260923213343_flow_v3_instant_play.sql", import.meta.url), "utf8"),
+  readFile(new URL("../supabase/migrations/20260925154500_flow_timed_3m_leaderboard_v1.sql", import.meta.url), "utf8"),
 ]);
 assert.match(phase1, /if \(isPublicStreamRun\(\)\) \{\s*startRun\(\);/);
 assert.match(phase1, /event\.key === "Tab"/);
@@ -277,9 +277,9 @@ assert.match(loader, /flowLength/);
 assert.match(loader, /flowStreamPlanV3\.js\?v=[0-9a-z]+/);
 assert.match(loader, /flowScoreV3\.js\?v=[0-9a-z]+/);
 assert.match(loader, /flowRecordsV3\.js\?v=[0-9a-z]+/);
-assert.match(migration, /where board_key in \('flow-quick-v1', 'flow-long-v1'\)/);
-assert.match(migration, /where board_key = 'flow-standard-v1'/);
-assert.match(migration, /rules_version = 3/);
+assert.match(migration, /flow-quick-v1', 'flow-standard-v1', 'flow-long-v1/);
+assert.match(migration, /flow-standard-3m-v1/);
+assert.match(migration, /rules_version[^\n]*4|rules_version, ranking_strategy[\s\S]*\n\s*4,/);
 assert.match(migration, /'wordsCompleted', words_completed/);
 
-console.log("Flow V3 session contracts passed: direct timed stream, in-run Tab skip, duration presets, theme filter, volume-driven score, one leaderboard, durable PBs, and server validation.");
+console.log("Flow V3 session contracts passed: direct timed stream, next-source Tab skip, duration presets, theme filter, rules-v4 3-minute scoring, durable PBs, and server validation.");
