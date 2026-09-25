@@ -175,6 +175,20 @@ function focusTypingInput(screen) {
   queueMicrotask(() => setTypingFocusState(screen));
 }
 
+function positionStreamCaret(screen, current, viewport) {
+  const caret = screen?.querySelector?.("[data-flow-live-caret]");
+  if (!caret || !current || !viewport) return false;
+  const viewportRect = viewport.getBoundingClientRect();
+  const currentRect = current.getBoundingClientRect();
+  const x = currentRect.left - viewportRect.left + viewport.scrollLeft;
+  const y = currentRect.top - viewportRect.top + viewport.scrollTop;
+  const height = Math.max(18, currentRect.height * 0.88);
+  caret.style.height = `${height.toFixed(2)}px`;
+  caret.style.transform = `translate3d(${x.toFixed(2)}px, ${(y + (currentRect.height - height) / 2).toFixed(2)}px, 0)`;
+  caret.hidden = false;
+  return true;
+}
+
 function keepStreamCaretInTypingViewport(screen, current) {
   if (screen?.dataset?.flowStreamV3 !== "true") return false;
   const viewport = screen.querySelector(".flow-passages");
@@ -196,6 +210,7 @@ function keepStreamCaretInTypingViewport(screen, current) {
   if (Math.abs(viewport.scrollTop - targetScrollTop) > 1) {
     viewport.scrollTop = targetScrollTop;
   }
+  positionStreamCaret(screen, current, viewport);
   return true;
 }
 
