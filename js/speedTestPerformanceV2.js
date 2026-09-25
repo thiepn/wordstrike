@@ -1,3 +1,4 @@
+import { getResilientBrowserStorage } from "./browserStorage.js";
 import { getRecentSessions } from "./modeStorage.js";
 import { getCurrentSpeedTest } from "./speedTest.js";
 
@@ -150,7 +151,7 @@ export function selectPreviousComparableSession(recentSessions = [], result = {}
 
 function readLayerPreferences() {
   try {
-    const parsed = JSON.parse(globalThis.localStorage?.getItem(LAYER_STORAGE_KEY) || "null");
+    const parsed = JSON.parse(getResilientBrowserStorage()?.getItem(LAYER_STORAGE_KEY) || "null");
     return {
       raw: parsed?.raw !== false,
       sustained: parsed?.sustained !== false,
@@ -163,7 +164,7 @@ function readLayerPreferences() {
 
 function writeLayerPreferences(layers) {
   try {
-    globalThis.localStorage?.setItem(LAYER_STORAGE_KEY, JSON.stringify(layers));
+    getResilientBrowserStorage()?.setItem(LAYER_STORAGE_KEY, JSON.stringify(layers));
   } catch {
     // Layer preferences are optional and must never block results rendering.
   }
