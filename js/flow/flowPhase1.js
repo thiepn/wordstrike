@@ -30,6 +30,7 @@ import {
 } from "./flowScoreV2.js?v=20260923f";
 import { recordFlowResultV2 } from "./flowRecordsV2.js?v=20260923f";
 import {
+  FLOW_SCORE_V3_RULES,
   calculateFlowScoreV3,
   createFlowScoreV3Result,
 } from "./flowScoreV3.js?v=20260925d";
@@ -1493,7 +1494,7 @@ function renderPublicComplete(app, snapshot) {
         <section class="flow-v2-result-metrics" aria-label="Flow results">
           <div><span>WPM</span><strong>${result.wpm.toFixed(1)}</strong></div>
           <div><span>Accuracy</span><strong>${result.accuracy.toFixed(1)}%</strong></div>
-          <div><span>Consistency</span><strong>${result.consistency.toFixed(0)}</strong></div>
+          <div><span>Consistency</span><strong>${consistencyLabel}</strong></div>
         </section>
         <div class="flow-v2-result-meta">
           <span>${result.wordsCompleted.toLocaleString("en-US")} words</span>
@@ -1592,6 +1593,9 @@ function renderPublicStreamSessionComplete(result) {
   const durationLabel = profile.durationMs == null
     ? formatRunDuration(result.activeDurationMs)
     : `${profile.minutes}:00 session`;
+  const consistencyLabel = result.consistencySamples >= FLOW_SCORE_V3_RULES.minimumConsistencySamples
+    ? result.consistency.toFixed(0)
+    : "—";
   const eligibility = result.recordEligible
     ? ""
     : profile.id !== "standard"
@@ -1621,7 +1625,8 @@ function renderPublicStreamSessionComplete(result) {
         <div class="flow-v2-result-meta">
           <span>${result.wordsCompleted.toLocaleString("en-US")} words</span>
           <span>${durationLabel}</span>
-          <span>${result.correctCharacters.toLocaleString("en-US")} correct chars</span>
+          <span>${result.incorrectKeystrokes.toLocaleString("en-US")} mistypes</span>
+          <span>${result.correctedErrors.toLocaleString("en-US")} corrected</span>
         </div>
         ${eligibility}
         ${globalSubmission}
