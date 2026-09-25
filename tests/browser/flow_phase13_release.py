@@ -83,7 +83,8 @@ def launch_public_flow(page):
     expect(page.locator('[data-flow-source-title]')).to_have_text(plan["documents"][0]["title"])
     expect(page.locator('[data-flow-source-position]')).to_contain_text("Text 1 /")
     expect(page.locator('[data-flow-hud-v5="true"]')).to_be_visible()
-    expect(page.locator('[data-flow-progression]')).to_be_visible()
+    expect(page.locator('[data-flow-progression]')).to_be_hidden()
+    expect(page.locator('[data-flow-session-strip]')).to_be_hidden()
     progression = page.evaluate("window.wordstrikeFlowPhase1.getPublicProgressionState()")
     assert progression["summary"]["totalMilestones"] == 25, progression
     return plan
