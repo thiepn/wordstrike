@@ -329,12 +329,14 @@ function decorateRun(screen) {
     copy.prepend(hint);
   }
 
-  for (const target of [screen.querySelector(".flow-run-copy"), screen.querySelector("[data-flow-passage]")]) {
-    target?.addEventListener("pointerdown", (event) => {
-      event.preventDefault();
-      focusTypingInput(screen);
-    });
-  }
+  screen.addEventListener("pointerdown", (event) => {
+    const interactive = event.target?.closest?.(
+      'button, select, input, textarea, a[href], [contenteditable="true"], [role="button"]',
+    );
+    if (interactive) return;
+    event.preventDefault();
+    focusTypingInput(screen);
+  });
   const input = focusCapture(screen);
   input?.addEventListener("focus", () => setTypingFocusState(screen));
   input?.addEventListener("blur", () => queueMicrotask(() => setTypingFocusState(screen)));
