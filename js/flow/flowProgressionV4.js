@@ -38,7 +38,7 @@ export const FLOW_PROGRESSION_V4_MILESTONES = Object.freeze([
   Object.freeze({ id: "eligible-streak-3", category: "streak", name: "Three Strong", description: "Record 3 eligible runs in a row.", metric: "eligibleStreak", target: 3 }),
   Object.freeze({ id: "eligible-streak-7", category: "streak", name: "Seven Strong", description: "Record 7 eligible runs in a row.", metric: "eligibleStreak", target: 7 }),
   Object.freeze({ id: "precision-streak-3", category: "precision", name: "Clean Line", description: "Record 3 eligible runs at 98%+ accuracy in a row.", metric: "precisionStreak", target: 3 }),
-  Object.freeze({ id: "endurance-5m", category: "endurance", name: "Stay With It", description: "Sustain one eligible Flow run for 5 active minutes.", metric: "endurance", target: 5 * 60_000 }),
+  Object.freeze({ id: "endurance-5m", category: "endurance", name: "Stay With It", description: "Sustain one Flow run for 5 active minutes.", metric: "endurance", target: 5 * 60_000 }),
 ].filter((milestone) => milestone.target > 0));
 
 export const FLOW_PROGRESSION_V4_REWARD_TIERS = Object.freeze([
@@ -190,12 +190,12 @@ function applyRun(progress, run, themes = []) {
   progress.lastPlayedAt = Math.max(progress.lastPlayedAt || 0, run.endedAt);
 
   progress.best.score = Math.max(progress.best.score, run.score);
+  progress.best.activeDurationMs = Math.max(progress.best.activeDurationMs, run.activeDurationMs);
+  progress.best.words = Math.max(progress.best.words, run.wordsCompleted);
   if (run.recordEligible) {
     progress.best.wpm = Math.max(progress.best.wpm, run.wpm);
     progress.best.accuracy = Math.max(progress.best.accuracy, run.accuracy);
     progress.best.consistency = Math.max(progress.best.consistency, run.consistency);
-    progress.best.activeDurationMs = Math.max(progress.best.activeDurationMs, run.activeDurationMs);
-    progress.best.words = Math.max(progress.best.words, run.wordsCompleted);
   }
 
   if (run.recordEligible) progress.streaks.eligibleCurrent += 1;
