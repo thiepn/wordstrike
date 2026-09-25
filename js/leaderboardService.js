@@ -27,7 +27,14 @@ export const LEADERBOARD_CATEGORIES = Object.freeze({
 
 const LEGACY_DAILY_BOARD_KEY = "daily-strike-v1";
 const LEGACY_DAILY_CATEGORY = "daily";
-const VALID_BOARDS = Object.freeze(Object.values(LEADERBOARD_BOARDS));
+const VALID_BOARDS = Object.freeze([
+  LEADERBOARD_BOARDS.CAMPAIGN,
+  LEADERBOARD_BOARDS.TYPING_60,
+  LEADERBOARD_BOARDS.TYPING_15,
+  LEADERBOARD_BOARDS.ENDLESS,
+  LEADERBOARD_BOARDS.ARCADE_RUSH,
+  LEADERBOARD_BOARDS.FLOW_STANDARD,
+]);
 const VALID_CATEGORIES = Object.freeze(Object.values(LEADERBOARD_CATEGORIES));
 const PUBLIC_CATEGORIES = Object.freeze([
   LEADERBOARD_CATEGORIES.CAMPAIGN,
@@ -43,9 +50,7 @@ export const EXPECTED_LEADERBOARD_RULES_VERSIONS = Object.freeze({
   [LEADERBOARD_BOARDS.TYPING_15]: 1,
   [LEADERBOARD_BOARDS.ENDLESS]: 1,
   [LEADERBOARD_BOARDS.ARCADE_RUSH]: ARCADE_RUSH_LEADERBOARD_RULES_VERSION,
-  [LEADERBOARD_BOARDS.FLOW_QUICK]: 2,
   [LEADERBOARD_BOARDS.FLOW_STANDARD]: FLOW_SCORE_V3_RULES.rulesVersion,
-  [LEADERBOARD_BOARDS.FLOW_LONG]: 2,
 });
 
 export function isLeaderboardCacheStateCurrent(boardKey, cachedState) {
@@ -96,8 +101,8 @@ export function getBoardKeyForSelection(category, typingDuration = 60, flowLengt
   return LEADERBOARD_BOARDS.CAMPAIGN;
 }
 
-// Public navigation excludes retired modes. Legacy boards remain addressable
-// directly so old saved/submitted results can still be inspected safely.
+// Public navigation and fetches exclude retired Flow boards. Their constants
+// remain only for migration/rejection compatibility.
 const PUBLIC_KEYBOARD_CATEGORY_ORDER = PUBLIC_CATEGORIES;
 
 export function getLeaderboardKeyboardTarget(state, key) {
