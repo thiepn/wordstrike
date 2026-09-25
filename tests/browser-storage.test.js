@@ -106,7 +106,7 @@ test("per-key fallback keeps the newest session copy authoritative after a local
     sessionStorage: session,
   });
   assert.equal(reloaded.getItem("large-key"), "new-session");
-  assert.equal(local.getItem("large-key"), "old-local");
+  assert.equal(local.getItem("large-key"), null, "stale persistent copy should be cleared after the failed write");
 });
 
 test("Campaign saves and compact progress backup survive Firefox localStorage failure", () => {
