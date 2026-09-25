@@ -383,6 +383,30 @@ def certify_word_recovery(browser, browser_name, base, evidence):
         "expectedGlyph": first.group()[omit],
         "rendered": error_node.text_content(),
     }
+    assert error_node.get_attribute("data-flow-actual") not in (None, first.group()[omit])
+
+    typing_surface = page.locator('[data-flow-longform="true"]')
+    font_family = typing_surface.evaluate("el => getComputedStyle(el).fontFamily")
+    assert "Mono" in font_family or "monospace" in font_family.lower(), font_family
+
+    second_word_geometry = page.evaluate(
+        """range => {
+          const chars = [...document.querySelectorAll('[data-flow-char]')]
+            .filter(el => Number(el.dataset.flowChar) >= range.start && Number(el.dataset.flowChar) < range.end);
+          const wrappers = new Set(chars.map(el => el.closest('.flow-word')));
+          const tops = new Set(chars.map(el => Math.round(el.getBoundingClientRect().top * 10) / 10));
+          return {
+            count: chars.length,
+            wrapperCount: wrappers.size,
+            wrapperClass: chars[0]?.closest('.flow-word')?.className || '',
+            topCount: tops.size,
+          };
+        }""",
+        {"start": second_start, "end": segment["startIndex"] + second.end()},
+    )
+    assert second_word_geometry["wrapperCount"] == 1, second_word_geometry
+    assert "flow-word" in second_word_geometry["wrapperClass"], second_word_geometry
+    assert second_word_geometry["topCount"] == 1, second_word_geometry
 
     page.keyboard.type(second.group())
     second_end = segment["startIndex"] + second.end()
@@ -400,13 +424,17 @@ def certify_word_recovery(browser, browser_name, base, evidence):
 
     boundary = page.locator(f'[data-flow-char="{second_end}"]')
     width_before = boundary.evaluate("el => el.getBoundingClientRect().width")
+    caret_before = page.locator('[data-flow-live-caret]').evaluate("el => el.getBoundingClientRect().left")
     page.keyboard.type("x")
+    page.wait_for_timeout(100)
     snapshot = page.evaluate("window.wordstrikeFlowPhase1.getSnapshot()")
     assert snapshot["currentIndex"] == second_end, snapshot
     width_after = boundary.evaluate("el => el.getBoundingClientRect().width")
+    caret_after = page.locator('[data-flow-live-caret]').evaluate("el => el.getBoundingClientRect().left")
     assert boundary.text_content() == " "
     assert boundary.get_attribute("data-flow-extra") == "x"
     assert abs(width_after - width_before) <= 0.1, (width_before, width_after)
+    assert caret_after > caret_before + 1, (caret_before, caret_after)
 
     page.keyboard.press("Backspace")
     assert boundary.get_attribute("data-flow-extra") is None
@@ -419,6 +447,9 @@ def certify_word_recovery(browser, browser_name, base, evidence):
         "nextWord": second.group(),
         "boundaryWidthBefore": width_before,
         "boundaryWidthAfter": width_after,
+        "caretBeforeExtra": caret_before,
+        "caretAfterExtra": caret_after,
+        "fontFamily": font_family,
     })
     context.close()
 
