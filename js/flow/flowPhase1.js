@@ -1558,10 +1558,12 @@ function renderPublicStreamSessionComplete(result) {
 
   const profile = currentPublicSessionProfile();
   const recordState = lastPublicRecordState || {};
-  const pbCopy = recordState.isPersonalBest
+  const competitiveSession = profile.id === "standard";
+  const competitivePersonalBest = competitiveSession ? recordState.personalBest : null;
+  const pbCopy = competitiveSession && recordState.isPersonalBest
     ? '<div class="flow-v2-pb-badge" data-flow-v3-pb="new">NEW PERSONAL BEST</div>'
-    : recordState.personalBest
-      ? `<div class="flow-v2-pb-reference">Personal best <strong>${recordState.personalBest.score.toLocaleString("en-US")}</strong></div>`
+    : competitivePersonalBest
+      ? `<div class="flow-v2-pb-reference">3-minute personal best <strong>${competitivePersonalBest.score.toLocaleString("en-US")}</strong></div>`
       : "";
   const durationLabel = profile.durationMs == null
     ? formatRunDuration(result.activeDurationMs)
