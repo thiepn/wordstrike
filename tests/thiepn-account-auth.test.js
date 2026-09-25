@@ -18,14 +18,22 @@ test("WordStrike retires its app-specific auth key without promoting it", () => 
     /RETIRED_WORDSTRIKE_AUTH_STORAGE_KEY\s*=\s*["']wordstrike_supabase_auth_v1["']/,
   );
   assert.match(source, /cleanupRetiredAuthStorage\(/);
-  assert.match(source, /storage\.removeItem\(`\$\{RETIRED_WORDSTRIKE_AUTH_STORAGE_KEY\}\$\{suffix\}`\)/);
+  assert.match(source, /target\.removeItem\(\`\$\{RETIRED_WORDSTRIKE_AUTH_STORAGE_KEY\}\$\{suffix\}\`\)/);
   assert.doesNotMatch(source, /prepareSharedAuthStorage\(/);
   assert.doesNotMatch(source, /LEGACY_WORDSTRIKE_AUTH_STORAGE_KEY/);
 });
 
 test("shared THIEPN Account storage is configured on the Supabase client", () => {
   assert.match(source, /storageKey:\s*SUPABASE_AUTH_STORAGE_KEY/);
-  assert.match(source, /cleanupRetiredAuthStorage\(\)/);
+  assert.match(source, /cleanupRetiredAuthStorage\(storage\)/);
+  assert.match(source, /auth\.storage\s*=\s*authStorage/);
+});
+
+test("Firefox-safe auth storage avoids direct localStorage default access and has a refresh-safe fallback", () => {
+  assert.match(source, /safeGlobalStorage\("localStorage"\)/);
+  assert.match(source, /safeGlobalStorage\("sessionStorage"\)/);
+  assert.match(source, /createAuthStorageAdapter\(/);
+  assert.doesNotMatch(source, /storage\s*=\s*globalThis\.localStorage/);
 });
 
 test("THIEPN Account presentation enhancer is idempotent under its MutationObserver", () => {
