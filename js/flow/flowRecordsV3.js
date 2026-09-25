@@ -1,7 +1,7 @@
 import { compareFlowScoreV3Results } from "./flowScoreV3.js";
 
-export const FLOW_RECORDS_V3_STORAGE_KEY = "wordstrike_flow_records_v3";
-export const FLOW_RECORDS_V3_VERSION = 1;
+export const FLOW_RECORDS_V3_STORAGE_KEY = "wordstrike_flow_records_v3_timed_3m";
+export const FLOW_RECORDS_V3_VERSION = 2;
 export const FLOW_RECORDS_V3_MAX_HISTORY = 40;
 export const FLOW_RECORDS_V3_MAX_SESSION_IDS = 120;
 
@@ -13,12 +13,12 @@ function cleanResult(value) {
   if (!sessionId) return null;
   return {
     schemaVersion: 1,
-    contractVersion: 2,
-    rulesVersion: 3,
+    contractVersion: 3,
+    rulesVersion: 4,
     metricVersion: 2,
     modeId: "flow",
     variantId: "flow-v3",
-    boardKey: "flow-standard-v1",
+    boardKey: "flow-standard-3m-v1",
     sessionId,
     endedAt: Math.max(0, finite(value.endedAt)),
     endedReason: ["reset", "complete", "exit", "theme-change"].includes(value.endedReason)
@@ -115,7 +115,7 @@ export function getFlowRecentRunsV3(limit = 5) {
 export function recordFlowResultV3(result) {
   const clean = cleanResult(result);
   const records = loadFlowRecordsV3();
-  if (!clean || records.recordedSessionIds.includes(clean.sessionId)) {
+  if (!clean || !clean.completed || records.recordedSessionIds.includes(clean.sessionId)) {
     return {
       recorded: false,
       isPersonalBest: false,
