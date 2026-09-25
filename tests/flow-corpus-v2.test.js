@@ -155,7 +155,7 @@ const loader = await readFile(new URL("../js/flow/flowRuntimeLoader.js", import.
 const phase1 = await readFile(new URL("../js/flow/flowPhase1.js", import.meta.url), "utf8");
 assert.match(loader, /flowCorpusV2\.js\?v=20260923a/);
 assert.match(loader, /flowCorpusHistory\.js\?v=20260923a/);
-assert.match(loader, /wordstrike-flow-release-v30/);
+assert.match(loader, /wordstrike-flow-release-v31/);
 assert.match(phase1, /recordFlowCorpusRun/);
 assert.match(phase1, /corpusVersion === 2/);
 
