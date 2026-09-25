@@ -33,17 +33,17 @@ import {
   FLOW_SCORE_V3_RULES,
   calculateFlowScoreV3,
   createFlowScoreV3Result,
-} from "./flowScoreV3.js?v=20260925d";
+} from "./flowScoreV3.js?v=20260925e";
 import {
   getFlowPersonalBestV3,
   loadFlowRecordsV3,
   recordFlowResultV3,
-} from "./flowRecordsV3.js?v=20260923a";
+} from "./flowRecordsV3.js?v=20260925a";
 import {
   getFlowProgressionSummaryV4,
   loadFlowProgressionV4,
   recordFlowProgressionV4,
-} from "./flowProgressionV4.js?v=20260924a";
+} from "./flowProgressionV4.js?v=20260925b";
 import {
   createFlowSessionV4,
   formatFlowSessionDurationV4,
