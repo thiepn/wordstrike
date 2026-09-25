@@ -3,7 +3,7 @@ import {
   createFlowTypingRun,
   getFlowTypingSnapshot,
   insertFlowText,
-} from "./flowEngine.js";
+} from "./flowEngine.js?v=20260925a";
 import {
   analyzeFlowCadence,
   analyzeFlowCadenceLive,
@@ -506,6 +506,32 @@ function publicLongformMarkup() {
   }).join("");
 }
 
+function syncPublicStreamIdentity(app = root()) {
+  if (!isPublicStreamRun() || !app) return;
+  const identity = getFlowStreamIdentity(resolvedRunPlan, activeSegmentIndex);
+  setTextIfChanged(app.querySelector("[data-flow-source-position]"), identity.sourcePosition);
+  setTextIfChanged(app.querySelector("[data-flow-source-title]"), identity.sourceTitle);
+  const sourceTitle = app.querySelector("[data-flow-source-title]");
+  if (sourceTitle?.getAttribute("title") !== identity.sourceTitle) {
+    sourceTitle?.setAttribute("title", identity.sourceTitle);
+  }
+  setTextIfChanged(app.querySelector("[data-flow-source-meta]"), publicStreamSourceMeta(identity));
+}
+
+function refreshPublicStreamPassage() {
+  if (!isPublicStreamRun()) return false;
+  const app = root();
+  const passage = app?.querySelector?.("[data-flow-passage]");
+  if (!app || !passage) return false;
+  passage.innerHTML = publicLongformMarkup();
+  rebuildMountedCharacterNodes(app);
+  syncPublicStreamIdentity(app);
+  const viewport = app.querySelector(".flow-passages");
+  if (viewport) viewport.scrollTop = 0;
+  globalThis.window?.wordstrikeFlowUxPhase8?.scheduleCaretVisibility?.();
+  return true;
+}
+
 function syncPublicSegmentIndex() {
   if (!run || !isPublicLongformRun()) return;
   while (
@@ -600,11 +626,21 @@ function flowCharacterAt(index) {
   if (!run?.passage || index < 0 || index >= run.passage.length) return null;
   const expected = run.passage[index];
   const typed = run.typedCharacters[index];
+  const extras = (run.extraCharacters || []).filter((entry) => entry.index === index);
+  const hasExtras = extras.length > 0;
   return {
     index,
     expected,
-    actual: typed?.actual ?? null,
-    status: typed ? (typed.correct ? "correct" : "incorrect") : "pending",
+    actual: hasExtras
+      ? `${extras.map((entry) => entry.actual).join("")}${typed?.actual ?? expected}`
+      : typed?.actual ?? null,
+    status: hasExtras
+      ? "incorrect"
+      : typed?.missed
+        ? "missed"
+        : typed
+          ? (typed.correct ? "correct" : "incorrect")
+          : "pending",
     current: index === run.currentIndex && run.phase !== FLOW_PHASES.COMPLETE,
   };
 }
@@ -677,14 +713,18 @@ function runHeaderLabel() {
   return `CHAPTER ${segment.chapterIndex + 1}/${resolvedRunPlan.chapterCount} · ${chapter.title.toUpperCase()} · ${segment.passageIndex + 1}/${chapter.passages.length}`;
 }
 
-function publicStreamIdentityMarkup() {
-  if (!isPublicStreamRun()) return "";
-  const identity = getFlowStreamIdentity(resolvedRunPlan, activeSegmentIndex);
-  const sourceMeta = [
+function publicStreamSourceMeta(identity) {
+  return [
     identity.sourceThemeLabel,
     identity.difficulty,
     identity.wordCount ? `${identity.wordCount.toLocaleString("en-US")} words` : null,
   ].filter(Boolean).join(" · ");
+}
+
+function publicStreamIdentityMarkup() {
+  if (!isPublicStreamRun()) return "";
+  const identity = getFlowStreamIdentity(resolvedRunPlan, activeSegmentIndex);
+  const sourceMeta = publicStreamSourceMeta(identity);
   return `<div class="flow-v5-brand" data-flow-identity>
       <strong><i aria-hidden="true"></i>${escapeHtml(identity.modeLabel)}</strong>
       <span>${escapeHtml(identity.modeDescriptor)}</span>
@@ -907,7 +947,7 @@ function renderRun() {
     ? `<div class="flow-passage flow-longform-passage" data-flow-passage data-flow-longform="true" aria-label="Longform typing text">${publicLongformMarkup()}</div>`
     : `<div class="flow-passage" data-flow-passage aria-label="${escapeHtml(visiblePassageText())}">${visibleCharacterView().map(charMarkup).join("")}</div>`;
   app.innerHTML = `
-    <section class="screen flow-phase1-screen flow-run-screen" data-flow-view="run"${publicLongform ? ' data-flow-longform-v2="true"' : ""}>
+    <section class="screen flow-phase1-screen flow-run-screen" data-flow-view="run"${publicLongform ? ' data-flow-longform-v2="true"' : ""}${isPublicStreamRun() ? ' data-flow-stream-v3="true"' : ""}>
       <main class="flow-run-shell">
         <header class="flow-run-header${isPublicStreamRun() ? " flow-v5-run-header" : ""}">
           <button type="button" class="screen-back-button" data-flow-action="back">BACK</button>
@@ -1074,7 +1114,9 @@ function updateRunView(startIndex = run?.currentIndex ?? 0, endIndex = startInde
     const beforeSegment = activeSegmentIndex;
     syncPublicSegmentIndex();
     if (isPublicStreamRun() && activeSegmentIndex !== beforeSegment) {
-      renderRun();
+      refreshPublicStreamPassage();
+      syncRunHud();
+      scheduleCadenceHud();
       return;
     }
   } else if (maybeAdvanceRunPlan()) return;
