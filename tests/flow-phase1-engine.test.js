@@ -68,4 +68,29 @@ assert.equal(unresolved.phase, FLOW_PHASES.COMPLETE);
 assert.equal(unresolved.uncorrectedErrors, 1, "Phase 1 must preserve unresolved mistakes at completion");
 assert.equal(unresolved.incorrectChars, 1);
 
-console.log("Flow Phase 1 engine contracts passed: complete text, punctuation, corrections, unresolved errors, and timing telemetry.");
+const earlyWordCommit = createFlowTypingRun("brown fox", { category: "everyday", difficulty: "natural" });
+assert.equal(insertFlowText(earlyWordCommit, "bown ", 400), true);
+assert.equal(earlyWordCommit.currentIndex, 6, "Space should commit the damaged word and start the next word cleanly");
+assert.equal(getFlowCharacterView(earlyWordCommit)[6].current, true);
+assert.equal(insertFlowText(earlyWordCommit, "fox", 410), true);
+assert.equal(earlyWordCommit.phase, FLOW_PHASES.COMPLETE);
+assert.equal(
+  getFlowCharacterView(earlyWordCommit).slice(6).every((character) => character.status === "correct"),
+  true,
+  "A mistake in one word must not cascade into following words",
+);
+
+const extraAtBoundary = createFlowTypingRun("cat dog", { category: "everyday", difficulty: "natural" });
+assert.equal(insertFlowText(extraAtBoundary, "catt", 500), true);
+assert.equal(extraAtBoundary.currentIndex, 3, "Extra letters at a word boundary must not consume the next word");
+assert.equal(extraAtBoundary.extraCharacters.length, 1);
+assert.equal(getFlowCharacterView(extraAtBoundary)[3].actual, "t ");
+assert.equal(backspaceFlowText(extraAtBoundary, 510), true);
+assert.equal(extraAtBoundary.currentIndex, 3);
+assert.equal(extraAtBoundary.extraCharacters.length, 0);
+assert.equal(extraAtBoundary.uncorrectedErrors, 0);
+assert.equal(insertFlowText(extraAtBoundary, " dog", 520), true);
+assert.equal(extraAtBoundary.phase, FLOW_PHASES.COMPLETE);
+assert.equal(extraAtBoundary.correctedErrors, 1);
+
+console.log("Flow Phase 1 engine contracts passed: complete text, punctuation, corrections, word-boundary recovery, unresolved errors, and timing telemetry.");
