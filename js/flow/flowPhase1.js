@@ -1656,31 +1656,43 @@ function submitPublicStreamBestInBackground(result, recordState) {
   });
 }
 
-function reachedPublicStreamDocumentIndex() {
-  if (!isPublicStreamRun() || !run || !resolvedRunPlan?.documents?.length) return 0;
-  let reachedDocumentIndex = 0;
-  for (const segment of resolvedRunPlan.segments || []) {
-    if (run.currentIndex > segment.startIndex) {
-      reachedDocumentIndex = Math.max(reachedDocumentIndex, segment.documentIndex || 0);
-    }
+function typedPublicStreamDocumentIndexes() {
+  if (!isPublicStreamRun() || !run || !resolvedRunPlan?.segments?.length) return [];
+  const typed = new Set();
+  for (const event of run.rawKeystrokes || []) {
+    if (event?.type !== "insert" || !Number.isInteger(Number(event.index))) continue;
+    const index = Number(event.index);
+    const segment = resolvedRunPlan.segments.find((candidate) => (
+      index >= candidate.startIndex
+      && index <= (candidate.separatorIndex ?? candidate.endIndex)
+    ));
+    if (segment && Number.isInteger(segment.documentIndex)) typed.add(segment.documentIndex);
   }
-  return Math.min(reachedDocumentIndex, resolvedRunPlan.documents.length - 1);
+  return [...typed]
+    .filter((index) => index >= 0 && index < resolvedRunPlan.documents.length)
+    .sort((a, b) => a - b);
+}
+
+function typedPublicStreamDocuments() {
+  return typedPublicStreamDocumentIndexes()
+    .map((index) => resolvedRunPlan.documents[index])
+    .filter(Boolean);
 }
 
 function publicProgressionPlan() {
   if (!resolvedRunPlan || resolvedRunPlan.corpusVersion !== 2 || !resolvedRunPlan.documents?.length) {
     return resolvedRunPlan;
   }
-  const reachedDocumentIndex = reachedPublicStreamDocumentIndex();
-  const reachedThemes = [...new Set(
-    resolvedRunPlan.documents
-      .slice(0, reachedDocumentIndex + 1)
+  const typedDocuments = typedPublicStreamDocuments();
+  const typedThemes = [...new Set(
+    typedDocuments
       .map((document) => document.theme)
       .filter(Boolean),
   )];
   return {
     ...resolvedRunPlan,
-    corpusThemes: reachedThemes,
+    documents: typedDocuments,
+    corpusThemes: typedThemes,
   };
 }
 
@@ -1722,11 +1734,13 @@ function finalizePublicStreamRun(endedReason = "reset") {
   lastPublicResult = result;
   lastPublicRecordState = recordState;
   if (result.completed && resolvedRunPlan?.corpusVersion === 2) {
-    const reachedDocumentIndex = reachedPublicStreamDocumentIndex();
-    recordFlowCorpusRun({
-      ...resolvedRunPlan,
-      documents: resolvedRunPlan.documents.slice(0, reachedDocumentIndex + 1),
-    }, { completedAt: result.endedAt });
+    const typedDocuments = typedPublicStreamDocuments();
+    if (typedDocuments.length) {
+      recordFlowCorpusRun({
+        ...resolvedRunPlan,
+        documents: typedDocuments,
+      }, { completedAt: result.endedAt });
+    }
   }
   submitPublicStreamBestInBackground(result, recordState);
   return result;
@@ -1943,6 +1957,7 @@ if (globalThis.window) {
     getSelection: () => resolvedSelection,
     getRunPlan: () => resolvedRunPlan,
     getActiveSegmentIndex: () => activeSegmentIndex,
+    getTypedPublicDocumentIndexes: () => [...typedPublicStreamDocumentIndexes()],
     getPerformanceStats: () => ({
       ...performanceStats,
       liveCadenceEventWindow: FLOW_LIVE_CADENCE_EVENT_WINDOW,
