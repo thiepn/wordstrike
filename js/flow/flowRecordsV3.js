@@ -25,6 +25,9 @@ function cleanResult(value) {
       ? value.endedReason
       : "reset",
     sessionLength: "flow",
+    sessionPreset: ["quick", "standard", "deep", "endless"].includes(value.sessionPreset)
+      ? value.sessionPreset
+      : "standard",
     completed: value.completed === true,
     recordEligible: value.recordEligible === true,
     score: Math.max(0, Math.round(finite(value.score))),
