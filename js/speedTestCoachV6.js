@@ -1,4 +1,5 @@
 import { buildPerformanceV5Analysis } from "./speedTestPerformanceV5.js";
+import { getResilientBrowserStorage } from "./browserStorage.js";
 
 export const TYPING_COACH_V6_VERSION = 6;
 export const TYPING_COACH_V6_ACTIVE_KEY = "wordstrike_typing_coach_v6_active";
@@ -311,7 +312,7 @@ export function buildTypingCoachV6({ samples = [], result = {}, profile = null }
 
 function readJson(key, fallback) {
   try {
-    const parsed = JSON.parse(globalThis.localStorage?.getItem(key) || "null");
+    const parsed = JSON.parse(getResilientBrowserStorage()?.getItem(key) || "null");
     return parsed ?? fallback;
   } catch {
     return fallback;
@@ -320,7 +321,9 @@ function readJson(key, fallback) {
 
 function writeJson(key, value) {
   try {
-    globalThis.localStorage?.setItem(key, JSON.stringify(value));
+    const storage = getResilientBrowserStorage();
+    if (!storage) return false;
+    storage.setItem(key, JSON.stringify(value));
     return true;
   } catch {
     return false;
@@ -432,7 +435,7 @@ export const markTypingCoachRetestRequested = () => patchActive({ retestRequeste
 
 export function clearActiveTypingCoachCycle() {
   volatileActiveCycle = null;
-  try { globalThis.localStorage?.removeItem(TYPING_COACH_V6_ACTIVE_KEY); } catch {}
+  try { getResilientBrowserStorage()?.removeItem(TYPING_COACH_V6_ACTIVE_KEY); } catch {}
 }
 
 function history() {
