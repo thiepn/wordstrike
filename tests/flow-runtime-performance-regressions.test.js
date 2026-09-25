@@ -48,6 +48,12 @@ assert.match(source.ux8, /viewport\.scrollTop = targetScrollTop/, "public Flow l
 assert.match(source.phase1, /refreshPublicStreamPassage/, "paragraph rollover must refresh only the passage content");
 assert.match(source.ux8, /positionStreamCaret/, "public Flow must position a dedicated live caret independently from text");
 assert.match(source.ux8, /measureCaretExtraWidth/, "public Flow caret must advance through extra letters without moving text");
+assert.match(source.ux8, /streamScrollTarget/, "public Flow line shift must keep one explicit target");
+assert.match(source.ux8, /cancelAnimationFrame\(streamScrollFrame\)/, "public Flow line shift must cancel superseded animation frames");
+assert.match(source.ux8, /const durationMs = 85/, "public Flow line shift must stay short and bounded");
+assert.doesNotMatch(source.ux8, /scrollIntoView\([\s\S]*behavior:\s*"smooth"[\s\S]*data-flow-stream-v3/, "public Flow stream must not queue browser smooth-scroll operations");
+assert.match(source.phase1, /typedPublicStreamDocumentIndexes/, "Flow progression must derive document credit from typed input");
+assert.match(source.phase1, /event\?\.type !== "insert"/, "Tab skip events must not count as typed corpus exposure");
 assert.match(source.phase1, /class="flow-word"/, "public Flow must group characters into unbreakable word units");
 assert.match(source.gameCss, /font-family:\s*var\(--flow-data-face\)/, "public Flow typing surface must use typing-oriented monospace geometry");
 assert.match(source.gameCss, /data-flow-actual/, "substitution typos must render from overlay data without changing glyph geometry");
