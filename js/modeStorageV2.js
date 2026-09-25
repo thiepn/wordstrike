@@ -883,7 +883,7 @@ export function getRecentSessions() {
 export function resetModeData() {
   const defaults = createDefaultModeData();
   saveModeData(defaults);
-  try { globalThis.localStorage?.removeItem(CAMPAIGN_PLACEMENT_BACKUP_KEY); } catch { /* Ignore reset cleanup failure. */ }
+  try { getResilientBrowserStorage()?.removeItem(CAMPAIGN_PLACEMENT_BACKUP_KEY); } catch { /* Ignore reset cleanup failure. */ }
   clearRetiredDailyStorage();
   return defaults;
 }
