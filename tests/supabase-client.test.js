@@ -78,4 +78,36 @@ try {
   else delete globalThis.sessionStorage;
 }
 
+
+const quotaLocalValues = new Map();
+const quotaLocal = {
+  getItem(key) { return quotaLocalValues.get(key) ?? null; },
+  setItem(key, value) {
+    if (key === "sb-large-token") throw Object.assign(new Error("quota"), { name: "QuotaExceededError" });
+    quotaLocalValues.set(key, String(value));
+  },
+  removeItem(key) { quotaLocalValues.delete(key); },
+};
+const quotaSessionValues = new Map();
+const quotaSession = {
+  getItem(key) { return quotaSessionValues.get(key) ?? null; },
+  setItem(key, value) { quotaSessionValues.set(key, String(value)); },
+  removeItem(key) { quotaSessionValues.delete(key); },
+};
+const oldQuotaLocal = Object.getOwnPropertyDescriptor(globalThis, "localStorage");
+const oldQuotaSession = Object.getOwnPropertyDescriptor(globalThis, "sessionStorage");
+try {
+  Object.defineProperty(globalThis, "localStorage", { configurable: true, value: quotaLocal });
+  Object.defineProperty(globalThis, "sessionStorage", { configurable: true, value: quotaSession });
+  const resilientAuthStorage = createAuthStorageAdapter();
+  resilientAuthStorage.setItem("sb-large-token", "large-refresh-token");
+  assert.equal(quotaSession.getItem("sb-large-token"), "large-refresh-token");
+  assert.equal(resilientAuthStorage.getItem("sb-large-token"), "large-refresh-token");
+} finally {
+  if (oldQuotaLocal) Object.defineProperty(globalThis, "localStorage", oldQuotaLocal);
+  else delete globalThis.localStorage;
+  if (oldQuotaSession) Object.defineProperty(globalThis, "sessionStorage", oldQuotaSession);
+  else delete globalThis.sessionStorage;
+}
+
 console.log("Supabase browser client uses an explicit persistent auth storage adapter.");
