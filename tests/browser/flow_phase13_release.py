@@ -452,6 +452,55 @@ def certify_word_recovery(browser, browser_name, base, evidence):
     context.close()
 
 
+def certify_input_focus_integrity(browser, browser_name, base, evidence):
+    context = context_for(browser, base)
+    page = context.new_page()
+    open_modes(page, base)
+    launch_public_flow(page)
+
+    input_capture = page.locator('[data-flow-input]')
+    expect(input_capture).to_be_focused()
+
+    theme = page.locator('[data-flow-theme-select]')
+    theme.focus()
+    expect(theme).to_be_focused()
+
+    before = page.evaluate("window.wordstrikeFlowPhase1.getSnapshot().currentIndex")
+    page.keyboard.press("Backspace")
+    after = page.evaluate("window.wordstrikeFlowPhase1.getSnapshot().currentIndex")
+    assert after == before, (before, after)
+
+    page.locator('[data-flow-session-clock]').click()
+    expect(input_capture).to_be_focused()
+
+    before = page.evaluate("window.wordstrikeFlowPhase1.getSnapshot().currentIndex")
+    page.evaluate("""() => {
+      const input = document.querySelector('[data-flow-input]');
+      input.dispatchEvent(new InputEvent('beforeinput', {
+        inputType: 'insertFromPaste',
+        data: 'pasted words must not count',
+        bubbles: true,
+        cancelable: true,
+      }));
+    }""")
+    after = page.evaluate("window.wordstrikeFlowPhase1.getSnapshot().currentIndex")
+    assert after == before, (before, after)
+
+    focus_hint_position = page.locator('[data-flow-ux="focus-hint"]').evaluate(
+        "el => getComputedStyle(el).position"
+    )
+    assert focus_hint_position == "absolute", focus_hint_position
+
+    evidence.append({
+        "browser": browser_name,
+        "case": "typing focus and paste ownership stay isolated",
+        "pasteIndexBefore": before,
+        "pasteIndexAfter": after,
+        "focusHintPosition": focus_hint_position,
+    })
+    context.close()
+
+
 def certify_skip_credit_integrity(browser, browser_name, base, evidence):
     if browser_name != "chromium":
         return
@@ -579,8 +628,8 @@ def certify_offline(browser, browser_name, base, evidence):
 
     cached = page.evaluate("""async () => {
       const targets = [
-        './js/flow/flowRuntimeLoader.js?v=20260925l',
-        './js/flow/flowPhase1.js?v=20260925i',
+        './js/flow/flowRuntimeLoader.js?v=20260925m',
+        './js/flow/flowPhase1.js?v=20260925j',
         './js/flow/flowSessionV4.js?v=20260924a',
         './js/flow/flowProgressionV4.js?v=20260924a',
         './js/flow/flowIdentityV1.js?v=20260924b',
@@ -645,6 +694,7 @@ def main():
                 certify_fresh_default(browser, name, base, evidence)
                 certify_theme_stream_integrity(browser, name, base, evidence)
                 certify_word_recovery(browser, name, base, evidence)
+                certify_input_focus_integrity(browser, name, base, evidence)
                 certify_skip_credit_integrity(browser, name, base, evidence)
                 certify_mobile(browser, name, base, evidence)
                 certify_offline(browser, name, base, evidence)
