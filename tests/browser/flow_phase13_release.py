@@ -452,6 +452,47 @@ def certify_word_recovery(browser, browser_name, base, evidence):
     context.close()
 
 
+def certify_skip_credit_integrity(browser, browser_name, base, evidence):
+    if browser_name != "chromium":
+        return
+
+    context = context_for(browser, base)
+    page = context.new_page()
+    open_modes(page, base)
+    plan = launch_public_flow(page)
+
+    assert page.evaluate("window.wordstrikeFlowPhase1.getTypedPublicDocumentIndexes()") == []
+
+    first_segment = plan["segments"][0]
+    page.keyboard.type(first_segment["text"][:12])
+    assert page.evaluate("window.wordstrikeFlowPhase1.getTypedPublicDocumentIndexes()") == [0]
+
+    first_second_document_segment = next(
+        segment for segment in plan["segments"] if segment["documentIndex"] == 1
+    )
+    while page.evaluate("window.wordstrikeFlowPhase1.getActiveSegmentIndex()") < first_second_document_segment["index"]:
+        page.keyboard.press("Tab")
+        expect(page.locator('[data-flow-view="run"]')).to_be_visible(timeout=10000)
+
+    assert page.evaluate("window.wordstrikeFlowPhase1.getTypedPublicDocumentIndexes()") == [0], (
+        "Tab-skipped documents must not receive corpus/progression credit"
+    )
+
+    page.keyboard.type(first_second_document_segment["text"][:8])
+    assert page.evaluate("window.wordstrikeFlowPhase1.getTypedPublicDocumentIndexes()") == [0, 1]
+
+    progression = page.evaluate("window.wordstrikeFlowPhase1.getPublicProgressionState()")
+    assert progression["progression"]["totals"]["runs"] == 0, progression
+
+    evidence.append({
+        "browser": browser_name,
+        "case": "Tab skips do not award untyped document credit",
+        "typedDocuments": page.evaluate("window.wordstrikeFlowPhase1.getTypedPublicDocumentIndexes()"),
+        "activeSegment": page.evaluate("window.wordstrikeFlowPhase1.getActiveSegmentIndex()"),
+    })
+    context.close()
+
+
 def certify_mobile(browser, browser_name, base, evidence):
     if browser_name != "chromium":
         return
@@ -538,8 +579,8 @@ def certify_offline(browser, browser_name, base, evidence):
 
     cached = page.evaluate("""async () => {
       const targets = [
-        './js/flow/flowRuntimeLoader.js?v=20260925k',
-        './js/flow/flowPhase1.js?v=20260925h',
+        './js/flow/flowRuntimeLoader.js?v=20260925l',
+        './js/flow/flowPhase1.js?v=20260925i',
         './js/flow/flowSessionV4.js?v=20260924a',
         './js/flow/flowProgressionV4.js?v=20260924a',
         './js/flow/flowIdentityV1.js?v=20260924b',
@@ -604,6 +645,7 @@ def main():
                 certify_fresh_default(browser, name, base, evidence)
                 certify_theme_stream_integrity(browser, name, base, evidence)
                 certify_word_recovery(browser, name, base, evidence)
+                certify_skip_credit_integrity(browser, name, base, evidence)
                 certify_mobile(browser, name, base, evidence)
                 certify_offline(browser, name, base, evidence)
                 browser.close()
