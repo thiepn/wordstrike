@@ -2,7 +2,7 @@ import {
   getLeaderboardSelection,
   LEADERBOARD_CATEGORIES,
 } from "./leaderboardService.js";
-import { getResilientBrowserStorage } from "./browserStorage.js";
+import { getSessionBrowserStorage } from "./browserStorage.js";
 
 export const LEADERBOARD_RETURN_STORAGE_KEY = "wordstrike_leaderboard_auth_return_v1";
 const LEGACY_DAILY_CATEGORY = "daily";
@@ -41,7 +41,7 @@ export function leaderboardReturnStateForBoard(boardKey) {
   });
 }
 
-export function saveLeaderboardReturnState(value, storage = getResilientBrowserStorage()) {
+export function saveLeaderboardReturnState(value, storage = getSessionBrowserStorage()) {
   const valid = validateLeaderboardReturnState(value);
   if (!valid || !storage?.setItem) return false;
   try {
@@ -52,7 +52,7 @@ export function saveLeaderboardReturnState(value, storage = getResilientBrowserS
   }
 }
 
-export function consumeLeaderboardReturnState(storage = getResilientBrowserStorage()) {
+export function consumeLeaderboardReturnState(storage = getSessionBrowserStorage()) {
   if (!storage?.getItem || !storage?.removeItem) return null;
   let value = null;
   try {
