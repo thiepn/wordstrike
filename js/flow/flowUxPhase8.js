@@ -167,9 +167,14 @@ function setTypingFocusState(screen) {
   const input = focusCapture(screen);
   const hint = screen.querySelector("[data-flow-ux='focus-hint']");
   if (!input || !hint) return;
-  const focused = document.activeElement === input;
+  const activeElement = document.activeElement;
+  const focused = activeElement === input;
+  const intentionalControlFocus = screen.contains(activeElement)
+    && activeElement?.matches?.(
+      'button, select, input:not([data-flow-input]), textarea:not([data-flow-input]), a[href], [contenteditable="true"]',
+    );
   screen.dataset.typingFocus = focused ? "active" : "inactive";
-  hint.hidden = focused;
+  hint.hidden = focused || intentionalControlFocus;
 }
 
 function focusTypingInput(screen) {
