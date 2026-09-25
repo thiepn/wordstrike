@@ -331,7 +331,7 @@ function decorateRun(screen) {
     hint.className = "flow-ux-focus-hint";
     hint.dataset.flowUx = "focus-hint";
     hint.hidden = true;
-    hint.textContent = "Click the passage to resume typing";
+    hint.textContent = "Click anywhere to resume typing";
     copy.prepend(hint);
   }
 
@@ -343,9 +343,8 @@ function decorateRun(screen) {
     event.preventDefault();
     focusTypingInput(screen);
   });
-  const input = focusCapture(screen);
-  input?.addEventListener("focus", () => setTypingFocusState(screen));
-  input?.addEventListener("blur", () => queueMicrotask(() => setTypingFocusState(screen)));
+  screen.addEventListener("focusin", () => queueMicrotask(() => setTypingFocusState(screen)));
+  screen.addEventListener("focusout", () => queueMicrotask(() => setTypingFocusState(screen)));
   setTypingFocusState(screen);
 
   // Establish the fixed three-line geometry before the first painted typing
