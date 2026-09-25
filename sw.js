@@ -1,5 +1,5 @@
 const CACHE_PREFIX = "wordstrike-pwa-";
-const CACHE_NAME = CACHE_PREFIX + "v98-flow-crisp-typing-v31";
+const CACHE_NAME = CACHE_PREFIX + "v99-flow-text-first-v32";
 const APP_SHELL = [
   "./js/practiceLab/practiceAssessmentInput.js",
   "./js/practiceLab/practiceDurableManifest.js",
@@ -69,7 +69,7 @@ const APP_SHELL = [
   "./js/flow/flowRecordsV2.js",
   "./js/flow/flowRecordsV2.js?v=20260923a",
   "./js/flow/flowRuntimeLoader.js",
-  "./js/flow/flowRuntimeLoader.js?v=20260925i",
+  "./js/flow/flowRuntimeLoader.js?v=20260925j",
   "./js/flow/flowSelection.js",
   "./js/flow/flowShell.js",
   "./js/flow/flowState.js",
@@ -102,9 +102,9 @@ const APP_SHELL = [
   "./styles/screens/flow-phase5.css",
   "./styles/screens/flow-phase5.css?v=20260916a",
   "./styles/screens/flow-game-mode-v2.css",
-  "./styles/screens/flow-game-mode-v2.css?v=20260925f",
+  "./styles/screens/flow-game-mode-v2.css?v=20260925g",
   "./styles/screens/flow-session-v4.css",
-  "./styles/screens/flow-session-v4.css?v=20260924c",
+  "./styles/screens/flow-session-v4.css?v=20260925a",
   "./styles/screens/flow-ui-phase7-polish.css",
   "./styles/screens/flow-ui-phase7-polish.css?v=20260916b",
   "./styles/screens/flow-ui-phase7.css",
