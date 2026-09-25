@@ -593,7 +593,17 @@ def certify_mobile(browser, browser_name, base, evidence):
     assert geometry["theme"] <= geometry["viewport"], geometry
 
     session_before = page.evaluate("window.wordstrikeFlowPhase1.getPublicSessionId()")
-    page.keyboard.type(plan["fullText"][:80])
+    next_text = page.locator('[data-flow-action="next-text"]')
+    expect(next_text).to_be_visible()
+    assert next_text.is_enabled()
+    before_document = plan["segments"][page.evaluate("window.wordstrikeFlowPhase1.getActiveSegmentIndex()")]["documentIndex"]
+    next_text.click()
+    expect(page.locator('[data-flow-view="run"]')).to_be_visible(timeout=10000)
+    after_segment = page.evaluate("window.wordstrikeFlowPhase1.getActiveSegmentIndex()")
+    assert plan["segments"][after_segment]["documentIndex"] > before_document
+    assert page.evaluate("window.wordstrikeFlowPhase1.getPublicSessionId()") == session_before
+
+    page.keyboard.type(plan["segments"][after_segment]["text"][:80])
     page.keyboard.press("Tab")
     expect(page.locator('[data-flow-view="run"]')).to_be_visible(timeout=10000)
     assert page.evaluate("window.wordstrikeFlowPhase1.getPublicSessionId()") == session_before
