@@ -5,11 +5,11 @@ const round = (value, digits = 2) => {
   return Math.round(finite(value) * factor) / factor;
 };
 
-export const FLOW_V3_BOARD_KEY = "flow-standard-v1";
+export const FLOW_V3_BOARD_KEY = "flow-standard-3m-v1";
 
 export const FLOW_SCORE_V3_RULES = Object.freeze({
-  contractVersion: 2,
-  rulesVersion: 3,
+  contractVersion: 3,
+  rulesVersion: 4,
   metricVersion: 2,
   pointsPerCorrectCharacter: 10,
   baselineWpm: 60,
@@ -22,7 +22,8 @@ export const FLOW_SCORE_V3_RULES = Object.freeze({
   enduranceCharactersForMaximumBonus: 10_000,
   minimumRecordAccuracy: 90,
   minimumRecordCharacters: 250,
-  minimumRecordDurationMs: 20_000,
+  minimumRecordDurationMs: 179_900,
+  maximumRecordDurationMs: 180_100,
   minimumConsistencySamples: 20,
 });
 
@@ -114,6 +115,7 @@ export function createFlowScoreV3Result({
     && standardSession
     && consistencyAvailable
     && activeDurationMs >= FLOW_SCORE_V3_RULES.minimumRecordDurationMs
+    && activeDurationMs <= FLOW_SCORE_V3_RULES.maximumRecordDurationMs
     && breakdown.correctCharacters >= FLOW_SCORE_V3_RULES.minimumRecordCharacters
     && breakdown.wpm > 0
     && breakdown.accuracy >= FLOW_SCORE_V3_RULES.minimumRecordAccuracy;
