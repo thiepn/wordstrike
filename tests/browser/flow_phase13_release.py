@@ -148,6 +148,11 @@ def certify_public_journey(browser, browser_name, base, evidence):
 
     # Tab changes text inside the same timed run. It must not end, score, or reset the session.
     before_segment = page.evaluate("window.wordstrikeFlowPhase1.getActiveSegmentIndex()")
+    before_document = first_plan["segments"][before_segment]["documentIndex"]
+    expected_next_segment = next(
+        segment for segment in first_plan["segments"]
+        if segment["documentIndex"] > before_document and segment["paragraphIndex"] == 0
+    )
     page.keyboard.press("Tab")
     expect(page.locator('[data-flow-view="run"]')).to_be_visible(timeout=10000)
     second_plan = page.evaluate("window.wordstrikeFlowPhase1.getRunPlan()")
@@ -157,7 +162,13 @@ def certify_public_journey(browser, browser_name, base, evidence):
     assert second_session == first_session, (first_session, second_session)
     assert second_plan["seed"] == first_seed, (first_seed, second_plan["seed"])
     assert second_plan["id"] == first_plan["id"], (first_plan["id"], second_plan["id"])
-    assert after_segment == before_segment + 1, (before_segment, after_segment)
+    assert after_segment == expected_next_segment["index"], (before_segment, after_segment, expected_next_segment)
+    expect(page.locator('[data-flow-source-title]')).to_have_text(
+        first_plan["documents"][expected_next_segment["documentIndex"]]["title"]
+    )
+    expect(page.locator('[data-flow-source-position]')).to_contain_text(
+        f"Text {expected_next_segment['documentIndex'] + 1} /"
+    )
     assert previous_result is None, previous_result
     assert page.locator('[data-flow-view="complete"]').count() == 0
     assert page.locator('[data-flow-micro-result]').count() == 0
@@ -247,13 +258,18 @@ def certify_fresh_default(browser, browser_name, base, evidence):
     assert page.locator('[data-flow-session-preset]').input_value() == "standard"
     expect(page.locator('[data-flow-session-remaining]')).to_have_text("3:00")
 
+    expected_next_segment = next(
+        segment for segment in plan["segments"]
+        if segment["documentIndex"] == 1 and segment["paragraphIndex"] == 0
+    )
     page.keyboard.press("Tab")
     expect(page.locator('[data-flow-view="run"]')).to_be_visible(timeout=10000)
     skipped_plan = page.evaluate("window.wordstrikeFlowPhase1.getRunPlan()")
     skipped_session = page.evaluate("window.wordstrikeFlowPhase1.getPublicSessionId()")
     assert skipped_session == first_session, (first_session, skipped_session)
     assert skipped_plan["seed"] == first_seed, (first_seed, skipped_plan["seed"])
-    assert page.evaluate("window.wordstrikeFlowPhase1.getActiveSegmentIndex()") == 1
+    assert page.evaluate("window.wordstrikeFlowPhase1.getActiveSegmentIndex()") == expected_next_segment["index"]
+    expect(page.locator('[data-flow-source-title]')).to_have_text(plan["documents"][1]["title"])
     assert page.evaluate("window.wordstrikeFlowPhase1.getPublicResult()") is None
     assert page.locator('[data-flow-view="ready"]').count() == 0
     assert page.locator('[data-flow-view="complete"]').count() == 0
@@ -261,7 +277,7 @@ def certify_fresh_default(browser, browser_name, base, evidence):
 
     evidence.append({
         "browser": browser_name,
-        "case": "fresh Flow defaults to three minutes and empty Tab skips in-run",
+        "case": "fresh Flow defaults to three minutes and empty Tab skips to next source",
         "documents": plan["documentCount"],
         "paragraphs": plan["paragraphCount"],
         "wordsAvailable": plan["wordCount"],
