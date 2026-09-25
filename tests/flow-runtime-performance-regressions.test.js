@@ -3,6 +3,8 @@ import { readFile } from "node:fs/promises";
 
 const paths = {
   loader: "../js/flow/flowRuntimeLoader.js",
+  phase1: "../js/flow/flowPhase1.js",
+  gameCss: "../styles/screens/flow-game-mode-v2.css",
   migration: "../js/flow/flowMigrationPresentation.js",
   visual: "../js/flow/flowVisualPhase6.js",
   ui7: "../js/flow/flowUiPhase7.js",
@@ -41,6 +43,15 @@ assert.doesNotMatch(source.visual, /subtree:\s*true/, "visual decorator should o
 assert.doesNotMatch(source.ux8, /passageObserver/, "caret visibility must not rely on a live passage MutationObserver");
 assert.doesNotMatch(source.ux8, /observe\(app, \{ childList: true, subtree: true \}\)/, "UX root decorator must not wake on every typed character");
 assert.match(source.ux8, /scheduleCaretVisibility/, "caret visibility must use the direct frame scheduler");
+assert.match(source.ux8, /keepStreamCaretInTypingViewport/, "public Flow must keep caret motion inside its own bounded typing viewport");
+assert.match(source.ux8, /viewport\.scrollTop = targetScrollTop/, "public Flow line movement must scroll the typing viewport, not the page");
+assert.match(source.phase1, /refreshPublicStreamPassage/, "paragraph rollover must refresh only the passage content");
+assert.doesNotMatch(
+  source.phase1,
+  /if \(isPublicStreamRun\(\) && activeSegmentIndex !== beforeSegment\) \{\s*renderRun\(\)/,
+  "public Flow must not rebuild the full run screen at paragraph boundaries",
+);
+assert.match(source.gameCss, /data-flow-stream-v3="true"/, "public Flow requires the stable stream viewport styles");
 
 assert.doesNotMatch(source.visualCss, /mix-blend-mode:\s*soft-light/, "full-screen blend compositing is too expensive during typing");
 assert.doesNotMatch(source.uxCss, /backdrop-filter:\s*blur\(/, "fixed Flow setup dock must avoid continuous backdrop blur compositing");
