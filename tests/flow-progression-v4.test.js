@@ -101,12 +101,13 @@ try {
     sessionId: "flow-current",
     completed: true,
     recordEligible: true,
+    sessionPreset: "standard",
     endedAt: 3_000,
     score: 250_000,
     wpm: 121,
     accuracy: 99.2,
     consistency: 96,
-    activeDurationMs: 360_000,
+    activeDurationMs: 180_000,
     wordsCompleted: 900,
     correctCharacters: 4_500,
     theme: "mixed",
@@ -122,17 +123,46 @@ try {
   assert.equal(update.progression.totals.score, 310_000);
   assert.equal(update.progression.best.wpm, 121);
   assert.equal(update.progression.best.consistency, 96);
-  assert.equal(update.progression.best.activeDurationMs, 360_000);
+  assert.equal(update.progression.best.activeDurationMs, 180_000);
   assert.equal(update.progression.streaks.eligibleBest, 3);
   assert.equal(update.progression.streaks.precisionBest, 3);
   assert.equal(Object.keys(update.progression.themes).length, specificThemes.length);
-  for (const id of ["wpm-120", "consistency-95", "themes-all", "eligible-streak-3", "precision-streak-3", "endurance-5m"]) {
+  for (const id of ["wpm-120", "consistency-95", "themes-all", "eligible-streak-3", "precision-streak-3"]) {
     assert.ok(update.newlyEarned.some((milestone) => milestone.id === id), `expected new milestone ${id}`);
   }
 
-  const duplicate = recordFlowProgressionV4(currentResult, { plan: { corpusThemes: specificThemes } });
+  const duplicate = recordFlowProgressionV4(currentResult, { plan: { sessionPreset: "standard", corpusThemes: specificThemes } });
   assert.equal(duplicate.recorded, false);
   assert.equal(duplicate.progression.totals.runs, 3, "session ID idempotency must prevent double counting");
+
+  const deepResult = {
+    sessionId: "flow-deep-local",
+    completed: true,
+    recordEligible: false,
+    sessionPreset: "deep",
+    endedAt: 4_000,
+    score: 80_000,
+    wpm: 70,
+    accuracy: 97,
+    consistency: 84,
+    activeDurationMs: 300_000,
+    wordsCompleted: 350,
+    correctCharacters: 1_750,
+    theme: specificThemes[0],
+  };
+  const deepUpdate = recordFlowProgressionV4(deepResult, {
+    plan: { sessionPreset: "deep", corpusThemes: [specificThemes[0]] },
+  });
+  assert.equal(deepUpdate.recorded, true);
+  assert.equal(deepUpdate.progression.totals.runs, 4);
+  assert.equal(deepUpdate.progression.totals.eligibleRuns, 3);
+  assert.equal(deepUpdate.progression.streaks.eligibleCurrent, 3,
+    "local Deep Flow must not break the standard-session eligible streak");
+  assert.equal(deepUpdate.progression.streaks.precisionCurrent, 3,
+    "local Deep Flow must not break the standard-session precision streak");
+  assert.equal(deepUpdate.progression.best.activeDurationMs, 300_000);
+  assert.ok(deepUpdate.newlyEarned.some((milestone) => milestone.id === "endurance-5m"),
+    "a completed five-minute Deep Flow should earn the endurance milestone");
 
   const summary = getFlowProgressionSummaryV4(update.progression);
   assert.equal(summary.earnedCount, Object.keys(update.progression.milestones).length);
