@@ -3,6 +3,7 @@ import { FLOW_V3_THEME_IDS } from "./flowStreamPlanV3.js?v=20260923b";
 export const FLOW_PROGRESSION_V4_STORAGE_KEY = "wordstrike_flow_progression_v4";
 export const FLOW_PROGRESSION_V4_VERSION = 1;
 export const FLOW_PROGRESSION_V4_MAX_SESSION_IDS = 240;
+export const FLOW_PROGRESSION_V4_MIN_ENDURANCE_WORDS = 50;
 
 const SPECIFIC_THEME_IDS = Object.freeze(FLOW_V3_THEME_IDS.filter((theme) => theme !== "mixed"));
 const THEME_TARGET = SPECIFIC_THEME_IDS.length;
@@ -195,7 +196,9 @@ function applyRun(progress, run, themes = [], {
   progress.lastPlayedAt = Math.max(progress.lastPlayedAt || 0, run.endedAt);
 
   progress.best.score = Math.max(progress.best.score, run.score);
-  progress.best.activeDurationMs = Math.max(progress.best.activeDurationMs, run.activeDurationMs);
+  if (run.wordsCompleted >= FLOW_PROGRESSION_V4_MIN_ENDURANCE_WORDS) {
+    progress.best.activeDurationMs = Math.max(progress.best.activeDurationMs, run.activeDurationMs);
+  }
   progress.best.words = Math.max(progress.best.words, run.wordsCompleted);
   if (run.recordEligible) {
     progress.best.wpm = Math.max(progress.best.wpm, run.wpm);
