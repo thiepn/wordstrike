@@ -792,6 +792,8 @@ function flowCharacterAt(index) {
     expected,
     actual: typed?.actual ?? null,
     extraText,
+    extraCount: extras.length,
+    extraCommitted: hasExtras && typed?.correct === true,
     status: hasExtras
       ? "incorrect"
       : typed?.missed
@@ -813,9 +815,10 @@ function charMarkup(character, { paragraphBreak = false } = {}) {
   const classes = ["flow-char", `flow-char--${character.status}`];
   if (character.current) classes.push("flow-char--current");
   if (character.extraText) classes.push("flow-char--has-extra");
+  if (character.extraCommitted) classes.push("flow-char--extra-committed");
   const paragraphBreakAttribute = paragraphBreak ? ' data-flow-paragraph-break="true"' : "";
   const extraAttribute = character.extraText
-    ? ` data-flow-extra="${escapeHtml(character.extraText)}"`
+    ? ` data-flow-extra="${escapeHtml(character.extraText)}" data-flow-extra-count="${character.extraCount}"`
     : "";
   const actualAttribute = character.status === "incorrect"
     && !character.extraText
@@ -852,7 +855,7 @@ function updateCharacterNode(index) {
   const character = flowCharacterAt(index);
   if (!node || !character) return;
   const shown = stableCharacterGlyph(character);
-  const className = `flow-char flow-char--${character.status}${character.current ? " flow-char--current" : ""}${character.extraText ? " flow-char--has-extra" : ""}`;
+  const className = `flow-char flow-char--${character.status}${character.current ? " flow-char--current" : ""}${character.extraText ? " flow-char--has-extra" : ""}${character.extraCommitted ? " flow-char--extra-committed" : ""}`;
   let changed = false;
   if (node.textContent !== shown) {
     node.textContent = shown;
@@ -876,6 +879,12 @@ function updateCharacterNode(index) {
   if ((node.dataset.flowExtra || "") !== (character.extraText || "")) {
     if (character.extraText) node.dataset.flowExtra = character.extraText;
     else delete node.dataset.flowExtra;
+    changed = true;
+  }
+  const extraCount = character.extraText ? String(character.extraCount) : "";
+  if ((node.dataset.flowExtraCount || "") !== extraCount) {
+    if (extraCount) node.dataset.flowExtraCount = extraCount;
+    else delete node.dataset.flowExtraCount;
     changed = true;
   }
   if (node.className !== className) {
