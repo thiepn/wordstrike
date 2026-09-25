@@ -3,12 +3,12 @@ import {
   createFlowTypingRun,
   getFlowTypingSnapshot,
   insertFlowText,
-} from "./flowEngine.js?v=20260925a";
+} from "./flowEngine.js?v=20260925b";
 import {
   analyzeFlowCadence,
   analyzeFlowCadenceLive,
   FLOW_LIVE_CADENCE_EVENT_WINDOW,
-} from "./flowCadence.js?v=20260924b";
+} from "./flowCadence.js?v=20260925b";
 import { resolveFlowRunPlan } from "./flowRunPlan.js?v=20260923e";
 import {
   FLOW_V3_DEFAULT_SESSION_PRESET,
@@ -32,7 +32,7 @@ import { recordFlowResultV2 } from "./flowRecordsV2.js?v=20260923f";
 import {
   calculateFlowScoreV3,
   createFlowScoreV3Result,
-} from "./flowScoreV3.js?v=20260923a";
+} from "./flowScoreV3.js?v=20260925b";
 import {
   getFlowPersonalBestV3,
   loadFlowRecordsV3,
