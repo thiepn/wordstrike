@@ -175,12 +175,26 @@ function focusTypingInput(screen) {
   queueMicrotask(() => setTypingFocusState(screen));
 }
 
+let caretMeasureCanvas = null;
+
+function measureCaretExtraWidth(current) {
+  const extra = current?.dataset?.flowExtra || "";
+  if (!extra) return 0;
+  caretMeasureCanvas ||= document.createElement("canvas");
+  const context = caretMeasureCanvas.getContext("2d");
+  if (!context) return 0;
+  const style = globalThis.getComputedStyle?.(current);
+  if (style?.font) context.font = style.font;
+  return context.measureText(extra).width;
+}
+
 function positionStreamCaret(screen, current, viewport) {
   const caret = screen?.querySelector?.("[data-flow-live-caret]");
   if (!caret || !current || !viewport) return false;
   const viewportRect = viewport.getBoundingClientRect();
   const currentRect = current.getBoundingClientRect();
-  const x = currentRect.left - viewportRect.left + viewport.scrollLeft;
+  const extraWidth = measureCaretExtraWidth(current);
+  const x = currentRect.left - viewportRect.left + viewport.scrollLeft + extraWidth;
   const y = currentRect.top - viewportRect.top + viewport.scrollTop;
   const height = Math.max(18, currentRect.height * 0.88);
   caret.style.height = `${height.toFixed(2)}px`;
