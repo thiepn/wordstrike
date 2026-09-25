@@ -1629,7 +1629,10 @@ function finishPublicStreamSession() {
   if (!isPublicStreamRun() || !run || publicSessionFinished || view !== "run") return false;
   publicSessionFinished = true;
   clearPublicSessionTimer();
-  const completedAt = now();
+  const currentAt = now();
+  const timedDeadlineReached = publicSessionDeadlineAt != null
+    && publicSessionRemainingMs(currentAt) === 0;
+  const completedAt = timedDeadlineReached ? publicSessionDeadlineAt : currentAt;
   if (run.startedAt != null && run.phase !== FLOW_PHASES.COMPLETE) {
     run.completedAt = completedAt;
     run.phase = FLOW_PHASES.COMPLETE;
