@@ -225,6 +225,7 @@ def firefox_storage_fallback(browser, base, browser_name, checks):
       const modeModule = await import('./js/modeStorage.js');
       const speedModule = await import('./js/speedTest.js');
       const configModule = await import('./js/speedTestConfig.js');
+      const authStorageModule = await import('./js/supabaseClient.js');
 
       const campaign = storageModule.createDefaultSave();
       const campaignSaved = storageModule.saveGame(campaign);
@@ -241,6 +242,9 @@ def firefox_storage_fallback(browser, base, browser_name, checks):
       const mode = modeModule.createDefaultModeData();
       mode.totals.completedSessions = 4;
       const modeSaved = modeModule.saveModeData(mode);
+
+      const authStorage = authStorageModule.createAuthStorageAdapter();
+      authStorage?.setItem('wordstrike-firefox-auth-cert', 'persisted-auth');
 
       const speed = speedModule.startSpeedTest({
         config: configModule.getSpeedTestConfig('words-10'),
@@ -268,6 +272,7 @@ def firefox_storage_fallback(browser, base, browser_name, checks):
         typingWarning: speed.result?.localPersistence?.warning ?? null,
         sessionCampaign: Boolean(sessionStorage.getItem('wordstrike_save')),
         sessionMode: Boolean(sessionStorage.getItem('wordstrike_mode_data_v2')),
+        sessionAuth: sessionStorage.getItem('wordstrike-firefox-auth-cert'),
         fallbackMarker: sessionStorage.getItem('wordstrike.browser-storage-fallback-keys.v1'),
       };
     }""")
@@ -278,8 +283,10 @@ def firefox_storage_fallback(browser, base, browser_name, checks):
     assert result["typingStatus"] == "saved", result
     assert result["typingWarning"] is None, result
     assert result["sessionCampaign"] is True and result["sessionMode"] is True, result
+    assert result["sessionAuth"] == "persisted-auth", result
     assert "wordstrike_save" in (result["fallbackMarker"] or ""), result
     assert "wordstrike_mode_data_v2" in (result["fallbackMarker"] or ""), result
+    assert "wordstrike-firefox-auth-cert" in (result["fallbackMarker"] or ""), result
 
     page.reload(wait_until="domcontentloaded")
     expect(page.locator(".menu-screen")).to_be_visible(timeout=10000)
