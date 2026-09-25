@@ -30,7 +30,8 @@ test("non-Practice runtime centralizes direct Web Storage access", () => {
   for (const relative of collectJsFiles(jsRoot)) {
     if (allowedDirectStorageOwners.has(relative)) continue;
     const source = fs.readFileSync(path.join(jsRoot, relative), "utf8");
-    if (/\b(?:globalThis|window)\.(?:localStorage|sessionStorage)\b/.test(source)) {
+    const directWebStorage = /(?:\b(?:globalThis|window|self)\s*\.\s*)?(?:localStorage|sessionStorage)\s*(?:\?\.|\.)\s*(?:getItem|setItem|removeItem|clear|key)\b/;
+    if (directWebStorage.test(source)) {
       violations.push(relative);
     }
   }
