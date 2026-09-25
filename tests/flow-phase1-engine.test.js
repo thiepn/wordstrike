@@ -83,6 +83,28 @@ assert.equal(
   "A mistake in one word must not cascade into following words",
 );
 
+const truncatedWord = createFlowTypingRun("brown fox", { category: "everyday", difficulty: "natural" });
+assert.equal(insertFlowText(truncatedWord, "br ", 450), true);
+assert.equal(truncatedWord.currentIndex, 6);
+assert.equal(truncatedWord.uncorrectedErrors, 1,
+  "one early Space must count as one unresolved input error even when it skips several letters");
+assert.equal(truncatedWord.incorrectKeystrokes, 1);
+assert.equal(truncatedWord.errorTimings.length, 1);
+assert.equal(truncatedWord.errorTimings[0].skippedCount, 3);
+assert.deepEqual(
+  getFlowCharacterView(truncatedWord).slice(2, 5).map((character) => character.status),
+  ["missed", "missed", "missed"],
+);
+assert.equal(backspaceFlowText(truncatedWord, 455), false,
+  "after Space commits a damaged word, Backspace must not reopen the previous word");
+assert.equal(insertFlowText(truncatedWord, "fox", 460), true);
+assert.equal(truncatedWord.phase, FLOW_PHASES.COMPLETE);
+const truncatedSnapshot = getFlowTypingSnapshot(truncatedWord);
+assert.ok(
+  truncatedSnapshot.uncorrectedErrors <= truncatedSnapshot.gameplay.incorrectKeystrokes,
+  "unresolved errors must remain compatible with the leaderboard keystroke contract",
+);
+
 const extraAtBoundary = createFlowTypingRun("cat dog", { category: "everyday", difficulty: "natural" });
 assert.equal(insertFlowText(extraAtBoundary, "catt", 500), true);
 assert.equal(extraAtBoundary.currentIndex, 3, "Extra letters at a word boundary must not consume the next word");
