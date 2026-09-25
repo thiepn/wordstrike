@@ -3,7 +3,7 @@ import {
   createFlowTypingRun,
   getFlowTypingSnapshot,
   insertFlowText,
-} from "./flowEngine.js?v=20260925b";
+} from "./flowEngine.js?v=20260925c";
 import {
   analyzeFlowCadence,
   analyzeFlowCadenceLive,
