@@ -1,5 +1,5 @@
 export const FLOW_BOARD_KEYS = Object.freeze([
-  "flow-standard-v1",
+  "flow-standard-3m-v1",
 ]);
 
 export const PUBLIC_BOARD_KEYS = Object.freeze([
@@ -12,7 +12,7 @@ export const PUBLIC_BOARD_KEYS = Object.freeze([
 ]);
 export const LEADERBOARD_LIMIT = 100;
 export const LEADERBOARD_RULES_VERSION = 1;
-export const FLOW_LEADERBOARD_RULES_VERSION = 3;
+export const FLOW_LEADERBOARD_RULES_VERSION = 4;
 export const ARCADE_RUSH_BOARD_KEY = "arcade-rush-v1";
 
 const RETIRED_DAILY_BOARD_KEY = "daily-strike-v1";
