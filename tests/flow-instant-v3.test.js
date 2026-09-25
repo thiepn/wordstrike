@@ -7,9 +7,12 @@ import {
   createFlowScoreV3Result,
 } from "../js/flow/flowScoreV3.js";
 import {
+  FLOW_V3_DEFAULT_SESSION_PRESET,
   FLOW_V3_DEFAULT_THEME,
+  FLOW_V3_SESSION_PRESETS,
   FLOW_V3_THEME_IDS,
   createFlowStreamPlanV3,
+  normalizeFlowV3SessionPreset,
   normalizeFlowV3Theme,
 } from "../js/flow/flowStreamPlanV3.js";
 import {
@@ -75,12 +78,15 @@ const secondPlan = createFlowStreamPlanV3({
 assert.equal(firstPlan.gameplayVersion, 3);
 assert.equal(firstPlan.structure, "continuous-stream");
 assert.equal(firstPlan.sessionLength, "flow");
+assert.equal(firstPlan.sessionPreset, "standard");
+assert.equal(firstPlan.targetMinutes, 3);
+assert.equal(firstPlan.targetDurationMs, 180000);
 assert.equal(firstPlan.stream, true);
 assert.equal(firstPlan.theme, "mixed");
 assert.equal(firstPlan.documentCount, 10);
 assert.ok(firstPlan.paragraphCount >= 50);
 assert.ok(firstPlan.wordCount >= 4500,
-  "one stream should contain enough material that normal sessions end by reset, not content exhaustion");
+  "one stream should contain enough material that normal timed sessions end by the clock, not content exhaustion");
 assert.equal(firstPlan.id, firstPlanAgain.id);
 assert.equal(firstPlan.fullText, firstPlanAgain.fullText);
 assert.notEqual(firstPlan.id, secondPlan.id);
@@ -95,6 +101,11 @@ const science = createFlowStreamPlanV3({
 assert.equal(science.theme, "science");
 assert.ok(science.documents.every((document) => document.theme === "science"));
 assert.equal(normalizeFlowV3Theme("not-a-theme"), FLOW_V3_DEFAULT_THEME);
+assert.equal(normalizeFlowV3SessionPreset("unknown"), FLOW_V3_DEFAULT_SESSION_PRESET);
+assert.equal(FLOW_V3_SESSION_PRESETS.quick.durationMs, 120000);
+assert.equal(FLOW_V3_SESSION_PRESETS.standard.durationMs, 180000);
+assert.equal(FLOW_V3_SESSION_PRESETS.deep.durationMs, 300000);
+assert.equal(FLOW_V3_SESSION_PRESETS.endless.durationMs, null);
 
 const snapshot = {
   phase: "running",
@@ -212,14 +223,18 @@ const [phase1, loader, ui, migration] = await Promise.all([
 ]);
 assert.match(phase1, /if \(isPublicStreamRun\(\)\) \{\s*startRun\(\);/);
 assert.match(phase1, /event\.key === "Tab"/);
-assert.match(phase1, /rerollPublicStream\(\)/);
+assert.match(phase1, /skipPublicStreamText/);
 assert.match(phase1, /TAB · NEXT TEXT/);
 assert.match(phase1, /data-flow-theme-select/);
+assert.match(phase1, /data-flow-session-preset/);
+assert.match(phase1, /data-flow-session-remaining/);
+assert.match(phase1, /finishPublicStreamSession/);
 assert.match(phase1, /calculateFlowScoreV3/);
 assert.doesNotMatch(ui, /aria-label="Flow run length"/);
 assert.doesNotMatch(ui, /leaderboard-flow-select-quick/);
 assert.match(ui, /SCORE.*WPM.*WORDS/s);
 assert.match(loader, /flowTheme/);
+assert.match(loader, /flowLength/);
 assert.match(loader, /flowStreamPlanV3\.js\?v=20260923b/);
 assert.match(loader, /flowScoreV3\.js\?v=20260923a/);
 assert.match(loader, /flowRecordsV3\.js\?v=20260923a/);
@@ -228,4 +243,4 @@ assert.match(migration, /where board_key = 'flow-standard-v1'/);
 assert.match(migration, /rules_version = 3/);
 assert.match(migration, /'wordsCompleted', words_completed/);
 
-console.log("Flow V3 instant-play contracts passed: direct stream, Tab reroll, optional theme filter, volume-driven score, one leaderboard, durable PBs, and server validation.");
+console.log("Flow V3 session contracts passed: direct timed stream, in-run Tab skip, duration presets, theme filter, volume-driven score, one leaderboard, durable PBs, and server validation.");
