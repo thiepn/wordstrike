@@ -113,7 +113,36 @@ def certify_public_journey(browser, browser_name, base, evidence):
     first_plan = launch_public_flow(page)
     first_session = page.evaluate("window.wordstrikeFlowPhase1.getPublicSessionId()")
     first_seed = first_plan["seed"]
+    scroll_before = page.evaluate("window.scrollY")
     typed = type_prefix(page, first_plan)
+    page.wait_for_timeout(180)
+    scroll_after = page.evaluate("window.scrollY")
+    assert abs(scroll_after - scroll_before) <= 1, (scroll_before, scroll_after)
+
+    typing_geometry = page.evaluate("""() => {
+      const viewport = document.querySelector('.flow-passages');
+      const passage = document.querySelector('[data-flow-passage]');
+      const current = document.querySelector('.flow-char--current');
+      const caret = document.querySelector('[data-flow-live-caret]');
+      const vr = viewport.getBoundingClientRect();
+      const cr = current.getBoundingClientRect();
+      const caretRect = caret.getBoundingClientRect();
+      const lineHeight = parseFloat(getComputedStyle(passage).lineHeight);
+      const progress = parseFloat(
+        document.querySelector('[data-flow-session-progress-fill]').style.width
+      ) || 0;
+      return {
+        viewportHeight: vr.height,
+        lineHeight,
+        caretDx: Math.abs(caretRect.left - cr.left),
+        caretDy: Math.abs(caretRect.top - cr.top),
+        timerProgress: progress,
+      };
+    }""")
+    assert 2.8 <= typing_geometry["viewportHeight"] / typing_geometry["lineHeight"] <= 3.2, typing_geometry
+    assert typing_geometry["caretDx"] <= 3, typing_geometry
+    assert typing_geometry["caretDy"] <= 5, typing_geometry
+    assert typing_geometry["timerProgress"] > 0, typing_geometry
 
     # Tab changes text inside the same timed run. It must not end, score, or reset the session.
     before_segment = page.evaluate("window.wordstrikeFlowPhase1.getActiveSegmentIndex()")
@@ -190,6 +219,8 @@ def certify_public_journey(browser, browser_name, base, evidence):
         "typedCharactersBeforeSkip": len(typed),
         "segmentBefore": before_segment,
         "segmentAfter": after_segment,
+        "timerProgress": typing_geometry["timerProgress"],
+        "caretDx": typing_geometry["caretDx"],
         "theme": themed_plan["theme"],
     })
     context.close()
