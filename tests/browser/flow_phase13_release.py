@@ -540,12 +540,12 @@ def certify_offline(browser, browser_name, base, evidence):
 
     cached = page.evaluate("""async () => {
       const targets = [
-        './js/flow/flowRuntimeLoader.js?v=20260925i',
+        './js/flow/flowRuntimeLoader.js?v=20260925j',
         './js/flow/flowPhase1.js?v=20260925h',
         './js/flow/flowSessionV4.js?v=20260924a',
         './js/flow/flowProgressionV4.js?v=20260924a',
         './js/flow/flowIdentityV1.js?v=20260924b',
-        './styles/screens/flow-session-v4.css?v=20260924c',
+        './styles/screens/flow-session-v4.css?v=20260925a',
         './js/flow/flowCadence.js?v=20260925b',
         './js/flow/flowStreamPlanV3.js?v=20260925b',
         './js/flow/flowScoreV3.js?v=20260925d',
@@ -554,7 +554,7 @@ def certify_offline(browser, browser_name, base, evidence):
         './js/leaderboardSubmissionService.js',
         './js/submissionOutbox.js',
         './js/supabaseClient.js',
-        './styles/screens/flow-game-mode-v2.css?v=20260925f',
+        './styles/screens/flow-game-mode-v2.css?v=20260925g',
       ];
       const results = [];
       for (const target of targets) {
