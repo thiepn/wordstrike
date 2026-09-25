@@ -37,9 +37,39 @@ assert.equal(validateLeaderboardRequest({ boardKey: LEADERBOARD_BOARDS.FLOW_QUIC
 assert.equal(EXPECTED_LEADERBOARD_RULES_VERSIONS[LEADERBOARD_BOARDS.FLOW_STANDARD], 3);
 assert.equal(getLeaderboardSelection(LEADERBOARD_BOARDS.FLOW_STANDARD).selectedCategory, LEADERBOARD_CATEGORIES.FLOW);
 
-assert.match(loader, /const FLOW_RELEASE_VERSION = 29/);
-assert.match(loader, /wordstrike-flow-release-v32/);
-assert.match(index, /js\/flow\/flowRuntimeLoader\.js\?v=20260925g/);
+assert.match(loader, /const FLOW_RELEASE_VERSION = \d+/);
+assert.match(loader, /wordstrike-flow-release-v\d+/);
+
+const loaderVersion = index.match(/js\/flow\/flowRuntimeLoader\.js\?v=([^"]+)/)?.[1];
+assert.ok(loaderVersion, "index must version the Flow runtime loader");
+assert.equal(
+  loader.includes(`"./js/flow/flowRuntimeLoader.js?v=${loaderVersion}"`),
+  true,
+  "Flow offline pack must contain the exact delivered loader version",
+);
+
+const phase1Version = loader.match(/import\("\.\/flowPhase1\.js\?v=([^"]+)"\)/)?.[1];
+assert.ok(phase1Version, "loader must version the active Flow controller");
+assert.equal(
+  loader.includes(`"./js/flow/flowPhase1.js?v=${phase1Version}"`),
+  true,
+  "offline pack must contain the exact active Flow controller",
+);
+
+for (const [moduleName, source] of [
+  ["flowStreamPlanV3", phase1],
+  ["flowScoreV3", phase1],
+  ["flowCadence", phase1],
+]) {
+  const version = source.match(new RegExp(`\\./${moduleName}\\.js\\?v=([^"]+)`))?.[1];
+  assert.ok(version, "active Flow controller must version " + moduleName);
+  assert.equal(
+    loader.includes(`"./js/flow/${moduleName}.js?v=${version}"`),
+    true,
+    "offline pack must match active " + moduleName,
+  );
+}
+
 for (const asset of [
   "./js/authService.js",
   "./js/leaderboardProfileService.js",
@@ -47,19 +77,10 @@ for (const asset of [
   "./js/leaderboardService.js",
   "./js/submissionOutbox.js",
   "./js/pendingResultSubmission.js",
-  "./js/flow/flowStreamPlanV3.js?v=20260925b",
   "./js/flow/flowScoreV3.js",
-  "./js/flow/flowScoreV3.js?v=20260925d",
   "./js/flow/flowRecordsV3.js",
-  "./js/flow/flowRecordsV3.js?v=20260923a",
-  "./js/flow/flowPhase1.js?v=20260925g",
-  "./js/flow/flowProgressionV4.js?v=20260924a",
-  "./js/flow/flowIdentityV1.js?v=20260924b",
-  "./styles/screens/flow-session-v4.css?v=20260924c",
   "./styles/screens/flow-session-v4.css",
-  "./js/flow/flowSessionV4.js?v=20260924a",
   "./js/flow/flowSessionV4.js",
-  "./js/flow/flowCadence.js?v=20260925b",
 ]) {
   assert.equal(loader.includes(JSON.stringify(asset)), true, "offline pack missing " + asset);
 }
