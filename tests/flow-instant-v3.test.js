@@ -75,6 +75,11 @@ const secondPlan = createFlowStreamPlanV3({
   seed: "flow-v3-contract-seed-2",
   history: emptyHistory,
 });
+const quickPlan = createFlowStreamPlanV3({
+  seed: "flow-v3-quick-contract",
+  sessionPreset: "quick",
+  history: emptyHistory,
+});
 assert.equal(firstPlan.gameplayVersion, 3);
 assert.equal(firstPlan.structure, "continuous-stream");
 assert.equal(firstPlan.sessionLength, "flow");
@@ -91,6 +96,8 @@ assert.equal(firstPlan.id, firstPlanAgain.id);
 assert.equal(firstPlan.fullText, firstPlanAgain.fullText);
 assert.notEqual(firstPlan.id, secondPlan.id);
 assert.notEqual(firstPlan.fullText, secondPlan.fullText);
+assert.equal(quickPlan.sessionPreset, "quick");
+assert.equal(quickPlan.targetDurationMs, 120000);
 
 assert.ok(FLOW_V3_THEME_IDS.includes("science"));
 const science = createFlowStreamPlanV3({
@@ -149,6 +156,16 @@ assert.equal(result.score, calculateFlowScoreV3({
   accuracy: 600 / 620 * 100,
   consistency: 90,
 }).score);
+
+const quickResult = createFlowScoreV3Result({
+  sessionId: "session-flow-v3-quick-12345678",
+  endedAt: 1700000000500,
+  endedReason: "complete",
+  snapshot,
+  plan: quickPlan,
+});
+assert.equal(quickResult.recordEligible, false,
+  "Quick, Deep, and Endless sessions must not compete on the standard 3-minute board");
 
 const normalized = buildFlowSubmissionResult(result);
 assert.ok(normalized);
