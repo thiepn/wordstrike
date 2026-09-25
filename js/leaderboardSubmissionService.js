@@ -334,8 +334,8 @@ export function createLeaderboardSubmissionService({
     )) return { status: "ineligible", reason: "invalid-result" };
     if (activeMode === "flow" && (
       payload.result.completed !== true ||
-      payload.result.contractVersion !== 2 ||
-      payload.result.rulesVersion !== 3 ||
+      payload.result.contractVersion !== 3 ||
+      payload.result.rulesVersion !== 4 ||
       payload.result.metricVersion !== 2 ||
       payload.result.variantId !== "flow-v3" ||
       payload.result.sessionLength !== "flow" ||
