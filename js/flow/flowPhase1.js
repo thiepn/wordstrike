@@ -790,13 +790,13 @@ function flowCharacterAt(index) {
   const expected = run.passage[index];
   const typed = run.typedCharacters[index];
   const extras = (run.extraCharacters || []).filter((entry) => entry.index === index);
-  const hasExtras = extras.length > 0;
+  const extraText = extras.map((entry) => entry.actual).join("");
+  const hasExtras = extraText.length > 0;
   return {
     index,
     expected,
-    actual: hasExtras
-      ? `${extras.map((entry) => entry.actual).join("")}${typed?.actual ?? expected}`
-      : typed?.actual ?? null,
+    actual: typed?.actual ?? null,
+    extraText,
     status: hasExtras
       ? "incorrect"
       : typed?.missed
@@ -808,12 +808,21 @@ function flowCharacterAt(index) {
   };
 }
 
+function stableCharacterGlyph(character) {
+  if (isPublicStreamRun()) return character.expected;
+  return character.actual ?? character.expected;
+}
+
 function charMarkup(character, { paragraphBreak = false } = {}) {
-  const shown = character.actual ?? character.expected;
+  const shown = stableCharacterGlyph(character);
   const classes = ["flow-char", `flow-char--${character.status}`];
   if (character.current) classes.push("flow-char--current");
+  if (character.extraText) classes.push("flow-char--has-extra");
   const paragraphBreakAttribute = paragraphBreak ? ' data-flow-paragraph-break="true"' : "";
-  return `<span class="${classes.join(" ")}" data-flow-char="${character.index}" data-status="${character.status}"${paragraphBreakAttribute} aria-hidden="true">${escapeHtml(shown)}</span>`;
+  const extraAttribute = character.extraText
+    ? ` data-flow-extra="${escapeHtml(character.extraText)}"`
+    : "";
+  return `<span class="${classes.join(" ")}" data-flow-char="${character.index}" data-status="${character.status}"${extraAttribute}${paragraphBreakAttribute} aria-hidden="true">${escapeHtml(shown)}</span>`;
 }
 
 function visibleCharacterView() {
@@ -841,8 +850,8 @@ function updateCharacterNode(index) {
   const node = mountedCharacterNodes.get(index);
   const character = flowCharacterAt(index);
   if (!node || !character) return;
-  const shown = character.actual ?? character.expected;
-  const className = `flow-char flow-char--${character.status}${character.current ? " flow-char--current" : ""}`;
+  const shown = stableCharacterGlyph(character);
+  const className = `flow-char flow-char--${character.status}${character.current ? " flow-char--current" : ""}${character.extraText ? " flow-char--has-extra" : ""}`;
   let changed = false;
   if (node.textContent !== shown) {
     node.textContent = shown;
@@ -850,6 +859,11 @@ function updateCharacterNode(index) {
   }
   if (node.dataset.status !== character.status) {
     node.dataset.status = character.status;
+    changed = true;
+  }
+  if ((node.dataset.flowExtra || "") !== (character.extraText || "")) {
+    if (character.extraText) node.dataset.flowExtra = character.extraText;
+    else delete node.dataset.flowExtra;
     changed = true;
   }
   if (node.className !== className) {
