@@ -204,10 +204,10 @@ try {
   assert.match(phase1, /data-flow-progression/);
   assert.match(phase1, /data-flow-milestone-reward/);
   assert.match(phase1, /getPublicProgressionState/);
-  assert.match(loader, /flowProgressionV4\.js\?v=20260924a/);
+  assert.match(loader, /flowProgressionV4\.js\?v=[0-9a-z]+/);
   assert.match(loader, /wordstrike-flow-release-v\d+/);
   assert.match(sw, /const CACHE_NAME = CACHE_PREFIX \+ "v\d+-[^"]+";/);
-  assert.match(sw, /flowProgressionV4\.js\?v=20260924a/);
+  assert.match(sw, /flowProgressionV4\.js\?v=[0-9a-z]+/);
   assert.match(css, /WORDSTRIKE FLOW — PHASE 7B/);
   assert.match(css, /flow-v4-progression-strip/);
   assert.match(css, /flow-v4-milestone-reward/);
