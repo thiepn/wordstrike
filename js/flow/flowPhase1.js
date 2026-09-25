@@ -1919,12 +1919,33 @@ if (globalThis.window) {
     refreshPlanFromLocation: refreshFlowPlanFromLocation,
     startCurrentRun: startCurrentFlowRun,
     rerollPublicRun: () => isPublicStreamRun() ? rerollPublicStream() : false,
+    skipPublicText: () => isPublicStreamRun() ? skipPublicStreamText() : false,
     setPublicTheme: (theme) => {
       if (!isPublicStreamRun()) return false;
-      finalizePublicStreamRun("theme-change");
-      updatePublicFlowUrl({ theme, newSeed: true });
-      startRun();
-      return true;
+      return restartPublicStreamSession({
+        theme: normalizeFlowV3Theme(theme),
+        sessionPreset: resolvedRunPlan.sessionPreset,
+      });
+    },
+    setPublicSessionPreset: (sessionPreset) => {
+      if (!isPublicStreamRun()) return false;
+      return restartPublicStreamSession({
+        theme: resolvedRunPlan.theme,
+        sessionPreset: normalizeFlowV3SessionPreset(sessionPreset),
+      });
+    },
+    getPublicSessionTimerState: () => {
+      if (!isPublicStreamRun()) return null;
+      const durationMs = publicSessionDurationMs();
+      const remainingMs = publicSessionRemainingMs();
+      return {
+        sessionPreset: resolvedRunPlan.sessionPreset,
+        durationMs,
+        remainingMs,
+        started: publicSessionStartedAt != null,
+        paused: publicSessionPausedAt != null,
+        finished: publicSessionFinished,
+      };
     },
     getPublicSessionId: () => publicRunSessionId,
     getPublicResult: () => lastPublicResult ? { ...lastPublicResult, seriesIds: [...lastPublicResult.seriesIds] } : null,
