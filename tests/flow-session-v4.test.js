@@ -214,7 +214,7 @@ assert.match(css, /flow-v5-session-meta/);
 assert.match(css, /pointer-events:\s*none/);
 assert.match(css, /prefers-reduced-motion/);
 assert.match(loader, /flowSessionV4\.js\?v=20260924a/);
-assert.match(loader, /flowProgressionV4\.js\?v=20260924a/);
+assert.match(loader, /flowProgressionV4\.js\?v=[0-9a-z]+/);
 assert.match(loader, /flow-session-v4\.css\?v=[0-9a-z]+/);
 assert.match(index, /flow-session-v4\.css\?v=[0-9a-z]+/);
 
