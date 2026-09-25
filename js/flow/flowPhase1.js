@@ -1737,10 +1737,13 @@ function finalizePublicStreamRun(endedReason = "reset") {
 }
 
 function rememberDisplayedPublicStreamText() {
-  if (!isPublicStreamRun() || run?.currentIndex > 0 || !resolvedRunPlan?.documents?.length) return;
+  if (!isPublicStreamRun() || !resolvedRunPlan?.documents?.length) return;
+  const segment = resolvedRunPlan.segments?.[activeSegmentIndex];
+  const document = segment && resolvedRunPlan.documents[segment.documentIndex];
+  if (!document) return;
   recordFlowCorpusRun({
     ...resolvedRunPlan,
-    documents: resolvedRunPlan.documents.slice(0, 1),
+    documents: [document],
   }, { completedAt: Date.now() });
 }
 
