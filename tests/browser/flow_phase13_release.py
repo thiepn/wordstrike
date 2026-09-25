@@ -608,6 +608,40 @@ def bounded_offline_ready(page, timeout_ms=30000):
     ])""", timeout_ms)
 
 
+def certify_hidden_time_continues(browser, browser_name, base, evidence):
+    if browser_name != "chromium":
+        return
+
+    context = context_for(browser, base)
+    page = context.new_page()
+    open_modes(page, base)
+    plan = launch_public_flow(page)
+
+    page.keyboard.type(plan["fullText"][:12])
+    before = page.evaluate("window.wordstrikeFlowPhase1.getPublicSessionTimerState()")
+    assert before["started"] is True, before
+    assert before["paused"] is False, before
+
+    other = context.new_page()
+    other.goto(base, wait_until="domcontentloaded")
+    other.bring_to_front()
+    other.wait_for_timeout(800)
+    page.bring_to_front()
+    page.wait_for_timeout(80)
+
+    after = page.evaluate("window.wordstrikeFlowPhase1.getPublicSessionTimerState()")
+    assert after["paused"] is False, after
+    assert after["remainingMs"] <= before["remainingMs"] - 500, (before, after)
+
+    evidence.append({
+        "browser": browser_name,
+        "case": "hidden tab time continues against timed Flow",
+        "remainingBefore": before["remainingMs"],
+        "remainingAfter": after["remainingMs"],
+    })
+    context.close()
+
+
 def certify_offline(browser, browser_name, base, evidence):
     if browser_name != "chromium":
         return
@@ -628,8 +662,8 @@ def certify_offline(browser, browser_name, base, evidence):
 
     cached = page.evaluate("""async () => {
       const targets = [
-        './js/flow/flowRuntimeLoader.js?v=20260925m',
-        './js/flow/flowPhase1.js?v=20260925j',
+        './js/flow/flowRuntimeLoader.js?v=20260925n',
+        './js/flow/flowPhase1.js?v=20260925k',
         './js/flow/flowSessionV4.js?v=20260924a',
         './js/flow/flowProgressionV4.js?v=20260924a',
         './js/flow/flowIdentityV1.js?v=20260924b',
@@ -697,6 +731,7 @@ def main():
                 certify_input_focus_integrity(browser, name, base, evidence)
                 certify_skip_credit_integrity(browser, name, base, evidence)
                 certify_mobile(browser, name, base, evidence)
+                certify_hidden_time_continues(browser, name, base, evidence)
                 certify_offline(browser, name, base, evidence)
                 browser.close()
         (ARTIFACTS / "evidence.json").write_text(
