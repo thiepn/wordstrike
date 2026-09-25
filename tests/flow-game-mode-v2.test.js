@@ -20,6 +20,7 @@ assert.equal(release.searchParams.get("flowRelease"), "1");
 assert.equal(release.searchParams.get("flowRun"), "1");
 assert.equal(release.searchParams.get("flowModifiers"), "0");
 assert.equal(release.searchParams.get("flowAdaptive"), "0");
+assert.equal(release.searchParams.get("flowLength"), "standard");
 
 const staleThemeRelease = new URL(buildFlowReleaseUrl({
   href: "https://wordstrike.test/?flowTheme=future-theme",
@@ -37,8 +38,10 @@ assert.match(gameMode, /function decorateRun/);
 assert.match(phase1, /function isPublicStreamRun/);
 assert.match(phase1, /if \(isPublicStreamRun\(\)\) \{\s*startRun\(\);/);
 assert.match(phase1, /event\.key === "Tab"/);
-assert.match(phase1, /rerollPublicStream\(\)/);
+assert.match(phase1, /skipPublicStreamText/);
 assert.match(phase1, /data-flow-theme-select/);
+assert.match(phase1, /data-flow-session-preset/);
+assert.match(phase1, /data-flow-session-remaining/);
 assert.match(phase1, /TAB · NEXT TEXT/);
 assert.match(phase1, /calculateFlowScoreV3/);
 assert.match(phase1, /recordFlowResultV3/);
@@ -60,4 +63,4 @@ assert.match(css, /flow-v3-tab-hint/);
 assert.match(modes, /id: MODE_IDS\.FLOW/);
 assert.match(modes, /route: "flow-release"/);
 
-console.log("Flow public product contract passed: click-to-type instant stream, Tab reroll, compact optional text filter, and V3 scoring runtime.");
+console.log("Flow public product contract passed: click-to-type 3-minute stream, in-run Tab skip, session selector, text filter, and V3 scoring runtime.");
