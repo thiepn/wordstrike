@@ -653,6 +653,18 @@ function publicLongformMarkup() {
   }).join("");
 }
 
+function syncPublicStreamSkipControl(app = root()) {
+  if (!isPublicStreamRun() || !app) return;
+  const button = app.querySelector('[data-flow-action="next-text"]');
+  if (!button) return;
+  const hasNext = Boolean(nextPublicStreamDocumentSegment());
+  button.disabled = !hasNext;
+  button.setAttribute("aria-disabled", hasNext ? "false" : "true");
+  setTextIfChanged(button.querySelector("[data-flow-next-text-label]"), hasNext ? "NEXT TEXT" : "FINAL TEXT");
+  const shortcut = button.querySelector(".flow-v3-tab-shortcut");
+  if (shortcut) shortcut.hidden = !hasNext;
+}
+
 function syncPublicStreamIdentity(app = root()) {
   if (!isPublicStreamRun() || !app) return;
   const identity = getFlowStreamIdentity(resolvedRunPlan, activeSegmentIndex);
@@ -663,6 +675,7 @@ function syncPublicStreamIdentity(app = root()) {
     sourceTitle?.setAttribute("title", identity.sourceTitle);
   }
   setTextIfChanged(app.querySelector("[data-flow-source-meta]"), publicStreamSourceMeta(identity));
+  syncPublicStreamSkipControl(app);
 }
 
 function refreshPublicStreamPassage() {
@@ -947,7 +960,9 @@ function publicStreamToolsMarkup() {
         ${FLOW_V3_THEME_IDS.map((theme) => `<option value="${theme}"${theme === resolvedRunPlan.theme ? " selected" : ""}>${escapeHtml(formatFlowThemeLabel(theme))}</option>`).join("")}
       </select>
     </label>
-    <span class="flow-v3-tab-hint">TAB · NEXT TEXT</span>
+    <button type="button" class="flow-v3-tab-hint" data-flow-action="next-text" aria-label="Next Flow text">
+      <span class="flow-v3-tab-shortcut">TAB</span><span data-flow-next-text-label>NEXT TEXT</span>
+    </button>
   </div>`;
 }
 
@@ -1202,6 +1217,10 @@ function renderRun() {
       sessionPreset: normalizeFlowV3SessionPreset(event.target?.value),
     });
   });
+  app.querySelector('[data-flow-action="next-text"]')?.addEventListener("click", () => {
+    skipPublicStreamText();
+  });
+  syncPublicStreamSkipControl(app);
   input?.focus?.({ preventScroll: true });
   syncRunHud();
   updatePublicSessionTimerUi();
