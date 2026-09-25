@@ -1130,7 +1130,7 @@ function renderRun() {
         ${isPublicStreamRun() ? `<div class="flow-v5-session-meta">${publicSessionStripMarkup()}${publicProgressionStripMarkup()}</div>` : ""}
         ${publicMicroResultMarkup()}
         <div class="flow-run-copy">
-          <div class="flow-passages" aria-label="Typing passage">${passage}</div>
+          <div class="flow-passages" aria-label="Typing passage">${passage}${isPublicStreamRun() ? '<span class="flow-v3-live-caret" data-flow-live-caret aria-hidden="true"></span>' : ""}</div>
         </div>
         ${publicLongform ? "" : `<div class="flow-run-diagnostics" aria-live="polite">
           <span>WPM <strong data-flow-final-wpm>0.0</strong></span>
