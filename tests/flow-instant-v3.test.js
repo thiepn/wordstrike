@@ -276,7 +276,7 @@ assert.match(loader, /flowTheme/);
 assert.match(loader, /flowLength/);
 assert.match(loader, /flowStreamPlanV3\.js\?v=[0-9a-z]+/);
 assert.match(loader, /flowScoreV3\.js\?v=[0-9a-z]+/);
-assert.match(loader, /flowRecordsV3\.js\?v=20260923a/);
+assert.match(loader, /flowRecordsV3\.js\?v=[0-9a-z]+/);
 assert.match(migration, /where board_key in \('flow-quick-v1', 'flow-long-v1'\)/);
 assert.match(migration, /where board_key = 'flow-standard-v1'/);
 assert.match(migration, /rules_version = 3/);
