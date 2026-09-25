@@ -19,14 +19,14 @@ const [
   readFile(new URL("../js/flow/flowPhase1.js", import.meta.url), "utf8"),
   readFile(new URL("../js/submissionOutbox.js", import.meta.url), "utf8"),
   readFile(new URL("../js/pendingResultSubmission.js", import.meta.url), "utf8"),
-  readFile(new URL("../supabase/migrations/20260923213343_flow_v3_instant_play.sql", import.meta.url), "utf8"),
+  readFile(new URL("../supabase/migrations/20260925154500_flow_timed_3m_leaderboard_v1.sql", import.meta.url), "utf8"),
   readFile(new URL("../supabase/functions/submit-score/index.ts", import.meta.url), "utf8"),
   readFile(new URL("../supabase/functions/get-leaderboard/index.ts", import.meta.url), "utf8"),
   readFile(new URL("../package.json", import.meta.url), "utf8"),
 ]);
 
-assert.equal(FLOW_V3_BOARD_KEY, "flow-standard-v1");
-assert.equal(FLOW_SCORE_V3_RULES.rulesVersion, 3);
+assert.equal(FLOW_V3_BOARD_KEY, "flow-standard-3m-v1");
+assert.equal(FLOW_SCORE_V3_RULES.rulesVersion, 4);
 assert.equal(FLOW_SCORE_V3_RULES.metricVersion, 2);
 assert.deepEqual(FLOW_BOARD_KEYS, [LEADERBOARD_BOARDS.FLOW_STANDARD]);
 assert.equal(PUBLIC_BOARD_KEYS.includes(LEADERBOARD_BOARDS.FLOW_STANDARD), true);
@@ -34,7 +34,7 @@ assert.equal(PUBLIC_BOARD_KEYS.includes(LEADERBOARD_BOARDS.FLOW_QUICK), false);
 assert.equal(PUBLIC_BOARD_KEYS.includes(LEADERBOARD_BOARDS.FLOW_LONG), false);
 assert.equal(validateLeaderboardRequest({ boardKey: LEADERBOARD_BOARDS.FLOW_STANDARD }).valid, true);
 assert.equal(validateLeaderboardRequest({ boardKey: LEADERBOARD_BOARDS.FLOW_QUICK }).code, "INVALID_BOARD");
-assert.equal(EXPECTED_LEADERBOARD_RULES_VERSIONS[LEADERBOARD_BOARDS.FLOW_STANDARD], 3);
+assert.equal(EXPECTED_LEADERBOARD_RULES_VERSIONS[LEADERBOARD_BOARDS.FLOW_STANDARD], 4);
 assert.equal(getLeaderboardSelection(LEADERBOARD_BOARDS.FLOW_STANDARD).selectedCategory, LEADERBOARD_CATEGORIES.FLOW);
 
 assert.match(loader, /const FLOW_RELEASE_VERSION = \d+/);
@@ -91,13 +91,13 @@ assert.match(phase1, /continuous-stream/);
 assert.match(phase1, /rerollPublicStream/);
 assert.match(phase1, /event\.key === "Tab"/);
 assert.match(phase1, /data-flow-theme-select/);
-assert.match(phase1, /createLeaderboardSubmissionService/);
+assert.match(phase1, /preparePublicGlobalSubmission/);
 assert.match(outbox, /"flow"/);
 assert.match(pending, /"flow"/);
 
-assert.match(migration, /rules_version = 3/);
-assert.match(migration, /where board_key = 'flow-standard-v1'/);
-assert.match(migration, /where board_key in \('flow-quick-v1', 'flow-long-v1'\)/);
+assert.match(migration, /rules_version[^\n]*4|rules_version, ranking_strategy[\s\S]*\n\s*4,/);
+assert.match(migration, /flow-standard-3m-v1/);
+assert.match(migration, /flow-quick-v1', 'flow-standard-v1', 'flow-long-v1/);
 assert.match(migration, /is_active = false/);
 assert.match(migration, /revoke all on function public\.submit_leaderboard_result[\s\S]*from public, anon, authenticated/);
 assert.match(migration, /grant execute on function public\.submit_leaderboard_result[\s\S]*to service_role/);
