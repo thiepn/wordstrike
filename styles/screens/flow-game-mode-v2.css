@@ -742,3 +742,83 @@
 .flow-run-screen[data-flow-stream-v3="true"] .flow-char[data-flow-paragraph-break="true"]::before {
   display: none;
 }
+
+
+/* ---------- FLOW V3: finite session clock ---------- */
+
+.flow-v3-session-clock {
+  display: grid;
+  grid-template-columns: auto auto;
+  grid-template-areas:
+    "label time"
+    "track track";
+  gap: 7px 16px;
+  align-items: end;
+  width: min(100%, 860px);
+  margin: -4px auto 0;
+  color: var(--flow-ink-muted);
+  font-family: var(--flow-data-face);
+  font-variant-numeric: tabular-nums;
+}
+
+.flow-v3-session-clock > span {
+  grid-area: label;
+  align-self: center;
+  font-size: 0.58rem;
+  font-weight: 650;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.flow-v3-session-clock > strong {
+  grid-area: time;
+  justify-self: end;
+  color: var(--flow-ink);
+  font-size: clamp(1.25rem, 2.8vw, 1.8rem);
+  font-weight: 560;
+  letter-spacing: -0.025em;
+  line-height: 1;
+}
+
+.flow-v3-session-progress {
+  grid-area: track;
+  position: relative;
+  overflow: hidden;
+  height: 3px;
+  background: color-mix(in srgb, var(--flow-line-strong) 78%, transparent);
+}
+
+.flow-v3-session-progress > i {
+  position: absolute;
+  inset: 0 auto 0 0;
+  display: block;
+  min-width: 1px;
+  background: var(--flow-signal);
+}
+
+.flow-v3-session-clock[data-endless="true"] .flow-v3-session-progress {
+  opacity: 0.35;
+}
+
+.flow-v3-session-clock[data-endless="true"] .flow-v3-session-progress > i {
+  display: none;
+}
+
+.flow-complete-screen[data-flow-score-v3="true"] .flow-v3-results {
+  width: min(calc(100% - 32px), 760px);
+}
+
+@media (max-width: 620px) {
+  .flow-v3-session-clock {
+    width: 100%;
+    margin-top: 0;
+  }
+
+  .flow-v3-session-clock > span {
+    font-size: 0.52rem;
+  }
+
+  .flow-v3-session-clock > strong {
+    font-size: 1.25rem;
+  }
+}
