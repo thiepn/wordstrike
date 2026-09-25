@@ -1,5 +1,5 @@
 const CACHE_PREFIX = "wordstrike-pwa-";
-const CACHE_NAME = CACHE_PREFIX + "v97-flow-typing-surface-v30";
+const CACHE_NAME = CACHE_PREFIX + "v98-flow-crisp-typing-v31";
 const APP_SHELL = [
   "./js/practiceLab/practiceAssessmentInput.js",
   "./js/practiceLab/practiceDurableManifest.js",
@@ -69,7 +69,7 @@ const APP_SHELL = [
   "./js/flow/flowRecordsV2.js",
   "./js/flow/flowRecordsV2.js?v=20260923a",
   "./js/flow/flowRuntimeLoader.js",
-  "./js/flow/flowRuntimeLoader.js?v=20260925h",
+  "./js/flow/flowRuntimeLoader.js?v=20260925i",
   "./js/flow/flowSelection.js",
   "./js/flow/flowShell.js",
   "./js/flow/flowState.js",
@@ -102,7 +102,7 @@ const APP_SHELL = [
   "./styles/screens/flow-phase5.css",
   "./styles/screens/flow-phase5.css?v=20260916a",
   "./styles/screens/flow-game-mode-v2.css",
-  "./styles/screens/flow-game-mode-v2.css?v=20260925e",
+  "./styles/screens/flow-game-mode-v2.css?v=20260925f",
   "./styles/screens/flow-session-v4.css",
   "./styles/screens/flow-session-v4.css?v=20260924c",
   "./styles/screens/flow-ui-phase7-polish.css",
