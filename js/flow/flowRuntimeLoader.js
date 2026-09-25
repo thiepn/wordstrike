@@ -4,8 +4,8 @@ import {
 } from "./flowIdentityV1.js?v=20260924b";
 
 const RELEASE_FLAG = "flowRelease";
-const FLOW_RELEASE_VERSION = 31;
-const FLOW_RELEASE_CACHE_NAME = "wordstrike-flow-release-v34";
+const FLOW_RELEASE_VERSION = 32;
+const FLOW_RELEASE_CACHE_NAME = "wordstrike-flow-release-v35";
 const FLOW_OFFLINE_CACHE_BATCH_SIZE = 16;
 const FLOW_RELEASE_QUERY_KEYS = Object.freeze([
   "mode",
@@ -30,7 +30,7 @@ const FLOW_RELEASE_QUERY_KEYS = Object.freeze([
 ]);
 
 const FLOW_RELEASE_ASSETS = Object.freeze([
-  "./js/flow/flowRuntimeLoader.js?v=20260925i",
+  "./js/flow/flowRuntimeLoader.js?v=20260925j",
   "./js/leaderboardReturnState.js",
   "./js/pendingResultSubmission.js",
   "./js/submissionOutbox.js",
@@ -102,9 +102,9 @@ const FLOW_RELEASE_ASSETS = Object.freeze([
   "./js/flow/flowVisualPhase6.js?v=20260923a",
   "./styles/screens/flow-phase1.css?v=20260916d",
   "./styles/screens/flow-phase5.css?v=20260916a",
-  "./styles/screens/flow-game-mode-v2.css?v=20260925f",
+  "./styles/screens/flow-game-mode-v2.css?v=20260925g",
   "./styles/screens/flow-session-v4.css",
-  "./styles/screens/flow-session-v4.css?v=20260924c",
+  "./styles/screens/flow-session-v4.css?v=20260925a",
   "./styles/screens/flow-visual-phase6.css?v=20260923a",
   "./styles/screens/flow-visual-phase6-polish.css?v=20260916a",
   "./styles/screens/flow-ui-phase7.css?v=20260916a",
