@@ -175,12 +175,38 @@ function focusTypingInput(screen) {
   queueMicrotask(() => setTypingFocusState(screen));
 }
 
+function keepStreamCaretInTypingViewport(screen, current) {
+  if (screen?.dataset?.flowStreamV3 !== "true") return false;
+  const viewport = screen.querySelector(".flow-passages");
+  const passage = screen.querySelector("[data-flow-passage]");
+  if (!viewport || !passage) return false;
+
+  const passageStyle = globalThis.getComputedStyle?.(passage);
+  const lineHeight = Number.parseFloat(passageStyle?.lineHeight || "")
+    || Math.max(24, current.getBoundingClientRect().height * 1.7);
+  const viewportHeight = lineHeight * 3;
+  const height = `${viewportHeight.toFixed(2)}px`;
+  if (viewport.style.height !== height) viewport.style.height = height;
+
+  const viewportRect = viewport.getBoundingClientRect();
+  const currentRect = current.getBoundingClientRect();
+  const absoluteTop = currentRect.top - viewportRect.top + viewport.scrollTop;
+  const activeLine = Math.max(0, Math.floor((absoluteTop + (lineHeight * 0.2)) / lineHeight));
+  const targetScrollTop = Math.max(0, (activeLine - 1) * lineHeight);
+  if (Math.abs(viewport.scrollTop - targetScrollTop) > 1) {
+    viewport.scrollTop = targetScrollTop;
+  }
+  return true;
+}
+
 function ensureCaretVisible() {
   scheduledCaretCheck = false;
   const screen = currentScreen();
   if (!screen?.matches?.('[data-flow-view="run"]')) return;
   const current = screen.querySelector(".flow-char--current");
   if (!current) return;
+  if (keepStreamCaretInTypingViewport(screen, current)) return;
+
   const rect = current.getBoundingClientRect();
   const topSafe = globalThis.innerHeight * 0.24;
   const bottomSafe = globalThis.innerHeight * 0.72;
