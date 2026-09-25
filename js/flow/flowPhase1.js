@@ -837,7 +837,13 @@ function charMarkup(character, { paragraphBreak = false } = {}) {
   const extraAttribute = character.extraText
     ? ` data-flow-extra="${escapeHtml(character.extraText)}"`
     : "";
-  return `<span class="${classes.join(" ")}" data-flow-char="${character.index}" data-status="${character.status}"${extraAttribute}${paragraphBreakAttribute} aria-hidden="true">${escapeHtml(shown)}</span>`;
+  const actualAttribute = character.status === "incorrect"
+    && !character.extraText
+    && character.actual != null
+    && character.actual !== character.expected
+      ? ` data-flow-actual="${escapeHtml(character.actual)}"`
+      : "";
+  return `<span class="${classes.join(" ")}" data-flow-char="${character.index}" data-status="${character.status}"${actualAttribute}${extraAttribute}${paragraphBreakAttribute} aria-hidden="true">${escapeHtml(shown)}</span>`;
 }
 
 function visibleCharacterView() {
@@ -874,6 +880,17 @@ function updateCharacterNode(index) {
   }
   if (node.dataset.status !== character.status) {
     node.dataset.status = character.status;
+    changed = true;
+  }
+  const actualText = character.status === "incorrect"
+    && !character.extraText
+    && character.actual != null
+    && character.actual !== character.expected
+      ? character.actual
+      : "";
+  if ((node.dataset.flowActual || "") !== actualText) {
+    if (actualText) node.dataset.flowActual = actualText;
+    else delete node.dataset.flowActual;
     changed = true;
   }
   if ((node.dataset.flowExtra || "") !== (character.extraText || "")) {
