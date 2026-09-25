@@ -37,8 +37,8 @@ assert.equal(validateLeaderboardRequest({ boardKey: LEADERBOARD_BOARDS.FLOW_QUIC
 assert.equal(EXPECTED_LEADERBOARD_RULES_VERSIONS[LEADERBOARD_BOARDS.FLOW_STANDARD], 3);
 assert.equal(getLeaderboardSelection(LEADERBOARD_BOARDS.FLOW_STANDARD).selectedCategory, LEADERBOARD_CATEGORIES.FLOW);
 
-assert.match(loader, /const FLOW_RELEASE_VERSION = 23/);
-assert.match(loader, /wordstrike-flow-release-v26/);
+assert.match(loader, /const FLOW_RELEASE_VERSION = 24/);
+assert.match(loader, /wordstrike-flow-release-v27/);
 assert.match(index, /js\/flow\/flowRuntimeLoader\.js\?v=20260924m/);
 for (const asset of [
   "./js/authService.js",
@@ -47,19 +47,19 @@ for (const asset of [
   "./js/leaderboardService.js",
   "./js/submissionOutbox.js",
   "./js/pendingResultSubmission.js",
-  "./js/flow/flowStreamPlanV3.js?v=20260923b",
+  "./js/flow/flowStreamPlanV3.js?v=20260925b",
   "./js/flow/flowScoreV3.js",
-  "./js/flow/flowScoreV3.js?v=20260923a",
+  "./js/flow/flowScoreV3.js?v=20260925b",
   "./js/flow/flowRecordsV3.js",
   "./js/flow/flowRecordsV3.js?v=20260923a",
-  "./js/flow/flowPhase1.js?v=20260925a",
+  "./js/flow/flowPhase1.js?v=20260925b",
   "./js/flow/flowProgressionV4.js?v=20260924a",
   "./js/flow/flowIdentityV1.js?v=20260924b",
   "./styles/screens/flow-session-v4.css?v=20260924c",
   "./styles/screens/flow-session-v4.css",
   "./js/flow/flowSessionV4.js?v=20260924a",
   "./js/flow/flowSessionV4.js",
-  "./js/flow/flowCadence.js?v=20260924b",
+  "./js/flow/flowCadence.js?v=20260925b",
 ]) {
   assert.equal(loader.includes(JSON.stringify(asset)), true, "offline pack missing " + asset);
 }
