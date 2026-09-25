@@ -74,6 +74,7 @@ for (const asset of [
   "./js/authService.js",
   "./js/leaderboardProfileService.js",
   "./js/leaderboardSubmissionService.js",
+  "./js/leaderboardSubmissionService.js?v=20260925a",
   "./js/leaderboardService.js",
   "./js/submissionOutbox.js",
   "./js/pendingResultSubmission.js",
