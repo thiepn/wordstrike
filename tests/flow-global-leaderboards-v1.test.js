@@ -40,7 +40,7 @@ const result = Object.freeze({
   boardKey: "flow-standard-v1",
   sessionId: "session-flow-v3-test-12345678",
   endedAt: 1700000000000,
-  endedReason: "reset",
+  endedReason: "complete",
   sessionLength: "flow",
   completed: true,
   recordEligible: true,
