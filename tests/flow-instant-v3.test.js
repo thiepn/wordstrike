@@ -285,7 +285,8 @@ const [phase1, loader, ui, migration] = await Promise.all([
 assert.match(phase1, /if \(isPublicStreamRun\(\)\) \{\s*startRun\(\);/);
 assert.match(phase1, /event\.key === "Tab"/);
 assert.match(phase1, /skipPublicStreamText/);
-assert.match(phase1, /TAB · NEXT TEXT/);
+assert.match(phase1, /data-flow-action="next-text"/);
+assert.match(phase1, /flow-v3-tab-shortcut/);
 assert.match(phase1, /data-flow-theme-select/);
 assert.match(phase1, /data-flow-session-preset/);
 assert.match(phase1, /data-flow-session-remaining/);
