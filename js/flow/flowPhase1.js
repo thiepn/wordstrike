@@ -1195,6 +1195,8 @@ function renderRun() {
   });
   const input = app.querySelector("[data-flow-input]");
   input?.addEventListener("beforeinput", handleBeforeInput);
+  input?.addEventListener("paste", (event) => event.preventDefault());
+  input?.addEventListener("drop", (event) => event.preventDefault());
   input?.addEventListener("input", () => { input.value = ""; });
   app.querySelector("[data-flow-passage]")?.addEventListener("pointerdown", () => input?.focus?.({ preventScroll: true }));
   app.querySelector("[data-flow-theme-select]")?.addEventListener("change", (event) => {
@@ -1839,9 +1841,10 @@ function handleBeforeInput(event) {
     deleteBackward();
     return;
   }
-  if (event.inputType?.startsWith("insert") && typeof event.data === "string" && event.data.length) {
+  if (event.inputType?.startsWith("insert")) {
     event.preventDefault();
-    insertText(event.data);
+    if (event.inputType !== "insertText") return;
+    if (typeof event.data === "string" && event.data.length) insertText(event.data);
   }
 }
 
