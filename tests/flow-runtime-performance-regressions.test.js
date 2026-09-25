@@ -47,6 +47,10 @@ assert.match(source.ux8, /keepStreamCaretInTypingViewport/, "public Flow must ke
 assert.match(source.ux8, /viewport\.scrollTop = targetScrollTop/, "public Flow line movement must scroll the typing viewport, not the page");
 assert.match(source.phase1, /refreshPublicStreamPassage/, "paragraph rollover must refresh only the passage content");
 assert.match(source.ux8, /positionStreamCaret/, "public Flow must position a dedicated live caret independently from text");
+assert.match(source.ux8, /measureCaretExtraWidth/, "public Flow caret must advance through extra letters without moving text");
+assert.match(source.phase1, /class="flow-word"/, "public Flow must group characters into unbreakable word units");
+assert.match(source.gameCss, /font-family:\s*var\(--flow-data-face\)/, "public Flow typing surface must use typing-oriented monospace geometry");
+assert.match(source.gameCss, /data-flow-actual/, "substitution typos must render from overlay data without changing glyph geometry");
 assert.match(source.phase1, /data-flow-live-caret/, "public Flow must mount a dedicated live caret");
 assert.match(source.phase1, /insertAdjacentHTML\("beforeend", publicStreamSegmentMarkup\(segment\)\)/, "paragraph rollover should append look-ahead text instead of replacing the passage");
 assert.doesNotMatch(source.phase1, /passage\.innerHTML = publicLongformMarkup\(\)/, "live paragraph rollover must never replace the passage DOM");
