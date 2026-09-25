@@ -167,6 +167,9 @@ function cleanRecordResult(value) {
     sessionId: value.sessionId,
     completed: value.completed === true,
     recordEligible: value.recordEligible === true,
+    sessionPreset: ["quick", "standard", "deep", "endless"].includes(value.sessionPreset)
+      ? value.sessionPreset
+      : "standard",
     endedAt: Math.max(0, finite(value.endedAt)),
     score: integer(value.score),
     wpm: Math.max(0, finite(value.wpm)),
@@ -179,7 +182,9 @@ function cleanRecordResult(value) {
   };
 }
 
-function applyRun(progress, run, themes = []) {
+function applyRun(progress, run, themes = [], {
+  affectsCompetitiveStreaks = run?.sessionPreset === "standard",
+} = {}) {
   if (!run?.completed || run.correctCharacters <= 0) return false;
   progress.totals.runs += 1;
   progress.totals.eligibleRuns += run.recordEligible ? 1 : 0;
@@ -198,13 +203,15 @@ function applyRun(progress, run, themes = []) {
     progress.best.consistency = Math.max(progress.best.consistency, run.consistency);
   }
 
-  if (run.recordEligible) progress.streaks.eligibleCurrent += 1;
-  else progress.streaks.eligibleCurrent = 0;
-  progress.streaks.eligibleBest = Math.max(progress.streaks.eligibleBest, progress.streaks.eligibleCurrent);
+  if (affectsCompetitiveStreaks) {
+    if (run.recordEligible) progress.streaks.eligibleCurrent += 1;
+    else progress.streaks.eligibleCurrent = 0;
+    progress.streaks.eligibleBest = Math.max(progress.streaks.eligibleBest, progress.streaks.eligibleCurrent);
 
-  if (run.recordEligible && run.accuracy >= 98) progress.streaks.precisionCurrent += 1;
-  else progress.streaks.precisionCurrent = 0;
-  progress.streaks.precisionBest = Math.max(progress.streaks.precisionBest, progress.streaks.precisionCurrent);
+    if (run.recordEligible && run.accuracy >= 98) progress.streaks.precisionCurrent += 1;
+    else progress.streaks.precisionCurrent = 0;
+    progress.streaks.precisionBest = Math.max(progress.streaks.precisionBest, progress.streaks.precisionCurrent);
+  }
 
   const exploredThemes = new Set([
     ...themes,
@@ -223,7 +230,12 @@ export function bootstrapFlowProgressionV4(sourceRecords) {
     .sort((a, b) => a.endedAt - b.endedAt);
 
   for (const run of history) {
-    applyRun(progress, run, run.theme === "mixed" ? [] : [run.theme]);
+    applyRun(
+      progress,
+      run,
+      run.theme === "mixed" ? [] : [run.theme],
+      { affectsCompetitiveStreaks: run.sessionPreset === "standard" },
+    );
   }
 
   progress.totals.runs = Math.max(progress.totals.runs, integer(source.completedRuns));
@@ -345,7 +357,12 @@ export function recordFlowProgressionV4(result, { plan = null, sourceRecords = n
   }
 
   const themes = Array.isArray(plan?.corpusThemes) ? plan.corpusThemes.map(String) : [];
-  applyRun(progress, run, themes);
+  const sessionPreset = ["quick", "standard", "deep", "endless"].includes(plan?.sessionPreset)
+    ? plan.sessionPreset
+    : run.sessionPreset;
+  applyRun(progress, run, themes, {
+    affectsCompetitiveStreaks: sessionPreset === "standard",
+  });
   progress.recordedSessionIds = [
     run.sessionId,
     ...progress.recordedSessionIds.filter((id) => id !== run.sessionId),
