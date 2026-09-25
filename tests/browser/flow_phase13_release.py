@@ -62,6 +62,9 @@ def launch_public_flow(page):
     assert plan["gameplayVersion"] == 3, plan
     assert plan["structure"] == "continuous-stream", plan
     assert plan["sessionLength"] == "flow", plan
+    assert plan["sessionPreset"] == "standard", plan
+    assert plan["targetMinutes"] == 3, plan
+    assert plan["targetDurationMs"] == 180000, plan
     assert plan["theme"] == "mixed", plan
     assert plan["documentCount"] == 10, plan
     assert plan["paragraphCount"] >= 50, plan
@@ -71,6 +74,9 @@ def launch_public_flow(page):
     labels = page.locator(".flow-game-v2-hud > div > span").all_text_contents()
     assert labels == ["Score", "WPM", "Accuracy", "Words"], labels
     expect(page.locator('[data-flow-theme-select]')).to_be_visible()
+    expect(page.locator('[data-flow-session-preset]')).to_be_visible()
+    assert page.locator('[data-flow-session-preset]').input_value() == "standard"
+    expect(page.locator('[data-flow-session-remaining]')).to_have_text("3:00")
     expect(page.locator(".flow-v3-tab-hint")).to_contain_text("NEXT TEXT")
     expect(page.locator('[data-flow-identity]')).to_be_visible()
     expect(page.locator('[data-flow-source-title]')).to_have_text(plan["documents"][0]["title"])
@@ -109,48 +115,35 @@ def certify_public_journey(browser, browser_name, base, evidence):
     first_seed = first_plan["seed"]
     typed = type_prefix(page, first_plan)
 
-    # Tab is the central Flow loop: record the attempt, reroll, continue immediately.
+    # Tab changes text inside the same timed run. It must not end, score, or reset the session.
+    before_segment = page.evaluate("window.wordstrikeFlowPhase1.getActiveSegmentIndex()")
     page.keyboard.press("Tab")
     expect(page.locator('[data-flow-view="run"]')).to_be_visible(timeout=10000)
     second_plan = page.evaluate("window.wordstrikeFlowPhase1.getRunPlan()")
     second_session = page.evaluate("window.wordstrikeFlowPhase1.getPublicSessionId()")
+    after_segment = page.evaluate("window.wordstrikeFlowPhase1.getActiveSegmentIndex()")
     previous_result = page.evaluate("window.wordstrikeFlowPhase1.getPublicResult()")
-    assert second_session != first_session, (first_session, second_session)
-    assert second_plan["seed"] != first_seed, (first_seed, second_plan["seed"])
-    assert second_plan["id"] != first_plan["id"], (first_plan["id"], second_plan["id"])
-    assert previous_result["variantId"] == "flow-v3", previous_result
-    assert previous_result["rulesVersion"] == 3, previous_result
-    assert previous_result["endedReason"] == "reset", previous_result
-    assert previous_result["correctCharacters"] == len(typed), previous_result
-    assert previous_result["wordsCompleted"] == len(typed) // 5, previous_result
-    assert previous_result["score"] > 0, previous_result
+    assert second_session == first_session, (first_session, second_session)
+    assert second_plan["seed"] == first_seed, (first_seed, second_plan["seed"])
+    assert second_plan["id"] == first_plan["id"], (first_plan["id"], second_plan["id"])
+    assert after_segment == before_segment + 1, (before_segment, after_segment)
+    assert previous_result is None, previous_result
     assert page.locator('[data-flow-view="complete"]').count() == 0
+    assert page.locator('[data-flow-micro-result]').count() == 0
 
-    # Phase 7A: the next run is already live while the previous run summary is visible.
     session_state = page.evaluate("window.wordstrikeFlowPhase1.getPublicSessionState()")
-    micro = page.evaluate("window.wordstrikeFlowPhase1.getPublicMicroResult()")
-    assert session_state["runCount"] == 1, session_state
-    assert session_state["totalWords"] == previous_result["wordsCompleted"], session_state
-    assert session_state["totalScore"] == previous_result["score"], session_state
-    assert session_state["bestRun"]["score"] == previous_result["score"], session_state
-    assert micro["title"] == "NEW SESSION BEST", micro
-    assert micro["score"] == previous_result["score"], micro
     progression = page.evaluate("window.wordstrikeFlowPhase1.getPublicProgressionState()")
-    assert progression["progression"]["totals"]["runs"] == 1, progression
-    assert progression["progression"]["totals"]["words"] == previous_result["wordsCompleted"], progression
-    assert "runs-1" in progression["progression"]["milestones"], progression
-    assert progression["summary"]["earnedCount"] >= 1, progression
-    assert micro["progressionReward"]["primaryName"] == "First Current", micro
-    expect(page.locator('[data-flow-micro-result]')).to_be_visible()
-    expect(page.locator('[data-flow-milestone-reward]')).to_contain_text("First Current")
-    expect(page.locator('[data-flow-session-run]')).to_have_text("2")
-    expect(page.locator('[data-flow-session-words]')).to_have_text(str(previous_result["wordsCompleted"]))
+    assert session_state["runCount"] == 0, session_state
+    assert progression["progression"]["totals"]["runs"] == 0, progression
+    expect(page.locator('[data-flow-session-run]')).to_have_text("1")
     expect(page.locator('[data-flow-progression-count]')).to_contain_text("/ 25")
 
-    live_prefix = second_plan["fullText"][:20]
+    live_prefix = second_plan["segments"][after_segment]["text"][:20]
+    live_start = second_plan["segments"][after_segment]["startIndex"]
     page.keyboard.type(live_prefix)
     live_snapshot = page.evaluate("window.wordstrikeFlowPhase1.getSnapshot()")
-    assert live_snapshot["currentIndex"] == len(live_prefix), live_snapshot
+    assert live_snapshot["currentIndex"] == live_start + len(live_prefix), live_snapshot
+    assert live_snapshot["totalInsertedCharacters"] == len(typed) + len(live_prefix), live_snapshot
 
     # Optional text-kind filtering is secondary and never returns to a setup screen.
     page.locator('[data-flow-theme-select]').select_option("science")
@@ -192,11 +185,11 @@ def certify_public_journey(browser, browser_name, base, evidence):
 
     evidence.append({
         "browser": browser_name,
-        "case": "instant Flow launch, Tab reroll, optional theme filter, clean exit",
-        "firstSeed": first_seed,
-        "secondSeed": second_plan["seed"],
-        "typedCharacters": len(typed),
-        "score": previous_result["score"],
+        "case": "timed Flow launch, in-run Tab skip, optional theme filter, clean exit",
+        "seed": first_seed,
+        "typedCharactersBeforeSkip": len(typed),
+        "segmentBefore": before_segment,
+        "segmentAfter": after_segment,
         "theme": themed_plan["theme"],
     })
     context.close()
@@ -216,28 +209,31 @@ def certify_fresh_default(browser, browser_name, base, evidence):
     assert fresh_progression["summary"]["tier"]["name"] == "Open Current", fresh_progression
     expect(page.locator('[data-flow-progression-count]')).to_have_text("0 / 25")
 
-    first_document = plan["documents"][0]["documentId"]
     first_session = page.evaluate("window.wordstrikeFlowPhase1.getPublicSessionId()")
+    first_seed = plan["seed"]
+    assert page.locator('[data-flow-session-preset]').input_value() == "standard"
+    expect(page.locator('[data-flow-session-remaining]')).to_have_text("3:00")
+
     page.keyboard.press("Tab")
     expect(page.locator('[data-flow-view="run"]')).to_be_visible(timeout=10000)
-    rerolled = page.evaluate("window.wordstrikeFlowPhase1.getRunPlan()")
-    rerolled_session = page.evaluate("window.wordstrikeFlowPhase1.getPublicSessionId()")
-    assert rerolled_session != first_session, (first_session, rerolled_session)
-    assert rerolled["documents"][0]["documentId"] != first_document, (
-        first_document,
-        rerolled["documents"][0]["documentId"],
-    )
+    skipped_plan = page.evaluate("window.wordstrikeFlowPhase1.getRunPlan()")
+    skipped_session = page.evaluate("window.wordstrikeFlowPhase1.getPublicSessionId()")
+    assert skipped_session == first_session, (first_session, skipped_session)
+    assert skipped_plan["seed"] == first_seed, (first_seed, skipped_plan["seed"])
+    assert page.evaluate("window.wordstrikeFlowPhase1.getActiveSegmentIndex()") == 1
+    assert page.evaluate("window.wordstrikeFlowPhase1.getPublicResult()") is None
     assert page.locator('[data-flow-view="ready"]').count() == 0
     assert page.locator('[data-flow-view="complete"]').count() == 0
+    expect(page.locator('[data-flow-session-remaining]')).to_have_text("3:00")
 
     evidence.append({
         "browser": browser_name,
-        "case": "fresh Flow click enters immediately and empty Tab rerolls source",
+        "case": "fresh Flow defaults to three minutes and empty Tab skips in-run",
         "documents": plan["documentCount"],
         "paragraphs": plan["paragraphCount"],
         "wordsAvailable": plan["wordCount"],
-        "firstDocument": first_document,
-        "nextDocument": rerolled["documents"][0]["documentId"],
+        "sessionPreset": plan["sessionPreset"],
+        "activeSegment": 1,
     })
     context.close()
 
@@ -305,7 +301,7 @@ def certify_theme_stream_integrity(browser, browser_name, base, evidence):
         "browser": browser_name,
         "case": "Flow V4 theme and stream integrity stress",
         "documentTransitionIndex": target_index,
-        "rerolls": 12,
+        "textSkips": 12,
     })
     context.close()
 
@@ -328,6 +324,8 @@ def certify_mobile(browser, browser_name, base, evidence):
       identity: document.querySelector('[data-flow-identity]').getBoundingClientRect().width,
       source: document.querySelector('[data-flow-source]').getBoundingClientRect().width,
       passage: document.querySelector('[data-flow-longform="true"]').getBoundingClientRect().width,
+      timer: document.querySelector('[data-flow-session-clock]').getBoundingClientRect().width,
+      sessionPreset: document.querySelector('[data-flow-session-preset]').getBoundingClientRect().width,
       theme: document.querySelector('[data-flow-theme-select]').getBoundingClientRect().width,
     })""")
     assert geometry["overflow"] <= 1, geometry
@@ -338,20 +336,19 @@ def certify_mobile(browser, browser_name, base, evidence):
     assert geometry["identity"] <= geometry["viewport"] + 1, geometry
     assert geometry["source"] <= geometry["viewport"] + 1, geometry
     assert geometry["passage"] <= geometry["viewport"] + 1, geometry
+    assert geometry["timer"] <= geometry["viewport"] + 1, geometry
+    assert geometry["sessionPreset"] <= geometry["viewport"], geometry
     assert geometry["theme"] <= geometry["viewport"], geometry
 
+    session_before = page.evaluate("window.wordstrikeFlowPhase1.getPublicSessionId()")
     page.keyboard.type(plan["fullText"][:80])
     page.keyboard.press("Tab")
     expect(page.locator('[data-flow-view="run"]')).to_be_visible(timeout=10000)
-    expect(page.locator('[data-flow-micro-result]')).to_be_visible()
-    toast = page.locator('[data-flow-micro-result]').evaluate("""el => {
-      const rect = el.getBoundingClientRect();
-      return {left: rect.left, right: rect.right, width: rect.width};
-    }""")
-    assert toast["left"] >= -1, toast
-    assert toast["right"] <= geometry["viewport"] + 1, (toast, geometry)
-    page.screenshot(path=str(ARTIFACTS / "chromium-instant-flow-mobile.png"), full_page=True)
-    evidence.append({"browser": browser_name, "case": "390px instant Flow and Tab reroll", **geometry})
+    assert page.evaluate("window.wordstrikeFlowPhase1.getPublicSessionId()") == session_before
+    assert page.locator('[data-flow-micro-result]').count() == 0
+    expect(page.locator('[data-flow-session-clock]')).to_be_visible()
+    page.screenshot(path=str(ARTIFACTS / "chromium-timed-flow-mobile.png"), full_page=True)
+    evidence.append({"browser": browser_name, "case": "390px timed Flow and in-run Tab skip", **geometry})
     context.close()
 
 
@@ -395,21 +392,21 @@ def certify_offline(browser, browser_name, base, evidence):
 
     cached = page.evaluate("""async () => {
       const targets = [
-        './js/flow/flowRuntimeLoader.js?v=20260924m',
-        './js/flow/flowPhase1.js?v=20260924j',
+        './js/flow/flowRuntimeLoader.js?v=20260925b',
+        './js/flow/flowPhase1.js?v=20260925b',
         './js/flow/flowSessionV4.js?v=20260924a',
         './js/flow/flowProgressionV4.js?v=20260924a',
         './js/flow/flowIdentityV1.js?v=20260924b',
         './styles/screens/flow-session-v4.css?v=20260924c',
-        './js/flow/flowCadence.js?v=20260924b',
-        './js/flow/flowStreamPlanV3.js?v=20260923b',
-        './js/flow/flowScoreV3.js?v=20260923a',
+        './js/flow/flowCadence.js?v=20260925b',
+        './js/flow/flowStreamPlanV3.js?v=20260925b',
+        './js/flow/flowScoreV3.js?v=20260925b',
         './js/flow/flowRecordsV3.js?v=20260923a',
         './js/leaderboardService.js',
         './js/leaderboardSubmissionService.js',
         './js/submissionOutbox.js',
         './js/supabaseClient.js',
-        './styles/screens/flow-game-mode-v2.css?v=20260923d',
+        './styles/screens/flow-game-mode-v2.css?v=20260925b',
       ];
       const results = [];
       for (const target of targets) {
