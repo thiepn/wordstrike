@@ -933,3 +933,24 @@
   white-space: pre;
   pointer-events: none;
 }
+
+
+/* ---------- FLOW V3: crisp typing feedback ---------- */
+
+.flow-run-screen[data-flow-stream-v3="true"] .flow-char--pending {
+  color: var(--flow-ink-soft);
+  opacity: 0.48;
+}
+
+.flow-run-screen[data-flow-stream-v3="true"] .flow-char--correct {
+  color: var(--flow-ink);
+  opacity: 1;
+}
+
+.flow-run-screen[data-flow-stream-v3="true"] .flow-char--current {
+  text-shadow: none;
+}
+
+.flow-run-screen[data-flow-stream-v3="true"] .flow-v3-live-caret {
+  box-shadow: none;
+}
