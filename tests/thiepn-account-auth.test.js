@@ -30,8 +30,8 @@ test("shared THIEPN Account storage is configured on the Supabase client", () =>
 });
 
 test("Firefox-safe auth storage avoids direct localStorage default access and has a refresh-safe fallback", () => {
-  assert.match(source, /safeGlobalStorage\("localStorage"\)/);
-  assert.match(source, /safeGlobalStorage\("sessionStorage"\)/);
+  assert.match(source, /getResilientBrowserStorage\(\)/);
+  assert.match(source, /createResilientBrowserStorage\(/);
   assert.match(source, /createAuthStorageAdapter\(/);
   assert.doesNotMatch(source, /storage\s*=\s*globalThis\.localStorage/);
 });
