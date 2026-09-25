@@ -11,10 +11,13 @@ import {
 } from "./flowCadence.js?v=20260924b";
 import { resolveFlowRunPlan } from "./flowRunPlan.js?v=20260923e";
 import {
+  FLOW_V3_DEFAULT_SESSION_PRESET,
+  FLOW_V3_SESSION_PRESETS,
   FLOW_V3_THEME_IDS,
+  normalizeFlowV3SessionPreset,
   normalizeFlowV3Theme,
   resolveFlowStreamPlanV3,
-} from "./flowStreamPlanV3.js?v=20260923b";
+} from "./flowStreamPlanV3.js?v=20260925b";
 import {
   formatFlowThemeLabel,
   getFlowStreamIdentity,
@@ -81,6 +84,7 @@ let publicFlowRequested = false;
 let resolvedRunPlan = null;
 let resolvedSelection = null;
 const LIVE_CADENCE_INTERVAL_MS = 180;
+const PUBLIC_SESSION_TICK_MS = 125;
 
 function refreshFlowPlanFromLocation(locationLike = globalThis.location) {
   const params = new URLSearchParams(locationLike?.search || "");
@@ -122,6 +126,11 @@ let flowSessionV4 = null;
 let pendingMicroResultV4 = null;
 let microResultTimer = null;
 let flowAutomaticSubmissionSessionId = null;
+let publicSessionStartedAt = null;
+let publicSessionDeadlineAt = null;
+let publicSessionPausedAt = null;
+let publicSessionTimer = null;
+let publicSessionFinished = false;
 let performanceStats = createPerformanceStats();
 
 function createPerformanceStats() {
@@ -153,13 +162,19 @@ function createPublicFlowSeed() {
   return `flow-v3-${stamp}-${Math.random().toString(36).slice(2, 10)}`;
 }
 
-function updatePublicFlowUrl({ theme = resolvedRunPlan?.theme || "mixed", newSeed = true } = {}) {
+function updatePublicFlowUrl({
+  theme = resolvedRunPlan?.theme || "mixed",
+  sessionPreset = resolvedRunPlan?.sessionPreset || FLOW_V3_DEFAULT_SESSION_PRESET,
+  newSeed = true,
+} = {}) {
   const normalizedTheme = normalizeFlowV3Theme(theme);
+  const normalizedSessionPreset = normalizeFlowV3SessionPreset(sessionPreset);
   const url = new URL(globalThis.location.href);
   url.searchParams.set("mode", "flow");
   url.searchParams.set("flowRelease", "1");
   url.searchParams.set("flowRun", "1");
   url.searchParams.set("flowTheme", normalizedTheme);
+  url.searchParams.set("flowLength", normalizedSessionPreset);
   savePreferredFlowTheme(normalizedTheme);
   if (newSeed || !url.searchParams.get("flowSeed")) url.searchParams.set("flowSeed", createPublicFlowSeed());
   globalThis.history?.replaceState?.(null, "", url.href);
@@ -172,6 +187,124 @@ function formatRunDuration(ms) {
   const minutes = Math.floor(totalSeconds / 60);
   const seconds = String(totalSeconds % 60).padStart(2, "0");
   return `${minutes}:${seconds}`;
+}
+
+function currentPublicSessionProfile() {
+  const id = normalizeFlowV3SessionPreset(
+    resolvedRunPlan?.sessionPreset || FLOW_V3_DEFAULT_SESSION_PRESET,
+  );
+  return FLOW_V3_SESSION_PRESETS[id];
+}
+
+function publicSessionDurationMs() {
+  const value = currentPublicSessionProfile()?.durationMs;
+  return Number.isFinite(Number(value)) ? Number(value) : null;
+}
+
+function publicSessionRemainingMs(at = now()) {
+  const duration = publicSessionDurationMs();
+  if (duration == null) return null;
+  if (publicSessionStartedAt == null || publicSessionDeadlineAt == null) return duration;
+  const clockAt = publicSessionPausedAt ?? at;
+  return Math.max(0, publicSessionDeadlineAt - clockAt);
+}
+
+function formatPublicSessionCountdown(ms) {
+  if (ms == null) return "∞";
+  const totalSeconds = Math.max(0, Math.ceil(ms / 1000));
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = String(totalSeconds % 60).padStart(2, "0");
+  return `${minutes}:${seconds}`;
+}
+
+function clearPublicSessionTimer() {
+  if (publicSessionTimer != null) globalThis.clearTimeout?.(publicSessionTimer);
+  publicSessionTimer = null;
+}
+
+function resetPublicSessionClock() {
+  clearPublicSessionTimer();
+  publicSessionStartedAt = null;
+  publicSessionDeadlineAt = null;
+  publicSessionPausedAt = null;
+  publicSessionFinished = false;
+}
+
+function updatePublicSessionTimerUi(at = now()) {
+  if (!isPublicStreamRun()) return;
+  const app = root();
+  if (!app) return;
+  const profile = currentPublicSessionProfile();
+  const duration = publicSessionDurationMs();
+  const remaining = publicSessionRemainingMs(at);
+  const elapsed = duration == null || remaining == null ? 0 : Math.max(0, duration - remaining);
+  const progress = duration == null ? 0 : Math.max(0, Math.min(100, (elapsed / duration) * 100));
+  const clock = app.querySelector("[data-flow-session-clock]");
+  const remainingNode = app.querySelector("[data-flow-session-remaining]");
+  const fill = app.querySelector("[data-flow-session-progress-fill]");
+  const label = app.querySelector("[data-flow-session-label]");
+  setTextIfChanged(
+    label,
+    profile.durationMs == null ? "ENDLESS FLOW" : `${profile.minutes} MIN FLOW`,
+  );
+  setTextIfChanged(remainingNode, formatPublicSessionCountdown(remaining));
+  if (fill) fill.style.width = `${progress}%`;
+  if (clock) {
+    clock.dataset.endless = duration == null ? "true" : "false";
+    clock.setAttribute("aria-valuenow", String(Math.round(progress)));
+    clock.setAttribute(
+      "aria-valuetext",
+      duration == null ? "Endless session" : `${formatPublicSessionCountdown(remaining)} remaining`,
+    );
+  }
+}
+
+function schedulePublicSessionTimer() {
+  clearPublicSessionTimer();
+  if (
+    !isPublicStreamRun()
+    || publicSessionFinished
+    || publicSessionStartedAt == null
+    || publicSessionDeadlineAt == null
+    || publicSessionPausedAt != null
+    || view !== "run"
+  ) return;
+  publicSessionTimer = globalThis.setTimeout?.(() => {
+    publicSessionTimer = null;
+    const remaining = publicSessionRemainingMs();
+    updatePublicSessionTimerUi();
+    if (remaining != null && remaining <= 0) {
+      finishPublicStreamSession();
+      return;
+    }
+    schedulePublicSessionTimer();
+  }, PUBLIC_SESSION_TICK_MS) ?? null;
+}
+
+function ensurePublicSessionClock(at = now()) {
+  if (!isPublicStreamRun() || publicSessionFinished) return false;
+  if (publicSessionStartedAt != null) return true;
+  publicSessionStartedAt = at;
+  const duration = publicSessionDurationMs();
+  publicSessionDeadlineAt = duration == null ? null : at + duration;
+  updatePublicSessionTimerUi(at);
+  schedulePublicSessionTimer();
+  return true;
+}
+
+function publicSessionTimerMarkup() {
+  if (!isPublicStreamRun()) return "";
+  const profile = currentPublicSessionProfile();
+  const duration = publicSessionDurationMs();
+  const label = duration == null ? "ENDLESS FLOW" : `${profile.minutes} MIN FLOW`;
+  const remaining = formatPublicSessionCountdown(duration);
+  return `<section class="flow-v3-session-clock" data-flow-session-clock data-endless="${duration == null ? "true" : "false"}"
+      role="progressbar" aria-label="Flow session time" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"
+      aria-valuetext="${duration == null ? "Endless session" : `${remaining} remaining`}">
+    <span data-flow-session-label>${label}</span>
+    <strong data-flow-session-remaining>${remaining}</strong>
+    <div class="flow-v3-session-progress" aria-hidden="true"><i data-flow-session-progress-fill style="width:0%"></i></div>
+  </section>`;
 }
 
 function escapeHtml(value) {
@@ -395,6 +528,10 @@ function beginVisibilityPause(at = now()) {
   ) return false;
   visibilityPauseStartedAt = at;
   visibilityPausedRun = run;
+  if (publicSessionStartedAt != null && publicSessionPausedAt == null) {
+    publicSessionPausedAt = at;
+    clearPublicSessionTimer();
+  }
   clearCadenceRefresh();
   return true;
 }
@@ -411,6 +548,14 @@ function endVisibilityPause(at = now()) {
     startAt,
     endAt: at,
   }));
+  if (publicSessionPausedAt != null) {
+    if (publicSessionDeadlineAt != null) {
+      publicSessionDeadlineAt += Math.max(0, at - publicSessionPausedAt);
+    }
+    publicSessionPausedAt = null;
+    updatePublicSessionTimerUi(at);
+    schedulePublicSessionTimer();
+  }
   return true;
 }
 
@@ -429,6 +574,7 @@ function restoreReturnSurface() {
   if (!app) return;
   clearCadenceRefresh();
   clearMicroResultTimer();
+  resetPublicSessionClock();
   resetMountedCharacterNodes();
   dismissed = true;
   active = false;
@@ -739,6 +885,11 @@ function publicStreamIdentityMarkup() {
 function publicStreamToolsMarkup() {
   if (!isPublicStreamRun()) return "";
   return `<div class="flow-v3-run-tools flow-v5-run-tools">
+    <label><span>Session</span>
+      <select data-flow-session-preset aria-label="Flow session length">
+        ${Object.values(FLOW_V3_SESSION_PRESETS).map((profile) => `<option value="${profile.id}"${profile.id === resolvedRunPlan.sessionPreset ? " selected" : ""}>${profile.durationMs == null ? "Endless" : `${profile.minutes} min`}</option>`).join("")}
+      </select>
+    </label>
     <label><span>Text mix</span>
       <select data-flow-theme-select aria-label="Flow text mix">
         ${FLOW_V3_THEME_IDS.map((theme) => `<option value="${theme}"${theme === resolvedRunPlan.theme ? " selected" : ""}>${escapeHtml(formatFlowThemeLabel(theme))}</option>`).join("")}
@@ -958,6 +1109,7 @@ function renderRun() {
         </header>
         ${!publicLongform && chapter ? `<div class="flow-chapter-strip" data-flow-chapter><span>${escapeHtml(chapter.title)}</span><strong>${escapeHtml(chapter.difficulty)}</strong></div>` : ""}
         ${hud}
+        ${isPublicStreamRun() ? publicSessionTimerMarkup() : ""}
         ${isPublicStreamRun() ? `<div class="flow-v5-session-meta">${publicSessionStripMarkup()}${publicProgressionStripMarkup()}</div>` : ""}
         ${publicMicroResultMarkup()}
         <div class="flow-run-copy">
@@ -984,13 +1136,21 @@ function renderRun() {
   app.querySelector("[data-flow-passage]")?.addEventListener("pointerdown", () => input?.focus?.({ preventScroll: true }));
   app.querySelector("[data-flow-theme-select]")?.addEventListener("change", (event) => {
     if (!isPublicStreamRun()) return;
-    const theme = normalizeFlowV3Theme(event.target?.value);
-    finalizePublicStreamRun("theme-change");
-    updatePublicFlowUrl({ theme, newSeed: true });
-    startRun();
+    restartPublicStreamSession({
+      theme: normalizeFlowV3Theme(event.target?.value),
+      sessionPreset: resolvedRunPlan.sessionPreset,
+    });
+  });
+  app.querySelector("[data-flow-session-preset]")?.addEventListener("change", (event) => {
+    if (!isPublicStreamRun()) return;
+    restartPublicStreamSession({
+      theme: resolvedRunPlan.theme,
+      sessionPreset: normalizeFlowV3SessionPreset(event.target?.value),
+    });
   });
   input?.focus?.({ preventScroll: true });
   syncRunHud();
+  updatePublicSessionTimerUi();
   scheduleCadenceHud(true);
   scheduleMicroResultDismiss(app);
 }
@@ -998,6 +1158,7 @@ function renderRun() {
 function startRun() {
   clearCadenceRefresh();
   resetVisibilityPause();
+  if (isPublicStreamRun() && publicSessionStartedAt == null) publicSessionFinished = false;
   if (resolvedRunPlan) {
     run = createFlowTypingRun(resolvedRunPlan.fullText, {
       category: resolvedRunPlan.category,
@@ -1441,10 +1602,53 @@ function rememberDisplayedPublicStreamText() {
   }, { completedAt: Date.now() });
 }
 
-function rerollPublicStream() {
+function skipPublicStreamText() {
+  if (!isPublicStreamRun() || !run || view !== "run") return false;
+  const next = resolvedRunPlan?.segments?.[activeSegmentIndex + 1];
+  if (!next) return false;
   rememberDisplayedPublicStreamText();
-  finalizePublicStreamRun("reset");
-  updatePublicFlowUrl({ newSeed: true });
+  const at = now();
+  const fromIndex = run.currentIndex;
+  run.rawKeystrokes.push(Object.freeze({
+    type: "skip",
+    index: fromIndex,
+    fromIndex,
+    toIndex: next.startIndex,
+    at,
+  }));
+  run.skippedRanges ||= [];
+  run.skippedRanges.push(Object.freeze({
+    fromIndex,
+    toIndex: next.startIndex,
+    at,
+  }));
+  run.currentIndex = next.startIndex;
+  run.currentWordStartIndex = next.startIndex;
+  run.minimumBackspaceIndex = next.startIndex;
+  run.furthestIndexReached = Math.max(Number(run.furthestIndexReached) || 0, next.startIndex);
+  activeSegmentIndex += 1;
+  refreshPublicStreamPassage();
+  syncRunHud();
+  scheduleCadenceHud(true);
+  root()?.querySelector?.("[data-flow-input]")?.focus?.({ preventScroll: true });
+  return true;
+}
+
+function rerollPublicStream() {
+  return skipPublicStreamText();
+}
+
+function restartPublicStreamSession({
+  theme = resolvedRunPlan?.theme || "mixed",
+  sessionPreset = resolvedRunPlan?.sessionPreset || FLOW_V3_DEFAULT_SESSION_PRESET,
+} = {}) {
+  if (!isPublicStreamRun()) return false;
+  if (view === "run" && run?.currentIndex > 0) finalizePublicStreamRun("reset");
+  resetPublicFlowSessionV4();
+  resetPublicSessionClock();
+  lastPublicResult = null;
+  lastPublicRecordState = null;
+  updatePublicFlowUrl({ theme, sessionPreset, newSeed: true });
   startRun();
   return true;
 }
@@ -1458,8 +1662,18 @@ function deleteBackward() {
 
 function insertText(value) {
   if (!run || typeof value !== "string" || !value.length) return;
+  const at = now();
+  if (
+    isPublicStreamRun()
+    && publicSessionStartedAt != null
+    && publicSessionRemainingMs(at) === 0
+  ) {
+    finishPublicStreamSession();
+    return;
+  }
   const beforeIndex = run.currentIndex;
-  if (!insertFlowText(run, value, now())) return;
+  if (!insertFlowText(run, value, at)) return;
+  if (isPublicStreamRun()) ensurePublicSessionClock(at);
   updateRunView(Math.max(0, beforeIndex - 1), run.currentIndex);
 }
 
@@ -1509,7 +1723,8 @@ function handleDocumentKeydown(event) {
     if (event.key === "Enter") {
       event.preventDefault();
       event.stopImmediatePropagation();
-      startRun();
+      if (view === "complete" && isPublicStreamRun()) restartPublicStreamSession();
+      else startRun();
     }
     return;
   }
