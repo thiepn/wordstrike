@@ -105,7 +105,9 @@ export function createFlowScoreV3Result({
     consistency,
   });
   const activeDurationMs = Math.max(0, round(cadence.typingDurationMs, 1));
-  const recordEligible = consistencyAvailable
+  const standardSession = plan.sessionPreset == null || plan.sessionPreset === "standard";
+  const recordEligible = standardSession
+    && consistencyAvailable
     && activeDurationMs >= FLOW_SCORE_V3_RULES.minimumRecordDurationMs
     && breakdown.correctCharacters >= FLOW_SCORE_V3_RULES.minimumRecordCharacters
     && breakdown.wpm > 0
