@@ -323,6 +323,7 @@ function scheduleCaretVisibility() {
 }
 
 function decorateRun(screen) {
+  cancelStreamLineShift();
   screen.dataset.flowUxPhase8 = "true";
   const copy = screen.querySelector(".flow-run-copy");
   if (copy && !copy.querySelector("[data-flow-ux='focus-hint']")) {
@@ -347,9 +348,9 @@ function decorateRun(screen) {
   input?.addEventListener("blur", () => queueMicrotask(() => setTypingFocusState(screen)));
   setTypingFocusState(screen);
 
-  // Character progress calls scheduleCaretVisibility() directly from Phase 1.
-  // No live subtree observer is needed on the passage hot path.
-  scheduleCaretVisibility();
+  // Establish the fixed three-line geometry before the first painted typing
+  // frame. Character progress uses the scheduled path after this initial sync.
+  ensureCaretVisible();
 }
 
 function decorateChapter(screen) {
