@@ -1014,3 +1014,18 @@
     padding: 10px 0 18px;
   }
 }
+
+
+/* ---------- FLOW V3: committed extra-letter cleanup ---------- */
+
+.flow-run-screen[data-flow-stream-v3="true"] .flow-char--extra-committed::before {
+  content: "+" attr(data-flow-extra-count);
+  top: -0.72em;
+  left: 0;
+  color: var(--flow-danger);
+  font-size: 0.52em;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0;
+  text-decoration: none;
+}
