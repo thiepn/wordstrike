@@ -39,7 +39,7 @@ assert.equal(getLeaderboardSelection(LEADERBOARD_BOARDS.FLOW_STANDARD).selectedC
 
 assert.match(loader, /const FLOW_RELEASE_VERSION = 26/);
 assert.match(loader, /wordstrike-flow-release-v29/);
-assert.match(index, /js\/flow\/flowRuntimeLoader\.js\?v=20260924m/);
+assert.match(index, /js\/flow\/flowRuntimeLoader\.js\?v=20260925d/);
 for (const asset of [
   "./js/authService.js",
   "./js/leaderboardProfileService.js",
