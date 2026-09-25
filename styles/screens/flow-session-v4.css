@@ -803,3 +803,107 @@
     box-shadow: none;
   }
 }
+
+
+/* =========================================================
+   FLOW V3: text-first active run
+   Keep the run surface focused on typing. Progression/session
+   history remains recorded but does not occupy the live viewport.
+   ========================================================= */
+
+.flow-run-screen[data-flow-stream-v3="true"] .flow-v5-session-meta {
+  display: none;
+}
+
+.flow-run-screen[data-flow-stream-v3="true"] .flow-game-v2-hud[data-flow-hud-v5="true"] {
+  position: static;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0;
+  overflow: visible;
+  border: 0;
+  border-top: 1px solid var(--flow-line);
+  border-bottom: 1px solid var(--flow-line);
+  border-left: 0;
+  background: transparent;
+}
+
+.flow-run-screen[data-flow-stream-v3="true"] .flow-game-v2-hud[data-flow-hud-v5="true"] > div {
+  align-content: center;
+  min-height: 42px;
+  padding: 6px 10px 7px;
+  border-right: 1px solid var(--flow-line);
+  border-bottom: 0;
+}
+
+.flow-run-screen[data-flow-stream-v3="true"] .flow-game-v2-hud[data-flow-hud-v5="true"] > div:first-child {
+  padding-left: 0;
+}
+
+.flow-run-screen[data-flow-stream-v3="true"] .flow-game-v2-hud[data-flow-hud-v5="true"] > div:last-child {
+  padding-right: 0;
+  border-right: 0;
+}
+
+.flow-run-screen[data-flow-stream-v3="true"] .flow-game-v2-hud[data-flow-hud-v5="true"] span {
+  font-size: 0.42rem;
+  letter-spacing: 0.09em;
+}
+
+.flow-run-screen[data-flow-stream-v3="true"] .flow-game-v2-hud[data-flow-hud-v5="true"] strong,
+.flow-run-screen[data-flow-stream-v3="true"] .flow-game-v2-hud[data-flow-hud-v5="true"] .flow-v5-hud-score strong {
+  font-family: var(--flow-data-face);
+  font-size: clamp(0.88rem, 1.7vw, 1.05rem);
+  font-weight: 620;
+  line-height: 1.05;
+}
+
+.flow-run-screen[data-flow-stream-v3="true"] .flow-game-v2-hud[data-flow-hud-v5="true"] small {
+  display: none;
+}
+
+.flow-run-screen[data-flow-stream-v3="true"] .flow-v5-run-header {
+  padding-bottom: 8px;
+}
+
+@media (max-width: 620px) {
+  .flow-run-screen[data-flow-stream-v3="true"] .flow-v5-brand span,
+  .flow-run-screen[data-flow-stream-v3="true"] .flow-v5-source small {
+    display: none;
+  }
+
+  .flow-run-screen[data-flow-stream-v3="true"] .flow-v5-run-header {
+    gap: 7px 10px !important;
+    padding-bottom: 7px;
+  }
+
+  .flow-run-screen[data-flow-stream-v3="true"] .flow-game-v2-hud[data-flow-hud-v5="true"] {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .flow-run-screen[data-flow-stream-v3="true"] .flow-game-v2-hud[data-flow-hud-v5="true"] > div {
+    min-height: 38px;
+    padding: 5px 5px 6px;
+    border-bottom: 0;
+    text-align: left;
+  }
+
+  .flow-run-screen[data-flow-stream-v3="true"] .flow-game-v2-hud[data-flow-hud-v5="true"] > div:nth-child(2),
+  .flow-run-screen[data-flow-stream-v3="true"] .flow-game-v2-hud[data-flow-hud-v5="true"] > div:nth-child(3),
+  .flow-run-screen[data-flow-stream-v3="true"] .flow-game-v2-hud[data-flow-hud-v5="true"] > div:last-child {
+    text-align: center;
+  }
+
+  .flow-run-screen[data-flow-stream-v3="true"] .flow-game-v2-hud[data-flow-hud-v5="true"] > div:last-child {
+    text-align: right;
+  }
+
+  .flow-run-screen[data-flow-stream-v3="true"] .flow-game-v2-hud[data-flow-hud-v5="true"] span {
+    font-size: 0.36rem;
+    letter-spacing: 0.055em;
+  }
+
+  .flow-run-screen[data-flow-stream-v3="true"] .flow-game-v2-hud[data-flow-hud-v5="true"] strong,
+  .flow-run-screen[data-flow-stream-v3="true"] .flow-game-v2-hud[data-flow-hud-v5="true"] .flow-v5-hud-score strong {
+    font-size: clamp(0.76rem, 3.2vw, 0.92rem);
+  }
+}
