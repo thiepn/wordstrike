@@ -4,8 +4,8 @@ import {
 } from "./flowIdentityV1.js?v=20260924b";
 
 const RELEASE_FLAG = "flowRelease";
-const FLOW_RELEASE_VERSION = 23;
-const FLOW_RELEASE_CACHE_NAME = "wordstrike-flow-release-v26";
+const FLOW_RELEASE_VERSION = 24;
+const FLOW_RELEASE_CACHE_NAME = "wordstrike-flow-release-v27";
 const FLOW_OFFLINE_CACHE_BATCH_SIZE = 16;
 const FLOW_RELEASE_QUERY_KEYS = Object.freeze([
   "mode",
@@ -30,7 +30,7 @@ const FLOW_RELEASE_QUERY_KEYS = Object.freeze([
 ]);
 
 const FLOW_RELEASE_ASSETS = Object.freeze([
-  "./js/flow/flowRuntimeLoader.js?v=20260925a",
+  "./js/flow/flowRuntimeLoader.js?v=20260925b",
   "./js/leaderboardReturnState.js",
   "./js/pendingResultSubmission.js",
   "./js/submissionOutbox.js",
@@ -55,14 +55,14 @@ const FLOW_RELEASE_ASSETS = Object.freeze([
   "./js/flow/flowAdaptive.js",
   "./js/flow/flowAdaptivePhase10.js?v=20260923a",
   "./js/flow/flowCadence.js",
-  "./js/flow/flowCadence.js?v=20260924b",
+  "./js/flow/flowCadence.js?v=20260925b",
   "./js/flow/flowCatalog.js",
   "./js/flow/flowConfig.js",
   "./js/flow/flowContent.js",
   "./js/flow/flowContentExpansion.js",
   "./js/flow/flowCorpusV2.js?v=20260923a",
   "./js/flow/flowCorpusHistory.js?v=20260923a",
-  "./js/flow/flowEngine.js?v=20260925a",
+  "./js/flow/flowEngine.js?v=20260925b",
   "./js/flow/flowGameplay.js",
   "./js/flow/flowGameModeV2.js?v=20260923c",
   "./js/flow/flowIntegrationBootstrap.js?v=20260923b",
@@ -73,7 +73,7 @@ const FLOW_RELEASE_ASSETS = Object.freeze([
   "./js/flow/flowModifiers.js",
   "./js/flow/flowModifiersPhase9.js?v=20260923a",
   "./js/flow/flowPassages.js",
-  "./js/flow/flowPhase1.js?v=20260925a",
+  "./js/flow/flowPhase1.js?v=20260925b",
   "./js/flow/flowProgression.js",
   "./js/flow/flowProgression.js?v=20260923a",
   "./js/flow/flowProgressionV4.js",
@@ -83,11 +83,11 @@ const FLOW_RELEASE_ASSETS = Object.freeze([
   "./js/flow/flowScoreV2.js?v=20260923f",
   "./js/flow/flowRecordsV3.js?v=20260923a",
   "./js/flow/flowRecordsV3.js",
-  "./js/flow/flowScoreV3.js?v=20260923a",
+  "./js/flow/flowScoreV3.js?v=20260925b",
   "./js/flow/flowSessionV4.js",
   "./js/flow/flowSessionV4.js?v=20260924a",
   "./js/flow/flowScoreV3.js",
-  "./js/flow/flowStreamPlanV3.js?v=20260923b",
+  "./js/flow/flowStreamPlanV3.js?v=20260925b",
   "./js/flow/flowScoreV2.js",
   "./js/flow/flowScoreV2.js?v=20260923a",
   "./js/flow/flowRecordsV2.js?v=20260923a",
@@ -98,11 +98,11 @@ const FLOW_RELEASE_ASSETS = Object.freeze([
   "./js/flow/flowUiPhase7.js?v=20260923a",
   "./js/flow/flowUiPhase7KeyboardGuard.js?v=20260923a",
   "./js/flow/flowUiPhase7Polish.js?v=20260923a",
-  "./js/flow/flowUxPhase8.js?v=20260925a",
+  "./js/flow/flowUxPhase8.js?v=20260925b",
   "./js/flow/flowVisualPhase6.js?v=20260923a",
   "./styles/screens/flow-phase1.css?v=20260916d",
   "./styles/screens/flow-phase5.css?v=20260916a",
-  "./styles/screens/flow-game-mode-v2.css?v=20260925a",
+  "./styles/screens/flow-game-mode-v2.css?v=20260925b",
   "./styles/screens/flow-session-v4.css",
   "./styles/screens/flow-session-v4.css?v=20260924c",
   "./styles/screens/flow-visual-phase6.css?v=20260923a",
@@ -169,6 +169,13 @@ function releaseUrl(locationLike = globalThis.location) {
   url.searchParams.set(
     "flowTheme",
     normalizeStoredFlowTheme(requestedTheme ?? loadPreferredFlowTheme("mixed")),
+  );
+  const requestedLength = url.searchParams.get("flowLength");
+  url.searchParams.set(
+    "flowLength",
+    ["quick", "standard", "deep", "endless"].includes(requestedLength)
+      ? requestedLength
+      : "standard",
   );
   if (!url.searchParams.has("flowSeed")) url.searchParams.set("flowSeed", createReleaseSeed());
   return url;
@@ -407,7 +414,7 @@ async function importFlowRuntime() {
     const integrationBootstrap = await import("./flowIntegrationBootstrap.js?v=20260923b");
     integrationBootstrap.applyFlowIntegrationDefaults?.();
     await Promise.all([
-      import("./flowPhase1.js?v=20260924j"),
+      import("./flowPhase1.js?v=20260925b"),
       import("./flowVisualPhase6.js?v=20260923a"),
     ]);
 
@@ -425,7 +432,7 @@ async function importFlowRuntime() {
       keyboardGuard.refreshFlowUiGuard?.();
       await import("./flowUiPhase7Polish.js?v=20260923a");
       if (params.get("flowUx") === "1") {
-        await import("./flowUxPhase8.js?v=20260924c");
+        await import("./flowUxPhase8.js?v=20260925b");
         await Promise.resolve();
         const extensions = [];
         if (params.get("flowModifiers") === "1") extensions.push(import("./flowModifiersPhase9.js?v=20260923a"));
