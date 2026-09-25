@@ -8,6 +8,13 @@ import { loadFlowCorpusHistory } from "./flowCorpusHistory.js?v=20260923a";
 
 export const FLOW_V3_DEFAULT_THEME = "mixed";
 export const FLOW_V3_STREAM_DOCUMENT_COUNT = 10;
+export const FLOW_V3_DEFAULT_SESSION_PRESET = "standard";
+export const FLOW_V3_SESSION_PRESETS = Object.freeze({
+  quick: Object.freeze({ id: "quick", label: "Quick", minutes: 2, durationMs: 120_000 }),
+  standard: Object.freeze({ id: "standard", label: "Flow", minutes: 3, durationMs: 180_000 }),
+  deep: Object.freeze({ id: "deep", label: "Deep", minutes: 5, durationMs: 300_000 }),
+  endless: Object.freeze({ id: "endless", label: "Endless", minutes: null, durationMs: null }),
+});
 export const FLOW_V3_THEME_IDS = Object.freeze([
   FLOW_V3_DEFAULT_THEME,
   ...FLOW_CORPUS_V2_THEMES.map((theme) => theme.id),
@@ -25,6 +32,12 @@ function hashSeed(value) {
 
 export function normalizeFlowV3Theme(value) {
   return FLOW_V3_THEME_IDS.includes(value) ? value : FLOW_V3_DEFAULT_THEME;
+}
+
+export function normalizeFlowV3SessionPreset(value) {
+  return Object.hasOwn(FLOW_V3_SESSION_PRESETS, value)
+    ? value
+    : FLOW_V3_DEFAULT_SESSION_PRESET;
 }
 
 function createSegments(documents) {
@@ -64,10 +77,13 @@ function createSegments(documents) {
 export function createFlowStreamPlanV3({
   seed = "flow-v3-public",
   theme = FLOW_V3_DEFAULT_THEME,
+  sessionPreset = FLOW_V3_DEFAULT_SESSION_PRESET,
   history = null,
   documentCount = FLOW_V3_STREAM_DOCUMENT_COUNT,
 } = {}) {
   const safeTheme = normalizeFlowV3Theme(theme);
+  const safeSessionPreset = normalizeFlowV3SessionPreset(sessionPreset);
+  const sessionProfile = FLOW_V3_SESSION_PRESETS[safeSessionPreset];
   const storedHistory = history || loadFlowCorpusHistory();
   const pool = safeTheme === FLOW_V3_DEFAULT_THEME
     ? FLOW_CORPUS_V2_DOCUMENTS
@@ -128,8 +144,10 @@ export function createFlowStreamPlanV3({
     category: safeTheme,
     difficulty: "mixed",
     sessionLength: "flow",
+    sessionPreset: safeSessionPreset,
     modifiers: Object.freeze([]),
-    targetMinutes: null,
+    targetMinutes: sessionProfile.minutes,
+    targetDurationMs: sessionProfile.durationMs,
     chapterCount: 1,
     passageCount: segments.length,
     paragraphCount: segments.length,
@@ -175,5 +193,6 @@ export function resolveFlowStreamPlanV3(searchLike = "") {
   return createFlowStreamPlanV3({
     seed: params.get("flowSeed") || "flow-v3-public",
     theme: params.get("flowTheme") || FLOW_V3_DEFAULT_THEME,
+    sessionPreset: params.get("flowLength") || FLOW_V3_DEFAULT_SESSION_PRESET,
   });
 }
