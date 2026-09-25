@@ -1854,6 +1854,12 @@ function exitFlowToReturnSurface(reason = "exit") {
 
 function handleDocumentKeydown(event) {
   if (!active) return;
+  const target = event.target;
+  const nativeControl = target?.matches?.(
+    'select, button, a[href], input:not([data-flow-input]), textarea:not([data-flow-input]), [contenteditable="true"]',
+  );
+  if (nativeControl) return;
+
   if (event.key === "Escape") {
     event.preventDefault();
     event.stopImmediatePropagation();
