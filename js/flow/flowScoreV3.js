@@ -105,16 +105,18 @@ export function createFlowScoreV3Result({
     consistency,
   });
   const activeDurationMs = Math.max(0, round(cadence.typingDurationMs, 1));
+  const normalizedReason = ["reset", "complete", "exit", "theme-change"].includes(endedReason)
+    ? endedReason
+    : "reset";
   const standardSession = plan.sessionPreset == null || plan.sessionPreset === "standard";
-  const recordEligible = standardSession
+  const completed = normalizedReason === "complete" && breakdown.correctCharacters > 0;
+  const recordEligible = completed
+    && standardSession
     && consistencyAvailable
     && activeDurationMs >= FLOW_SCORE_V3_RULES.minimumRecordDurationMs
     && breakdown.correctCharacters >= FLOW_SCORE_V3_RULES.minimumRecordCharacters
     && breakdown.wpm > 0
     && breakdown.accuracy >= FLOW_SCORE_V3_RULES.minimumRecordAccuracy;
-  const normalizedReason = ["reset", "complete", "exit", "theme-change"].includes(endedReason)
-    ? endedReason
-    : "reset";
 
   return Object.freeze({
     schemaVersion: 1,
@@ -128,7 +130,7 @@ export function createFlowScoreV3Result({
     endedAt: Math.max(0, finite(endedAt)),
     endedReason: normalizedReason,
     sessionLength: "flow",
-    completed: breakdown.correctCharacters > 0,
+    completed,
     recordEligible,
     score: breakdown.score,
     wpm: breakdown.wpm,
@@ -139,7 +141,7 @@ export function createFlowScoreV3Result({
     activeDurationMs,
     wordsCompleted: breakdown.standardWords,
     charactersCompleted: Math.max(0, Math.round(
-      finite(snapshot.totalInsertedCharacters, snapshot.currentIndex),
+      breakdown.correctCharacters + finite(snapshot.uncorrectedErrors),
     )),
     correctCharacters: breakdown.correctCharacters,
     correctKeystrokes: Math.max(0, Math.round(finite(gameplay.correctKeystrokes))),
