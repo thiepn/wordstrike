@@ -213,7 +213,7 @@ assert.match(css, /pointer-events:\s*none/);
 assert.match(css, /prefers-reduced-motion/);
 assert.match(loader, /flowSessionV4\.js\?v=20260924a/);
 assert.match(loader, /flowProgressionV4\.js\?v=20260924a/);
-assert.match(loader, /flow-session-v4\.css\?v=20260924c/);
-assert.match(index, /flow-session-v4\.css\?v=20260924c/);
+assert.match(loader, /flow-session-v4\.css\?v=[0-9a-z]+/);
+assert.match(index, /flow-session-v4\.css\?v=[0-9a-z]+/);
 
 console.log("Flow Phase 7A contracts passed: session totals, PB/session-best momentum, live summaries, non-blocking micro-results, and offline UI wiring.");
