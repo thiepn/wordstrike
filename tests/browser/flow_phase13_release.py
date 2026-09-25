@@ -5,6 +5,7 @@ from pathlib import Path
 from threading import Thread
 import json
 import os
+import re
 import traceback
 
 from playwright.sync_api import sync_playwright, expect
@@ -337,6 +338,91 @@ def certify_theme_stream_integrity(browser, browser_name, base, evidence):
     context.close()
 
 
+def certify_word_recovery(browser, browser_name, base, evidence):
+    if browser_name != "chromium":
+        return
+
+    context = context_for(browser, base)
+    page = context.new_page()
+    open_modes(page, base)
+    plan = launch_public_flow(page)
+    segment = plan["segments"][0]
+    text = segment["text"]
+    words = list(re.finditer(r"\S+", text))
+
+    chosen = None
+    for index in range(len(words) - 2):
+        first = words[index]
+        second = words[index + 1]
+        if second.start() - first.end() != 1 or len(first.group()) < 4 or len(second.group()) < 3:
+            continue
+        omit = next(
+            (pos for pos in range(1, len(first.group()) - 1)
+             if first.group()[pos] != first.group()[pos + 1]),
+            None,
+        )
+        if omit is not None:
+            chosen = (first, second, omit)
+            break
+    assert chosen is not None, text[:180]
+    first, second, omit = chosen
+
+    prefix = text[:first.start()]
+    page.keyboard.type(prefix)
+    damaged = first.group()[:omit] + first.group()[omit + 1:]
+    page.keyboard.type(damaged + " ")
+
+    second_start = segment["startIndex"] + second.start()
+    snapshot = page.evaluate("window.wordstrikeFlowPhase1.getSnapshot()")
+    assert snapshot["currentIndex"] == second_start, (snapshot, first.group(), damaged, second.group())
+
+    error_index = segment["startIndex"] + first.start() + omit
+    error_node = page.locator(f'[data-flow-char="{error_index}"]')
+    assert "flow-char--incorrect" in (error_node.get_attribute("class") or "")
+    assert error_node.text_content() == first.group()[omit], {
+        "expectedGlyph": first.group()[omit],
+        "rendered": error_node.text_content(),
+    }
+
+    page.keyboard.type(second.group())
+    second_end = segment["startIndex"] + second.end()
+    snapshot = page.evaluate("window.wordstrikeFlowPhase1.getSnapshot()")
+    assert snapshot["currentIndex"] == second_end, snapshot
+    statuses = page.locator(
+        f'[data-flow-char][data-status="correct"]'
+    ).evaluate_all(
+        """(els, range) => els
+          .filter(el => Number(el.dataset.flowChar) >= range.start && Number(el.dataset.flowChar) < range.end)
+          .map(el => Number(el.dataset.flowChar))""",
+        {"start": second_start, "end": second_end},
+    )
+    assert len(statuses) == second_end - second_start, (statuses, second.group())
+
+    boundary = page.locator(f'[data-flow-char="{second_end}"]')
+    width_before = boundary.evaluate("el => el.getBoundingClientRect().width")
+    page.keyboard.type("x")
+    snapshot = page.evaluate("window.wordstrikeFlowPhase1.getSnapshot()")
+    assert snapshot["currentIndex"] == second_end, snapshot
+    width_after = boundary.evaluate("el => el.getBoundingClientRect().width")
+    assert boundary.text_content() == " "
+    assert boundary.get_attribute("data-flow-extra") == "x"
+    assert abs(width_after - width_before) <= 0.1, (width_before, width_after)
+
+    page.keyboard.press("Backspace")
+    assert boundary.get_attribute("data-flow-extra") is None
+    assert page.evaluate("window.wordstrikeFlowPhase1.getSnapshot().currentIndex") == second_end
+
+    evidence.append({
+        "browser": browser_name,
+        "case": "word mistakes recover on Space without reflow",
+        "damagedWord": first.group(),
+        "nextWord": second.group(),
+        "boundaryWidthBefore": width_before,
+        "boundaryWidthAfter": width_after,
+    })
+    context.close()
+
+
 def certify_mobile(browser, browser_name, base, evidence):
     if browser_name != "chromium":
         return
@@ -488,6 +574,7 @@ def main():
                 certify_public_journey(browser, name, base, evidence)
                 certify_fresh_default(browser, name, base, evidence)
                 certify_theme_stream_integrity(browser, name, base, evidence)
+                certify_word_recovery(browser, name, base, evidence)
                 certify_mobile(browser, name, base, evidence)
                 certify_offline(browser, name, base, evidence)
                 browser.close()
