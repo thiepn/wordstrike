@@ -32,7 +32,7 @@ import { recordFlowResultV2 } from "./flowRecordsV2.js?v=20260923f";
 import {
   calculateFlowScoreV3,
   createFlowScoreV3Result,
-} from "./flowScoreV3.js?v=20260925c";
+} from "./flowScoreV3.js?v=20260925d";
 import {
   getFlowPersonalBestV3,
   loadFlowRecordsV3,
