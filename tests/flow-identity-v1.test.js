@@ -88,7 +88,7 @@ try {
   assert.match(loader, /loadPreferredFlowTheme/);
   assert.match(loader, /normalizeStoredFlowTheme/);
   assert.match(loader, /flowIdentityV1\.js\?v=20260924b/);
-  assert.match(loader, /wordstrike-flow-release-v30/);
+  assert.match(loader, /wordstrike-flow-release-v31/);
   assert.match(phase1, /getFlowStreamIdentity/);
   assert.match(phase1, /savePreferredFlowTheme/);
   assert.match(phase1, /data-flow-identity/);
