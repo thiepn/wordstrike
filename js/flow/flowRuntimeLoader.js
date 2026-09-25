@@ -4,8 +4,8 @@ import {
 } from "./flowIdentityV1.js?v=20260924b";
 
 const RELEASE_FLAG = "flowRelease";
-const FLOW_RELEASE_VERSION = 28;
-const FLOW_RELEASE_CACHE_NAME = "wordstrike-flow-release-v31";
+const FLOW_RELEASE_VERSION = 29;
+const FLOW_RELEASE_CACHE_NAME = "wordstrike-flow-release-v32";
 const FLOW_OFFLINE_CACHE_BATCH_SIZE = 16;
 const FLOW_RELEASE_QUERY_KEYS = Object.freeze([
   "mode",
@@ -30,7 +30,7 @@ const FLOW_RELEASE_QUERY_KEYS = Object.freeze([
 ]);
 
 const FLOW_RELEASE_ASSETS = Object.freeze([
-  "./js/flow/flowRuntimeLoader.js?v=20260925f",
+  "./js/flow/flowRuntimeLoader.js?v=20260925g",
   "./js/leaderboardReturnState.js",
   "./js/pendingResultSubmission.js",
   "./js/submissionOutbox.js",
@@ -73,7 +73,7 @@ const FLOW_RELEASE_ASSETS = Object.freeze([
   "./js/flow/flowModifiers.js",
   "./js/flow/flowModifiersPhase9.js?v=20260923a",
   "./js/flow/flowPassages.js",
-  "./js/flow/flowPhase1.js?v=20260925f",
+  "./js/flow/flowPhase1.js?v=20260925g",
   "./js/flow/flowProgression.js",
   "./js/flow/flowProgression.js?v=20260923a",
   "./js/flow/flowProgressionV4.js",
@@ -83,7 +83,7 @@ const FLOW_RELEASE_ASSETS = Object.freeze([
   "./js/flow/flowScoreV2.js?v=20260923f",
   "./js/flow/flowRecordsV3.js?v=20260923a",
   "./js/flow/flowRecordsV3.js",
-  "./js/flow/flowScoreV3.js?v=20260925c",
+  "./js/flow/flowScoreV3.js?v=20260925d",
   "./js/flow/flowSessionV4.js",
   "./js/flow/flowSessionV4.js?v=20260924a",
   "./js/flow/flowScoreV3.js",
@@ -414,7 +414,7 @@ async function importFlowRuntime() {
     const integrationBootstrap = await import("./flowIntegrationBootstrap.js?v=20260923b");
     integrationBootstrap.applyFlowIntegrationDefaults?.();
     await Promise.all([
-      import("./flowPhase1.js?v=20260925f"),
+      import("./flowPhase1.js?v=20260925g"),
       import("./flowVisualPhase6.js?v=20260923a"),
     ]);
 
