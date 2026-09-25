@@ -2,6 +2,7 @@ import { calculateGrade } from "./scoring.js";
 import { normalizeSpeedTestFontSize } from "./speedTestPresentation.js";
 import { getRecentSessions, getSpeedTestRecord } from "./modeStorage.js";
 import { notifyLocalDataChanged } from "./localDataEvents.js";
+import { getResilientBrowserStorage } from "./browserStorage.js";
 
 import { createDefaultCustomization, normalizeCustomization, normalizeCustomizationValue } from "./customization.js";
 
@@ -210,11 +211,7 @@ function validateSave(value) {
 }
 
 function getStorage() {
-  try {
-    return globalThis.localStorage ?? null;
-  } catch {
-    return null;
-  }
+  return getResilientBrowserStorage();
 }
 
 function campaignSnapshot(save) {
