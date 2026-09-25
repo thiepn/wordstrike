@@ -1263,9 +1263,7 @@ function updateRunView(startIndex = run?.currentIndex ?? 0, endIndex = startInde
   if (run.phase === FLOW_PHASES.COMPLETE) {
     clearCadenceRefresh();
     if (isPublicStreamRun()) {
-      finalizePublicStreamRun("complete");
-      updatePublicFlowUrl({ newSeed: true });
-      startRun();
+      finishPublicStreamSession();
     } else {
       renderComplete();
     }
@@ -1506,6 +1504,79 @@ function renderComplete() {
   app.querySelector('[data-flow-action="restart"]')?.addEventListener("click", startRun);
   app.querySelector('[data-flow-action="back"]')?.addEventListener("click", restoreReturnSurface);
   app.querySelector('[data-flow-action="restart"]')?.focus?.({ preventScroll: true });
+}
+
+function renderPublicStreamSessionComplete(result) {
+  const app = root();
+  if (!app || !result) return false;
+  clearCadenceRefresh();
+  clearPublicSessionTimer();
+  resetMountedCharacterNodes();
+  view = "complete";
+
+  const profile = currentPublicSessionProfile();
+  const recordState = lastPublicRecordState || {};
+  const pbCopy = recordState.isPersonalBest
+    ? '<div class="flow-v2-pb-badge" data-flow-v3-pb="new">NEW PERSONAL BEST</div>'
+    : recordState.personalBest
+      ? `<div class="flow-v2-pb-reference">Personal best <strong>${recordState.personalBest.score.toLocaleString("en-US")}</strong></div>`
+      : "";
+  const durationLabel = profile.durationMs == null
+    ? formatRunDuration(result.activeDurationMs)
+    : `${profile.minutes}:00 session`;
+  const eligibility = result.recordEligible
+    ? ""
+    : '<p class="flow-v2-record-note">Global ranking requires at least 90% accuracy and enough typed text.</p>';
+
+  app.innerHTML = `
+    <section class="screen flow-phase1-screen flow-complete-screen" data-flow-view="complete" data-flow-score-v3="true">
+      <main class="flow-phase1-shell flow-complete-shell flow-v2-results flow-v3-results">
+        <div class="flow-phase1-kicker">${escapeHtml(profile.label.toUpperCase())} SESSION COMPLETE</div>
+        <h1>FLOW COMPLETE</h1>
+        ${pbCopy}
+        <div class="flow-final-score flow-v2-final-score">
+          <span>Score</span>
+          <strong data-flow-final-score>${result.score.toLocaleString("en-US")}</strong>
+        </div>
+        <section class="flow-v2-result-metrics" aria-label="Flow results">
+          <div><span>WPM</span><strong>${result.wpm.toFixed(1)}</strong></div>
+          <div><span>Accuracy</span><strong>${result.accuracy.toFixed(1)}%</strong></div>
+          <div><span>Consistency</span><strong>${result.consistency.toFixed(0)}</strong></div>
+        </section>
+        <div class="flow-v2-result-meta">
+          <span>${result.wordsCompleted.toLocaleString("en-US")} words</span>
+          <span>${durationLabel}</span>
+          <span>${result.correctCharacters.toLocaleString("en-US")} correct chars</span>
+        </div>
+        ${eligibility}
+        <div class="flow-complete-actions">
+          <button type="button" class="ui-button ui-button--primary" data-flow-action="restart">PLAY AGAIN</button>
+          <button type="button" class="ui-button" data-flow-action="back">BACK</button>
+        </div>
+      </main>
+    </section>`;
+  app.querySelector('[data-flow-action="restart"]')?.addEventListener("click", () => restartPublicStreamSession());
+  app.querySelector('[data-flow-action="back"]')?.addEventListener("click", restoreReturnSurface);
+  app.querySelector('[data-flow-action="restart"]')?.focus?.({ preventScroll: true });
+  return true;
+}
+
+function finishPublicStreamSession() {
+  if (!isPublicStreamRun() || !run || publicSessionFinished || view !== "run") return false;
+  publicSessionFinished = true;
+  clearPublicSessionTimer();
+  const completedAt = now();
+  if (run.startedAt != null && run.phase !== FLOW_PHASES.COMPLETE) {
+    run.completedAt = completedAt;
+    run.phase = FLOW_PHASES.COMPLETE;
+  }
+  const result = finalizePublicStreamRun("complete");
+  if (!result) {
+    publicSessionFinished = false;
+    return false;
+  }
+  updatePublicSessionTimerUi(completedAt);
+  return renderPublicStreamSessionComplete(result);
 }
 
 function submitPublicStreamBestInBackground(result, recordState) {
