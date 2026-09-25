@@ -1,5 +1,5 @@
 const CACHE_PREFIX = "wordstrike-pwa-";
-const CACHE_NAME = CACHE_PREFIX + "v100-flow-caret-v33";
+const CACHE_NAME = CACHE_PREFIX + "v101-flow-smooth-lines-v34";
 const APP_SHELL = [
   "./js/practiceLab/practiceAssessmentInput.js",
   "./js/practiceLab/practiceDurableManifest.js",
@@ -57,7 +57,7 @@ const APP_SHELL = [
   "./js/flow/flowModifiersPhase9.js",
   "./js/flow/flowPassages.js",
   "./js/flow/flowPhase1.js",
-  "./js/flow/flowPhase1.js?v=20260925h",
+  "./js/flow/flowPhase1.js?v=20260925i",
   "./js/flow/flowProgression.js",
   "./js/flow/flowProgression.js?v=20260923a",
   "./js/flow/flowProgressionV4.js",
@@ -69,7 +69,7 @@ const APP_SHELL = [
   "./js/flow/flowRecordsV2.js",
   "./js/flow/flowRecordsV2.js?v=20260923a",
   "./js/flow/flowRuntimeLoader.js",
-  "./js/flow/flowRuntimeLoader.js?v=20260925k",
+  "./js/flow/flowRuntimeLoader.js?v=20260925l",
   "./js/flow/flowSelection.js",
   "./js/flow/flowShell.js",
   "./js/flow/flowState.js",
@@ -78,7 +78,7 @@ const APP_SHELL = [
   "./js/flow/flowUiPhase7KeyboardGuard.js?v=20260923a",
   "./js/flow/flowUiPhase7Polish.js",
   "./js/flow/flowUxPhase8.js",
-  "./js/flow/flowUxPhase8.js?v=20260925e",
+  "./js/flow/flowUxPhase8.js?v=20260925f",
   "./js/flow/flowVisualPhase6.js",
   "./js/nativeBackNavigation.js",
   "./js/speedTestPerformanceV1.js?v=20260924a",
