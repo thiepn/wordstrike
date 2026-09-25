@@ -25,6 +25,7 @@ import {
 import {
   buildFlowSubmissionResult,
   buildSubmissionPayload,
+  createLeaderboardSubmissionService,
 } from "../js/leaderboardSubmissionService.js";
 import {
   FLOW_BOARD_KEYS,
@@ -191,6 +192,27 @@ const payload = buildSubmissionPayload("flow", result);
 assert.ok(payload);
 assert.equal(payload.boardKey, "flow-standard-3m-v1");
 assert.equal(validateScoreSubmission(payload).valid, true);
+
+const eligibilityService = createLeaderboardSubmissionService({
+  getClient: () => null,
+});
+assert.equal(
+  eligibilityService.prepareResultSubmission(
+    "flow",
+    result,
+    { status: "signed-in", user: { id: "flow-user" } },
+    { status: "ready", profile: { username: "Flow_User" } },
+  ).status,
+  "ready",
+  "current rules-v4 Flow results must reach the shared submission ready state",
+);
+assert.equal(
+  eligibilityService.refreshSubmissionEligibility(
+    { status: "signed-out" },
+    { status: "ready", profile: { username: "Flow_User" } },
+  ).reason,
+  "signed-out",
+);
 assert.equal(
   validateScoreSubmission({
     ...payload,
