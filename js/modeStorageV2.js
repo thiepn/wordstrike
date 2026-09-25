@@ -16,6 +16,7 @@ import {
   validateDisplayName,
 } from "./playerProfile.js";
 import { notifyLocalDataChanged } from "./localDataEvents.js";
+import { getResilientBrowserStorage } from "./browserStorage.js";
 import {
   applyResultToLifetimeStatistics,
   createDefaultLifetimeStatistics,
@@ -54,8 +55,10 @@ function clone(value) {
 }
 
 function readJsonStorage(key) {
+  const storage = getResilientBrowserStorage();
+  if (!storage) return null;
   try {
-    const raw = globalThis.localStorage?.getItem(key);
+    const raw = storage.getItem(key);
     if (!raw) return null;
     const parsed = JSON.parse(raw);
     return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : null;
@@ -65,8 +68,10 @@ function readJsonStorage(key) {
 }
 
 function writeJsonStorage(key, value) {
+  const storage = getResilientBrowserStorage();
+  if (!storage) return false;
   try {
-    globalThis.localStorage?.setItem(key, JSON.stringify(value));
+    storage.setItem(key, JSON.stringify(value));
     return true;
   } catch {
     return false;
@@ -416,7 +421,7 @@ export function migrateModeDataToV2(value) {
 }
 
 function clearRetiredDailyStorage() {
-  try { globalThis.localStorage?.removeItem(RETIRED_DAILY_STORAGE_KEY); } catch { /* Ignore cleanup failure. */ }
+  try { getResilientBrowserStorage()?.removeItem(RETIRED_DAILY_STORAGE_KEY); } catch { /* Ignore cleanup failure. */ }
 }
 
 function readCampaignPlacementBackup() {

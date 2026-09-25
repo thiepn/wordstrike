@@ -1,4 +1,5 @@
 import { buildSubmissionPayload } from "./leaderboardSubmissionService.js";
+import { getResilientBrowserStorage } from "./browserStorage.js";
 
 export const PENDING_RESULT_STORAGE_KEY = "wordstrike.pending-result-submission.v1";
 export const PENDING_RESULT_MAX_AGE_MS = 30 * 60 * 1000;
@@ -34,7 +35,7 @@ function validIntent(value, now) {
 }
 
 export function savePendingResultSubmission(mode, result, {
-  storage = globalThis.localStorage,
+  storage = getResilientBrowserStorage(),
   now = Date.now(),
 } = {}) {
   const immutablePayload = buildSubmissionPayload(mode, result);
@@ -60,7 +61,7 @@ export function savePendingResultSubmission(mode, result, {
 }
 
 export function bindPendingResultSubmission(userId, {
-  storage = globalThis.localStorage,
+  storage = getResilientBrowserStorage(),
   now = Date.now(),
 } = {}) {
   if (typeof userId !== "string" || !userId) return Object.freeze({ intent: null, error: "AUTH_REQUIRED" });
@@ -80,14 +81,14 @@ export function bindPendingResultSubmission(userId, {
 }
 
 export function loadPendingResultSubmission({
-  storage = globalThis.localStorage,
+  storage = getResilientBrowserStorage(),
   now = Date.now(),
 } = {}) {
   return inspectPendingResultSubmission({ storage, now }).intent;
 }
 
 export function inspectPendingResultSubmission({
-  storage = globalThis.localStorage,
+  storage = getResilientBrowserStorage(),
   now = Date.now(),
 } = {}) {
   if (!storage?.getItem) return Object.freeze({ intent: null, error: null });
@@ -105,6 +106,6 @@ export function inspectPendingResultSubmission({
   }
 }
 
-export function clearPendingResultSubmission(storage = globalThis.localStorage) {
+export function clearPendingResultSubmission(storage = getResilientBrowserStorage()) {
   try { storage?.removeItem?.(PENDING_RESULT_STORAGE_KEY); return true; } catch { return false; }
 }

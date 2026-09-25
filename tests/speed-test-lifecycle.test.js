@@ -158,9 +158,17 @@ clearSpeedTestRuntime();
 clearSession();
 
 const workingStorage = globalThis.localStorage;
+const workingSessionStorage = globalThis.sessionStorage;
+const firefoxSessionValues = new Map();
 globalThis.localStorage = {
-  getItem() { return null; },
-  setItem() { throw new Error("quota"); },
+  getItem() { throw Object.assign(new Error("storage unavailable"), { name: "NS_ERROR_NOT_AVAILABLE" }); },
+  setItem() { throw Object.assign(new Error("storage unavailable"), { name: "NS_ERROR_NOT_AVAILABLE" }); },
+  removeItem() { throw Object.assign(new Error("storage unavailable"), { name: "NS_ERROR_NOT_AVAILABLE" }); },
+};
+globalThis.sessionStorage = {
+  getItem(key) { return firefoxSessionValues.get(key) ?? null; },
+  setItem(key, value) { firefoxSessionValues.set(key, String(value)); },
+  removeItem(key) { firefoxSessionValues.delete(key); },
 };
 clearSession();
 state = startSpeedTest({
@@ -174,6 +182,28 @@ for (const [index, key] of [..."word"].entries()) {
   handleCurrentSpeedTestKey(event(key, 700000 + index), 700 + index);
 }
 assert.equal(state.ended, true);
+assert.equal(state.result.localPersistence.status, "saved",
+  "Firefox localStorage failure should fall back to sessionStorage instead of losing the result");
+assert.ok(firefoxSessionValues.has("wordstrike_mode_data_v2"));
+clearSpeedTestRuntime();
+clearSession();
+
+globalThis.sessionStorage = {
+  getItem() { return null; },
+  setItem() { throw new Error("quota"); },
+  removeItem() {},
+};
+state = startSpeedTest({
+  config: getSpeedTestConfig("words-10"),
+  wordPool: pool,
+  attemptSeed: 997,
+});
+state.words.splice(0, state.words.length, ...Array(9).fill("cat"), "word");
+state.currentWordIndex = 9;
+for (const [index, key] of [..."word"].entries()) {
+  handleCurrentSpeedTestKey(event(key, 710000 + index), 710 + index);
+}
+assert.equal(state.ended, true);
 assert.equal(state.result.localPersistence.status, "failed");
 assert.match(state.result.localPersistence.warning, /could not be saved locally/i);
 assert.deepEqual(state.recordFlags, {
@@ -184,6 +214,7 @@ assert.deepEqual(state.recordFlags, {
 clearSpeedTestRuntime();
 clearSession();
 globalThis.localStorage = workingStorage;
+globalThis.sessionStorage = workingSessionStorage;
 
 state = startSpeedTest({
   config: getSpeedTestConfig("time-60"),
@@ -196,4 +227,4 @@ assert.equal(frames.size, 0);
 clearSpeedTestRuntime();
 assert.equal(getCurrentSpeedTest(), null);
 
-console.log("Typing Test delayed start, deadline, exact-once completion, retry identity, final-word, persistence failure, and cleanup tests passed.");
+console.log("Typing Test delayed start, deadline, exact-once completion, retry identity, Firefox fallback, persistence failure, and cleanup tests passed.");

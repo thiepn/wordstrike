@@ -1,3 +1,5 @@
+import { getResilientBrowserStorage } from "./browserStorage.js";
+
 export const SUBMISSION_OUTBOX_STORAGE_KEY = "wordstrike.submission-outbox.v1";
 export const SUBMISSION_OUTBOX_SCHEMA_VERSION = 1;
 export const SUBMISSION_OUTBOX_MAX_ENTRIES = 50;
@@ -80,7 +82,7 @@ function entryKey(entry) {
 }
 
 export function listSubmissionOutbox({
-  storage = globalThis.localStorage,
+  storage = getResilientBrowserStorage(),
   now = Date.now(),
   userId = null,
 } = {}) {
@@ -93,7 +95,7 @@ export function listSubmissionOutbox({
 }
 
 export function enqueueSubmissionOutbox(mode, immutablePayload, boundUserId, {
-  storage = globalThis.localStorage,
+  storage = getResilientBrowserStorage(),
   now = Date.now(),
 } = {}) {
   if (!MODES.has(mode) || !validPayload(immutablePayload) || typeof boundUserId !== "string" || !boundUserId) {
@@ -140,7 +142,7 @@ export function enqueueSubmissionOutbox(mode, immutablePayload, boundUserId, {
 }
 
 export function markSubmissionOutboxAttempt(sessionId, boundUserId, {
-  storage = globalThis.localStorage,
+  storage = getResilientBrowserStorage(),
   now = Date.now(),
   errorCode = null,
 } = {}) {
@@ -162,7 +164,7 @@ export function markSubmissionOutboxAttempt(sessionId, boundUserId, {
 }
 
 export function removeSubmissionOutbox(sessionId, boundUserId = null, {
-  storage = globalThis.localStorage,
+  storage = getResilientBrowserStorage(),
   now = Date.now(),
 } = {}) {
   const read = readEntries(storage, now);
@@ -175,7 +177,7 @@ export function removeSubmissionOutbox(sessionId, boundUserId = null, {
   return writeEntries(storage, next);
 }
 
-export function clearSubmissionOutbox(storage = globalThis.localStorage) {
+export function clearSubmissionOutbox(storage = getResilientBrowserStorage()) {
   if (!storage?.removeItem) return false;
   try {
     storage.removeItem(SUBMISSION_OUTBOX_STORAGE_KEY);
