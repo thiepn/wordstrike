@@ -340,9 +340,6 @@ def certify_theme_stream_integrity(browser, browser_name, base, evidence):
 
 
 def certify_word_recovery(browser, browser_name, base, evidence):
-    if browser_name != "chromium":
-        return
-
     context = context_for(browser, base)
     page = context.new_page()
     open_modes(page, base)
@@ -541,7 +538,7 @@ def certify_offline(browser, browser_name, base, evidence):
 
     cached = page.evaluate("""async () => {
       const targets = [
-        './js/flow/flowRuntimeLoader.js?v=20260925j',
+        './js/flow/flowRuntimeLoader.js?v=20260925k',
         './js/flow/flowPhase1.js?v=20260925h',
         './js/flow/flowSessionV4.js?v=20260924a',
         './js/flow/flowProgressionV4.js?v=20260924a',
