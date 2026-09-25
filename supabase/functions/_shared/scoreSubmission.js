@@ -160,8 +160,8 @@ export function validateFlowScoreSubmission(body) {
   if (result.recordEligible !== true) return failure("RECORD_NOT_ELIGIBLE");
   if (result.developerMode !== false) return failure("DEVELOPER_RESULT");
   if (result.sessionSource !== "flow-release") return failure("INVALID_SESSION_SOURCE");
-  if (!["reset", "complete", "exit", "theme-change"].includes(result.endedReason)) {
-    return failure("INVALID_RESULT");
+  if (result.endedReason !== "complete") {
+    return failure("TEST_NOT_COMPLETED");
   }
 
   if (
