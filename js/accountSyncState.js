@@ -1,10 +1,12 @@
+import { getResilientBrowserStorage } from "./browserStorage.js";
+
 export const ACCOUNT_SYNC_DEVICE_STORAGE_KEY = "wordstrike.account-sync-device.v1";
 export const ACCOUNT_SYNC_STATE_PREFIX = "wordstrike.account-sync-state.v1:";
 export const ACCOUNT_SYNC_LOCAL_STATE_VERSION = 1;
 
 let fallbackDeviceId = null;
 
-function storageRef(storage = globalThis.localStorage) {
+function storageRef(storage = getResilientBrowserStorage()) {
   try { return storage ?? null; } catch { return null; }
 }
 
@@ -27,7 +29,7 @@ function deviceIdCandidate(cryptoSource = globalThis.crypto) {
 }
 
 export function getOrCreateAccountSyncDeviceId({
-  storage = globalThis.localStorage,
+  storage = getResilientBrowserStorage(),
   cryptoSource = globalThis.crypto,
 } = {}) {
   const target = storageRef(storage);
@@ -132,7 +134,7 @@ function stateKey(userId) {
 }
 
 export function loadAccountSyncUserState(userId, {
-  storage = globalThis.localStorage,
+  storage = getResilientBrowserStorage(),
 } = {}) {
   if (typeof userId !== "string" || !userId) return createDefaultAccountSyncUserState("");
   const target = storageRef(storage);
@@ -146,7 +148,7 @@ export function loadAccountSyncUserState(userId, {
 }
 
 export function saveAccountSyncUserState(userId, value, {
-  storage = globalThis.localStorage,
+  storage = getResilientBrowserStorage(),
 } = {}) {
   if (typeof userId !== "string" || !userId) return false;
   const target = storageRef(storage);
@@ -165,7 +167,7 @@ export function saveAccountSyncUserState(userId, value, {
 }
 
 export function clearAccountSyncUserState(userId, {
-  storage = globalThis.localStorage,
+  storage = getResilientBrowserStorage(),
 } = {}) {
   if (typeof userId !== "string" || !userId) return false;
   try {

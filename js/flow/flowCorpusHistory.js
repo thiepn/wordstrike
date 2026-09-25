@@ -1,3 +1,5 @@
+import { getResilientBrowserStorage } from "../browserStorage.js";
+
 const STORAGE_KEY = "wordstrike:flow-corpus-v2-history";
 const SCHEMA_VERSION = 1;
 const MAX_RECENT_DOCUMENTS = 30;
@@ -27,12 +29,7 @@ function dedupe(values, limit) {
 }
 
 function resolveStorage(storage) {
-  if (storage) return storage;
-  try {
-    return globalThis.localStorage || null;
-  } catch {
-    return null;
-  }
+  return storage || getResilientBrowserStorage();
 }
 
 export function normalizeFlowCorpusHistory(value) {

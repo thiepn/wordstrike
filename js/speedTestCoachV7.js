@@ -1,3 +1,5 @@
+import { getResilientBrowserStorage } from "./browserStorage.js";
+
 export const TYPING_COACH_V7_VERSION = 7;
 export const TYPING_COACH_V7_PLAN_KEY = "wordstrike_typing_coach_v7_plan";
 export const TYPING_COACH_V7_HISTORY_KEY = "wordstrike_typing_coach_v7_history";
@@ -36,7 +38,7 @@ function localDayKey(now = Date.now()) {
 
 function readJson(key, fallback) {
   try {
-    const parsed = JSON.parse(globalThis.localStorage?.getItem(key) || "null");
+    const parsed = JSON.parse(getResilientBrowserStorage()?.getItem(key) || "null");
     return parsed ?? fallback;
   } catch {
     return fallback;
@@ -45,7 +47,9 @@ function readJson(key, fallback) {
 
 function writeJson(key, value) {
   try {
-    globalThis.localStorage?.setItem(key, JSON.stringify(value));
+    const storage = getResilientBrowserStorage();
+    if (!storage) return false;
+    storage.setItem(key, JSON.stringify(value));
     return true;
   } catch {
     return false;
@@ -372,5 +376,5 @@ export function getTypingCoachV7History() {
 }
 
 export function clearTypingCoachV7Plan() {
-  try { globalThis.localStorage?.removeItem(TYPING_COACH_V7_PLAN_KEY); } catch {}
+  try { getResilientBrowserStorage()?.removeItem(TYPING_COACH_V7_PLAN_KEY); } catch {}
 }

@@ -258,6 +258,7 @@ const APP_SHELL = [
   "./js/arcadeRushShadowCoordinator.js",
   "./js/auditedFallbackWords.js",
   "./js/authService.js",
+  "./js/browserStorage.js",
   "./js/accountDataMerge.js",
   "./js/accountDataSync.js",
   "./js/accountSyncMerge.js",
