@@ -1860,7 +1860,15 @@ function handleDocumentKeydown(event) {
     exitFlowToReturnSurface("exit");
     return;
   }
-  if (isPublicStreamRun() && event.key === "Tab" && view === "run") {
+  if (
+    isPublicStreamRun()
+    && event.key === "Tab"
+    && view === "run"
+    && !event.ctrlKey
+    && !event.metaKey
+    && !event.altKey
+    && !event.shiftKey
+  ) {
     event.preventDefault();
     event.stopImmediatePropagation();
     rerollPublicStream();
