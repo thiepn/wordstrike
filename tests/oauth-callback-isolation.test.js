@@ -6,7 +6,7 @@ const source = fs.readFileSync(new URL("../index.html", import.meta.url), "utf8"
 
 test("shared root only relays explicitly marked Diet OAuth callbacks", () => {
   const markerRead = source.indexOf("targetKind = sessionStorage.getItem(TARGET_KEY)");
-  const explicitGuard = source.indexOf("if (targetKind !== 'web' && targetKind !== 'native') return;");
+  const explicitGuard = source.indexOf("if (targetKind !== 'web' && targetKind !== 'web-v2' && targetKind !== 'web-v1-legacy' && targetKind !== 'native') return;");
   const redirect = source.indexOf("location.replace(target.href)");
 
   assert.ok(markerRead >= 0, "Diet OAuth marker must be read");
