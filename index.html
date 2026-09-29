@@ -9,7 +9,7 @@
         // WORDSTRIKE deliberately uses implicit OAuth, whose result is returned
         // in the URL fragment. Diet Copilot uses PKCE, whose result is returned
         // in the query string. Web callbacks go straight back to Diet so the
-        // canonical Diet client that created the verifier performs the exchange.
+        // canonical Diet 2.0 production client that created the verifier performs the exchange.
         // Only an explicit native marker diverts the callback to Android.
         const TARGET_KEY = 'diet-copilot:oauth-target-v2';
         const FLOW_KEY = 'diet-copilot:oauth-flow-v2';
@@ -38,7 +38,7 @@
           targetKind === 'native'
             ? '/diet/native-auth-callback.html'
             : targetKind === 'web-v2'
-              ? '/diet/v2/'
+              ? '/diet/'
               : '/diet/',
           source.origin
         );
