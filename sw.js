@@ -1,5 +1,5 @@
 const CACHE_PREFIX = "wordstrike-pwa-";
-const CACHE_NAME = CACHE_PREFIX + "v108-flow-next-text-v41";
+const CACHE_NAME = CACHE_PREFIX + "v108-flow-next-text-v42-diet-v2-relay";
 const APP_SHELL = [
   "./js/practiceLab/practiceAssessmentInput.js",
   "./js/practiceLab/practiceDurableManifest.js",
@@ -921,6 +921,13 @@ self.addEventListener("fetch", event => {
   if (request.method !== "GET") return;
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
+
+  // OAuth callback navigations must always reach the current network document.
+  // Never answer them with a cached game shell or write the callback URL into cache.
+  if (
+    request.mode === "navigate"
+    && ["code","sb_flow_id","error","error_code","error_description"].some(key => url.searchParams.has(key))
+  ) return;
 
   if (request.mode === "navigate") {
     const networkPromise = fetch(request);
