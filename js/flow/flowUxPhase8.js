@@ -346,6 +346,15 @@ function decorateRun(screen) {
   screen.addEventListener("focusin", () => queueMicrotask(() => setTypingFocusState(screen)));
   screen.addEventListener("focusout", () => queueMicrotask(() => setTypingFocusState(screen)));
   setTypingFocusState(screen);
+  // Flow can mount before the asynchronously imported UI decorators complete.
+  // A mode-select click may leave focus on a detached mode button, especially
+  // in Firefox. Restore typing focus only when focus is outside the new run;
+  // never override the user's theme, duration, or other intentional control.
+  queueMicrotask(() => {
+    if (screen.isConnected && !screen.contains(document.activeElement)) {
+      focusTypingInput(screen);
+    }
+  });
 
   // Establish the fixed three-line geometry before the first painted typing
   // frame. Character progress uses the scheduled path after this initial sync.
