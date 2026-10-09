@@ -130,12 +130,15 @@ test("production mode selection cannot launch Arcade Rush and Flow uses only its
     readFile(new URL("../js/modes.js", import.meta.url), "utf8"),
     readFile(new URL("../js/flow/flowRuntimeLoader.js", import.meta.url), "utf8"),
   ]);
-  assert.match(main, /route === "arcade-rush-ready"\) openArcadeRushReady\("mode-select"\)/);
+  assert.match(main, /"arcade-rush-ready": \(\) => openArcadeRushReady\("mode-select"\)/);
+  assert.match(main, /resolveMode: \(id\) => getAllModes\(\)\.find/);
   assert.doesNotMatch(main, /MODE_IDS\.DAILY|openDailyReady|startDaily|daily-ready/);
   assert.match(main, /renderModeSelect\(getPracticeLabFeatureGate\(\)\.resolveModeDefinitions\(getAllModes\(\)\)/);
   assert.doesNotMatch(modes, /Daily Strike|MODE_IDS\.DAILY|daily-ready/);
   assert.match(modes, /name: "Arcade Rush"[\s\S]*enabled: true[\s\S]*visible: false[\s\S]*route: null/);
   assert.match(modes, /name: "Flow"[\s\S]*enabled: true[\s\S]*visible: true[\s\S]*route: "flow-release"/);
-  assert.match(release, /button\[data-mode-id=["']flow["']\]/);
+  assert.match(main, /"flow-release": \(\) => \{/);
+  assert.match(main, /void launchPublicFlow\(\)/);
+  assert.doesNotMatch(release, /installModeEntryRouting\(/);
   assert.match(release, /flowRelease/);
 });
