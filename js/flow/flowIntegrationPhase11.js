@@ -9,7 +9,7 @@ import {
 } from "./flowProgression.js?v=20260923a";
 
 const params = new URLSearchParams(globalThis.location?.search || "");
-const enabled = params.get("dev") === "1"
+const enabled = (params.get("dev") === "1" || params.get("flowRelease") === "1")
   && params.get("mode") === "flow"
   && params.get("flowRun") === "1"
   && params.get("flowUi") === "1"
