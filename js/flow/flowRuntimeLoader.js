@@ -122,7 +122,8 @@ function paramsFor(locationLike = globalThis.location) {
 
 export function isFlowReleaseRoute(locationLike = globalThis.location) {
   const params = paramsFor(locationLike);
-  return params.get(RELEASE_FLAG) === "1" && params.get("mode") === "flow";
+  return params.get("mode") === "flow"
+    && (params.get(RELEASE_FLAG) === "1" || params.get("dev") !== "1");
 }
 
 export function isFlowDeveloperRoute(locationLike = globalThis.location) {
@@ -147,13 +148,12 @@ function releaseUrl(locationLike = globalThis.location) {
   const url = new URL(href);
   url.searchParams.delete("dev");
   url.searchParams.set("mode", "flow");
-  url.searchParams.set(RELEASE_FLAG, "1");
-  url.searchParams.set("flowRun", "1");
-  url.searchParams.set("flowUi", "1");
-  url.searchParams.set("flowUx", "1");
-  url.searchParams.set("flowModifiers", "0");
-  url.searchParams.set("flowAdaptive", "0");
-  url.searchParams.set("flowIntegration", "1");
+  // Canonical public URLs describe user intent, not internal phase gates.
+  // Legacy bookmarked phase flags are accepted but removed on navigation.
+  for (const key of [
+    RELEASE_FLAG, "flowRun", "flowUi", "flowUx",
+    "flowModifiers", "flowAdaptive", "flowIntegration",
+  ]) url.searchParams.delete(key);
   for (const key of [
     "flowCategory",
     "flowDifficulty",
@@ -375,7 +375,7 @@ async function importFlowRuntime() {
     ]);
 
     const params = new URLSearchParams(globalThis.location.search);
-    if (params.get("flowUi") === "1") {
+    if (release || params.get("flowUi") === "1") {
       const [keyboardGuard] = await Promise.all([
         import("./flowUiPhase7KeyboardGuard.js?v=20260923a"),
         import("./flowUiPhase7.js?v=20260923a"),
@@ -387,13 +387,13 @@ async function importFlowRuntime() {
       await Promise.resolve();
       keyboardGuard.refreshFlowUiGuard?.();
       await import("./flowUiPhase7Polish.js?v=20260923a");
-      if (params.get("flowUx") === "1") {
+      if (release || params.get("flowUx") === "1") {
         await import("./flowUxPhase8.js?v=20260925g");
         await Promise.resolve();
         const extensions = [];
         if (params.get("flowModifiers") === "1") extensions.push(import("./flowModifiersPhase9.js?v=20260923a"));
         if (params.get("flowAdaptive") === "1") extensions.push(import("./flowAdaptivePhase10.js?v=20260923a"));
-        if (params.get("flowIntegration") === "1") extensions.push(import("./flowIntegrationPhase11.js?v=20260923b"));
+        if (release || params.get("flowIntegration") === "1") extensions.push(import("./flowIntegrationPhase11.js?v=20260923b"));
         await Promise.all(extensions);
       }
     }
