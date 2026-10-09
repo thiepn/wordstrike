@@ -167,8 +167,11 @@ def certify_run_and_results(browser, browser_name, base, evidence):
     opacity = float(page.evaluate("parseFloat(getComputedStyle(document.querySelector('.flow-char--pending')).opacity)"))
     assert opacity >= 0.50, opacity
 
-    # Losing the hidden capture focus provides an explicit recovery affordance.
+    # Intentional focus on a UI control should not display a typing warning.
     page.locator('.screen-back-button').focus()
+    expect(page.locator('[data-flow-ux="focus-hint"]')).to_be_hidden()
+    # An actual focus loss (without a selected UI control) must offer recovery.
+    page.evaluate("document.activeElement.blur()")
     expect(page.locator('[data-flow-ux="focus-hint"]')).to_be_visible(timeout=2000)
     page.locator('.flow-run-copy').click(position={"x": 20, "y": 20})
     active_label = page.evaluate("document.activeElement?.getAttribute('data-flow-input') !== null")
