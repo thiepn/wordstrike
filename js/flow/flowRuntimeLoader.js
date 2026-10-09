@@ -294,12 +294,6 @@ function waitForModeSelect(timeoutMs = 5000) {
   });
 }
 
-function removeTemporaryDeveloperFlag() {
-  const url = new URL(globalThis.location.href);
-  url.searchParams.delete("dev");
-  replaceUrl(url);
-}
-
 function installReleaseBootstrapGuard() {
   if (typeof document === "undefined") return () => {};
   const id = "flow-release-bootstrap-guard";
@@ -403,9 +397,6 @@ async function importFlowRuntime() {
     replaceUrl(normalized);
     await waitForModeSelect();
     clearReleaseBootstrapGuard = installReleaseBootstrapGuard();
-    const temporary = new URL(globalThis.location.href);
-    temporary.searchParams.set("dev", "1");
-    replaceUrl(temporary);
   }
 
   try {
@@ -470,7 +461,6 @@ async function importFlowRuntime() {
     }
   } finally {
     if (release) {
-      removeTemporaryDeveloperFlag();
       clearReleaseBootstrapGuard?.();
     }
   }
