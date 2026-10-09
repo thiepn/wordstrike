@@ -478,12 +478,22 @@ def certify_input_focus_integrity(browser, browser_name, base, evidence):
     try:
         expect(input_capture).to_be_focused()
     except AssertionError as error:
-        active = page.evaluate("""() => ({
-          activeTag: document.activeElement?.tagName,
-          activeHtml: document.activeElement?.outerHTML?.slice(0, 300),
-          runFocus: document.querySelector('[data-flow-view="run"]')?.dataset.typingFocus,
-          mountedCapture: !!document.querySelector('[data-flow-input]')?.isConnected,
-        })""")
+        active = page.evaluate("""() => {
+          const input = document.querySelector('[data-flow-input]');
+          const before = document.activeElement?.tagName;
+          const style = input ? getComputedStyle(input) : null;
+          input?.focus({preventScroll: true});
+          return {
+            activeTagBefore: before,
+            activeTagAfterManualFocus: document.activeElement?.tagName,
+            manualFocusWorks: document.activeElement === input,
+            runFocus: document.querySelector('[data-flow-view="run"]')?.dataset.typingFocus,
+            mountedCapture: !!input?.isConnected,
+            display: style?.display,
+            visibility: style?.visibility,
+            disabled: input?.disabled,
+          };
+        }""")
         raise AssertionError(f"Flow entry must focus capture: {active}") from error
 
     theme = page.locator('[data-flow-theme-select]')
