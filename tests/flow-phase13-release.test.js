@@ -79,6 +79,16 @@ assert.equal(release.searchParams.get("flowLength"), "standard");
 assert.equal(isFlowReleaseRoute({ href: release.href, search: release.search }), true);
 assert.equal(isFlowDeveloperRoute({ href: release.href, search: release.search }), false);
 assert.equal(isFlowDeveloperRoute({ href: "https://wordstrike.test/?dev=1&mode=flow", search: "?dev=1&mode=flow" }), true);
+assert.equal(isFlowReleaseRoute({
+  href: "https://wordstrike.test/?mode=flow",
+  search: "?mode=flow",
+}), true, "canonical public direct link must be recognized");
+const historical = new URL("https://wordstrike.test/?mode=flow&flowRelease=1&flowRun=1&flowUi=1&flowUx=1&flowTheme=science&flowLength=quick");
+assert.equal(isFlowReleaseRoute(historical), true, "historical direct links must remain accepted");
+const normalizedHistorical = new URL(buildFlowReleaseUrl(historical));
+assert.equal(normalizedHistorical.searchParams.get("flowTheme"), "science");
+assert.equal(normalizedHistorical.searchParams.get("flowLength"), "quick");
+assert.equal(normalizedHistorical.searchParams.has("flowRelease"), false);
 
 const dirty = new URL(release.href);
 dirty.searchParams.set("flowLength", "quick");
