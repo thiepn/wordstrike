@@ -121,7 +121,7 @@
   <body>
     <main id="app"></main>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0"></script>
-    <script type="module" src="js/main.js?v=20260924g"></script>
+    <script type="module" src="js/main.js?v=20261009a"></script>
     <script type="module" src="js/flow/flowMigrationPresentation.js?v=20260923a"></script>
     <script type="module" src="js/flow/flowRuntimeLoader.js?v=20260925s"></script>
     <script type="module" src="js/thiepnAccountPresentation.js?v=20260912a"></script>
@@ -143,7 +143,9 @@
     <script>
       const canRegisterPwa = location.protocol === "https:" || location.hostname === "localhost";
       if ("serviceWorker" in navigator && canRegisterPwa) {
-        window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js").catch(() => {}));
+        window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js", { updateViaCache: "none" })
+          .then(registration => registration.update().catch(() => {}))
+          .catch(() => {}));
       }
     </script>
   </body>
