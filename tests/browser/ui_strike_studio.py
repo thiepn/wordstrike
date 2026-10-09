@@ -61,19 +61,21 @@ def certify(kind, base, evidence):
                 assert page.locator('.studio-mode-icon').count() == 5
                 capture(page, prefix+'-mode-'+mode_id, evidence)
             page.locator('[data-mode-id="practice"]').click()
-            expect(page.locator('[data-route="skill-map"]')).to_be_visible(timeout=15000)
+            expect(page.get_by_role("button", name="Skill Map", exact=True)).to_be_visible(timeout=15000)
             capture(page, prefix+'-practice', evidence)
             for label, action, target in [('profile','profile','.profile-stats-screen'),('settings','settings','.settings-screen'),('leaderboards','open-leaderboards','.leaderboards-screen')]:
                 home(page,base);page.locator(f'[data-action="{action}"]').click()
                 expect(page.locator(target)).to_be_visible(timeout=15000)
                 capture(page,prefix+'-'+label,evidence)
             home(page,base);page.locator('[data-action="modes"]').click();page.locator('[data-mode-id="flow"]').click()
-            expect(page.locator('[data-flow-integration-profile]')).to_be_visible(timeout=15000)
-            expect(page.locator('[aria-label="Selected Flow run setup"]')).to_contain_text('3 sections')
-            expect(page.locator('[aria-label="Selected Flow run setup"]')).to_contain_text('~5 min')
-            capture(page,prefix+'-flow-setup',evidence)
-            page.locator('[data-flow-action="start"]').click()
+            # Public Flow V3 starts immediately; the retired multi-section setup
+            # is intentionally not part of the five-mode public experience.
             expect(page.locator('[data-flow-view="run"]')).to_be_visible(timeout=15000)
+            expect(page.locator('[data-flow-session-preset]')).to_have_value('standard')
+            expect(page.locator('[data-flow-session-remaining]')).to_have_text('3:00')
+            assert page.locator('[data-flow-integration-profile]').count() == 0
+            assert page.locator('[data-flow-action="start"]').count() == 0
+            capture(page,prefix+'-flow-instant-run',evidence)
             sample=page.evaluate('window.wordstrikeFlowPhase1.getRunPlan().segments[0].text.slice(0,80)')
             page.keyboard.type(sample,delay=5)
             assert page.evaluate('window.wordstrikeFlowPhase1.getSnapshot().currentIndex') == len(sample)

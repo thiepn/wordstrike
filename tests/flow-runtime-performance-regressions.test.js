@@ -43,8 +43,9 @@ assert.doesNotMatch(source.visual, /subtree:\s*true/, "visual decorator should o
 assert.doesNotMatch(source.ux8, /passageObserver/, "caret visibility must not rely on a live passage MutationObserver");
 assert.doesNotMatch(source.ux8, /observe\(app, \{ childList: true, subtree: true \}\)/, "UX root decorator must not wake on every typed character");
 assert.match(source.ux8, /scheduleCaretVisibility/, "caret visibility must use the direct frame scheduler");
+assert.match(source.ux8, /if \(!screen\.contains\(focused\)\) focusTypingInput\(screen\)/, "decorators must restore initial Flow input focus without stealing focused controls");
 assert.match(source.ux8, /keepStreamCaretInTypingViewport/, "public Flow must keep caret motion inside its own bounded typing viewport");
-assert.match(source.ux8, /viewport\.scrollTop = targetScrollTop/, "public Flow line movement must scroll the typing viewport, not the page");
+assert.match(source.ux8, /shiftStreamViewport\(screen, viewport, targetScrollTop\)/, "public Flow line movement must scroll the typing viewport, not the page");
 assert.match(source.phase1, /refreshPublicStreamPassage/, "paragraph rollover must refresh only the passage content");
 assert.match(source.ux8, /positionStreamCaret/, "public Flow must position a dedicated live caret independently from text");
 assert.match(source.ux8, /measureCaretExtraWidth/, "public Flow caret must advance through extra letters without moving text");

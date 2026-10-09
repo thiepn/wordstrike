@@ -346,6 +346,20 @@ function decorateRun(screen) {
   screen.addEventListener("focusin", () => queueMicrotask(() => setTypingFocusState(screen)));
   screen.addEventListener("focusout", () => queueMicrotask(() => setTypingFocusState(screen)));
   setTypingFocusState(screen);
+  // Flow can mount before the asynchronously imported UI decorators complete.
+  // A mode-select click may leave focus on a detached mode button, especially
+  // in Firefox. Restore typing focus only when focus is outside the new run;
+  // never override the user's theme, duration, or other intentional control.
+  const recoverInitialFocus = () => {
+    if (!screen.isConnected || !screen.matches('[data-flow-view="run"]')) return;
+    const focused = document.activeElement;
+    // Never steal focus from a deliberate setting, action or typing control.
+    if (!screen.contains(focused)) focusTypingInput(screen);
+  };
+  queueMicrotask(recoverInitialFocus);
+  // Later screen decorators can move DOM after the first microtask. Keep
+  // recovery bounded to one initial animation frame, not a perpetual trap.
+  globalThis.requestAnimationFrame?.(recoverInitialFocus);
 
   // Establish the fixed three-line geometry before the first painted typing
   // frame. Character progress uses the scheduled path after this initial sync.

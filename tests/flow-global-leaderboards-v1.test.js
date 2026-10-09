@@ -22,7 +22,7 @@ import {
   validateLeaderboardRequest,
 } from "../supabase/functions/_shared/leaderboardRead.js";
 
-const accuracy = 900 / 930 * 100;
+const accuracy = Math.round((900 / 930 * 100) * 100) / 100; // serialized accuracy is two decimals
 const score = calculateFlowScoreV3({
   correctCharacters: 900,
   wpm: 60,
@@ -159,7 +159,8 @@ const [phase1, migration, ui, outbox, pending] = await Promise.all([
 ]);
 
 assert.match(phase1, /session-flow-v3-/);
-assert.match(phase1, /createLeaderboardSubmissionService/);
+assert.match(phase1, /bindFlowSubmissionActions\(app, result\)/);
+assert.doesNotMatch(phase1, /createLeaderboardSubmissionService\(\)/, "Flow must not instantiate a private submission service");
 assert.match(phase1, /rerollPublicStream/);
 assert.match(ui, /leaderboard-select-flow/);
 assert.doesNotMatch(ui, /leaderboard-flow-select-quick/);

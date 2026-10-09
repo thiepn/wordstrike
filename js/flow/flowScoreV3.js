@@ -34,9 +34,12 @@ export function calculateFlowScoreV3({
   consistency = 0,
 } = {}) {
   const scoredCharacters = Math.max(0, Math.round(finite(correctCharacters)));
-  const measuredWpm = Math.max(0, finite(wpm));
-  const scoredAccuracy = clamp(finite(accuracy), 0, 100);
-  const scoredConsistency = clamp(finite(consistency), 0, 100);
+  // The backend verifies the score from serialized WPM (1 decimal),
+  // accuracy (2 decimals) and integer consistency, not raw floats.
+  // Score those same values so valid runs cannot fail SCORE_MISMATCH.
+  const measuredWpm = round(Math.max(0, finite(wpm)), 1);
+  const scoredAccuracy = round(clamp(finite(accuracy), 0, 100), 2);
+  const scoredConsistency = Math.round(clamp(finite(consistency), 0, 100));
   const volumePoints = scoredCharacters * FLOW_SCORE_V3_RULES.pointsPerCorrectCharacter;
   const speedMultiplier = clamp(
     measuredWpm / FLOW_SCORE_V3_RULES.baselineWpm,
@@ -71,7 +74,7 @@ export function calculateFlowScoreV3({
     volumePoints,
     wpm: round(measuredWpm, 1),
     accuracy: round(scoredAccuracy, 2),
-    consistency: round(scoredConsistency, 1),
+    consistency: scoredConsistency,
     speedMultiplier: round(speedMultiplier, 6),
     accuracyMultiplier: round(accuracyMultiplier, 6),
     consistencyMultiplier: round(consistencyMultiplier, 6),

@@ -21,7 +21,7 @@ const PRE_FLOW_ACTIVE_BOARDS = [
 ];
 const ACTIVE_BOARDS = [
   ...PRE_FLOW_ACTIVE_BOARDS,
-  "flow-standard-v1",
+  "flow-standard-3m-v1",
 ];
 
 assert.deepEqual(PUBLIC_BOARD_KEYS, ACTIVE_BOARDS);
