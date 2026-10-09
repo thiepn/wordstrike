@@ -27,10 +27,18 @@ assert.doesNotMatch(main, /practice(?:WeakKeys|CombinationRepair|TreatmentRespon
 
 assert.match(controllerFacade, /import\("\.\/practiceLabControllerCurrent\.js"\)/);
 assert.match(controllerFacade, /import\("\.\/practiceExperimentRegistryRuntime\.js"\)/);
-assert.match(controllerFacade, /import\("\.\/practiceCombinationRepairExperiment\.js"\)/);
-assert.match(controllerFacade, /import\("\.\/practiceWeakKeysExperiment\.js"\)/);
-assert.match(controllerFacade, /import\("\.\/practiceCustomTextExperiment\.js"\)/);
-assert.match(controllerFacade, /import\("\.\/practiceWeaknessBossExperiment\.js"\)/);
+// The facade now resolves an ordered experiment registry from one lazy
+// module table instead of repeating a large hand-wired Promise.all tuple.
+assert.match(controllerFacade, /\.\.\.EXPERIMENT_MODULES\.map\(\(\[url\]\) => import\(url\)\)/);
+for (const [moduleName, registration] of [
+  ["practiceCombinationRepairExperiment", "registerPracticeCombinationRepairExperiment"],
+  ["practiceWeakKeysExperiment", "registerPracticeWeakKeysExperiment"],
+  ["practiceCustomTextExperiment", "registerPracticeCustomTextExperiment"],
+  ["practiceWeaknessBossExperiment", "registerPracticeWeaknessBossExperiment"],
+]) {
+  assert.ok(controllerFacade.includes(`["./${moduleName}.js", "${registration}"]`),
+    `missing lazily registered experiment: ${moduleName}`);
+}
 assert.doesNotMatch(controllerFacade, /from "\.\/practiceLab(?:ViewModel|Renderer|Routes)(?:V\d+)?\.js"/);
 assert.doesNotMatch(controllerFacade, /from "\.\/practice(?:SessionEngine|Repository|IndexedDbStore|ManifestStore|TreatmentResponseRuntime)\.js"/);
 
