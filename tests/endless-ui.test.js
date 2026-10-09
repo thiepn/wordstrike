@@ -74,7 +74,8 @@ for (const [stage, progress, expected] of [[4, 7, "7 / 10"], [8, 11, "11 / 15"],
 }
 
 const main = await readFile(new URL("../js/main.js", import.meta.url), "utf8");
-assert.match(main, /"endless-ready": \(\) => openEndlessReady\("mode-select"\)/);
+assert.match(main, /"endless-ready": \(\) => openEndlessReady\(routeNavigationRestoring \? "history" : "mode-select"\)/,
+  "endless must distinguish restored history from user-selected navigation");
 assert.match(main, /Screens\.ENDLESS_READY/);
 assert.match(main, /Screens\.ENDLESS_RESULTS/);
 assert.equal(main.split('addEventListener("keydown"').length - 1, 1);
