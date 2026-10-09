@@ -1,5 +1,5 @@
 const CACHE_PREFIX = "wordstrike-pwa-";
-const CACHE_NAME = CACHE_PREFIX + "v108-flow-next-text-v42-diet-v2-relay";
+const CACHE_NAME = CACHE_PREFIX + "v109-auth-session-isolation-20261009";
 const APP_SHELL = [
   "./js/practiceLab/practiceAssessmentInput.js",
   "./js/practiceLab/practiceDurableManifest.js",
@@ -303,7 +303,7 @@ const APP_SHELL = [
   "./js/levelGenerator.js",
   "./js/lifetimeStatistics.js",
   "./js/main.js",
-  "./js/main.js?v=20260924g",
+  "./js/main.js?v=20261009a",
   "./js/mobileInputAdapter.js",
   "./js/modeCustomization.js",
   "./js/modeCustomizationPresentation.js",
@@ -878,7 +878,9 @@ const CORE_SHELL = Object.freeze([
   "./style.css",
   "./styles/ui-system.css",
   "./js/main.js",
-  "./js/main.js?v=20260924g",
+  "./js/main.js?v=20261009a",
+  "./js/authService.js",
+  "./js/supabaseClient.js",
 ]);
 
 const OPTIONAL_PRECACHE_BATCH_SIZE = 24;
