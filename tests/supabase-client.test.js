@@ -36,7 +36,7 @@ assert.equal(auth.flowType, "implicit");
 assert.equal(auth.persistSession, true);
 assert.equal(auth.autoRefreshToken, true);
 assert.equal(auth.detectSessionInUrl, true);
-assert.equal(auth.storageKey, "sb-hycegznamzjhwinegaai-auth-token");
+assert.equal(auth.storageKey, "wordstrike:auth:session:v2");
 assert.ok(auth.storage, "browser storage must be supplied explicitly to Supabase");
 
 auth.storage.setItem("session-test", "persisted");
@@ -45,8 +45,47 @@ assert.equal(storage.getItem("session-test"), "persisted");
 auth.storage.removeItem("session-test");
 assert.equal(storage.getItem("session-test"), null);
 
-assert.equal(SUPABASE_AUTH_STORAGE_KEY, "sb-hycegznamzjhwinegaai-auth-token");
+assert.equal(SUPABASE_AUTH_STORAGE_KEY, "wordstrike:auth:session:v2");
 assert.equal(createAuthStorageAdapter({}), null);
+
+const DIET_AUTH_STORAGE_KEY = "sb-hycegznamzjhwinegaai-auth-token";
+assert.notEqual(SUPABASE_AUTH_STORAGE_KEY, DIET_AUTH_STORAGE_KEY,
+  "Wordstrike must not share Diet Copilot's origin-scoped refresh token");
+
+// Wordstrike and Diet share the thiepn.dev origin, not a session lifecycle.
+// Logging out of Wordstrike must not delete Diet's refresh token and vice versa.
+{
+  const entries = new Map([
+    [DIET_AUTH_STORAGE_KEY, JSON.stringify({ access_token: "diet-token" })],
+  ]);
+  const sharedOriginStorage = {
+    getItem: key => entries.get(key) ?? null,
+    setItem: (key, value) => entries.set(key, String(value)),
+    removeItem: key => entries.delete(key),
+  };
+  const wordstrikeStorage = createAuthStorageAdapter(sharedOriginStorage);
+  wordstrikeStorage.setItem(SUPABASE_AUTH_STORAGE_KEY, JSON.stringify({ access_token: "wordstrike-token" }));
+
+  assert.equal(JSON.parse(wordstrikeStorage.getItem(SUPABASE_AUTH_STORAGE_KEY)).access_token,
+    "wordstrike-token");
+  assert.equal(JSON.parse(sharedOriginStorage.getItem(DIET_AUTH_STORAGE_KEY)).access_token,
+    "diet-token");
+
+  const reloadedWordstrike = createAuthStorageAdapter(sharedOriginStorage);
+  assert.equal(JSON.parse(reloadedWordstrike.getItem(SUPABASE_AUTH_STORAGE_KEY)).access_token,
+    "wordstrike-token");
+  reloadedWordstrike.removeItem(SUPABASE_AUTH_STORAGE_KEY);
+  assert.equal(reloadedWordstrike.getItem(SUPABASE_AUTH_STORAGE_KEY), null);
+  assert.equal(JSON.parse(sharedOriginStorage.getItem(DIET_AUTH_STORAGE_KEY)).access_token,
+    "diet-token");
+
+  // No implicit migration from the shared credential: copying its refresh token
+  // would let two clients independently rotate and invalidate the same token.
+  const newlyLoadedWordstrike = createAuthStorageAdapter(sharedOriginStorage);
+  assert.equal(newlyLoadedWordstrike.getItem(SUPABASE_AUTH_STORAGE_KEY), null);
+}
+
+console.log("Wordstrike's session key is isolated from Diet and survives reloads.");
 
 const oldLocalStorage = Object.getOwnPropertyDescriptor(globalThis, "localStorage");
 const oldSessionStorage = Object.getOwnPropertyDescriptor(globalThis, "sessionStorage");
