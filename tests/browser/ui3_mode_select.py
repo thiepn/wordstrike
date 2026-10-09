@@ -217,7 +217,9 @@ def inspect_keyboard_and_routes(browser, base, browser_name, evidence):
     expect(page.locator('[data-flow-view="run"]')).to_be_visible(timeout=15000)
     assert page.locator('[data-flow-view="ready"]').count() == 0
     assert page.evaluate("window.wordstrikeFlowPhase1.getRunPlan().gameplayVersion") == 3
-    assert "flowRelease=1" in page.url, page.url
+    assert "mode=flow" in page.url, page.url
+    assert "flowRelease=" not in page.url, page.url
+    assert "dev=1" not in page.url, page.url
     assert "dev=1" not in page.url, page.url
 
     # Escape returns to Mode Select and strips the release deep-link parameters.
