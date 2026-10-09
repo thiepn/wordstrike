@@ -31,7 +31,7 @@ const LENGTH_COPY = Object.freeze({
 const QUICK_CHAPTERS = Object.freeze(["Settle In", "Precision", "Final Flow"]);
 const FULL_CHAPTERS = Object.freeze(["Settle In", "Momentum", "Precision", "Complexity", "Pressure", "Final Flow"]);
 const params = new URLSearchParams(globalThis.location?.search || "");
-const phase7Requested = (params.get("dev") === "1" || params.get("flowRelease") === "1") && params.get("mode") === "flow" && params.get("flowRun") === "1";
+const phase7Requested = params.get("mode") === "flow" && (params.get("dev") !== "1" || params.get("flowRelease") === "1" || params.get("flowRun") === "1");
 const autostartRequested = params.get("flowUiStart") === "1";
 
 let draft = null;
