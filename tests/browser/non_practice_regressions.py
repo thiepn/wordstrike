@@ -35,6 +35,11 @@ class QuietHandler(SimpleHTTPRequestHandler):
         pass
 
 
+def local_only(context, base):
+    """Allow app-origin requests only; keep regression runs deterministic."""
+    context.route("**/*", lambda route: route.continue_() if route.request.url.startswith(base) else route.abort())
+
+
 def overflow(page, selector=".screen"):
     return page.locator(selector).evaluate("el => el.scrollWidth - el.clientWidth")
 
