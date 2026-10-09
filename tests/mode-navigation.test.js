@@ -133,7 +133,9 @@ assert.match(keyboardSource, /const itemCount = getAllModes\(\)\.length \+ 1/);
 assert.match(keyboardSource, /state\.modeSelection === getAllModes\(\)\.length\) openTitle\(\)/);
 assert.match(mainSource, /createGlobalKeyboardController\(\{/);
 assert.match(mainSource, /"arcade-rush-ready": \(\) => openArcadeRushReady\("mode-select"\)/);
-assert.match(mainSource, /return modeLifecycle\.enter\(modeId\)/);
+assert.match(mainSource, /const accepted = modeLifecycle\.enter\(modeId\)/);
+assert.match(mainSource, /if \(accepted && modeId !== MODE_IDS\.FLOW\) rememberPublicRoute\(modeId\)/,
+  "accepted mode must be reflected in the canonical public URL");
 assert.match(mainSource, /resolveMode: \(id\) => getAllModes\(\)\.find/);
 assert.match(mainSource, /back: openModeSelect/);
 assert.match(mainSource, /renderDevSessionDiagnostics/);
