@@ -49,11 +49,7 @@ assert.equal(ARCHIVED_DAILY_CHALLENGE_VERSION, 1);
 assert.equal(PUBLIC_BOARD_KEYS.includes("daily-strike-v1"), false);
 assert.equal(SUPPORTED_BOARD_KEYS.includes("daily-strike-v1"), false);
 for (const [boardKey, version] of Object.entries(EXPECTED_LEADERBOARD_RULES_VERSIONS)) {
-  const expected = boardKey === "flow-standard-v1"
-    ? 3
-    : boardKey === "flow-quick-v1" || boardKey === "flow-long-v1"
-      ? 2
-      : 1;
+  const expected = boardKey === "flow-standard-3m-v1" ? 4 : 1;
   assert.equal(version, expected, `${boardKey} must keep its intended rules version`);
 }
 assert.equal(validateScoreSubmission(dailySubmission()).code, "INVALID_BOARD");
