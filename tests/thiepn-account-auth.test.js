@@ -9,8 +9,8 @@ const presentationSource = fs.readFileSync(
 );
 
 test("Wordstrike uses its own auth storage key on the shared thiepn.dev origin", () => {
-  assert.match(source, /SUPABASE_AUTH_STORAGE_KEY\\s*=\\s*["']wordstrike:auth:session:v2["']/);
-  assert.doesNotMatch(source, /SUPABASE_AUTH_STORAGE_KEY\\s*=\\s*["']sb-hycegznamzjhwinegaai-auth-token["']/);
+  assert.match(source, /SUPABASE_AUTH_STORAGE_KEY\s*=\s*["']wordstrike:auth:session:v2["']/);
+  assert.doesNotMatch(source, /SUPABASE_AUTH_STORAGE_KEY\s*=\s*["']sb-hycegznamzjhwinegaai-auth-token["']/);
 });
 
 test("WordStrike retires its app-specific auth key without promoting it", () => {
