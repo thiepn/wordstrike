@@ -87,10 +87,10 @@ def certify(browser_type, browser_name, base, evidence):
 
     # A full page reload must keep that same frontier.
     page.reload(wait_until="domcontentloaded")
-    expect(page.locator(".menu-screen")).to_be_visible()
-    page.locator('[data-action="modes"]').click()
-    page.locator('[data-mode-id="campaign"]').click()
-    expect(page.locator(".campaign-progress-screen")).to_be_visible()
+    # P2 restores a bookmarked Campaign directly, rather than discarding
+    # the mode link and showing Title. Verify both the route and saved frontier.
+    expect(page.locator(".campaign-progress-screen")).to_be_visible(timeout=10000)
+    assert "mode=campaign" in page.url, page.url
     expect(page.locator('.campaign-node[aria-current="true"]')).to_have_attribute("data-level", "17")
 
     # Minimal HUD may hide secondary telemetry, but live Campaign score is essential.
