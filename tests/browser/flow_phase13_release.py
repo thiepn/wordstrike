@@ -54,7 +54,9 @@ def launch_public_flow(page):
     assert page.locator('[data-flow-game-length]').count() == 0
     assert page.locator('[data-flow-choice-group]').count() == 0
 
-    assert "flowRelease=1" in page.url, page.url
+    assert "mode=flow" in page.url, page.url
+    assert "flowRelease=" not in page.url, page.url
+    assert "flowRun=" not in page.url, page.url
     assert "dev=1" not in page.url, page.url
     assert page.evaluate("window.wordstrikeFlowReleasePhase13.runtimeReady()") is True
     assert page.evaluate("window.wordstrikeFlowReleasePhase13.isReleaseRoute()") is True
