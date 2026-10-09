@@ -11,7 +11,16 @@ const sdk = {
   },
 };
 
-const client = getSupabaseClient({ sdk });
+// This test runs under Node.js, which has no browser localStorage.
+// Supply an explicit durable storage double instead of relying on an
+// in-memory SDK fallback that production now correctly rejects.
+const store = new Map();
+const storage = {
+  getItem: key => store.get(key) ?? null,
+  setItem: (key, value) => { store.set(key, String(value)); },
+  removeItem: key => { store.delete(key); },
+};
+const client = getSupabaseClient({ sdk, storage });
 assert.equal(client, fakeClient);
 assert.equal(calls.length, 1);
 const auth = calls[0].options.auth;
