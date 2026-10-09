@@ -73,6 +73,9 @@ export function getSupabaseClient({
   try {
     cleanupRetiredAuthStorage(storage);
     const authStorage = createAuthStorageAdapter(storage);
+    // Never start a seemingly successful browser login with memory-only
+    // storage: it would disappear on every reload in restricted browsers.
+    if (!authStorage) return null;
     const auth = {
       // WordStrike is a client-only static site. Use Supabase's browser-native
       // implicit OAuth flow so the returned session can be consumed directly
@@ -83,7 +86,7 @@ export function getSupabaseClient({
       detectSessionInUrl: true,
       storageKey: SUPABASE_AUTH_STORAGE_KEY,
     };
-    if (authStorage) auth.storage = authStorage;
+    auth.storage = authStorage;
 
     clientSingleton = sdk.createClient(config.url, config.publishableKey, { auth });
   } catch {
