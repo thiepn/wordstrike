@@ -190,9 +190,8 @@ export function stripFlowReleaseUrl(locationLike = globalThis.location) {
   const href = locationLike?.href || globalThis.location?.href || "http://localhost/";
   const url = new URL(href);
   for (const key of FLOW_RELEASE_QUERY_KEYS) url.searchParams.delete(key);
-  if (url.searchParams.get("dev") === "1" && isFlowReleaseRoute(locationLike)) {
-    url.searchParams.delete("dev");
-  }
+  // Exiting a Flow deep link must not leave a transient developer flag.
+  if (paramsFor(locationLike).get("mode") === "flow") url.searchParams.delete("dev");
   return url.href;
 }
 
