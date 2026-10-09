@@ -100,9 +100,10 @@ assert.match(main, /function finishLevel\(game, success\) \{[\s\S]*?game !== app
 
 // Flow keyboard activation must enter through the exact same capture-phase
 // release button path used by pointer activation.
-assert.match(main, /route === "flow-release"/);
-assert.match(main, /querySelector\('button\[data-mode-id="flow"\]'\)/);
-assert.match(main, /flowEntry\.click\(\)/);
+assert.match(main, /"flow-release": \(\) => \{/);
+assert.match(main, /void launchPublicFlow\(\)/);
+assert.match(main, /return modeLifecycle\.enter\(modeId\)/);
+assert.doesNotMatch(main, /flowEntry\.click\(\)/);
 
 // Async UI completions must remain owned by the surface/request that started them.
 assert.match(
