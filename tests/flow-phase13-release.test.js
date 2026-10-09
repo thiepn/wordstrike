@@ -54,11 +54,11 @@ const releaseHref = buildFlowReleaseUrl(source);
 const release = new URL(releaseHref);
 assert.equal(release.searchParams.get("foo"), "keep");
 assert.equal(release.searchParams.has("dev"), false);
-for (const key of [
-  "mode", "flowRelease", "flowRun", "flowUi", "flowUx",
-  "flowModifiers", "flowAdaptive", "flowIntegration", "flowSeed",
-]) {
+for (const key of ["mode", "flowSeed", "flowTheme", "flowLength"]) {
   assert.ok(release.searchParams.has(key), `release URL missing ${key}`);
+}
+for (const key of ["flowRelease", "flowRun", "flowUi", "flowUx", "flowModifiers", "flowAdaptive", "flowIntegration"]) {
+  assert.equal(release.searchParams.has(key), false, `canonical Flow URL leaked internal flag ${key}`);
 }
 assert.match(release.searchParams.get("flowSeed"), /^release-/);
 const explicitSeed = new URL(buildFlowReleaseUrl({
@@ -74,10 +74,8 @@ for (const key of ["flowCategory", "flowDifficulty", "flowModifierIds", "flowWea
   assert.equal(legacyOptions.searchParams.has(key), false, `public release must strip legacy Flow option ${key}`);
 }
 assert.equal(release.searchParams.get("mode"), "flow");
-assert.equal(release.searchParams.get("flowRelease"), "1");
-assert.equal(release.searchParams.get("flowModifiers"), "0");
+assert.equal(release.searchParams.get("mode"), "flow");
 assert.equal(release.searchParams.get("flowLength"), "standard");
-assert.equal(release.searchParams.get("flowAdaptive"), "0");
 assert.equal(isFlowReleaseRoute({ href: release.href, search: release.search }), true);
 assert.equal(isFlowDeveloperRoute({ href: release.href, search: release.search }), false);
 assert.equal(isFlowDeveloperRoute({ href: "https://wordstrike.test/?dev=1&mode=flow", search: "?dev=1&mode=flow" }), true);
@@ -148,7 +146,7 @@ for (const asset of [
 const mainEntry = index.match(/src="js\/main\.js\?v=[^"]+"/)?.[0] || "";
 const mainIndex = mainEntry ? index.indexOf(mainEntry) : -1;
 const releaseIndex = index.indexOf('src="js/flow/flowRuntimeLoader.js?v=20260925s"');
-assert.ok(mainIndex >= 0 && releaseIndex > mainIndex, "main.js must boot before the release loader can temporarily emulate the developer route");
+assert.ok(mainIndex >= 0 && releaseIndex > mainIndex, "main.js and Flow loader must share the application bootstrap");
 assert.doesNotMatch(index, /src="js\/flow\/flowPhase1\.js/);
 assert.doesNotMatch(index, /const flowParams = new URLSearchParams/);
 assert.match(loader, /await waitForModeSelect\(\)/);
@@ -157,10 +155,10 @@ assert.doesNotMatch(loader, /location\.assign\(next\.href\)/, "public Flow entry
 assert.match(loader, /await Promise\.all\(\[/, "Flow modules should load in dependency-safe parallel waves");
 assert.match(loader, /activateFromLocation/, "cached Flow modules must support same-document re-entry");
 assert.match(loader, /flowGameModeV2\.js\?v=20260923c/, "public release must load the Flow V2 game-mode layer");
-assert.match(loader, /temporary\.searchParams\.set\("dev", "1"\)/);
-assert.match(loader, /removeTemporaryDeveloperFlag\(\)/);
+assert.doesNotMatch(loader, /temporary\.searchParams\.set\("dev", "1"\)/);
+assert.doesNotMatch(loader, /removeTemporaryDeveloperFlag\(\)/);
 assert.match(loader, /installReleaseExitCleanup\(\)/);
-assert.match(loader, /button\[data-mode-id=["']flow["']\]/);
+assert.doesNotMatch(loader, /installModeEntryRouting\(|bindPublicModeEntry\(/, "host owns mode click routing");
 assert.match(loader, /cacheFlowAssetsInBatches\(cache, missing\)/);
 assert.match(loader, /requestIdleCallback/);
 assert.match(loader, /flowSeed/);
