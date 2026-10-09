@@ -556,6 +556,7 @@ function getArcadeRushAttemptSeed() {
 }
 
 function openTitle() {
+  modeLifecycle.leave();
   unmountPracticeLab();
   cleanupCampaignAttempt("main-menu");
   changeScreen(Screens.TITLE);
@@ -1938,6 +1939,9 @@ async function bootstrap() {
   const appRoot = document.querySelector("#app");
   attachAppClickListener(appRoot, handleAppClick);
   appRoot?.addEventListener("input", handleAppInput);
+  document.addEventListener("wordstrike:mode-exit", (event) => {
+    if (event?.detail?.modeId === MODE_IDS.FLOW) modeLifecycle.leave();
+  });
   document.addEventListener("wordstrike:open-leaderboard", (event) => {
     const boardKey = event?.detail?.boardKey;
     if (Object.values(LEADERBOARD_BOARDS).includes(boardKey)) openLeaderboardBoard(boardKey);
