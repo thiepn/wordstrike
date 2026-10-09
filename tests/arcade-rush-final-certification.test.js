@@ -97,7 +97,7 @@ const CURRENT_BOARD_KEYS = [
   "typing-15s-english200-v1",
   "endless-v1",
   "arcade-rush-v1",
-  "flow-standard-v1",
+  "flow-standard-3m-v1",
 ];
 
 // 1. Flow owns the public replacement slot while Arcade Rush remains a hidden
