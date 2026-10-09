@@ -129,17 +129,17 @@ assert.match(serviceWorker, /cacheNetworkResponseInBackground/);
 assert.match(serviceWorker, /OPTIONAL_PRECACHE_BATCH_SIZE = 24/);
 assert.match(flowLoader, /FLOW_OFFLINE_CACHE_BATCH_SIZE = 16/);
 
-const modeEntryRouting = flowLoader.match(/function installModeEntryRouting\(\) \{[\s\S]*?\n\}/)?.[0] || "";
-assert.match(modeEntryRouting, /const target = event\.target\?\.closest\?\.\('button\[data-mode-id="flow"\]'\)/);
-assert.match(
-  modeEntryRouting,
-  /if \(isFlowReleaseRoute\(\)\) \{[\s\S]*?event\.preventDefault\(\);[\s\S]*?event\.stopImmediatePropagation\(\);[\s\S]*?return;/,
-  "duplicate Flow clicks during release bootstrap must be consumed before normal mode onclick routing",
-);
-assert.ok(
-  modeEntryRouting.indexOf("const target =") < modeEntryRouting.indexOf("if (isFlowReleaseRoute())"),
-  "Flow target detection must precede the release-route duplicate-click guard",
-);
+// One host owns public-mode clicks; Flow only loads its dedicated runtime.
+// Explicit duplication protection belongs to the lifecycle/launcher, not a
+// competing capture-phase document listener.
+assert.match(main, /createModeLifecycle\(\{/);
+assert.match(main, /return modeLifecycle\.enter\(modeId\)/);
+assert.match(main, /"flow-release": \(\) => \{/);
+assert.match(main, /void launchPublicFlow\(\)/);
+assert.match(flowLoader, /export function launchPublicFlow\(\)/);
+assert.match(flowLoader, /if \(publicLaunchPromise\) return publicLaunchPromise/);
+assert.doesNotMatch(flowLoader, /installModeEntryRouting\(|bindPublicModeEntry\(/);
+assert.doesNotMatch(main, /flowEntry\.click\(\)/);
 
 assert.match(workflow, /Certify Pass 7 adversarial release stress/);
 assert.match(workflow, /python3 tests\/browser\/release_adversarial_pass7\.py/);
