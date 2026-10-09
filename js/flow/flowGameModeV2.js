@@ -5,9 +5,7 @@ import {
 import { FLOW_SESSION_LENGTHS } from "./flowConfig.js";
 
 const params = new URLSearchParams(globalThis.location?.search || "");
-const enabled = params.get("dev") === "1"
-  && params.get("mode") === "flow"
-  && params.get("flowRelease") === "1";
+const enabled = params.get("mode") === "flow" && params.get("flowRelease") === "1";
 
 const LENGTH_ORDER = Object.freeze(["quick", "standard", "long"]);
 const LENGTH_COPY = Object.freeze({
