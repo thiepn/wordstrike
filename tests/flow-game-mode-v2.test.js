@@ -52,7 +52,7 @@ assert.doesNotMatch(phase1, /createLeaderboardSubmissionService\(\)/, "Flow must
 assert.match(loader, /flowGameModeV2\.js\?v=20260923c/);
 assert.match(loader, /flowStreamPlanV3\.js\?v=[0-9a-z]+/);
 assert.match(loader, /flowScoreV3\.js\?v=[0-9a-z]+/);
-assert.match(loader, /flowRecordsV3\.js\?v=20260923a/);
+assert.match(loader, /flowRecordsV3\.js\?v=[0-9a-z]+/, "Flow records must remain explicitly cache-versioned");
 assert.match(loader, /flowTheme/);
 assert.match(loader, /normalizeStoredFlowTheme/);
 
