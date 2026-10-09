@@ -453,11 +453,20 @@ async function importFlowRuntime() {
     // button may now be detached; restore capture focus only for a newly
     // mounted run and never override a setting/button already inside it.
     if (release && typeof document !== "undefined") {
-      const screen = document.querySelector('.flow-phase1-screen[data-flow-view="run"]');
-      const capture = screen?.querySelector("[data-flow-input]");
-      if (capture && !screen.contains(document.activeElement)) {
-        capture.focus({ preventScroll: true });
-      }
+      const restorePublicRunFocus = () => {
+        const screen = document.querySelector('.flow-phase1-screen[data-flow-view="run"]');
+        const capture = screen?.querySelector("[data-flow-input]");
+        // Only recover focus left on the body by mode-button removal.
+        // Never steal it from a user-selected control or another window.
+        if (capture && document.activeElement === document.body
+            && document.hasFocus?.() !== false) {
+          capture.focus({ preventScroll: true });
+        }
+      };
+      restorePublicRunFocus();
+      // Some browsers finish the original clicked button's focus teardown
+      // after Flow mounts. Give that teardown one bounded completion turn.
+      globalThis.setTimeout?.(restorePublicRunFocus, 120);
     }
   } finally {
     if (release) {
