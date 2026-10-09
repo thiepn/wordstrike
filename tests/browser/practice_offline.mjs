@@ -66,8 +66,10 @@ try {
   await page.locator('[data-practice-action="back"]').click();
  }
  await page.reload();
- await page.locator('[data-action="modes"]').click();
- await page.locator('button[data-mode-id="practice"]').click();
+ // Offline reload of the bookmarked Practice mode must restore the real
+ // Practice UI directly; loading Title and entering manually is not equivalent.
+ assert.equal(new URL(page.url()).searchParams.get('mode'), 'practice');
+ await page.locator('.pl-navigation [data-route="progress"]').waitFor({timeout:15000});
  await page.locator('.pl-navigation [data-route="progress"]').click();
  const history=page.locator('[data-practice-history]');
  await history.getByText(/read-ahead/).first().waitFor({timeout:15000}).catch(async error=>{throw new Error(error.message+'\n'+await page.locator('body').innerText());});

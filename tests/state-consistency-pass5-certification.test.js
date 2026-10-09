@@ -102,7 +102,8 @@ assert.match(main, /function finishLevel\(game, success\) \{[\s\S]*?game !== app
 // release button path used by pointer activation.
 assert.match(main, /"flow-release": \(\) => \{/);
 assert.match(main, /void launchPublicFlow\(\)/);
-assert.match(main, /return modeLifecycle\.enter\(modeId\)/);
+assert.match(main, /const accepted = modeLifecycle\.enter\(modeId\)/);
+assert.match(main, /if \(accepted && modeId !== MODE_IDS\.FLOW\) rememberPublicRoute\(modeId\)/);
 assert.doesNotMatch(main, /flowEntry\.click\(\)/);
 
 // Async UI completions must remain owned by the surface/request that started them.

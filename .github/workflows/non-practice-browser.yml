@@ -29,6 +29,8 @@ jobs:
         run: python3 tests/browser/ui2_title_navigation.py
       - name: Certify UI3 Mode Select
         run: python3 tests/browser/ui3_mode_select.py
+      - name: Certify P2 mode history, canonical links and reload
+        run: python3 tests/browser/p2_navigation.py
       - name: Certify UI4 Campaign progression
         run: python3 tests/browser/ui4_campaign_progression.py
       - name: Certify UI5 Campaign gameplay
@@ -64,6 +66,7 @@ jobs:
             browser-artifacts/ui1-design-system/
             browser-artifacts/ui2-title-navigation/
             browser-artifacts/ui3-mode-select/
+            browser-artifacts/p2-navigation/
             browser-artifacts/ui4-campaign-progression/
             browser-artifacts/ui5-campaign-gameplay/
             browser-artifacts/ui6-endless-gameplay/

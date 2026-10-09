@@ -36,7 +36,13 @@ try{for(const mode of ['fresh-full','existing-full']){
   const after=await rows(page,'coachPlans');assert.equal(after.length,1);assert.equal(after[0].status,'finished');assert.equal(after[0].completion.completedCount,1);
   const sessions=await rows(page,'sessionSummaries');assert.equal(sessions.filter(s=>s.status==='completed'&&s.coachBinding?.coachPlanId===report.planId).length,1);
   await page.screenshot({path:path.join(out,`${browserName}-${mode}-complete.png`),fullPage:true});
-  await page.reload({waitUntil:'domcontentloaded'});await openCoach(page);
+  await page.reload({waitUntil:'domcontentloaded'});
+  // P2 restores the bookmarked Practice Lab instead of resetting to Title.
+  // Keep the stronger persistence assertion and navigate within the restored
+  // lab, rather than clicking a Title-only [data-action="modes"] button.
+  await page.locator('.pl-navigation [data-route="daily-training"]').waitFor({state:'visible',timeout:20000});
+  assert.equal(new URL(page.url()).searchParams.get('mode'),'practice','reload must preserve the canonical Practice deep link');
+  await page.locator('.pl-navigation [data-route="daily-training"]').click();
   await page.waitForFunction(()=>document.querySelector('[data-practice-action="create-coach-plan"]')===null&&document.querySelector('.practice-coach-block'));
   assert.equal((await rows(page,'profiles')).length,1,'Reload must not create a different profile');assert.equal((await rows(page,'coachPlans'))[0].coachPlanId,report.planId);
   assert.equal(await page.evaluate(()=>localStorage.getItem('another-hub-app-test')),'preserve me');

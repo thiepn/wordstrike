@@ -17,6 +17,10 @@ import {
 
 const index = await readFile(new URL("../index.html", import.meta.url), "utf8");
 const loader = await readFile(new URL("../js/flow/flowRuntimeLoader.js", import.meta.url), "utf8");
+const deliveredLoaderVersion = index.match(/src="js\/flow\/flowRuntimeLoader\.js\?v=([^"]+)"/)?.[1];
+assert.ok(deliveredLoaderVersion, "the HTML entrypoint must declare a versioned Flow loader");
+assert.ok(loader.includes(`"./js/flow/flowRuntimeLoader.js?v=${deliveredLoaderVersion}"`),
+  "Flow's offline pack must contain the exact version delivered by HTML");
 
 const modes = getAllModes();
 assert.deepEqual(modes.map(({ id }) => id), [
@@ -106,7 +110,7 @@ for (const key of FLOW_RELEASE_QUERY_KEYS) {
 assert.ok(FLOW_RELEASE_ASSETS.length >= 30, "release cache pack should cover the complete Flow stack");
 assert.equal(new Set(FLOW_RELEASE_ASSETS).size, FLOW_RELEASE_ASSETS.length, "release cache pack contains duplicates");
 for (const asset of [
-  "./js/flow/flowRuntimeLoader.js?v=20260925s",
+  `./js/flow/flowRuntimeLoader.js?v=${deliveredLoaderVersion}`,
   "./js/leaderboardService.js",
   "./js/supabaseConfig.js",
   "./js/supabaseClient.js",
@@ -155,7 +159,7 @@ for (const asset of [
 
 const mainEntry = index.match(/src="js\/main\.js\?v=[^"]+"/)?.[0] || "";
 const mainIndex = mainEntry ? index.indexOf(mainEntry) : -1;
-const releaseIndex = index.indexOf('src="js/flow/flowRuntimeLoader.js?v=20260925s"');
+const releaseIndex = index.indexOf(`src="js/flow/flowRuntimeLoader.js?v=${deliveredLoaderVersion}"`);
 assert.ok(mainIndex >= 0 && releaseIndex > mainIndex, "main.js and Flow loader must share the application bootstrap");
 assert.doesNotMatch(index, /src="js\/flow\/flowPhase1\.js/);
 assert.doesNotMatch(index, /const flowParams = new URLSearchParams/);

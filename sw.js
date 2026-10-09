@@ -1,5 +1,5 @@
 const CACHE_PREFIX = "wordstrike-pwa-";
-const CACHE_NAME = CACHE_PREFIX + "v110-unified-mode-lifecycle-20261009";
+const CACHE_NAME = CACHE_PREFIX + "v111-public-route-history-20261009";
 const APP_SHELL = [
   "./js/practiceLab/practiceAssessmentInput.js",
   "./js/practiceLab/practiceDurableManifest.js",
@@ -69,7 +69,7 @@ const APP_SHELL = [
   "./js/flow/flowRecordsV2.js",
   "./js/flow/flowRecordsV2.js?v=20260923a",
   "./js/flow/flowRuntimeLoader.js",
-  "./js/flow/flowRuntimeLoader.js?v=20260925s",
+  "./js/flow/flowRuntimeLoader.js?v=20261009p2",
   "./js/flow/flowSelection.js",
   "./js/flow/flowShell.js",
   "./js/flow/flowState.js",
@@ -303,8 +303,9 @@ const APP_SHELL = [
   "./js/levelGenerator.js",
   "./js/lifetimeStatistics.js",
   "./js/main.js",
-  "./js/main.js?v=20261009a",
+  "./js/main.js?v=20261009b",
   "./js/modeLifecycle.js",
+  "./js/appRouteNavigation.js",
   "./js/mobileInputAdapter.js",
   "./js/modeCustomization.js",
   "./js/modeCustomizationPresentation.js",
@@ -879,8 +880,9 @@ const CORE_SHELL = Object.freeze([
   "./style.css",
   "./styles/ui-system.css",
   "./js/main.js",
-  "./js/main.js?v=20261009a",
+  "./js/main.js?v=20261009b",
   "./js/modeLifecycle.js",
+  "./js/appRouteNavigation.js",
   "./js/authService.js",
   "./js/supabaseClient.js",
 ]);

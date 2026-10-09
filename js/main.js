@@ -86,7 +86,8 @@ import {
 } from "./ui.js";
 import { getAllModes, MODE_IDS } from "./modes.js";
 import { createModeLifecycle } from "./modeLifecycle.js";
-import { launchPublicFlow } from "./flow/flowRuntimeLoader.js?v=20260925s";
+import { createAppRouteNavigation } from "./appRouteNavigation.js";
+import { isFlowReleaseRoute, launchPublicFlow } from "./flow/flowRuntimeLoader.js?v=20261009p2";
 import {
   beginCampaignSession,
   finalizeCampaignSession,
@@ -261,6 +262,15 @@ let arcadeRushDeveloperSeed = null;
 let settingsSurfaceGeneration = 0;
 let profileSurfaceGeneration = 0;
 let profileCopyRequestSequence = 0;
+let routeNavigation = null;
+let routeNavigationRestoring = false;
+
+// Only the top-level host may create public browser history entries.
+// Results, Practice experiments and unfinished gameplay are never serialized
+// into history.state or query parameters.
+function rememberPublicRoute(route, options) {
+  if (!routeNavigationRestoring) routeNavigation?.navigate(route, options);
+}
 
 function getPracticeLabFeatureGate() {
   if (!practiceLabFeatureGate) practiceLabFeatureGate = createPracticeFeatureGate({ developerMode: appState.devMode });
@@ -557,6 +567,7 @@ function getArcadeRushAttemptSeed() {
 
 function openTitle() {
   modeLifecycle.leave();
+  rememberPublicRoute("title");
   unmountPracticeLab();
   cleanupCampaignAttempt("main-menu");
   changeScreen(Screens.TITLE);
@@ -624,6 +635,9 @@ function openLeaderboardReturn(returnState) {
 
 function openModeSelect() {
   modeLifecycle.leave();
+  // A bookmarked Flow launch needs a Mode Select return surface before the
+  // Flow runtime mounts. Do not erase its URL during that bootstrap handoff.
+  if (!isFlowReleaseRoute()) rememberPublicRoute("modes");
   unmountPracticeLab();
   cleanupCampaignAttempt("mode-select");
   changeScreen(Screens.MODE_SELECT);
@@ -668,7 +682,7 @@ function openLevelSelect(reason = "level-select") {
     ? Math.min(appState.currentLevel || 1, 100)
     : getCampaignResumeLevel(appState.save);
   const selectionLimit = appState.devMode ? 100 : resumeLevel;
-  const requestedLevel = ["mode-select", "auth-return", "placement-result"].includes(reason)
+  const requestedLevel = ["mode-select", "auth-return", "placement-result", "history"].includes(reason)
     ? resumeLevel
     : appState.currentLevel || resumeLevel;
   appState.levelSelection = Math.max(1, Math.min(requestedLevel, selectionLimit, 100));
@@ -1267,8 +1281,8 @@ const modeLifecycle = createModeLifecycle({
   handlers: {
     "practice-lab": () => openPracticeLab(),
     "level-select": () => {
-      openLevelSelect("mode-select");
-      if (!isCampaignEstablished(appState.save)) {
+      openLevelSelect(routeNavigationRestoring ? "history" : "mode-select");
+      if (!routeNavigationRestoring && !isCampaignEstablished(appState.save)) {
         openAutomaticTutorial("campaign", (choice) => {
           if (choice === "primary") startLevel(1, "level-select");
         }, { primaryLabel: "START LEVEL 1" });
@@ -1276,13 +1290,16 @@ const modeLifecycle = createModeLifecycle({
     },
     "speed-test": () => {
       appState.speedTestConfigId = DEFAULT_SPEED_TEST_CONFIG_ID;
-      if (!openAutomaticTutorial("typing", () => resetSpeedTestAttempt("mode-select"))) {
+      if (routeNavigationRestoring) {
+        resetSpeedTestAttempt("history");
+      } else if (!openAutomaticTutorial("typing", () => resetSpeedTestAttempt("mode-select"))) {
         resetSpeedTestAttempt("mode-select");
       }
     },
-    "endless-ready": () => openEndlessReady("mode-select"),
+    "endless-ready": () => openEndlessReady(routeNavigationRestoring ? "history" : "mode-select"),
     "arcade-rush-ready": () => openArcadeRushReady("mode-select"),
     "flow-release": () => {
+      rememberPublicRoute("flow");
       void launchPublicFlow();
       return true;
     },
@@ -1290,7 +1307,33 @@ const modeLifecycle = createModeLifecycle({
 });
 
 function activateSelectedMode(modeId = getAllModes()[appState.modeSelection]?.id) {
-  return modeLifecycle.enter(modeId);
+  const accepted = modeLifecycle.enter(modeId);
+  if (accepted && modeId !== MODE_IDS.FLOW) rememberPublicRoute(modeId);
+  return accepted;
+}
+
+// Browser Back/Forward restores the mode's safe entry surface, never an
+// in-progress gameplay attempt. All durable records continue to load through
+// the existing storage implementations and auth-specific return paths.
+function restorePublicRoute(route) {
+  routeNavigationRestoring = true;
+  try {
+    if (window.wordstrikeFlowPhase1?.isActive?.() && route.modeId !== MODE_IDS.FLOW) {
+      window.wordstrikeFlowPhase1.exitToReturnSurface?.("browser-history");
+    }
+    if (route.kind === "title") {
+      openTitle();
+    } else if (route.kind === "modes") {
+      openModeSelect();
+    } else if (route.kind === "mode") {
+      // Flow decorates a real Mode Select return surface instead of competing
+      // with it for #app. The launcher reuses an existing seed on history replay.
+      openModeSelect();
+      activateSelectedMode(route.modeId);
+    }
+  } finally {
+    routeNavigationRestoring = false;
+  }
 }
 
 function toggleSetting(key) {
@@ -1728,6 +1771,10 @@ const nativeBackNavigation = createNativeBackNavigation({
   windowRef: window,
   onBack: handleNativeBack,
 });
+routeNavigation = createAppRouteNavigation({
+  windowRef: window,
+  onRoute: restorePublicRoute,
+});
 
 function syncKeyboardResultsSelection(screen, index) {
   const selector = screen === Screens.SPEED_TEST_RESULTS
@@ -1935,12 +1982,20 @@ async function bootstrap() {
   window.addEventListener("online", () => {
     void resumeDurableSubmissions(getAuthState(), getLeaderboardProfileState());
   });
-  nativeBackNavigation.mount();
+  // Public navigation gets real Back/Forward history. Preserve the older
+  // Android native-back guard for developer links and unsupported history APIs.
+  if (appState.devMode || !routeNavigation.mount()) nativeBackNavigation.mount();
   const appRoot = document.querySelector("#app");
   attachAppClickListener(appRoot, handleAppClick);
   appRoot?.addEventListener("input", handleAppInput);
   document.addEventListener("wordstrike:mode-exit", (event) => {
-    if (event?.detail?.modeId === MODE_IDS.FLOW) modeLifecycle.leave();
+    if (event?.detail?.modeId !== MODE_IDS.FLOW) return;
+    modeLifecycle.leave();
+    // Escape/Flow Exit should not leave an abandoned live run as a Back entry.
+    // A genuine popstate already owns its destination and must not be changed.
+    if (routeNavigation?.current()?.modeId === MODE_IDS.FLOW) {
+      routeNavigation.navigate("modes", { replace: true });
+    }
   });
   document.addEventListener("wordstrike:open-leaderboard", (event) => {
     const boardKey = event?.detail?.boardKey;
@@ -1964,6 +2019,18 @@ async function bootstrap() {
     const returnState = pendingLeaderboardReturn;
     pendingLeaderboardReturn = null;
     openLeaderboardReturn(returnState);
+  } else if (!appState.devMode && routeNavigation.isMounted()
+    && routeNavigation.current().kind !== "title") {
+    renderCurrentScreen();
+    const initialRoute = routeNavigation.current();
+    if (initialRoute.modeId === MODE_IDS.FLOW) {
+      // Flow's existing direct-link bootstrap owns the one initial launch.
+      // Mount its return surface without clobbering ?mode=flow.
+      routeNavigationRestoring = true;
+      try { openModeSelect(); } finally { routeNavigationRestoring = false; }
+    } else {
+      restorePublicRoute(initialRoute);
+    }
   } else {
     renderCurrentScreen();
     openAutomaticTutorial("general", (choice) => {

@@ -224,7 +224,8 @@ const [mainSource, keyboardSource, uiSource] = await Promise.all([
 assert.match(mainSource, /speedTestResultsReadyAt/);
 assert.match(keyboardSource, /isResultsInputBlocked\(/);
 assert.match(mainSource, /"speed-test": \(\) => \{/);
-assert.match(mainSource, /return modeLifecycle\.enter\(modeId\)/);
+assert.match(mainSource, /const accepted = modeLifecycle\.enter\(modeId\)/);
+assert.match(mainSource, /if \(accepted && modeId !== MODE_IDS\.FLOW\) rememberPublicRoute\(modeId\)/);
 assert.match(mainSource, /appState\.speedTestConfigId = DEFAULT_SPEED_TEST_CONFIG_ID/);
 assert.match(mainSource, /change:\s*\(\) => resetSpeedTestAttempt\("change-test"\)/);
 assert.match(mainSource, /const attemptSeed = getAttemptSeed\(\)/);

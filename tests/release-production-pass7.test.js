@@ -133,7 +133,8 @@ assert.match(flowLoader, /FLOW_OFFLINE_CACHE_BATCH_SIZE = 16/);
 // Explicit duplication protection belongs to the lifecycle/launcher, not a
 // competing capture-phase document listener.
 assert.match(main, /createModeLifecycle\(\{/);
-assert.match(main, /return modeLifecycle\.enter\(modeId\)/);
+assert.match(main, /const accepted = modeLifecycle\.enter\(modeId\)/);
+assert.match(main, /if \(accepted && modeId !== MODE_IDS\.FLOW\) rememberPublicRoute\(modeId\)/);
 assert.match(main, /"flow-release": \(\) => \{/);
 assert.match(main, /void launchPublicFlow\(\)/);
 assert.match(flowLoader, /export function launchPublicFlow\(\)/);

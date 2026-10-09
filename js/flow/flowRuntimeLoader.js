@@ -5,7 +5,7 @@ import {
 
 const RELEASE_FLAG = "flowRelease";
 const FLOW_RELEASE_VERSION = 41;
-const FLOW_RELEASE_CACHE_NAME = "wordstrike-flow-release-v44";
+const FLOW_RELEASE_CACHE_NAME = "wordstrike-flow-release-v45";
 const FLOW_OFFLINE_CACHE_BATCH_SIZE = 16;
 const FLOW_RELEASE_QUERY_KEYS = Object.freeze([
   "mode",
@@ -30,7 +30,7 @@ const FLOW_RELEASE_QUERY_KEYS = Object.freeze([
 ]);
 
 const FLOW_RELEASE_ASSETS = Object.freeze([
-  "./js/flow/flowRuntimeLoader.js?v=20260925s",
+  "./js/flow/flowRuntimeLoader.js?v=20261009p2",
   "./js/leaderboardReturnState.js",
   "./js/pendingResultSubmission.js",
   "./js/submissionOutbox.js",
@@ -196,7 +196,8 @@ export function stripFlowReleaseUrl(locationLike = globalThis.location) {
 }
 
 function replaceUrl(url) {
-  globalThis.history?.replaceState?.(null, "", url.href || String(url));
+  // Keep the host router marker and unrelated auth/navigation state intact.
+  globalThis.history?.replaceState?.(globalThis.history?.state ?? null, "", url.href || String(url));
 }
 
 let runtimeReady = Promise.resolve(false);
