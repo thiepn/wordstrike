@@ -294,6 +294,9 @@ function installReleaseExitCleanup() {
     if (!seenActive || cleaned || !document.querySelector(".mode-select-screen")) return;
     cleaned = true;
     replaceUrl(stripFlowReleaseUrl());
+    document.dispatchEvent(new CustomEvent("wordstrike:mode-exit", {
+      detail: { modeId: "flow" },
+    }));
     releaseExitObserver?.disconnect?.();
     releaseExitObserver = null;
   };
