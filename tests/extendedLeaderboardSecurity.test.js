@@ -7,7 +7,7 @@ import { dailySubmission } from "./leaderboardSubmissionFixtures.js";
 const activeBoards = [
   "campaign-highest-level-v1", "typing-60s-english200-v1",
   "typing-15s-english200-v1", "endless-v1", "arcade-rush-v1",
-  "flow-standard-v1",
+  "flow-standard-3m-v1",
 ];
 assert.deepEqual(PUBLIC_BOARD_KEYS, activeBoards);
 assert.deepEqual(SUPPORTED_BOARD_KEYS, activeBoards);
