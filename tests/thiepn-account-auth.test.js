@@ -8,8 +8,9 @@ const presentationSource = fs.readFileSync(
   "utf8",
 );
 
-test("THIEPN Account uses the shared Supabase project storage key", () => {
-  assert.match(source, /SUPABASE_AUTH_STORAGE_KEY\s*=\s*["']sb-hycegznamzjhwinegaai-auth-token["']/);
+test("Wordstrike uses its own auth storage key on the shared thiepn.dev origin", () => {
+  assert.match(source, /SUPABASE_AUTH_STORAGE_KEY\\s*=\\s*["']wordstrike:auth:session:v2["']/);
+  assert.doesNotMatch(source, /SUPABASE_AUTH_STORAGE_KEY\\s*=\\s*["']sb-hycegznamzjhwinegaai-auth-token["']/);
 });
 
 test("WordStrike retires its app-specific auth key without promoting it", () => {
@@ -23,7 +24,7 @@ test("WordStrike retires its app-specific auth key without promoting it", () => 
   assert.doesNotMatch(source, /LEGACY_WORDSTRIKE_AUTH_STORAGE_KEY/);
 });
 
-test("shared THIEPN Account storage is configured on the Supabase client", () => {
+test("Wordstrike-owned storage is configured on its Supabase client", () => {
   assert.match(source, /storageKey:\s*SUPABASE_AUTH_STORAGE_KEY/);
   assert.match(source, /cleanupRetiredAuthStorage\(storage\)/);
   assert.match(source, /auth\.storage\s*=\s*authStorage/);
