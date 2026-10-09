@@ -228,41 +228,6 @@ export function launchPublicFlow() {
   return publicLaunchPromise;
 }
 
-function bindPublicModeEntry() {
-  if (typeof document === "undefined" || isFlowReleaseRoute()) return;
-  for (const button of document.querySelectorAll('button[data-mode-id="flow"]')) {
-    button.dataset.flowReleaseEntry = "true";
-  }
-}
-
-function installModeEntryRouting() {
-  if (typeof document === "undefined") return;
-  document.addEventListener("click", (event) => {
-    const target = event.target?.closest?.('button[data-mode-id="flow"]');
-    if (!target) return;
-    // During same-document launch the URL flips to the release route before
-    // Flow replaces Mode Select. Consume any duplicate click in that window so
-    // the button's normal onclick cannot recursively re-enter activateSelectedMode().
-    if (isFlowReleaseRoute()) {
-      event.preventDefault();
-      event.stopImmediatePropagation();
-      return;
-    }
-    event.preventDefault();
-    event.stopImmediatePropagation();
-    void launchPublicFlow();
-  }, true);
-
-  // The listener above is intentionally installed on release pages too so it
-  // survives a same-document Flow exit and can launch Flow again afterwards.
-  // The MutationObserver is only needed on non-release pages and stays disabled
-  // during active Flow typing to avoid waking on gameplay DOM mutations.
-  if (isFlowReleaseRoute()) return;
-  const app = document.querySelector("#app");
-  if (app) new MutationObserver(bindPublicModeEntry).observe(app, { childList: true });
-  bindPublicModeEntry();
-}
-
 function waitForModeSelect(timeoutMs = 5000) {
   if (typeof document === "undefined") return Promise.resolve(false);
   return new Promise((resolve) => {
@@ -330,7 +295,6 @@ function installReleaseExitCleanup() {
     if (!seenActive || cleaned || !document.querySelector(".mode-select-screen")) return;
     cleaned = true;
     replaceUrl(stripFlowReleaseUrl());
-    bindPublicModeEntry();
     releaseExitObserver?.disconnect?.();
     releaseExitObserver = null;
   };
