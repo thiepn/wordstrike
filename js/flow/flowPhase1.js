@@ -88,7 +88,8 @@ const PUBLIC_SESSION_TICK_MS = 125;
 
 function refreshFlowPlanFromLocation(locationLike = globalThis.location) {
   const params = new URLSearchParams(locationLike?.search || "");
-  resolvedRunPlan = params.get("flowRelease") === "1"
+  resolvedRunPlan = params.get("mode") === "flow"
+    && (params.get("flowRelease") === "1" || params.get("dev") !== "1")
     ? resolveFlowStreamPlanV3(params)
     : resolveFlowRunPlan(params);
   resolvedSelection = resolvedRunPlan ? null : resolveFlowSelection(params);
@@ -98,7 +99,8 @@ function refreshFlowPlanFromLocation(locationLike = globalThis.location) {
 function resolveFlowRouteState(locationLike = globalThis.location) {
   const params = new URLSearchParams(locationLike?.search || "");
   developerFlowRequested = params.get("dev") === "1" && params.get("mode") === "flow";
-  publicFlowRequested = params.get("flowRelease") === "1" && params.get("mode") === "flow";
+  publicFlowRequested = params.get("mode") === "flow"
+    && (params.get("flowRelease") === "1" || params.get("dev") !== "1");
   refreshFlowPlanFromLocation(locationLike);
   return developerFlowRequested || publicFlowRequested;
 }
@@ -171,8 +173,8 @@ function updatePublicFlowUrl({
   const normalizedSessionPreset = normalizeFlowV3SessionPreset(sessionPreset);
   const url = new URL(globalThis.location.href);
   url.searchParams.set("mode", "flow");
-  url.searchParams.set("flowRelease", "1");
-  url.searchParams.set("flowRun", "1");
+  url.searchParams.delete("flowRelease");
+  url.searchParams.delete("flowRun");
   url.searchParams.set("flowTheme", normalizedTheme);
   url.searchParams.set("flowLength", normalizedSessionPreset);
   savePreferredFlowTheme(normalizedTheme);
