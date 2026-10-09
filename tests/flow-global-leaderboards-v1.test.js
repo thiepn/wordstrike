@@ -159,7 +159,8 @@ const [phase1, migration, ui, outbox, pending] = await Promise.all([
 ]);
 
 assert.match(phase1, /session-flow-v3-/);
-assert.match(phase1, /createLeaderboardSubmissionService/);
+assert.match(phase1, /bindFlowSubmissionActions\(app, result\)/);
+assert.doesNotMatch(phase1, /createLeaderboardSubmissionService\(\)/, "Flow must not instantiate a private submission service");
 assert.match(phase1, /rerollPublicStream/);
 assert.match(ui, /leaderboard-select-flow/);
 assert.doesNotMatch(ui, /leaderboard-flow-select-quick/);
