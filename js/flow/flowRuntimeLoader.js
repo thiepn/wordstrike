@@ -449,6 +449,16 @@ async function importFlowRuntime() {
     // the same document re-enter Flow with a freshly resolved release seed/setup
     // instead of requiring a reload just to rerun module side effects.
     globalThis.window?.wordstrikeFlowPhase1?.activateFromLocation?.();
+    // All async presentation layers have been imported. A focused Mode Select
+    // button may now be detached; restore capture focus only for a newly
+    // mounted run and never override a setting/button already inside it.
+    if (release && typeof document !== "undefined") {
+      const screen = document.querySelector('.flow-phase1-screen[data-flow-view="run"]');
+      const capture = screen?.querySelector("[data-flow-input]");
+      if (capture && !screen.contains(document.activeElement)) {
+        capture.focus({ preventScroll: true });
+      }
+    }
   } finally {
     if (release) {
       removeTemporaryDeveloperFlag();
