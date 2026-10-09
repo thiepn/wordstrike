@@ -4,7 +4,12 @@ import {
   getResilientBrowserStorage,
 } from "./browserStorage.js";
 
-export const SUPABASE_AUTH_STORAGE_KEY = "sb-hycegznamzjhwinegaai-auth-token";
+// Never use Supabase's project-default storage key on thiepn.dev.
+// Diet Copilot also uses that key on this origin, so either app could
+// overwrite or clear the other's session during refresh or sign-out.
+// Do not migrate the shared refresh token: copying it between apps would
+// create two independent clients rotating the same credential.
+export const SUPABASE_AUTH_STORAGE_KEY = "wordstrike:auth:session:v2";
 export const RETIRED_WORDSTRIKE_AUTH_STORAGE_KEY = "wordstrike_supabase_auth_v1";
 
 let clientSingleton = null;

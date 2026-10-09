@@ -117,6 +117,10 @@ Local gameplay does **not** require an account.
 
 Players can optionally sign in with Google through Supabase to use global leaderboards. Online leaderboard accounts use a separate public username.
 
+Wordstrike persists its auth session under an app-specific browser storage key (`wordstrike:auth:session:v2`). This isolates it from Diet Copilot and other apps hosted on `thiepn.dev`, which previously used the same Supabase project's default session key. Existing players must **sign in once after this isolation update**; Wordstrike intentionally does not import or delete a token held in the shared legacy key because that might still belong to another app. Local gameplay progress and statistics are unaffected by this auth-only change.
+
+Wordstrike's current Google OAuth login is **not yet** the separate first-party Account OAuth/PKCE SSO flow at `account.thiepn.dev`; that migration requires an officially registered first-party OAuth client and app-owned callback.
+
 Current public leaderboard categories include:
 
 - Campaign
