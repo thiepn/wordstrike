@@ -84,7 +84,9 @@ import {
   updateGlobalSubmissionRegion,
   updateRenderedMenuSelection,
 } from "./ui.js";
-import { getAllModes, isModeEnabled, MODE_IDS } from "./modes.js";
+import { getAllModes, MODE_IDS } from "./modes.js";
+import { createModeLifecycle } from "./modeLifecycle.js";
+import { launchPublicFlow } from "./flow/flowRuntimeLoader.js?v=20260925s";
 import {
   beginCampaignSession,
   finalizeCampaignSession,
@@ -554,6 +556,7 @@ function getArcadeRushAttemptSeed() {
 }
 
 function openTitle() {
+  modeLifecycle.leave();
   unmountPracticeLab();
   cleanupCampaignAttempt("main-menu");
   changeScreen(Screens.TITLE);
@@ -620,6 +623,7 @@ function openLeaderboardReturn(returnState) {
 }
 
 function openModeSelect() {
+  modeLifecycle.leave();
   unmountPracticeLab();
   cleanupCampaignAttempt("mode-select");
   changeScreen(Screens.MODE_SELECT);
@@ -1255,39 +1259,38 @@ async function copyPlayerId() {
   return copied;
 }
 
+// All public modes enter through the same host-owned route table. Flow owns
+// its typing runtime, Practice owns its experiment stack, and neither installs
+// another listener over the Mode Select buttons.
+const modeLifecycle = createModeLifecycle({
+  resolveMode: (id) => getAllModes().find((mode) => mode.id === id),
+  handlers: {
+    "practice-lab": () => openPracticeLab(),
+    "level-select": () => {
+      openLevelSelect("mode-select");
+      if (!isCampaignEstablished(appState.save)) {
+        openAutomaticTutorial("campaign", (choice) => {
+          if (choice === "primary") startLevel(1, "level-select");
+        }, { primaryLabel: "START LEVEL 1" });
+      }
+    },
+    "speed-test": () => {
+      appState.speedTestConfigId = DEFAULT_SPEED_TEST_CONFIG_ID;
+      if (!openAutomaticTutorial("typing", () => resetSpeedTestAttempt("mode-select"))) {
+        resetSpeedTestAttempt("mode-select");
+      }
+    },
+    "endless-ready": () => openEndlessReady("mode-select"),
+    "arcade-rush-ready": () => openArcadeRushReady("mode-select"),
+    "flow-release": () => {
+      void launchPublicFlow();
+      return true;
+    },
+  },
+});
+
 function activateSelectedMode(modeId = getAllModes()[appState.modeSelection]?.id) {
-  if (modeId === MODE_IDS.PRACTICE) return openPracticeLab();
-  if (!isModeEnabled(modeId)) return false;
-  const route = getAllModes().find((mode) => mode.id === modeId)?.route;
-  if (route === "level-select") {
-    openLevelSelect("mode-select");
-    // A missing onboarding flag must never make an established Campaign look
-    // reset. Progress or a prior placement is stronger evidence than tutorial
-    // storage, so automatic onboarding is only for genuinely new players.
-    if (!isCampaignEstablished(appState.save)) {
-      openAutomaticTutorial("campaign", (choice) => {
-        if (choice === "primary") startLevel(1, "level-select");
-      }, { primaryLabel: "START LEVEL 1" });
-    }
-  }
-  else if (route === "speed-test") {
-    appState.speedTestConfigId = DEFAULT_SPEED_TEST_CONFIG_ID;
-    if (!openAutomaticTutorial("typing", () => resetSpeedTestAttempt("mode-select"))) {
-      resetSpeedTestAttempt("mode-select");
-    }
-  }
-  else if (route === "endless-ready") openEndlessReady("mode-select");
-  else if (route === "arcade-rush-ready") openArcadeRushReady("mode-select");
-  else if (route === "flow-release") {
-    // Flow owns its release bootstrap in the capture-phase runtime loader.
-    // Reuse that exact entry path so keyboard activation and pointer activation
-    // cannot diverge into different lifecycle behavior.
-    const flowEntry = document.querySelector('button[data-mode-id="flow"]');
-    if (!flowEntry) return false;
-    flowEntry.click();
-  }
-  else return false;
-  return true;
+  return modeLifecycle.enter(modeId);
 }
 
 function toggleSetting(key) {
@@ -1936,6 +1939,9 @@ async function bootstrap() {
   const appRoot = document.querySelector("#app");
   attachAppClickListener(appRoot, handleAppClick);
   appRoot?.addEventListener("input", handleAppInput);
+  document.addEventListener("wordstrike:mode-exit", (event) => {
+    if (event?.detail?.modeId === MODE_IDS.FLOW) modeLifecycle.leave();
+  });
   document.addEventListener("wordstrike:open-leaderboard", (event) => {
     const boardKey = event?.detail?.boardKey;
     if (Object.values(LEADERBOARD_BOARDS).includes(boardKey)) openLeaderboardBoard(boardKey);

@@ -122,7 +122,8 @@ function paramsFor(locationLike = globalThis.location) {
 
 export function isFlowReleaseRoute(locationLike = globalThis.location) {
   const params = paramsFor(locationLike);
-  return params.get(RELEASE_FLAG) === "1" && params.get("mode") === "flow";
+  return params.get("mode") === "flow"
+    && (params.get(RELEASE_FLAG) === "1" || params.get("dev") !== "1");
 }
 
 export function isFlowDeveloperRoute(locationLike = globalThis.location) {
@@ -147,13 +148,12 @@ function releaseUrl(locationLike = globalThis.location) {
   const url = new URL(href);
   url.searchParams.delete("dev");
   url.searchParams.set("mode", "flow");
-  url.searchParams.set(RELEASE_FLAG, "1");
-  url.searchParams.set("flowRun", "1");
-  url.searchParams.set("flowUi", "1");
-  url.searchParams.set("flowUx", "1");
-  url.searchParams.set("flowModifiers", "0");
-  url.searchParams.set("flowAdaptive", "0");
-  url.searchParams.set("flowIntegration", "1");
+  // Canonical public URLs describe user intent, not internal phase gates.
+  // Legacy bookmarked phase flags are accepted but removed on navigation.
+  for (const key of [
+    RELEASE_FLAG, "flowRun", "flowUi", "flowUx",
+    "flowModifiers", "flowAdaptive", "flowIntegration",
+  ]) url.searchParams.delete(key);
   for (const key of [
     "flowCategory",
     "flowDifficulty",
@@ -190,9 +190,8 @@ export function stripFlowReleaseUrl(locationLike = globalThis.location) {
   const href = locationLike?.href || globalThis.location?.href || "http://localhost/";
   const url = new URL(href);
   for (const key of FLOW_RELEASE_QUERY_KEYS) url.searchParams.delete(key);
-  if (url.searchParams.get("dev") === "1" && isFlowReleaseRoute(locationLike)) {
-    url.searchParams.delete("dev");
-  }
+  // Exiting a Flow deep link must not leave a transient developer flag.
+  if (paramsFor(locationLike).get("mode") === "flow") url.searchParams.delete("dev");
   return url.href;
 }
 
@@ -213,7 +212,7 @@ function runFlowRuntime() {
   return request;
 }
 
-function launchPublicFlow() {
+export function launchPublicFlow() {
   if (publicLaunchPromise) return publicLaunchPromise;
   const next = releaseUrl();
   // Flow used to force a full document navigation here. That made the main app
@@ -226,41 +225,6 @@ function launchPublicFlow() {
   });
   publicLaunchPromise = launch;
   return publicLaunchPromise;
-}
-
-function bindPublicModeEntry() {
-  if (typeof document === "undefined" || isFlowReleaseRoute()) return;
-  for (const button of document.querySelectorAll('button[data-mode-id="flow"]')) {
-    button.dataset.flowReleaseEntry = "true";
-  }
-}
-
-function installModeEntryRouting() {
-  if (typeof document === "undefined") return;
-  document.addEventListener("click", (event) => {
-    const target = event.target?.closest?.('button[data-mode-id="flow"]');
-    if (!target) return;
-    // During same-document launch the URL flips to the release route before
-    // Flow replaces Mode Select. Consume any duplicate click in that window so
-    // the button's normal onclick cannot recursively re-enter activateSelectedMode().
-    if (isFlowReleaseRoute()) {
-      event.preventDefault();
-      event.stopImmediatePropagation();
-      return;
-    }
-    event.preventDefault();
-    event.stopImmediatePropagation();
-    void launchPublicFlow();
-  }, true);
-
-  // The listener above is intentionally installed on release pages too so it
-  // survives a same-document Flow exit and can launch Flow again afterwards.
-  // The MutationObserver is only needed on non-release pages and stays disabled
-  // during active Flow typing to avoid waking on gameplay DOM mutations.
-  if (isFlowReleaseRoute()) return;
-  const app = document.querySelector("#app");
-  if (app) new MutationObserver(bindPublicModeEntry).observe(app, { childList: true });
-  bindPublicModeEntry();
 }
 
 function waitForModeSelect(timeoutMs = 5000) {
@@ -292,12 +256,6 @@ function waitForModeSelect(timeoutMs = 5000) {
     const timer = globalThis.setTimeout?.(() => finish(false), timeoutMs);
     inspect();
   });
-}
-
-function removeTemporaryDeveloperFlag() {
-  const url = new URL(globalThis.location.href);
-  url.searchParams.delete("dev");
-  replaceUrl(url);
 }
 
 function installReleaseBootstrapGuard() {
@@ -336,7 +294,9 @@ function installReleaseExitCleanup() {
     if (!seenActive || cleaned || !document.querySelector(".mode-select-screen")) return;
     cleaned = true;
     replaceUrl(stripFlowReleaseUrl());
-    bindPublicModeEntry();
+    document.dispatchEvent(new CustomEvent("wordstrike:mode-exit", {
+      detail: { modeId: "flow" },
+    }));
     releaseExitObserver?.disconnect?.();
     releaseExitObserver = null;
   };
@@ -403,9 +363,6 @@ async function importFlowRuntime() {
     replaceUrl(normalized);
     await waitForModeSelect();
     clearReleaseBootstrapGuard = installReleaseBootstrapGuard();
-    const temporary = new URL(globalThis.location.href);
-    temporary.searchParams.set("dev", "1");
-    replaceUrl(temporary);
   }
 
   try {
@@ -420,7 +377,7 @@ async function importFlowRuntime() {
     ]);
 
     const params = new URLSearchParams(globalThis.location.search);
-    if (params.get("flowUi") === "1") {
+    if (release || params.get("flowUi") === "1") {
       const [keyboardGuard] = await Promise.all([
         import("./flowUiPhase7KeyboardGuard.js?v=20260923a"),
         import("./flowUiPhase7.js?v=20260923a"),
@@ -432,13 +389,13 @@ async function importFlowRuntime() {
       await Promise.resolve();
       keyboardGuard.refreshFlowUiGuard?.();
       await import("./flowUiPhase7Polish.js?v=20260923a");
-      if (params.get("flowUx") === "1") {
+      if (release || params.get("flowUx") === "1") {
         await import("./flowUxPhase8.js?v=20260925g");
         await Promise.resolve();
         const extensions = [];
         if (params.get("flowModifiers") === "1") extensions.push(import("./flowModifiersPhase9.js?v=20260923a"));
         if (params.get("flowAdaptive") === "1") extensions.push(import("./flowAdaptivePhase10.js?v=20260923a"));
-        if (params.get("flowIntegration") === "1") extensions.push(import("./flowIntegrationPhase11.js?v=20260923b"));
+        if (release || params.get("flowIntegration") === "1") extensions.push(import("./flowIntegrationPhase11.js?v=20260923b"));
         await Promise.all(extensions);
       }
     }
@@ -470,7 +427,6 @@ async function importFlowRuntime() {
     }
   } finally {
     if (release) {
-      removeTemporaryDeveloperFlag();
       clearReleaseBootstrapGuard?.();
     }
   }
@@ -480,7 +436,8 @@ async function importFlowRuntime() {
 }
 
 const offlineReady = scheduleFlowOfflineCacheWarmup();
-installModeEntryRouting();
+// Main's shared mode lifecycle now owns pointer and keyboard entry.
+// Legacy direct links still bootstrap via the route-aware runtime.
 runtimeReady = runFlowRuntime();
 
 if (globalThis.window) {

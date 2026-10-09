@@ -9,12 +9,10 @@ import {
 } from "./flowProgression.js?v=20260923a";
 
 const params = new URLSearchParams(globalThis.location?.search || "");
-const enabled = params.get("dev") === "1"
-  && params.get("mode") === "flow"
-  && params.get("flowRun") === "1"
-  && params.get("flowUi") === "1"
-  && params.get("flowUx") === "1"
-  && params.get("flowIntegration") === "1";
+const enabled = params.get("mode") === "flow"
+  && ((params.get("dev") !== "1" || params.get("flowRelease") === "1")
+    || (params.get("flowRun") === "1" && params.get("flowUi") === "1"
+      && params.get("flowUx") === "1" && params.get("flowIntegration") === "1"));
 
 let decoratedScreen = null;
 let trackedStartedAt = null;

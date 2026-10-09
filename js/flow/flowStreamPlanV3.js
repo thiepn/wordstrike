@@ -187,7 +187,8 @@ export function createFlowStreamPlanV3({
 
 export function resolveFlowStreamPlanV3(searchLike = "") {
   const params = searchLike instanceof URLSearchParams ? searchLike : new URLSearchParams(searchLike);
-  if (params.get("flowRelease") !== "1" || params.get("mode") !== "flow" || params.get("flowRun") !== "1") {
+  if (params.get("mode") !== "flow"
+    || (params.get("dev") === "1" && params.get("flowRelease") !== "1")) {
     return null;
   }
   return createFlowStreamPlanV3({

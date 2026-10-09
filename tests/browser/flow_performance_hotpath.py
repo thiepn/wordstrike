@@ -63,7 +63,7 @@ def certify_public_entry(browser_type, base, evidence):
     result = page.evaluate("""entry => ({
       sameDocument: window.__flowEntryDocumentMarker === entry,
       elapsedMs: performance.now() - window.__flowEntryStartedAt,
-      releaseRoute: new URL(location.href).searchParams.get('flowRelease') === '1',
+      releaseRoute: new URL(location.href).searchParams.get('mode') === 'flow'\n        && !new URL(location.href).searchParams.has('flowRelease')\n        && !new URL(location.href).searchParams.has('dev'),
       ready: Boolean(window.wordstrikeFlowPhase1?.isActive?.()),
       gameplayVersion: window.wordstrikeFlowPhase1?.getRunPlan?.()?.gameplayVersion,
     })""", entry)

@@ -30,7 +30,8 @@ assert.match(source.loader, /await Promise\.all\(\[/);
 assert.match(source.loader, /activateFromLocation/);
 assert.match(source.loader, /integrationBootstrap\.applyFlowIntegrationDefaults\?\.\(\)/, "same-document re-entry must replay persisted Flow setup defaults");
 assert.match(source.loader, /keyboardGuard\.refreshFlowUiGuard\?\.\(\)/, "Phase 7 setup must be explicitly refreshed after parallel module load");
-assert.match(source.loader, /new MutationObserver\(bindPublicModeEntry\)\.observe\(app, \{ childList: true \}\)/);
+assert.doesNotMatch(source.loader, /installModeEntryRouting\(|bindPublicModeEntry\(/, "Flow must not intercept host-owned mode selection");
+assert.doesNotMatch(source.loader, /temporary\.searchParams\.set\("dev", "1"\)/, "Public Flow must not impersonate developer mode");
 
 for (const key of ["migration", "ui7", "keyboard", "modifiers", "adaptive", "integration"]) {
   assert.doesNotMatch(source[key], /observe\(app, \{ childList: true, subtree: true \}\)/, `${key} must not wake on every live Flow subtree mutation`);

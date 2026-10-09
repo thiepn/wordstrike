@@ -5,9 +5,8 @@ import {
 import { FLOW_SESSION_LENGTHS } from "./flowConfig.js";
 
 const params = new URLSearchParams(globalThis.location?.search || "");
-const enabled = params.get("dev") === "1"
-  && params.get("mode") === "flow"
-  && params.get("flowRelease") === "1";
+const enabled = params.get("mode") === "flow"
+  && (params.get("flowRelease") === "1" || params.get("dev") !== "1");
 
 const LENGTH_ORDER = Object.freeze(["quick", "standard", "long"]);
 const LENGTH_COPY = Object.freeze({
@@ -52,13 +51,10 @@ function normalizeLength(value) {
 function publicRunUrl({ length = selectedLength, newSeed = false } = {}) {
   const url = new URL(globalThis.location.href);
   url.searchParams.set("mode", "flow");
-  url.searchParams.set("flowRelease", "1");
-  url.searchParams.set("flowRun", "1");
-  url.searchParams.set("flowUi", "1");
-  url.searchParams.set("flowUx", "1");
-  url.searchParams.set("flowModifiers", "0");
-  url.searchParams.set("flowAdaptive", "0");
-  url.searchParams.set("flowIntegration", "1");
+  for (const key of [
+    "flowRelease", "flowRun", "flowUi", "flowUx",
+    "flowModifiers", "flowAdaptive", "flowIntegration",
+  ]) url.searchParams.delete(key);
   url.searchParams.set("flowLength", normalizeLength(length));
 
   for (const key of [
