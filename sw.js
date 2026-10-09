@@ -1,5 +1,5 @@
 const CACHE_PREFIX = "wordstrike-pwa-";
-const CACHE_NAME = CACHE_PREFIX + "v109-auth-session-isolation-20261009";
+const CACHE_NAME = CACHE_PREFIX + "v110-unified-mode-lifecycle-20261009";
 const APP_SHELL = [
   "./js/practiceLab/practiceAssessmentInput.js",
   "./js/practiceLab/practiceDurableManifest.js",
@@ -304,6 +304,7 @@ const APP_SHELL = [
   "./js/lifetimeStatistics.js",
   "./js/main.js",
   "./js/main.js?v=20261009a",
+  "./js/modeLifecycle.js",
   "./js/mobileInputAdapter.js",
   "./js/modeCustomization.js",
   "./js/modeCustomizationPresentation.js",
@@ -879,6 +880,7 @@ const CORE_SHELL = Object.freeze([
   "./styles/ui-system.css",
   "./js/main.js",
   "./js/main.js?v=20261009a",
+  "./js/modeLifecycle.js",
   "./js/authService.js",
   "./js/supabaseClient.js",
 ]);
