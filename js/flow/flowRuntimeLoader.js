@@ -213,7 +213,7 @@ function runFlowRuntime() {
   return request;
 }
 
-function launchPublicFlow() {
+export function launchPublicFlow() {
   if (publicLaunchPromise) return publicLaunchPromise;
   const next = releaseUrl();
   // Flow used to force a full document navigation here. That made the main app
@@ -480,7 +480,8 @@ async function importFlowRuntime() {
 }
 
 const offlineReady = scheduleFlowOfflineCacheWarmup();
-installModeEntryRouting();
+// Main's shared mode lifecycle now owns pointer and keyboard entry.
+// Legacy direct links still bootstrap via the route-aware runtime.
 runtimeReady = runFlowRuntime();
 
 if (globalThis.window) {
