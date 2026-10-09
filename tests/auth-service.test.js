@@ -98,3 +98,118 @@ assert.equal(resilientService.getAuthState().status, "signed-in");
 failNextGetSession = true;
 assert.equal((await resilientService.initializeAuth()).status, "signed-in");
 assert.equal(resilientService.getAuthState().user.id, "user-1");
+
+function createPendingSessionClient() {
+  let resolveSession;
+  let rejectSession;
+  let listener = null;
+  const sessionRequest = new Promise((resolve, reject) => {
+    resolveSession = resolve;
+    rejectSession = reject;
+  });
+  return {
+    client: {
+      auth: {
+        onAuthStateChange(callback) {
+          listener = callback;
+          return { data: { subscription: { unsubscribe() {} } } };
+        },
+        getSession() { return sessionRequest; },
+      },
+    },
+    emit(event, session) { listener?.(event, session); },
+    resolve(session) { resolveSession({ data: { session }, error: null }); },
+    reject(error) { rejectSession(error); },
+  };
+}
+
+const freshSession = { user: { id: "fresh" }, access_token: "new-token" };
+const olderSession = { user: { id: "old" }, access_token: "old-token" };
+
+// A slow getSession() must not overwrite a newer successful sign-in.
+{
+  const mock = createPendingSessionClient();
+  const auth = createAuthService({ getClient: () => mock.client });
+  const loading = auth.initializeAuth();
+  mock.emit("SIGNED_IN", freshSession);
+  mock.resolve(null);
+  await loading;
+  assert.equal(auth.getAuthState().status, "signed-in");
+  assert.equal(auth.getAuthState().session.access_token, "new-token");
+}
+
+// INITIAL_SESSION may restore a valid session before getSession() finishes.
+{
+  const mock = createPendingSessionClient();
+  const auth = createAuthService({ getClient: () => mock.client });
+  const loading = auth.initializeAuth();
+  mock.emit("INITIAL_SESSION", freshSession);
+  mock.resolve(null);
+  await loading;
+  assert.equal(auth.getAuthState().user.id, "fresh");
+}
+
+// Token refresh events must not be replaced with a stale token snapshot.
+{
+  const mock = createPendingSessionClient();
+  const auth = createAuthService({ getClient: () => mock.client });
+  const loading = auth.initializeAuth();
+  mock.emit("TOKEN_REFRESHED", freshSession);
+  mock.resolve(olderSession);
+  await loading;
+  assert.equal(auth.getAuthState().session.access_token, "new-token");
+}
+
+// A confirmed sign-out must not be undone by a previous session lookup.
+{
+  const mock = createPendingSessionClient();
+  const auth = createAuthService({ getClient: () => mock.client });
+  const loading = auth.initializeAuth();
+  mock.emit("SIGNED_OUT", null);
+  mock.resolve(olderSession);
+  await loading;
+  assert.equal(auth.getAuthState().status, "signed-out");
+  assert.equal(auth.getAuthState().user, null);
+}
+
+// Transient null events do not mean the refresh token is gone.
+{
+  const mock = createPendingSessionClient();
+  const auth = createAuthService({ getClient: () => mock.client });
+  const loading = auth.initializeAuth();
+  mock.emit("TOKEN_REFRESHED", null);
+  mock.resolve(freshSession);
+  await loading;
+  assert.equal(auth.getAuthState().status, "signed-in");
+}
+
+// Failure of an older initialization cannot demote a fresh sign-in.
+{
+  const mock = createPendingSessionClient();
+  const auth = createAuthService({ getClient: () => mock.client });
+  const loading = auth.initializeAuth();
+  mock.emit("SIGNED_IN", freshSession);
+  mock.reject(new Error("transient session lookup failure"));
+  await loading;
+  assert.equal(auth.getAuthState().session.access_token, "new-token");
+}
+
+// Cold-start restoration still works normally with no intervening event.
+{
+  const mock = createPendingSessionClient();
+  const auth = createAuthService({ getClient: () => mock.client });
+  const loading = auth.initializeAuth();
+  mock.emit("INITIAL_SESSION", null);
+  mock.resolve(olderSession);
+  await loading;
+  assert.equal(auth.getAuthState().user.id, "old");
+}
+
+// If both browser storages are blocked, client creation may throw;
+// initialization must report an unavailable session rather than reject.
+{
+  const auth = createAuthService({ getClient: () => { throw new Error("storage blocked"); } });
+  const result = await auth.initializeAuth();
+  assert.equal(result.status, "error");
+}
+console.log("Race-safe reload, refresh and sign-out ordering tests passed.");

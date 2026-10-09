@@ -30,25 +30,36 @@ export function createAuthService({
     session?.user ? session : null,
   );
 
+  // Auth events are authoritative over a getSession() request started earlier.
+  // Without this revision guard, a late null/stale result can log out a user
+  // who just signed in, or resurrect a session after an explicit sign-out.
+  let sessionEventRevision = 0;
   const publishSessionEvent = (event, session) => {
-    if (session?.user) return publish(stateFromSession(session));
-    if (event === "SIGNED_OUT") return publish(freezeState("signed-out"));
-    // INITIAL_SESSION can arrive before getSession() resolves and transient auth
-    // events may omit a session. Never turn a healthy restored session into a
-    // visible logout unless Supabase explicitly emitted SIGNED_OUT.
-    if (state.session?.user) return state;
-    if (event === "INITIAL_SESSION") return state;
-    return publish(freezeState("signed-out"));
+    if (event === "SIGNED_OUT") {
+      sessionEventRevision += 1;
+      return publish(freezeState("signed-out"));
+    }
+    if (session?.user) {
+      sessionEventRevision += 1;
+      return publish(stateFromSession(session));
+    }
+    // A null INITIAL_SESSION or transient event is not an authoritative logout.
+    // getSession() resolves the cold-start signed-out state if no newer event wins.
+    return state;
   };
 
   const initialize = () => {
     if (initializationPromise) return initializationPromise;
     const preservedSession = state.session?.user ? state.session : null;
     if (!preservedSession) publish(freezeState("loading"));
+    const revisionAtStart = sessionEventRevision;
     const request = (async () => {
-      const client = getClient();
-      if (!client?.auth) return publish(freezeState("unavailable"));
       try {
+        const client = getClient();
+        if (!client?.auth) {
+          if (sessionEventRevision !== revisionAtStart) return state;
+          return publish(freezeState("unavailable"));
+        }
         if (!authSubscription) {
           const response = client.auth.onAuthStateChange?.((event, session) => {
             publishSessionEvent(event, session);
@@ -56,9 +67,11 @@ export function createAuthService({
           authSubscription = response?.data?.subscription ?? response?.subscription ?? null;
         }
         const { data, error } = await client.auth.getSession();
+        // Supabase can emit INITIAL_SESSION, SIGNED_IN, TOKEN_REFRESHED, or
+        // SIGNED_OUT while getSession is still pending. Never overwrite the
+        // event's newer state with the request's older snapshot.
+        if (sessionEventRevision !== revisionAtStart) return state;
         if (error) {
-          // A network/service failure is not proof that the browser session was
-          // revoked. Keep a restored session usable and retry on the next init.
           if (state.session?.user || preservedSession?.user) {
             return publish(stateFromSession(state.session?.user ? state.session : preservedSession));
           }
@@ -66,6 +79,8 @@ export function createAuthService({
         }
         return publish(stateFromSession(data?.session ?? null));
       } catch {
+        if (sessionEventRevision !== revisionAtStart) return state;
+        // A transient network/storage exception is not a confirmed logout.
         if (state.session?.user || preservedSession?.user) {
           return publish(stateFromSession(state.session?.user ? state.session : preservedSession));
         }
