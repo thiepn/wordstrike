@@ -350,7 +350,9 @@ assert.deepEqual(validateLeaderboardReturnState({
 const mainSource = await readRoot("js", "main.js");
 const appControllerSource = await readRoot("js", "arcadeRushAppController.js");
 const clickRoutingSource = await readRoot("js", "appClickRouting.js");
-assert.match(mainSource, /route === "arcade-rush-ready"\) openArcadeRushReady\("mode-select"\)/);
+assert.match(mainSource, /"arcade-rush-ready": \(\) => openArcadeRushReady\("mode-select"\)/);
+assert.match(mainSource, /resolveMode: \(id\) => getAllModes\(\)\.find/);
+assert.equal(getAllModes().some(({ id }) => id === MODE_IDS.ARCADE_RUSH), false, "retired mode must remain unreachable from the public lifecycle");
 assert.match(mainSource, /function startArcadeRush\(/);
 assert.doesNotMatch(mainSource, /function openArcadeRushReady[\s\S]{0,140}if \(!appState\.devMode\)/);
 assert.doesNotMatch(mainSource, /function startArcadeRush[\s\S]{0,140}if \(!appState\.devMode\)/);
