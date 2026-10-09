@@ -21,15 +21,20 @@ function memoryStorage(initial = {}) {
   };
 }
 
-test("WORDSTRIKE uses the shared THIEPN Account storage key", () => {
-  assert.equal(SUPABASE_AUTH_STORAGE_KEY, "sb-hycegznamzjhwinegaai-auth-token");
+const DIET_AUTH_STORAGE_KEY = "sb-hycegznamzjhwinegaai-auth-token";
+
+test("WORDSTRIKE uses an app-scoped THIEPN Auth session key", () => {
+  assert.equal(SUPABASE_AUTH_STORAGE_KEY, "wordstrike:auth:session:v2");
+  assert.notEqual(SUPABASE_AUTH_STORAGE_KEY, DIET_AUTH_STORAGE_KEY);
   assert.equal(RETIRED_WORDSTRIKE_AUTH_STORAGE_KEY, "wordstrike_supabase_auth_v1");
 });
 
 test("retired WORDSTRIKE auth artifacts are deleted without being promoted", () => {
-  const shared = JSON.stringify({ access_token: "shared" });
+  const wordstrikeSession = JSON.stringify({ access_token: "wordstrike" });
+  const dietSession = JSON.stringify({ access_token: "diet" });
   const storage = memoryStorage({
-    [SUPABASE_AUTH_STORAGE_KEY]: shared,
+    [SUPABASE_AUTH_STORAGE_KEY]: wordstrikeSession,
+    [DIET_AUTH_STORAGE_KEY]: dietSession,
     [RETIRED_WORDSTRIKE_AUTH_STORAGE_KEY]: JSON.stringify({ access_token: "legacy" }),
     [`${RETIRED_WORDSTRIKE_AUTH_STORAGE_KEY}-code-verifier`]: "legacy-verifier",
     [`${RETIRED_WORDSTRIKE_AUTH_STORAGE_KEY}-user`]: "legacy-user",
@@ -37,14 +42,16 @@ test("retired WORDSTRIKE auth artifacts are deleted without being promoted", () 
   });
 
   assert.equal(cleanupRetiredAuthStorage(storage), true);
-  assert.equal(storage.getItem(SUPABASE_AUTH_STORAGE_KEY), shared);
+  assert.equal(storage.getItem(SUPABASE_AUTH_STORAGE_KEY), wordstrikeSession);
+  assert.equal(storage.getItem(DIET_AUTH_STORAGE_KEY), dietSession,
+    "retired Wordstrike cleanup must not alter Diet's active session");
   assert.equal(storage.getItem(RETIRED_WORDSTRIKE_AUTH_STORAGE_KEY), null);
   assert.equal(storage.getItem(`${RETIRED_WORDSTRIKE_AUTH_STORAGE_KEY}-code-verifier`), null);
   assert.equal(storage.getItem(`${RETIRED_WORDSTRIKE_AUTH_STORAGE_KEY}-user`), null);
   assert.equal(storage.getItem("wordstrike-game-progress"), "keep-me");
 });
 
-test("a retired session alone never creates a shared THIEPN session", () => {
+test("a retired Wordstrike session never creates a new app-scoped session", () => {
   const storage = memoryStorage({
     [RETIRED_WORDSTRIKE_AUTH_STORAGE_KEY]: JSON.stringify({ access_token: "legacy" }),
   });
