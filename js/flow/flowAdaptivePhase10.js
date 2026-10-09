@@ -4,7 +4,7 @@ import {
 } from "./flowAdaptive.js";
 
 const params = new URLSearchParams(globalThis.location?.search || "");
-const enabled = (params.get("dev") === "1" || params.get("flowRelease") === "1")
+const enabled = (params.get("dev") === "1" || params.get("flowRelease") === "1" || params.get("mode") === "flow")
   && params.get("mode") === "flow"
   && params.get("flowRun") === "1"
   && params.get("flowUi") === "1"
