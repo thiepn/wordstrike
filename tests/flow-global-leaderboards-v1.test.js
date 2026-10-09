@@ -22,7 +22,7 @@ import {
   validateLeaderboardRequest,
 } from "../supabase/functions/_shared/leaderboardRead.js";
 
-const accuracy = 900 / 930 * 100;
+const accuracy = Math.round((900 / 930 * 100) * 100) / 100; // serialized accuracy is two decimals
 const score = calculateFlowScoreV3({
   correctCharacters: 900,
   wpm: 60,
