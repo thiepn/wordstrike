@@ -16,10 +16,10 @@ const release = new URL(buildFlowReleaseUrl({
   search: "?flowCategory=academic&flowDifficulty=expert&flowModifierIds=sprint&flowWeaknesses=old",
 }));
 
-assert.equal(release.searchParams.get("flowRelease"), "1");
-assert.equal(release.searchParams.get("flowRun"), "1");
-assert.equal(release.searchParams.get("flowModifiers"), "0");
-assert.equal(release.searchParams.get("flowAdaptive"), "0");
+assert.equal(release.searchParams.get("mode"), "flow");
+for (const key of ["flowRelease", "flowRun", "flowUi", "flowUx", "flowModifiers", "flowAdaptive"]) {
+  assert.equal(release.searchParams.has(key), false, `canonical public route must omit ${key}`);
+}
 assert.equal(release.searchParams.get("flowLength"), "standard");
 
 const staleThemeRelease = new URL(buildFlowReleaseUrl({
