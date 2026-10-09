@@ -116,7 +116,8 @@ const [mainSource, adapterSource] = await Promise.all([
 ]);
 assert.doesNotMatch(mainSource, /function openArcadeRushReady[\s\S]{0,120}if \(!appState\.devMode\)/);
 assert.doesNotMatch(mainSource, /function startArcadeRush[\s\S]{0,120}if \(!appState\.devMode\)/);
-assert.match(mainSource, /route === "arcade-rush-ready"\) openArcadeRushReady\("mode-select"\)/);
+assert.match(mainSource, /"arcade-rush-ready": \(\) => openArcadeRushReady\("mode-select"\)/);
+assert.match(mainSource, /resolveMode: \(id\) => getAllModes\(\)\.find/);
 assert.match(mainSource, /prepareAutomaticResultSubmission\("arcade-rush", result\)/);
 assert.doesNotMatch(mainSource, /Screens\.DAILY_|MODE_IDS\.DAILY|openDailyReady|startDaily/);
 // Internal handlers survive for historical result/return-state compatibility;
