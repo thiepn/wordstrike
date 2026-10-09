@@ -59,7 +59,8 @@ assert.match(html, /rel="icon" type="image\/png" href="\.\/assets\/icons\/favico
 assert.match(html, /rel="apple-touch-icon" href="\.\/assets\/icons\/apple-touch-icon\.png"/);
 assert.equal((html.match(/rel="manifest"/g) || []).length, 1);
 assert.match(html, /href="\.\/manifest\.webmanifest"/);
-assert.match(html, /navigator\.serviceWorker\.register\("\.\/sw\.js"\)/);
+assert.match(html, /navigator\.serviceWorker\.register\("\.\/sw\.js"(?:,\s*\{[^}]*\})?\)/,
+  "PWA registration must use the scoped Wordstrike service worker");
 assert.doesNotMatch(html, /href="\/assets\//);
 
 const manifest = JSON.parse(await readFile(new URL("../manifest.webmanifest", import.meta.url), "utf8"));
