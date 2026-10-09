@@ -111,3 +111,47 @@ try {
 }
 
 console.log("Supabase browser client uses an explicit persistent auth storage adapter.");
+
+// Recreating the adapter (as happens on a page reload) must reuse the same
+// durable session instead of silently falling back to an in-memory client.
+{
+  const persistent = new Map();
+  const local = {
+    getItem: key => persistent.get(key) ?? null,
+    setItem: (key, value) => persistent.set(key, String(value)),
+    removeItem: key => persistent.delete(key),
+  };
+  const firstPage = createAuthStorageAdapter(local);
+  firstPage.setItem(SUPABASE_AUTH_STORAGE_KEY, JSON.stringify({ access_token: "persisted-token" }));
+  const reloadedPage = createAuthStorageAdapter(local);
+  assert.equal(
+    JSON.parse(reloadedPage.getItem(SUPABASE_AUTH_STORAGE_KEY)).access_token,
+    "persisted-token",
+  );
+}
+
+// A browser that blocks both storage APIs must not silently create an
+// apparently signed-in session that disappears at the next page load.
+{
+  const noStorageModule = await import(new URL(
+    `../js/supabaseClient.js?storage-blocked=${Date.now()}`, import.meta.url,
+  ));
+  const previousLocal = Object.getOwnPropertyDescriptor(globalThis, "localStorage");
+  const previousSession = Object.getOwnPropertyDescriptor(globalThis, "sessionStorage");
+  try {
+    for (const key of ["localStorage", "sessionStorage"]) {
+      Object.defineProperty(globalThis, key, {
+        configurable: true,
+        get() { throw new Error("Storage access denied"); },
+      });
+    }
+    assert.equal(noStorageModule.getSupabaseClient({ config: validConfig, sdk }), null);
+    assert.equal(calls.length, 1, "SDK must not run without persistent storage");
+  } finally {
+    if (previousLocal) Object.defineProperty(globalThis, "localStorage", previousLocal);
+    else delete globalThis.localStorage;
+    if (previousSession) Object.defineProperty(globalThis, "sessionStorage", previousSession);
+    else delete globalThis.sessionStorage;
+  }
+}
+console.log("Storage-denied and page-reload persistence regression tests passed.");
