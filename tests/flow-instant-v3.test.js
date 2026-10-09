@@ -191,7 +191,24 @@ assert.equal(normalized.endedReason, "complete");
 const payload = buildSubmissionPayload("flow", result);
 assert.ok(payload);
 assert.equal(payload.boardKey, "flow-standard-3m-v1");
-assert.equal(validateScoreSubmission(payload).valid, true);
+assert.equal(validateScoreSubmission(payload).valid, true,
+  `Client score and serialized metrics must satisfy server validation: ${validateScoreSubmission(payload).code ?? "OK"}`);
+
+// Fractional raw accuracy must produce exactly the server-recomputed score
+// after precision normalization; rounding disagreement rejects valid records.
+const precisionScore = calculateFlowScoreV3({
+  correctCharacters: 900,
+  wpm: 60,
+  accuracy: 900 / 930 * 100,
+  consistency: 90,
+});
+const wireScore = calculateFlowScoreV3({
+  correctCharacters: 900,
+  wpm: precisionScore.wpm,
+  accuracy: precisionScore.accuracy,
+  consistency: precisionScore.consistency,
+});
+assert.equal(precisionScore.score, wireScore.score, "score must be stable across serialization");
 
 const eligibilityService = createLeaderboardSubmissionService({
   getClient: () => null,
