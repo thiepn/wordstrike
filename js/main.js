@@ -86,7 +86,7 @@ import {
 } from "./ui.js";
 import { getAllModes, MODE_IDS } from "./modes.js";
 import { createModeLifecycle } from "./modeLifecycle.js";
-import { launchPublicFlow } from "./flow/flowRuntimeLoader.js";
+import { launchPublicFlow } from "./flow/flowRuntimeLoader.js?v=20260925s";
 import {
   beginCampaignSession,
   finalizeCampaignSession,
