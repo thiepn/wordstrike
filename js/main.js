@@ -682,7 +682,7 @@ function openLevelSelect(reason = "level-select") {
     ? Math.min(appState.currentLevel || 1, 100)
     : getCampaignResumeLevel(appState.save);
   const selectionLimit = appState.devMode ? 100 : resumeLevel;
-  const requestedLevel = ["mode-select", "auth-return", "placement-result"].includes(reason)
+  const requestedLevel = ["mode-select", "auth-return", "placement-result", "history"].includes(reason)
     ? resumeLevel
     : appState.currentLevel || resumeLevel;
   appState.levelSelection = Math.max(1, Math.min(requestedLevel, selectionLimit, 100));
