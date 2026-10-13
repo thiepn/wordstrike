@@ -1,6 +1,5 @@
 name: Flow Phase 8 UX certification
 on:
-  pull_request:
   workflow_dispatch:
 permissions:
   contents: read

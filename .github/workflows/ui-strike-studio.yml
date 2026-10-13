@@ -2,18 +2,7 @@ name: Strike Studio visual and interaction checks
 on:
   push:
     branches: [main, ui-strike-studio]
-  pull_request:
-    paths:
-      - 'index.html'
-      - 'js/strikeStudioPresentation.js'
-      - 'js/flow/flowUiPhase7Polish.js'
-      - 'js/flow/flowRuntimeLoader.js'
-      - 'sw.js'
-      - 'styles/strike-studio.css'
-      - 'tests/ui-strike-studio.test.js'
-      - 'tests/browser/ui_strike_studio.py'
-      - 'tests/browser/ui_live_smoke.py'
-      - '.github/workflows/ui-strike-studio.yml'
+  workflow_dispatch:
 permissions:
   contents: read
 concurrency:

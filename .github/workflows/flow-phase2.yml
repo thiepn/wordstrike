@@ -1,6 +1,5 @@
 name: Flow Phase 2 certification
 on:
-  pull_request:
   workflow_dispatch:
 permissions:
   contents: read

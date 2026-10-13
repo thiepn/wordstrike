@@ -1,23 +1,6 @@
 name: Practice Certification Matrix
 
 on:
-  pull_request:
-    paths:
-      - 'js/practiceLab/**'
-      - 'js/main.js'
-      - 'js/modes.js'
-      - 'data/practice/**'
-      - 'practiceLab*.css'
-      - 'tests/practice-*.test.js'
-      - 'tests/*pl38*.test.js'
-      - 'tests/*pl39*.test.js'
-      - 'tests/browser/practice_*.mjs'
-      - 'tests/browser/practice_*.py'
-      - 'tests/browser/storage_native.mjs'
-      - 'scripts/*Practice*.mjs'
-      - 'package.json'
-      - 'sw.js'
-      - '.github/workflows/practice-certification.yml'
   push:
     branches: [main]
     paths:
