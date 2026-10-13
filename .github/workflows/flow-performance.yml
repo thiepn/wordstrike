@@ -1,6 +1,5 @@
 name: Flow performance hot-path certification
 on:
-  pull_request:
   workflow_dispatch:
 permissions:
   contents: read
