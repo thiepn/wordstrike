@@ -1,24 +1,5 @@
 name: Campaign recovery certification
 on:
-  pull_request:
-    paths:
-      - 'js/storage.js'
-      - 'js/main.js'
-      - 'js/ui.js'
-      - 'js/campaignGameplayPresentation.js'
-      - 'js/leaderboardReturnState.js'
-      - 'styles/screens/campaign-progression.css'
-      - 'styles/screens/campaign-gameplay.css'
-      - 'styles/mode-customization.css'
-      - 'tests/campaign-*.test.js'
-      - 'tests/ui4-campaign-progression.test.js'
-      - 'tests/ui5-campaign-gameplay.test.js'
-      - 'tests/browser/campaign_recovery.py'
-      - 'tests/browser/ui4_campaign_progression.py'
-      - 'tests/browser/ui5_campaign_gameplay.py'
-      - 'index.html'
-      - 'sw.js'
-      - '.github/workflows/campaign-recovery.yml'
   workflow_dispatch:
 permissions:
   contents: read

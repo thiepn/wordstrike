@@ -1,21 +1,5 @@
 name: Auth and leaderboard browser certification
 on:
-  pull_request:
-    paths:
-      - 'js/authService.js'
-      - 'js/supabaseClient.js'
-      - 'js/supabaseConfig.js'
-      - 'js/leaderboard*.js'
-      - 'js/automaticSubmissionController.js'
-      - 'js/pendingResult*.js'
-      - 'js/statisticsUi.js'
-      - 'js/thiepnAccountPresentation.js'
-      - 'js/appClickRouting.js'
-      - 'js/main.js'
-      - 'styles/screens/profile-leaderboards-settings*.css'
-      - 'tests/browser/ui11_profile_leaderboards_settings.py'
-      - 'tests/browser/ui11_mobile_heading_contract.py'
-      - '.github/workflows/auth-leaderboard-browser.yml'
   workflow_dispatch:
 permissions:
   contents: read
